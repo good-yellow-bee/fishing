@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type KeyboardEvent } from "react";
 import { Link } from "react-router-dom";
 import { anglerTitle, BOARD_LIMIT, FISH, weeklyFish, type BoardEntry, type BoardPeriod, type BoardView, type SpeciesRecord } from "@stillwater/shared";
 import { errorText, getBoard, getSpeciesRecords } from "../api";
@@ -6,6 +6,8 @@ import { FishMark } from "../components/FishMark";
 import { t, tn, useT } from "../i18n";
 import { weightText } from "../i18n/content";
 import { usePageTitle } from "../pageTitle";
+
+const PERIODS = ["all", "week"] as const;
 
 function periodLabel(period: BoardPeriod): string {
   return period === "all" ? t("All time") : t("This week");
@@ -60,6 +62,16 @@ export function BoardPage() {
       .catch(() => setRecords([]));
   }, []);
 
+  function tabKey(event: KeyboardEvent<HTMLDivElement>) {
+    const at = PERIODS.indexOf(period);
+    const to = ({ ArrowRight: at + 1, ArrowLeft: at - 1, Home: 0, End: PERIODS.length - 1 } as Record<string, number>)[event.key];
+    if (to === undefined) return;
+    event.preventDefault();
+    const next = PERIODS[(to + PERIODS.length) % PERIODS.length]!;
+    setPeriod(next);
+    document.getElementById(`board-tab-${next}`)?.focus();
+  }
+
   if (error) return <main className="log-page">{errorText(error)}</main>;
   if (!board) return <main className="log-page">{t("Reading the lodge board…")}</main>;
 
@@ -75,13 +87,17 @@ export function BoardPage() {
         <Link to="/log">{t("Catch log")}</Link>
       </p>
       <h1 id="board-title">{t("Lodge board")}</h1>
-      <div className="board-tabs" role="tablist" aria-label={t("Board period")}>
-        {(["all", "week"] as const).map((option) => (
+      {/* Tabs: one stop for Tab, the arrow keys (and Home and End) move between them and pick. */}
+      <div className="board-tabs" role="tablist" aria-label={t("Board period")} onKeyDown={tabKey}>
+        {PERIODS.map((option) => (
           <button
             key={option}
+            id={`board-tab-${option}`}
             type="button"
             role="tab"
             aria-selected={period === option}
+            aria-controls="board-panel"
+            tabIndex={period === option ? 0 : -1}
             className={period === option ? "active" : ""}
             onClick={() => setPeriod(option)}
           >
@@ -101,56 +117,58 @@ export function BoardPage() {
           </p>
         );
       })()}
-      <p>
-        {week
-          ? t("Top {limit} anglers by points landed since Monday 00:00 UTC. Heaviest fish this week breaks a tie.", { limit: BOARD_LIMIT })
-          : t("Top {limit} anglers by lifetime points. Heaviest fish breaks a tie.", { limit: BOARD_LIMIT })}
-      </p>
-      {you && (
-        <div className="log-summary">
-          <div>
-            <span className="eyebrow">{t("Your place")}</span>
-            <strong>#{you.rank}</strong>
-          </div>
-          <div>
-            <span className="eyebrow">{points}</span>
-            <strong>{you.score}</strong>
-          </div>
-          <div>
-            <span className="eyebrow">{t("Heaviest")}</span>
-            <strong>{you.heaviest > 0 ? weightText(you.heaviest) : "—"}</strong>
-            <small>
-              {tn(you.species, "{n} species", "{n} species")} · {tn(you.catches, "{n} landed", "{n} landed")}
-            </small>
-          </div>
-        </div>
-      )}
-      {/* On a phone the table scrolls sideways on its own, so it takes focus for the arrow keys and is named by the page title. */}
-      <table tabIndex={0} aria-labelledby="board-title">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>{t("Angler")}</th>
-            <th>{t("Level")}</th>
-            <th>{points}</th>
-            <th>{t("Heaviest")}</th>
-            <th>{t("Species|count")}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {board.entries.map((row) => (
-            <BoardRow key={row.userId} row={row} you={row.userId === you?.userId} />
-          ))}
-        </tbody>
-      </table>
-      {board.entries.length === 0 && <p>{week ? t("Nobody has landed a fish this week. Be first.") : t("The board is blank. Land a fish.")}</p>}
-      {you && you.rank > BOARD_LIMIT && (
-        <p className="board-standing">
+      <div id="board-panel" role="tabpanel" aria-labelledby={`board-tab-${board.period}`}>
+        <p>
           {week
-            ? tn(you.score, "Outside the posted hundred. You sit at #{rank} with {n} point this week.", "Outside the posted hundred. You sit at #{rank} with {n} points this week.", { rank: you.rank })
-            : tn(you.score, "Outside the posted hundred. You sit at #{rank} with {n} lifetime point.", "Outside the posted hundred. You sit at #{rank} with {n} lifetime points.", { rank: you.rank })}
+            ? t("Top {limit} anglers by points landed since Monday 00:00 UTC. Heaviest fish this week breaks a tie.", { limit: BOARD_LIMIT })
+            : t("Top {limit} anglers by lifetime points. Heaviest fish breaks a tie.", { limit: BOARD_LIMIT })}
         </p>
-      )}
+        {you && (
+          <div className="log-summary">
+            <div>
+              <span className="eyebrow">{t("Your place")}</span>
+              <strong>#{you.rank}</strong>
+            </div>
+            <div>
+              <span className="eyebrow">{points}</span>
+              <strong>{you.score}</strong>
+            </div>
+            <div>
+              <span className="eyebrow">{t("Heaviest")}</span>
+              <strong>{you.heaviest > 0 ? weightText(you.heaviest) : "—"}</strong>
+              <small>
+                {tn(you.species, "{n} species", "{n} species")} · {tn(you.catches, "{n} landed", "{n} landed")}
+              </small>
+            </div>
+          </div>
+        )}
+        {/* On a phone the table scrolls sideways on its own, so it takes focus for the arrow keys and is named by the page title. */}
+        <table tabIndex={0} aria-labelledby="board-title">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>{t("Angler")}</th>
+              <th>{t("Level")}</th>
+              <th>{points}</th>
+              <th>{t("Heaviest")}</th>
+              <th>{t("Species|count")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {board.entries.map((row) => (
+              <BoardRow key={row.userId} row={row} you={row.userId === you?.userId} />
+            ))}
+          </tbody>
+        </table>
+        {board.entries.length === 0 && <p>{week ? t("Nobody has landed a fish this week. Be first.") : t("The board is blank. Land a fish.")}</p>}
+        {you && you.rank > BOARD_LIMIT && (
+          <p className="board-standing">
+            {week
+              ? tn(you.score, "Outside the posted hundred. You sit at #{rank} with {n} point this week.", "Outside the posted hundred. You sit at #{rank} with {n} points this week.", { rank: you.rank })
+              : tn(you.score, "Outside the posted hundred. You sit at #{rank} with {n} lifetime point.", "Outside the posted hundred. You sit at #{rank} with {n} lifetime points.", { rank: you.rank })}
+          </p>
+        )}
+      </div>
       <section className="record-wall" aria-label={t("Species records")}>
         <h2>{t("Record wall")}</h2>
         <p>{t("The heaviest of each fish anyone at the lodge has landed.")}</p>

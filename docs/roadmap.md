@@ -1135,6 +1135,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA90~~ | ~~A tally's rows on a touch screen: Bests' hours, moons, skies, winds, temperatures and lures, and a kind's and a water's, named each row with a 20 px link 8 px from the next; each is now a 32 px band, plain inline links off touch (#1289)~~ | phone UX | S |
 | ~~PA91~~ | ~~A kind's first and newest fish on a touch screen ("First in the book Sat, Oct 3 · newest Sun, Oct 18") were 19 px links; each is now a 32 px band, plain inline links off touch (#1291)~~ | phone UX | S |
 | ~~PA92~~ | ~~A kind's waters on a touch screen with large text on a narrow phone: the count and sizes ("2 fish · 11.5 in · 0.4 lb") wrapped onto lines whose links' reaches overlapped, leaving "2 fish" 29 px; a wrapped line now drops 8 px, one line keeps its height (#1293)~~ | phone UX | S |
+| ~~PA93~~ | ~~The lodge board's All time and This week tabs work as tabs from the keyboard: one Tab stop, the arrow keys, Home and End move between them and pick, and the board is named as their panel (#?)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
