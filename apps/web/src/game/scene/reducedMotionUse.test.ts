@@ -34,4 +34,11 @@ describe("reduce motion on the lake", () => {
     expect(squirrels).toContain("useReducedMotion()");
     expect(squirrels).toMatch(/still \? STILL_TIME : clock\.elapsedTime/);
   });
+
+  it("keeps the spring grebes floating at one moment under it, never rushing across the water", () => {
+    const grebes = scene.find((file) => file.name === "Grebes.tsx")?.text ?? "";
+    expect(grebes).toContain("useReducedMotion()");
+    expect(grebes).toContain("const at = still ? STILL_TIME : time;");
+    expect(grebes).not.toMatch(/grebePose\([^)]*, time\)/);
+  });
 });
