@@ -437,7 +437,8 @@ function SpotView() {
   const nextHere = nextRealTrips(book, today).find((trip) => trip.spotId === spot.id);
   const restHere = lastHere ? daysBetween(lastHere, today) : 0;
   // For the copied summary: the day it was last fished and what that day's outing gave, the first thing a mate asks.
-  const lastHereTrip = lastHere ? countedTrips.filter((trip) => trip.date === lastHere).sort((a, b) => fishOn(b.id) - fishOn(a.id) || newestOutingFirst(book)(a, b))[0] : undefined;
+  // Of a dawn and a dusk, the later, as Out now takes it.
+  const lastHereTrip = lastHere ? countedTrips.filter((trip) => trip.date === lastHere).sort(newestOutingFirst(book))[0] : undefined;
   const lastHereText = lastHere ? t("Last fished here: {day}", { day: lastHereTrip ? `${formatDay(lastHere)} · ${tn(fishOn(lastHereTrip.id), "{n} fish", "{n} fish")}` : formatDay(lastHere) }) : null;
   // By the day a fish counts on, as the year search each bar opens reads it.
   const years = yearTally(summed, (entry) => bookFishDay(book, entry));
@@ -515,7 +516,7 @@ function SpotView() {
         {/* When it was last fished, by its last outing or fish: how long it has rested. */}
         {lastHere ? (
           <p className="meta last-here">
-            <LastHereLine rest={restHere} day={lastHere} trip={countedTrips.filter((trip) => trip.date === lastHere).sort((a, b) => fishOn(b.id) - fishOn(a.id) || newestOutingFirst(book)(a, b))[0]} fish={fishOn} catches={catches} />
+            <LastHereLine rest={restHere} day={lastHere} trip={lastHereTrip} fish={fishOn} catches={catches} />
           </p>
         ) : null}
         {outNowHere ? (

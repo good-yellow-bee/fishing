@@ -1,5 +1,6 @@
 import { FISH, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { t } from "../i18n";
+import { kindKey } from "./speciesLink";
 
 export type Renamed = { ok: true; book: Logbook; name: string; count: number } | { ok: false; message: string };
 
@@ -16,17 +17,19 @@ export function renameInBook(book: Logbook, field: NameField, from: string, type
   // The same limits as the catch form's.
   if (field === "species" && (clean.length < 2 || clean.length > 40)) return { ok: false, message: "Name the fish, in a few words." };
   if (field === "lure" && (clean.length < 2 || clean.length > 60)) return { ok: false, message: "What was on the line?" };
-  const key = from.trim().toLowerCase();
+  // A kind however it was typed ("Perches", "perch ") is renamed whole, as its page shows it.
+  const keyOf = (name: string) => (field === "species" ? kindKey(name) : name.trim().toLowerCase());
+  const key = keyOf(from);
   const nameOf = (entry: CatchEntry) => entry[field];
   const others = [
-    ...book.catches.map(nameOf).filter((name) => name.trim().toLowerCase() !== key),
+    ...book.catches.map(nameOf).filter((name) => keyOf(name) !== key),
     ...(field === "species" ? FISH.map((fish) => fish.name) : []),
   ];
   const want = clean.toLowerCase();
   const name = others.find((other) => other.trim().toLowerCase() === want || t(other).toLowerCase() === want) ?? clean;
   let count = 0;
   const catches = book.catches.map((entry) => {
-    if (nameOf(entry).trim().toLowerCase() !== key) return entry;
+    if (keyOf(nameOf(entry)) !== key) return entry;
     count += 1;
     return entry[field] === name ? entry : { ...entry, [field]: name };
   });

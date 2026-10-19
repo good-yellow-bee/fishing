@@ -1,6 +1,7 @@
 import { biteTimes, catchesForSpot, lakeSeason, localDate, moonTally, waterTempTally, type BiteTime, type MoonQuarter, type LakeSeason, type CatchEntry, type Logbook, type LureTally, type Sky, type Trip, type Wind, type WaterTempTally } from "@stillwater/shared";
 import { pieceTally } from "./pieceTally";
-import { pieceKey, shownPieceKey } from "./gear/pieceKey";
+import { shownPieceKey } from "./gear/pieceKey";
+import { kindKey, mostWritten } from "./speciesLink";
 import { isSampleOuting } from "./bookCopy";
 import { countedFish, ownFish } from "./milestones";
 
@@ -146,14 +147,14 @@ export function waterSpecies(catches: readonly CatchEntry[], limit = 3): string[
   const counts = new Map<string, { spellings: Map<string, number>; count: number }>();
   for (const entry of catches) {
     const name = entry.species.trim();
-    const key = pieceKey(name);
+    const key = kindKey(name);
     const row = counts.get(key) ?? { spellings: new Map<string, number>(), count: 0 };
     row.count += 1;
     row.spellings.set(name, (row.spellings.get(name) ?? 0) + 1);
     counts.set(key, row);
   }
   return [...counts.values()]
-    .map((row) => ({ count: row.count, name: [...row.spellings].sort((a, b) => b[1] - a[1] || Number(/^\p{Lu}/u.test(b[0])) - Number(/^\p{Lu}/u.test(a[0])))[0]![0] }))
+    .map((row) => ({ count: row.count, name: mostWritten(row.spellings) }))
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
     .slice(0, limit)
     .map((row) => row.name);
@@ -161,9 +162,9 @@ export function waterSpecies(catches: readonly CatchEntry[], limit = 3): string[
 
 /** The lures that took this kind of fish on this water, most first; empty when the water hasn't given that kind. */
 export function speciesLures(catches: readonly CatchEntry[], species: string, limit = 3): string[] {
-  const want = pieceKey(species);
+  const want = kindKey(species);
   if (!want) return [];
-  const kind = catches.filter((entry) => pieceKey(entry.species) === want);
+  const kind = catches.filter((entry) => kindKey(entry.species) === want);
   return pieceTally(kind, limit).map((row) => row.lure);
 }
 

@@ -9,7 +9,7 @@ import { formatClock, formatDay } from "./format";
 import { useLogbook } from "./LogbookState";
 import { catchPage, useShowMore } from "./PagedCatches";
 import { bookFishDay, monthName } from "./tripMonths";
-import { speciesCounts } from "./speciesLink";
+import { speciesCounts, kindKey } from "./speciesLink";
 import { FROM_LIST } from "./leaveDeleted";
 import { catchLink } from "./catchList";
 import { FIND_PARAM, exactTerm } from "./findLinks";
@@ -105,8 +105,8 @@ export function PhotosPage() {
   const pictured = catchesWithPhotos(catchesNewestFirst(book), (id) => photoFor(id) !== null);
   const kinds = speciesCounts(pictured);
   // A kind picked that has since lost its last photo shows them all again.
-  const picked = kind && kinds.some((row) => row.species.trim().toLowerCase() === kind) ? kind : null;
-  const ofKind = picked ? pictured.filter((entry) => entry.species.trim().toLowerCase() === picked) : pictured;
+  const picked = kind && kinds.some((row) => kindKey(row.species) === kind) ? kind : null;
+  const ofKind = picked ? pictured.filter((entry) => kindKey(entry.species) === picked) : pictured;
   // The waters with photos, most pictured first; a water picked that has none left shows them all again.
   const perWater = new Map<string, number>();
   for (const entry of pictured) perWater.set(entry.spotId, (perWater.get(entry.spotId) ?? 0) + 1);
@@ -137,7 +137,7 @@ export function PhotosPage() {
   const { visible, more } = catchPage(largest ? largestFirst(all) : all, shown);
   const monthOf = (entry: CatchEntry) => bookFishDay(book, entry).slice(0, 7);
   // Each row of chips counts the photos the other two picks leave, so a chip's number is what tapping it shows.
-  const kindOf = (entry: CatchEntry) => entry.species.trim().toLowerCase();
+  const kindOf = (entry: CatchEntry) => kindKey(entry.species);
   const inKind = (entry: CatchEntry) => !picked || kindOf(entry) === picked;
   const inWater = (entry: CatchEntry) => !pickedWater || entry.spotId === pickedWater;
   const inYear = (entry: CatchEntry) => !pickedYear || yearOf(entry) === pickedYear;
@@ -207,10 +207,10 @@ export function PhotosPage() {
           </button>
           {/* A chip the other picks leave no photos for goes, unless it is the one picked, so it can be unpicked. */}
           {kinds.map((row) => {
-            const count = kindCounts.get(row.species.trim().toLowerCase()) ?? 0;
-            const on = picked === row.species.trim().toLowerCase();
+            const count = kindCounts.get(kindKey(row.species)) ?? 0;
+            const on = picked === kindKey(row.species);
             return count > 0 || on ? (
-              <button key={row.species} type="button" className="text-button" aria-pressed={on} onClick={() => setKind(row.species.trim().toLowerCase())}>
+              <button key={row.species} type="button" className="text-button" aria-pressed={on} onClick={() => setKind(kindKey(row.species))}>
                 {t(row.species)} ({count})
               </button>
             ) : null;
