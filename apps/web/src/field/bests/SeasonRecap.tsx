@@ -10,6 +10,8 @@ import { newWatersThisYear } from "./notYet";
 import { bestFishDay, bookFishDay } from "../tripMonths";
 import { formatDay } from "../format";
 import { kindNames } from "../speciesLink";
+import { pieceTally } from "../pieceTally";
+import { pieceName } from "../gear/pieceKey";
 import { countedFish } from "../milestones";
 
 /** "42, 8 more than 2025": a season's count against the one before, when the one before had any. */
@@ -57,6 +59,7 @@ export function SeasonRecapBox({
   fishLink,
   outings,
   kindsId,
+  lureLink,
 }: {
   book: Logbook;
   year: string;
@@ -65,6 +68,8 @@ export function SeasonRecapBox({
   fishLink?: string;
   outings?: { count: number; to: string };
   kindsId?: string;
+  /** The season's fish on a lure, for its best lure line. */
+  lureLink?: (lure: string) => string;
 }) {
   useT();
   const recap = seasonRecap(book, year, today);
@@ -89,12 +94,17 @@ export function SeasonRecapBox({
         : upFrom
           ? t("Fish an outing: {rate}, up from {before} in {year}", { rate: rateNow, before: rateBefore, year: before })
           : t("Fish an outing: {rate}, down from {before} in {year}", { rate: rateNow, before: rateBefore, year: before });
+  // The lure the season was won on, once one clearly led: the box is what gets shared.
+  const [lure, nextLure] = pieceTally(book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${year}-`)), 2);
+  const topLure = lure && lure.count >= 2 && lure.count > (nextLure?.count ?? 0) ? lure : null;
+  const lureLine = topLure ? t("Best lure: {lure} ({count})", { lure: pieceName(topLure.lure), count: topLure.count }) : null;
   const lines = [
     fishLine,
     daysLine,
     ...(outingsLine ? [outingsLine] : []),
     ...(rateLine ? [rateLine] : []),
     kindsLine,
+    ...(lureLine ? [lureLine] : []),
     // A past season's goal, how it ended; this year's has its own box below.
     ...(goal !== null ? [recap.fish >= goal ? t("Goal reached: {count} of {goal} fish in {year}.", { count: recap.fish, goal, year }) : t("{count} of {goal} fish in {year}", { count: recap.fish, goal, year })] : []),
   ];
@@ -112,6 +122,8 @@ export function SeasonRecapBox({
             ) : line === fishLine && fishLink && recap.fish > 0 ? (
               // The season's counts open what they count: its fish, its outings, its kinds further down.
               <Link to={fishLink}>{line}</Link>
+            ) : topLure && lureLink && line === lureLine ? (
+              <Link to={lureLink(topLure.lure)}>{line}</Link>
             ) : outings && line === outingsLine ? (
               <Link to={outings.to}>{line}</Link>
             ) : line === kindsLine && kindsId && recap.kinds > 0 ? (

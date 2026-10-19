@@ -5,7 +5,7 @@ import { biteTimes, catchesNewestFirst, fishCountsByTrip, localDate, measureOf, 
 import { pieceTally } from "../pieceTally";
 import { sheetOutings } from "../catchCsv";
 import { CatchCard } from "../cards";
-import { num, t, useT } from "../../i18n";
+import { num, t, tn, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
 import { fishCountLabel, formatDay, outingNameById } from "../format";
 import { hookTally, hookText } from "../hookTally";
@@ -30,6 +30,7 @@ import { PLAY_LAKE_ID } from "../playLake";
 import { countedSearch } from "../countedSearch";
 import { countedBook, countedFish } from "../milestones";
 import { isSampleCatch, isSampleOnly, isSampleOuting, withoutSample } from "../bookCopy";
+import { daysBetween } from "../spotOrder";
 import { SameKinds } from "./SameKinds";
 import { tripDaySearch } from "../tripSearch";
 import { outingDay } from "../tripDates";
@@ -87,6 +88,20 @@ function waterFishLine(catches: readonly CatchEntry[]): string {
 function lastFishLine(book: Logbook, catches: readonly CatchEntry[]) {
   const last = catches.reduce<CatchEntry | null>((newest, entry) => (!newest || entry.caughtAt > newest.caughtAt ? entry : newest), null);
   return last ? <p className="meta">{t("Last fish: {day}", { day: formatDay(bookFishDay(book, last)) })}</p> : null;
+}
+
+/** A fish's size by one measure, inches or pounds, to set two fish of a kind side by side. */
+function sizeOf(entry: CatchEntry | null, kind: "length" | "weight"): number {
+  const measure = entry ? measureOf(entry, kind) : null;
+  return !measure ? 0 : measure.kind === "length" ? measure.inches : measure.pounds;
+}
+
+/** "Best here: Northern pike, 33 in": a water's longest fish, or its heaviest when none was measured. */
+function waterBestLine(book: Logbook, catches: readonly CatchEntry[], kindName: (species: string) => string) {
+  const bests = personalBests({ ...book, catches: [...catches] });
+  const kind = bests.longest ? "length" : "weight";
+  const entry = bests.longest ?? bests.heaviest;
+  return entry ? <p className="meta">{t("Best here: {species}, {size}", { species: kindName(entry.species), size: measureText(measureOf(entry, kind)!) })}</p> : null;
 }
 
 /** "?year=2025": one season's fish and outings, or the whole book when it is left out. */
@@ -213,6 +228,16 @@ export function BestsPage() {
     else kindFish.set(key, [entry]);
   }
   const freshKinds = year ? new Set(seasonRecap(whole, year, today).newKinds.map((name) => name.trim().toLowerCase())) : null;
+  // In a picked season, the kinds whose longest or heaviest beat every season before it: what an angler asks of a year.
+  const earlier = year ? new Map(personalBests({ ...whole, catches: countedFish(whole.catches).filter((entry) => dayOf(entry) < `${year}-01-01`) }).species.map((row) => [row.species.trim().toLowerCase(), row])) : null;
+  const newBest = (row: (typeof bests.species)[number]) => {
+    const before = earlier?.get(row.species.trim().toLowerCase());
+    return !!before && ((before.longest !== null && sizeOf(row.longest, "length") > sizeOf(before.longest, "length")) || (before.heaviest !== null && sizeOf(row.heaviest, "weight") > sizeOf(before.heaviest, "weight")));
+  };
+  // The newest fish of the angler's own and how long ago it came, for a dry spell measured in days.
+  const lastFish = countedFish(whole.catches).reduce<CatchEntry | null>((newest, entry) => (!newest || dayOf(entry) > dayOf(newest) ? entry : newest), null);
+  const lastFishDay = lastFish ? dayOf(lastFish) : null;
+  const sinceLastFish = lastFishDay ? daysBetween(lastFishDay, today) : 0;
   const nameOf = (spotId: string) => spotById(book, spotId)?.name ?? t("Unknown water");
   const titleOf = (tripId: string | null) => (tripId ? outingNameById(book, tripId) : null);
 
@@ -292,6 +317,12 @@ export function BestsPage() {
         {streak.dry > 1 ? <p className="meta">{t("Most outings in a row without a fish: {count}", { count: streak.dry })}</p> : null}
         {/* A blank spell still running: how long since an outing gave a fish. */}
         {streak.dryNow > 1 && streak.best > 0 ? <p className="meta">{t("Outings since your last fish: {count}", { count: streak.dryNow })}</p> : null}
+        {/* And in days, once it is more than a day or two: the day opens its fish. */}
+        {lastFishDay && sinceLastFish >= 3 ? (
+          <p className="meta last-fish">
+            <Link to={findLink(tail(lastFishDay))}>{t("Last fish: {day}", { day: `${formatDay(lastFishDay)} · ${tn(sinceLastFish, "{n} day ago", "{n} days ago")}` })}</Link>
+          </p>
+        ) : null}
         {split ? (
           <p className="meta weekend-split">
             {t("Fish an outing: {weekend} on weekends, {weekday} on weekdays.", { weekend: num(split.weekend), weekday: num(split.weekday) })}
@@ -349,6 +380,7 @@ export function BestsPage() {
           // The season's outings already fished, as the outings page it opens counts them ("Outings: 6 · 1 planned").
           outings={{ count: sheetOutings(whole, fishedBy).trips.filter((trip) => trip.date.startsWith(`${year}-`)).length, to: `/trips?${new URLSearchParams({ find: tripDaySearch(all, year, new Set(whole.trips.map((trip) => trip.id)), t) }).toString()}` }}
           kindsId="by-species"
+          lureLink={(lure) => linkFor(exactTerm("lure", t(lure)))}
         />
       ) : null}
 
@@ -365,7 +397,7 @@ export function BestsPage() {
               t("None")
             )}
           </strong>
-          <small>{bests.longest ? kindName(bests.longest.species) : (emptySeason ?? t("No length in the book"))}</small>
+          <small>{bests.longest ? `${kindName(bests.longest.species)} · ${formatDay(dayOf(bests.longest))}` : (emptySeason ?? t("No length in the book"))}</small>
         </div>
         <div>
           <span className="eyebrow">{t("Heaviest")}</span>
@@ -378,7 +410,7 @@ export function BestsPage() {
               t("None")
             )}
           </strong>
-          <small>{bests.heaviest ? kindName(bests.heaviest.species) : (emptySeason ?? t("No weight in the book"))}</small>
+          <small>{bests.heaviest ? `${kindName(bests.heaviest.species)} · ${formatDay(dayOf(bests.heaviest))}` : (emptySeason ?? t("No weight in the book"))}</small>
         </div>
         <div>
           <span className="eyebrow">{t("Waters with fish")}</span>
@@ -483,6 +515,8 @@ export function BestsPage() {
                       {row.large ? <span className="stamp">{t("Large")}</span> : null}
                       {/* A kind the season brought into the book for the first time. */}
                       {freshKinds?.has(row.species.trim().toLowerCase()) ? <span className="stamp">{t("New this season")}</span> : null}
+                      {/* A kind the season set a new record for. */}
+                      {newBest(row) ? <span className="stamp">{t("New best")}</span> : null}
                     </div>
                     <p className="meta">
                       {fishCountLabel(row.count)}
@@ -583,6 +617,7 @@ export function BestsPage() {
                   <p className="meta">{waterFishLine(bySpot.get(water.spotId) ?? [])}</p>
                   {/* When it last gave one: a water gone quiet is worth a visit, or a rest. */}
                   {lastFishLine(whole, bySpot.get(water.spotId) ?? [])}
+                  {waterBestLine(book, bySpot.get(water.spotId) ?? [], kindName)}
                 </Link>
               ))}
             </div>

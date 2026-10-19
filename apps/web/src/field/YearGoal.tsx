@@ -114,6 +114,7 @@ export function YearGoal({ book, now = new Date(), openAtStart = false }: { book
   // Last year's total, counted the same way: a place to start a goal from.
   const lastYear = String(Number(year) - 1);
   const lastYearCount = book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${lastYear}-`)).length;
+  const beatLastYear = Math.max(lastYearCount + 1, Math.round(lastYearCount * 1.1));
   const hintId = useId();
   // Last year up to this same day, counted as this year's count is: where the year stood then.
   const lastYearByNow = lastYearCount > 0 ? seasonRecap(book, year, localDate(now)).fishBefore : 0;
@@ -180,6 +181,14 @@ export function YearGoal({ book, now = new Date(), openAtStart = false }: { book
           <p className="meta year-goal-same">
             <button type="button" className="text-button" onClick={() => commit(String(lastYearCount))}>
               {t("Same as last year ({n})", { n: lastYearCount })}
+            </button>
+          </p>
+        ) : null}
+        {/* Or a tenth more than last year, at least one: a goal to beat it by, while that is still ahead. */}
+        {lastYearCount > 0 && beatLastYear > count ? (
+          <p className="meta year-goal-beat">
+            <button type="button" className="text-button" onClick={() => commit(String(beatLastYear))}>
+              {t("Beat last year ({n})", { n: beatLastYear })}
             </button>
           </p>
         ) : null}

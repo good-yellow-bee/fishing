@@ -100,7 +100,8 @@ export function DayCalendar({
     .filter(([, mark]) => mark.fish > 0 || mark.trips.length > 0)
     .map(([day]) => day)
     .sort();
-  const active = current && linked.includes(current) ? current : linked[0];
+  // The one tab stop starts on the latest day out so far, where a keyboard reader wants to begin, not the first.
+  const active = current && linked.includes(current) ? current : (linked.filter((day) => day <= today).at(-1) ?? linked[0]);
   const monthFish = (month: string) => [...marks.entries()].reduce((sum, [day, mark]) => (day.startsWith(`${month}-`) ? sum + mark.fish : sum), 0);
   // The month's days out, as the shaded and outlined days show them: a fish, or an outing already past.
   const monthDays = (month: string) => [...marks.entries()].filter(([day, mark]) => day.startsWith(`${month}-`) && (mark.fish > 0 || (mark.trips.length > 0 && day < fishedBy))).length;
