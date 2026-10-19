@@ -18,6 +18,8 @@ export type FightSim = {
   stamina: number;
   runSide: -1 | 1;
   turning?: boolean;
+  /** The rod pulled the same way a run is heading: it only gives the fish line. */
+  withRun?: boolean;
   /** The run it makes on seeing the net, while that run lasts. */
   lastRun?: boolean;
   /** A trophy's second run at the net, after the first last run. */
@@ -197,6 +199,10 @@ const SPENT_REEL = 1.2;
 /** Pulling the rod against a run eats this many extra seconds of it each second, and tires the fish this much more. */
 const TURN_CUT = 0.9;
 const TIRE_TURN = 0.06;
+/** The rod pulled the same way a run heads, past a moment to switch, lets line go this much faster, or brings it in this much slower while reeling. */
+export const WITH_RUN_DRIFT = 1.4;
+export const WITH_RUN_REEL = 0.6;
+export const WITH_RUN_GRACE_SEC = 0.25;
 
 /** Under this the fish is tiring; under the other it is played out. */
 export const TIRING_STAMINA = 0.6;
@@ -517,6 +523,7 @@ export function makeFight(
   /** A trophy-sized fish sees the net twice. */
   let lastRunsLeft = isTrophyWeight(species, weight) ? 2 : 1;
   let turnedThisRun = false;
+  let withRunFrom: number | null = null;
   let heldThroughLeap = false;
   const leaper = LEAPERS.has(species.id) && !cold;
   const breacher = BREACHERS.has(species.id);
@@ -683,6 +690,10 @@ export function makeFight(
     if (sim.turning && nextAt !== null) nextAt -= TURN_CUT * dtSec * 1000;
     if (sim.turning) turnedThisRun = true;
     if (sim.turning && sim.darted) followedDart = true;
+    // Pulled the way the run heads, past a moment to see it and switch, the rod only gives the fish line.
+    const pullingWith = turnable && sim.surge === 2 && !sim.jump && !sim.roll && !sim.charge && steer === sim.runSide;
+    withRunFrom = pullingWith ? (withRunFrom ?? nowMs) : null;
+    sim.withRun = withRunFrom !== null && nowMs - withRunFrom >= WITH_RUN_GRACE_SEC * 1000;
     const escalation = species.challenge === "surge" ? Math.min(0.25, completedSurges * 0.05) : 0;
     const eff = (pattern.strength * surgeScale + escalation) * SURGE_PULL * (1 - worn() * (1 - SPENT_PULL)) * (water === "deep" ? DEEP_PULL : 1);
     const rocky = water === "rocks" && turnable && !sim.turning && !sim.roll && !sim.charge;
@@ -699,11 +710,11 @@ export function makeFight(
       sim.tension += (tensionUpCalm + (sim.surge === 2 && !charging ? eff * (rocky ? ROCK_PULL : 1) : 0) + (sim.wrapped ? WRAP_PULL : 0)) * dtSec;
       // Line under real pressure comes in faster, for an angler brave enough to reel in the amber.
       const pressure = sim.tension >= TIGHT_TENSION && sim.tension < RED_TENSION ? PRESSURE_REEL : 1;
-      sim.line -= reelRate * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * (sim.weeded ? WEED_REEL : 1) * (sim.wrapped ? 0 : 1) * (broadsider && sim.stamina >= TIRING_STAMINA ? BROADSIDE_REEL : 1) * (charging ? CHARGE_REEL / pattern.reelSurge : 1) * dtSec;
+      sim.line -= reelRate * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * (sim.weeded ? WEED_REEL : 1) * (sim.wrapped ? 0 : 1) * (broadsider && sim.stamina >= TIRING_STAMINA ? BROADSIDE_REEL : 1) * (charging ? CHARGE_REEL / pattern.reelSurge : 1) * (sim.withRun ? WITH_RUN_REEL : 1) * dtSec;
     } else {
       sim.tension = Math.max(0, sim.tension - tensionDecay * dtSec);
       // A sulking fish sits where it is: no line goes out.
-      if (!sim.sulk && !sim.weeded && !sim.wrapped && !charging) sim.line += (sim.surge === 2 ? driftSurge * (sim.downstream ? DOWNSTREAM_RUN : 1) : driftCalm) * dtSec;
+      if (!sim.sulk && !sim.weeded && !sim.wrapped && !charging) sim.line += (sim.surge === 2 ? driftSurge * (sim.downstream ? DOWNSTREAM_RUN : 1) * (sim.withRun ? WITH_RUN_DRIFT : 1) : driftCalm) * dtSec;
     }
     // Like a leap, a shake reeled through costs the clean bonus, never the fish.
     if (reeling && sim.shake && nowMs >= shakeAt + SHAKE_GRACE_SEC * 1000) {

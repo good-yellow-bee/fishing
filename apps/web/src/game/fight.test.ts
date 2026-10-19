@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { FRAYED_SNAP, TEETH_SEC, TOOTHY, CHARGERS, CHARGE_SLACK_SEC, BREACHERS, BROADSIDE_REEL, BROADSIDERS, QUIT_TIRE, QUITTERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, FLOOD_DRIFT, floodedInlet, BOAT_RUN, WIND_SLACK, WINTER_TIRE, seasonTireMul, thrivesInCold, COLD_LOVERS, SUMMER_TIRE, COLDWATER, warmTireMul, rainCooled, deepCooled, FALL_RUN_TIRE, FALL_RUNNERS, runTireMul, SPRING_RUN_TIRE, SPRING_RUNNERS, springRunTireMul, CURRENT_FIGHTER_TIRE, CURRENT_FIGHTERS, currentTireMul, FALL_FEED_TIRE, FALL_FEEDERS, fallFeedTireMul, RAIN_HUNTER_TIRE, SCENT_HUNTERS, rainHunterTireMul, SUMMER_STRENGTH_TIRE, WARM_LOVERS, summerStrengthTireMul, NEST_TIRE, NEST_GUARDERS, nestTireMul, NIGHT_HUNTER_TIRE, NIGHT_HUNTERS, nightTireMul, SPAWN_SPENT_TIRE, EARLY_SPAWNERS, spentTireMul, TWILIGHT_HUNTER_TIRE, TWILIGHT_HUNTERS, twilightTireMul, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, TREBLE_HOLD, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD, SHAKE_MS, SHAKE_GRACE_SEC } from "./fight";
+import { FRAYED_SNAP, TEETH_SEC, TOOTHY, CHARGERS, CHARGE_SLACK_SEC, BREACHERS, BROADSIDE_REEL, BROADSIDERS, QUIT_TIRE, QUITTERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, FLOOD_DRIFT, floodedInlet, BOAT_RUN, WIND_SLACK, WINTER_TIRE, seasonTireMul, thrivesInCold, COLD_LOVERS, SUMMER_TIRE, COLDWATER, warmTireMul, rainCooled, deepCooled, FALL_RUN_TIRE, FALL_RUNNERS, runTireMul, SPRING_RUN_TIRE, SPRING_RUNNERS, springRunTireMul, CURRENT_FIGHTER_TIRE, CURRENT_FIGHTERS, currentTireMul, FALL_FEED_TIRE, FALL_FEEDERS, fallFeedTireMul, RAIN_HUNTER_TIRE, SCENT_HUNTERS, rainHunterTireMul, SUMMER_STRENGTH_TIRE, WARM_LOVERS, summerStrengthTireMul, NEST_TIRE, NEST_GUARDERS, nestTireMul, NIGHT_HUNTER_TIRE, NIGHT_HUNTERS, nightTireMul, SPAWN_SPENT_TIRE, EARLY_SPAWNERS, spentTireMul, TWILIGHT_HUNTER_TIRE, TWILIGHT_HUNTERS, twilightTireMul, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, TREBLE_HOLD, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD, SHAKE_MS, SHAKE_GRACE_SEC, WITH_RUN_DRIFT, WITH_RUN_GRACE_SEC, WITH_RUN_REEL } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -450,6 +450,49 @@ describe("turning runs", () => {
     }
     expect(lengths.with).toBe(lengths.straight);
     expect(lengths.against).toBeLessThan(lengths.straight! * 0.6);
+  });
+
+  /** Plays to the first run, then 0.6 s of it, pulling the rod the way it heads or not; returns the line it took and when the pull began to count. */
+  function pullWithRun(pullWith: boolean, reeling: boolean) {
+    const runtime = makeFight(fish("pike"), 10, 3, () => 0.5);
+    let now = 0;
+    while (runtime.sim.surge !== 2) runtime.step((now += 50), 0.05, false);
+    const start = runtime.sim.line;
+    let countedAt: number | null = null;
+    for (let ms = 50; ms <= 600; ms += 50) {
+      runtime.step((now += 50), 0.05, reeling, pullWith ? runtime.sim.runSide : 0);
+      if (runtime.sim.withRun && countedAt === null) countedAt = ms;
+      runtime.sim.tension = 0.3;
+    }
+    return { taken: runtime.sim.line - start, countedAt };
+  }
+
+  it("lets a run take more line when the rod pulls the same way, after a moment to switch", () => {
+    const straight = pullWithRun(false, false);
+    const pulled = pullWithRun(true, false);
+    expect(straight.countedAt).toBeNull();
+    expect(pulled.countedAt).toBeGreaterThan(WITH_RUN_GRACE_SEC * 1000);
+    expect(pulled.countedAt).toBeLessThanOrEqual(WITH_RUN_GRACE_SEC * 1000 + 50);
+    // Five ticks of 0.05 s count before the pull does, the other seven give line WITH_RUN_DRIFT times as fast.
+    expect(pulled.taken / straight.taken).toBeCloseTo((5 + 7 * WITH_RUN_DRIFT) / 12, 5);
+  });
+
+  it("brings line in slower while reeling a run the rod pulls the same way", () => {
+    const straight = pullWithRun(false, true);
+    const pulled = pullWithRun(true, true);
+    expect(straight.taken).toBeLessThan(0);
+    // The fish tires a touch differently either way, so this is only near.
+    expect(pulled.taken / straight.taken).toBeCloseTo((5 + 7 * WITH_RUN_REEL) / 12, 2);
+  });
+
+  it("never counts a pull the same way through a leap", () => {
+    const runtime = makeFight(fish("salmon"), 20, 5, () => 0.5);
+    let now = 0;
+    for (let i = 0; i < 2000 && !(runtime.sim.surge === 2 && runtime.sim.jump); i++) runtime.step((now += 50), 0.05, false);
+    for (let i = 0; i < 10 && runtime.sim.surge === 2; i++) {
+      runtime.step((now += 50), 0.05, false, runtime.sim.runSide);
+      expect(runtime.sim.withRun).toBe(false);
+    }
   });
 
   it("never turns a leap", () => {

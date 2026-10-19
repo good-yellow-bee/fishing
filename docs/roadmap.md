@@ -1641,7 +1641,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT320~~ | ~~Long cast stretch: a lure landing past 3/4 of the angler's reach (the boat's longer reach counted) is a long cast, where the line out stretches and soaks up the strike, so the solid-hook time is 0.8x; the hookset says "this far out, where the line stretches", and a beginner is spared~~ (#1340) | gameplay | S |
 | ~~GT321~~ | ~~Level 15 (38000 lifetime points, "One with the lake"): a strike in the first 48% of the bite sets the hook solid, not 40%, on the hookset line and the Strike card's solid mark alike~~ (#1344) | gameplay | S |
 | ~~GT322~~ | ~~News card 2026-10-19-game25 covers GT319, GT320 and GT321: work a lure slowly in winter, a long cast needs a quicker strike, and level 15~~ (#1347) | ui | S |
-| GT323 | A strike at nothing tugs the bait: striking in the wait at a still float, at a nibble once the yank is spent, or working a lure past its few helpful touches puts the fish off, so the bite comes 0.4 s later each time and mashing the strike never meets it; the hint says so, a camera pinch's first finger takes it back, and a beginner is spared | gameplay | S |
+| ~~GT323~~ | ~~A strike at nothing tugs the bait: striking in the wait at a still float, at a nibble once the yank is spent, or working a lure past its few helpful touches puts the fish off, so the bite comes 0.4 s later each time and mashing the strike never meets it; the hint says so, a camera pinch's first finger takes it back, and a beginner is spared~~ (#1351) | gameplay | S |
+| GT324 | Pulling the rod the wrong way: a turnable run with the rod pulled the same way it heads, past a quarter second to see it and switch, takes line 1.4x as fast, or comes in at 0.6x while reeling; the steer line says "Wrong way", so holding one side through a whole fight no longer turns every other run for free | gameplay | S |
 
 ## Risks / open questions for the owner
 
