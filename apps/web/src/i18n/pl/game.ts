@@ -107,6 +107,8 @@ export const PL_GAME: PlBook = {
   "Lily pads: turn every run, or it dives into the pad stems": "Grzybienie: zawracaj każdy odjazd, bo zanurkuje między łodygi",
   "A cloud slides over the sun, and the fish move up into the shallows to feed.": "Chmura nasuwa się na słońce, a ryby podpływają na płyciznę żerować.",
   "{n} more reasons": ["jeszcze {n} powód", "jeszcze {n} powody", "jeszcze {n} powodów"],
+  "When a cast has more reasons for a quick or slow bite than the hint can fit, the hint ends with \"2 more reasons\": tap it to read the rest. And the outings you pack up from the lake now show their titles and season notes in whichever language you read the field log in.":
+    "Gdy rzut ma więcej powodów szybkiego lub wolnego brania, niż mieści podpowiedź, kończy się ona napisem „jeszcze 2 powody”: stuknij, by przeczytać resztę. A wyprawy zwinięte nad jeziorem pokazują teraz tytuły i notki o porze roku w języku, w którym czytasz dziennik połowów.",
   "Tight to the lily pads, where the bass and pike wait in ambush.": "Tuż przy liściach grzybieni, gdzie w zasadzce czekają bassy i szczupaki.",
   "Along the rock edge, where the point drops off and the bass hold.": "Wzdłuż skalnej krawędzi, gdzie cypel opada w głąb i trzymają się bassy.",
   "Over the duckweed, where the bass lurk in its shade for a lure on top.": "Nad rzęsą, gdzie bassy czają się w jej cieniu na przynętę z powierzchni.",
