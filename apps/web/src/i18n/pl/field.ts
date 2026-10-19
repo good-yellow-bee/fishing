@@ -637,6 +637,7 @@ export const PL_FIELD: PlBook = {
   "{n} years ago": ["rok temu", "{n} lata temu", "{n} lat temu"],
   "Best day": "Najlepszy dzień",
   "Busiest month": "Najczęściej nad wodą",
+  "Last fished here: {day}": "Ostatnio łowione tu: {day}",
   "From the sample week ({n})": "Z przykładowego tygodnia ({n})",
   "The game's lake": "Jezioro z gry",
   "The game's lake is called that too; your water is kept apart from it.": "Jezioro z gry też tak się nazywa; to łowisko jest liczone osobno.",

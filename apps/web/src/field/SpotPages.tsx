@@ -9,6 +9,7 @@ import {
   catchesForSpot,
   fishCountsByTrip,
   localDate,
+  personalBests,
   shiftDate,
   spotById,
   tripsForSpot,
@@ -202,6 +203,11 @@ export function SpotsPage() {
   const byName = (row: { spot: { name: string } }) => !needle || foldText(row.spot.name).toLowerCase().includes(needle);
   const shownRows = (shownKind === "all" ? rows : rows.filter((row) => row.spot.id !== PLAY_LAKE_ID && row.spot.waterType === shownKind)).filter(byName);
   // Waters of that name under another kind: the kind picked hides them, so say so and offer them.
+  // A water's longest fish, or its heaviest when none was measured: what the card names as its best.
+  const biggestAt = (catches: readonly CatchEntry[], spotId: string) => {
+    const bests = personalBests({ ...book, catches: catches.filter((entry) => entry.spotId === spotId) });
+    return bests.longest ? { entry: bests.longest, kind: "length" as const } : bests.heaviest ? { entry: bests.heaviest, kind: "weight" as const } : null;
+  };
   const sampleGroup = (row: { spot: { id: string } }) => book.catches.some(ownFish) && isSampleSpot(row.spot.id) && countOf(row) === 0;
   const ownShown = shownRows.filter((row) => row.spot.id !== PLAY_LAKE_ID && !sampleGroup(row));
   const sampleShown = shownRows.filter((row) => row.spot.id !== PLAY_LAKE_ID && sampleGroup(row));
@@ -310,10 +316,12 @@ export function SpotsPage() {
                   // Outings fished, as the water's own page counts them: not those still planned, and today's once it has a fish.
                   tripCount={(ownHere(row.spot.id) ? ownTrips(row.spot.id) : tripsForSpot(book, row.spot.id)).filter((trip) => trip.date < fishedBy || (trip.date <= today && (fishOnTrip.get(trip.id) ?? 0) > 0)).length}
                   lastFishDay={ownHere(row.spot.id) ? ownRow.get(row.spot.id)?.lastFishDay ?? null : row.lastFishDay}
-                  restDays={order === "rested" && lastOut.has(row.spot.id) ? daysBetween(lastOut.get(row.spot.id)!, today) : null}
+                  // Under any order once it has rested a week, as the Map says it: a water left alone is worth a look.
+                  restDays={lastOut.has(row.spot.id) && (order === "rested" || daysBetween(lastOut.get(row.spot.id)!, today) >= 7) ? daysBetween(lastOut.get(row.spot.id)!, today) : null}
                   nextOuting={nextOutingLine(upcoming.find((trip) => trip.spotId === row.spot.id), today, tomorrow)}
                   // The angler's own fish where the card counts theirs; the game's lake and an untouched sample water what they have.
                   bestLure={bestLureAt(ownHere(row.spot.id) ? countedCatches : book.catches, row.spot.id)}
+                  biggest={biggestAt(ownHere(row.spot.id) ? countedCatches : book.catches, row.spot.id)}
                   waterTemp={recentTemp(ownHere(row.spot.id) ? countedCatches : book.catches, row.spot.id, today, (entry) => bookFishDay(book, entry))}
                 />
               ))}
@@ -424,6 +432,9 @@ function SpotView() {
   // The next outing planned here, as the Waters card names it; today's once it has a fish is under way, not ahead.
   const nextHere = nextRealTrips(book, today).find((trip) => trip.spotId === spot.id);
   const restHere = lastHere ? daysBetween(lastHere, today) : 0;
+  // For the copied summary: the day it was last fished and what that day's outing gave, the first thing a mate asks.
+  const lastHereTrip = lastHere ? countedTrips.filter((trip) => trip.date === lastHere).sort((a, b) => fishOn(b.id) - fishOn(a.id))[0] : undefined;
+  const lastHereText = lastHere ? t("Last fished here: {day}", { day: lastHereTrip ? `${formatDay(lastHere)} · ${tn(fishOn(lastHereTrip.id), "{n} fish", "{n} fish")}` : formatDay(lastHere) }) : null;
   // By the day a fish counts on, as the year search each bar opens reads it.
   const years = yearTally(summed, (entry) => bookFishDay(book, entry));
   // This season here against last season up to the same date, once last season had begun by now. Today's outing
@@ -562,9 +573,10 @@ function SpotView() {
       </aside>
       <WaterTipsBox catches={summed} on={today} within={exactTerm("water", spot.name)} place={spot.place ?? placeFor(spot.id)} />
       <TempThroughYear catches={summed} />
-      {summed.length > 0 ? (
+      {/* A water fished only blank has something to send too: "skip this one". */}
+      {summed.length > 0 || fishedOutings > 0 ? (
         <CopySummary
-          text={() => spotSummary(spot, fishedOutings, summed, average, top ? { trip: top, fish: fishOn(top.id) } : null)}
+          text={() => spotSummary(spot, fishedOutings, summed, average, top ? { trip: top, fish: fishOn(top.id) } : null, lastHereText)}
           file="stillwater-water.txt"
         />
       ) : null}
