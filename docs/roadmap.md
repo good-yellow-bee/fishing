@@ -2203,3 +2203,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR553~~ | ~~Round 93 ideas: warming or cooling on a water's card, today's sunrise and sunset on its page, its place in the copied summary~~ (#1328) | field | S |
 | ~~BR554~~ | ~~Round 94 outing fixes: an evening outing still going after midnight, sample plans past their day, weekday words in Find an outing, lure spellings, loose fish on cards, focus, touch and wording~~ (#1336) | field | S |
 | ~~BR555~~ | ~~Round 94 outing ideas: quick searches under Find an outing, Last night for an outing still going, missed strikes on cards, all of a water's tackle tips at once~~ (#1337) | field | S |
+| ~~BR556~~ | ~~Round 95 catch fixes: own counts for the lure at a water and a search's spreadsheet, Only my fish on a sample-only book, one kind however written, largest first on one scale, step focus, form touch, released/kept in Polish, wording~~ (#1345) | field | S |

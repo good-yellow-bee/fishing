@@ -385,8 +385,9 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
   const translated = getLang() !== "en";
   const want = normalize(needle);
   // "released" or "kept" whole: just the fish put back, or just the ones taken home, not every note with the word.
-  if (want === normalize(t("Released")) || want === normalize(inPolish("Released"))) return catchesNewestFirst(book).filter((entry) => entry.released);
-  if (want === normalize(t("Kept")) || ["zabrane", "zabrany"].includes(want)) return catchesNewestFirst(book).filter((entry) => !entry.released);
+  // In either language and any form, so a search kept from one language still finds them in the other.
+  if (want === normalize(t("Released")) || RELEASED_WORDS.has(want)) return catchesNewestFirst(book).filter((entry) => entry.released);
+  if (want === normalize(t("Kept")) || KEPT_WORDS.has(want)) return catchesNewestFirst(book).filter((entry) => !entry.released);
   // "photo" whole: the fish with a picture kept, in either language.
   if (["photo", "photos", normalize(t("Photo")), normalize(t("Photos"))].includes(want)) return catchesNewestFirst(book).filter((entry) => pictured(entry.id));
   // "note" whole: the fish written up with a note, in either language; "-note" the ones left bare.
@@ -605,6 +606,10 @@ export function leftOutParts(book: Logbook, needle: string): { keep: string[]; d
 
 /** One search, or several joined with "+" ("Northern pike + Overcast"): then only the fish every part finds. */
 /** `pictured` says which fish have a photo kept, for "photo"; left out, none do. */
+/** "released" and "kept" in both languages and the forms Polish gives them, read whole. */
+const RELEASED_WORDS = new Set(["released", "release", "wypuszczona", "wypuszczone", "wypuszczony", "wypuszczonych"].map(normalize));
+const KEPT_WORDS = new Set(["kept", "zabrana", "zabrane", "zabrany", "zabranych"].map(normalize));
+
 export function findCatches(book: Logbook, needle: string, t: (text: string) => string, pictured: (id: string) => boolean = () => false): CatchEntry[] {
   const { keep, drop } = leftOutParts(book, needle);
   if (drop.length === 0) return findKept(book, keep, t, pictured);
@@ -885,6 +890,9 @@ export function CatchSearch() {
               </>
             ) : matches.length === 0 ? (
               emptyText(book, settled, t)
+            ) : othersOnly ? (
+              // One fish, and not the angler's: said as several are.
+              `${t("Matches: {count}", { count: matches.length })} ${t("It is from the sample week or the game.")}`
             ) : (
               t("Matches: {count}", { count: matches.length })
             )}
@@ -910,7 +918,8 @@ export function CatchSearch() {
               <button
                 type="button"
                 className="text-button"
-                onClick={() => downloadFile(catchesCsv({ ...book, catches: matches }), "text/csv;charset=utf-8", datedName("stillwater-catches.csv"))}
+                // The angler's own fish, as the count and the copy hold them: a sheet sent on doesn't carry the sample's.
+                onClick={() => downloadFile(catchesCsv({ ...book, catches: mine.length > 0 ? mine : matches }), "text/csv;charset=utf-8", datedName("stillwater-catches.csv"))}
               >
                 {t("Download these as a spreadsheet")}
               </button>
@@ -984,7 +993,19 @@ function MatchSplits({ matches, all, search, largest }: { matches: readonly Catc
     for (const entry of matches) counts.set(key(entry), (counts.get(key(entry)) ?? 0) + 1);
     return [...counts];
   };
-  const kinds = tally((entry) => entry.species).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  // One kind however it was written ("Zander", "zander "), under the spelling most of its fish carry, as the kind's chip
+  // opens them all.
+  const spelled = new Map<string, Map<string, number>>();
+  for (const entry of matches) {
+    const name = entry.species.trim();
+    const key = name.toLowerCase();
+    const forms = spelled.get(key) ?? new Map<string, number>();
+    forms.set(name, (forms.get(name) ?? 0) + 1);
+    spelled.set(key, forms);
+  }
+  const kinds = [...spelled.values()]
+    .map((forms): [string, number] => [[...forms].reduce((best, row) => (row[1] > best[1] ? row : best))[0], [...forms.values()].reduce((sum, n) => sum + n, 0)])
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
   const years = tally((entry) => bookFishDay(book, entry).slice(0, 4)).sort((a, b) => b[0].localeCompare(a[0]));
   // One kind found: each year's biggest beside its count, by the measure most of them were taken in, so "are my pike
   // getting bigger" reads off any search. Across kinds a biggest says nothing.
@@ -1022,7 +1043,7 @@ function MatchSplits({ matches, all, search, largest }: { matches: readonly Catc
     ) : null;
   return (
     <>
-      {line(t("By kind:"), kinds, (species) => exactTerm("species", t(species)), (species) => t(species), (entry, species) => entry.species === species)}
+      {line(t("By kind:"), kinds, (species) => exactTerm("species", t(species)), (species) => t(species), (entry, species) => entry.species.trim().toLowerCase() === species.toLowerCase())}
       {line(t("By year:"), years, (year) => year, (year) => year, (entry, year) => bookFishDay(book, entry).startsWith(`${year}-`), bestIn)}
     </>
   );
