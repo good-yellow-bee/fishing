@@ -133,6 +133,12 @@ export function TripsPage() {
   const fishByTrip = fishCountsByTrip(book);
   // The angler's own outings, as Home and Bests count them: Recent's month headings count these and say the rest apart.
   const countedIds = new Set(countedBook(book).trips.map((trip) => trip.id));
+  // The words that leave out the outings in Recent not counted as the angler's own, once there are some of theirs.
+  const notMine = countedIds.size > 0 ? recent.filter((trip) => !countedIds.has(trip.id)) : [];
+  const onlyMine = [
+    ...(notMine.some(isSampleOuting) ? [`-${t("sample|search word")}`] : []),
+    ...(notMine.some((trip) => !offPlayLake(trip)) ? [`-${t("game|search word")}`] : []),
+  ].join(" ");
   // How the outings already fished have gone, across every water.
   // Counted as Bests counts them: the sample week's outings go with the angler's first own outing or fish.
   // A day's fish logged without its outing count for that day's outing on that water, as a water's page and Bests count them.
@@ -253,6 +259,14 @@ export function TripsPage() {
           <h2 className="subhead">{t("Recent")}</h2>
           {average ? <p className="meta">{average}</p> : null}
           {runNow > 0 ? <p className="meta outing-run">{tn(runNow, "A fish on each of your last {n} outings", "A fish on each of your last {n} outings")}</p> : null}
+          {/* A blank spell still running, as Bests says it: the moment to change water or lure. */}
+          {streak.dryNow > 1 && streak.best > 0 ? <p className="meta">{t("Outings since your last fish: {count}", { count: streak.dryNow })}</p> : null}
+          {/* The sample week's and the game's outings sit among the angler's own: one tap leaves them out. */}
+          {onlyMine ? (
+            <p className="meta only-mine">
+              <Link to={`/trips?${new URLSearchParams({ [TRIP_FIND]: onlyMine }).toString()}`}>{t("Only my outings")}</Link>
+            </p>
+          ) : null}
           {sheetOutings(book, today).trips.length > 0 ? (
             <p className="fish-csv">
               <button type="button" className="text-button" onClick={() => downloadFile(tripsCsv(book, today), "text/csv;charset=utf-8", datedName("stillwater-outings.csv"))}>
@@ -601,6 +615,7 @@ function TripView() {
       {/* The sample week's planned days stay off a calendar, as "Add all to calendar" leaves them out. */}
       {/* Today's outing under way (a fish in) is no plan any more: it goes on to Go again, as a past one does. */}
       {play || isSampleOuting(trip) ? null : !fished ? (
+        <>
         <p className="trip-calendar">
           <button
             type="button"
@@ -619,6 +634,15 @@ function TripView() {
             {t("Print the packing list")}
           </button>
         </p>
+          {/* Plans are made with someone: the day, the water, what works there and what is still to pack, for a message. */}
+          <CopySummary
+            text={() => [`${outingName(trip, book.spots)} · ${formatDay(trip.date)} · ${spot?.name ?? t("Unknown water")}`, ...calendarNotes(book, trip, tackleItems), trip.note.trim()].filter(Boolean).join("\n")}
+            file="stillwater-plan.txt"
+            label={t("Copy the plan")}
+            copied={t("Plan copied.")}
+            saved={t("Plan saved as a file.")}
+          />
+        </>
       ) : (
         spot ? (
           <p className="trip-again">
