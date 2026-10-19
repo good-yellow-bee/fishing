@@ -1127,6 +1127,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA82~~ | ~~A catch's conditions box on a touch screen: the sky, wind, water temperature and moon links were 25 px targets on 27 px lines; each is now a 32 px band, plain inline links off touch (#1275)~~ | phone UX | S |
 | ~~PA83~~ | ~~An empty list's link on a touch screen: "Plan one", "Log a catch", "Add a spot" and the trip's "Last fish here" ended their line as 18-22 px targets; each is now a 32 px band, plain inline links off touch (#1277)~~ | phone UX | S |
 | ~~PA84~~ | ~~A page's one-link lines on a touch screen: "Add a photo" on a fish, "Write up the day" and "Go again" on an outing were 19-20 px targets 12 px from the next line; each is now a 32 px band, plain inline links off touch (#1278)~~ | phone UX | S |
+| ~~PA85~~ | ~~The way on from a missing page ("Back to the book") and a merged water ("Open ...") on a touch screen: 19 px links, now 32 px bands like the other one-link lines (#1279)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 

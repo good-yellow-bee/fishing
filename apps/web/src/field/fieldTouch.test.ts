@@ -183,13 +183,14 @@ describe("an empty list's link on a touch screen", () => {
 });
 
 describe("a page's one-link lines on a touch screen", () => {
-  it("makes Add a photo, Write up the day and Go again 32 px bands, and leaves desktop's inline links alone", () => {
+  it("makes Add a photo, Write up the day, Go again and a missing page's way back 32 px bands, and leaves desktop's inline links alone", () => {
     const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
-    const block = /\n  :is\(\.add-photo, \.trip-write-up, \.trip-again\) > a \{([^}]*)\}/.exec(touch)?.[1];
+    const block = /\n  :is\(\.add-photo, \.trip-write-up, \.trip-again, \.lone-link\) > a \{([^}]*)\}/.exec(touch)?.[1];
     expect(block).toContain("display: inline-block;");
     expect(block).toContain("min-height: 32px;");
     expect(block).toContain("box-sizing: border-box;");
-    expect(css.slice(0, css.indexOf("@media (pointer: coarse) {"))).not.toContain(":is(.add-photo, .trip-write-up, .trip-again) > a");
+    expect(css.slice(0, css.indexOf("@media (pointer: coarse) {"))).not.toContain(".lone-link");
+    expect(readFileSync(`${import.meta.dirname}/NotFoundPage.tsx`, "utf8")).toContain('<p className="lone-link">');
   });
 });
 
