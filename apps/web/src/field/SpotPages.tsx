@@ -63,6 +63,9 @@ import { noteAddedWater } from "./addedWater";
 import { bestLureAt } from "./waterLure";
 import { useTypedParam } from "./typedParam";
 import { CopyPlace } from "./CopyPlace";
+import { seasonWaters } from "./seasonWaters";
+import { downloadFile } from "./download";
+import { fileSlug, gpxFor } from "./gpx";
 import { keepDraft, readKeptDraft } from "./catchDraft";
 import { editFromPage, leaveDeleted, leaveSaved } from "./leaveDeleted";
 import { savedState, sayAfterBack } from "./SavedNote";
@@ -129,6 +132,7 @@ export function SpotsPage() {
   // Fish as the page sums them: the sample week's go with the angler's first fish.
   const ownRow = new Map(ownRows.map((row) => [row.spot.id, row]));
   const ownTrips = (id: string) => counted.trips.filter((trip) => trip.spotId === id);
+  const season = seasonWaters(book, today);
   const ownHere = (id: string) => id !== PLAY_LAKE_ID && ((ownRow.get(id)?.fishCount ?? 0) > 0 || ownTrips(id).length > 0);
   if (order === "rested") {
     rows.sort((a, b) => {
@@ -179,6 +183,13 @@ export function SpotsPage() {
           <p className="eyebrow">{t("Waters|page eyebrow")}</p>
           <h1>{t("Spots")}</h1>
           <p className="lede">{t("The places you actually go back to, and the day they fish well.")}</p>
+          {/* The season's waters, and how many of them are new this year: trying new water is a season's goal too. */}
+          {season.fished > 0 ? (
+            <p className="meta season-waters">
+              {`${today.slice(0, 4)}: ${tn(season.fished, "{n} water fished", "{n} waters fished")}`}
+              {season.first > 0 ? `, ${tn(season.first, "{n} new|waters", "{n} new|waters")}` : ""}
+            </p>
+          ) : null}
         </div>
         <Link to="/spots/new" className="field-primary inline">
           {t("Add a spot")}
@@ -431,11 +442,22 @@ function SpotView() {
               {t("Open on a map")}
             </MapAnchor>
             {/* Among the angler's other waters, on the Map page's own sheet. */}
-            {" · "}
+            {"\u00a0· "}
             <Link to={`/map#water-${spot.id}`}>{t("See it on the Map")}</Link>
             {/* To paste into a sounder, a message or the car's navigation: the numbers above are fiddly to select on a phone. */}
-            {" · "}
+            {"\u00a0· "}
             <CopyPlace lat={spot.place.lat} lng={spot.place.lng} />
+            {/* The drive there before dawn, from wherever the angler is. */}
+            {"\u00a0· "}
+            <a href={`https://www.openstreetmap.org/directions?route=%3B${spot.place.lat}%2C${spot.place.lng}`} target="_blank" rel="noreferrer">
+              {t("Directions")}
+              <span className="sr-only"> {t("(opens OpenStreetMap in a new tab)")}</span>
+            </a>
+            {/* A waypoint a GPS, sounder or phone's navigation app imports, rather than numbers copied one by one. */}
+            {"\u00a0· "}
+            <button type="button" className="text-button" onClick={() => downloadFile(gpxFor([spot]), "application/gpx+xml", `${fileSlug(spot.name)}.gpx`)}>
+              {t("Save for a GPS (.gpx)")}
+            </button>
           </p>
         ) : placeFor(spot.id) ? (
           // A sample water has its pin on the sample sheet: its row there, as an own water's place leads to its own.
@@ -638,8 +660,9 @@ function SpotForm() {
   const canLocate = typeof navigator !== "undefined" && "geolocation" in navigator;
   const [error, setError] = useState("");
   // Unsaved changes to a water in the book wait for the next visit to its form.
+  // A new water's notes too, unless it is being added on the way to a catch or outing, whose own draft holds them.
   const kept = useKeptForm(
-    existing ? `spot:${existing.id}` : null,
+    existing ? `spot:${existing.id}` : then ? null : "spot:new",
     existing ? JSON.stringify(storedBook.spots.find((spot) => spot.id === existing.id) ?? existing) : "",
     { name, waterType, notes, bestConditions, place },
     (fields) => {
