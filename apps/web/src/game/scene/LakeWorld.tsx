@@ -202,6 +202,8 @@ import { Crows } from "./Crows";
 import { crowsOut } from "./crowFlush";
 import { sleddersOut } from "./sledRun";
 import { Sledders } from "./Sledders";
+import { spindriftOut } from "./blowingSnow";
+import { Spindrift } from "./Spindrift";
 import { NightEyes } from "./NightEyes";
 import { eyesOut } from "./eyeShine";
 import { Birdwatcher } from "./Birdwatcher";
@@ -2388,6 +2390,7 @@ export const LakeWorld = memo(function LakeWorld({
       {joggerOut(hour, sky, season) && <Jogger />}
       {crowsOut(hour, sky, season) && <Crows jogging={joggerOut(hour, sky, season)} />}
       {sleddersOut(hour, sky, season) && <Sledders />}
+      {spindriftOut(hour, sky, season, wind) && <Spindrift wind={wind} />}
       {birderOut(hour, sky, season) && <Birdwatcher />}
       {porchOut(hour, sky, season) && <PorchRocker />}
       {sandpipersOut(hour, sky, season) && <Sandpipers />}
