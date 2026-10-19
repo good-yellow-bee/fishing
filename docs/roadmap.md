@@ -1320,7 +1320,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC159~~ | ~~Damselflies: on calm summer days two bright blue damselflies keep to the dock, one each side, settling on the posts beside the angler with wings folded, darting out to hover low over the water and flitting back (two draws)~~ (#1353) | scene | S |
 | ~~SC160~~ | ~~News card scene35: the cap cloud on the hills and the damselflies~~ (#1353) | scene | S |
 | ~~SC161~~ | ~~Fewer draws: the seven dragonflies over the reed beds draw as one instanced body mesh and one wing mesh (21 draws to 2), and the stone skimmer's arms share one instanced draw and its legs bake into one shape (5 limb draws to 2)~~ (#1356) | scene | S |
-| SC162 | Fewer draws: each high bird flock over the lake draws its wings as one instanced mesh (14 wing draws to 2, still culled out of view), and each swan's two wake arms bake into one shape (4 draws to 2) | scene | S |
+| ~~SC162~~ | ~~Fewer draws: each high bird flock over the lake draws its wings as one instanced mesh (14 wing draws to 2, still culled out of view), and each swan's two wake arms bake into one shape (4 draws to 2)~~ (#1360) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
