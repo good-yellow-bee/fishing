@@ -1690,7 +1690,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT336~~ | ~~Two long-run lodge badges: Whole lake (land every kind of fish in the lake, all 18) and Trophy hunter (land five kinds at trophy weight)~~ (#1398) | gameplay | S |
 | ~~GT337~~ | ~~The shack sells a live shiner for 50 points (the server takes them): it goes on the hook for the next cast, one at a time, and a shiner on the hook, bought or landed, stays on across a reload~~ (#1400) | gameplay | S |
 | ~~GT338~~ | ~~News card 2026-10-19-game30 covers GT336 and GT337: the Whole lake and Trophy hunter badges, and the shack's live shiner~~ (#1402) | ui | S |
-| GT339 | Level 17, Child of the lake, at 57000 lifetime points: the shack sells groundbait and live shiners a fifth cheaper (48 and 40 points; the server charges the same) | gameplay | S |
+| ~~GT339~~ | ~~Level 17, Child of the lake, at 57000 lifetime points: the shack sells groundbait and live shiners a fifth cheaper (48 and 40 points; the server charges the same)~~ (#1405) | gameplay | S |
+| GT340 | Taking a lodge record from another angler pays 1.5x points in place of the personal best's 1.25x (the server checks other anglers' heaviest of the kind), and the landed card's record stamp says "· 1.5× points" | gameplay | S |
 
 ## Risks / open questions for the owner
 

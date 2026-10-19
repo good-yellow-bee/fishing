@@ -28,6 +28,23 @@ export function personalBestBonus(weight: number, priorBest: number | null | und
   return priorBest != null && weight > priorBest ? PB_BONUS : 1;
 }
 
+/** A fish that takes the lodge record of its kind from another angler earns this much more, in place of the personal best bonus. */
+export const LODGE_RECORD_BONUS = 1.5;
+
+/**
+ * The bonus for taking the lodge record from another angler: `othersBest` is the heaviest of the kind any other angler landed,
+ * and it only counts while it stands above the angler's own `priorBest`, so beating a record the angler already holds is a personal best.
+ */
+export function lodgeRecordBonus(weight: number, priorBest: number | null | undefined, othersBest: number | null | undefined): number {
+  return othersBest != null && weight > othersBest && othersBest >= (priorBest ?? 0) ? LODGE_RECORD_BONUS : 1;
+}
+
+/** The lodge record bonus when the catch takes the record from another angler, else the personal best bonus. */
+export function bestBonus(weight: number, priorBest: number | null | undefined, othersBest: number | null | undefined): number {
+  const lodge = lodgeRecordBonus(weight, priorBest, othersBest);
+  return lodge > 1 ? lodge : personalBestBonus(weight, priorBest);
+}
+
 export function weightInRange(species: FishSpecies, weight: number): boolean {
   return weight >= species.minWeight && weight <= species.maxWeight;
 }
@@ -61,8 +78,8 @@ export type CatchResult = CatchOk | CatchErr;
 
 /** `at` is when the catch is recorded; it picks the fish of the week. */
 /** `requestId`, when given, rolls for a golden fish. */
-/** `priorBest` is the heaviest of this species the angler landed before, for the personal best bonus. */
-export function validateCatch(profile: Profile, request: CatchRequest & { requestId?: string }, at: Date = new Date(), priorBest: number | null = null): CatchResult {
+/** `priorBest` is the heaviest of this species the angler landed before, for the personal best bonus; `othersBest` the heaviest any other angler landed, for the lodge record bonus. */
+export function validateCatch(profile: Profile, request: CatchRequest & { requestId?: string }, at: Date = new Date(), priorBest: number | null = null, othersBest: number | null = null): CatchResult {
   const species = fishById(request.speciesId);
   if (!species) return { ok: false, error: "unknown species", status: 400 };
   if (!species.spots.includes(request.spot)) {
@@ -78,7 +95,7 @@ export function validateCatch(profile: Profile, request: CatchRequest & { reques
     return { ok: false, error: "line too light for this fish", status: 409 };
   }
   const golden = request.requestId !== undefined && isGolden(request.requestId) ? GOLDEN_BONUS : 1;
-  return { ok: true, points: catchPoints(species, request.weight, request.clean, weeklyBonus(species.id, at) * golden * cleanRunBonus(request.clean, request.cleanRun) * personalBestBonus(request.weight, priorBest)), species };
+  return { ok: true, points: catchPoints(species, request.weight, request.clean, weeklyBonus(species.id, at) * golden * cleanRunBonus(request.clean, request.cleanRun) * bestBonus(request.weight, priorBest, othersBest)), species };
 }
 
 export type UpgradeOk = { ok: true; cost: number; nextRank: number };
