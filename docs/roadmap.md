@@ -1718,7 +1718,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT347~~ | ~~Strong arms lift a bottom-sticker: from Strength 7 one pump brings a sulking catfish or sturgeon off the bottom, not two; the shack's Strength line and the fight card's Bottom-sticker line say so~~ (#1429) | gameplay | S |
 | ~~GT348~~ | ~~News card 2026-10-19-game33 covers GT346 and GT347: level 18, Breath of the lake, raises the shack board's rewards, and Strength 7 lifts a bottom-sticker in one pump~~ (#1430) | ui | S |
 | ~~GT349~~ | ~~A patient angler waits a dropped fish out: from Patience 7 a fish that dropped the bait before the strike takes again on a cast straight back 60% of the time, not 40%; the shack's Patience line and the miss line say so~~ (#1433) | gameplay | S |
-| GT350 | An accurate caster drops into the gaps: from Accuracy 7 a cast into the reeds' weed, the lily pads or the point's rocks snags half as often; the shack's Accuracy line says so | gameplay | S |
+| ~~GT350~~ | ~~An accurate caster drops into the gaps: from Accuracy 7 a cast into the reeds' weed, the lily pads or the point's rocks snags half as often; the shack's Accuracy line says so~~ (#1436) | gameplay | S |
+| GT351 | News card 2026-10-19-game34 covers GT349 and GT350: Patience 7 brings a dropped fish back more often, and Accuracy 7 snags half as often | ui | S |
 
 ## Risks / open questions for the owner
 
