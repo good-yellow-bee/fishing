@@ -36,11 +36,12 @@ import { mostKindsDay } from "./bests/mostKinds";
 import { CopySummary } from "./CopySummary";
 import { spotSummary } from "./summaries";
 import { EditDelete } from "./EditDelete";
-import { fishCountLabel, formatDay, messageText, outingName, outingNameById, tripWhen } from "./format";
+import { fishCountLabel, formatDay, formatTimeOfDay, messageText, outingName, outingNameById, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { locale, num, t, tn, useT } from "../i18n";
 import { tempText } from "../i18n/content";
-import { lastReading, tempThroughYear } from "./waterTips";
+import { lastReading, readingBefore, tempThroughYear } from "./waterTips";
+import { sunTimes } from "./sunTimes";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { useKeptForm } from "./keptForm";
 import { ChoiceRow } from "./ChoiceRow";
@@ -102,13 +103,16 @@ export function recentTemp(
   spotId: string,
   today: string,
   dayOf: (entry: CatchEntry) => string = (entry) => localDate(new Date(entry.caughtAt)),
-): { fahrenheit: number; day: string } | null {
+): { fahrenheit: number; day: string; trend?: "warming" | "cooling" } | null {
   const here = catches.filter((entry) => entry.spotId === spotId);
   const last = lastReading(here);
   if (!last) return null;
   const entry = here.find((found) => found.id === last.id);
   const day = entry ? dayOf(entry) : localDate(new Date(last.at));
-  return day <= today && daysBetween(day, today) <= TEMP_FRESH_DAYS ? { fahrenheit: last.fahrenheit, day } : null;
+  if (day > today || daysBetween(day, today) > TEMP_FRESH_DAYS) return null;
+  // Which way the water is going, against a reading of the weeks before that reads differently, as the water's page says it.
+  const before = readingBefore(here, last, (fahrenheit) => tempText(fahrenheit) !== tempText(last.fahrenheit));
+  return { fahrenheit: last.fahrenheit, day, ...(before ? { trend: last.fahrenheit > before.fahrenheit ? ("warming" as const) : ("cooling" as const) } : {}) };
 }
 
 export function SpotsPage() {
@@ -500,7 +504,10 @@ function SpotView() {
               {t("Save for a GPS (.gpx)")}
             </button>
           </p>
-        ) : placeFor(spot.id) ? (
+        ) : null}
+        {/* When the light comes and goes there: the page counts the fish that came within an hour of either. */}
+        {spot.place ? <SunAtWater place={spot.place} /> : null}
+        {spot.place ? null : placeFor(spot.id) ? (
           // A sample water has its pin on the sample sheet: its row there, as an own water's place leads to its own.
           <p className="meta spot-place">
             <Link to={`/map#water-${spot.id}`}>{t("See it on the Map")}</Link>
@@ -930,6 +937,19 @@ function SpotForm() {
       </form>
     </div>
   );
+}
+
+/** "Today: sunrise 6:58 · sunset 17:40" at the water, in this device's clock; tomorrow's once today's sun has set. */
+function SunAtWater({ place }: { place: { lat: number; lng: number } }) {
+  const now = new Date();
+  const today = localDate(now);
+  const sunToday = sunTimes(today, place.lat, place.lng);
+  const afterDark = "rise" in sunToday && now > sunToday.set;
+  const day = afterDark ? shiftDate(now, 1) : today;
+  const sun = afterDark ? sunTimes(day, place.lat, place.lng) : sunToday;
+  if (!("rise" in sun)) return null;
+  const times = { rise: formatTimeOfDay(sun.rise.toISOString()), set: formatTimeOfDay(sun.set.toISOString()) };
+  return <p className="meta sun-line">{afterDark ? t("Tomorrow: sunrise {rise} · sunset {set}", times) : t("Today: sunrise {rise} · sunset {set}", times)}</p>;
 }
 
 /** "Water temperature in 2026: Apr 20 52°F → Jun 3 64°F → Sep 9 58°F", from the readings noted with fish. */

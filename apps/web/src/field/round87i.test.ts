@@ -40,7 +40,7 @@ describe("round 87 ideas: a water's last temperature on its card", () => {
     const { recentTemp } = await import("./SpotPages");
     const read = (id: string, at: Date, waterTempF: number, spotId = "own") => ({ ...fish(id, spotId, at.toISOString()), weather: { waterTempF } }) as CatchEntry;
     const catches = [read("a", new Date(2026, 9, 1, 8), 55), read("b", new Date(2026, 9, 12, 8), 51), read("c", new Date(2026, 9, 15, 8), 70, "other")];
-    expect(recentTemp(catches, "own", "2026-10-19")).toEqual({ fahrenheit: 51, day: "2026-10-12" });
+    expect(recentTemp(catches, "own", "2026-10-19")).toEqual({ fahrenheit: 51, day: "2026-10-12", trend: "cooling" });
     expect(recentTemp(catches, "own", "2026-11-20")).toBeNull();
     expect(recentTemp([], "own", "2026-10-19")).toBeNull();
   });
