@@ -46,6 +46,7 @@ import { datedName, downloadFile } from "../download";
 import { gpxFor } from "../gpx";
 import { countedBook, countedFish } from "../milestones";
 import { focusPageHeading } from "../pageFocus";
+import { pieceName } from "../gear/pieceKey";
 import "./spot-map.css";
 
 const POND = oval(POND_CENTER, 0.0052, 0.014);
@@ -381,7 +382,7 @@ export function SpotMapPage() {
     const dated = row?.lastFishDay ? t("{fish}, last {day}", { fish, day: formatDay(row.lastFishDay) }) : fish;
     // What to pack for there: the lure that took the most of its fish, when two or more did and none ties it.
     const best = bestLure(spotId);
-    const line = best ? `${dated} · ${t("best on {lure}", { lure: t(best) })}` : dated;
+    const line = best ? `${dated} · ${t("best on {lure}", { lure: pieceName(best) })}` : dated;
     // In the small hours, last evening's outing still going there: the one the angler is out on now.
     const going = book.trips.find((trip) => trip.spotId === spotId && !isSampleOuting(trip) && stillGoing(book, trip));
     if (going)

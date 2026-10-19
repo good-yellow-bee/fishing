@@ -2,11 +2,14 @@ import { foldText, type Spot } from "@stillwater/shared";
 
 const escape = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
+/** A coordinate as GPX takes it: to six places (about 11 cm), never "-1e-7" for a place right on the equator. */
+const decimal = (value: number) => String(Number(value.toFixed(6)) || 0);
+
 /** Waters with a place as GPX waypoints, named as the book names them, which a GPS, a sounder or a phone's map imports. */
 export function gpxFor(spots: readonly Spot[]): string {
   const points = spots.flatMap((spot) =>
     spot.place
-      ? [`  <wpt lat="${spot.place.lat}" lon="${spot.place.lng}">\n    <name>${escape(spot.name.trim())}</name>${spot.notes.trim() ? `\n    <desc>${escape(spot.notes.trim())}</desc>` : ""}\n  </wpt>`]
+      ? [`  <wpt lat="${decimal(spot.place.lat)}" lon="${decimal(spot.place.lng)}">\n    <name>${escape(spot.name.trim())}</name>${spot.notes.trim() ? `\n    <desc>${escape(spot.notes.trim())}</desc>` : ""}\n  </wpt>`]
       : [],
   );
   return `<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="Stillwater" xmlns="http://www.topografix.com/GPX/1/1">\n${points.join("\n")}\n</gpx>\n`;

@@ -1340,6 +1340,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC174~~ | ~~Fewer draws: the spring goose family draws as four instanced meshes (14 draws to 4), the two swans and their wakes as four (10 to 4), and each campfire bakes its flame and core into one shape~~ (#1385) | scene | S |
 | ~~SC175~~ | ~~Fewer draws: seventeen far-bank figures (the jogger, skier, sledders, woodcutter, dog walker, paddleboarder, stone skimmer, anglers, rowers, painter and others) bake their posed limbs into one skinned mesh each, so each figure costs one draw however many limbs it swings~~ (#1387) | scene | S |
 | ~~SC176~~ | ~~Fewer draws: fourteen lake birds and animals (the moose, osprey, heron, hare, cormorant, dock robin, sandpipers, winter gulls, grebes, loon, owl, woodpecker, the disc tossers and the dinghy) bake their posed parts into one skinned mesh each~~ (#1388) | scene | S |
+| ~~SC177~~ | ~~Swan pedalo: on calm, fine summer days two people pedal a white swan pedal boat in a slow loop on the east water, its paddle wheel turning and a wake behind it (one draw for the boat and riders), taking the water the dinghy sails on breezy days~~ (#1391) | scene | S |
+| ~~SC178~~ | ~~Dock mouse: on evenings and nights from spring to fall a field mouse now and then climbs onto the dock behind the angler, scurries across in dashes, sits up to nibble a crumb and darts off over the edge (one draw), with news scene39 for it and the pedalo~~ (#1396) | scene | S |
+| ~~SC179~~ | ~~Mooring lines: while the rowboat lies tied up by the pier, a bow line and a stern line run to the pier posts, sagging and drawing tighter as the hull rides the chop, gone once it is untied (one draw)~~ (#1399) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1677,7 +1680,10 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT330~~ | ~~Level 16, Voice of the lake, at 47000 lifetime points: pulling the rod against a run cuts it short 25% faster~~ (#1377) | gameplay | S |
 | ~~GT331~~ | ~~A turned run swings the fish's head round: for 1 s after a run the angler turned, reeling wins line 1.3x faster, and the steer line says "Its head is turned — reel now to win line"~~ (#1380) | gameplay | S |
 | ~~GT332~~ | ~~News card 2026-10-19-game28 covers GT330 and GT331: level 16, Voice of the lake, turns runs short faster, and a turned run swings the fish's head round for a burst of line~~ (#1382) | ui | S |
-| GT333 | A personal best pays: a fish heavier than the angler's own best of its kind earns 1.25x points (the server checks it against the angler's catches; the first of a kind beats nothing), and the landed card's stamp says "Personal best · was 0.6 lb · 1.25× points" | gameplay | S |
+| ~~GT333~~ | ~~A personal best pays: a fish heavier than the angler's own best of its kind earns 1.25x points (the server checks it against the angler's catches; the first of a kind beats nothing), and the landed card's stamp says "Personal best · was 0.6 lb · 1.25× points"~~ (#1384) | gameplay | S |
+| ~~GT334~~ | ~~The shack's bait tin sells a handful of groundbait for 60 points (the server takes them), up to 3 in the bag; bought handfuls stay in the bag across a reload, and a free handful still comes with each visit~~ (#1390) | gameplay | S |
+| ~~GT335~~ | ~~News card 2026-10-19-game29 covers GT333 and GT334: a personal best pays 1.25x points, and the shack sells groundbait~~ (#1395) | ui | S |
+| GT336 | Two long-run lodge badges: Whole lake (land every kind of fish in the lake, all 18) and Trophy hunter (land five kinds at trophy weight) | gameplay | S |
 
 ## Risks / open questions for the owner
 
@@ -2250,3 +2256,5 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR561~~ | ~~Round 97 gear ideas: Undo after Unpack all and ×, packing progress and Out now on the Map, best lures of the outing's own water first~~ (#1368) | field | S |
 | ~~BR562~~ | ~~Bests round 98 fixes: last evening's outing no blank after midnight, loose fish in fish an outing, kinds and lures in the reader's language, long lure layout, focus after Back, Polish goal lines, sample-only goal note~~ (#1383) | field | S |
 | ~~BR563~~ | ~~Round 98 Bests ideas: each water's biggest fish, the day on record tiles, New best stamp and best lure in a season, days since the last fish, Beat last year goal offer, calendar tab stop on the latest day~~ (#1386) | field | S |
+| ~~BR564~~ | ~~Waters round 99 fixes: last evening's outing no blank after midnight and Out now, loose fish in outing counts, Polish lure names and units, focus after Back, the game's lake in the new-water form, sample waters labelled, far-off sun times, blank-water card wording, GPX decimals~~ (#1394) | field | S |
+| ~~BR565~~ | ~~Round 99 waters ideas: each water card names its best fish and a week's rest, the copied summary says when it was last fished, a water fished only blank can be copied~~ (#1397) | field | S |

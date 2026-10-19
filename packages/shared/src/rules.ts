@@ -93,6 +93,18 @@ export function validateUpgrade(profile: Profile, skill: SkillId): UpgradeResult
   return { ok: true, cost, nextRank: current + 1 };
 }
 
+/** A handful of groundbait from the shack costs this many points; the bag carries at most GROUNDBAIT_CARRY handfuls. */
+export const GROUNDBAIT_PRICE = 60;
+export const GROUNDBAIT_CARRY = 3;
+
+export type PurchaseOk = { ok: true; cost: number };
+export type PurchaseResult = PurchaseOk | UpgradeErr;
+
+export function validateGroundbaitBuy(profile: Profile): PurchaseResult {
+  if (profile.points < GROUNDBAIT_PRICE) return { ok: false, error: "not enough points", status: 409 };
+  return { ok: true, cost: GROUNDBAIT_PRICE };
+}
+
 export function rollWeight(species: FishSpecies, patience: number, random = Math.random, level = 1): number {
   const trophyBoost = level >= 8 ? 0.1 : 0;
   const t = Math.min(1, Math.max(0, random() + patience * 0.015 + trophyBoost));

@@ -194,6 +194,19 @@ export function FieldShell({ children }: { children: ReactNode }) {
     const active = document.activeElement;
     // Back from a fish, an outing or a water to the list it was opened from: its card takes focus where the list is
     // scrolled to, so the next Tab goes on down the list rather than jumping to the top.
+    // Back to the very link followed, when this entry knows it: so focus lands where the page was scrolled to, not on
+    // another link to the same page further down (a water's "Last fished here" beside that outing's card).
+    const target = addressOf(leftShown);
+    const idx = historyIdx();
+    const followed = how === "POP" && main && idx !== null ? followedAt.get(idx) : undefined;
+    if (main && followed?.to === target) {
+      const links = linksTo(main, target);
+      const link = links[followed.nth] ?? links[0];
+      if (link) {
+        link.focus({ preventScroll: true });
+        return;
+      }
+    }
     const from = /^\/(catches|trips|spots)\/([^/]+)$/.exec(left);
     if (how === "POP" && main && from && (from[1] === "catches" || from[2] !== "new")) {
       // A list's card before a sum's "Heaviest" link to the same fish; an outing or a water only from its card.
@@ -204,16 +217,11 @@ export function FieldShell({ children }: { children: ReactNode }) {
         return;
       }
     }
-    // Back to any other link that opened the page left, as Bests' rows, calendar days and kinds do: the very link
-    // followed when this entry knows it, so focus lands where the page was scrolled to rather than on a heading far above.
+    // Back with no link known (a reload, a deep link): the one link on the page to where it was, as Bests' rows have.
     if (how === "POP" && main && !(active && main.contains(active) && active !== main)) {
-      const target = addressOf(leftShown);
       const links = linksTo(main, target);
-      const idx = historyIdx();
-      const followed = idx === null ? undefined : followedAt.get(idx);
-      const back = followed?.to === target ? (links[followed.nth] ?? links[0]) : links.length === 1 ? links[0] : undefined;
-      if (back) {
-        back.focus({ preventScroll: true });
+      if (links.length === 1) {
+        links[0]!.focus({ preventScroll: true });
         return;
       }
     }

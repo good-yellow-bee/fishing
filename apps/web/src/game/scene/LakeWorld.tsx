@@ -105,6 +105,8 @@ import { beesOut } from "./meadowFlowers";
 import { Woodpile } from "./Woodpile";
 import { WindowGlow } from "./WindowGlow";
 import { Dinghy } from "./Dinghy";
+import { Pedalo } from "./Pedalo";
+import { pedaloOut } from "./pedalBoat";
 import { sailingOut } from "./sailingTrip";
 import { TireSwing } from "./TireSwing";
 import { ShoreWash } from "./ShoreWash";
@@ -251,6 +253,10 @@ import { robinOut } from "./robinVisit";
 import { Damselflies } from "./Damselflies";
 import { damselfliesOut } from "./damselPerch";
 import { DockSnail } from "./DockSnail";
+import { MooringLines } from "./MooringLines";
+import { poseMooringRopes } from "./mooringRope";
+import { DockMouse } from "./DockMouse";
+import { mouseOut } from "./mouseScurry";
 import { snailOut } from "./snailCrawl";
 import { gullsOut } from "./gullFloes";
 import { WinterGulls } from "./WinterGulls";
@@ -2078,6 +2084,7 @@ function Creek({ hour, weather, wind }: { hour: LakeHour; weather: WeatherLook; 
 /** The angler's own rowboat. Moored by the pier until level 7 unties it; follows the row out and back, rocking on the chop. */
 function PlayerBoat({ fill }: { fill: FillKind | null }) {
   const ref = useRef<THREE.Group>(null);
+  const ropes = useRef<THREE.InstancedMesh>(null);
   useFrame((state) => {
     const hull = ref.current;
     if (!hull) return;
@@ -2090,12 +2097,18 @@ function PlayerBoat({ fill }: { fill: FillKind | null }) {
     hull.rotation.y = boat.yaw + boat.swing;
     hull.rotation.x = THREE.MathUtils.clamp((waterHeight(at.x, at.z + sample, t) - y) * 1.15, -0.2, 0.2);
     hull.rotation.z = THREE.MathUtils.clamp((y - waterHeight(at.x + sample, at.z, t)) * 1.15, -0.2, 0.2);
+    // Tied up, its lines run to the pier's posts, sagging and drawing tighter as it rides the chop.
+    hull.updateMatrixWorld();
+    poseMooringRopes(ropes.current, hull, boat.mode === "moored");
   });
   return (
-    <group ref={ref}>
-      <ToonModel url={MODELS.rowboat} scale={0.66} shadows={false} />
-      {fill && <BoatFill url={MODELS.rowboat} scale={0.66} kind={fill} seed={3} across={ROWBOAT_HULL} shown={mooredNow} />}
-    </group>
+    <>
+      <group ref={ref}>
+        <ToonModel url={MODELS.rowboat} scale={0.66} shadows={false} />
+        {fill && <BoatFill url={MODELS.rowboat} scale={0.66} kind={fill} seed={3} across={ROWBOAT_HULL} shown={mooredNow} />}
+      </group>
+      <MooringLines ref={ropes} />
+    </>
   );
 }
 
@@ -2449,6 +2462,7 @@ export const LakeWorld = memo(function LakeWorld({
       {canoeOut(hour, sky, season) && <Canoeist />}
       {skiingOut(hour, sky, season) && <Skier />}
       {sailingOut(hour, sky, season, wind) && <Dinghy wind={wind} />}
+      {pedaloOut(hour, sky, season, wind) && <Pedalo />}
       {kiteOut(hour, sky, season, wind) && <Kite wind={wind} />}
       {HAMMOCK_TREES && hammockOut(hour, sky, season) && <Hammock trees={HAMMOCK_TREES} />}
       {balloonOut(hour, sky, season, wind) && <HotAirBalloon wind={wind} />}
@@ -2481,6 +2495,7 @@ export const LakeWorld = memo(function LakeWorld({
       {robinOut(hour, sky) && <DockRobin snow={dockSnowy(season)} />}
       {damselfliesOut(hour, sky, season, wind) && <Damselflies />}
       {snailOut(hour, sky, season) && <DockSnail />}
+      {mouseOut(hour, sky, season) && <DockMouse />}
       {gullsOut(hour, sky, season) && <WinterGulls wind={wind} />}
       {snowShedOut(hour, sky, season) && <ShedSnow trees={TREES} wind={wind} />}
       <Cabin season={season} hour={hour} lit={cabinWindowsLit(hour)} smoking={chimneySmoking(hour, season)} wind={wind} />

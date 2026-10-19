@@ -4,6 +4,7 @@ import {
   WATER_LABELS,
   itemsForTrip,
   localDate,
+  measureOf,
   packedCount,
   type CatchEntry,
   type Spot,
@@ -11,7 +12,7 @@ import {
   type WaterType,
 } from "@stillwater/shared";
 import { tn, useT } from "../i18n";
-import { measuresText, tempText } from "../i18n/content";
+import { measureText, measuresText, tempText } from "../i18n/content";
 import { daysAheadLabel, fishCountLabel, fishSum, formatClock, formatDay, noteText, outingName, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { catchBadge } from "./catchBadge";
@@ -22,6 +23,7 @@ import { catchLink, type ListKey } from "./catchList";
 import { FROM_LIST } from "./leaveDeleted";
 import { isPlanned } from "./TripMonthHead";
 import { outingDay, stillGoing } from "./tripDates";
+import { bookSpelling, pieceName } from "./gear/pieceKey";
 import { bookFishDay } from "./tripMonths";
 
 /** A card's heading sits one below the section it is listed under. */
@@ -152,6 +154,7 @@ export function SpotCard({
   nextOuting = null,
   bestLure = null,
   waterTemp = null,
+  biggest = null,
 }: {
   spot: Spot;
   fishCount: number;
@@ -165,6 +168,8 @@ export function SpotCard({
   nextOuting?: string | null;
   /** The water's last temperature noted with a fish, while it is recent enough to go by. */
   waterTemp?: { fahrenheit: number; day: string; trend?: "warming" | "cooling" } | null;
+  /** The water's best fish and the measure it is best by. */
+  biggest?: { entry: CatchEntry; kind: "length" | "weight" } | null;
 }) {
   const t = useT();
   return (
@@ -175,13 +180,15 @@ export function SpotCard({
       </div>
       <p className="conditions-line">{spot.bestConditions || t("Conditions not noted")}</p>
       <p className="meta">
-        {fishCountLabel(fishCount)}
+        {/* Beside its outings, a count: "0 fish · 2 outings", not "Nothing logged" when two were. */}
+        {tripCount > 0 ? tn(fishCount, "{n} fish", "{n} fish") : fishCountLabel(fishCount)}
         {" · "}
         {tn(tripCount, "{n} outing", "{n} outings")}
         {lastFishDay ? ` · ${t("Last fish: {day}", { day: formatDay(lastFishDay) })}` : ""}
-        {bestLure ? ` · ${t("best on {lure}", { lure: t(bestLure) })}` : ""}
+        {bestLure ? ` · ${t("best on {lure}", { lure: pieceName(bestLure) })}` : ""}
       </p>
       {restDays !== null ? <p className="meta">{restDays === 0 ? t("Fished here today") : restDays === 1 ? t("Last fished here yesterday") : tn(restDays, "Last fished here {n} day ago", "Last fished here {n} days ago")}</p> : null}
+      {biggest ? <p className="meta">{t("Best here: {species}, {size}", { species: t(bookSpelling(biggest.entry.species)), size: measureText(measureOf(biggest.entry, biggest.kind)!) })}</p> : null}
       {nextOuting ? <p className="meta next-outing">{nextOuting}</p> : null}
       {waterTemp ? (
         <p className="meta water-temp">

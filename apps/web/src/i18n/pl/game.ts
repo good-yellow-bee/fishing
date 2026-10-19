@@ -75,6 +75,11 @@ export const PL_GAME: PlBook = {
   "fish rising": "ryby się spławiają",
   "groundbait · {casts} left": "zanęta · zostało {casts}",
   "Groundbait": "Zanęta",
+  "Bait tin": "Puszka z zanętą",
+  "A handful ({cost} pts)": "Garść ({cost} pkt)",
+  "Your bag is full: {max} handfuls.": "Torba jest pełna: {max} garści.",
+  "Keeps the fish feeding at a bank for {casts} casts. In your bag: {n} of {max}.": "Zatrzymuje żerujące ryby na łowisku przez {casts} rzutów. W torbie: {n} z {max}.",
+  "purchase failed": "Zakup nie powiódł się",
   "Bait": "Zanęta",
   "Toss a handful of groundbait here: the next {casts} casts bite sooner.": "Rzuć tu garść zanęty: przez kolejne rzuty ({casts}) brania przyjdą szybciej.",
   "You toss a handful of groundbait. The fish will gather to feed here for the next {casts} casts.": "Rzucasz garść zanęty. Ryby zbiorą się tu na żer przez kolejne rzuty ({casts}).",
@@ -740,6 +745,8 @@ export const PL_GAME: PlBook = {
   "It's turning toward you — get ready to reel!": "Zawraca w twoją stronę — szykuj się do zwijania!",
   "REEL — it's charging straight at you!": "ZWIJAJ — płynie prosto na ciebie!",
   "Turning it!": "Zawracasz ją!",
+  "Beat your own best of a kind and the catch now earns 1.25× points, marked on the landed card. And the shack sells groundbait: 60 points a handful, up to three in the bag, and they keep until you throw them.":
+    "Pobicie własnego rekordu danego gatunku daje teraz 1,25× punktów, co widać na karcie połowu. A w szopie można kupić zanętę: 60 punktów za garść, do trzech w torbie, i czekają, aż ich użyjesz.",
   "From level 16, Voice of the lake, at 47000 points, pulling the rod against a run cuts it short a quarter faster. And a run you turn swings the fish's head round: reel straight after it to win line faster for a moment.":
     "Od poziomu 16, Głos jeziora (47000 punktów), ciągnięcie wędki przeciw odjazdowi skraca go szybciej o 25%. A zawrócony odjazd obraca rybę łbem do ciebie: kręć zaraz po nim, a przez chwilę odzyskasz żyłkę szybciej.",
   "Its head is turned — reel now to win line": "Ma łeb zwrócony do ciebie — kręć teraz, by odzyskać żyłkę",
@@ -775,8 +782,6 @@ export const PL_GAME: PlBook = {
   "Change the lure": "Zmień przynętę",
   "An orchard now grows below the farm on the far hills: white and pink blossom in spring, gold leaves and red apples in the fall, bare in winter. From spring through summer a pair of white storks stands in a nest on the barn roof, clattering their bills now and then.":
     "Pod farmą na wzgórzach za jeziorem rośnie teraz sad: wiosną kwitnie na biało i różowo, jesienią ma złote liście i czerwone jabłka, a zimą stoi nagi. Od wiosny do końca lata na dachu stodoły w gnieździe stoi para bocianów, które co jakiś czas klekoczą.",
-  "Three clean fights in a row now pay: from the third, each clean catch earns 1.2× more points. And a lure's colour counts: a bright one like chartreuse shows up in rain, fog or the low light, a natural one like green pumpkin in clear daylight, and a black one at night, and the lure list marks it good now.":
-    "Trzy czyste hole z rzędu teraz się opłacają: od trzeciego każdy czysty połów daje 1,2× więcej punktów. Liczy się też kolor przynęty: jaskrawą, jak chartreuse, dobrze widać w deszczu, mgle i słabym świetle, naturalną, jak green pumpkin, w jasny dzień, a czarną nocą, i lista przynęt oznacza ją jako dobrą teraz.",
   "When a cloud slides over the sun on a bright day, the fish move up into the shallows to feed, so the Dock, the Reeds, the Point and the Inlet bite sooner while it lasts. A fish hooked out by the lily pads now fights like one in the weeds and dives for the pad stems, so turn every run. And when a bank is fished hard, a kind of lure its wary fish haven't seen yet catches them off guard.":
     "Gdy w jasny dzień chmura zasłoni słońce, ryby podpływają na płyciznę żerować, więc na Pomoście, w Trzcinach, na Cyplu i przy Ujściu brania przychodzą szybciej, póki chmura nie odpłynie. Ryba zacięta przy grzybieniach walczy teraz jak w zielsku i nurkuje między łodygi, więc zawracaj każdy odjazd. A gdy łowisko jest mocno obłowione, rodzaj przynęty, którego ostrożne ryby jeszcze nie widziały, zaskakuje je.",
   "On dry summer days a hummingbird zips in to the wildflowers by the shack and hovers at them one by one, and on clear summer days someone swims breaststroke in the shallows off the far bank, their towel on the sand. From spring to fall someone walks the far bank with a dog that runs on ahead and stops to sniff. On foggy days a lone angler in a yellow oilskin fishes from a rowboat anchored out on the lake.":
@@ -795,6 +800,9 @@ export const PL_GAME: PlBook = {
     "W szare, pochmurne dni w chmurach co jakiś czas otwiera się prześwit i przez jezioro przesuwa się plama słońca, a w dół ukośnie schodzą do niej blade promienie. W wietrzne zimowe dni wiatr zrywa śnieg ze wzgórz za drugim brzegiem i niesie go wzdłuż nich długimi białymi smugami.",
   "On winter days snow lies white on the hills behind the lake, and two children take turns sledging down a run between the far trees, rushing down in a spray of snow and trudging back up pulling their sleds.":
     "W zimowe dni na wzgórzach za jeziorem leży biały śnieg, a dwoje dzieci na zmianę zjeżdża na sankach po torze między drzewami na drugim brzegu, pędząc w obłoku śniegu i wspinając się z powrotem z sankami na sznurku.",
+  "On calm, sunny summer days two people pedal a white swan pedal boat slowly round the water off to the right, its paddle wheel churning behind. And on evenings and nights from spring to fall a little field mouse sometimes scurries across the dock behind you, sits up to nibble a crumb, and darts off over the edge.":
+    "W spokojne, słoneczne letnie dni dwoje ludzi pedałuje białym rowerem wodnym w kształcie łabędzia, powoli okrążając wodę po prawej, a za nim kręci się koło łopatkowe. A wieczorami i nocą od wiosny do jesieni mała mysz polna czasem przebiega po pomoście za tobą, siada, żeby skubnąć okruszek, i znika za krawędzią.",
+  "On Waters, each card names the water's best fish and says when it has rested a week or more. A water's copied summary says when it was last fished, and a water fished only blank can be copied too.": "W łowiskach każda karta podaje największą rybę łowiska i mówi, kiedy odpoczywa tydzień lub dłużej. Skopiowane podsumowanie łowiska mówi, kiedy ostatnio tam łowiono, a łowisko bez żadnej ryby też można skopiować.",
   "On Bests, a water's card names its biggest fish, the record tiles say the day, and a season marks each kind that set a new best and names its best lure. The year's goal box says how many days since your last fish, and the goal form offers a goal that beats last year.": "W rekordach karta łowiska podaje największą rybę, kafelki rekordów mówią, którego dnia padły, a sezon oznacza każdy gatunek z nowym rekordem i podaje najlepszą przynętę. Ramka celu na rok mówi, ile dni minęło od ostatniej ryby, a formularz celu proponuje cel lepszy niż w zeszłym roku.",
   "A little steam train now runs along the foot of the hills behind the far bank, puffing out of one tunnel and into the other, then back the other way a while later. After dark its carriage windows glow as it goes.":
     "U stóp wzgórz za jeziorem kursuje teraz mała ciuchcia: wyjeżdża z jednego tunelu, sapiąc parą, i znika w drugim, a po chwili wraca w drugą stronę. Po zmroku jej okna świecą w drodze.",
