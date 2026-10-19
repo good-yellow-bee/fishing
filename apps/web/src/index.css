@@ -895,6 +895,11 @@ a:focus-visible {
   color: var(--amber);
 }
 
+.walk-signs .panel-btn[aria-pressed="true"] {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
 .walk-signs .bait-short {
   display: none;
 }

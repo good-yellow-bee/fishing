@@ -528,6 +528,12 @@ export function useFishingGame(
   const [lamp, setLamp] = useState(false);
   const lampRef = useRef(false);
   lampRef.current = lamp;
+  /** Whether the headlamp lit the water when this cast went out; the cast keeps it, slow bite and long strike alike. */
+  const castLampRef = useRef(false);
+  // Night's end switches the lamp off, so the next night starts dark.
+  useEffect(() => {
+    if (hour !== "night") setLamp(false);
+  }, [hour]);
   /** The reasons past WAIT_REASONS the cast's hint left out, with the hint they belong to. */
   const [moreReasons, setMoreReasons] = useState<{ hint: string; more: readonly string[] }>({ hint: "", more: NO_REASONS });
   const [stance, setStance] = useState<StanceId>("shop");
@@ -945,7 +951,8 @@ export function useFishingGame(
       reasons.unshift(lively ? t("The lively shiner swims hard on the hook, and more of the hunters here come to it.") : t("The live shiner swims down off the hook, and the hunters here come to it."));
     }
     // Told late with the other slow sides the angler can switch off, so the two-reason cap keeps it.
-    const lampWait = lampLit(lampRef.current, hour) && !mercyRef.current ? LAMP_WAIT : 1;
+    castLampRef.current = lampLit(lampRef.current, hour) && !mercyRef.current;
+    const lampWait = castLampRef.current ? LAMP_WAIT : 1;
     if (lampWait > 1) reasons.unshift(t("Your headlamp shows the float plainly, but its light on the water puts the fish off."));
     // Told last, so the two-reason cap always keeps it: waiting a few seconds is the fix.
     if (anchorWait > 1) reasons.unshift(t("The anchor's splash put the fish down, so the bites come slow: give it a few seconds before you cast."));
@@ -1040,7 +1047,7 @@ export function useFishingGame(
         setPhaseBoth("hookset");
         setHint(topwater ? t("It blew up on the topwater — strike!") : strikeCall(style));
         const openWindow = () => {
-          const heldMs = Math.round(hookWindowMs(current.accuracy, mercyNow, anglerLevel(current.lifetimePoints)) * (lampLit(lampRef.current, hour) ? LAMP_WINDOW : 1));
+          const heldMs = Math.round(hookWindowMs(current.accuracy, mercyNow, anglerLevel(current.lifetimePoints)) * (castLampRef.current ? LAMP_WINDOW : 1));
           const windowMs = style === "light" ? Math.round(heldMs * LIGHT_HOLD) : style === "gulp" ? Math.round(heldMs * GULP_HOLD) : style === "snatch" ? Math.round(heldMs * SNATCH_HOLD) : heldMs;
           biteWindowRef.current = { at: performance.now(), ms: windowMs };
           setStrikeWindowMs(windowMs);
@@ -1762,9 +1769,9 @@ export function useFishingGame(
     return () => window.clearTimeout(timer);
   }, [level]);
 
-  /** Tie the frayed or twisted end off and a fresh knot on, touch up a dull hook point, and put a fresh worm on, so the line holds full strain, casts clean, sets solid and draws the fish again. */
   const toggleLamp = useCallback(() => setLamp((on) => !on), []);
 
+  /** Tie the frayed or twisted end off and a fresh knot on, touch up a dull hook point, and put a fresh worm on, so the line holds full strain, casts clean, sets solid and draws the fish again. */
   const retie = useCallback(() => {
     if (phaseRef.current !== "idle" || (!frayedRef.current && !isTwisted(twistRef.current) && !dullRef.current && !isWashedOut(soakRef.current))) return;
     const wasFrayed = frayedRef.current;

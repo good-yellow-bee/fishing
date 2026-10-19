@@ -734,7 +734,7 @@ export function DockPage() {
         retieKey.current();
         return;
       }
-      if (event.code === "KeyL" && !event.repeat) {
+      if (event.code === "KeyL" && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey) {
         event.preventDefault();
         lampKey.current();
         return;
@@ -803,7 +803,7 @@ export function DockPage() {
     if (fishing && !rowing && game.handfuls > 0 && !shopOpen) game.throwGroundbait();
   };
   lampKey.current = () => {
-    if (hour === "night") game.toggleLamp();
+    if (hour === "night" && !rowing && !shopOpen) game.toggleLamp();
   };
   retieKey.current = () => {
     if (!rowing && (game.frayed || game.twisted || game.dulled || washedWorm) && !shopOpen) game.retie();
@@ -1065,7 +1065,7 @@ export function DockPage() {
                   game.toggleLamp();
                 }}
               >
-                {game.lamp ? t("Headlamp off") : t("Headlamp on")}
+                {t("Headlamp")}
               </button>
             )}
             {!rowing && (game.frayed || game.twisted || game.dulled || washedWorm) && (
