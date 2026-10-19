@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { APPROACH_SEC, ARRIVE_AFTER_SEC, LEAVE_SEC, PERCH_Y, perchedAfter, rodDragonflyAt, rodDragonflyOut } from "./rodDragonfly";
+import { APPROACH_SEC, ARRIVE_AFTER_SEC, LEAVE_SEC, PERCH_Y, perchedAfter, rodDragonflyAt, rodDragonflyOut } from "./dragonflyPerch";
 
 describe("dragonfly on the rod tip", () => {
   it("comes out on dry summer days only", () => {

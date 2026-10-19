@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { mergeParts, mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
-import { perchedAfter, rodDragonflyAt } from "./rodDragonfly";
+import { perchedAfter, rodDragonflyAt } from "./dragonflyPerch";
 import { toonRamp } from "./toon";
 import type { ScenePhase } from "./types";
 
@@ -32,7 +32,7 @@ export function rodDragonflyWingShape() {
 
 type Props = { rodTip: THREE.Vector3; phase: ScenePhase; nibble: boolean };
 
-/** A dragonfly that settles on the rod tip when the line sits quiet on a summer day, and flies off on a nibble or the strike (rodDragonfly.ts). */
+/** A dragonfly that settles on the rod tip when the line sits quiet on a summer day, and flies off on a nibble or the strike (dragonflyPerch.ts). */
 export function RodDragonfly({ rodTip, phase, nibble }: Props) {
   const still = useReducedMotion();
   const fly = useRef<THREE.Group>(null);

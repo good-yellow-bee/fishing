@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { mergePainted } from "./mergeParts";
-import { paperBoatAt } from "./paperBoat";
+import { paperBoatAt } from "./paperDrift";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
@@ -51,7 +51,7 @@ export function paperBoatShape() {
   ]);
 }
 
-/** A little paper boat that now and then drifts across in front of the dock with the breeze (paperBoat.ts). */
+/** A little paper boat that now and then drifts across in front of the dock with the breeze (paperDrift.ts). */
 export function PaperBoat({ wind }: { wind: { x: number; z: number } }) {
   const still = useReducedMotion();
   const boat = useRef<THREE.Mesh>(null);

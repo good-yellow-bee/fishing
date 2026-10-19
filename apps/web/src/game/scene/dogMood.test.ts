@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { DOCK_PLANKS } from "@stillwater/shared";
-import { CHEER_SEC, DOG_LOOK_MAX, DOG_SPOT, DOZE_IDLE_SEC, DOZE_WAIT_SEC, dogGlance, dogLookAt, dogMood, dogOut, easeMood, tailSwing, watching } from "./dockDog";
-import { paperBoatAt } from "./paperBoat";
+import { CHEER_SEC, DOG_LOOK_MAX, DOG_SPOT, DOZE_IDLE_SEC, DOZE_WAIT_SEC, dogGlance, dogLookAt, dogMood, dogOut, easeMood, tailSwing, watching } from "./dogMood";
+import { paperBoatAt } from "./paperDrift";
 import { robinAt } from "./robinVisit";
 import { MOUSE_FROM } from "./mouseScurry";
 import { THERMOS_SPOT } from "./steamWisp";

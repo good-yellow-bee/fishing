@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { DOCK_PLANKS, OPEN_PAD, inLake } from "@stillwater/shared";
 import { MOORING } from "./boat";
-import { CROSS_SEC, EVERY_SEC, driftSign, paperBoatAt, paperBoatOut } from "./paperBoat";
+import { CROSS_SEC, EVERY_SEC, driftSign, paperBoatAt, paperBoatOut } from "./paperDrift";
 
 describe("paper boat", () => {
   it("drifts by on fine spring and summer days", () => {

@@ -1350,6 +1350,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC182~~ | ~~Swallows on the mooring line: on fine spring and summer days three swallows now and then swoop in one after another and perch in a row on the moored rowboat's bow line, riding its sway, bobbing their tails and glancing about, then flick off over the water (two draws), with news scene41 for them and the dock dog~~ (#1408) | scene | S |
 | ~~SC183~~ | ~~Paper boat: on fine spring and summer days, every few minutes a little folded paper boat drifts slowly across in front of the dock with the breeze, rocking on the ripples and turning lazily, then floats off out of view (one draw)~~ (#1411) | scene | S |
 | ~~SC184~~ | ~~The dock dog watches the robin while it sits on the dock posts and a paper boat as it drifts by, lifting its head from a doze and turning to follow them~~ (#1411) | scene | S |
+| SC185 | The dock dog wears a knitted red jumper with cream stripes in winter, and the new pure scene modules get names apart from their components (dragonflyPerch, dogMood, swallowPerch, paperDrift) so they cannot clash on a case-insensitive Mac | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 

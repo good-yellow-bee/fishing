@@ -35,10 +35,10 @@ import { Mayflies } from "./Mayflies";
 import { RodBell } from "./RodBell";
 import { RodDragonfly } from "./RodDragonfly";
 import { DockDog } from "./DockDog";
-import { dogOut } from "./dockDog";
-import { paperBoatOut } from "./paperBoat";
+import { dogOut } from "./dogMood";
+import { paperBoatOut } from "./paperDrift";
 import { robinOut } from "./robinVisit";
-import { rodDragonflyOut } from "./rodDragonfly";
+import { rodDragonflyOut } from "./dragonflyPerch";
 import { Windsock } from "./Windsock";
 import { Lightning } from "./Lightning";
 import { Rainbow } from "./Rainbow";
@@ -2207,7 +2207,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       />
       <RodBell rodTip={rodTip} phase={phase} nibble={nibble} night={hour === "night"} />
       {rodDragonflyOut(hour, sky, season) && <RodDragonfly rodTip={rodTip} phase={phase} nibble={nibble} />}
-      {dogOut(hour, sky) && <DockDog phase={phase} robin={robinOut(hour, sky)} paperWind={paperBoatOut(hour, sky, season) ? (wind ?? NO_WIND).x : null} />}
+      {dogOut(hour, sky) && <DockDog key={season} phase={phase} robin={robinOut(hour, sky)} paperWind={paperBoatOut(hour, sky, season) ? (wind ?? NO_WIND).x : null} winter={season === "winter"} />}
       <SchoolShadows phase={phase} schooled={schooled} bobber={bobberWorld} />
       <LurkerShadow phase={phase} lurking={lurking} closeInMs={lurkerCloseInMs} bobber={bobberWorld} />
       {species && <FishShadow level={level} phase={phase} weight={weight} bobber={bobberWorld} speciesId={species.id} />}

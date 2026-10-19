@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { DOG_SPOT, DOG_YAW, dogGlance, dogLookAt, dogMood, easeMood, tailSwing, watching, type DogMood } from "./dockDog";
-import { paperBoatAt } from "./paperBoat";
+import { DOG_SPOT, DOG_YAW, dogGlance, dogLookAt, dogMood, easeMood, tailSwing, watching, type DogMood } from "./dogMood";
+import { paperBoatAt } from "./paperDrift";
 import { robinAt } from "./robinVisit";
-import { mergePainted } from "./mergeParts";
+import { mergePainted, type PaintedPart } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { useSkinnedFigure } from "./skinFigure";
 import { toonRamp } from "./toon";
@@ -15,14 +15,30 @@ const PALE = "#e2bf86";
 const EAR = "#a5713a";
 const NOSE = "#2a1e18";
 const COLLAR = "#b8352c";
+const JUMPER = "#b8322c";
+const STRIPE = "#efe9df";
 /** A shade larger than life, to stand beside the chunky angler. */
 const DOG_SCALE = 1.2;
 /** How far its chest rises about the hips when it sits up. */
 const SIT_TILT = 0.75;
 
-/** The hindquarters lying on the boards: back, haunches and folded back paws, facing +z. */
-export function dogRearShape() {
+/** Its winter jumper's back, a knitted red tube round the middle of the body with two cream stripes. */
+function jumperBack(): PaintedPart[] {
+  return [
+    { geometry: new THREE.SphereGeometry(1, 12, 9), position: [0, 0.135, 0.04], scale: [0.137, 0.118, 0.19], color: JUMPER },
+    ...[0.12, -0.04].map((z) => ({
+      geometry: new THREE.TorusGeometry(1, 0.08, 6, 18),
+      position: [0, 0.135, z] as const,
+      scale: [0.127, 0.11, 0.15] as const,
+      color: STRIPE,
+    })),
+  ];
+}
+
+/** The hindquarters lying on the boards: back, haunches and folded back paws, facing +z; in a red jumper in `winter`. */
+export function dogRearShape(winter = false) {
   return mergePainted([
+    ...(winter ? jumperBack() : []),
     { geometry: new THREE.SphereGeometry(1, 12, 9), position: [0, 0.13, -0.02], scale: [0.13, 0.11, 0.26], color: COAT },
     ...[-1, 1].flatMap((side) => [
       { geometry: new THREE.SphereGeometry(1, 10, 8), position: [side * 0.085, 0.11, -0.17] as const, scale: [0.07, 0.09, 0.11] as const, color: COAT },
@@ -31,9 +47,10 @@ export function dogRearShape() {
   ]);
 }
 
-/** The chest and collar, from the hips forward. */
-export function dogChestShape() {
+/** The chest and collar, from the hips forward; the jumper's front over the shoulders in `winter`, leaving the pale bib showing. */
+export function dogChestShape(winter = false) {
   return mergePainted([
+    ...(winter ? [{ geometry: new THREE.SphereGeometry(1, 12, 9), position: [0, 0.025, 0.24] as const, scale: [0.127, 0.127, 0.12] as const, color: JUMPER }] : []),
     { geometry: new THREE.SphereGeometry(1, 12, 9), position: [0, 0.02, 0.27], scale: [0.12, 0.12, 0.14], color: COAT },
     { geometry: new THREE.SphereGeometry(1, 10, 7), position: [0, -0.02, 0.33], scale: [0.08, 0.08, 0.08], color: PALE },
     { geometry: new THREE.TorusGeometry(0.075, 0.014, 6, 14), position: [0, 0.08, 0.36], rotation: [Math.PI / 2 - 0.5, 0, 0], color: COLLAR },
@@ -71,17 +88,19 @@ type Props = {
   /** Whether the dock robin is about, and the breeze the paper boat drifts on when one is out (null when not): it watches them. */
   robin?: boolean;
   paperWind?: number | null;
+  /** In winter it wears a knitted jumper. Its shape is baked once, so give the dog a fresh key when this changes. */
+  winter?: boolean;
 };
 
-/** The angler's dog lying on the dock by day: it watches the line, the robin and the paper boat, dozes, and sits up wagging for a bite (dockDog.ts). */
-export function DockDog({ phase, robin = false, paperWind = null }: Props) {
+/** The angler's dog lying on the dock by day: it watches the line, the robin and the paper boat, dozes, and sits up wagging for a bite (dogMood.ts). */
+export function DockDog({ phase, robin = false, paperWind = null, winter = false }: Props) {
   const still = useReducedMotion();
   const root = useRef<THREE.Group>(null);
   const front = useRef<THREE.Group>(null);
   const legs = useRef<(THREE.Group | null)[]>([]);
   const head = useRef<THREE.Group>(null);
   const tail = useRef<THREE.Group>(null);
-  const shapes = useMemo(() => ({ rear: dogRearShape(), chest: dogChestShape(), leg: dogLegShape(), head: dogHeadShape(), tail: dogTailShape() }), []);
+  const shapes = useMemo(() => ({ rear: dogRearShape(winter), chest: dogChestShape(winter), leg: dogLegShape(), head: dogHeadShape(), tail: dogTailShape() }), [winter]);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
   useEffect(
     () => () => {

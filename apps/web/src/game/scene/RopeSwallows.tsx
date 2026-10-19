@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { liveRopePoint, liveRopes } from "./mooringRope";
 import { useReducedMotion } from "./reducedMotion";
-import { PERCH_LIFT, PERCH_ROPE, SWALLOW_COUNT, ropeSwallowAt } from "./ropeSwallows";
+import { PERCH_LIFT, PERCH_ROPE, SWALLOW_COUNT, ropeSwallowAt } from "./swallowPerch";
 import { makeWing, swallowBody } from "./Swallows";
 
 const BACK = "#22305a";
@@ -15,7 +15,7 @@ const FLAP_SWING = 0.7;
 const PERCH_PITCH = -0.45;
 
 /**
- * Swallows that now and then perch in a row on the moored rowboat's bow line (ropeSwallows.ts),
+ * Swallows that now and then perch in a row on the moored rowboat's bow line (swallowPerch.ts),
  * riding the rope as PlayerBoat lays it. Every body is one instanced draw and every wing another.
  */
 export function RopeSwallows() {
