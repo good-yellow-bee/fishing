@@ -1143,6 +1143,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA98~~ | ~~The shack's daily request Claim buttons stand 32 px tall on a touch screen (#1304)~~ | phone UX | S |
 | ~~PA99~~ | ~~The news card on an upright phone ends above the banks' row instead of covering its top (#1307)~~ | phone UX | S |
 | ~~PA100~~ | ~~A claimed daily request's Claimed reads clearly through its dimmed row (#1309)~~ | phone UX | S |
+| ~~PA101~~ | ~~The trip recap's heaviest fish names its kind inside the stat list, so a screen reader reads the list whole (#1311)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
