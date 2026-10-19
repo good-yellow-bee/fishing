@@ -2205,4 +2205,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR555~~ | ~~Round 94 outing ideas: quick searches under Find an outing, Last night for an outing still going, missed strikes on cards, all of a water's tackle tips at once~~ (#1337) | field | S |
 | ~~BR556~~ | ~~Round 95 catch fixes: own counts for the lure at a water and a search's spreadsheet, Only my fish on a sample-only book, one kind however written, largest first on one scale, step focus, form touch, released/kept in Polish, wording~~ (#1345) | field | S |
 | ~~BR557~~ | ~~Round 95 catch ideas: quick searches under Find a catch, a search's spreadsheet named after it, a fish's place on its outing~~ (#1346) | field | S |
-| ~~BR558~~ | ~~Round 96 fixes: Home lists the angler's own fish and outings, a night session keeps Log a catch, Yesterday vs Last night, loose fish in the outings sheet, one name per kind in the exports~~ (#TBD) | field | S |
+| ~~BR558~~ | ~~Round 96 fixes: Home lists the angler's own fish and outings, a night session keeps Log a catch, Yesterday vs Last night, loose fish in the outings sheet, one name per kind in the exports~~ (#1355) | field | S |
