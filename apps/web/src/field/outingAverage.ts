@@ -6,6 +6,13 @@ import { num, t, tn } from "../i18n";
  * Null with fewer than two such outings, where an average says nothing.
  */
 export function outingAverage(trips: readonly Trip[], fishOn: (tripId: string) => number, today: string): string | null {
+  const parts = averageParts(trips, fishOn, today);
+  if (!parts) return null;
+  return parts.blank ? t("{average}, {blank}", { average: parts.average, blank: parts.blank }) : parts.average;
+}
+
+/** The average and its blank outings apart ("1 without a fish", or null), for a page that links the blank ones. */
+export function averageParts(trips: readonly Trip[], fishOn: (tripId: string) => number, today: string): { average: string; blank: string | null } | null {
   // Today's outing counts once it has a fish; until then it is still the day's plan.
   const fished = trips.filter((trip) => trip.date < today || (trip.date === today && fishOn(trip.id) > 0));
   if (fished.length < 2) return null;
@@ -15,7 +22,7 @@ export function outingAverage(trips: readonly Trip[], fishOn: (tripId: string) =
   const average = t("{n} fish an outing on average", { n: num(mean, mean > 0 && mean < 0.1 ? 2 : 1) });
   const blank = counts.filter((count) => count === 0).length;
   // Joined as the language reads it: Polish decimal commas would run "1,7, 1" together.
-  return blank > 0 ? t("{average}, {blank}", { average, blank: tn(blank, "{n} without a fish", "{n} without a fish") }) : average;
+  return { average, blank: blank > 0 ? tn(blank, "{n} without a fish", "{n} without a fish") : null };
 }
 
 /** The outing on a water that caught strictly more fish than every other one fished there, once three have been fished. */

@@ -122,7 +122,10 @@ export function TripCard({
     bag.length === 0
       ? // Still ahead, or today's before its first fish, with nothing packed: planned, not a blank day.
         isPlanned(trip, today, fishCount)
-        ? t("Planned")
+        ? // Last evening's, still going in the small hours: the angler is sitting on it, as the Map says.
+          trip.date < today && stillGoing(book, trip)
+          ? t("Out now")
+          : t("Planned")
         : // Beside "3 lost", a count: "0 fish · 3 lost", not "Nothing logged · 3 lost".
           fishCount === 0 && (trip.lost || trip.missed)
           ? fishSum(0)

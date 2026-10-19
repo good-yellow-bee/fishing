@@ -100,7 +100,9 @@ function LastTimeLine({ book, trip, today }: { book: Logbook; trip: Trip; today:
   // A loose fish only when that was the day's one outing there: of a dawn and a dusk, it is neither's until filed.
   const alone = here.filter((other) => other.date === last.date).length === 1;
   const fish = book.catches.filter((entry) => entry.spotId === trip.spotId && (entry.tripId === last.id || (alone && !entry.tripId && bookFishDay(book, entry) === last.date)));
-  const lure = pieceTally(fish, 1)[0];
+  // The lure only when it led: after a one-all tie, naming either would be a guess.
+  const [top, next] = pieceTally(fish, 2);
+  const lure = top && top.count > (next?.count ?? 0) ? top : undefined;
   // How long the water has rested, as the outing's own page says it: during a night session, to the outing's own day.
   const rest = daysBetween(last.date, trip.date < today ? trip.date : today);
   const day = rest >= 2 ? `${formatDay(last.date)} · ${tn(rest, "{n} day ago", "{n} days ago")}` : formatDay(last.date);
