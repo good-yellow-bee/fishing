@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-19-scene26";
+export const NEWS_ID = "2026-10-19-scene27";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "Now and then a heavier squall sweeps across the lake in a shower, a grey curtain of rain with the water boiling beneath it. On winter days crows feed on the far shore and fly up in a loop over the water when the jogger runs by, and at night a pair of eyes sometimes shines at the edge of the far bank.",
   "On still summer evenings little clouds of midges dance and glint over the water in front of the dock, and on fine fall mornings long silk threads from tiny spiders drift across the lake, catching the sun. Now and then a shoal of fry bursts out of the open water as something hunts them from below, and on bitter, clear winter mornings the air over the lake sparkles with diamond dust.",
   "A search for a day that only has a night's small-hours fish offers that outing's day instead, the calendar's month counts open those days and fish, Home recalls in early January how last year's goal ended, outings sent to the calendar remind you to pack the evening before, and the year's copied summary says where its pace ends it.",
   "On warm days someone reads in a striped hammock by the campers' tent, and on calm summer days someone paddles a paddleboard across the lake with a little dog sitting up at the nose. On calm nights someone rows slowly round the lake with a lantern glowing at the stern. Spring and summer showers now and then turn to hail that bounces on the dock, and on dry fall days a little whirlwind spins a column of leaves out over the water.",

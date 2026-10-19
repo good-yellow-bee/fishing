@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { inLake } from "@stillwater/shared";
+import { SWAN_LOOP } from "./swanGlide";
 import { LEG_SEC, PADDLE_FROM, PADDLE_TO, STROKES_A_SIDE, STROKE_SEC, TURN_SEC, bladeDip, bladeReach, dogLook, paddleAt, paddleOut } from "./paddleRoute";
 
 const CALM = { x: 0.02, z: 0 };
@@ -29,6 +30,13 @@ describe("paddleboarder", () => {
     expect(there.z).toBeCloseTo(PADDLE_TO.z, 1);
     const back = paddleAt(2 * LEG_SEC + TURN_SEC * 1.5);
     expect(back.x).toBeCloseTo(PADDLE_FROM.x, 1);
+  });
+
+  it("keeps well clear of the swans' loop", () => {
+    for (let t = 0; t < 2 * (LEG_SEC + TURN_SEC); t += 0.5) {
+      const pose = paddleAt(t);
+      expect(Math.hypot((pose.x - SWAN_LOOP.x) / SWAN_LOOP.rx, (pose.z - SWAN_LOOP.z) / SWAN_LOOP.rz)).toBeGreaterThan(1.5);
+    }
   });
 
   it("takes a run of strokes on one side, then swaps the paddle across", () => {

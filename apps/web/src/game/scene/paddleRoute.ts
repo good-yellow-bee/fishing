@@ -14,9 +14,9 @@ export function paddleOut(hour: LakeHour, sky: Sky | undefined, season: LakeSeas
 
 /** Above this drift the water is too choppy to stand up on. */
 export const CALM = 0.1;
-/** The two ends of the run: in front of the far west bank, clear of the reeds, the canoe's shore course and the sailing dinghy's reach. */
+/** The two ends of the run: in front of the far west bank, clear of the reeds, the canoe's shore course, the sailing dinghy's reach and the swans' loop. */
 export const PADDLE_FROM = { x: -13, z: -4.5 };
-export const PADDLE_TO = { x: -2.5, z: -9 };
+export const PADDLE_TO = { x: -4.5, z: -6 };
 /** Seconds to paddle the run one way, and to turn the board round at its end. */
 export const LEG_SEC = 70;
 export const TURN_SEC = 7;
