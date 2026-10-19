@@ -21,7 +21,7 @@ afterEach(() => setLang("en"));
 describe("round 101 ideas: the wait since the fish before", () => {
   const book: Logbook = {
     spots: [],
-    trips: [{ id: "t", date: "2026-08-20", spotId: "own", title: "", note: "" }],
+    trips: [{ id: "t", date: "2026-08-20", spotId: "own", title: "Home Lake", note: "" }],
     catches: [fish("a", "2026-08-20T18:00:00.000Z"), fish("b", "2026-08-20T19:05:00.000Z"), fish("c", "2026-08-20T19:45:00.000Z"), fish("loose", "2026-08-20T19:50:00.000Z", null)],
   };
 
@@ -44,6 +44,8 @@ describe("round 101 ideas: a length in feet and inches", () => {
       expect(toBookAmount(`2' 3"`, "length", units)).toBe("27");
       expect(toBookAmount("2 ft", "length", units)).toBe("24");
       expect(toBookAmount("2ft 3.5", "length", units)).toBe("27.5");
+      expect(toBookAmount("2’ 3”", "length", units)).toBe("27");
+      expect(toBookAmount("2′ 3″", "length", units)).toBe("27");
     }
   });
 

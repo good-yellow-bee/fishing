@@ -19,7 +19,8 @@ const POUNDS_OUNCES = new RegExp(String.raw`^(?:${NUM}\s*(?:lbs?|#)\s*)?(?:${NUM
 /** "18 1/4", "3/4", "18 1/4 in": inches as a tape is marked. */
 const INCH_FRACTION = new RegExp(String.raw`^(?:(\d+)\s+)?(\d+)\s*/\s*(\d+)\s*(?:in|inch|inches|")?$`, "i");
 /** "1 ft 2 in", "2' 3\"", "2 ft": a long fish in feet and inches. */
-const FEET_INCHES = new RegExp(String.raw`^(\d+)\s*(?:ft|feet|foot|')\s*(?:${NUM}\s*(?:in|inch|inches|")?)?$`, "i");
+// A phone's smart punctuation writes the marks curly: 2’ 3” and 2′ 3″ too.
+const FEET_INCHES = new RegExp(String.raw`^(\d+)\s*(?:ft|feet|foot|['’′])\s*(?:${NUM}\s*(?:in|inch|inches|["”″])?)?$`, "i");
 /** A plain number with its unit written after it: "28 in", "3.2 lb", "71 cm", "1,4 kg", "850 g", "85 dag", "450 mm". */
 const WITH_UNIT = new RegExp(String.raw`^${NUM}\s*(in|inch|inches|"|lbs?|#|cm|mm|kg|dag|g)$`, "i");
 

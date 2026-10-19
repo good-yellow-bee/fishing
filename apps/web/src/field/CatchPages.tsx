@@ -57,6 +57,7 @@ import { speciesLures, waterSpecies, waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, gramsAsKilos, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 import { getUnits, locale, t, tn, useLang, useT, type Units } from "../i18n";
 import { pieceKey, pieceName } from "./gear/pieceKey";
+import { ownTitle } from "./tripDates";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { ChoiceRow } from "./ChoiceRow";
 import { lengthText, measureText, measuresText, tempText, weatherText, weightText } from "../i18n/content";
@@ -1617,6 +1618,8 @@ function CatchView() {
   const trip = entry.tripId ? tripById(book, entry.tripId) : undefined;
   const tripFish = trip ? book.catches.filter((other) => other.tripId === trip.id).length : 0;
   // Its place on the outing, first fish first: when in the session it came. Two in the same minute go by id.
+  const intoTrip = intoOuting(book, entry);
+  const sinceBefore = afterOneBefore(book, entry);
   const tripPlace = trip ? book.catches.filter((other) => other.tripId === trip.id && byTime(other, entry) < 0).length + 1 : 0;
   // A fish logged on its own while an outing was on this water that day: offer to file it there.
   const looseTrip = trip ? undefined : tripForFish(book, entry.spotId, toLocalInput(new Date(entry.caughtAt)));
@@ -1945,19 +1948,19 @@ function CatchView() {
       <CopySummary text={() => catchSummary(entry, spot?.name ?? null, trip ? outingName(trip, book.spots) : null)} file="stillwater-catch.txt" photo={photo} />
       {trip ? (
         <p className="trip-link">
-          {/* An untitled outing goes by its water, named just above: "That day's outing" rather than the name twice. */}
-          {trip.title.trim() || !spot ? (
+          {/* An untitled outing on this fish's water, named just above: "That day's outing" rather than the name twice. */}
+          {ownTitle(trip, book.spots) || trip.spotId !== entry.spotId ? (
             <>
               {t("Outing:")} <Link id="catch-outing" to={`/trips/${trip.id}`}>{outingName(trip, book.spots)}</Link>
             </>
           ) : (
             <Link id="catch-outing" to={`/trips/${trip.id}`}>
-              {bookFishDay(book, entry) !== localDate(new Date(entry.caughtAt)) ? t("That night's outing") : t("That day's outing")}
+              {trip.date < localDate(new Date(entry.caughtAt)) ? t("That night's outing") : t("That day's outing")}
             </Link>
           )}
           {tripFish > 1 ? ` · ${t("fish {n} of {total}", { n: tripPlace, total: tripFish })}` : null}
-          {tripFish > 1 && intoOuting(book, entry) ? ` · ${intoOuting(book, entry)}` : null}
-          {afterOneBefore(book, entry) ? ` · ${afterOneBefore(book, entry)}` : null}
+          {tripFish > 1 && intoTrip ? ` · ${intoTrip}` : null}
+          {sinceBefore ? ` · ${sinceBefore}` : null}
         </p>
       ) : looseTrip ? (
         <p className="trip-link">
@@ -2038,7 +2041,7 @@ function CatchView() {
         </p>
       ) : null}
       {/* Its water's fish, the third way an angler looks back: what else that water gave. */}
-      {spot && !/^water(-largest)?:/.test(list?.key ?? "") && catchesForSpot(book, spot.id).length > 1 ? (
+      {spot && offPlayLake(entry) && !/^water(-largest)?:/.test(list?.key ?? "") && catchesForSpot(book, spot.id).length > 1 ? (
         <p className="catch-list-at">
           <Link
             to={catchLink(entry.id, `water:${spot.id}`)}
