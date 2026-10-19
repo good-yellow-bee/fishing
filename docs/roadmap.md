@@ -1363,6 +1363,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC191~~ | ~~Winter scarf: in winter the angler wraps up in a knitted red scarf with cream stripes to match the dock dog's jumper, its fringed ends hanging down the back and lifting and flapping in the wind~~ (#1427) | scene | S |
 | ~~SC192~~ | ~~Robin takes fright: strike a fish from the dock while the robin sits on the posts and it flies off at once from where it sat, back on its next visit; the dog's head follows it off (robin moved into the fishing scene, one strike hook shared with the little owl)~~ (#1432) | scene | S |
 | ~~SC193~~ | ~~News card scene44 covers SC190 to SC192~~ (#1432) | scene | S |
+| ~~SC194~~ | ~~Leaf on the cap: in fall a leaf now and then comes seesawing down out of the trees and settles on the back of the angler's cap, riding there until your next cast shakes it off the brim~~ (#1437) | scene | S |
+| ~~SC195~~ | ~~Petal on the cap: in spring a pink blossom petal comes down onto the angler's cap the same way the fall leaf does, until a cast shakes it off~~ (#1440) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1716,7 +1718,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT346~~ | ~~Level 18, Breath of the lake, at 68000 lifetime points: the shack board's requests pay a quarter more (the server pays the same, and the board shows the raised reward)~~ (#1425) | gameplay | S |
 | ~~GT347~~ | ~~Strong arms lift a bottom-sticker: from Strength 7 one pump brings a sulking catfish or sturgeon off the bottom, not two; the shack's Strength line and the fight card's Bottom-sticker line say so~~ (#1429) | gameplay | S |
 | ~~GT348~~ | ~~News card 2026-10-19-game33 covers GT346 and GT347: level 18, Breath of the lake, raises the shack board's rewards, and Strength 7 lifts a bottom-sticker in one pump~~ (#1430) | ui | S |
-| GT349 | A patient angler waits a dropped fish out: from Patience 7 a fish that dropped the bait before the strike takes again on a cast straight back 60% of the time, not 40%; the shack's Patience line and the miss line say so | gameplay | S |
+| ~~GT349~~ | ~~A patient angler waits a dropped fish out: from Patience 7 a fish that dropped the bait before the strike takes again on a cast straight back 60% of the time, not 40%; the shack's Patience line and the miss line say so~~ (#1433) | gameplay | S |
+| ~~GT350~~ | ~~An accurate caster drops into the gaps: from Accuracy 7 a cast into the reeds' weed, the lily pads or the point's rocks snags half as often; the shack's Accuracy line says so~~ (#1436) | gameplay | S |
+| GT351 | News card 2026-10-19-game34 covers GT349 and GT350: Patience 7 brings a dropped fish back more often, and Accuracy 7 snags half as often | ui | S |
 
 ## Risks / open questions for the owner
 

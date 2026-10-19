@@ -374,7 +374,7 @@ export const PL_GAME: PlBook = {
 
   // Shop
   "Land heavier species. From {rank}, one pump lifts a catfish or sturgeon.": "Wyholuj cięższe gatunki. Od {rank} jedna pompka podrywa suma lub jesiotra.",
-  "Wider cast band and longer strike window.": "Szerszy pasek rzutu i dłuższy czas na zacięcie.",
+  "Wider cast band and longer strike window. From {rank}, a cast into weeds, pads or rocks snags half as often.": "Szerszy pasek rzutu i dłuższy czas na zacięcie. Od {rank} rzut w zielsko, grzybienie lub kamienie zaczepia się o połowę rzadziej.",
   "Shorter waits, heavier fish. From {rank}, a fish that drops the bait takes again more often.": "Krótsze czekanie, cięższe ryby. Od {rank} ryba, która puści przynętę, częściej bierze znowu.",
   "Tackle box": "Skrzynka ze sprzętem",
   "Line & nerve": "Żyłka i nerwy",
@@ -694,6 +694,8 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "On a phone held sideways, the first-cast coach and the news card now leave the shore signs clear from the moment the lake opens. In the field log, tabbing to a field the bottom tab bar half covers scrolls it into full view, and an outing link that wraps onto two lines is as easy to tap on each.":
+    "Na telefonie trzymanym poziomo podpowiedzi do pierwszego rzutu i karta Co nowego nie zasłaniają tabliczek na brzegu od chwili otwarcia jeziora. W dzienniku przejście klawiszem Tab do pola, które dolny pasek kart przykrywa do połowy, przewija je całe na widok, a link do wyprawy zawinięty na dwie linijki łatwo trafić w każdej z nich.",
   "Strike a fish from the dock and the robin or the little owl on the posts takes fright and flies off, to come back another time. And in winter you now wrap up in a red knitted scarf to match your dog's jumper, its ends blowing in the wind.":
     "Zatnij rybę z pomostu, a rudzik albo pójdźka na słupkach się spłoszy i odleci, by wrócić innym razem. A zimą owijasz się teraz czerwonym, dzierganym szalikiem do pary ze sweterkiem psa, a jego końce powiewają na wietrze.",
   "On nights without rain a little owl now glides in low over the water and lands on the post beside the lantern. It bobs its head, turns it right round to look behind it, follows the moths circling the lantern outside winter, and glides off again. And the swallows on the moored boat's rope now burst off together when you untie it under them.":
@@ -762,8 +764,8 @@ export const PL_GAME: PlBook = {
   "It's turning toward you — get ready to reel!": "Zawraca w twoją stronę — szykuj się do zwijania!",
   "REEL — it's charging straight at you!": "ZWIJAJ — płynie prosto na ciebie!",
   "Turning it!": "Zawracasz ją!",
-  "Clear the shack's whole board of a day's requests and the last claim pays 25 points on top. And let a trophy-weight fish go from the catch card and it earns you 20 more points: the Release button says so.":
-    "Odbierz wszystkie prośby z tablicy w szopie danego dnia, a ostatnia wypłaci dodatkowe 25 punktów. A wypuść rybę o wadze trofeum z karty połowu, a dostaniesz jeszcze 20 punktów: przycisk Wypuść to pokazuje.",
+  "Patience 7 keeps a fish that dropped the bait about, so a cast straight back has it take again more often, and Accuracy 7 drops your lure into the gaps, so a cast into the weeds, the lily pads or the rocks snags half as often. The shack's tackle box now says what rank 7 of each skill brings.":
+    "Cierpliwość 7 zatrzymuje rybę, która puściła przynętę, więc rzut od razu w to samo miejsce częściej kończy się braniem, a Celność 7 wpuszcza przynętę w prześwity, więc rzut w zielsko, grzybienie lub kamienie zaczepia się o połowę rzadziej. Skrzynka na sprzęt w szopie mówi teraz, co daje 7. stopień każdej umiejętności.",
   "On fine spring and summer days a little paper boat now and then drifts slowly past in front of the dock. Your dog turns to watch it go by, and the robin on the posts too, and in winter it wears a red knitted jumper.":
     "W pogodne wiosenne i letnie dni przed pomostem przepływa czasem powoli mała papierowa łódka. Twój pies odwraca głowę, żeby popatrzeć, jak płynie, a także na rudzika na słupkach, a zimą nosi czerwony sweter z dzianiny.",
   "Level 18, Breath of the lake, waits at 68000 points, and from there the shack board's requests pay a quarter more. And from Strength 7 one pump lifts a sulking catfish or sturgeon off the bottom, not two.":
@@ -819,8 +821,6 @@ export const PL_GAME: PlBook = {
     "W szare, pochmurne dni w chmurach co jakiś czas otwiera się prześwit i przez jezioro przesuwa się plama słońca, a w dół ukośnie schodzą do niej blade promienie. W wietrzne zimowe dni wiatr zrywa śnieg ze wzgórz za drugim brzegiem i niesie go wzdłuż nich długimi białymi smugami.",
   "On winter days snow lies white on the hills behind the lake, and two children take turns sledging down a run between the far trees, rushing down in a spray of snow and trudging back up pulling their sleds.":
     "W zimowe dni na wzgórzach za jeziorem leży biały śnieg, a dwoje dzieci na zmianę zjeżdża na sankach po torze między drzewami na drugim brzegu, pędząc w obłoku śniegu i wspinając się z powrotem z sankami na sznurku.",
-  "By day, unless it rains, a golden dog now lies on the dock behind you. It watches a fresh cast, dozes off when nothing bites, and sits up with its tail going when a fish takes. And on fine spring and summer days swallows sometimes come and sit in a row on the moored rowboat's rope.":
-    "Za dnia, gdy nie pada, na pomoście za tobą leży teraz złoty pies. Patrzy na świeży rzut, zasypia, gdy nic nie bierze, i siada, merdając ogonem, gdy ryba chwyci. A w pogodne wiosenne i letnie dni na cumie przycumowanej łódki przysiadają czasem rzędem jaskółki.",
   "Home's Next box copies the plan for a message. The outings spreadsheet lists the lures each outing took, and from January to March the book file offers last year's catches as a sheet of their own. A lure typed two ways reads once in the spreadsheets and copied texts.":
     "Pole „Następna” na stronie głównej kopiuje plan do wiadomości. Arkusz wypraw podaje przynęty z każdej wyprawy, a od stycznia do marca plik dziennika oferuje osobny arkusz z połowami z zeszłego roku. Przynęta wpisana na dwa sposoby jest w arkuszach i kopiowanych tekstach jedną przynętą.",
   "A fish's page offers to step through its water's fish, and on an outing it says how long after the one before it came. A loose fish on a day with a dawn and a dusk outing goes to the nearer one, a length can be written in feet and inches, such as 2 ft 3 in, and a lure typed two ways reads as one.":

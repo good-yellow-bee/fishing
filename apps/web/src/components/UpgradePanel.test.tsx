@@ -36,7 +36,7 @@ describe("UpgradePanel", () => {
     expect(unlock).toMatch(/^Strength 2: /);
     expect(described(strength!)).toEqual(["Land heavier species. From 7, one pump lifts a catfish or sturgeon.", unlock]);
     // Accuracy opens nothing on its own at Strength 1, so it has no unlock line to point at.
-    expect(described(accuracy!)).toEqual(["Wider cast band and longer strike window."]);
+    expect(described(accuracy!)).toEqual(["Wider cast band and longer strike window. From 7, a cast into weeds, pads or rocks snags half as often."]);
     expect(described(patience!)).toEqual(["Shorter waits, heavier fish. From 7, a fish that drops the bait takes again more often."]);
   });
 
