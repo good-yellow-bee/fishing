@@ -1317,8 +1317,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC156~~ | ~~Hill bonfire: on dry fall evenings and nights a bonfire burns on the far hills between the hay fields, its glow standing up to face the lake and its smoke leaning away on the wind (the shack's campfire drawn larger)~~ (#1348) | scene | S |
 | ~~SC157~~ | ~~News card scene34: the paraglider and the hill bonfire~~ (#1348) | scene | S |
 | ~~SC158~~ | ~~Cap cloud: on grey and wet days low cloud hangs on the tops of the far hills in soft grey wreaths that drift slowly along the ridge with the wind, lower and thicker in the rain (one draw)~~ (#1352) | scene | S |
-| SC159 | Damselflies: on calm summer days two bright blue damselflies keep to the dock, one each side, settling on the posts beside the angler with wings folded, darting out to hover low over the water and flitting back (two draws) | scene | S |
-| SC160 | News card scene35: the cap cloud on the hills and the damselflies | scene | S |
+| ~~SC159~~ | ~~Damselflies: on calm summer days two bright blue damselflies keep to the dock, one each side, settling on the posts beside the angler with wings folded, darting out to hover low over the water and flitting back (two draws)~~ (#1353) | scene | S |
+| ~~SC160~~ | ~~News card scene35: the cap cloud on the hills and the damselflies~~ (#1353) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
