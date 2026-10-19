@@ -1818,7 +1818,7 @@ function CatchView() {
           at={listPhotos.findIndex((row) => row.id === entry.id)}
         />
       ) : null}
-      <aside className="conditions" aria-label={t("Conditions")}>
+      <aside className="conditions catch-conditions" aria-label={t("Conditions")}>
         {entry.weather ? (
           <>
             <span className="eyebrow">{t("Weather")}</span>

@@ -71,6 +71,14 @@ describe("the field log on a touch screen", () => {
     const block = /\.map-index a:not\(\.map-plan, \.map-coord-link, \.map-next\)::after \{([^}]*)\}/.exec(mapCss)?.[1];
     expect(block).toContain("inset: -6px -3px;");
   });
+
+  it("makes each water in the Map's not-on-a-map-yet line a 32 px band, on touch only", () => {
+    const touch = mapCss.slice(mapCss.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.map-note a \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-height: 32px;");
+    expect(mapCss.slice(0, mapCss.indexOf("@media (pointer: coarse) {"))).not.toContain(".map-note a");
+  });
 });
 
 describe("the field log's tab bar on a 320 px phone", () => {
@@ -144,6 +152,76 @@ describe("Bests' season box on a touch screen", () => {
     expect(block).toContain("box-sizing: border-box;");
     // Off a touch screen they stay inline links, which keep axe's inline-text exception (see Home's count links).
     expect(css.slice(0, css.indexOf("@media (pointer: coarse) {"))).not.toMatch(/\n\.season-recap p a \{/);
+  });
+});
+
+describe("a water's tips box on a touch screen", () => {
+  it("makes each linked word a 32 px band, at least 32 px wide, and leaves desktop's inline links alone", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.water-tips p a \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-width: 32px;");
+    expect(block).toContain("min-height: 32px;");
+    expect(block).toContain("box-sizing: border-box;");
+    expect(css.slice(0, css.indexOf("@media (pointer: coarse) {"))).not.toMatch(/\n\.water-tips p a \{/);
+  });
+});
+
+describe("a catch's conditions box on a touch screen", () => {
+  it("makes the sky, wind, temperature and moon links 32 px bands, and leaves desktop's inline links alone", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.catch-conditions > p:not\(\.meta\) a \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-height: 32px;");
+    expect(block).toContain("box-sizing: border-box;");
+    expect(css.slice(0, css.indexOf("@media (pointer: coarse) {"))).not.toContain(".catch-conditions");
+    expect(readFileSync(`${import.meta.dirname}/CatchPages.tsx`, "utf8")).toContain('<aside className="conditions catch-conditions"');
+  });
+});
+
+describe("an empty list's link on a touch screen", () => {
+  it("makes the link that fills it a 32 px band, and leaves desktop's inline link alone", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.empty a \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-height: 32px;");
+    expect(block).toContain("box-sizing: border-box;");
+    expect(css.slice(0, css.indexOf("@media (pointer: coarse) {"))).not.toMatch(/\n\.empty a \{/);
+  });
+});
+
+describe("a page's one-link lines on a touch screen", () => {
+  it("makes Add a photo, Write up the day, Go again and a missing page's way back 32 px bands, and leaves desktop's inline links alone", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  :is\(\.add-photo, \.trip-write-up, \.trip-again, \.lone-link\) > a \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-height: 32px;");
+    expect(block).toContain("box-sizing: border-box;");
+    expect(css.slice(0, css.indexOf("@media (pointer: coarse) {"))).not.toContain(".lone-link");
+    expect(readFileSync(`${import.meta.dirname}/NotFoundPage.tsx`, "utf8")).toContain('<p className="lone-link">');
+  });
+});
+
+describe("a month's heading in Bests' days calendar on a touch screen", () => {
+  it("makes its outings and fish links 32 px bands, and leaves desktop's inline links alone", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.day-month h3 a \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("min-width: 32px;");
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-height: 32px;");
+    expect(block).toContain("box-sizing: border-box;");
+    expect(css.slice(0, css.indexOf("@media (pointer: coarse) {"))).not.toContain(".day-month h3 a");
+  });
+});
+
+describe("a log form's note on a touch screen", () => {
+  it("makes the fish or outing it links a 32 px band, and leaves desktop's inline link alone", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.form-note a \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-height: 32px;");
+    expect(block).toContain("box-sizing: border-box;");
+    expect(css.slice(0, css.indexOf("@media (pointer: coarse) {"))).not.toMatch(/\n\.form-note a \{/);
   });
 });
 

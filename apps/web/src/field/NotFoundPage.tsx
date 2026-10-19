@@ -12,7 +12,7 @@ export function NotFoundPage() {
           <p className="lede">{t("Nothing in the book lives at this address.")}</p>
         </div>
       </header>
-      <p>
+      <p className="lone-link">
         <Link to="/">{t("Back to the book")}</Link>
       </p>
     </div>
