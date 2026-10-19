@@ -5,6 +5,7 @@ import * as THREE from "three";
 import { DROPOFF_PAD, OPEN_PAD, POINT_PAD, REEDS_PAD, SHOP_X, SHOP_Z, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, moonLight, type LakeHour, type LakeSeason, type Sky as WeatherSky, type SpotId } from "@stillwater/shared";
 import { ArticulatedFish } from "./ArticulatedFish";
 import { ToonModel } from "./ToonModel";
+import { StaticModels, type StaticModel } from "./StaticModels";
 import { applyToon, disposeMaterials, releaseSharedMaterials, shareMaterials, toonRamp } from "./toon";
 import { bakeToon, lookOf, releaseBaked } from "./toonBake";
 import { SWAY_FOOT, batchPlaced, placement } from "./scatterBatch";
@@ -1973,45 +1974,62 @@ function PierDeck({ shade, pale }: { shade: number; pale: number }) {
   ));
 }
 
+/** The pier's still timbers: its bridge spans, the landing platform, a log and a paddle, soaked darker by `shade`. */
+function dockModels(shade: number): StaticModel[] {
+  return [
+    ...BRIDGE_SPANS.map((z): StaticModel => ({ url: MODELS.bridge, position: [0, 0, z], rotation: [0, Math.PI / 2, 0], scale: BRIDGE_SCALE, shade })),
+    { url: MODELS.platform, position: [0, 0, 7.9], scale: 1.55, shade },
+    { url: MODELS.log, position: [1.35, 0.12, 7.2], rotation: [0, 0.5, 0], scale: 1.1, shade },
+    { url: MODELS.paddle, position: [-1, 0.18, 7.05], rotation: [0.15, 0.6, 1.15], scale: 1.25, shade },
+  ];
+}
+const DRY_DOCK = dockModels(1);
+const WET_DOCK = dockModels(WET_SHADE);
+
 /** The pier and its planks; rain soaks the wood darker (`wet`), and frost or snow pales the walkway (`pale`). */
 function Dock({ wet, pale }: { wet: boolean; pale: number }) {
   const shade = wet ? WET_SHADE : 1;
   return (
     <group>
-      {BRIDGE_SPANS.map((z) => (
-        <ToonModel key={z} url={MODELS.bridge} position={[0, 0, z]} rotation={[0, Math.PI / 2, 0]} scale={BRIDGE_SCALE} shade={shade} />
-      ))}
+      <StaticModels items={wet ? WET_DOCK : DRY_DOCK} />
       <PierDeck shade={shade} pale={pale} />
-      <ToonModel url={MODELS.platform} position={[0, 0, 7.9]} scale={1.55} shade={shade} />
-      <ToonModel url={MODELS.log} position={[1.35, 0.12, 7.2]} rotation={[0, 0.5, 0]} scale={1.1} shade={shade} />
-      <ToonModel url={MODELS.paddle} position={[-1, 0.18, 7.05]} rotation={[0.15, 0.6, 1.15]} scale={1.25} shade={shade} />
     </group>
   );
 }
+
+/** The shack's ground: its grass platform, deck, logs, a paddle and a bush, about the shack's spot. */
+const SHACK_MODELS: StaticModel[] = [
+  { url: MODELS.grassPlat, position: [0, 0, 0], scale: 2.2 },
+  { url: MODELS.platform, position: [0, 0.02, -0.2], scale: 1.7 },
+  { url: MODELS.log, position: [-0.85, 0.22, 0.55], rotation: [0, 1.2, 0], scale: 1.15 },
+  { url: MODELS.log, position: [0.9, 0.22, 0.45], rotation: [0, -0.4, 0], scale: 1.05 },
+  { url: MODELS.log, position: [0.1, 0.38, -0.7], rotation: [0, 0.2, 0], scale: 1.3 },
+  { url: MODELS.paddle, position: [-1.15, 0.7, 0.1], rotation: [0.2, 0.4, 1.2], scale: 1.4 },
+  { url: MODELS.bushDetailed, position: [1.8, 0, -1.1], scale: 1.4, shadows: false, sitOnGround: true },
+];
 
 function Shack() {
   return (
     <group position={[SHOP_X, 0, SHOP_Z]}>
-      <ToonModel url={MODELS.grassPlat} position={[0, 0, 0]} scale={2.2} />
-      <ToonModel url={MODELS.platform} position={[0, 0.02, -0.2]} scale={1.7} />
-      <ToonModel url={MODELS.log} position={[-0.85, 0.22, 0.55]} rotation={[0, 1.2, 0]} scale={1.15} />
-      <ToonModel url={MODELS.log} position={[0.9, 0.22, 0.45]} rotation={[0, -0.4, 0]} scale={1.05} />
-      <ToonModel url={MODELS.log} position={[0.1, 0.38, -0.7]} rotation={[0, 0.2, 0]} scale={1.3} />
-      <ToonModel url={MODELS.paddle} position={[-1.15, 0.7, 0.1]} rotation={[0.2, 0.4, 1.2]} scale={1.4} />
-      <ToonModel url={MODELS.bushDetailed} position={[1.8, 0, -1.1]} scale={1.4} shadows={false} sitOnGround />
+      <StaticModels items={SHACK_MODELS} />
     </group>
   );
 }
 
+/** The boardwalk pieces along the near shore and the logs by the reeds and the point. */
+const SHORE_PATH_MODELS: StaticModel[] = [
+  { url: MODELS.path, position: [-6.2, 0.02, 11.2], rotation: [0, 1.2, 0], scale: 1.55 },
+  { url: MODELS.path, position: [-9.8, 0.02, 10.4], rotation: [0, 0.9, 0], scale: 1.5 },
+  { url: MODELS.path, position: [8.4, 0.02, 11], rotation: [0, -1.05, 0], scale: 1.5 },
+  { url: MODELS.path, position: [12.2, 0.02, 9.6], rotation: [0, -0.85, 0], scale: 1.45 },
+  { url: MODELS.log, position: [REEDS_PAD.x + 1.1, 0.12, REEDS_PAD.z + 0.4], rotation: [0, 0.8, 0], scale: 1.05 },
+  { url: MODELS.log, position: [POINT_PAD.x + 1.15, 0.12, POINT_PAD.z + 0.35], rotation: [0, -0.4, 0], scale: 1.05 },
+];
+
 function ShorePath() {
   return (
     <group>
-      <ToonModel url={MODELS.path} position={[-6.2, 0.02, 11.2]} rotation={[0, 1.2, 0]} scale={1.55} />
-      <ToonModel url={MODELS.path} position={[-9.8, 0.02, 10.4]} rotation={[0, 0.9, 0]} scale={1.5} />
-      <ToonModel url={MODELS.path} position={[8.4, 0.02, 11]} rotation={[0, -1.05, 0]} scale={1.5} />
-      <ToonModel url={MODELS.path} position={[12.2, 0.02, 9.6]} rotation={[0, -0.85, 0]} scale={1.45} />
-      <ToonModel url={MODELS.log} position={[REEDS_PAD.x + 1.1, 0.12, REEDS_PAD.z + 0.4]} rotation={[0, 0.8, 0]} scale={1.05} />
-      <ToonModel url={MODELS.log} position={[POINT_PAD.x + 1.15, 0.12, POINT_PAD.z + 0.35]} rotation={[0, -0.4, 0]} scale={1.05} />
+      <StaticModels items={SHORE_PATH_MODELS} />
       <Rocks items={DROPOFF_ROCKS} />
     </group>
   );
