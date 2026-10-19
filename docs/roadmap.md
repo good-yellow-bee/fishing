@@ -1340,6 +1340,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC174~~ | ~~Fewer draws: the spring goose family draws as four instanced meshes (14 draws to 4), the two swans and their wakes as four (10 to 4), and each campfire bakes its flame and core into one shape~~ (#1385) | scene | S |
 | ~~SC175~~ | ~~Fewer draws: seventeen far-bank figures (the jogger, skier, sledders, woodcutter, dog walker, paddleboarder, stone skimmer, anglers, rowers, painter and others) bake their posed limbs into one skinned mesh each, so each figure costs one draw however many limbs it swings~~ (#1387) | scene | S |
 | ~~SC176~~ | ~~Fewer draws: fourteen lake birds and animals (the moose, osprey, heron, hare, cormorant, dock robin, sandpipers, winter gulls, grebes, loon, owl, woodpecker, the disc tossers and the dinghy) bake their posed parts into one skinned mesh each~~ (#1388) | scene | S |
+| ~~SC177~~ | ~~Swan pedalo: on calm, fine summer days two people pedal a white swan pedal boat in a slow loop on the east water, its paddle wheel turning and a wake behind it (one draw for the boat and riders), taking the water the dinghy sails on breezy days~~ (#1391) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
