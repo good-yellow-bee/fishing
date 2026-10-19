@@ -489,6 +489,7 @@ export const PL_GAME: PlBook = {
   "The sky is high and bright after yesterday's rain, and the fish sulk deep. A slow jig or worm still draws them.": "Po wczorajszym deszczu niebo jest wysokie i jasne, a ryby stoją ospale w głębi. Wolny jig albo robak wciąż je skusi.",
   "The lake is turning over, and the stirred-up water puts the fish off. The inlet's fresh stream water still holds them.": "Jezioro się przewraca, a zmącona woda zniechęca ryby. Świeża woda strumienia w ujściu wciąż je trzyma.",
   "The lake is turning over, but the inlet's fresh stream water keeps its fish feeding.": "Jezioro się przewraca, ale świeża woda strumienia w ujściu wciąż zachęca ryby do żerowania.",
+  "The anchor's splash put the fish down, so the bites come slow: give it a few seconds before you cast.": "Plusk kotwicy spłoszył ryby, więc brania przychodzą wolno: odczekaj kilka sekund przed rzutem.",
   "The midday glare drives the fish from the open water, so the bites come slow.": "Południowy blask przegania ryby z otwartej wody, więc brania przychodzą powoli.",
   "The low sun behind you throws your shadow across the water, and the fish shy from it. Try another bank till the sun climbs or sets.":
     "Niskie słońce za plecami rzuca twój cień na wodę, a ryby go unikają. Spróbuj innego brzegu, aż słońce wzejdzie wyżej albo zajdzie.",

@@ -27,6 +27,8 @@ export const boat = {
   yaw: MOORED_YAW,
   /** At anchor, how far a run has swung the hull round on its anchor line, added to the yaw. */
   swing: 0,
+  /** When the anchor last went down (Date.now()), for the splash that puts the fish down. */
+  anchoredAt: 0,
 };
 
 /** How far the hull swings round toward a run at anchor, in radians. */
@@ -45,6 +47,7 @@ const listeners = new Set<() => void>();
 function setMode(mode: BoatMode) {
   if (boat.mode === mode) return;
   boat.mode = mode;
+  if (mode === "anchored") boat.anchoredAt = Date.now();
   for (const listener of listeners) listener();
 }
 

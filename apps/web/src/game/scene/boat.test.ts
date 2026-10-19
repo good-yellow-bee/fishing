@@ -19,9 +19,11 @@ describe("rowboat", () => {
     expect(boat.mode).toBe("rowingOut");
     row(ROW_SECONDS / 2);
     expect(boat.mode).toBe("rowingOut");
+    const before = Date.now();
     row(ROW_SECONDS);
     expect(boat.mode).toBe("anchored");
     expect(boat.u).toBe(1);
+    expect(boat.anchoredAt).toBeGreaterThanOrEqual(before);
     expect(rowBack()).toBe(true);
     expect(row(ROW_SECONDS + 0.2)).toBe(true);
     expect(boat.mode).toBe("moored");
