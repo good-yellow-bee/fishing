@@ -6,6 +6,7 @@ export const NEWS_KEY = "stillwater.news.v1";
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
   "On fine, breezy days from spring to fall a paraglider soars along the ridge of the hills behind the far bank, banking round at each end. On fall evenings a bonfire burns on those hills between the hay fields, glowing in the dark with its smoke leaning away on the wind.",
+  "At level 15, One with the lake, a strike in the first 48% of the bite sets the hook solid, not 40%. Far out the line stretches, so a long cast needs a quicker strike for a solid hook. And in winter, work a jig, spoon, popper or streamer slowly: touched again too soon, it puts the cold fish off.",
   "Find a catch offers its best words as one-tap searches, and a search's spreadsheet is named after it. A fish's page says its place on the outing, such as fish 3 of 5.",
   "An old windmill now stands on the hills behind the far bank, its sails turning with the day's wind and standing still when it drops. By day in spring and fall a little flock of sheep grazes the hay field on those hills, and in spring their lambs skip along after them.",
   "On summer and fall evenings a pale barn owl hunts low over the hay fields on the far hills, hovering and dropping into the stubble. On summer days a little red tractor works the field, and on clear days the shadows of passing clouds slide over the hills as well as the water.",
@@ -19,7 +20,6 @@ export const NEWS_ITEMS: readonly string[] = [
   "At level 14, Soul of the lake, your line holds a moment past the red: it snaps at 105% strain, not 100%. And off the dock on a still summer dusk, drop a dry fly under one of the dancing midge clouds, where the bluegill, crappie, shiners and rainbow trout rise to the midges that fall.",
   "The fight card's coloured lines, from the surge call to the clean-fight stamp, and the landed card's few words about the fish are darker and easier to read. In the shack, a request's Claim button is easier to tap on a phone and its Claimed label is easier to read. The news card no longer covers the bank buttons on a phone, and a screen reader reads the trip recap's heaviest fish whole.",
   "The lure record can be downloaded as a spreadsheet, for the water picked or all of them. The Map finds the water nearest you, and saves all your waters for a GPS in one file.",
-  "Strike a pike sooner on a worm or a live shiner: given time it swallows the bait, and if the fight then runs long its teeth fray the line, so it snaps sooner until you retie. And after dark off the dock, cast a jig, spinner or spoon among the minnows in the lanterns' light, where the crappie, walleye and bass hunt them.",
 ];
 
 /** Whether this angler should see the card: someone who has fished before and not yet dismissed this batch. */
