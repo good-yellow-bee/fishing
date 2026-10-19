@@ -170,6 +170,29 @@ const TIME_WORDS: Partial<Record<(typeof BITE_TIMES)[number]["id"], string[]>> =
   night: ["dark", "noc", "nocą", "nocy"],
 };
 
+const RECENT_KEY = "stillwater.recent-searches.v1";
+
+/** The last three searches that found something, newest first; none where the browser keeps nothing. */
+function readRecent(): string[] {
+  try {
+    const kept: unknown = JSON.parse(localStorage.getItem(RECENT_KEY) ?? "[]");
+    return Array.isArray(kept) ? kept.filter((text): text is string => typeof text === "string").slice(0, 3) : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Puts a search first among the recent ones, once however it was spelled, and keeps three. */
+export function keepRecent(text: string): string[] {
+  const next = [text, ...readRecent().filter((other) => normalize(other) !== normalize(text))].slice(0, 3);
+  try {
+    localStorage.setItem(RECENT_KEY, JSON.stringify(next));
+  } catch {
+    // A private window keeps nothing: the list just isn't offered next time.
+  }
+  return next;
+}
+
 /** True when what was typed starts a word for a part of the day ("night", "dusk", "wieczorem"), from three letters up: the outing search asks the fish then. */
 export function isTimeWord(want: string, t: (text: string) => string): boolean {
   const typed = normalize(want);
@@ -717,6 +740,23 @@ export function CatchSearch() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+  const search = (next: string) => {
+    typed.current.add(next);
+    setQuery(next);
+    setParams(
+      (current) => {
+        const out = new URLSearchParams(current);
+        if (next.trim()) out.set(FIND_PARAM, next);
+        else {
+          out.delete(FIND_PARAM);
+          out.delete(ORDER_PARAM);
+        }
+        return out;
+      },
+      { replace: true },
+    );
+  };
+  const [recent, setRecent] = useState(readRecent);
   const needle = query.trim();
   // Typing stays quick in a long book: the results catch up a beat behind the keys.
   const settled = useDeferredValue(needle);
@@ -755,24 +795,26 @@ export function CatchSearch() {
         value={query}
         placeholder={t("Species, water, lure, month")}
         autoComplete="off"
-        onChange={(event) => {
-          const next = event.target.value;
-          typed.current.add(next);
-          setQuery(next);
-          setParams(
-            (current) => {
-              const out = new URLSearchParams(current);
-              if (next.trim()) out.set(FIND_PARAM, next);
-              else {
-                out.delete(FIND_PARAM);
-                out.delete(ORDER_PARAM);
-              }
-              return out;
-            },
-            { replace: true },
-          );
+        onChange={(event) => search(event.target.value)}
+        // Left with matches (a card tapped, or done), the search is kept among the last few.
+        onBlur={() => {
+          if (settled && matches.length > 0) setRecent(keepRecent(settled));
         }}
       />
+      {/* The box empty: the last searches that found something, one tap to run again. */}
+      {!needle && recent.length > 0 ? (
+        <p className="search-tip recent-searches">
+          {t("Recent:")}{" "}
+          {recent.map((text, index) => (
+            <Fragment key={text}>
+              {index > 0 ? " · " : null}
+              <button type="button" className="text-button" onClick={() => search(text)}>
+                {text}
+              </button>
+            </Fragment>
+          ))}
+        </p>
+      ) : null}
       {/* Only the count is read out; the cards themselves are not a live region. It stays mounted, so each new count is heard. */}
       <div role="status" className={settled ? (matches.length === 0 ? "empty" : "search-count") : undefined}>
         {!settled ? null : matches.length > 1 ? (

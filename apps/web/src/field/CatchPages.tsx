@@ -36,7 +36,7 @@ import {
 } from "@stillwater/shared";
 import { CatchCard } from "./cards";
 import { sameSizeSearch } from "./sizeQuery";
-import { PhotoFull } from "./PhotoFull";
+import { PhotoFull, type ListPhoto } from "./PhotoFull";
 import { catchNeighbors, neighborsIn } from "./catchNeighbors";
 import { tempBandSearch } from "./WeatherBars";
 import { LIST_PARAM, catchLink, catchList, largestList, type ListKey } from "./catchList";
@@ -1516,6 +1516,14 @@ function CatchView() {
   const photo = photoFor(entry.id);
   // Opened from a list (a search, a kind, an outing, a water): the steps keep to it, and lead back to it.
   const list = catchList(book, params.get(LIST_PARAM), entry.id, t, (id) => photoFor(id) !== null);
+  const photoCaption = (fish: CatchEntry) => [t(fish.species), measuresText(fish), formatDay(bookFishDay(book, fish)), ...(spotById(book, fish.spotId) ? [spotById(book, fish.spotId)!.name] : [])].join(" · ");
+  // Opened from a list, the full-size view steps through the list's other photos too.
+  const listPhotos: ListPhoto[] = (list?.rows ?? []).flatMap((fish) => {
+    const src = photoFor(fish.id);
+    return src
+      ? [{ id: fish.id, src, alt: t("Photo of {species}", { species: t(fish.species) }), name: `${t(fish.species)} ${bookFishDay(book, fish)}`, caption: photoCaption(fish), to: catchLink(fish.id, list?.key) }]
+      : [];
+  });
   const { newer, older } = list ? neighborsIn(list.rows, entry.id) : catchNeighbors(book, entry.id);
   const listIndex = list ? list.rows.findIndex((row) => row.id === entry.id) : -1;
   // A past outing's page lists its fish first fish first: the count goes as the page reads.
@@ -1776,10 +1784,13 @@ function CatchView() {
       ) : null}
       {photo ? (
         <PhotoFull
+          key={entry.id}
           src={photo}
           alt={t("Photo of {species}", { species: t(entry.species) })}
           name={`${t(entry.species)} ${caughtDay}`}
-          caption={[t(entry.species), measuresText(entry), formatDay(caughtDay), ...(spot ? [spot.name] : [])].join(" · ")}
+          caption={photoCaption(entry)}
+          photos={listPhotos}
+          at={listPhotos.findIndex((row) => row.id === entry.id)}
         />
       ) : null}
       <aside className="conditions" aria-label={t("Conditions")}>
@@ -1901,6 +1912,19 @@ function CatchView() {
             onClick={() => requestAnimationFrame(() => focusPageHeading({ preventScroll: true }))}
           >
             {t("Step through {species} only", { species: t(entry.species) })}
+          </Link>
+        </p>
+      ) : null}
+      {/* Found in another list, the rest of its outing's fish are a step away too: that night's photos and weights to fill in. */}
+      {trip && tripFish > 1 && list?.key !== `trip:${trip.id}` ? (
+        <p className="catch-list-at">
+          <Link
+            to={catchLink(entry.id, `trip:${trip.id}`)}
+            replace
+            state={location.state}
+            onClick={() => requestAnimationFrame(() => focusPageHeading({ preventScroll: true }))}
+          >
+            {t("Step through this outing's fish")}
           </Link>
         </p>
       ) : null}
