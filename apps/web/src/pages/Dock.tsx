@@ -264,20 +264,19 @@ export function DockPage() {
     observer.observe(wrap);
     return () => observer.disconnect();
   }, [game.surfaceRef, scenePhase, shopOpen, photo, lakeShown]);
-  // On an upright phone the hint hangs under the bank chip, which wraps tall in its narrow column when it says several
-  // things ("Dock · biting today · bites sooner now · groundbait · 5 left"): the scene keeps the chip's bottom edge.
+  // On an upright phone the coach and the hint hang under the bank chip, which wraps tall in its narrow column when it
+  // says several things ("Dock · biting today · bites sooner now · groundbait · 5 left"): the scene keeps its height.
   useEffect(() => {
     const wrap = game.surfaceRef.current;
     const chip = wrap?.querySelector<HTMLElement>(":scope > .stance-chip");
     if (!wrap || !chip || typeof ResizeObserver === "undefined") return;
-    const sync = () => wrap.style.setProperty("--stance-bottom", `${Math.ceil(chip.offsetTop + chip.offsetHeight)}px`);
+    const sync = () => wrap.style.setProperty("--stance-h", `${Math.ceil(chip.offsetHeight)}px`);
     const observer = new ResizeObserver(sync);
     observer.observe(chip);
-    observer.observe(wrap);
     sync();
     return () => {
       observer.disconnect();
-      wrap.style.removeProperty("--stance-bottom");
+      wrap.style.removeProperty("--stance-h");
     };
   }, [game.surfaceRef, lakeShown]);
   // The landed fish's ID is its request ID, so this matches the roll the server makes.
