@@ -35,10 +35,11 @@ dailyRequestRoutes.get("/daily-requests", (c) => {
   if (!local) return c.json({ error: "invalid day" }, 400);
   const catches = listCatchesBetween(user.id, local.from, local.to).map(toCatch);
   const claimed = new Set(listDailyClaims(user.id, local.day));
-  const lifetimePoints = getProfile(user.id)?.lifetime_points ?? 0;
+  const profile = getProfile(user.id);
+  if (!profile) return c.json({ error: "profile missing" }, 404);
   const requests = dailyRequestsForDay(local.day).map((request) => ({
     ...request,
-    reward: boardReward(request.reward, lifetimePoints),
+    reward: boardReward(request.reward, profile.lifetime_points),
     progress: dailyRequestProgress(request, catches),
     claimed: claimed.has(request.id),
   }));
@@ -55,7 +56,9 @@ dailyRequestRoutes.post("/daily-requests/:id/claim", (c) => {
   const catches = listCatchesBetween(user.id, local.from, local.to).map(toCatch);
   if (dailyRequestProgress(request, catches) < request.count) return c.json({ error: "request incomplete" }, 409);
   if (overlapsOtherClaimedDay(user.id, local)) return c.json({ error: "those hours already count for another day" }, 409);
-  const reward = boardReward(request.reward, getProfile(user.id)?.lifetime_points ?? 0);
+  const profile = getProfile(user.id);
+  if (!profile) return c.json({ error: "profile missing" }, 404);
+  const reward = boardReward(request.reward, profile.lifetime_points);
   const boardBonus = claimDailyRequest(user.id, local, request.id, reward, board.length, BOARD_BONUS);
   if (boardBonus === null) return c.json({ error: "request already claimed" }, 409);
   return c.json({ reward, boardBonus });

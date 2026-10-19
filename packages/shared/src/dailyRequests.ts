@@ -18,6 +18,7 @@ export type DailyCatch = { speciesId: string; spot: string; weight: number };
 /** Claiming the last of a day's requests clears the board, which pays this on top of its reward. */
 export const BOARD_BONUS = 25;
 
+/** From this level the shack board's requests pay a quarter more. */
 export const BOARD_REWARD_LEVEL = 18;
 
 /** What a request pays this angler: its reward, or a quarter more from BOARD_REWARD_LEVEL. */
