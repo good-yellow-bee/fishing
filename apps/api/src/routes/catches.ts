@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { Hono } from "hono";
 import { daysBetween, isGolden, isLakeHour, isLakeSeason, isLocalDay, isSky, validateCatch, SPOT_IDS, type CatchSubmission } from "@stillwater/shared";
-import { findCatchByRequestId, getProfile, heaviestCatch, othersHeaviestCatch, recordCatch, releaseCatch, toProfile, type CatchRow } from "../db.ts";
+import { findCatchByRequestId, getProfile, heaviestCatch, listCatchDays, othersHeaviestCatch, recordCatch, releaseCatch, toProfile, type CatchRow } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
 export const catchRoutes = new Hono();
@@ -47,7 +47,7 @@ catchRoutes.post("/catches", async (c) => {
   }
   const row = getProfile(user.id);
   if (!row) return c.json({ error: "profile missing" }, 404);
-  const result = validateCatch(toProfile(row), body, new Date(), heaviestCatch(user.id, body.speciesId), othersHeaviestCatch(user.id, body.speciesId));
+  const result = validateCatch(toProfile(row), body, new Date(), heaviestCatch(user.id, body.speciesId), othersHeaviestCatch(user.id, body.speciesId), listCatchDays(user.id));
   if (!result.ok) return c.json({ error: result.error }, result.status);
   const record: CatchRow = {
     id: randomUUID(),

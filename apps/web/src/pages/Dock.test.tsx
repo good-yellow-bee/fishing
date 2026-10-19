@@ -4,7 +4,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { badgeProgress, catchPoints, CLEAN_RUN_BONUS, GOLDEN_BONUS, LODGE_RECORD_BONUS, PB_BONUS, isGolden, weeklyBonus, dailyConditions, skyTurnForDay, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky, type SpotId } from "@stillwater/shared";
+import { badgeProgress, catchPoints, CLEAN_RUN_BONUS, DAY_RUN_BONUS, GOLDEN_BONUS, LODGE_RECORD_BONUS, PB_BONUS, isGolden, weeklyBonus, dailyConditions, skyTurnForDay, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky, type SpotId } from "@stillwater/shared";
 import { buyGroundbait, buyShiner, getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
@@ -371,6 +371,31 @@ describe("days on the water", () => {
     await act(async () => undefined);
     expect(page.querySelector(".hud-streak")?.textContent).toBe("3 days in a row");
     expect(vi.mocked(recordCatch).mock.lastCall?.[0]).toMatchObject({ requestId: "catch-today", day: day(0) });
+  });
+
+  it("stamps the day's first fish on a run of three days or more with its bonus, and counts it in the points", async () => {
+    const today = new Date();
+    const day = (back: number) => {
+      const at = new Date(today.getFullYear(), today.getMonth(), today.getDate() - back);
+      return `${at.getFullYear()}-${String(at.getMonth() + 1).padStart(2, "0")}-${String(at.getDate()).padStart(2, "0")}`;
+    };
+    vi.mocked(getMe).mockResolvedValue({ ...me, recentDays: [day(2), day(1)], longestStreak: 2 });
+    const perch = fishById("perch")!;
+    vi.mocked(recordCatch).mockResolvedValue({ id: "catch-run", points: 1, speciesId: perch.id, weight: 0.6 });
+    // The angler's days are loaded before the fish comes in, as they are on the water.
+    const page = await openDock("/");
+    landed.outcome = { kind: "landed", id: "catch-run", species: perch, weight: 0.6, spot: "dock", clean: false };
+    await act(async () => {
+      root!.render(
+        <MemoryRouter initialEntries={["/"]}>
+          <DockPage />
+        </MemoryRouter>,
+      );
+    });
+    const stamps = [...page.querySelectorAll(".landed-card .catch-stamp")].map((p) => p.textContent);
+    expect(stamps).toContain("First fish of day 3 in a row · 1.5× points");
+    const points = catchPoints(perch, 0.6, false, DAY_RUN_BONUS * weeklyBonus(perch.id) * (isGolden("catch-run") ? GOLDEN_BONUS : 1));
+    expect(page.querySelector(".landed-card")!.textContent).toContain(`+${points} pts`);
   });
 });
 

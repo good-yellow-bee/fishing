@@ -229,6 +229,7 @@ export const PL_GAME: PlBook = {
   "New in the field guide": "Nowość w atlasie ryb",
   "Personal best · was {weight} · 1.25× points": "Rekord osobisty · było {weight} · 1,25× punktów",
   "Personal best · was {weight}": "Rekord osobisty · było {weight}",
+  "First fish of day {n} in a row · 1.5× points": "Pierwsza ryba {n}. dnia z rzędu · 1,5× punktów",
   "Book PB {weight}": "Rekord w dzienniku: {weight}",
   Trophy: "Trofeum",
   "First on the lodge wall": "Pierwsza na ścianie przystani",
