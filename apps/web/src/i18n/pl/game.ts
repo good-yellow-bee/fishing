@@ -559,6 +559,8 @@ export const PL_GAME: PlBook = {
   "Hooked solid in {time} s! {line}. Ease off when it runs.": "Hak siedzi pewnie po {time} s! {line}. Odpuść, gdy odjeżdża.",
   "Hooked in {time} s (solid under {limit} s in this wind). {line}. Ease off when it runs.": "Zacięte po {time} s (przy tym wietrze pewnie poniżej {limit} s). {line}. Odpuść, gdy odjeżdża.",
   "Hooked in {time} s (solid under {limit} s on the dull hook). {line}. Ease off when it runs.": "Zacięte po {time} s (tępym haczykiem pewnie poniżej {limit} s). {line}. Odpuść, gdy odjeżdża.",
+  "Hooked in {time} s (solid under {limit} s this far out, where the line stretches). {line}. Ease off when it runs.":
+    "Zacięte po {time} s (tak daleko, gdzie żyłka się rozciąga, pewnie poniżej {limit} s). {line}. Odpuść, gdy odjeżdża.",
   "Hooked in {time} s (solid under {limit} s). {line}. Ease off when it runs.": "Zacięte po {time} s (pewnie poniżej {limit} s). {line}. Odpuść, gdy odjeżdża.",
   "NOW — strike!": "TERAZ — zatnij!",
   "WHAM — it hit! Strike!": "ŁUP — uderzyła! Zatnij!",

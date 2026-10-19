@@ -28,6 +28,9 @@ import {
   skyAt,
   skyTurnForDay,
   weatherForDay,
+  CAST_RANGE,
+  BOAT_CAST_RANGE,
+  castRangeMultiplier,
 } from "@stillwater/shared";
 import { locale, t } from "../i18n";
 
@@ -213,10 +216,21 @@ export const WIND_STRIKE = { breezy: 0.85, strong: 0.7 } as const;
 /** A jig's single stout hook drives home on a strike, so it sets solid over a longer share of the window. */
 export const JIG_SOLID = 1.25;
 
-/** How quick a strike must be, in ms, to set the hook solid in a window this long, in this wind, on this lure. */
-export function solidStrikeMs(windowMs: number, windy?: keyof typeof WIND_STRIKE, lure?: string, dull = false) {
+/** How quick a strike must be, in ms, to set the hook solid in a window this long, in this wind, on this lure, with a dull point, this far out. */
+export function solidStrikeMs(windowMs: number, windy?: keyof typeof WIND_STRIKE, lure?: string, dull = false, long = false) {
   const jig = !!lure?.trim() && lureClass(lure).id === "jig";
-  return windowMs * SOLID_STRIKE_SHARE * (windy ? WIND_STRIKE[windy] : 1) * (jig ? JIG_SOLID : 1) * (dull ? DULL_SOLID : 1);
+  return windowMs * SOLID_STRIKE_SHARE * (windy ? WIND_STRIKE[windy] : 1) * (jig ? JIG_SOLID : 1) * (dull ? DULL_SOLID : 1) * (long ? LONG_CAST_SOLID : 1);
+}
+
+/** A lure landing past this share of the angler's reach is a long cast. */
+export const LONG_CAST_SHARE = 0.75;
+/** On a long cast the line out stretches and soaks up the strike, so a solid hook needs a quicker one. */
+export const LONG_CAST_SOLID = 0.8;
+
+/** Whether a lure landing at (toX, toZ) from (fromX, fromZ) lies past LONG_CAST_SHARE of this angler's reach, from the bank or the boat. */
+export function isLongCast(fromX: number, fromZ: number, toX: number, toZ: number, level: number, boat = false) {
+  const reach = CAST_RANGE * castRangeMultiplier(level) * (boat ? BOAT_CAST_RANGE : 1);
+  return Math.hypot(toX - fromX, toZ - fromZ) > reach * LONG_CAST_SHARE;
 }
 
 /** A hook point blunted on the rocks needs a quicker strike to drive home: its share of the usual solid-strike time, until it is touched up. */
