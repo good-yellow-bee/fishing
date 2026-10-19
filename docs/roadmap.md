@@ -1123,6 +1123,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA78~~ | ~~Reduce motion keeps the spring grebes floating at one moment: no head shaking and no rush across the water with its spray; a close cast still sends them under (#1226)~~ | phone UX | S |
 | ~~PA79~~ | ~~Bests' month-by-year table on a touch screen: each count and year total was a 24 px link with 8 px between rows; its reach now fills the cell, a 32 px band meeting the next row's, moving nothing (#1268)~~ | phone UX | S |
 | ~~PA80~~ | ~~Bests' season box on a touch screen: its stacked count links (fish, days out, kinds, best day) were 16-18 px targets 22 px apart; each is now a 32 px band touching the next, as Home's count lines are, and stays a plain inline link off touch (#1270)~~ | phone UX | S |
+| ~~PA81~~ | ~~A water's tips box on a touch screen: the linked lures and words (Most fish at: dawn, Best weather: overcast...) were 18-20 px targets on 24 px lines, "Jig" 20 px wide; each is now a 32 px band at least 32 px wide, plain inline links off touch (#1273)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 

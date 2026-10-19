@@ -147,6 +147,18 @@ describe("Bests' season box on a touch screen", () => {
   });
 });
 
+describe("a water's tips box on a touch screen", () => {
+  it("makes each linked word a 32 px band, at least 32 px wide, and leaves desktop's inline links alone", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.water-tips p a \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-width: 32px;");
+    expect(block).toContain("min-height: 32px;");
+    expect(block).toContain("box-sizing: border-box;");
+    expect(css.slice(0, css.indexOf("@media (pointer: coarse) {"))).not.toMatch(/\n\.water-tips p a \{/);
+  });
+});
+
 describe("Bests' month-by-year table on a touch screen", () => {
   it("reaches each 24 px count 4 px out to its cell's edges, a 32 px band meeting the next row's", () => {
     const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
