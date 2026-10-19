@@ -26,7 +26,7 @@ describe("round 84 ideas: a day searched whose fish count on the night before", 
   const book: Logbook = { spots: [ownLake], trips: [trip("night", "2026-10-10")], catches: [fish("a", local(2026, 10, 10, 23), "night"), fish("b", local(2026, 10, 11, 1, 30), "night")] };
 
   it("names the outing's day and how many went there", () => {
-    expect(smallHoursOn(book, "2026-10-11")).toEqual({ count: 1, day: "2026-10-10" });
+    expect(smallHoursOn(book, "2026-10-11")).toEqual({ count: 1, day: "2026-10-10", on: "2026-10-11" });
   });
 
   it("says nothing for the outing's own day, or for words", () => {

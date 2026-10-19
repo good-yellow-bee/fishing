@@ -41,17 +41,37 @@ export function seasonCopy(book: Logbook, year: string, today: string): string {
 }
 
 /** A picked season at a glance against the one before: fish, days out, kinds, and the kinds new to the book. */
-export function SeasonRecapBox({ book, year, today, dayLink }: { book: Logbook; year: string; today: string; dayLink?: (date: string) => string }) {
+/** `fishLink` and `daysLink` open the season's fish and outings; `kindsId` is the heading of the page's kinds, jumped to. */
+export function SeasonRecapBox({
+  book,
+  year,
+  today,
+  dayLink,
+  fishLink,
+  daysLink,
+  kindsId,
+}: {
+  book: Logbook;
+  year: string;
+  today: string;
+  dayLink?: (date: string) => string;
+  fishLink?: string;
+  daysLink?: string;
+  kindsId?: string;
+}) {
   useT();
   const recap = seasonRecap(book, year, today);
   const goal = year < today.slice(0, 4) ? readYearGoal(year) : null;
   if (recap.fish === 0 && recap.days === 0) return null;
   // A season still going is set against the one before up to the same day.
   const before = recap.beforeUntil ? t("{year} by this date", { year: recap.before }) : recap.before;
+  const fishLine = t("Fish: {count}", { count: against(recap.fish, recap.fishBefore, before) });
+  const daysLine = t("Days out: {count}", { count: against(recap.days, recap.daysBefore, before) });
+  const kindsLine = t("Kinds: {count}", { count: against(recap.kinds, recap.kindsBefore, before) });
   const lines = [
-    t("Fish: {count}", { count: against(recap.fish, recap.fishBefore, before) }),
-    t("Days out: {count}", { count: against(recap.days, recap.daysBefore, before) }),
-    t("Kinds: {count}", { count: against(recap.kinds, recap.kindsBefore, before) }),
+    fishLine,
+    daysLine,
+    kindsLine,
     // A past season's goal, how it ended; this year's has its own box below.
     ...(goal !== null ? [recap.fish >= goal ? t("Goal reached: {count} of {goal} fish in {year}.", { count: recap.fish, goal, year }) : t("{count} of {goal} fish in {year}", { count: recap.fish, goal, year })] : []),
   ];
@@ -64,7 +84,28 @@ export function SeasonRecapBox({ book, year, today, dayLink }: { book: Logbook; 
           <span key={line}>
             {index > 0 ? <br /> : null}
             {/* The best day opens its fish, as the Best day tile does. */}
-            {top && dayLink && line === bestDay[0] ? <Link to={dayLink(top.date)}>{line}</Link> : line}
+            {top && dayLink && line === bestDay[0] ? (
+              <Link to={dayLink(top.date)}>{line}</Link>
+            ) : line === fishLine && fishLink && recap.fish > 0 ? (
+              // The season's counts open what they count: its fish, its outings, its kinds further down.
+              <Link to={fishLink}>{line}</Link>
+            ) : line === daysLine && daysLink && recap.days > 0 ? (
+              <Link to={daysLink}>{line}</Link>
+            ) : line === kindsLine && kindsId && recap.kinds > 0 ? (
+              <a
+                href={`#${kindsId}`}
+                onClick={(event) => {
+                  event.preventDefault();
+                  const heading = document.getElementById(kindsId);
+                  heading?.scrollIntoView({ block: "start" });
+                  heading?.focus({ preventScroll: true });
+                }}
+              >
+                {line}
+              </a>
+            ) : (
+              line
+            )}
           </span>
         ))}
       </p>
