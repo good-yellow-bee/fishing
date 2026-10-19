@@ -22,6 +22,7 @@ import { catchLink, type ListKey } from "./catchList";
 import { FROM_LIST } from "./leaveDeleted";
 import { isPlanned } from "./TripMonthHead";
 import { outingDay, stillGoing } from "./tripDates";
+import { pieceName } from "./gear/pieceKey";
 import { bookFishDay } from "./tripMonths";
 
 /** A card's heading sits one below the section it is listed under. */
@@ -175,11 +176,12 @@ export function SpotCard({
       </div>
       <p className="conditions-line">{spot.bestConditions || t("Conditions not noted")}</p>
       <p className="meta">
-        {fishCountLabel(fishCount)}
+        {/* Beside its outings, a count: "0 fish · 2 outings", not "Nothing logged" when two were. */}
+        {tripCount > 0 ? tn(fishCount, "{n} fish", "{n} fish") : fishCountLabel(fishCount)}
         {" · "}
         {tn(tripCount, "{n} outing", "{n} outings")}
         {lastFishDay ? ` · ${t("Last fish: {day}", { day: formatDay(lastFishDay) })}` : ""}
-        {bestLure ? ` · ${t("best on {lure}", { lure: t(bestLure) })}` : ""}
+        {bestLure ? ` · ${t("best on {lure}", { lure: pieceName(bestLure) })}` : ""}
       </p>
       {restDays !== null ? <p className="meta">{restDays === 0 ? t("Fished here today") : restDays === 1 ? t("Last fished here yesterday") : tn(restDays, "Last fished here {n} day ago", "Last fished here {n} days ago")}</p> : null}
       {nextOuting ? <p className="meta next-outing">{nextOuting}</p> : null}
