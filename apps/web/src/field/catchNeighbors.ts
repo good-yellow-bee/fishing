@@ -19,7 +19,7 @@ export function catchNeighbors(book: Logbook, id: string): Neighbors<CatchEntry>
 
 /**
  * The outings either side, by day: game days step only among themselves, real ones among real ones. Once the book
- * holds the angler's own, the sample week's plans still ahead are hidden, as Coming up hides them, unless one is shown.
+ * holds the angler's own, the sample week's plans (ahead, or past with no fish) are hidden, as Coming up hides them, unless one is shown.
  */
 export function tripNeighbors(book: Logbook, id: string, today = localDate(new Date())): Neighbors<Trip> {
   const self = book.trips.find((trip) => trip.id === id);
@@ -34,7 +34,7 @@ export function tripNeighbors(book: Logbook, id: string, today = localDate(new D
     return x && y ? y.localeCompare(x) : 0;
   };
   const rows = book.trips
-    .filter((trip) => (trip.spotId === PLAY_LAKE_ID) === play && !(hideSamplePlans && isSampleOuting(trip) && trip.date >= today))
+    .filter((trip) => (trip.spotId === PLAY_LAKE_ID) === play && !(hideSamplePlans && isSampleOuting(trip) && (trip.date >= today || !firstFish.has(trip.id))))
     .sort((a, b) => b.date.localeCompare(a.date) || byFish(a, b) || a.id.localeCompare(b.id));
   return neighborsIn(rows, id);
 }

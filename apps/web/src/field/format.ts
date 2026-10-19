@@ -69,9 +69,10 @@ export function formatTimeOfDay(iso: string): string {
   return format("time").format(new Date(iso));
 }
 
-export function formatClock(iso: string): string {
+/** A day and time, with the year when it isn't this one, or always with `withYear`. */
+export function formatClock(iso: string, withYear?: boolean): string {
   const date = new Date(iso);
-  return format("clock", otherYear(date)).format(date);
+  return format("clock", withYear ?? otherYear(date)).format(date);
 }
 
 /** "in 6 days" for an outing still ahead past tomorrow, "" otherwise: plans are made around the days left. */
@@ -89,6 +90,11 @@ export function tripWhen(ymd: string, today: string, tomorrow: string): string {
 export function toLocalInput(date: Date): string {
   const pad = (value: number) => String(value).padStart(2, "0");
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+/** "0 fish", "3 fish": a count set among other counts, where "Nothing logged" would read as a sentence. */
+export function fishSum(count: number): string {
+  return tn(count, "{n} fish", "{n} fish");
 }
 
 export function fishCountLabel(count: number): string {

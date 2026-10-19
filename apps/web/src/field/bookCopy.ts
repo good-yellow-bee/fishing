@@ -47,6 +47,14 @@ export function isSampleOnly(book: Logbook) {
   );
 }
 
+/**
+ * One of the sample week's plans (its outings with no fish) once the book holds the angler's own: made up, so it stays
+ * out of their lists once its day has passed as well as before, rather than turning into a blank day.
+ */
+export function isSamplePlan(book: Logbook, trip: { id: string; spotId: string }) {
+  return isSampleOuting(trip) && !book.catches.some((entry) => entry.tripId === trip.id) && !isSampleOnly(book);
+}
+
 /** Whether any of the sample's invented waters is still in the book. */
 export function hasSampleWaters(book: Logbook) {
   return book.spots.some((spot) => SAMPLE_SPOT_IDS.has(spot.id));

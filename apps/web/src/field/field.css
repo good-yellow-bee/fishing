@@ -444,6 +444,12 @@ button.field-primary {
     inset: -4px -3px -6px;
   }
 
+  /* An outing's last link line ("Next time here", "First time at this water") reaches 6 px down: the kind and lure
+     chips under it start clear of that reach. */
+  .meta + .species-chips {
+    margin-top: 8px;
+  }
+
   /* Photos' "Your heaviest/longest fish has no photo" links run on in one line that wraps, each reaching into the
      other: each stands as a 32 px band of its own instead. */
   .photo-missing span a {
