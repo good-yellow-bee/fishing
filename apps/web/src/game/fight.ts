@@ -492,6 +492,8 @@ export function makeFight(
   swallowed = false,
   /** The strain a sound line snaps at: 1, or a little past it at level 14. A frayed line still snaps at FRAYED_SNAP. */
   snapAt = 1,
+  /** How much faster a turn cuts a run short: 1, or a quarter faster from level 16. */
+  turnCut = 1,
 ): FightRuntime {
   const weedy = water === "weeds";
   const pattern = PATTERNS[species.challenge];
@@ -687,7 +689,7 @@ export function makeFight(
     }
     // A leap goes up, not sideways, so only a run can be turned.
     sim.turning = turnable && sim.surge === 2 && !sim.jump && !sim.roll && !sim.charge && steer === -sim.runSide;
-    if (sim.turning && nextAt !== null) nextAt -= TURN_CUT * dtSec * 1000;
+    if (sim.turning && nextAt !== null) nextAt -= TURN_CUT * turnCut * dtSec * 1000;
     if (sim.turning) turnedThisRun = true;
     if (sim.turning && sim.darted) followedDart = true;
     // Pulled the way the run heads, past a moment to see it and switch, the rod only gives the fish line.

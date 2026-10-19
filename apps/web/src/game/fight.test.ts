@@ -452,6 +452,21 @@ describe("turning runs", () => {
     expect(lengths.against).toBeLessThan(lengths.straight! * 0.6);
   });
 
+  it("cuts a run short faster with a level 16 turn", () => {
+    const turnedRunMs = (turnCut: number) => {
+      const runtime = makeFight(fish("pike"), 10, 3, () => 0.5, 1, "open", undefined, false, false, false, false, false, false, false, 1, turnCut);
+      let now = 0;
+      while (runtime.sim.surge !== 2) runtime.step((now += 50), 0.05, false);
+      let runMs = 0;
+      while (runtime.sim.surge === 2) {
+        runtime.step((now += 50), 0.05, false, -runtime.sim.runSide as -1 | 1);
+        runMs += 50;
+      }
+      return runMs;
+    };
+    expect(turnedRunMs(1.25)).toBeLessThan(turnedRunMs(1));
+  });
+
   /** Plays to the first run, then 0.6 s of it, pulling the rod the way it heads or not; returns the line it took and when the pull began to count. */
   function pullWithRun(pullWith: boolean, reeling: boolean) {
     const runtime = makeFight(fish("pike"), 10, 3, () => 0.5);
