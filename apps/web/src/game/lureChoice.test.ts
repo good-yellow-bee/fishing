@@ -116,7 +116,12 @@ describe("suitsNow", () => {
     ["Green pumpkin tube", { sky: "clear", date: new Date(2027, 0, 7, 9) }, true],
     ["Nightcrawler", { sky: "clear", date: new Date(2027, 0, 7, 9) }, true],
     ["Pheasant tails", { sky: "clear", date: new Date(2027, 0, 7, 9) }, false],
-    ["Green pumpkin tube", { sky: "clear", date: new Date(2027, 0, 7, 13) }, false],
+    ["Tube jig", { sky: "clear", date: new Date(2027, 0, 7, 13) }, false],
+    // A colour that suits the light: bright in murk, natural in clear daylight, dark at night.
+    ["Chartreuse jig", { sky: "rain" }, true],
+    ["Chartreuse jig", {}, false],
+    ["Green pumpkin tube", { sky: "clear" }, true],
+    ["Black jig", { hour: "night" }, true],
   ] as const)("says whether %s suits %o", (lure, change, suits) => {
     expect(suitsNow(lure, { ...plain, ...change })).toBe(suits);
   });
