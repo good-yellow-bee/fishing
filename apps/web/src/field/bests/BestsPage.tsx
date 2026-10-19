@@ -26,6 +26,7 @@ import { inReadersOrder, newWatersThisYear, notYetThisYear } from "./notYet";
 import { CopySummary } from "../CopySummary";
 import { outingStreak, weekStreak, weekendSplit } from "../outingAverage";
 import { MonthYearTable } from "./MonthYearTable";
+import { recordStood } from "./recordStood";
 import { PLAY_LAKE_ID } from "../playLake";
 import { countedSearch } from "../countedSearch";
 import { countedBook, countedFish } from "../milestones";
@@ -238,10 +239,10 @@ export function BestsPage() {
   const lastFish = countedFish(whole.catches).reduce<CatchEntry | null>((newest, entry) => (!newest || dayOf(entry) > dayOf(newest) ? entry : newest), null);
   const lastFishDay = lastFish ? dayOf(lastFish) : null;
   const sinceLastFish = lastFishDay ? daysBetween(lastFishDay, today) : 0;
-  // How long an all-time record has stood, from a month on: a season's best is that season's, not a standing mark.
+  // How long an all-time record has stood: a season's best is that season's, not a standing mark.
   const recordAge = (day: string) => {
-    const days = year ? 0 : daysBetween(day, today);
-    return days >= 30 ? ` · ${tn(days, "{n} day ago", "{n} days ago")}` : "";
+    const stood = year ? "" : recordStood(day, today);
+    return stood ? ` · ${stood}` : "";
   };
   const nameOf = (spotId: string) => spotById(book, spotId)?.name ?? t("Unknown water");
   const titleOf = (tripId: string | null) => (tripId ? outingNameById(book, tripId) : null);
