@@ -40,5 +40,6 @@ describe("round 102 ideas: the outings sheet names the lures", () => {
 describe("round 102 ideas: the plan as text", () => {
   it("starts with the outing, its day and its water", () => {
     expect(planText(book, book.trips[0]!, []).split("\n")[0]).toMatch(/^Dawn · .+ · Own Lake$/);
+    expect(planText(book, { ...book.trips[0]!, title: "Own Lake" }, []).split("\n")[0]).toMatch(/^[^·]+ · Own Lake$/);
   });
 });

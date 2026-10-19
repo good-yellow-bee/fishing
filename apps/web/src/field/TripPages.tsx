@@ -161,7 +161,9 @@ function lastTimeNote(book: Logbook, trip: Trip): string {
 /** A plan as text for a message: the day, the water, what works there and what is still to pack. */
 export function planText(book: Logbook, trip: Trip, tackleItems: TackleItem[]): string {
   const spot = spotById(book, trip.spotId);
-  return [`${outingName(trip, book.spots)} · ${formatDay(trip.date)} · ${spot?.name ?? t("Unknown water")}`, ...calendarNotes(book, trip, tackleItems), trip.note.trim()].filter(Boolean).join("\n");
+  // An untitled outing's name is its water's, which follows anyway.
+  const head = [ownTitle(trip, book.spots), formatDay(trip.date), spot?.name ?? t("Unknown water")].filter(Boolean).join(" · ");
+  return [head, ...calendarNotes(book, trip, tackleItems), trip.note.trim()].filter(Boolean).join("\n");
 }
 
 export function saveOutingIcs(book: Logbook, trip: Trip, tackleItems: TackleItem[], today: string) {
