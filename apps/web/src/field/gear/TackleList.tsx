@@ -54,7 +54,9 @@ export function TackleList({
   spots?: readonly Spot[];
 }) {
   const t = useT();
-  const { items, toggle, add, remove, unpackTrip, copyTrip, unsavedTrip } = useTackle();
+  const { items, toggle, add, remove, unpackTrip, copyTrip, unsavedTrip, updateTackle } = useTackle();
+  // The last Unpack all or ×, with its way back, until the list changes another way.
+  const [taken, setTaken] = useState<{ text: string; undo: (current: TackleItem[]) => TackleItem[] } | null>(null);
   const rows = itemsForTrip(items, tripId);
   const lastBag = rows.length === 0 ? lastPackedTrip(trips, items, tripId) : null;
   // Beyond the likeliest bag, any other outing's: a pike trip's list for this pike trip, a month on.
@@ -101,6 +103,7 @@ export function TackleList({
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
+    setTaken(null);
     // "net, pliers, hooks": a piece for each, once each; any refused stay in the box with the reason.
     const seen = new Set<string>();
     // Not a decimal comma ("Żyłka 0,25", "Wędka 2,7 m"), nor a list of sizes ("Haczyki nr 8, 10"): one piece each.
@@ -143,7 +146,10 @@ export function TackleList({
         type="button"
         className="text-button tackle-unpack"
         onClick={() => {
+          // The ticks as they were, put back by Undo; a piece ticked since stays ticked.
+          const was = new Set(rows.filter((item) => item.packed).map((item) => item.id));
           unpackTrip(tripId);
+          setTaken({ text: t("All unpacked."), undo: (current) => current.map((item) => (was.has(item.id) ? { ...item, packed: true } : item)) });
           focusAfter();
         }}
       >
@@ -227,6 +233,7 @@ export function TackleList({
                   checked={item.packed}
                   onChange={(event) => {
                     toggle(item.id, event.target.checked);
+                    setTaken(null);
                     // A packed piece leaves a hiding list: the next one takes the focus.
                     // The last one packed brings the whole list back: focus goes on to adding a piece.
                     if (hiding && event.target.checked) {
@@ -252,7 +259,10 @@ export function TackleList({
                 type="button"
                 className="tackle-remove"
                 onClick={() => {
+                  // Back in its place on Undo, unless it has come back since.
+                  const at = items.findIndex((other) => other.id === item.id);
                   remove(item.id);
+                  setTaken({ text: t("{piece} taken off the list.", { piece: pieceName(item.label) }), undo: (current) => (current.some((other) => other.id === item.id) ? current : [...current.slice(0, at), item, ...current.slice(at)]) });
                   focusAfter(index);
                 }}
                 aria-label={t("Take {piece} off the list", { piece: pieceName(item.label) })}
@@ -263,6 +273,23 @@ export function TackleList({
           ))}
         </ul>
       )}
+      {taken ? (
+        <p className="meta tackle-undo">
+          <span role="status">{taken.text}</span>{" "}
+          <button
+            type="button"
+            className="text-button"
+            onClick={() => {
+              updateTackle(taken.undo);
+              setTaken(null);
+              // The button goes with the line: on to adding a piece, as after the change itself.
+              focusAfter();
+            }}
+          >
+            {t("Undo")}
+          </button>
+        </p>
+      ) : null}
       {/* A day fished and done: the lures taken along that took nothing, to leave home or try another way. */}
       {idle.length > 0 ? <p className="meta tackle-idle">{t("Packed, no fish on: {lures}", { lures: idle.map((item) => pieceName(item.label)).join(", ") })}</p> : null}
       {rows.length > 0 ? (

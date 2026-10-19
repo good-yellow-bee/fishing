@@ -143,8 +143,10 @@ function LureRecord({ today }: { today: string }) {
   const [justPacked, setJustPacked] = useState<string | null>(null);
   // The button goes once the lure is on the list: focus moves to the line saying so.
   const focusPacked = useRef(false);
-  // The record's best lures not yet on that list, packed in one go.
-  const best = next ? orderedRecords(found, "most").filter((row) => row.fish > 0 && !onNext.has(shownPieceKey(row.label))).slice(0, 3) : [];
+  // The record's best lures not yet on that list, packed in one go: with All waters, those of the outing's own water
+  // first, then the rest, so a pike lake's outing isn't offered another water's perch spinner first.
+  const ranked = next && !water ? [...orderedRecords(pieceRecords(bookAt(next.spotId), items, today), "most"), ...orderedRecords(found, "most")] : orderedRecords(found, "most");
+  const best = next ? ranked.filter((row, index) => row.fish > 0 && !onNext.has(shownPieceKey(row.label)) && ranked.findIndex((other) => shownPieceKey(other.label) === shownPieceKey(row.label)) === index).slice(0, 3) : [];
   const [packedBest, setPackedBest] = useState<string[] | null>(null);
   const focusPackedBest = useRef(false);
   if (records.length === 0) return null;
