@@ -32,6 +32,7 @@ import { keepBookStorage } from "./keepStorage";
 import { bookLine, localizeSample } from "./sampleText";
 import { LOGBOOK_STORAGE_KEY, STORAGE_FULL, isStorageFull, openStoredLogbook, readStoredLogbook, saveLogbook, setAsideCatchIds, unreadableHeldOnly } from "./storage";
 import { forgetDeletedFish, noteDeletedFish } from "./deletedFish";
+import { noteChangedOn } from "./leaveDeleted";
 import { forgetRemovedPhotos, noteRemovedPhotos } from "./removedPhotos";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 import { noteText, toLocalInput } from "./format";
@@ -222,6 +223,8 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       const from = window.location.pathname + (query ? `?${query}` : "");
       const before = { kind, book, photos, from, fromState, ...(onUndo ? { onUndo } : {}) };
       if (!commit(next)) return false;
+      // Made where the angler stays (a merge or a rename moves to the new name's page, a delete leaves its page).
+      if (kind === "sample" || kind === "blank" || kind === "unsample" || kind === "file") noteChangedOn(from);
       // The sample or a blank book takes the book's place on purpose; a deleted fish or water is kept out of later merges,
       // and so is a removed sample week, so adding an older copy doesn't bring it back.
       if (kind !== "sample" && kind !== "file") {
@@ -369,7 +372,16 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         return result.ok;
       },
       // The sample takes the whole book's place, so it can be undone like a delete.
-      restoreSample: () => remove("sample", sampleLogbook(new Date())),
+      // The game's lake, rounds and fish come from play, not the sample: they stay beside it, as a blank start keeps them.
+      restoreSample: () => {
+        const sample = sampleLogbook(new Date());
+        const kept = sample.spots.some((spot) => spot.id === PLAY_LAKE_ID) ? [] : book.spots.filter((spot) => spot.id === PLAY_LAKE_ID);
+        return remove("sample", {
+          spots: [...sample.spots, ...kept],
+          trips: [...sample.trips, ...book.trips.filter((trip) => !offPlayLake(trip))],
+          catches: [...sample.catches, ...book.catches.filter((entry) => !offPlayLake(entry))],
+        });
+      },
       // The game's lake and what was landed there stay: they come from play, not the sample.
       startBlank: () => remove("blank", { spots: book.spots.filter((spot) => spot.id === PLAY_LAKE_ID), trips: book.trips.filter((trip) => !offPlayLake(trip)), catches: book.catches.filter((entry) => !offPlayLake(entry)) }),
       dropSample: () => remove("unsample", withoutSample(book)),

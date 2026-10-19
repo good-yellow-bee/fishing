@@ -80,6 +80,7 @@ export function YearGoal({ book, now = new Date(), openAtStart = false }: { book
   // A goal taken off that storage wouldn't let go of: it is still there on the next visit, and says so.
   const [unsaved, setUnsaved] = useState(false);
   const errorId = useId();
+  const countId = useId();
   // Set or taken off in another tab: shown here too, rather than this tab's older goal.
   useEffect(() => {
     const onStorage = (event: StorageEvent) => {
@@ -88,6 +89,13 @@ export function YearGoal({ book, now = new Date(), openAtStart = false }: { book
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
   }, [year]);
+  // Opened, the box takes focus and comes into view: after the page's own move to the top when Home's link opened it.
+  const input = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (!editing) return;
+    input.current?.focus({ preventScroll: true });
+    input.current?.scrollIntoView?.({ block: "center" });
+  }, [editing]);
   // The form and the buttons take each other's place, so focus is handed back to the goal's own button.
   const back = useRef<HTMLButtonElement>(null);
   const [refocus, setRefocus] = useState(false);
@@ -144,8 +152,8 @@ export function YearGoal({ book, now = new Date(), openAtStart = false }: { book
           <input
             name="goal"
             inputMode="numeric"
+            ref={input}
             value={draft}
-            autoFocus
             onChange={(event) => {
               setDraft(event.target.value);
               setError("");
@@ -195,8 +203,9 @@ export function YearGoal({ book, now = new Date(), openAtStart = false }: { book
   return (
     <div className="year-goal">
       <p>
-        {count >= goal ? t("Goal reached: {count} of {goal} fish in {year}.", { count, goal, year }) : t("{count} of {goal} fish in {year}", { count, goal, year })}{" "}
-        <button ref={back} type="button" className="text-button" onClick={open}>
+        <span id={countId}>{count >= goal ? t("Goal reached: {count} of {goal} fish in {year}.", { count, goal, year }) : t("{count} of {goal} fish in {year}", { count, goal, year })}</span>{" "}
+        {/* Focus comes back here after a save: the count it describes is what a screen reader hears with it. */}
+        <button ref={back} type="button" className="text-button" onClick={open} aria-describedby={countId}>
           {t("Change goal")}
         </button>{" "}
         <button

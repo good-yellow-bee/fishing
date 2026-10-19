@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { dogAt, walkerAt } from "./dogWalk";
-import { mergePainted } from "./mergeParts";
+import { mergePainted, poseLimbs } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 
@@ -111,6 +111,10 @@ export function DogWalker({ rain = false }: { rain?: boolean }) {
   const head = useRef<THREE.Group>(null);
   const tail = useRef<THREE.Group>(null);
   const paws = [useRef<THREE.Group>(null), useRef<THREE.Group>(null), useRef<THREE.Group>(null), useRef<THREE.Group>(null)];
+  // The limbs are drawn as instances posed from the groups above: legs, arms and paws a draw each.
+  const legMeshes = useRef<THREE.InstancedMesh>(null);
+  const armMeshes = useRef<THREE.InstancedMesh>(null);
+  const pawMeshes = useRef<THREE.InstancedMesh>(null);
   const shapes = useMemo(
     () => ({
       torso: walkerTorsoShape(),
@@ -169,6 +173,9 @@ export function DogWalker({ rain = false }: { rain?: boolean }) {
       const pair = i === 0 || i === 3 ? 1 : -1;
       if (paw.current) paw.current.rotation.x = -pup.stride * pair * reach * (1 - pup.sniff * 0.8);
     });
+    poseLimbs(legMeshes.current, legs);
+    poseLimbs(armMeshes.current, arms);
+    poseLimbs(pawMeshes.current, paws);
   });
   return (
     <group name="dog-walker">
@@ -177,16 +184,15 @@ export function DogWalker({ rain = false }: { rain?: boolean }) {
           <mesh geometry={shapes.torso} material={material} castShadow />
           {[1, -1].map((side, i) => (
             <group key={side} ref={arms[i]} position={[side * 0.2, SHOULDER_Y, 0]}>
-              <mesh geometry={shapes.arm} material={material} />
               {rain && i === 1 && <mesh geometry={shapes.umbrella} material={material} position={[0, -0.52, 0]} rotation={[HOLD - 0.35, 0, 0]} />}
             </group>
           ))}
+          <instancedMesh ref={armMeshes} args={[shapes.arm, material, 2]} frustumCulled={false} />
         </group>
         {[1, -1].map((side, i) => (
-          <group key={side} ref={legs[i]} position={[side * 0.09, HIP_Y, 0]}>
-            <mesh geometry={shapes.leg} material={material} />
-          </group>
+          <group key={side} ref={legs[i]} position={[side * 0.09, HIP_Y, 0]} />
         ))}
+        <instancedMesh ref={legMeshes} args={[shapes.leg, material, 2]} frustumCulled={false} />
       </group>
       <group ref={dog} scale={1.25}>
         <group ref={dogBody} position={[0, DOG_HIP_Y + 0.04, 0]}>
@@ -199,10 +205,9 @@ export function DogWalker({ rain = false }: { rain?: boolean }) {
           </group>
         </group>
         {DOG_FEET.map(([x, z], i) => (
-          <group key={i} ref={paws[i]} position={[x, DOG_HIP_Y, z]}>
-            <mesh geometry={shapes.paw} material={material} />
-          </group>
+          <group key={i} ref={paws[i]} position={[x, DOG_HIP_Y, z]} />
         ))}
+        <instancedMesh ref={pawMeshes} args={[shapes.paw, material, 4]} frustumCulled={false} />
       </group>
     </group>
   );

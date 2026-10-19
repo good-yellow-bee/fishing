@@ -33,7 +33,7 @@ import { countedSearch } from "../countedSearch";
 import { locale, t, tn, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
 import { offPlayLake } from "../playLake";
-import { ownFish } from "../milestones";
+import { countedBook, ownFish } from "../milestones";
 import { upcomingRealTrips } from "../bookCopy";
 
 function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
@@ -112,10 +112,23 @@ function LureRecord({ today }: { today: string }) {
       // Storage blocked: the order holds for this visit.
     }
   };
+  // One water's record: a pike lake and a trout stream want different bags. Offered among the waters the angler packed
+  // for, once there are two; the sample's only while the book has nothing of the angler's own, as the record counts.
+  const counted = countedBook(book);
+  const packedFor = new Set(items.map((item) => item.tripId));
+  const bookAt = (spotId: string) => ({ ...book, trips: book.trips.filter((trip) => trip.spotId === spotId), catches: book.catches.filter((entry) => entry.spotId === spotId) });
+  // Only a water with a record of its own: one picked never empties the record and takes its choice with it.
+  const waters = counted.spots.filter(
+    (spot) => counted.trips.some((trip) => trip.spotId === spot.id && trip.date <= today && packedFor.has(trip.id)) && pieceRecords(bookAt(spot.id), items, today).length > 0,
+  );
+  const [waterId, setWaterId] = useState("all");
+  const water = waters.find((spot) => spot.id === waterId) ?? null;
+  const atWater = water ? bookAt(water.id) : book;
   // The order picked holds while its control shows.
-  const found = pieceRecords(book, items, today);
+  const found = pieceRecords(atWater, items, today);
   const records = orderedRecords(found, found.length > 2 ? order : "most");
-  const quiet = notYetThisYear(book.catches, new Date(), (entry) => entry.lure, (entry) => bookFishDay(book, entry));
+  // The book the record counts: the sample week's made-up lures go with the first outing of the angler's own.
+  const quiet = notYetThisYear(countedBook(atWater).catches, new Date(), (entry) => entry.lure, (entry) => bookFishDay(book, entry));
   const [all, setAll] = useState(false);
   // A lure that took fish goes straight into the next outing's bag, unless it is already there.
   const next = upcomingRealTrips(book, today)[0];
@@ -136,6 +149,17 @@ function LureRecord({ today }: { today: string }) {
       <h2 className="subhead" id="lure-record" tabIndex={-1}>
         {t("Lure record")}
       </h2>
+      {waters.length >= 2 ? (
+        <div className="spot-order">
+          <ChoiceRow<string>
+            wrap
+            label={t("Water")}
+            value={water ? water.id : "all"}
+            options={[{ id: "all", label: t("All waters") }, ...waters.map((spot) => ({ id: spot.id, label: spot.name }))]}
+            onChange={setWaterId}
+          />
+        </div>
+      ) : null}
       {records.length > 2 ? (
         <div className="spot-order">
           <ChoiceRow<LureOrder>
@@ -155,7 +179,8 @@ function LureRecord({ today }: { today: string }) {
         {(all ? records : records.slice(0, RECORD_ROWS)).map((row) => (
           <li key={row.label}>
             {/* A lure that took fish opens them in the catch search. */}
-            {row.lure ? <Link to={findLink(countedSearch(book, exactTerm("lure", t(row.lure)), book.catches.filter((entry) => entry.lure.trim().toLowerCase() === row.lure!.trim().toLowerCase())))}>{t(row.label)}</Link> : <span>{t(row.label)}</span>}
+            {/* With a water picked, its fish there. */}
+            {row.lure ? <Link to={findLink(countedSearch(book, [exactTerm("lure", t(row.lure)), ...(water ? [exactTerm("water", water.name)] : [])].join(" "), atWater.catches.filter((entry) => entry.lure.trim().toLowerCase() === row.lure!.trim().toLowerCase())))}>{t(row.label)}</Link> : <span>{t(row.label)}</span>}
             <span className="meta">
               {fishCountLabel(row.fish)} · {tn(row.outings, "{n} outing", "{n} outings")}
               {/* How often it pays, once it has been out more than once. */}
@@ -176,7 +201,7 @@ function LureRecord({ today }: { today: string }) {
                   ) : null}
                 </>
               ) : null}
-              {next && justPacked === row.label ? (
+              {next && justPacked === row.label && onNext.has(shownPieceKey(row.label)) ? (
                 <span
                   className="lure-last"
                   tabIndex={-1}
@@ -210,7 +235,8 @@ function LureRecord({ today }: { today: string }) {
           </li>
         ))}
       </ul>
-      {next && packedBest ? (
+      {/* Said while those lures are still on the list; once one comes off, the button offers the best again. */}
+      {next && packedBest && packedBest.every((label) => onNext.has(shownPieceKey(label))) ? (
         <p
           className="meta packed-best"
           tabIndex={-1}
@@ -447,8 +473,10 @@ export function GearPage() {
 
   const upcoming = upcomingRealTrips(book, today);
   // Real days out: a game day has nothing in the bag.
-  const recent = recentTrips(book, today).filter(offPlayLake);
-  const fishByTrip = fishCountsByTrip(book);
+  // And not the sample week's once the angler has outings of their own, as Coming up and the record leave them out.
+  const counted = countedBook(book);
+  const recent = recentTrips(counted, today).filter(offPlayLake);
+  const fishByTrip = fishCountsByTrip(counted);
 
   return (
     <div className="sheet">

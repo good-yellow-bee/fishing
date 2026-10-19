@@ -4,6 +4,7 @@ import type { Logbook } from "@stillwater/shared";
 import { locale, t, tn, useT } from "../../i18n";
 import { formatDay } from "../format";
 import { findLink } from "../findLinks";
+import { FROM_LIST } from "../leaveDeleted";
 import { monthName } from "../tripMonths";
 import { dayMarks, markedMonths } from "./dayMarks";
 
@@ -100,6 +101,9 @@ export function DayCalendar({
   const monthFish = (month: string) => [...marks.entries()].reduce((sum, [day, mark]) => (day.startsWith(`${month}-`) ? sum + mark.fish : sum), 0);
   // The month's days out, as the shaded and outlined days show them: a fish, or an outing already past.
   const monthDays = (month: string) => [...marks.entries()].filter(([day, mark]) => day.startsWith(`${month}-`) && (mark.fish > 0 || (mark.trips.length > 0 && day < today))).length;
+  // The month's outings already fished, as its trip search counts them ("Outings: 4 · 1 planned").
+  const monthTrips = (month: string) =>
+    new Set([...marks.entries()].flatMap(([day, mark]) => (day.startsWith(`${month}-`) && (day < today || (day === today && mark.fish > 0)) ? mark.trips : []))).size;
   // The month with the most days out, once one leads the others.
   const busiest = busiestMonth(months.map((month) => [month, monthDays(month)] as const));
   // Today's own day says so, so the season reads against the date.
@@ -132,8 +136,24 @@ export function DayCalendar({
             <h3>
               {monthName(month)}
               {/* The month's days out and fish at a glance, counted as its days are. */}
+              {/* Days out say how often; the outings beside them open the month's outings, the fish its fish: each link opens what it counts. */}
               {monthDays(month) > 0 ? <small className="day-month-days">{` · ${tn(monthDays(month), "{n} day out", "{n} days out")}`}</small> : null}
-              {monthFish(month) > 0 ? <small className="day-month-fish">{` · ${tn(monthFish(month), "{n} fish", "{n} fish")}`}</small> : null}
+              {monthTrips(month) > 0 ? (
+                <small className="day-month-trips">
+                  {" · "}
+                  <Link to={`/trips?${new URLSearchParams({ find: tripTail(month) }).toString()}`} aria-label={t("{month}: {count}", { month: monthName(month), count: tn(monthTrips(month), "{n} outing", "{n} outings") })}>
+                    {tn(monthTrips(month), "{n} outing", "{n} outings")}
+                  </Link>
+                </small>
+              ) : null}
+              {monthFish(month) > 0 ? (
+                <small className="day-month-fish">
+                  {" · "}
+                  <Link to={findLink(tail(month))} aria-label={t("{month}: {count}", { month: monthName(month), count: tn(monthFish(month), "{n} fish", "{n} fish") })}>
+                    {tn(monthFish(month), "{n} fish", "{n} fish")}
+                  </Link>
+                </small>
+              ) : null}
               {month === busiest ? <small className="day-month-best">{` · ${t("Busiest month")}`}</small> : null}
             </h3>
             {/* Which column is which day, for the eye; each day's link already says its whole date. */}
@@ -155,7 +175,7 @@ export function DayCalendar({
                   const label = `${dayName(day)}: ${tn(mark.fish, "{n} fish", "{n} fish")}`;
                   return (
                     <li key={day} className={`day-fish day-level-${level(mark.fish)}${day === today ? " day-today" : ""}`}>
-                      <Link to={mark.lateTrip ? `/trips/${mark.lateTrip}` : findLink(tail(day))} aria-label={label} title={label} {...dayLink(day)} {...todayMark(day)} />
+                      <Link to={mark.lateTrip ? `/trips/${mark.lateTrip}` : findLink(tail(day))} state={mark.lateTrip ? FROM_LIST : undefined} aria-label={label} title={label} {...dayLink(day)} {...todayMark(day)} />
                     </li>
                   );
                 }
@@ -164,7 +184,7 @@ export function DayCalendar({
                   const label = `${dayName(day)}: ${tn(mark.trips.length, "an outing with no fish", "{n} outings with no fish")}`;
                   return (
                     <li key={day} className={`day-blank${day === today ? " day-today" : ""}`}>
-                      <Link to={mark.trips.length === 1 ? `/trips/${mark.trips[0]}` : `/trips?${new URLSearchParams({ find: tripTail(day) }).toString()}`} aria-label={label} title={label} {...dayLink(day)} {...todayMark(day)} />
+                      <Link to={mark.trips.length === 1 ? `/trips/${mark.trips[0]}` : `/trips?${new URLSearchParams({ find: tripTail(day) }).toString()}`} state={mark.trips.length === 1 ? FROM_LIST : undefined} aria-label={label} title={label} {...dayLink(day)} {...todayMark(day)} />
                     </li>
                   );
                 }
@@ -173,7 +193,7 @@ export function DayCalendar({
                   const label = `${dayName(day)}: ${tn(mark.trips.length, "an outing ahead", "{n} outings ahead")}`;
                   return (
                     <li key={day} className={`day-planned${day === today ? " day-today" : ""}`}>
-                      <Link to={mark.trips.length === 1 ? `/trips/${mark.trips[0]}` : `/trips?${new URLSearchParams({ find: tripTail(day) }).toString()}`} aria-label={label} title={label} {...dayLink(day)} {...todayMark(day)} />
+                      <Link to={mark.trips.length === 1 ? `/trips/${mark.trips[0]}` : `/trips?${new URLSearchParams({ find: tripTail(day) }).toString()}`} state={mark.trips.length === 1 ? FROM_LIST : undefined} aria-label={label} title={label} {...dayLink(day)} {...todayMark(day)} />
                     </li>
                   );
                 }

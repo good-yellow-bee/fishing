@@ -109,6 +109,7 @@ describe("year summary", () => {
       "2 fish · 2 species",
       "Days on the water in 2026: 2",
       "2 of 40 fish in 2026",
+      "On pace for 3 by the year's end",
       "Longest: Bluegill, 8 in",
       "Heaviest: Largemouth bass, 3.2 lb",
       "Waters: Cedar Bend (2)",

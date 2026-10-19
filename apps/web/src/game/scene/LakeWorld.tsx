@@ -23,6 +23,10 @@ import { BRIDGE_SCALE, BRIDGE_SPANS, PIER_BOARDS, PIER_PLANK, PIER_THICK, PIER_T
 import type { Hotspot } from "../hotspot";
 import { BubblingHotspot } from "./BubblingHotspot";
 import { LakeRain } from "./LakeRain";
+import { HailShower } from "./HailShower";
+import { hailOut } from "./hailBurst";
+import { RainCurtain } from "./RainCurtain";
+import { squallOut } from "./rainSquall";
 import { LakeSnow } from "./LakeSnow";
 import { MoonRoad } from "./MoonRoad";
 import { DockRain } from "./DockRain";
@@ -149,6 +153,14 @@ import { canoeOut } from "./canoeTrip";
 import { Skier } from "./Skier";
 import { skiingOut } from "./skiTour";
 import { Kite } from "./Kite";
+import { NightRower } from "./NightRower";
+import { nightRowOut } from "./nightRow";
+import { Hammock } from "./Hammock";
+import { hammockOut, hammockTrees } from "./hammockSway";
+import { ShedSnow } from "./ShedSnow";
+import { snowShedOut } from "./snowShed";
+import { HotAirBalloon } from "./HotAirBalloon";
+import { balloonOut } from "./balloonDrift";
 import { kiteOut } from "./kiteFlight";
 import { Campers, Tent } from "./Tent";
 import { CAMP_FIRE_AT, CAMP_LIGHTS, campersOut, tentPitched } from "./campTent";
@@ -159,6 +171,7 @@ import { hummingbirdOut } from "./hummingbirdVisits";
 import { FogAngler } from "./FogAngler";
 import { fogAnglerOut } from "./fogFishing";
 import { DogWalker } from "./DogWalker";
+import { FAR_HILLS, hillColor } from "./farHills";
 import { dogWalkOut } from "./dogWalk";
 import { Swimmer } from "./Swimmer";
 import { swimmingOut } from "./swimLane";
@@ -185,6 +198,24 @@ import { StoneSkimmer } from "./StoneSkimmer";
 import { skimOut } from "./skimStones";
 import { Jogger } from "./Jogger";
 import { joggerOut } from "./jogRun";
+import { Crows } from "./Crows";
+import { crowsOut } from "./crowFlush";
+import { sleddersOut } from "./sledRun";
+import { HayBales } from "./HayBales";
+import { Farmstead } from "./Farmstead";
+import { Cows } from "./Cows";
+import { HillShadows } from "./HillShadows";
+import { BarnOwl } from "./BarnOwl";
+import { barnOwlOut } from "./owlQuarter";
+import { ValleyMist } from "./ValleyMist";
+import { valleyMistOut } from "./valleyMist";
+import { cowsOut } from "./cowGraze";
+import { balesOut } from "./hayField";
+import { Sledders } from "./Sledders";
+import { spindriftOut } from "./blowingSnow";
+import { Spindrift } from "./Spindrift";
+import { NightEyes } from "./NightEyes";
+import { eyesOut } from "./eyeShine";
 import { Birdwatcher } from "./Birdwatcher";
 import { birderOut } from "./birdWatch";
 import { PorchRocker } from "./PorchRocker";
@@ -203,12 +234,24 @@ import { DockSnail } from "./DockSnail";
 import { snailOut } from "./snailCrawl";
 import { gullsOut } from "./gullFloes";
 import { WinterGulls } from "./WinterGulls";
+import { LakeSmoke } from "./LakeSmoke";
+import { lakeSmokeOut } from "./lakeSteam";
 import { Sculler } from "./Sculler";
 import { scullOut } from "./scullRow";
+import { Paddleboarder } from "./Paddleboarder";
+import { paddleOut } from "./paddleRoute";
+import { MidgeCloud } from "./MidgeCloud";
+import { midgesOut } from "./midgeDance";
+import { Gossamer } from "./Gossamer";
+import { gossamerOut } from "./silkDrift";
 import { Cabin } from "./Cabin";
 import { cabinWindowsLit, chimneySmoking } from "./cabinLook";
 import { owlOut } from "./owlMotion";
 import { JumpingFish } from "./JumpingFish";
+import { FryBurst } from "./FryBurst";
+import { fryOut } from "./fryScatter";
+import { DiamondDust } from "./DiamondDust";
+import { diamondDustOut } from "./iceGlitter";
 import { jumpsOn } from "./fishJump";
 import { Otter } from "./Otter";
 import { Osprey } from "./Osprey";
@@ -225,6 +268,8 @@ import { LILY_PADS_AT } from "../lilyCover";
 import { FallingLeaves } from "./FallingLeaves";
 import { LeafRaft } from "./LeafRaft";
 import { leavesOut, petalsOut } from "./leafFall";
+import { LeafWhirl } from "./LeafWhirl";
+import { leafWhirlOut } from "./leafEddy";
 import { otterOut } from "./otterMotion";
 import { lanternLevel } from "./lanternLight";
 import { heronOut } from "./heronMotion";
@@ -233,6 +278,8 @@ import { reedStem, reedTilt } from "./reedSway";
 import { sunCaustics } from "./sunCaustics";
 import { BankMirror, type MirrorHill, type MirrorTree } from "./BankMirror";
 import { LightShafts } from "./LightShafts";
+import { SunBreak } from "./SunBreak";
+import { sunBreakOut } from "./sunGap";
 import { shaftStrength } from "./shaftLight";
 import { PollenFilm } from "./PollenFilm";
 import { FoamLanes } from "./FoamLanes";
@@ -548,12 +595,7 @@ const CREEK_TREES: Scatter[] = [
 /** Every shore tree, for the bank's mirror image on still water. */
 const MIRROR_TREES: MirrorTree[] = [...TREES, ...BACK_TREES, ...CREEK_TREES].map((tree) => ({ position: tree.position, scale: tree.scale, variant: plantVariant(tree.position) }));
 
-/** The three hills behind the far shore: centre and radii of each icosphere. */
-const HILLS: { position: Vec3; scale: Vec3; day: string; night: string }[] = [
-  { position: [-28, 4.5, -26], scale: [17, 7, 10], day: "#587a5f", night: "#3d5a44" },
-  { position: [-5, 5.2, -30], scale: [20, 8, 10], day: "#628468", night: "#456348" },
-  { position: [20, 4.6, -27], scale: [18, 7, 11], day: "#547459", night: "#385640" },
-];
+const HILLS = FAR_HILLS;
 
 /** The two trees by the shack, placed about it. */
 const SHACK_TREES: Scatter[] = [
@@ -562,6 +604,9 @@ const SHACK_TREES: Scatter[] = [
 ];
 
 /** Where the squirrels run: between the two trees by the shack, and between two pairs of shore trees round the lake. */
+/** The two trees across the lake the hammock hangs between. */
+const HAMMOCK_TREES = hammockTrees(TREES);
+
 const SQUIRREL_RUNS = [[SHACK_TREES[1]!, SHACK_TREES[0]!] as const, ...squirrelRuns(TREES, 2)];
 
 /** The trees toadstools come up under in fall: the near shore and the two by the shack. */
@@ -1136,6 +1181,9 @@ function Cloud({ y, z, scale, speed, offset, color }: (typeof CLOUDS)[number] & 
   );
 }
 
+/** Cloud shadows lie a little darker on the lit hills than on the water, where the sky's reflection lightens them. */
+const HILL_SHADE = 1.3;
+
 function LakeSurface({
   spot,
   hour,
@@ -1176,8 +1224,8 @@ function LakeSurface({
   const pollen = pollenAmount(season, sky);
   const duckweed = duckweedAmount(season);
   const mirrorHills = useMemo<MirrorHill[]>(
-    () => HILLS.map((hill) => ({ position: hill.position, scale: hill.scale, color: seasonGroundColor(hour === "night" ? hill.night : hill.day, season) })),
-    [hour, season],
+    () => HILLS.map((hill) => ({ position: hill.position, scale: hill.scale, color: hillColor(hill, hour, season, sky) })),
+    [hour, season, sky],
   );
   const scroll = surfaceScroll(wind);
   const clouds = cloudScroll(wind);
@@ -1264,6 +1312,12 @@ function LakeSurface({
         <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.025, 0]}>
           <meshBasicMaterial color="#0b1a22" alphaMap={cloudMap} transparent opacity={cloudShade} depthWrite={false} />
         </mesh>
+      )}
+      {/* The same clouds' shadows slide on over the far hills; this group sits at the lake's middle. */}
+      {cloudShade > 0 && (
+        <group position={[0, 0, -LAKE_CENTER_Z]}>
+          <HillShadows map={cloudMap} opacity={cloudShade * HILL_SHADE} />
+        </group>
       )}
       <ShoreWash wind={wind} opacity={foamOpacity(hour, season)} />
       <mesh position={[-5, 0.035, 1]} rotation={[-Math.PI / 2, 0, 0]} scale={[1.8, 0.55, 1]}>
@@ -2221,8 +2275,12 @@ export const LakeWorld = memo(function LakeWorld({
       <LakeSurface spot={spot} hour={hour} sky={sky} season={season} weather={weather} wind={wind} />
 
       {HILLS.map((hill) => (
-        <Hill key={hill.position.join()} position={hill.position} scale={hill.scale} color={ground(hour === "night" ? hill.night : hill.day)} />
+        <Hill key={hill.position.join()} position={hill.position} scale={hill.scale} color={hillColor(hill, hour, season, sky)} />
       ))}
+      {balesOut(season) && <HayBales season={season} hour={hour} />}
+      <Farmstead season={season} hour={hour} wind={wind} />
+      {cowsOut(hour, sky, season) && <Cows />}
+      {barnOwlOut(hour, sky, season) && <BarnOwl />}
       <TreeSwayClock wind={wind} />
       <ScatterModels items={BACK_TREES} sway />
       <ScatterModels items={TREES} sway />
@@ -2301,9 +2359,18 @@ export const LakeWorld = memo(function LakeWorld({
         Array.from({ length: DRAGONFLY_COUNT }, (_, i) => <Dragonfly key={i} index={i} />)}
       {weather.rain &&
         (season === "winter" ? <LakeSnow light={weather.rainLight} wind={wind} /> : <LakeRain light={weather.rainLight} wind={wind} />)}
+      {hailOut(weather.rain, season) && <HailShower light={weather.rainLight} />}
+      {squallOut(weather.rain, season) && <RainCurtain light={weather.rainLight} />}
       {mist > 0 && <LakeMist amount={mist} color={mistColor} />}
+      {valleyMistOut(hour, sky, season, wind) && <ValleyMist color={mistColor} />}
+      {lakeSmokeOut(hour, sky, season) && <LakeSmoke wind={wind} color={mistColor} />}
+      {diamondDustOut(hour, sky, season, wind) && <DiamondDust wind={wind} />}
       {shafts > 0 && <LightShafts discPos={look.discPos} color={look.sun} strength={shafts} />}
+      {sunBreakOut(hour, sky) && <SunBreak discPos={look.discPos} wind={wind} />}
       {firefliesOut(hour, sky, season) && <Fireflies />}
+      {eyesOut(hour, sky) && <NightEyes />}
+      {midgesOut(hour, sky, season, wind) && <MidgeCloud wind={wind} />}
+      {gossamerOut(hour, sky, season, wind) && <Gossamer />}
       {heronOut(hour, sky) && <Heron />}
       {loonOut(hour, season) && <Loon />}
       {otterOut(hour, season) && <Otter />}
@@ -2326,11 +2393,15 @@ export const LakeWorld = memo(function LakeWorld({
       {skiingOut(hour, sky, season) && <Skier />}
       {sailingOut(hour, sky, season, wind) && <Dinghy wind={wind} />}
       {kiteOut(hour, sky, season, wind) && <Kite wind={wind} />}
+      {HAMMOCK_TREES && hammockOut(hour, sky, season) && <Hammock trees={HAMMOCK_TREES} />}
+      {balloonOut(hour, sky, season, wind) && <HotAirBalloon wind={wind} />}
       {fogAnglerOut(hour, sky) && <FogAngler />}
       {dogWalkOut(hour, season) && <DogWalker rain={sky === "rain"} />}
       {swimmingOut(hour, sky, season) && <Swimmer />}
       {choppingOut(hour, sky, season) && <Woodcutter />}
       {scullOut(hour, sky, season, wind) && <Sculler />}
+      {nightRowOut(hour, sky, season, wind) && <NightRower />}
+      {paddleOut(hour, sky, season, wind) && <Paddleboarder />}
       {gooseFamilyOut(hour, season) && <GooseFamily />}
       {leafJumpOut(hour, sky, season) && <LeafPile />}
       {leafJumpOut(hour, sky, season) && <LeafRaker />}
@@ -2341,6 +2412,9 @@ export const LakeWorld = memo(function LakeWorld({
       {headlampOut(hour, sky, season) && <NightAngler />}
       {skimOut(hour, sky, season, wind) && <StoneSkimmer />}
       {joggerOut(hour, sky, season) && <Jogger />}
+      {crowsOut(hour, sky, season) && <Crows jogging={joggerOut(hour, sky, season)} />}
+      {sleddersOut(hour, sky, season) && <Sledders />}
+      {spindriftOut(hour, sky, season, wind) && <Spindrift wind={wind} />}
       {birderOut(hour, sky, season) && <Birdwatcher />}
       {porchOut(hour, sky, season) && <PorchRocker />}
       {sandpipersOut(hour, sky, season) && <Sandpipers />}
@@ -2350,6 +2424,7 @@ export const LakeWorld = memo(function LakeWorld({
       {robinOut(hour, sky) && <DockRobin snow={dockSnowy(season)} />}
       {snailOut(hour, sky, season) && <DockSnail />}
       {gullsOut(hour, sky, season) && <WinterGulls wind={wind} />}
+      {snowShedOut(hour, sky, season) && <ShedSnow trees={TREES} wind={wind} />}
       <Cabin season={season} hour={hour} lit={cabinWindowsLit(hour)} smoking={chimneySmoking(hour, season)} wind={wind} />
       {tentPitched(season) && (
         <>
@@ -2362,10 +2437,12 @@ export const LakeWorld = memo(function LakeWorld({
       {cabinWindowsLit(hour) && <WindowGlow strength={sky === "rain" || sky === "fog" ? 0.4 : 1} />}
       {owlOut(hour, season) && <Owl />}
       {jumpsOn(season) && <JumpingFish hour={hour} />}
+      {fryOut(hour, season) && <FryBurst light={weather.rainLight} />}
       {swallowsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Swallows />}
       {feathersOut(season) && <Feathers wind={wind} />}
       {leavesOut(season) && <FallingLeaves wind={wind} />}
       {petalsOut(season) && <FallingLeaves wind={wind} petals />}
+      {leafWhirlOut(hour, sky, season) && <LeafWhirl />}
       {leavesOut(season) && <LeafRaft wind={wind} />}
       {fluffOut(season, sky) && <ReedFluff wind={wind} light={weather.rainLight} />}
       {gustsOut(Math.hypot(wind.x, wind.z)) && <Gusts wind={wind} />}

@@ -20,7 +20,7 @@ export const DUCKWEED_BEDS: DuckweedBed[] = [
 /** Fronds painted per square meter of bed, at its densest. */
 const SPECKS_PER_M2 = 60;
 /** How far the day's breeze can push a bed off its corner, in meters. */
-const MAX_PUSH = 0.8;
+export const MAX_PUSH = 0.8;
 
 /**
  * How thick the duckweed lies: it spreads through the warm still water of summer, thins as fall

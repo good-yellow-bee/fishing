@@ -1,11 +1,12 @@
-import { MOON_LABELS, WATER_LABELS, lureTally, moonName, moonPhase, measureOf, personalBests, type CatchEntry, type Logbook, type Spot, type Trip } from "@stillwater/shared";
+import { MOON_LABELS, WATER_LABELS, localDate, lureTally, moonName, moonPhase, measureOf, personalBests, type CatchEntry, type Logbook, type Spot, type Trip } from "@stillwater/shared";
 import { t, tn } from "../i18n";
 import { measureText, measuresText, weatherText } from "../i18n/content";
-import { fishCountLabel, formatDatedDay, formatTimeOfDay, noteText, outingName } from "./format";
+import { fishCountLabel, formatDatedDay, formatDay, formatTimeOfDay, noteText, outingName } from "./format";
 import { bookFishDay, daysOut } from "./tripMonths";
 import { parseExactTerm } from "./findLinks";
 import { splitLeftOut } from "./CatchSearch";
 import { speciesCounts, speciesWaters } from "./speciesLink";
+import { goalPace } from "./YearGoal";
 
 /**
  * An outing as plain text to paste into a message: the day, the water, then each fish in the order it came.
@@ -19,7 +20,10 @@ export function tripSummary(trip: Trip, spotName: string | null, catches: readon
     .sort((a, b) => a.caughtAt.localeCompare(b.caughtAt))
     .map((entry) => {
       const elsewhere = entry.spotId !== trip.spotId ? waterOf(entry.spotId) : null;
-      const parts = [`${formatTimeOfDay(entry.caughtAt)} ${t(entry.species)}`, measuresText(entry), t(entry.lure), ...(elsewhere ? [elsewhere] : []), ...(entry.released ? [t("Released")] : [])];
+      // A night session's fish after midnight say their own day, so the list doesn't seem to run back to the evening.
+      const day = localDate(new Date(entry.caughtAt));
+      const when = day === trip.date ? formatTimeOfDay(entry.caughtAt) : `${formatDay(day)}, ${formatTimeOfDay(entry.caughtAt)}`;
+      const parts = [`${when} ${t(entry.species)}`, measuresText(entry), t(entry.lure), ...(elsewhere ? [elsewhere] : []), ...(entry.released ? [t("Released")] : [])];
       return `- ${parts.join(", ")}`;
     });
   const counts = [
@@ -111,6 +115,8 @@ export function yearSummary(book: Logbook, year: string, today: string, goal: nu
     .filter((row) => row.name)
     .slice(0, 3)
     .map((row) => `${row.name} (${row.count})`);
+  const [y, m, d] = today.split("-").map(Number) as [number, number, number];
+  const pace = goal !== null && today.startsWith(`${year}-`) ? goalPace(catches.length, goal, new Date(y, m - 1, d)) : null;
   const lures = lureTally({ ...book, catches }, 3)
     .map((row) => `${t(row.lure)} (${row.count})`)
     .join(", ");
@@ -121,6 +127,8 @@ export function yearSummary(book: Logbook, year: string, today: string, goal: nu
     ...(goal !== null
       ? [catches.length >= goal ? t("Goal reached: {count} of {goal} fish in {year}.", { count: catches.length, goal, year }) : t("{count} of {goal} fish in {year}", { count: catches.length, goal, year })]
       : []),
+    // A year still under way, short of its goal: where its pace ends it, as the goal on Bests says.
+    ...(pace ? [t("On pace for {pace} by the year's end", { pace: pace.pace })] : []),
     ...best(bests.longest, "length"),
     ...best(bests.heaviest, "weight"),
     ...(waters.length > 0 ? [t("Waters: {waters}", { waters: waters.join(", ") })] : []),
@@ -145,14 +153,14 @@ function searchLabel(parts: readonly string[]): string {
  * The fish a search found, as plain text: what was searched, how many, then each fish oldest first
  * with its day, kind, size, lure and water.
  */
-export function searchSummary(parts: readonly string[], matches: readonly CatchEntry[], waterOf: (spotId: string) => string | null): string {
-  const fish = [...matches]
-    .sort((a, b) => a.caughtAt.localeCompare(b.caughtAt))
+/** `largest`: the list was shown largest first, so the copy keeps that order and says so. */
+export function searchSummary(parts: readonly string[], matches: readonly CatchEntry[], waterOf: (spotId: string) => string | null, largest = false): string {
+  const fish = (largest ? [...matches] : [...matches].sort((a, b) => a.caughtAt.localeCompare(b.caughtAt)))
     .map((entry) => {
       const water = waterOf(entry.spotId);
       // With its time, so a night session's small hours read as such under the day search that found them.
       const bits = [`${formatDatedDay(new Date(entry.caughtAt))} ${formatTimeOfDay(entry.caughtAt)} ${t(entry.species)}`, measuresText(entry), t(entry.lure), ...(water ? [water] : []), ...(entry.released ? [t("Released")] : [])];
       return `- ${bits.join(", ")}`;
     });
-  return [searchLabel(parts), fishCountLabel(matches.length), ...fish].join("\n");
+  return [searchLabel(parts), largest ? `${fishCountLabel(matches.length)} · ${t("Largest first")}` : fishCountLabel(matches.length), ...fish].join("\n");
 }

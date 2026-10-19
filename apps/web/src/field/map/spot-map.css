@@ -329,6 +329,11 @@
   font: inherit;
 }
 
+/* "Next outing" inside a row's fish line: a link in the line's own type. */
+.map-index a.map-next {
+  font: inherit;
+}
+
 /* On a touch screen the small links reach past their words into the row's padding, so a thumb finds them. */
 @media (pointer: coarse) {
   .map-index a.map-plan,
@@ -344,11 +349,11 @@
   }
 
   /* The water's name stood 23 px tall: it reaches 6 px into the row's padding the same way. */
-  .map-index a:not(.map-plan, .map-coord-link) {
+  .map-index a:not(.map-plan, .map-coord-link, .map-next) {
     position: relative;
   }
 
-  .map-index a:not(.map-plan, .map-coord-link)::after {
+  .map-index a:not(.map-plan, .map-coord-link, .map-next)::after {
     content: "";
     position: absolute;
     inset: -6px -3px;

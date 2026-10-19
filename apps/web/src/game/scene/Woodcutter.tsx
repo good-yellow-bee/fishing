@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { mergePainted } from "./mergeParts";
+import { mergePainted, mergeParts, poseLimbs } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { BLOCK_AT, CUTTER_AT, CUTTER_YAW, STACK_AT, chopAt } from "./woodChopping";
@@ -24,6 +24,11 @@ const BLOCK_Y = 0.42;
 const LOG_H = 0.4;
 /** Drawn a little larger than life, as the cabin is, so the work reads from across the lake. */
 const SCALE = 1.2;
+/** Where the woodstack stands, seen from the chopping block, at its scale. */
+const STACK_FROM_BLOCK = new THREE.Vector3(STACK_AT.x - BLOCK_AT.x, 0, STACK_AT.z - BLOCK_AT.z)
+  .applyAxisAngle(new THREE.Vector3(0, 1, 0), -CUTTER_YAW)
+  .divideScalar(SCALE)
+  .toArray();
 
 /** The woodcutter's body above the hips, in a check shirt and beanie, facing +z. */
 export function cutterTorsoShape() {
@@ -108,15 +113,17 @@ export function Woodcutter() {
   const arms = useRef<THREE.Group>(null);
   const log = useRef<THREE.Mesh>(null);
   const halves = [useRef<THREE.Group>(null), useRef<THREE.Group>(null)];
+  // The split halves are drawn as two instances posed from the groups above: one draw.
+  const halfMeshes = useRef<THREE.InstancedMesh>(null);
   const shapes = useMemo(
     () => ({
       torso: cutterTorsoShape(),
       legs: cutterLegsShape(),
       arms: axeArmsShape(),
-      block: blockShape(),
+      // The block and the woodstack never move: one draw, placed from the block.
+      yard: mergeParts([{ geometry: blockShape() }, { geometry: stackShape(), position: STACK_FROM_BLOCK, rotation: [0, Math.PI / 2, 0] }]),
       log: logShape(),
       half: halfShape(),
-      stack: stackShape(),
     }),
     [],
   );
@@ -134,16 +141,17 @@ export function Woodcutter() {
     // A turn of -x swings the arms up in front.
     if (arms.current) arms.current.rotation.x = -pose.swing;
     if (log.current) log.current.visible = pose.log;
+    if (halfMeshes.current) halfMeshes.current.visible = pose.split !== null;
     halves.forEach((half, i) => {
       const group = half.current;
       if (!group) return;
-      group.visible = pose.split !== null;
       const k = pose.split ?? 0;
       // Each half, its split face to the middle, topples outward off the block and lands split face up.
       const side = i === 0 ? 1 : -1;
       group.position.set(side * (0.005 + 0.3 * k), BLOCK_Y * (1 - k) + 0.12 * k, 0);
       group.rotation.set(0, side > 0 ? Math.PI : 0, (Math.PI / 2) * k);
     });
+    poseLimbs(halfMeshes.current, halves);
   });
   return (
     <group name="woodcutter">
@@ -157,16 +165,12 @@ export function Woodcutter() {
         </group>
       </group>
       <group position={[BLOCK_AT.x, 0, BLOCK_AT.z]} rotation={[0, CUTTER_YAW, 0]} scale={SCALE}>
-        <mesh geometry={shapes.block} material={material} castShadow />
+        <mesh geometry={shapes.yard} material={material} castShadow />
         <mesh ref={log} geometry={shapes.log} material={material} position={[0, BLOCK_Y, 0]} />
         {halves.map((half, i) => (
-          <group key={i} ref={half}>
-            <mesh geometry={shapes.half} material={material} />
-          </group>
+          <group key={i} ref={half} />
         ))}
-      </group>
-      <group position={[STACK_AT.x, 0, STACK_AT.z]} rotation={[0, CUTTER_YAW + Math.PI / 2, 0]} scale={SCALE}>
-        <mesh geometry={shapes.stack} material={material} castShadow />
+        <instancedMesh ref={halfMeshes} args={[shapes.half, material, 2]} frustumCulled={false} />
       </group>
     </group>
   );

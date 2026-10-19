@@ -835,15 +835,21 @@ button.field-primary:disabled {
 
 .spot-card-top {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 10px;
+  column-gap: 10px;
 }
 
-/* The name gives way, so the stamp keeps its place at the right even on a narrow phone with larger text. */
+/* The name keeps room for a word or two; past that the stamps drop under it rather than cut it letter by letter. */
 .spot-card-top > :first-child {
-  flex: 1 1 auto;
+  flex: 1 1 9ch;
   min-width: 0;
+}
+
+/* A long one-word kind in a card's fish line wraps rather than widen the page. */
+.spot-card > .meta {
+  overflow-wrap: anywhere;
 }
 
 .spot-card-top > .stamp {
@@ -980,11 +986,11 @@ html:has(.undo-bar) .field-main {
 
 /* With the Undo bar raised above the save buttons, a focused field and the form's last row scroll clear of it too. */
 html:has(.form-save):has(.undo-bar) {
-  scroll-padding-bottom: calc(92px + 80px);
+  scroll-padding-bottom: calc(92px + var(--undo-bar-h, 80px));
 }
 
 html:has(.form-save):has(.undo-bar) .field-main {
-  padding-bottom: calc(92px + 80px + 8px);
+  padding-bottom: calc(92px + var(--undo-bar-h, 80px) + 8px);
 }
 
 .choice-row {
@@ -1135,7 +1141,7 @@ html:has(.form-save):has(.undo-bar) .field-main {
 
   /* Room for the page's last link to scroll clear of the Undo bar too while it is up. */
   html:has(.undo-bar) .field-main {
-    padding-bottom: calc(92px + 80px);
+    padding-bottom: calc(92px + var(--undo-bar-h, 80px) + 8px);
   }
 
   .sheet {
@@ -1203,9 +1209,19 @@ html:has(.form-save):has(.undo-bar) .field-main {
     scroll-padding-bottom: calc(48px + 88px + env(safe-area-inset-bottom));
   }
 
-  /* The Undo bar sits above the tab bar, and is up to 80px tall with its words wrapped. */
+  /* The Undo bar sits above the tab bar, as tall as its words make it (measured by the bar; 80px until then). */
   html:has(.undo-bar) {
-    scroll-padding-bottom: calc(76px + 80px + env(safe-area-inset-bottom));
+    scroll-padding-bottom: calc(76px + var(--undo-bar-h, 80px) + 8px + env(safe-area-inset-bottom));
+  }
+
+  /* A long line takes the bar's whole width, with Undo and × on a row below, rather than wrapping word by word beside them. */
+  .undo-bar {
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+
+  .undo-bar > span {
+    flex: 1 1 auto;
   }
 
   /* Clear of the save bar and the tab bar together. */
@@ -1217,13 +1233,13 @@ html:has(.form-save):has(.undo-bar) .field-main {
     bottom: calc(150px + env(safe-area-inset-bottom));
   }
 
-  /* Raised over the save buttons, the bar is up to 80px tall: focus and the form's last row stop above it. */
+  /* Raised over the save buttons: focus and the form's last row stop above the bar, however tall it is. */
   html:has(.form-save):has(.undo-bar) {
-    scroll-padding-bottom: calc(150px + 80px + env(safe-area-inset-bottom));
+    scroll-padding-bottom: calc(150px + var(--undo-bar-h, 80px) + 8px + env(safe-area-inset-bottom));
   }
 
   html:has(.form-save):has(.undo-bar) .field-main {
-    padding-bottom: calc(150px + 80px + env(safe-area-inset-bottom));
+    padding-bottom: calc(150px + var(--undo-bar-h, 80px) + 8px + env(safe-area-inset-bottom));
   }
 
   .field-tab {
@@ -1325,6 +1341,8 @@ html:has(.form-save):has(.undo-bar) .field-main {
 
 .tally-label {
   overflow-wrap: anywhere;
+  /* "Październik" in the narrow label column breaks at a syllable, in the page's language, before anywhere. */
+  hyphens: auto;
 }
 
 .tally-note {
@@ -2222,6 +2240,18 @@ html:has(.form-save):has(.undo-bar) .field-main {
   display: inline-block;
   min-width: 24px;
   min-height: 24px;
+}
+
+/* Each year's best month stands out, and its total sits under a firmer rule. */
+.month-year td.month-year-top {
+  font-weight: 600;
+}
+
+.month-year tfoot th,
+.month-year tfoot td {
+  border-top: 2px solid var(--field-line);
+  border-bottom: 0;
+  font-weight: 600;
 }
 
 /* "Took:" before an outing's lure chips, so they don't read as more kinds of fish. */

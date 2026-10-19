@@ -24,7 +24,9 @@ import {
   lureTally,
   tripsForSpot,
   type CatchEntry,
+  type Logbook,
   type Spot,
+  type TackleItem,
   type Trip,
 } from "@stillwater/shared";
 import { CatchCard, TripCard } from "./cards";
@@ -108,8 +110,19 @@ function SinceLast({ caughtAt }: { caughtAt: string }) {
 /** The search for outings, kept in the address so Back from an outing returns to the same matches. */
 const TRIP_FIND = "find";
 
+/** Read the evening before, when the bag is packed: what has worked on the outing's water, and what isn't in it yet. */
+function calendarNotes(book: Logbook, trip: Trip, tackleItems: TackleItem[]): string[] {
+  const works = lureTally({ ...book, catches: countedFish(catchesForSpot(book, trip.spotId)) }, 3).map((row) => t(row.lure));
+  const toPack = itemsForTrip(tackleItems, trip.id).filter((item) => !item.packed).map((item) => item.label);
+  return [
+    works.length > 0 ? t("Works here: {lures}", { lures: works.join(", ") }) : "",
+    toPack.length > 0 ? t("Still to pack: {items}", { items: toPack.join(", ") }) : "",
+  ].filter(Boolean);
+}
+
 export function TripsPage() {
   const { book } = useLogbook();
+  const { items: tackleItems } = useTackle();
   useT();
   const [query, setQuery] = useTypedParam(TRIP_FIND);
   const today = localDate(new Date());
@@ -210,7 +223,8 @@ export function TripsPage() {
                 onClick={() => {
                   const outings = toCalendar.map((trip) => {
                     const spot = spotById(book, trip.spotId);
-                    return { trip: { ...trip, title: outingName(trip, book.spots) }, place: spot?.name ?? null, at: spot?.place };
+                    const title = outingName(trip, book.spots);
+                    return { trip: { ...trip, title }, place: spot?.name ?? null, at: spot?.place, more: calendarNotes(book, trip, tackleItems), alarm: t("Pack for {outing} tomorrow", { outing: title }) };
                   });
                   downloadFile(tripsIcs(outings), "text/calendar;charset=utf-8", datedName("stillwater-coming-up.ics"));
                 }}
@@ -366,7 +380,8 @@ function TripView() {
       </div>
       <FishSum catches={catches} list={`trip:${trip.id}`} />
       {/* Kept on the water, from the outing's day on: the fish that got away and the strikes that missed. */}
-      {trip.date <= today && !play ? <TripCounts trip={trip} landed={catches.length} /> : null}
+      {/* Not on the sample week's made-up outings beside the angler's own: a tap there would change a story, not a day. */}
+      {trip.date <= today && !play && !(isSampleOuting(trip) && !isSampleOnly(book)) ? <TripCounts trip={trip} landed={catches.length} /> : null}
       {/* Out there now: how long it has been quiet, to help decide when to move. */}
       {/* An evening outing still going in the small hours counts too; a fish over 12 hours old says nothing. */}
       {catches[0] && (trip.date === today || (trip.date === shiftDate(new Date(), -1) && new Date().getHours() < LATE_NIGHT_UNTIL)) ? (
@@ -543,6 +558,12 @@ function TripView() {
                     </>
                   )}
                 </span>
+              ) : !play && placeFor(spot.id) ? (
+                // A sample water: no real place to open, but a pin on the field log's own sheet, as its page links it.
+                <span className="map-link">
+                  {" · "}
+                  <Link to={`/map#water-${spot.id}`}>{t("See it on the Map")}</Link>
+                </span>
               ) : null}
             </>
           ) : null}
@@ -569,14 +590,7 @@ function TripView() {
             onClick={() => {
               // An untitled outing goes by its water's name, as its heading does.
               const named = { ...trip, title: outingName(trip, book.spots) };
-              // Read the evening before, when the bag is packed: what has worked here, and what isn't in it yet.
-              const works = spot ? lureTally({ ...book, catches: countedFish(catchesForSpot(book, spot.id)) }, 3).map((row) => t(row.lure)) : [];
-              const toPack = itemsForTrip(tackleItems, trip.id).filter((item) => !item.packed).map((item) => item.label);
-              const more = [
-                works.length > 0 ? t("Works here: {lures}", { lures: works.join(", ") }) : "",
-                toPack.length > 0 ? t("Still to pack: {items}", { items: toPack.join(", ") }) : "",
-              ].filter(Boolean);
-              downloadFile(tripIcs(named, spot?.name ?? null, new Date(), spot?.place, more), "text/calendar;charset=utf-8", tripIcsName(named));
+              downloadFile(tripIcs(named, spot?.name ?? null, new Date(), spot?.place, calendarNotes(book, trip, tackleItems), t("Pack for {outing} tomorrow", { outing: named.title })), "text/calendar;charset=utf-8", tripIcsName(named));
             }}
           >
             {t("Add to calendar")}
@@ -659,7 +673,13 @@ function TripForm() {
       book.catches.some((entry) => !entry.tripId && entry.spotId === guess && fishOnOutingDay(book, guess, toLocalInput(new Date(entry.caughtAt)), lastEvening)),
   );
   // Never the game's lake: its days are made by playing.
-  const presetDate = /^\d{4}-\d{2}-\d{2}$/.test(params.get("date") ?? "") ? (params.get("date") as string) : nightOuting ? lastEvening : localDate(new Date());
+  // "Go again" opens on the first day ahead with no outing on that water yet, not on today's outing there.
+  const againDate = again
+    ? datePicks(new Date())
+        .map((pick) => pick.date)
+        .find((day) => day >= localDate(new Date()) && !countedBook(book).trips.some((trip) => trip.spotId === again.spotId && trip.date === day))
+    : undefined;
+  const presetDate = /^\d{4}-\d{2}-\d{2}$/.test(params.get("date") ?? "") ? (params.get("date") as string) : nightOuting ? lastEvening : (againDate ?? localDate(new Date()));
   // Unasked, not a water that already has an outing that day: the next one fished, if any is free.
   // The sample week's made-up plans don't count once the book has the angler's own, as Coming up leaves them out.
   const busy = (spotId: string) => countedBook(book).trips.some((trip) => trip.spotId === spotId && trip.date === presetDate);

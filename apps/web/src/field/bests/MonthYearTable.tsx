@@ -37,6 +37,12 @@ export function MonthYearTable({
   // Months still to come are left blank, not counted as none.
   const thisMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
   if (years.length < 2) return null;
+  // Each season's whole count, and its best month once it had fish in more than one: which year was better is one glance.
+  const total = (year: string) => [...counts].filter(([month]) => month.startsWith(`${year}-`)).reduce((sum, [, count]) => sum + count, 0);
+  const top = (year: string) => {
+    const months = [...counts].filter(([month, count]) => month.startsWith(`${year}-`) && count > 0);
+    return months.length > 1 ? Math.max(...months.map(([, count]) => count)) : 0;
+  };
   return (
     <section>
       <div className="section-head">
@@ -66,10 +72,12 @@ export function MonthYearTable({
                     const month = `${year}-${mm}`;
                     const count = counts.get(month) ?? 0;
                     if (count === 0 && month > thisMonth) return <td key={year} />;
+                    const best = count > 0 && count === top(year);
+                    const label = `${monthName(month)}: ${fishCountLabel(count)}`;
                     return (
-                      <td key={year}>
+                      <td key={year} className={best ? "month-year-top" : undefined}>
                         {count > 0 ? (
-                          <Link to={findLink(tail(month))} aria-label={`${monthName(month)}: ${fishCountLabel(count)}`}>
+                          <Link to={findLink(tail(month))} aria-label={best ? t("{label}, the best month that year", { label }) : label}>
                             {count}
                           </Link>
                         ) : (
@@ -85,6 +93,18 @@ export function MonthYearTable({
               );
             })}
           </tbody>
+          <tfoot>
+            <tr>
+              <th scope="row">{t("Total")}</th>
+              {years.map((year) => (
+                <td key={year}>
+                  <Link to={findLink(tail(year))} aria-label={`${year}: ${fishCountLabel(total(year))}`}>
+                    {total(year)}
+                  </Link>
+                </td>
+              ))}
+            </tr>
+          </tfoot>
         </table>
       </div>
     </section>

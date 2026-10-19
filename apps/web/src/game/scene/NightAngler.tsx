@@ -4,7 +4,7 @@ import * as THREE from "three";
 import { makeSoftSpotTexture } from "./Atmosphere";
 import { brollySitterShape, rodRestShape } from "./BrollyFisher";
 import { BOX_AHEAD, BOX_SIDE, BUTT_AHEAD, FLOAT_AT, ROD_BUTT_Y, ROD_LENGTH, ROD_LIFT, ROD_TIP, SEAT_AT, SEAT_YAW, floatGlow, headlampLook } from "./headlampFishing";
-import { mergePainted } from "./mergeParts";
+import { mergePainted, mergeParts } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
@@ -85,13 +85,16 @@ export function NightAngler() {
   const bob = useRef<THREE.Group>(null);
   const shapes = useMemo(
     () => ({
-      sitter: brollySitterShape(),
-      torso: nightTorsoShape(),
+      // Everything at the swim that holds still, the sitter, the rests, the rod and the box: one draw.
+      rig: mergeParts([
+        { geometry: brollySitterShape(), scale: SCALE },
+        { geometry: nightTorsoShape(), position: [0, SEAT_Y * SCALE, -0.02 * SCALE], scale: SCALE },
+        { geometry: mergePainted([{ geometry: new THREE.BoxGeometry(0.34, 0.2, 0.22), color: BOX }]), position: [BOX_SIDE, 0.1 * SCALE, BOX_AHEAD], scale: SCALE },
+        { geometry: rodRestShape(ROD_BUTT_Y), position: [0, 0, BUTT_AHEAD] },
+        { geometry: rodRestShape(ROD_BUTT_Y + FRONT_REST * Math.tan(ROD_LIFT)), position: [0, 0, BUTT_AHEAD + FRONT_REST] },
+        { geometry: nightRodShape(), position: [0, ROD_BUTT_Y, BUTT_AHEAD], rotation: [-ROD_LIFT, 0, 0] },
+      ]),
       head: nightHeadShape(),
-      rod: nightRodShape(),
-      backRest: rodRestShape(ROD_BUTT_Y),
-      frontRest: rodRestShape(ROD_BUTT_Y + FRONT_REST * Math.tan(ROD_LIFT)),
-      box: new THREE.BoxGeometry(0.34, 0.2, 0.22),
       beam: beamGeometry(),
       stick: new THREE.CylinderGeometry(0.018, 0.018, 0.12, 6),
       lamp: new THREE.SphereGeometry(0.02, 6, 4),
@@ -99,7 +102,6 @@ export function NightAngler() {
     [],
   );
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
-  const boxMaterial = useMemo(() => new THREE.MeshToonMaterial({ color: BOX, gradientMap: toonRamp() }), []);
   const spot = useMemo(() => makeSoftSpotTexture(0.1), []);
   const fade = useMemo(() => beamFade(), []);
   const lights = useMemo(
@@ -119,9 +121,9 @@ export function NightAngler() {
   }, []);
   useEffect(
     () => () => {
-      [...Object.values(shapes), material, boxMaterial, spot, fade, ...Object.values(lights), line.geometry, line.material as THREE.Material].forEach((item) => item.dispose());
+      [...Object.values(shapes), material, spot, fade, ...Object.values(lights), line.geometry, line.material as THREE.Material].forEach((item) => item.dispose());
     },
-    [shapes, material, boxMaterial, spot, fade, lights, line],
+    [shapes, material, spot, fade, lights, line],
   );
   useFrame(({ clock }) => {
     const time = clock.elapsedTime;
@@ -145,10 +147,9 @@ export function NightAngler() {
   return (
     <group name="night-angler">
       <group position={[SEAT_AT.x, 0, SEAT_AT.z]} rotation={[0, SEAT_YAW, 0]}>
+        <mesh geometry={shapes.rig} material={material} />
         <group scale={SCALE}>
-          <mesh geometry={shapes.sitter} material={material} />
           <group position={[0, SEAT_Y, -0.02]}>
-            <mesh geometry={shapes.torso} material={material} />
             <group ref={head} position={[0, NECK_Y, 0]} rotation-order="YXZ">
               <mesh geometry={shapes.head} material={material} />
               <group position={LAMP_AT}>
@@ -158,12 +159,6 @@ export function NightAngler() {
               </group>
             </group>
           </group>
-          <mesh geometry={shapes.box} material={boxMaterial} position={[BOX_SIDE / SCALE, 0.1, BOX_AHEAD / SCALE]} />
-        </group>
-        <mesh geometry={shapes.backRest} material={material} position={[0, 0, BUTT_AHEAD]} />
-        <mesh geometry={shapes.frontRest} material={material} position={[0, 0, BUTT_AHEAD + FRONT_REST]} />
-        <group position={[0, ROD_BUTT_Y, BUTT_AHEAD]} rotation={[-ROD_LIFT, 0, 0]}>
-          <mesh geometry={shapes.rod} material={material} />
         </group>
       </group>
       <group ref={bob}>

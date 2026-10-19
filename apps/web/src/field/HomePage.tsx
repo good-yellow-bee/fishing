@@ -91,8 +91,8 @@ function LastTimeLine({ book, trip, today }: { book: Logbook; trip: Trip; today:
   if (!last) return null;
   const fish = catchesForTrip(book, last.id);
   const lure = lureTally({ ...book, catches: fish }, 1)[0];
-  // How long the water has rested, as the outing's own page says it.
-  const rest = daysBetween(last.date, today);
+  // How long the water has rested, as the outing's own page says it: during a night session, to the outing's own day.
+  const rest = daysBetween(last.date, trip.date < today ? trip.date : today);
   const day = rest >= 2 ? `${formatDay(last.date)} · ${tn(rest, "{n} day ago", "{n} days ago")}` : formatDay(last.date);
   return (
     <small className="next-last">
@@ -173,6 +173,8 @@ export function HomePage() {
   // "0 by this date last year" says nothing when the book only starts after that date.
   const firstDay = real.reduce((first, entry) => (bookFishDay(book, entry) < first ? bookFishDay(book, entry) : first), "9999");
   const comparable = lastYearDays.length > 0 && firstDay <= `${lastYear}-${today.slice(5)}`;
+  // Early January: how last year's goal ended, before the new year's count says much.
+  const lastGoal = today.slice(5) < "01-14" ? readYearGoal(lastYear) : null;
   const ownAny = countedOwn.trips.some((trip) => !isSampleOuting(trip)) || countedOwn.catches.some((entry) => !isSampleCatch(entry.id));
   const ownWaters = (ownAny ? withoutSample(book) : book).spots.filter((spot) => spot.id !== PLAY_LAKE_ID).length;
   // Today's outing counts once it has a fish, as the averages take it.
@@ -252,7 +254,7 @@ export function HomePage() {
         <div className="kept-draft" role="status">
           <p>
             {kept.species.trim()
-              ? t("A fish you started logging was not saved: {species}.", { species: kept.species.trim() })
+              ? t("A fish you started logging was not saved: {species}.", { species: t(kept.species.trim()) })
               : t("A fish you started logging was not saved.")}
           </p>
           <Link to={`/catches/new?${RESUME_PARAM}=1`} className="field-primary inline">
@@ -308,6 +310,12 @@ export function HomePage() {
                 <>
                   {" · "}
                   <Link to={`/bests?${GOAL_PARAM}=set`}>{t("Set a goal for {year}", { year: thisYear })}</Link>
+                </>
+              ) : null}
+              {lastGoal !== null ? (
+                <>
+                  {" · "}
+                  <Link to={`/bests?year=${lastYear}`}>{lastYearDays.length >= lastGoal ? t("{year}: goal reached, {n} of {goal}", { year: lastYear, n: lastYearDays.length, goal: lastGoal }) : t("{year}: {n} of {goal}", { year: lastYear, n: lastYearDays.length, goal: lastGoal })}</Link>
                 </>
               ) : null}
               {comparable ? `\u00a0· ${t("{n} by this date last year", { n: lastYearByNow })}` : null}
