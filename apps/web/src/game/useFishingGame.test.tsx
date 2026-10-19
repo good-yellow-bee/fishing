@@ -1875,6 +1875,30 @@ describe("level unlock integration", () => {
     expect(untilBite(TOPWATER_POPS + 1)).toBe(paused + FALSE_STRIKE_MS);
   });
 
+  it("brings a fish up sooner when a fly is twitched, for the first two twitches", () => {
+    const untilBite = (twitches: number) => {
+      const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Pheasant tail nymph");
+      vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "brook-trout")!);
+      cast(surface);
+      act(() => vi.advanceTimersByTime(300));
+      for (let twitch = 0; twitch < twitches; twitch++) {
+        act(() => surface.dispatchEvent(pointer("pointerdown", 2 + twitch)));
+        expect(hint()).toBe(twitch < TOPWATER_POPS ? "Twitch! The fly skitters on the film like a struggling insect. Let it drift…" : "Let it drift between twitches. Worked again so soon, it puts the fish off a moment.");
+        act(() => window.dispatchEvent(pointer("pointerup", 2 + twitch)));
+      }
+      let waited = 300;
+      for (; phase() !== "hookset:none" && waited < 20_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+      act(() => root!.unmount());
+      root = null;
+      container!.remove();
+      return waited;
+    };
+    const sat = untilBite(0);
+    const twitched = untilBite(TOPWATER_POPS);
+    expect(twitched).toBeLessThan(sat * 0.6);
+    expect(untilBite(TOPWATER_POPS + 1)).toBe(twitched + FALSE_STRIKE_MS);
+  });
+
   it("lets a level 13 angler lift a spoon a third time to bring the fish sooner", () => {
     const untilBite = (lifts: number, lifetimePoints: number) => {
       const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints }, "day", false, "Kastmaster spoon");

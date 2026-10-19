@@ -239,6 +239,11 @@ export function isCrank(lure: string | undefined) {
   return lure !== undefined && lure.trim() !== "" && lureClass(lure).id === "crank";
 }
 
+/** Whether the lure is a fly, which a tap twitches on the surface film like a struggling insect. */
+export function isFly(lure: string | undefined) {
+  return lure !== undefined && lure.trim() !== "" && lureClass(lure).id === "fly";
+}
+
 /** Pike that, missing a streamer stripped away from them, chase it down for one more hit. */
 export const STREAMER_CHASERS: ReadonlySet<string> = new Set(["pike", "ghost-pike"]);
 
@@ -248,7 +253,7 @@ export const WAIT_REASONS = 2;
 /** At most this many reasons a hooked fish tires slower or sooner are told at the hookset, so the hint stays readable. */
 export const TIRE_REASONS = 2;
 
-/** How many pops, hops, lifts, strips or pauses draw the fish up sooner below level 13 (see lureWorkTapsForLevel). */
+/** How many pops, hops, lifts, strips, pauses or twitches draw the fish up sooner below level 13 (see lureWorkTapsForLevel). */
 export const TOPWATER_POPS = 2;
 /** Each pop leaves this share of the wait still to go. */
 export const TOPWATER_POP_LEFT = 0.6;
@@ -406,7 +411,7 @@ export function useFishingGame(
     falseStrikeAtRef.current = performance.now();
     return true;
   };
-  const popRef = useRef<{ dueAt: number; take: () => void; pops: number; work: "pop" | "hop" | "lift" | "strip" | "pause"; taps: number; lastAt: number; season: LakeSeason | undefined } | null>(null);
+  const popRef = useRef<{ dueAt: number; take: () => void; pops: number; work: "pop" | "hop" | "lift" | "strip" | "pause" | "twitch"; taps: number; lastAt: number; season: LakeSeason | undefined } | null>(null);
   /** Clean fights landed in a row this session; a dirty landing or a lost fish starts it again. */
   const cleanRunRef = useRef(0);
   const castSnagRef = useRef<SnagCover | null>(null);
@@ -1082,8 +1087,8 @@ export function useFishingGame(
         timers.current.shown = whenShown(takeBait);
       };
       scheduleBite(bringOn, wait);
-      // A sitting topwater can be popped, a jig on the bottom hopped, a spoon lifted, a streamer stripped and a crankbait paused, to draw the fish sooner.
-      const work = topwater ? "pop" : isJig(lureRef?.current) ? "hop" : isSpoon(lureRef?.current) ? "lift" : isStreamer(lureRef?.current) ? "strip" : isCrank(lureRef?.current) ? "pause" : null;
+      // A sitting topwater can be popped, a jig on the bottom hopped, a spoon lifted, a streamer stripped, a crankbait paused and a fly twitched, to draw the fish sooner.
+      const work = topwater ? "pop" : isJig(lureRef?.current) ? "hop" : isSpoon(lureRef?.current) ? "lift" : isStreamer(lureRef?.current) ? "strip" : isCrank(lureRef?.current) ? "pause" : isFly(lureRef?.current) ? "twitch" : null;
       // In winter the slow fish want it worked slow; a beginner's easy fish don't mind.
       popRef.current = work ? { dueAt: performance.now() + wait, take: bringOn, pops: 0, work, taps: lureWorkTapsForLevel(anglerLevel(current.lifetimePoints)), lastAt: performance.now(), season: mercyNow ? undefined : season } : null;
       // A beginner's easy fish never backs off.
@@ -1231,9 +1236,9 @@ export function useFishingGame(
         const snag = snagRef.current;
         const pop = popRef.current;
         if (!snag && pop) {
-          // Popping a topwater, hopping a jig, lifting a spoon, stripping a streamer or pausing a crankbait draws the fish sooner, but only the first few times; then it wants to sit.
+          // Popping a topwater, hopping a jig, lifting a spoon, stripping a streamer, pausing a crankbait or twitching a fly draws the fish sooner, but only the first few times; then it wants to sit.
           if (pop.pops >= pop.taps) {
-            const rest = pop.work === "hop" ? t("Let it fall between hops.") : pop.work === "lift" ? t("Let it fall between lifts.") : pop.work === "strip" ? t("Let it hang between strips.") : pop.work === "pause" ? t("Keep it coming between pauses.") : t("Let it sit between pops.");
+            const rest = pop.work === "hop" ? t("Let it fall between hops.") : pop.work === "lift" ? t("Let it fall between lifts.") : pop.work === "strip" ? t("Let it hang between strips.") : pop.work === "pause" ? t("Keep it coming between pauses.") : pop.work === "twitch" ? t("Let it drift between twitches.") : t("Let it sit between pops.");
             // Worked past the few touches that help, it only puts the fish off.
             setHint(strikeAtNothing() ? `${rest} ${t("Worked again so soon, it puts the fish off a moment.")}` : rest);
             break;
@@ -1262,6 +1267,9 @@ export function useFishingGame(
           } else if (pop.work === "strip") {
             fx.reel();
             setHint(t("Strip! The streamer darts off like a fleeing fish. Let it hang…"));
+          } else if (pop.work === "twitch") {
+            fx.plop();
+            setHint(t("Twitch! The fly skitters on the film like a struggling insect. Let it drift…"));
           } else if (pop.work === "pause") {
             // Stopping the reel makes no sound of its own.
             setHint(t("Pause! The crankbait stops and floats up, and a following fish turns on it. Reel on…"));
