@@ -17,6 +17,14 @@ describe("a phone held sideways", () => {
     expect(block).toContain("max-height: calc((100dvh - var(--hud-bottom, 52px)) / var(--text-zoom, 1) - 72px);");
   });
 
+  it("moves the lure up beside the bank chip with larger text, clear of the walk stick", () => {
+    const sideways = css.slice(css.indexOf(SIDEWAYS));
+    expect(/html\[data-text-size\] \.lure-choice \{([^}]*)\}/.exec(sideways)?.[1]).toContain("top: calc(var(--hud-bottom, 52px) + 6px);");
+    expect(/html\[data-text-size\] \.lure-choice > span \{([^}]*)\}/.exec(sideways)?.[1]).toContain("clip: rect(0 0 0 0);");
+    expect(/html\[data-text-size\] \.stance-chip \{([^}]*)\}/.exec(sideways)?.[1]).toContain("left: calc(16px + min(220px, calc(30vw / var(--text-zoom, 1))));");
+    expect(/html\[data-text-size\] \.scene-wrap\[data-walkthrough="1"\] \.stance-chip \{([^}]*)\}/.exec(sideways)?.[1]).toContain("display: none;");
+  });
+
   it("keeps the coach and the news card off the signs, which take a second column with larger text", () => {
     const sideways = css.slice(css.indexOf(SIDEWAYS));
     const coach = [...sideways.matchAll(/\n  \.walkthrough \{([^}]*)\}/g)].map((m) => m[1]).find((b) => b.includes("--signs-room"));
