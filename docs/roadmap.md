@@ -1660,7 +1660,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT325~~ | ~~News card 2026-10-19-game26 covers GT323 and GT324: a strike at nothing puts the fish off, and pulling the rod the same way a run heads gives it line~~ (#1357) | ui | S |
 | ~~GT326~~ | ~~A run of clean fights pays: from the third clean fight landed in a row this session, each clean catch earns 1.2x more points on top of the clean bonus (the server checks it); the fight card says "3 in a row: 1.2× more" while it is still clean, and the landed card's clean stamp says "Clean fight · 3 in a row · 1.2× points"~~ (#1364) | gameplay | S |
 | ~~GT327~~ | ~~Lure colour: a lure whose label names a colour (English or Polish) bites 0.9x sooner when the colour suits the light: bright (chartreuse, firetiger, orange, white…) in rain, fog, overcast or the low light of dawn and dusk; natural (green pumpkin, crayfish, silver…) in clear daylight; dark (black, purple) at night; the wait hint says which~~ (#1369) | gameplay | S |
-| GT328 | The lure picker marks a lure whose colour suits the light as good now, with the season, hour and weather line under it, like the other lures the conditions favour | gameplay | S |
+| ~~GT328~~ | ~~The lure picker marks a lure whose colour suits the light as good now, with the season, hour and weather line under it, like the other lures the conditions favour~~ (#1371) | gameplay | S |
+| GT329 | News card 2026-10-19-game27 covers GT326 to GT328: a run of clean fights pays, and a lure's colour suits the light, marked in the lure list | ui | S |
 
 ## Risks / open questions for the owner
 
