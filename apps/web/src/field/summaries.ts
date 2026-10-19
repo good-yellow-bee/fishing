@@ -7,6 +7,7 @@ import { parseExactTerm } from "./findLinks";
 import { splitLeftOut } from "./CatchSearch";
 import { speciesCounts, speciesWaters } from "./speciesLink";
 import { goalPace } from "./YearGoal";
+import { sheetOutings } from "./catchCsv";
 
 /**
  * An outing as plain text to paste into a message: the day, the water, then each fish in the order it came.
@@ -106,6 +107,8 @@ export function speciesSummary(species: string, catches: readonly CatchEntry[], 
 export function yearSummary(book: Logbook, year: string, today: string, goal: number | null): string {
   const catches = book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${year}-`));
   const days = daysOut(book, year, today);
+  // The outings fished that year, as the outings sheet lists them: the number anglers set season against season.
+  const outings = sheetOutings(book, today).trips.filter((trip) => trip.date.startsWith(`${year}-`)).length;
   const bests = personalBests({ ...book, catches });
   const best = (entry: CatchEntry | null | undefined, kind: "length" | "weight") =>
     entry
@@ -124,6 +127,7 @@ export function yearSummary(book: Logbook, year: string, today: string, goal: nu
     t("{year} in the book", { year }),
     `${fishCountLabel(catches.length)} · ${tn(speciesCounts(catches).length, "{n} species", "{n} species")}`,
     ...(days > 0 ? [t("Days on the water in {year}: {count}", { year, count: days })] : []),
+    ...(outings > 0 ? [t("Outings: {count}", { count: outings })] : []),
     ...(goal !== null
       ? [catches.length >= goal ? t("Goal reached: {count} of {goal} fish in {year}.", { count: catches.length, goal, year }) : t("{count} of {goal} fish in {year}", { count: catches.length, goal, year })]
       : []),

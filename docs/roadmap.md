@@ -2155,3 +2155,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR544~~ | ~~Round 89 catch-page fixes: own fish counted as Home counts them, month headings, edits across time zones, year check, metric tenths, photo view focus~~ (#1283) | field | S |
 | ~~BR545~~ | ~~Round 89 catch-page ideas: Only my fish, the outing's last note in a tap, note as a search word, time after the outing's first fish~~ (#1286) | field | S |
 | ~~BR546~~ | ~~Round 90 Home and export fixes: loose night fish on the evening's day, one-fish calendar ring, Replace keeps the game, sheet outing names, past alarms, goal without the sample week~~ (#1292) | field | S |
+| ~~BR547~~ | ~~Round 90 ideas: all waters to a GPS in one file, a goal like last year's in a tap, Home's next outing to the calendar, outings in the year's copy~~ (#1294) | field | S |

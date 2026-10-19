@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-19-game20";
+export const NEWS_ID = "2026-10-19-field47";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "Waters can all go to a GPS in one file. The goal form offers last year's number in one tap. Home's next outing can go on your calendar, and the year's copied summary counts its outings. A night fish logged without its outing now counts on that night's day.",
   "Off the Point, cast tight to the sunken log: the bass, bluegill, crappie and pike holding in its shade bite sooner, and many a bite is one of them. And from the dock on calm days, land a popper or a fly among the water striders and whirligig beetles, where the crappie, shiners, smallmouth and trout are looking up for bugs.",
   "Catches now has Only my fish beside the sample week's count. A fish on an outing shows how long after the outing's first fish it came. A new fish can take the outing's last note in one tap, and “note” in Find a catch lists the fish you wrote up.",
   "More small links are easier to tap on a phone: Plan one and Log a catch under an empty list, Add a photo, Write up the day and Go again, the Map's waters with no place yet, Bests' month counts, a form's Open it, and Sign in, Back to the dock and the trip recap's Open the trip.",
