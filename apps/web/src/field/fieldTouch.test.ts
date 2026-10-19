@@ -95,6 +95,24 @@ describe("the field log on a touch screen", () => {
     expect(block).toContain("row-gap: 16px;");
   });
 
+  it("stands the catch form's Nearest water, Now and time steps as 32 px bands, on touch only", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.water-field \.text-button,\n  \.time-now\.text-button,\n  \.time-back \.text-button \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("min-height: 32px;");
+    expect(block).toContain("box-sizing: border-box;");
+    expect(touch).not.toContain("inset: -5px -4px;");
+    expect(css.slice(0, css.indexOf("@media (pointer: coarse) {"))).not.toContain(".time-back .text-button {");
+  });
+
+  it("keeps a page head's link whole on one line, its line's full band, on touch only", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  p\.meta\.stand a \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("max-width: 100%;");
+    expect(/\n  p\.meta\.stand a::after \{([^}]*)\}/.exec(touch)?.[1]).toContain("inset: 0 -3px;");
+    expect(css.slice(0, css.indexOf("@media (pointer: coarse) {"))).not.toContain("p.meta.stand a {");
+  });
+
   it("makes a water's Next outing in the Map's list a 32 px band with room under it, on touch only", () => {
     const touch = mapCss.slice(mapCss.indexOf("@media (pointer: coarse) {"));
     const block = /\n  \.map-index a\.map-next \{([^}]*)\}/.exec(touch)?.[1];

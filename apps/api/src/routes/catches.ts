@@ -29,6 +29,7 @@ catchRoutes.post("/catches", async (c) => {
     typeof body.requestId !== "string" ||
     !requestIdPattern.test(body.requestId) ||
     (body.clean !== undefined && typeof body.clean !== "boolean") ||
+    (body.cleanRun !== undefined && (!Number.isInteger(body.cleanRun) || body.cleanRun < 0)) ||
     (body.hour !== undefined && (typeof body.hour !== "string" || !isLakeHour(body.hour))) ||
     (body.sky !== undefined && !isSky(body.sky)) ||
     (body.season !== undefined && !isLakeSeason(body.season)) ||

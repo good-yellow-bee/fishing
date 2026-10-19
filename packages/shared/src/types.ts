@@ -58,6 +58,8 @@ export type CatchRequest = {
   weight: number;
   spot: SpotId;
   clean?: boolean;
+  /** Clean fights landed in a row this session, this one counted; from CLEAN_RUN_FROM a clean catch earns CLEAN_RUN_BONUS. */
+  cleanRun?: number;
   /** Optional so catches queued offline before these were sent still post. */
   hour?: LakeHour;
   sky?: Sky;

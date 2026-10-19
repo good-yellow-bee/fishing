@@ -1154,6 +1154,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA109~~ | ~~On a sideways phone in Polish a water's coordinates on the Map list wrapped onto Copy the place, whose reach cut the link to 16 px: when the two wrap, the button drops 16 px below (#1329)~~ | phone UX | S |
 | ~~PA110~~ | ~~The amber focus ring read 1.6 to 1 on the parchment cards, so a keyboard player could barely see which of the landed card's or a toast's buttons was next: a darker brass ring there, 5 to 1 or more (#1339)~~ | phone UX | S |
 | ~~PA111~~ | ~~With Sound captions on, a deer snorting on the far bank and the ducklings peeping played with no words on screen, so a player who can't hear them missed both: they now caption like the loon and the beaver, also with sound off (#1349)~~ | phone UX | S |
+| ~~PA112~~ | ~~On a phone the catch form's Nearest water to me, Now and −15 min · −1 h · −1 day reached only 5 px each way, 26-29 px bands, so a thumb aimed at one could miss; and with larger text a long link in a fish's page head (its time, its water) broke across two lines and each half lost its reach, a 25 px band. Each form button is now a 32 px band of its own, and a page head link moves down whole as its line's 35 px band, on touch only (#1359)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1320,6 +1321,11 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC159~~ | ~~Damselflies: on calm summer days two bright blue damselflies keep to the dock, one each side, settling on the posts beside the angler with wings folded, darting out to hover low over the water and flitting back (two draws)~~ (#1353) | scene | S |
 | ~~SC160~~ | ~~News card scene35: the cap cloud on the hills and the damselflies~~ (#1353) | scene | S |
 | ~~SC161~~ | ~~Fewer draws: the seven dragonflies over the reed beds draw as one instanced body mesh and one wing mesh (21 draws to 2), and the stone skimmer's arms share one instanced draw and its legs bake into one shape (5 limb draws to 2)~~ (#1356) | scene | S |
+| ~~SC162~~ | ~~Fewer draws: each high bird flock over the lake draws its wings as one instanced mesh (14 wing draws to 2, still culled out of view), and each swan's two wake arms bake into one shape (4 draws to 2)~~ (#1360) | scene | S |
+| ~~SC163~~ | ~~Fewer draws: the four clouds share one baked three-puff shape (12 draws to 4)~~ (#1361) | scene | S |
+| ~~SC164~~ | ~~Rapeseed: in spring the field under the windmill on the far hills flowers bright yellow in drill rows (one draw), with news scene36~~ (#1362) | scene | S |
+| ~~SC165~~ | ~~Fewer draws: the meadow bumblebees draw their bodies and wings as two instanced meshes (12 draws to 2), and the fishing terns their bodies and each side's wings as three (9 to 3)~~ (#1363) | scene | S |
+| ~~SC166~~ | ~~Fewer draws: plain multi-part models (logs, lily pads, paths, the bridge, the canoe) bake their coloured parts into one vertex-coloured mesh each (a summer day 393 draws to 365)~~ (#1365) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1649,7 +1655,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT322~~ | ~~News card 2026-10-19-game25 covers GT319, GT320 and GT321: work a lure slowly in winter, a long cast needs a quicker strike, and level 15~~ (#1347) | ui | S |
 | ~~GT323~~ | ~~A strike at nothing tugs the bait: striking in the wait at a still float, at a nibble once the yank is spent, or working a lure past its few helpful touches puts the fish off, so the bite comes 0.4 s later each time and mashing the strike never meets it; the hint says so, a camera pinch's first finger takes it back, and a beginner is spared~~ (#1351) | gameplay | S |
 | ~~GT324~~ | ~~Pulling the rod the wrong way: a turnable run with the rod pulled the same way it heads, past a quarter second to see it and switch, takes line 1.4x as fast, or comes in at 0.6x while reeling; the steer line says "Wrong way", so holding one side through a whole fight no longer turns every other run for free~~ (#1354) | gameplay | S |
-| GT325 | News card 2026-10-19-game26 covers GT323 and GT324: a strike at nothing puts the fish off, and pulling the rod the same way a run heads gives it line | ui | S |
+| ~~GT325~~ | ~~News card 2026-10-19-game26 covers GT323 and GT324: a strike at nothing puts the fish off, and pulling the rod the same way a run heads gives it line~~ (#1357) | ui | S |
+| GT326 | A run of clean fights pays: from the third clean fight landed in a row this session, each clean catch earns 1.2x more points on top of the clean bonus (the server checks it); the fight card says "3 in a row: 1.2× more" while it is still clean, and the landed card's clean stamp says "Clean fight · 3 in a row · 1.2× points" | gameplay | S |
 
 ## Risks / open questions for the owner
 

@@ -36,7 +36,7 @@ import {
   walkableAt,
 } from "./lake.ts";
 import { anglerLevel, canUseSpot, INLET_LEVEL, skillCost, SPOT_IDS } from "./progression.ts";
-import { canLand, catchPoints, legendaryCanBite, skillUnlock, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
+import { canLand, catchPoints, cleanRunBonus, CLEAN_RUN_BONUS, CLEAN_RUN_FROM, legendaryCanBite, skillUnlock, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
 import type { Profile } from "./types.ts";
 import { weeklyFish } from "./weeklyFish.ts";
 
@@ -111,6 +111,19 @@ describe("catch rules", () => {
     expect(validateCatch(starter, { ...request, clean: false }, at)).toMatchObject({ ok: true, points: catchPoints(perch, 0.8) });
     expect(validateCatch(starter, { ...request, clean: true }, at)).toMatchObject({ ok: true, points: catchPoints(perch, 0.8, true) });
     expect(catchPoints(perch, 0.8, true)).toBeGreaterThan(catchPoints(perch, 0.8));
+  });
+
+  it("adds the clean-run bonus from the third clean fight in a row, and only to a clean catch", () => {
+    const perch = fishById("perch")!;
+    const request = { speciesId: "perch", weight: 0.8, spot: "dock" as const };
+    const at = new Date("2026-07-15T12:00:00Z");
+    expect(validateCatch(starter, { ...request, clean: true, cleanRun: 2 }, at)).toMatchObject({ points: catchPoints(perch, 0.8, true) });
+    expect(validateCatch(starter, { ...request, clean: true, cleanRun: CLEAN_RUN_FROM }, at)).toMatchObject({ points: catchPoints(perch, 0.8, true, CLEAN_RUN_BONUS) });
+    expect(validateCatch(starter, { ...request, clean: false, cleanRun: 5 }, at)).toMatchObject({ points: catchPoints(perch, 0.8) });
+    expect(cleanRunBonus(true, 3)).toBe(1.2);
+    expect(cleanRunBonus(true, 9)).toBe(1.2);
+    expect(cleanRunBonus(true, undefined)).toBe(1);
+    expect(cleanRunBonus(undefined, 4)).toBe(1);
   });
 
   it("blocks landing when strength is short", () => {

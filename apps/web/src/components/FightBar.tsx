@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
+import { CLEAN_RUN_FROM } from "@stillwater/shared";
 import { canTurnRuns, ESCAPE_LINE, FRAYED_SNAP, fightLines, isCleanFight, jumpLines, RED_TENSION, SHORT_LINE, SOFT_MOUTHS, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone } from "../game/fight";
 import { habitLines } from "../game/habitLines";
 import { useSettings } from "../game/settings";
@@ -14,6 +15,8 @@ type Props = {
   best?: number | null;
   /** The hookset's message (or a call made mid-fight), shown for a while at the top of the card, since the hint is hidden in a fight. */
   note?: string | null;
+  /** Clean fights landed in a row this session before this one: landing this one clean too makes a run that earns more. */
+  cleanRun?: number;
 };
 
 const ZONE_COLOR: Record<TensionZone, string> = { easy: "#6a8f5a", tight: "#d9a94e", red: "#b85c38" };
@@ -22,7 +25,7 @@ const ZONE_WORD: Record<TensionZone, string> = { easy: "Easy", tight: "Tight", r
 /** How much fight the fish has left, beside the line bar: its runs weaken and it comes in faster as it tires. */
 const STAMINA_WORD: Record<StaminaState, string> = { fresh: "Fish fresh", tiring: "Fish tiring", spent: "Fish played out" };
 
-export function FightBar({ fight, sim, performance, best = null, note = null }: Props) {
+export function FightBar({ fight, sim, performance, best = null, note = null, cleanRun = 0 }: Props) {
   const { reelMode } = useSettings();
   const t = useT();
   const lang = useLang();
@@ -34,6 +37,8 @@ export function FightBar({ fight, sim, performance, best = null, note = null }: 
   // A language change reads the lines again.
   const lines = useMemo(() => fightLines(fight.species.challenge), [fight.species.challenge, lang]);
   const leapLines = useMemo(() => jumpLines(), [lang]);
+  // Landed clean, this one would make a run long enough to earn more: say so while it is still clean.
+  const cleanLine = cleanRun + 1 >= CLEAN_RUN_FROM ? t("Clean fight · 1.5× points · {n} in a row: 1.2× more", { n: cleanRun + 1 }) : t("Clean fight · 1.5× points");
   const habits = useMemo(() => habitLines(fight.species.id), [fight.species.id, lang]);
   const tensionMeter = useRef<HTMLDivElement>(null);
   const zoneWord = useRef<HTMLSpanElement>(null);
@@ -149,7 +154,7 @@ export function FightBar({ fight, sim, performance, best = null, note = null }: 
         }
         if (clean.current && record) {
           const stillClean = isCleanFight(record);
-          clean.current.textContent = stillClean ? t("Clean fight · 1.5× points") : t("Clean bonus lost");
+          clean.current.textContent = stillClean ? cleanLine : t("Clean bonus lost");
           clean.current.classList.toggle("lost", !stillClean);
         }
         if (card.current) {
@@ -163,7 +168,7 @@ export function FightBar({ fight, sim, performance, best = null, note = null }: 
     };
     frame = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frame);
-  }, [fight.species.challenge, leapLines, lines, performance, sim, t]);
+  }, [fight.species.challenge, leapLines, lines, performance, sim, t, cleanLine]);
 
   return (
     <div ref={card} className="fight-bar">
@@ -274,7 +279,7 @@ export function FightBar({ fight, sim, performance, best = null, note = null }: 
               {fight.windy === "strong" ? t("Strong wind: a slack line drifts out much faster") : t("Breezy: a slack line drifts out faster")}
             </p>
           )}
-          <p ref={clean} className="fight-clean">{t("Clean fight · 1.5× points")}</p>
+          <p ref={clean} className="fight-clean">{cleanLine}</p>
           {reelMode === "toggle" ? (
             <p className="fight-controls">
               <span className="on-pointer">{t("TAP click / Space to start reeling")}</span>

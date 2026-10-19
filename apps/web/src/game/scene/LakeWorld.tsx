@@ -215,6 +215,8 @@ import { HillBonfire } from "./HillBonfire";
 import { bonfireOut } from "./bonfireSite";
 import { paragliderOut } from "./paraglideRidge";
 import { Sheep } from "./Sheep";
+import { Rapeseed } from "./Rapeseed";
+import { rapeseedOut } from "./rapeseedField";
 import { sheepOut } from "./sheepFlock";
 import { ValleyMist } from "./ValleyMist";
 import { valleyMistOut } from "./valleyMist";
@@ -1170,6 +1172,13 @@ const CLOUDS: { y: number; z: number; scale: number; speed: number; offset: numb
   { y: 19, z: -34, scale: 1.2, offset: 72, speed: 0.28 },
 ];
 
+/** A cloud's three puffs, baked into one shape that every cloud shares. */
+const CLOUD_SHAPE = mergeParts([
+  { geometry: new THREE.SphereGeometry(1, 10, 7), position: [0, 0, 0], scale: [2.6, 1.1, 1.6] },
+  { geometry: new THREE.SphereGeometry(1, 9, 6), position: [1.9, 0.35, 0.2], scale: [1.5, 0.85, 1.2] },
+  { geometry: new THREE.SphereGeometry(1, 9, 6), position: [-1.8, 0.2, -0.3], scale: [1.3, 0.7, 1] },
+]);
+
 function Cloud({ y, z, scale, speed, offset, color }: (typeof CLOUDS)[number] & { color: string }) {
   const ref = useRef<THREE.Group>(null);
   useFrame((state) => {
@@ -1178,16 +1187,7 @@ function Cloud({ y, z, scale, speed, offset, color }: (typeof CLOUDS)[number] & 
   });
   return (
     <group ref={ref} position={[0, y, z]} scale={scale}>
-      <mesh position={[0, 0, 0]} scale={[2.6, 1.1, 1.6]}>
-        <sphereGeometry args={[1, 10, 7]} />
-        <meshBasicMaterial color={color} fog={false} />
-      </mesh>
-      <mesh position={[1.9, 0.35, 0.2]} scale={[1.5, 0.85, 1.2]}>
-        <sphereGeometry args={[1, 9, 6]} />
-        <meshBasicMaterial color={color} fog={false} />
-      </mesh>
-      <mesh position={[-1.8, 0.2, -0.3]} scale={[1.3, 0.7, 1]}>
-        <sphereGeometry args={[1, 9, 6]} />
+      <mesh geometry={CLOUD_SHAPE}>
         <meshBasicMaterial color={color} fog={false} />
       </mesh>
     </group>
@@ -1619,37 +1619,35 @@ function SunGlitter({ discPos }: { discPos: Vec3 }) {
   ));
 }
 
-function Bird({ position, phase, flap }: { position: Vec3; phase: number; flap: number }) {
-  const left = useRef<THREE.Group>(null);
-  const right = useRef<THREE.Group>(null);
-  useFrame((state) => {
-    const f = Math.sin(state.clock.elapsedTime * flap + phase) * 0.55 + 0.15;
-    if (left.current) left.current.rotation.z = f;
-    if (right.current) right.current.rotation.z = -f;
-  });
-  return (
-    <group position={position}>
-      <group ref={left}>
-        <mesh geometry={WING_GEOMETRY} material={BIRD_MATERIAL} />
-      </group>
-      <group ref={right} scale={[-1, 1, 1]}>
-        <mesh geometry={WING_GEOMETRY} material={BIRD_MATERIAL} />
-      </group>
-    </group>
-  );
-}
-
+/** A flock crossing high over the lake, each bird a pair of beating wings; the whole flock is one instanced draw. */
 function BirdFlock({ y, z, speed, offset, dir, birds }: FlockProps) {
   const ref = useRef<THREE.Group>(null);
+  const wings = useRef<THREE.InstancedMesh>(null);
+  const scratch = useMemo(() => ({ place: new THREE.Object3D() }), []);
   useFrame((state) => {
-    if (!ref.current) return;
-    ref.current.position.x = dir * (((state.clock.elapsedTime * speed + offset) % 110) - 55);
+    const time = state.clock.elapsedTime;
+    if (ref.current) ref.current.position.x = dir * (((time * speed + offset) % 110) - 55);
+    const mesh = wings.current;
+    if (!mesh) return;
+    const { place } = scratch;
+    birds.forEach((position, i) => {
+      const f = Math.sin(time * (6.5 + (i % 3) * 0.7) + i * 1.9) * 0.55 + 0.15;
+      // The right wing is the left one mirrored; the material is double-sided, so the flip shows no seam.
+      [1, -1].forEach((side, w) => {
+        place.position.set(...position);
+        place.rotation.set(0, 0, side * f);
+        place.scale.set(side, 1, 1);
+        place.updateMatrix();
+        mesh.setMatrixAt(i * 2 + w, place.matrix);
+      });
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+    // Bound the flock once its birds are placed, so it is culled while out of view, as each wing was.
+    if (!mesh.boundingSphere || mesh.boundingSphere.radius < 1) mesh.computeBoundingSphere();
   });
   return (
     <group ref={ref} position={[0, y, z]} rotation={[0, Math.PI / 2, 0]}>
-      {birds.map((position, i) => (
-        <Bird key={i} position={position} phase={i * 1.9} flap={6.5 + (i % 3) * 0.7} />
-      ))}
+      <instancedMesh ref={wings} args={[WING_GEOMETRY, BIRD_MATERIAL, birds.length * 2]} />
     </group>
   );
 }
@@ -2313,6 +2311,7 @@ export const LakeWorld = memo(function LakeWorld({
         <Hill key={hill.position.join()} position={hill.position} scale={hill.scale} color={hillColor(hill, hour, season, sky)} />
       ))}
       {balesOut(season) && <HayBales season={season} hour={hour} />}
+      {rapeseedOut(season) && <Rapeseed hour={hour} />}
       <Farmstead season={season} hour={hour} wind={wind} />
       <Windmill season={season} wind={wind} />
       {paragliderOut(hour, sky, season, wind) && <Paraglider />}

@@ -4,7 +4,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { badgeProgress, dailyConditions, skyTurnForDay, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky, type SpotId } from "@stillwater/shared";
+import { badgeProgress, catchPoints, CLEAN_RUN_BONUS, GOLDEN_BONUS, isGolden, weeklyBonus, dailyConditions, skyTurnForDay, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky, type SpotId } from "@stillwater/shared";
 import { getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
@@ -306,6 +306,24 @@ describe("lodge records", () => {
     expect(page.querySelector(".landed-card .guide-fish path")?.getAttribute("d")).toBe(pike.silhouette);
     expect(page.querySelector(".landed-card .guide-fish path")?.getAttribute("fill")).toBe(pike.color);
     expect(page.querySelector(".landed-card .catch-lore")?.textContent).toBe(pike.lore);
+  });
+});
+
+describe("a run of clean fights", () => {
+  it("stamps the third clean fight in a row with its bonus, counts it in the points and sends the run", async () => {
+    const at = new Date(2026, 6, 15, 14, 0);
+    vi.useFakeTimers({ toFake: ["Date"], now: at });
+    const perch = fishById("perch")!;
+    expect(weeklyBonus(perch.id, at)).toBe(1);
+    vi.mocked(recordCatch).mockResolvedValue({ id: "catch-clean-run", points: 1, speciesId: perch.id, weight: 0.8 });
+    landed.outcome = { kind: "landed", id: "catch-clean-run", species: perch, weight: 0.8, spot: "dock", clean: true, notes: { perfectCast: false, hookedSolid: true, turnedRuns: 0, cleanRun: 3 } };
+    const page = await openDock("/");
+    const stamps = [...page.querySelectorAll(".landed-card .catch-stamp")].map((p) => p.textContent);
+    expect(stamps).toContain("Clean fight · 3 in a row · 1.2× points");
+    expect(stamps).toContain("Hooked solid");
+    const points = catchPoints(perch, 0.8, true, CLEAN_RUN_BONUS * (isGolden("catch-clean-run") ? GOLDEN_BONUS : 1));
+    expect(page.querySelector(".landed-card")!.textContent).toContain(`+${points} pts`);
+    expect(vi.mocked(recordCatch).mock.lastCall?.[0]).toMatchObject({ requestId: "catch-clean-run", clean: true, cleanRun: 3 });
   });
 });
 

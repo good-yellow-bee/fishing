@@ -11,6 +11,15 @@ export function catchPoints(species: FishSpecies, weight: number, clean = false,
   return Math.max(1, Math.round(points));
 }
 
+/** From the third clean fight landed in a row this session, each clean catch earns this much more on top of the clean bonus. */
+export const CLEAN_RUN_FROM = 3;
+export const CLEAN_RUN_BONUS = 1.2;
+
+/** The bonus for a run of clean fights: `run` counts this catch and the clean ones landed right before it. */
+export function cleanRunBonus(clean: boolean | undefined, run: number | undefined): number {
+  return clean && (run ?? 0) >= CLEAN_RUN_FROM ? CLEAN_RUN_BONUS : 1;
+}
+
 export function weightInRange(species: FishSpecies, weight: number): boolean {
   return weight >= species.minWeight && weight <= species.maxWeight;
 }
@@ -60,7 +69,7 @@ export function validateCatch(profile: Profile, request: CatchRequest & { reques
     return { ok: false, error: "line too light for this fish", status: 409 };
   }
   const golden = request.requestId !== undefined && isGolden(request.requestId) ? GOLDEN_BONUS : 1;
-  return { ok: true, points: catchPoints(species, request.weight, request.clean, weeklyBonus(species.id, at) * golden), species };
+  return { ok: true, points: catchPoints(species, request.weight, request.clean, weeklyBonus(species.id, at) * golden * cleanRunBonus(request.clean, request.cleanRun)), species };
 }
 
 export type UpgradeOk = { ok: true; cost: number; nextRank: number };

@@ -41,10 +41,14 @@ export function ternShapes() {
   };
 }
 
-/** Terns circling and plunging over the day's fish patch; motion lives in ternHover.ts. */
+/** Where each wing hinges at the shoulder, right then left, in the bird's own size. */
+const SHOULDERS = [new THREE.Vector3(0.025, 0.01, 0.01), new THREE.Vector3(-0.025, 0.01, 0.01)];
+
+/** Terns circling and plunging over the day's fish patch; motion lives in ternHover.ts. Bodies and each side's wings are one instanced mesh apiece: three draws. */
 export function Terns({ center }: { center: { x: number; z: number } }) {
-  const birds = useRef<(THREE.Group | null)[]>([]);
-  const wings = useRef<(THREE.Group | null)[][]>(Array.from({ length: TERN_COUNT }, () => []));
+  const bodies = useRef<THREE.InstancedMesh>(null);
+  const rights = useRef<THREE.InstancedMesh>(null);
+  const lefts = useRef<THREE.InstancedMesh>(null);
   const splashes = useRef<(THREE.Mesh | null)[]>([]);
   const shapes = useMemo(ternShapes, []);
   // Reduced motion hangs them over the patch, wings out: no 2-a-second beats or plunges. They still slide to a new patch.
@@ -56,6 +60,7 @@ export function Terns({ center }: { center: { x: number; z: number } }) {
     }),
     [],
   );
+  const scratch = useMemo(() => ({ root: new THREE.Matrix4(), wing: new THREE.Matrix4(), turn: new THREE.Euler(0, 0, 0, "YXZ"), flap: new THREE.Euler(), quat: new THREE.Quaternion(), at: new THREE.Vector3(), size: new THREE.Vector3(SCALE, SCALE, SCALE) }), []);
   useEffect(
     () => () => {
       [shapes.body, shapes.right, shapes.left, looks.painted, looks.wing].forEach((thing) => thing.dispose());
@@ -75,16 +80,20 @@ export function Terns({ center }: { center: { x: number; z: number } }) {
       at.x += (dx / gap) * step;
       at.z += (dz / gap) * step;
     }
+    const body = bodies.current;
+    const sides = [rights.current, lefts.current];
+    if (!body || !sides[0] || !sides[1]) return;
     for (let k = 0; k < TERN_COUNT; k += 1) {
-      const bird = birds.current[k];
-      if (!bird) continue;
       const pose = ternPose(k, time, at);
       const surface = waterHeight(pose.x, pose.z, time);
-      bird.position.set(pose.x, surface + pose.y, pose.z);
       // Nose down through the plunge.
-      bird.rotation.set(pitchTurn(pose.diving ? -1.2 : 0), pose.yaw, 0, "YXZ");
-      wings.current[k]!.forEach((wing, side) => {
-        if (wing) wing.rotation.z = (side === 0 ? 1 : -1) * pose.flap * 0.7;
+      scratch.turn.set(pitchTurn(pose.diving ? -1.2 : 0), pose.yaw, 0);
+      scratch.root.compose(scratch.at.set(pose.x, surface + pose.y, pose.z), scratch.quat.setFromEuler(scratch.turn), scratch.size);
+      body.setMatrixAt(k, scratch.root);
+      sides.forEach((wings, side) => {
+        scratch.flap.set(0, 0, (side === 0 ? 1 : -1) * pose.flap * 0.7);
+        scratch.wing.makeRotationFromEuler(scratch.flap).setPosition(SHOULDERS[side]!);
+        wings!.setMatrixAt(k, scratch.wing.premultiply(scratch.root));
       });
       const splash = splashes.current[k];
       if (splash) {
@@ -97,25 +106,19 @@ export function Terns({ center }: { center: { x: number; z: number } }) {
         }
       }
     }
+    [body, ...sides].forEach((mesh) => (mesh!.instanceMatrix.needsUpdate = true));
   });
   return (
     <>
+      {/* The terns follow the fish patch about the lake, so they are never culled by a stale bound. */}
+      <instancedMesh ref={bodies} name="tern" args={[shapes.body, looks.painted, TERN_COUNT]} frustumCulled={false} />
+      <instancedMesh ref={rights} args={[shapes.right, looks.wing, TERN_COUNT]} frustumCulled={false} />
+      <instancedMesh ref={lefts} args={[shapes.left, looks.wing, TERN_COUNT]} frustumCulled={false} />
       {Array.from({ length: TERN_COUNT }, (_, k) => (
-        <group key={k}>
-          <group ref={(g) => void (birds.current[k] = g)} name="tern" scale={SCALE}>
-            <mesh geometry={shapes.body} material={looks.painted} />
-            {/* Long, narrow wings, hinged at the shoulder. */}
-            {[1, -1].map((side, i) => (
-              <group key={side} ref={(g) => void (wings.current[k]![i] = g)} position={[side * 0.025, 0.01, 0.01]}>
-                <mesh geometry={side > 0 ? shapes.right : shapes.left} material={looks.wing} />
-              </group>
-            ))}
-          </group>
-          <mesh ref={(m) => void (splashes.current[k] = m)} rotation={[-Math.PI / 2, 0, 0]} visible={false}>
-            <ringGeometry args={[0.7, 1, 18]} />
-            <meshBasicMaterial color="#eef6f6" transparent opacity={0} depthWrite={false} />
-          </mesh>
-        </group>
+        <mesh key={k} ref={(m) => void (splashes.current[k] = m)} rotation={[-Math.PI / 2, 0, 0]} visible={false}>
+          <ringGeometry args={[0.7, 1, 18]} />
+          <meshBasicMaterial color="#eef6f6" transparent opacity={0} depthWrite={false} />
+        </mesh>
       ))}
     </>
   );

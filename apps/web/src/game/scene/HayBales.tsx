@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import type { LakeHour, LakeSeason } from "@stillwater/shared";
-import { BALE_LENGTH, BALE_RADIUS, FIELDS, fieldPoint, hayBales } from "./hayField";
+import { BALE_LENGTH, BALE_RADIUS, fieldPoint, hayBales } from "./hayField";
 import { mergePainted } from "./mergeParts";
 import { toonRamp } from "./toon";
 
@@ -29,14 +29,19 @@ export function baleShape() {
 
 /** The mown fields on the hills' face, in stripes along the slope: one shape, its colours per vertex. */
 export function fieldsShape(season: "summer" | "fall", hour: LakeHour) {
+  return stripedFields(STRIPES[season], hour, [0, 1], BANDS);
+}
+
+/** Fields `which` on the hills' face in `bands` stripes along the slope, alternating the two tints: one shape, its colours per vertex. */
+export function stripedFields(stripes: readonly [string, string], hour: LakeHour, which: readonly number[], bands: number) {
   const dim = hour === "night" ? NIGHT_DIM : 1;
-  const tints = STRIPES[season].map((hex) => new THREE.Color(hex).multiplyScalar(dim));
+  const tints = stripes.map((hex) => new THREE.Color(hex).multiplyScalar(dim));
   const positions: number[] = [];
   const colors: number[] = [];
-  FIELDS.forEach((_, f) => {
+  which.forEach((f) => {
     for (let j = 0; j < UP; j += 1) {
       // Every vertex of a stripe's triangles takes its colour, so the stripes' edges stay crisp.
-      const tint = tints[Math.floor((j / UP) * BANDS) % 2]!;
+      const tint = tints[Math.floor((j / UP) * bands) % 2]!;
       for (let i = 0; i < ACROSS; i += 1) {
         const at = (a: number, b: number) => fieldPoint(f, (a / ACROSS) * 2 - 1, (b / UP) * 2 - 1);
         const corners = [at(i, j), at(i + 1, j), at(i + 1, j + 1), at(i, j + 1)];
