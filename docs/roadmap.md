@@ -1397,6 +1397,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC217~~ | ~~Fewer draws: every lily pad and its flower or bud draws as instanced meshes riding the swell (a LilyBed), instead of a model and two flower meshes per pad; about 11 fewer draws from spring to fall, no visible change~~ (#1489) | scene | S |
 | ~~SC218~~ | ~~Fewer draws: the bank stands' and walks' planks (four colour batches) and the pier's planks (two) are each one instanced mesh with per-plank colours, the pier's still soaking in rain and paling under frost and snow; about 8 fewer draws in every scene, no visible change~~ (#1492) | scene | S |
 | ~~SC219~~ | ~~Fewer draws: the three far hills are one instanced mesh, each hill keeping its colour for the hour, season and sky; 2 to 4 fewer draws, no visible change~~ (#1496) | scene | S |
+| SC220 | Fewer draws: each swimming lake fish (body, eyes, fins, marks, whiskers, middle, tail, about nine draws) is one skinned mesh of painted parts bending at the middle and the tail as before; about 39 fewer draws in every scene, no visible change to the fish's look or swim | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
