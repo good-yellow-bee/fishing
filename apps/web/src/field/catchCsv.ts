@@ -100,11 +100,14 @@ export function sheetOutings(book: Logbook, today: string): Logbook {
 export function tripsCsv(whole: Logbook, today: string): string {
   const book = sheetOutings(whole, today);
   const separator = getLang() === "pl" ? ";" : ",";
-  const header = [t("Date"), t("Trip"), t("Water"), t("Fish"), t("Kinds"), t("Lost fish"), t("Missed strikes"), t("Note")];
+  const header = [t("Date"), t("Trip"), t("Water"), t("Fish"), t("Kinds"), t("Lures"), t("Lost fish"), t("Missed strikes"), t("Note")];
   const fish = new Map<string, number>();
   // What each outing took, most first, in the sheet's language: "Zander ×2, Northern pike".
   const kinds = new Map<string, Map<string, number>>();
   const kindName = kindNames(book.catches);
+  // And on what, the same way, a piece however it was typed: "Spinner ×3, Jig".
+  const lures = new Map<string, Map<string, number>>();
+  const lureName = lureNames(book.catches);
   const onDay = new Map<string, string[]>();
   for (const trip of countedBook(whole).trips) onDay.set(`${trip.date} ${trip.spotId}`, [...(onDay.get(`${trip.date} ${trip.spotId}`) ?? []), trip.id]);
   const tripIds = new Set(book.trips.map((trip) => trip.id));
@@ -119,16 +122,22 @@ export function tripsCsv(whole: Logbook, today: string): string {
       const name = kindName(entry.species);
       tally.set(name, (tally.get(name) ?? 0) + 1);
       kinds.set(id, tally);
+      const lure = lureName(entry.lure);
+      if (lure) {
+        const used = lures.get(id) ?? new Map<string, number>();
+        used.set(lure, (used.get(lure) ?? 0) + 1);
+        lures.set(id, used);
+      }
     }
   }
-  const kindsOf = (tripId: string) =>
-    [...(kinds.get(tripId) ?? new Map<string, number>())]
+  const tallyOf = (tallies: Map<string, Map<string, number>>, tripId: string) =>
+    [...(tallies.get(tripId) ?? new Map<string, number>())]
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
       .map(([name, count]) => (count > 1 ? `${name} ×${count}` : name))
       .join(", ");
   const rows = [...book.trips]
     .sort((a, b) => b.date.localeCompare(a.date))
     // An untitled outing goes by its water's name, as the list names it.
-    .map((trip) => [trip.date, outingName(trip, book.spots), spotById(book, trip.spotId)?.name ?? "", String(fish.get(trip.id) ?? 0), kindsOf(trip.id), String(trip.lost ?? 0), String(trip.missed ?? 0), noteText(trip.note)]);
+    .map((trip) => [trip.date, outingName(trip, book.spots), spotById(book, trip.spotId)?.name ?? "", String(fish.get(trip.id) ?? 0), tallyOf(kinds, trip.id), tallyOf(lures, trip.id), String(trip.lost ?? 0), String(trip.missed ?? 0), noteText(trip.note)]);
   return sheet([header, ...rows], separator);
 }
