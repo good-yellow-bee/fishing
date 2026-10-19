@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-19-scene34";
+export const NEWS_ID = "2026-10-19-scene35";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "On grey and rainy days low cloud now hangs on the tops of the hills behind the far bank, drifting slowly along the ridge with the wind. On calm summer days two bright blue damselflies settle on the dock posts beside you, dart out to hover over the water, and come back.",
   "On fine, breezy days from spring to fall a paraglider soars along the ridge of the hills behind the far bank, banking round at each end. On fall evenings a bonfire burns on those hills between the hay fields, glowing in the dark with its smoke leaning away on the wind.",
   "With Sound captions on, a deer snorting on the far bank and ducklings peeping now get words on screen too, even with sound off. A keyboard player sees a clear ring on the catch card's and the toasts' buttons, and on a phone the Photos links for a fish without a photo and the Map list's Copy the place are easier to tap.",
   "At level 15, One with the lake, a strike in the first 48% of the bite sets the hook solid, not 40%. Far out the line stretches, so a long cast needs a quicker strike for a solid hook. And in winter, work a jig, spoon, popper or streamer slowly: touched again too soon, it puts the cold fish off.",
