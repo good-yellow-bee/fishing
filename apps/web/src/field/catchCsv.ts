@@ -1,7 +1,7 @@
-import { catchesNewestFirst, measuresOf, spotById, tripById, SKY_LABELS, WIND_LABELS, type Logbook } from "@stillwater/shared";
+import { catchesNewestFirst, measuresOf, spotById, SKY_LABELS, WIND_LABELS, type Logbook } from "@stillwater/shared";
 import { getLang, getUnits, num, t } from "../i18n";
 import { CM_PER_IN, KG_PER_LB } from "../i18n/content";
-import { noteText, outingName } from "./format";
+import { noteText, outingName, outingNameById } from "./format";
 import { countedBook } from "./milestones";
 import { bookFishDay } from "./tripMonths";
 
@@ -59,7 +59,8 @@ export function catchesCsv(book: Logbook): string {
       weight ? num(metric ? weight.pounds * KG_PER_LB : weight.pounds, 2) : "",
       t(entry.lure),
       spotById(book, entry.spotId)?.name ?? "",
-      entry.tripId ? (tripById(book, entry.tripId)?.title ?? "") : "",
+      // An untitled outing by its water, as the outings sheet names it, so the two sheets join on it.
+      entry.tripId ? (outingNameById(book, entry.tripId) ?? "") : "",
       weather ? t(SKY_LABELS[weather.sky]) : "",
       weather ? t(WIND_LABELS[weather.wind]) : "",
       weather?.waterTempF === undefined ? "" : waterTemp(metric ? ((weather.waterTempF - 32) * 5) / 9 : weather.waterTempF),

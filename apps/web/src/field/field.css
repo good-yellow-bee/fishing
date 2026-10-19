@@ -2176,8 +2176,10 @@ html:has(.form-save):has(.undo-bar) .field-main {
   border-radius: 3px;
 }
 
+/* A one-fish day's pale shade alone sits under 2:1 against an empty day: a ring in the full colour tells it apart. */
 .day-grid .day-level-1 {
   background: color-mix(in srgb, var(--field-water) 40%, transparent);
+  box-shadow: inset 0 0 0 1px var(--field-water);
 }
 
 .day-grid .day-level-2 {
@@ -2240,6 +2242,7 @@ html:has(.form-save):has(.undo-bar) .field-main {
 
   .day-grid .day-level-1 {
     background: color-mix(in srgb, Highlight 35%, Canvas);
+    box-shadow: inset 0 0 0 1px Highlight;
   }
 
   .day-grid .day-level-2 {
@@ -2385,6 +2388,7 @@ html:has(.form-save):has(.undo-bar) .field-main {
 }
 
 .day-month-days,
+.day-month-trips,
 .day-month-fish {
   font-weight: 400;
   color: var(--field-muted);

@@ -1,4 +1,4 @@
-import { LATE_NIGHT_UNTIL } from "./suggestions";
+import { LATE_NIGHT_UNTIL, tripForFish } from "./suggestions";
 import { localDate, type CatchEntry, type Logbook, type Trip } from "@stillwater/shared";
 import { locale } from "../i18n";
 
@@ -74,26 +74,55 @@ export function yearTally(catches: readonly CatchEntry[], monthOf: (entry: Catch
 
 /**
  * The day a fish counts for: its own local day, or its outing's day when it came in the small hours after that day
- * (`late`), so a night session doesn't make a second day out. `tripDays` maps outing ids to their "YYYY-MM-DD".
+ * (`late`), so a night session doesn't make a second day out. `tripDays` maps outing ids to their "YYYY-MM-DD";
+ * `loose` (looseNights) gives the evening's outing day for a small-hours fish logged without it.
  */
-export function fishDay(entry: Pick<CatchEntry, "caughtAt" | "tripId">, tripDays: ReadonlyMap<string, string>): { day: string; late: boolean } {
+export function fishDay(
+  entry: Pick<CatchEntry, "caughtAt" | "tripId"> & { id?: string },
+  tripDays: ReadonlyMap<string, string>,
+  loose?: ReadonlyMap<string, string>,
+): { day: string; late: boolean } {
   const at = new Date(entry.caughtAt);
-  const outing = entry.tripId ? tripDays.get(entry.tripId) : undefined;
+  const outing = (entry.tripId ? tripDays.get(entry.tripId) : undefined) ?? (entry.id ? loose?.get(entry.id) : undefined);
   const evening = new Date(at.getFullYear(), at.getMonth(), at.getDate() - 1, 12);
   if (outing && at.getHours() < LATE_NIGHT_UNTIL && localDate(evening) === outing) return { day: outing, late: true };
   return { day: localDate(at), late: false };
 }
 
 const tripDaysCache = new WeakMap<Logbook, ReadonlyMap<string, string>>();
+const looseCache = new WeakMap<Logbook, ReadonlyMap<string, string>>();
+
+/**
+ * The small-hours fish logged without their outing that the evening's outing on their water would take, as its page
+ * offers to file them (tripForFish): fish id to that outing's day. Counted there, a night session logged loose
+ * makes no second day out.
+ */
+export function looseNights(book: Logbook): ReadonlyMap<string, string> {
+  const known = looseCache.get(book);
+  if (known) return known;
+  const ids = new Set(book.trips.map((trip) => trip.id));
+  const found = new Map<string, string>();
+  for (const entry of book.catches) {
+    if (entry.tripId && ids.has(entry.tripId)) continue;
+    const at = new Date(entry.caughtAt);
+    if (Number.isNaN(at.getTime()) || at.getHours() >= LATE_NIGHT_UNTIL) continue;
+    const evening = localDate(new Date(at.getFullYear(), at.getMonth(), at.getDate() - 1, 12));
+    const local = `${localDate(at)}T${String(at.getHours()).padStart(2, "0")}:${String(at.getMinutes()).padStart(2, "0")}`;
+    const trip = tripForFish(book, entry.spotId, local);
+    if (trip?.date === evening) found.set(entry.id, trip.date);
+  }
+  looseCache.set(book, found);
+  return found;
+}
 
 /** The day a fish of the book counts on (fishDay), as the calendar and Bests count it: a night session's on its outing's. */
-export function bookFishDay(book: Logbook, entry: Pick<CatchEntry, "caughtAt" | "tripId">): string {
+export function bookFishDay(book: Logbook, entry: Pick<CatchEntry, "caughtAt" | "tripId"> & { id?: string }): string {
   let days = tripDaysCache.get(book);
   if (!days) {
     days = new Map(book.trips.map((trip) => [trip.id, trip.date]));
     tripDaysCache.set(book, days);
   }
-  return fishDay(entry, days).day;
+  return fishDay(entry, days, looseNights(book)).day;
 }
 
 /** The days of `year` the book shows on the water: a fish logged, or an outing from before today. */
@@ -101,7 +130,7 @@ export function daysOut(book: Logbook, year: string, today: string): number {
   const days = new Set<string>();
   const tripDays = new Map(book.trips.map((trip) => [trip.id, trip.date]));
   for (const entry of book.catches) {
-    const day = fishDay(entry, tripDays).day;
+    const day = fishDay(entry, tripDays, looseNights(book)).day;
     if (day.startsWith(`${year}-`)) days.add(day);
   }
   // An outing planned for today counts once it has a fish, through the catches above.
@@ -119,7 +148,7 @@ export function bestFishDay(book: Logbook): { date: string; count: number; tripI
   const dayOf = new Map<string, string>();
   for (const entry of book.catches) {
     if (Number.isNaN(new Date(entry.caughtAt).getTime())) continue;
-    const day = fishDay(entry, tripDays).day;
+    const day = fishDay(entry, tripDays, looseNights(book)).day;
     dayOf.set(entry.id, day);
     const list = byDay.get(day);
     if (list) list.push(entry);

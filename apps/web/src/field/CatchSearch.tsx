@@ -1005,7 +1005,7 @@ function MatchSplits({ matches, all, search, largest }: { matches: readonly Catc
   );
 }
 
-/** "3 days out · 2 outings": how many days and outings a search's fish came on, once that is more than one. */
+/** "Fish on 3 days · 2 outings": how many days and outings a search's fish came on, once that is more than one. */
 export function fishDays(book: Logbook, catches: readonly CatchEntry[]): { days: number; outings: number } {
   const trips = new Set(book.trips.map((trip) => trip.id));
   return {
@@ -1020,7 +1020,8 @@ function FishDays({ book, catches }: { book: Logbook; catches: readonly CatchEnt
   if (days < 2 && outings < 2) return null;
   return (
     <p className="meta fish-days">
-      {tn(days, "{n} day out", "{n} days out")}
+      {/* The days these fish came on, not every day out: Home's "days out" counts outings with no fish too. */}
+      {tn(days, "Fish on {n} day", "Fish on {n} days")}
       {outings > 0 ? `\u00a0· ${tn(outings, "{n} outing", "{n} outings")}` : ""}
     </p>
   );
