@@ -444,6 +444,16 @@ export function jigWinterWaitMul(lure: string | undefined, season: LakeSeason | 
   return season === "winter" && lure?.trim() && lureClass(lure).id === "jig" ? JIG_WINTER_WAIT : 1;
 }
 
+/** In winter the cold fish are slow: a hop, lift, pop or strip within this long of the lure landing or the last one comes too quick for them. */
+export const COLD_WORK_GAP_MS = 1000;
+/** Working the lure too quick in the cold puts the fish off: what is left of the wait stretches this much. */
+export const COLD_WORK_WAIT = 1.25;
+
+/** Whether this touch of the lure comes too quick for the cold fish: in winter, sooner than COLD_WORK_GAP_MS after the last. */
+export function tooQuickForCold(season: LakeSeason | undefined, sinceLastMs: number) {
+  return season === "winter" && sinceLastMs < COLD_WORK_GAP_MS;
+}
+
 /** In spring the reeds' shallows warm first, and the fish crowd in there, so any cast to the reeds draws the bite sooner. */
 export const SPRING_SHALLOWS_WAIT = 0.85;
 

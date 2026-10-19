@@ -427,6 +427,8 @@ export const PL_GAME: PlBook = {
   "Pop! The lure spits and gurgles. Let it sit…": "Pyk! Przynęta chlapie i bulgocze. Zostaw ją na chwilę…",
   "Let it sit between pops.": "Daj jej poleżeć między szarpnięciami.",
   "Let it fall between hops.": "Daj mu opaść między podbiciami.",
+  "Too quick for the cold water: the slow fish turn from it. Give it a slow count before the next one.":
+    "Za szybko jak na zimną wodę: ospałe ryby odwracają się od przynęty. Policz powoli przed następnym ruchem.",
   "Let it hang between strips.": "Daj mu zawisnąć między ściągnięciami.",
   "Strip! The streamer darts off like a fleeing fish. Let it hang…": "Ściągnij! Streamer rzuca się do ucieczki jak spłoszona rybka. Daj mu zawisnąć…",
   "Let it fall between lifts.": "Daj jej opaść między podniesieniami.",
