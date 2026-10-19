@@ -1150,6 +1150,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA105~~ | ~~On a sideways tablet a catch's Edit and Delete stack 12 px apart, and Delete's reach cut Edit's tap band to 29 px: they part by 16 px and Edit reaches 7 px each way, 33 px (#1316)~~ | phone UX | S |
 | ~~PA106~~ | ~~The map page shows its heading and a "Fog lifting…" status while its code loads, instead of an empty page (#1318)~~ | phone UX | S |
 | ~~PA107~~ | ~~On a phone the Map list's "Next outing" link was a wrapped 13 px line that the coordinates' reach cut to 9-16 px: it stands 32 px tall with room under it (#1320)~~ | phone UX | S |
+| ~~PA108~~ | ~~Photos' "Your heaviest fish has no photo" and "Your longest fish has no photo" links ran on in one wrapping line, each reaching into the other (21-30 px): each stands as a 32 px band on touch (#1323)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 

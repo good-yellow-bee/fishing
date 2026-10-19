@@ -444,6 +444,19 @@ button.field-primary {
     inset: -4px -3px -6px;
   }
 
+  /* Photos' "Your heaviest/longest fish has no photo" links run on in one line that wraps, each reaching into the
+     other: each stands as a 32 px band of its own instead. */
+  .photo-missing span a {
+    display: inline-block;
+    min-height: 32px;
+    padding-block: 5px;
+    box-sizing: border-box;
+  }
+
+  .photo-missing span a::after {
+    content: none;
+  }
+
   /* When a card's line wraps (lure above water on a phone), the rows part far enough that their reach doesn't overlap. */
   p.meta {
     row-gap: 12px;
