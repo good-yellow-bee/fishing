@@ -166,7 +166,7 @@ export const PL_CONTENT: PlBook = {
   "Pulling the rod against a run cuts it short 25% faster.": "Ciągnięcie wędki przeciw odjazdowi skraca go szybciej o 25%.",
   "The shack sells you groundbait and live shiners a fifth cheaper.": "W szopie kupujesz zanętę i żywe złotawce o jedną piątą taniej.",
   "The shack board's requests pay a quarter more.": "Prośby z tablicy w szopie płacą o jedną czwartą więcej.",
-  "Working a lure (pops, hops, lifts, strips and pauses) draws the fish sooner three times, not two.": "Praca przynętą (pyknięcia, podbicia, podniesienia, ściągnięcia i pauzy) przyspiesza branie trzy razy, a nie dwa.",
+  "Working a lure (pops, hops, lifts, strips, pauses and twitches) draws the fish sooner three times, not two.": "Praca przynętą (pyknięcia, podbicia, podniesienia, ściągnięcia, pauzy i drgnięcia) przyspiesza branie trzy razy, a nie dwa.",
 
   // Badges (badges.ts)
   "Four banks": "Cztery brzegi",

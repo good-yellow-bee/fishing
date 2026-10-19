@@ -451,6 +451,8 @@ export const PL_GAME: PlBook = {
     "Za szybko jak na zimną wodę: ospałe ryby odwracają się od przynęty. Policz powoli przed następnym ruchem.",
   "Let it hang between strips.": "Daj mu zawisnąć między ściągnięciami.",
   "Keep it coming between pauses.": "Między pauzami zwijaj dalej.",
+  "Let it drift between twitches.": "Między drgnięciami pozwól jej dryfować.",
+  "Twitch! The fly darts like a live insect. Let it drift…": "Drgnięcie! Mucha rzuca się jak żywy owad. Pozwól jej dryfować…",
   "Strip! The streamer darts off like a fleeing fish. Let it hang…": "Ściągnij! Streamer rzuca się do ucieczki jak spłoszona rybka. Daj mu zawisnąć…",
   "Pause! The crankbait stops and floats up, and a following fish turns on it. Reel on…": "Pauza! Wobler staje i wypływa w górę, a płynąca za nim ryba zawraca do niego. Zwijaj dalej…",
   "Let it fall between lifts.": "Daj jej opaść między podniesieniami.",
@@ -697,14 +699,14 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "On a small phone with larger text, the lake's header now fits its links in two rows, so the hint above your cast meter is no longer hidden under the walk stick, and a long word in the bank chip breaks inside it. On a fish's page, the line that finds fish caught in the same weather is easier to tap.":
+    "Na małym telefonie z większym tekstem nagłówek jeziora mieści teraz linki w dwóch rzędach, więc podpowiedź nad paskiem rzutu nie chowa się już pod drążkiem chodzenia, a długie słowo w plakietce brzegu łamie się w jej obrębie. Na stronie ryby łatwiej trafić w linijkę, która szuka ryb złowionych przy tej samej pogodzie.",
+  "On wet evenings and nights from spring to fall a toad now hops slowly across the dock behind you. In winter your dog's breath puffs in the cold, and the robin stays on the posts into dusk, the last bird to go to roost.":
+    "W wilgotne wieczory i noce, od wiosny do jesieni, za tobą powoli przeskakuje teraz przez pomost ropucha. Zimą oddech twojego psa paruje na mrozie, a rudzik zostaje na słupkach aż do zmierzchu, jako ostatni ptak, który idzie spać.",
   "In fall a leaf now and then comes seesawing down onto your cap, and in spring a blossom petal, riding there until your next cast shakes it off. And when a fish nibbles at your float, your dog wakes, lifts its head and cocks it at the float.":
     "Jesienią na twoją czapkę spada czasem kołyszący się liść, a wiosną płatek kwiatu, i zostaje tam aż do następnego rzutu, który go strąca. A gdy ryba skubie przy spławiku, twój pies się budzi, podnosi łeb i przechyla go, patrząc na spławik.",
   "On a phone held sideways, the first-cast coach and the news card now leave the shore signs clear from the moment the lake opens. In the field log, tabbing to a field the bottom tab bar half covers scrolls it into full view, and an outing link that wraps onto two lines is as easy to tap on each.":
     "Na telefonie trzymanym poziomo podpowiedzi do pierwszego rzutu i karta Co nowego nie zasłaniają tabliczek na brzegu od chwili otwarcia jeziora. W dzienniku przejście klawiszem Tab do pola, które dolny pasek kart przykrywa do połowy, przewija je całe na widok, a link do wyprawy zawinięty na dwie linijki łatwo trafić w każdej z nich.",
-  "Strike a fish from the dock and the robin or the little owl on the posts takes fright and flies off, to come back another time. And in winter you now wrap up in a red knitted scarf to match your dog's jumper, its ends blowing in the wind.":
-    "Zatnij rybę z pomostu, a rudzik albo pójdźka na słupkach się spłoszy i odleci, by wrócić innym razem. A zimą owijasz się teraz czerwonym, dzierganym szalikiem do pary ze sweterkiem psa, a jego końce powiewają na wietrze.",
-  "On nights without rain a little owl now glides in low over the water and lands on the post beside the lantern. It bobs its head, turns it right round to look behind it, follows the moths circling the lantern outside winter, and glides off again. And the swallows on the moored boat's rope now burst off together when you untie it under them.":
-    "W bezdeszczowe noce pójdźka nadlatuje teraz nisko nad wodą i siada na słupku obok latarni. Kiwa głową, obraca ją aż do tyłu, poza zimą śledzi ćmy krążące wokół latarni i znów odlatuje. A jaskółki z liny cumowniczej łódki zrywają się teraz razem, gdy ją odwiązujesz.",
   "{lure} · good here": "{lure} · dobra tutaj",
   "This bank suits it: the bites come sooner.": "Ten brzeg jej sprzyja: brania przychodzą szybciej.",
   "{lure} · good now": "{lure} · dobra teraz",
@@ -768,8 +770,8 @@ export const PL_GAME: PlBook = {
   "It's turning toward you — get ready to reel!": "Zawraca w twoją stronę — szykuj się do zwijania!",
   "REEL — it's charging straight at you!": "ZWIJAJ — płynie prosto na ciebie!",
   "Turning it!": "Zawracasz ją!",
-  "Patience 7 keeps a fish that dropped the bait about, so a cast straight back has it take again more often, and Accuracy 7 drops your lure into the gaps, so a cast into the weeds, the lily pads or the rocks snags half as often. The shack's tackle box now says what rank 7 of each skill brings.":
-    "Cierpliwość 7 zatrzymuje rybę, która puściła przynętę, więc rzut od razu w to samo miejsce częściej kończy się braniem, a Celność 7 wpuszcza przynętę w prześwity, więc rzut w zielsko, grzybienie lub kamienie zaczepia się o połowę rzadziej. Skrzynka na sprzęt w szopie mówi teraz, co daje 7. stopień każdej umiejętności.",
+  "Two more lures can be worked while they wait: tap to pause a crankbait so it floats up in front of a following fish, or to twitch a fly like a live insect. As with a popper, jig, spoon or streamer, the first taps bring the bite sooner, and too many put the fish off.":
+    "Dwie kolejne przynęty można prowadzić w czasie czekania: stuknij, by zatrzymać woblera, tak że wypłynie przed płynącą za nim rybą, albo by mucha drgnęła jak żywy owad. Jak przy poppersie, jigu, błystce czy streamerze pierwsze stuknięcia przyspieszają branie, a zbyt wiele płoszy rybę.",
   "Out on the boat, the anchor's splash puts the fish down for a few seconds, so give it a moment before you cast. And in a strong wind the anchored hull is held back on its line and follows a run less, so a run takes more line.":
     "Na łódce plusk kotwicy płoszy ryby na kilka sekund, więc odczekaj chwilę przed rzutem. A przy silnym wietrze kadłub trzymany na linie kotwicy słabiej obraca się za rybą, więc odjazd zabiera więcej linki.",
   "Its head is turned — reel now to win line": "Ma łeb zwrócony do ciebie — kręć teraz, by odzyskać żyłkę",

@@ -8,18 +8,20 @@ import { THERMOS_SPOT } from "./steamWisp";
 
 describe("dock dog", () => {
   it("lies on the dock by day, but stays home in the rain and after dark", () => {
-    expect(dogOut("day", "clear")).toBe(true);
-    expect(dogOut("day", "fog")).toBe(true);
-    expect(dogOut("day", "rain")).toBe(false);
-    expect(dogOut("dusk", "clear")).toBe(false);
-    expect(dogOut("night", "clear")).toBe(false);
+    expect(dogOut("day", "clear", "summer")).toBe(true);
+    expect(dogOut("day", "fog", "fall")).toBe(true);
+    expect(dogOut("day", "rain", "spring")).toBe(false);
+    expect(dogOut("dusk", "clear", "summer")).toBe(false);
+    expect(dogOut("night", "clear", "summer")).toBe(false);
+    // Winter's precipitation is snow, which it loves.
+    expect(dogOut("day", "rain", "winter")).toBe(true);
   });
 
   it("lies on the boards, clear of the thermos and the night mouse's way on", () => {
     expect(DOG_SPOT.x - 0.15).toBeGreaterThan(DOCK_PLANKS.minX);
     expect(DOG_SPOT.z + 0.45).toBeLessThan(DOCK_PLANKS.maxZ);
     expect(Math.hypot(DOG_SPOT.x - THERMOS_SPOT.x, DOG_SPOT.z - THERMOS_SPOT.z)).toBeGreaterThan(0.6);
-    expect(dogOut("dusk", "clear") || dogOut("night", "clear")).toBe(false);
+    expect(dogOut("dusk", "clear", "summer") || dogOut("night", "clear", "summer")).toBe(false);
     expect(MOUSE_FROM.x).toBeLessThan(DOG_SPOT.x);
   });
 

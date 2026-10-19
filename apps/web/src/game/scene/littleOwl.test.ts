@@ -9,7 +9,7 @@ describe("little owl on the dock post", () => {
     expect(littleOwlOut("night", "fog")).toBe(true);
     expect(littleOwlOut("night", "rain")).toBe(false);
     expect(littleOwlOut("dusk", "clear")).toBe(false);
-    for (const hour of ["dawn", "day", "dusk", "night"] as const) expect(littleOwlOut(hour, "clear") && robinOut(hour, "clear")).toBe(false);
+    for (const hour of ["dawn", "day", "dusk", "night"] as const) for (const season of ["spring", "summer", "fall", "winter"] as const) expect(littleOwlOut(hour, "clear") && robinOut(hour, "clear", season)).toBe(false);
   });
 
   it("sits on the front-left post for a good while each visit, and is away the rest", () => {

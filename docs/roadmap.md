@@ -1167,6 +1167,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA122~~ | ~~On a phone, tabbing from Title to Note on a new outing left the note box's bottom fifth and its focus ring under the fixed tab bar: Chrome does not scroll a field that is already partly in view, so the page's scroll padding never applied. The field log now scrolls any field the tab bar partly covers clear of it when the field takes focus (#1431)~~ | phone UX | S |
 | ~~PA123~~ | ~~Since the catch page's "Fish in these conditions" line took plain type (#1424) its line is 2 px shorter, and on a touch phone its link stood in a 30 px band. It now reaches 2 px further down, into the weather box's free space, for 32 px (#1443)~~ | phone UX | S |
 | ~~PA124~~ | ~~On a 280 px phone with larger text the lake's bank chip ("Dock · groundbait · 5 left") is 69 px wide inside, and "groundbait" alone ran 11 px out of it over the lure panel. The chip now breaks a word too long for it, with a hyphen where the language allows ("ground-bait") (#1450)~~ | phone UX | S |
+| ~~PA125~~ | ~~Under 360 px with larger text the lake header's links took three rows and pushed the hint under the walk stick and cast meter (71 px of it at 320 x 568, 26 px at 280 x 653). Its rows now sit flush (each link keeps its 32 px) and the links drop their letter spacing, so they take two: the hint clears the stick from 280 to 359 px in English. Known floor: Polish at 320 x 568 still needs three rows and the stick covers the hint's last 23 px (#1455)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1371,6 +1372,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC197~~ | ~~News card scene45 covers SC194 to SC196~~ (#1441) | scene | S |
 | ~~SC198~~ | ~~The dog's breath: on winter days the dock dog's breath puffs from its nose too, quicker than the angler's and out of step with it~~ (#1445) | scene | S |
 | ~~SC199~~ | ~~Toad on the dock: on wet dawns, dusks and nights from spring to fall a toad hauls itself up over the boards behind the angler, crosses in short hops with long sits, throat pumping and eyes blinking, and drops off the far edge (rainy evenings had only the snail)~~ (#1448) | scene | S |
+| ~~SC200~~ | ~~Winter robin at dusk: in winter the dock robin keeps visiting the posts on into dusk, in the lanterns' light, the last bird to roost (winter dusk had nothing about the dock)~~ (#1453) | scene | S |
+| ~~SC201~~ | ~~News card scene46 covers SC198 to SC200~~ (#1453) | scene | S |
+| ~~SC202~~ | ~~The dog in the snow: the dock dog now comes out on snowy winter days too (it stays home only in rain); snow builds on its back and now and then it gives itself a shake and throws it off in a burst of flakes~~ (#1456) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1730,7 +1734,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT352~~ | ~~The anchor's splash puts the fish down: out on the boat a cast within 15 s of the anchor going down bites 1.25x slower without spending the fresh water's first look, and the wait hint says to give it a few seconds~~ (#1442) | gameplay | S |
 | ~~GT353~~ | ~~A strong wind holds the anchored boat back: out on the boat in a strong wind a run takes 0.85 of the line it would from the bank, not 0.65, and the fight card's Boat line says so~~ (#1444) | gameplay | S |
 | ~~GT354~~ | ~~News card 2026-10-19-game35 covers GT352 and GT353: the anchor's splash puts the fish down, and a strong wind holds the anchored boat back~~ (#1446) | ui | S |
-| GT355 | Pause a crankbait: a tap while a crankbait waits pauses it so it floats up in front of a following fish, drawing the bite sooner for the first few taps like a hop, lift or strip, and the hint says "Pause! …" | gameplay | S |
+| ~~GT355~~ | ~~Pause a crankbait: a tap while a crankbait waits pauses it so it floats up in front of a following fish, drawing the bite sooner for the first few taps like a hop, lift or strip, and the hint says "Pause! …"~~ (#1449) | gameplay | S |
+| ~~GT356~~ | ~~Twitch a fly: a tap while a fly waits twitches it like a live insect, drawing the bite sooner for the first few taps like the other lure work, and the hint says "Twitch! …"~~ (#1452) | gameplay | S |
+| GT357 | News card 2026-10-19-game36 covers GT355 and GT356: pause a crankbait and twitch a fly while they wait | ui | S |
 
 ## Risks / open questions for the owner
 
