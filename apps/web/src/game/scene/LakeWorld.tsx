@@ -303,7 +303,7 @@ import { leavesOut, petalsOut } from "./leafFall";
 import { LeafWhirl } from "./LeafWhirl";
 import { leafWhirlOut } from "./leafEddy";
 import { otterOut } from "./otterMotion";
-import { lanternLevel } from "./lanternLight";
+import { lanternLevel, lanternMurk } from "./lanternLight";
 import { heronOut } from "./heronMotion";
 import { useReducedMotion } from "./reducedMotion";
 import { reedStem, reedTilt } from "./reedSway";
@@ -2529,7 +2529,7 @@ export const LakeWorld = memo(function LakeWorld({
       {fluffOut(season, sky) && <ReedFluff wind={wind} light={weather.rainLight} />}
       {gustsOut(Math.hypot(wind.x, wind.z)) && <Gusts wind={wind} />}
       {whitecapCount(Math.hypot(wind.x, wind.z)) > 0 && <Whitecaps wind={wind} light={weather.rainLight} />}
-      {lanternLevel(hour) > 0 && <Lanterns level={lanternLevel(hour)} />}
+      {lanternLevel(hour) > 0 && <Lanterns level={lanternLevel(hour)} murk={lanternMurk(sky)} />}
       {minnowsOut(hour) && <LanternMinnows />}
       {hotspot && <BubblingHotspot hotspot={hotspot} weather={weather} />}
       {hotspot && ternsOut(hour, sky, season) && <Terns center={hotspot} />}

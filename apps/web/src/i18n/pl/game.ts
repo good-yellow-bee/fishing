@@ -107,6 +107,7 @@ export const PL_GAME: PlBook = {
   "Lily pads: turn every run, or it dives into the pad stems": "Grzybienie: zawracaj każdy odjazd, bo zanurkuje między łodygi",
   "A cloud slides over the sun, and the fish move up into the shallows to feed.": "Chmura nasuwa się na słońce, a ryby podpływają na płyciznę żerować.",
   "Tight to the lily pads, where the bass and pike wait in ambush.": "Tuż przy liściach grzybieni, gdzie w zasadzce czekają bassy i szczupaki.",
+  "Along the rock edge, where the point drops off and the bass hold.": "Wzdłuż skalnej krawędzi, gdzie cypel opada w głąb i trzymają się bassy.",
   "Over the duckweed, where the bass lurk in its shade for a lure on top.": "Nad rzęsą, gdzie bassy czają się w jej cieniu na przynętę z powierzchni.",
   "Into the duckweed: the lure comes through bearded with weed, and the fish turn from it.": "W rzęsę: przynęta wraca obrośnięta zielskiem, a ryby się od niej odwracają.",
   "Under a cloud of dancing midges, where the fish rise to the ones that fall to the water.": "Pod chmarą tańczących muszek, gdzie ryby podnoszą się do tych, które spadają na wodę.",
@@ -699,14 +700,14 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "On rainy days a mallard drake now and then swims in and climbs onto the dock behind you to preen and shake off the rain. And in fog and rain the dock lanterns glow wider and warmer at night.":
+    "W deszczowe dni na pomost za tobą wychodzi czasem kaczor krzyżówki, który czyści pióra i otrząsa się z deszczu. A we mgle i w deszczu latarnie na pomoście świecą nocą szerszym, cieplejszym blaskiem.",
   "On snowy winter days your dog now comes out on the dock too, and when the snow piles up on its back it gives itself a shake. The robin comes to the snowy posts as well.":
     "W śnieżne zimowe dni twój pies też wychodzi teraz na pomost, a gdy śnieg nasypie mu się na grzbiet, otrząsa się. Na zaśnieżone słupki przylatuje też rudzik.",
   "On a small phone with larger text, the lake's header now fits its links in two rows, so the hint above your cast meter is no longer hidden under the walk stick, and a long word in the bank chip breaks inside it. On a fish's page, the line that finds fish caught in the same weather is easier to tap.":
     "Na małym telefonie z większym tekstem nagłówek jeziora mieści teraz linki w dwóch rzędach, więc podpowiedź nad paskiem rzutu nie chowa się już pod drążkiem chodzenia, a długie słowo w plakietce brzegu łamie się w jej obrębie. Na stronie ryby łatwiej trafić w linijkę, która szuka ryb złowionych przy tej samej pogodzie.",
   "On wet evenings and nights from spring to fall a toad now hops slowly across the dock behind you. In winter your dog's breath puffs in the cold, and the robin stays on the posts into dusk, the last bird to go to roost.":
     "W wilgotne wieczory i noce, od wiosny do jesieni, za tobą powoli przeskakuje teraz przez pomost ropucha. Zimą oddech twojego psa paruje na mrozie, a rudzik zostaje na słupkach aż do zmierzchu, jako ostatni ptak, który idzie spać.",
-  "In fall a leaf now and then comes seesawing down onto your cap, and in spring a blossom petal, riding there until your next cast shakes it off. And when a fish nibbles at your float, your dog wakes, lifts its head and cocks it at the float.":
-    "Jesienią na twoją czapkę spada czasem kołyszący się liść, a wiosną płatek kwiatu, i zostaje tam aż do następnego rzutu, który go strąca. A gdy ryba skubie przy spławiku, twój pies się budzi, podnosi łeb i przechyla go, patrząc na spławik.",
   "{lure} · good here": "{lure} · dobra tutaj",
   "This bank suits it: the bites come sooner.": "Ten brzeg jej sprzyja: brania przychodzą szybciej.",
   "{lure} · good now": "{lure} · dobra teraz",

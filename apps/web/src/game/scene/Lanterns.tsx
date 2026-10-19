@@ -26,8 +26,11 @@ export function lanternShapes() {
   };
 }
 
-/** Lanterns lit at `level` (0..1); mounted only from dusk. Three draws in all: the frames, the glass and the halos. */
-export function Lanterns({ level }: { level: number }) {
+/**
+ * Lanterns lit at `level` (0..1); mounted only from dusk. Three draws in all: the frames, the glass and the halos.
+ * `murk` (lanternMurk) swells and dims the halos in fog and rain, the light scattering in the wet air.
+ */
+export function Lanterns({ level, murk = 0 }: { level: number; murk?: number }) {
   const still = useReducedMotion();
   const lights = useRef<(THREE.PointLight | null)[]>([]);
   const halos = useRef<THREE.InstancedMesh>(null);
@@ -70,13 +73,14 @@ export function Lanterns({ level }: { level: number }) {
       LANTERNS.forEach((lantern, i) => {
         scratch.position.set(lantern.x, lantern.y, lantern.z);
         scratch.quaternion.copy(camera.quaternion);
-        scratch.scale.setScalar(HALO_SIZE * (0.6 + 0.4 * level) * lanternFlicker(time, lantern.seed, still));
+        scratch.scale.setScalar(HALO_SIZE * (0.6 + 0.4 * level) * (1 + 1.6 * murk) * lanternFlicker(time, lantern.seed, still));
         scratch.updateMatrix();
         glow.setMatrixAt(i, scratch.matrix);
       });
       glow.instanceMatrix.needsUpdate = true;
     }
-    halo.opacity = 0.55 * level;
+    // Against grey murk an additive glow needs to be brighter to show at all.
+    halo.opacity = Math.min(1, 0.55 * level * (1 + 0.6 * murk));
   });
 
   return (

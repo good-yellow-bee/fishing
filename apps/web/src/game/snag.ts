@@ -22,6 +22,18 @@ export const ROCK_SNAG_ODDS = 0.2;
 /** The rocks lie where the point's water is this shallow or less. */
 export const ROCK_DEPTH = 0.3;
 
+/** Just past the rocks the point drops to deeper water, where the bass hold along the edge: down to this depth. */
+export const ROCK_EDGE_DEPTH = 0.55;
+/** A cast onto the rock edge bites this much sooner. */
+export const ROCK_EDGE_WAIT = 0.85;
+
+/** Whether a cast landing at (x, z) on `spot` lands on the point's rock edge, just past the shallow rocks. */
+export function onRockEdge(spot: SpotId, x: number, z: number) {
+  if (spot !== "point") return false;
+  const depth = waterDepth(x, z);
+  return depth > ROCK_DEPTH && depth <= ROCK_EDGE_DEPTH;
+}
+
 export type SnagCover = "weed" | "rocks";
 
 /** From this Accuracy rank the lure drops into the gaps in the cover, so a cast into it snags half as often. */
