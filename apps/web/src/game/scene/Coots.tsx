@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { COOT_COUNT, cootAt } from "./cootSquabble";
 import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
+import { useSkinnedFigure } from "./skinFigure";
 import { toonRamp } from "./toon";
 
 const BODY = "#2a2c30";
@@ -60,6 +61,8 @@ export function Coots({ squabbling }: { squabbling: boolean }) {
     [shapes, materials],
   );
   const at = useMemo(() => new THREE.Matrix4(), []);
+  const root = useRef<THREE.Group>(null);
+  useSkinnedFigure(root, materials.painted);
   useFrame(({ clock }) => {
     const time = clock.elapsedTime;
     for (let i = 0; i < COOT_COUNT; i++) {
@@ -94,7 +97,7 @@ export function Coots({ squabbling }: { squabbling: boolean }) {
     }
   });
   return (
-    <group name="coots">
+    <group name="coots" ref={root}>
       {Array.from({ length: COOT_COUNT }, (_, i) => (
         <group key={i} ref={(g) => void (coots.current[i] = g)}>
           <group scale={SCALE}>
