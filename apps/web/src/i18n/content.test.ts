@@ -144,9 +144,9 @@ describe("units", () => {
     setUnits("metric");
     expect(weightText(2.4)).toBe("1.1 kg");
     expect(weightText(0.4)).toBe("0.18 kg");
-    expect(lengthText(28)).toBe("71 cm");
+    expect(lengthText(28)).toBe("71.1 cm");
     expect(tempText(61)).toBe("16°C");
-    expect(measureText({ kind: "length", inches: 11.5 })).toBe("29 cm");
+    expect(measureText({ kind: "length", inches: 11.5 })).toBe("29.2 cm");
     setLang("pl");
     expect(weatherText({ sky: "overcast", wind: "light-north", waterTempF: 52.5 })).toBe("Pochmurno · Słaby z północy · 11°C");
     expect(dailyRequestText({ id: "p", speciesId: "perch", minWeight: 0.9, count: 1, reward: 1 })).toBe("1 × okoń żółty powyżej 0,41 kg");

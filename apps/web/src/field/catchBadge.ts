@@ -1,5 +1,5 @@
 import { measuresOf, personalBests, type CatchEntry, type Logbook } from "@stillwater/shared";
-import { countedFish } from "./milestones";
+import { countedBook } from "./milestones";
 
 export type CatchBadge = "book" | "species" | null;
 
@@ -9,8 +9,9 @@ const cache = new WeakMap<Logbook, Map<string, Exclude<CatchBadge, null>>>();
 export function bookBadges(book: Logbook): Map<string, Exclude<CatchBadge, null>> {
   const known = cache.get(book);
   if (known) return known;
-  // The sample week's fish hold no record over the angler's own, as on the other pages (countedFish).
-  const real = { ...book, catches: countedFish(book.catches) };
+  // The sample week's fish hold no record over the angler's own, as on the other pages: they go with the angler's
+  // first fish or outing, as Home and Bests count them (countedBook).
+  const real = { ...book, catches: countedBook(book).catches };
   const bests = personalBests(real);
   const rivals = new Map<string, number>();
   for (const entry of real.catches) {

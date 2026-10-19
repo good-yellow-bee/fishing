@@ -796,6 +796,7 @@ export function CatchSearch() {
     const own = new Set(countedBook(book).catches.map((entry) => entry.id));
     return matches.filter((entry) => own.has(entry.id));
   }, [book, matches]);
+  const mineIds = useMemo(() => new Set(mine.map((entry) => entry.id)), [mine]);
   // Found only the sample week's or the game's fish, once those no longer count: said, so they aren't read as the angler's.
   const othersOnly = mine.length === 0 && matches.length > 0;
 
@@ -920,11 +921,13 @@ export function CatchSearch() {
           ) : null}
           {matches.length > 0 && (
             // Month headings only make sense newest first.
-            <PagedCatches key={`${settled}:${largest}`} items={matches} monthOf={largest ? undefined : (entry) => bookFishDay(book, entry).slice(0, 7)} headLevel={2}>
+            <PagedCatches key={`${settled}:${largest}`} items={matches} monthOf={largest ? undefined : (entry) => bookFishDay(book, entry).slice(0, 7)} headLevel={2} counted={(entry) => mineIds.has(entry.id)}>
               {(entry) => (
                 <CatchCard
                   key={entry.id}
                   entry={entry}
+                  // Largest first has no month headings, so the cards head the list under the page's h1.
+                  level={largest ? 2 : 3}
                   spotName={spotById(book, entry.spotId)?.name ?? t("Unknown water")}
                   tripTitle={entry.tripId ? outingNameById(book, entry.tripId) : null}
                   list={`${onCatches ? "catches" : "find"}${largest ? "-largest" : ""}:${settled}`}
