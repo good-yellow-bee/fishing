@@ -3,6 +3,7 @@ import { skillCost, SKILL_LABELS, nextSkillRank, type SkillId, type Profile } fr
 import { t, useT } from "../i18n";
 import { STRONG_LIFT_STRENGTH } from "../game/fight";
 import { PATIENT_DROP_RANK } from "../game/gotAway";
+import { CLEAN_DROP_ACCURACY } from "../game/snag";
 import { skillUnlockText } from "../i18n/content";
 
 type Props = {
@@ -18,7 +19,7 @@ function skillNote(skill: SkillId): string {
     case "strength":
       return t("Land heavier species. From {rank}, one pump lifts a catfish or sturgeon.", { rank: STRONG_LIFT_STRENGTH });
     case "accuracy":
-      return t("Wider cast band and longer strike window.");
+      return t("Wider cast band and longer strike window. From {rank}, a cast into weeds, pads or rocks snags half as often.", { rank: CLEAN_DROP_ACCURACY });
     case "patience":
       return t("Shorter waits, heavier fish. From {rank}, a fish that drops the bait takes again more often.", { rank: PATIENT_DROP_RANK });
   }

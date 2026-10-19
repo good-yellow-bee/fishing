@@ -1154,7 +1154,7 @@ export function useFishingGame(
     setSoak(soakAfterCast(soakRef.current, lureRef?.current, mercyRef.current));
     castHotspotRef.current = aimed !== null && isHotspotCast(hotspotRef.current, aimed.x, aimed.z, landing.spot);
     castRiseRef.current = risingRef.current && aimed !== null && isRiseCast(landing.spot, aimed.x, aimed.z, Date.now());
-    castSnagRef.current = aimed !== null ? castSnags(landing.spot, aimed.x, aimed.z, mercyRef.current, Math.random(), lureRef?.current, season) : null;
+    castSnagRef.current = aimed !== null ? castSnags(landing.spot, aimed.x, aimed.z, mercyRef.current, Math.random(), profile.accuracy, lureRef?.current, season) : null;
     castPerfectRef.current = isPerfectCast(castPower, profile.accuracy, level);
     // A beginner's easy fish sets as solid however far out it took.
     castLongRef.current = aimed !== null && angler !== null && !mercyRef.current && isLongCast(angler.x, angler.z, aimed.x, aimed.z, level, stanceNow === "open");

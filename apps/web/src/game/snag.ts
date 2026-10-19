@@ -24,6 +24,10 @@ export const ROCK_DEPTH = 0.3;
 
 export type SnagCover = "weed" | "rocks";
 
+/** From this Accuracy rank the lure drops into the gaps in the cover, so a cast into it snags half as often. */
+export const CLEAN_DROP_ACCURACY = 7;
+export const CLEAN_DROP_SNAG = 0.5;
+
 /** Whether a cast landing at (x, z) on `spot` lands among the point's shallow rocks. */
 export function onRocks(spot: SpotId, x: number, z: number) {
   return spot === "point" && waterDepth(x, z) <= ROCK_DEPTH;
@@ -31,12 +35,13 @@ export function onRocks(spot: SpotId, x: number, z: number) {
 
 /** What this cast snags on, if anything: the reeds' weed, the lily pads' stems or the point's rocks, never on a new angler's easy first fish.
  * A topwater lure rides over the weed and the pads, and a crankbait's lip bumps it off the rocks, so each slips its own cover. */
-export function castSnags(spot: SpotId, x: number, z: number, mercy: boolean, roll: number, lure?: string, season?: LakeSeason): SnagCover | null {
+export function castSnags(spot: SpotId, x: number, z: number, mercy: boolean, roll: number, accuracy: number, lure?: string, season?: LakeSeason): SnagCover | null {
   if (mercy) return null;
+  const odds = accuracy >= CLEAN_DROP_ACCURACY ? CLEAN_DROP_SNAG : 1;
   const kind = lure?.trim() ? lureClass(lure).id : null;
-  if (inWeeds(spot, x, z) && roll < SNAG_ODDS && kind !== "popper") return "weed";
-  if (tightToPads(season, x, z) && roll < LILY_SNAG_ODDS && kind !== "popper") return "weed";
-  if (onRocks(spot, x, z) && roll < ROCK_SNAG_ODDS && kind !== "crank") return "rocks";
+  if (inWeeds(spot, x, z) && roll < SNAG_ODDS * odds && kind !== "popper") return "weed";
+  if (tightToPads(season, x, z) && roll < LILY_SNAG_ODDS * odds && kind !== "popper") return "weed";
+  if (onRocks(spot, x, z) && roll < ROCK_SNAG_ODDS * odds && kind !== "crank") return "rocks";
   return null;
 }
 

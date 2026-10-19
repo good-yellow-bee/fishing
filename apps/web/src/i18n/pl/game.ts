@@ -374,7 +374,7 @@ export const PL_GAME: PlBook = {
 
   // Shop
   "Land heavier species. From {rank}, one pump lifts a catfish or sturgeon.": "Wyholuj cięższe gatunki. Od {rank} jedna pompka podrywa suma lub jesiotra.",
-  "Wider cast band and longer strike window.": "Szerszy pasek rzutu i dłuższy czas na zacięcie.",
+  "Wider cast band and longer strike window. From {rank}, a cast into weeds, pads or rocks snags half as often.": "Szerszy pasek rzutu i dłuższy czas na zacięcie. Od {rank} rzut w zielsko, grzybienie lub kamienie zaczepia się o połowę rzadziej.",
   "Shorter waits, heavier fish. From {rank}, a fish that drops the bait takes again more often.": "Krótsze czekanie, cięższe ryby. Od {rank} ryba, która puści przynętę, częściej bierze znowu.",
   "Tackle box": "Skrzynka ze sprzętem",
   "Line & nerve": "Żyłka i nerwy",

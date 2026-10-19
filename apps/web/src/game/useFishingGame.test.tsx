@@ -1223,7 +1223,7 @@ describe("useFishingGame strike timing", () => {
   it("tells the snag roll which lure was cast", () => {
     const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Topwater frog");
     cast(surface);
-    expect(vi.mocked(castSnags).mock.lastCall?.[5]).toBe("Topwater frog");
+    expect(vi.mocked(castSnags).mock.lastCall?.[6]).toBe("Topwater frog");
   });
 
   it("holds the bite while the lure is snagged, and lets it come once tapped free", () => {
