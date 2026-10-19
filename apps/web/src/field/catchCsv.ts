@@ -104,10 +104,12 @@ export function tripsCsv(whole: Logbook, today: string): string {
   const kinds = new Map<string, Map<string, number>>();
   const kindName = kindNames(book.catches);
   const onDay = new Map<string, string[]>();
-  for (const trip of book.trips) onDay.set(`${trip.date} ${trip.spotId}`, [...(onDay.get(`${trip.date} ${trip.spotId}`) ?? []), trip.id]);
+  for (const trip of countedBook(whole).trips) onDay.set(`${trip.date} ${trip.spotId}`, [...(onDay.get(`${trip.date} ${trip.spotId}`) ?? []), trip.id]);
   const tripIds = new Set(book.trips.map((trip) => trip.id));
   for (const entry of book.catches) {
-    const ids = entry.tripId ? [entry.tripId] : (onDay.get(`${bookFishDay(book, entry)} ${entry.spotId}`) ?? []);
+    // Only to the day's one outing there: of a dawn and a dusk, a loose fish is neither's until filed, as Trips counts it.
+    const day = onDay.get(`${bookFishDay(book, entry)} ${entry.spotId}`) ?? [];
+    const ids = entry.tripId ? [entry.tripId] : day.length === 1 ? day : [];
     for (const id of ids) {
       if (!tripIds.has(id)) continue;
       fish.set(id, (fish.get(id) ?? 0) + 1);

@@ -5,10 +5,19 @@ import { bookFishDay } from "./tripMonths";
 /**
  * The fish each outing brought, with the angler's fish logged without an outing that day on that water, as a water's
  * page and Bests count them: so the cards, the month headings and the average all say the same day the same way.
+ * A loose fish goes to the day's outing on its water only when there was one: of a dawn and a dusk, it is neither's
+ * until filed, rather than both's. `onItsWater`: only the outing's fish on its own water, for the lines that set it
+ * beside the water's other outings ("Last time here").
  */
-export function outingFish(book: Logbook): (tripId: string) => number {
-  const fishByTrip = fishCountsByTrip(book);
+export function outingFish(book: Logbook, onItsWater = false): (tripId: string) => number {
+  const tripsById = new Map(book.trips.map((trip) => [trip.id, trip]));
+  const fishByTrip = onItsWater ? new Map<string, number>() : fishCountsByTrip(book);
+  if (onItsWater)
+    for (const entry of book.catches)
+      if (entry.tripId && tripsById.get(entry.tripId)?.spotId === entry.spotId) fishByTrip.set(entry.tripId, (fishByTrip.get(entry.tripId) ?? 0) + 1);
   const own = countedBook(book);
+  const sameDay = new Map<string, number>();
+  for (const trip of own.trips) sameDay.set(`${trip.date} ${trip.spotId}`, (sameDay.get(`${trip.date} ${trip.spotId}`) ?? 0) + 1);
   const loose = new Map<string, number>();
   for (const entry of own.catches) {
     if (entry.tripId) continue;
@@ -18,7 +27,8 @@ export function outingFish(book: Logbook): (tripId: string) => number {
   const tripOf = new Map(own.trips.map((trip) => [trip.id, trip]));
   return (id) => {
     const trip = tripOf.get(id);
-    return (fishByTrip.get(id) ?? 0) + (trip ? (loose.get(`${trip.date} ${trip.spotId}`) ?? 0) : 0);
+    const key = trip ? `${trip.date} ${trip.spotId}` : "";
+    return (fishByTrip.get(id) ?? 0) + (trip && sameDay.get(key) === 1 ? (loose.get(key) ?? 0) : 0);
   };
 }
 

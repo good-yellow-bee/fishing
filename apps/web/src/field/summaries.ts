@@ -4,7 +4,7 @@ import { formatCoord } from "./map/places";
 import { osmLink } from "./osmLink";
 import { t, tn } from "../i18n";
 import { measureText, measuresText, weatherText } from "../i18n/content";
-import { fishCountLabel, formatDatedDay, formatDay, formatTimeOfDay, noteText, outingName } from "./format";
+import { fishCountLabel, fishSum, formatDatedDay, formatDay, formatTimeOfDay, noteText, outingName } from "./format";
 import { bookFishDay, daysOut } from "./tripMonths";
 import { parseExactTerm } from "./findLinks";
 import { splitLeftOut } from "./CatchSearch";
@@ -12,7 +12,7 @@ import { kindNames, speciesCounts, speciesWaters } from "./speciesLink";
 import { goalPace } from "./YearGoal";
 import { sheetOutings } from "./catchCsv";
 import { outingDay } from "./tripDates";
-import { pieceName } from "./gear/pieceKey";
+import { bookSpelling, pieceName } from "./gear/pieceKey";
 
 /**
  * An outing as plain text to paste into a message: the day, the water, then each fish in the order it came.
@@ -31,14 +31,15 @@ export function tripSummary(trip: Trip, spotName: string | null, catches: readon
       // Past New Year it carries its year, as the outing's day above does.
       const shown = day.slice(0, 4) === trip.date.slice(0, 4) ? formatDay(day) : formatDatedDay(new Date(`${day}T12:00:00`));
       const when = day === trip.date ? formatTimeOfDay(entry.caughtAt) : `${shown}, ${formatTimeOfDay(entry.caughtAt)}`;
-      const parts = [`${when} ${t(entry.species.trim())}`, measuresText(entry), t(entry.lure.trim()), ...(elsewhere ? [elsewhere] : []), ...(entry.released ? [t("Released")] : [])];
+      const parts = [`${when} ${t(bookSpelling(entry.species))}`, measuresText(entry), pieceName(entry.lure), ...(elsewhere ? [elsewhere] : []), ...(entry.released ? [t("Released")] : [])];
       return `- ${parts.join(", ")}`;
     });
   const counts = [
     ...(trip.lost ? [`${t("Lost fish")}: ${trip.lost}`] : []),
     ...(trip.missed ? [`${t("Missed strikes")}: ${trip.missed}`] : []),
   ];
-  return [head, fishCountLabel(catches.length), ...(counts.length ? [counts.join(" · ")] : []), ...fish, ...(trip.note.trim() ? ["", trip.note.trim()] : [])].join("\n");
+  // "0 fish" above a lost fish's line; "Nothing logged" only for a day with nothing at all to say.
+  return [head, counts.length ? fishSum(catches.length) : fishCountLabel(catches.length), ...(counts.length ? [counts.join(" · ")] : []), ...fish, ...(trip.note.trim() ? ["", trip.note.trim()] : [])].join("\n");
 }
 
 /** One fish as plain text: what it was, its size and lure, then when and where, and its note. */
