@@ -15,7 +15,7 @@ const IRIS = "#f0c22a";
 const DARK = "#1a1714";
 const FOOT = "#b9ab8a";
 /** Larger than life, so it reads from behind the angler in the dark. */
-const SCALE = 2.2;
+const SCALE = 2.5;
 
 /** The squat body with its pale-spotted back, streaked breast and feathered feet, facing +z. */
 export function owlBodyShape() {
@@ -51,15 +51,15 @@ export function owlHeadShape() {
 export function owlEyesShape() {
   return mergePainted(
     [-1, 1].flatMap((side) => [
-      { geometry: new THREE.SphereGeometry(0.0095, 8, 6), position: [side * 0.015, 0.024, 0.034] as const, color: IRIS },
-      { geometry: new THREE.SphereGeometry(0.0048, 6, 4), position: [side * 0.015, 0.024, 0.0425] as const, color: DARK },
+      { geometry: new THREE.SphereGeometry(0.012, 8, 6), position: [side * 0.016, 0.024, 0.036] as const, color: IRIS },
+      { geometry: new THREE.SphereGeometry(0.006, 6, 4), position: [side * 0.016, 0.024, 0.0465] as const, color: DARK },
     ]),
   );
 }
 
 /** Its lids, drawn over the eyes while it blinks. */
 export function owlLidsShape() {
-  return mergePainted([-1, 1].map((side) => ({ geometry: new THREE.SphereGeometry(0.0105, 8, 6), position: [side * 0.015, 0.024, 0.035] as const, color: PLUMAGE })));
+  return mergePainted([-1, 1].map((side) => ({ geometry: new THREE.SphereGeometry(0.013, 8, 6), position: [side * 0.016, 0.024, 0.037] as const, color: PLUMAGE })));
 }
 
 /** One broad rounded wing, from the shoulder outward along +x. */

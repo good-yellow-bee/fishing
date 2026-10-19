@@ -1353,6 +1353,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC184~~ | ~~The dock dog watches the robin while it sits on the dock posts and a paper boat as it drifts by, lifting its head from a doze and turning to follow them~~ (#1411) | scene | S |
 | ~~SC185~~ | ~~The dock dog wears a knitted red jumper with cream stripes in winter, and the new pure scene modules get names apart from their components (dragonflyPerch, dogMood, swallowPerch, paperDrift) so they cannot clash on a case-insensitive Mac~~ (#1411) | scene | S |
 | ~~SC186~~ | ~~Swallows on the mooring line burst off together, fanning out over the water, when the boat is untied under them, rather than vanishing, with news scene42 for the paper boat and the dog~~ (#1415) | scene | S |
+| ~~SC187~~ | ~~Little owl: on nights without rain a little owl glides in low and silent over the water to the dock's front-left post, beside the lantern, bobs its head, swivels it right round and blinks its big yellow eyes, then drops off and glides away (one draw, still on the post with reduced motion)~~ (#1417) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 

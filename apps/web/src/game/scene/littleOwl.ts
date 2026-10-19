@@ -19,7 +19,9 @@ export function littleOwlOut(hour: LakeHour, sky: Sky | undefined) {
 
 /** The front-left post, the one nearest the lake on the angler's left. */
 const front = DOCK_POST_CAPS.filter((cap) => cap.z === Math.min(...DOCK_POST_CAPS.map((c) => c.z)));
-export const OWL_POST = front.reduce((a, b) => (a.x < b.x ? a : b));
+const LEFT_POST = front.reduce((a, b) => (a.x < b.x ? a : b));
+/** On the outer half of its cap, clear of the lantern on the inner side, so it shows from behind the angler. */
+export const OWL_POST = { ...LEFT_POST, x: LEFT_POST.x - 0.08 };
 /** Where it glides in from and off to, low over the water out on either side. */
 const FROM: Point = { x: OWL_POST.x - 8, y: 1.6, z: OWL_POST.z - 6 };
 const TO: Point = { x: OWL_POST.x + 9, y: 1.2, z: OWL_POST.z - 7 };
@@ -57,8 +59,8 @@ function glide(a: Point, b: Point, t: number, dip: number): Point {
   return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t - dip * Math.sin(Math.PI * t), z: a.z + (b.z - a.z) * t };
 }
 
-/** Facing the angler, back up the dock, as it perches. */
-const PERCH_YAW = 0;
+/** Facing back up the dock, turned a touch toward the angler, as it perches. */
+const PERCH_YAW = 0.25;
 
 /** The owl `time` seconds in. `snow` lifts it onto the post's snow cap; `still` keeps it sat on the post. */
 export function owlAt(time: number, snow = false, still = false): OwlPose {
