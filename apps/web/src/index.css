@@ -2266,10 +2266,11 @@ html[data-input="pad"] .fight-bar .on-pad {
     width: min(210px, calc(56vw / var(--text-zoom, 1)));
     padding: 6px 8px 8px;
   }
-  /* Under the HUD too: with larger text the header wraps to three rows and hid the card's title and first lines. */
+  /* Under the HUD too: with larger text the header wraps to three rows and hid the card's title and first lines.
+   * It ends 8 px above the banks' 44 px row at the screen's foot, whose top 14 px it used to cover. */
   .whats-new {
     top: calc(var(--hud-bottom, 140px) + 8px);
-    max-height: calc((100dvh - 38px) / var(--text-zoom, 1) - var(--hud-bottom, 140px) - 8px);
+    max-height: calc(100dvh / var(--text-zoom, 1) - var(--hud-bottom, 140px) - 68px);
   }
 
 

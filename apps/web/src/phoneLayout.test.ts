@@ -141,7 +141,7 @@ describe("the trip recap on a phone", () => {
 });
 
 describe("the news card on a phone", () => {
-  it("is solid, pins Got it at its foot, sits under the header and ends on screen at any text size", () => {
+  it("is solid, pins Got it at its foot, sits under the header and ends above the banks' row at any text size", () => {
     const card = /\n\.whats-new \{([^}]*)\}/.exec(css)?.[1];
     expect(card).toContain("max-height: calc((100dvh - 38px) / var(--text-zoom, 1) - 102px);");
     expect(card).toContain("background: rgb(20, 28, 25);");
@@ -150,7 +150,7 @@ describe("the news card on a phone", () => {
     expect(foot).toContain("background: inherit;");
     const from = css.indexOf("@media (max-width: 800px) and (min-height: 501px)");
     const upright = css.slice(from, css.indexOf("@media (max-width: 520px)", from));
-    expect(upright).toMatch(/\.whats-new \{\n    top: calc\(var\(--hud-bottom, 140px\) \+ 8px\);\n    max-height: calc\(\(100dvh - 38px\) \/ var\(--text-zoom, 1\) - var\(--hud-bottom, 140px\) - 8px\);/);
+    expect(upright).toMatch(/\.whats-new \{\n    top: calc\(var\(--hud-bottom, 140px\) \+ 8px\);\n    max-height: calc\(100dvh \/ var\(--text-zoom, 1\) - var\(--hud-bottom, 140px\) - 68px\);/);
   });
 });
 

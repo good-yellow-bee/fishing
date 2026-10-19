@@ -1141,6 +1141,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA96~~ | ~~The landed card's rarity tag (common, uncommon, rare, legendary) read 2.3-3.1 to 1 on its parchment, and the quiet stamp just under 4.5: each is inked darker in its own hue, 5 to 1 or more (#1300)~~ | phone UX | S |
 | ~~PA97~~ | ~~The badge toast's small Badge line read 4.4 to 1 on its parchment over a night lake: inked to the legendary tag's brass, 5.5 to 1 (#1301)~~ | phone UX | S |
 | ~~PA98~~ | ~~The shack's daily request Claim buttons stand 32 px tall on a touch screen (#1304)~~ | phone UX | S |
+| ~~PA99~~ | ~~The news card on an upright phone ends above the banks' row instead of covering its top (#1307)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1607,7 +1608,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT305~~ | ~~Bugs on the surface: a popper or fly landing among the water striders off the dock's left side (calm days outside winter) or the whirligig raft off its right (calm spring and summer days), as the scene shows them, lands where the fish are looking up for bugs, so the bite comes sooner (0.85) and 35% of bites are a crappie, shiner, smallmouth or rainbow sipping from the film (as the dock can land them; not a beginner's first fish); the cast says so~~ (#1288) | gameplay | S |
 | ~~GT306~~ | ~~News card 2026-10-19-game20 covers GT304 and GT305: the sunken log and the surface bugs~~ (#1290) | ui | S |
 | ~~GT307~~ | ~~Pike teeth: a pike or muskie hooked deep on swallowed bait (a late strike on live bait) has its teeth on the line, and once the fight runs past 8 s they fray it, so it snaps at 0.9 like a line the rocks scuffed and stays frayed till retied; the hookset says so, the card calls it when it happens, a snap blames the teeth, and the fight card and field guide list "Sharp teeth"~~ (#1296) | gameplay | S |
-| GT308 | Minnows under the lanterns: after dark a jig, spinner, spoon, crankbait or streamer landing among the minnows milling in the dock lanterns' light (the scene's MINNOW_POOL, plus 0.3 m) lands where the hunters pick them off, so the bite comes sooner (0.85) and 35% of bites are a crappie, walleye, smallmouth or largemouth (as the dock can land them; not a beginner's first fish); the cast says so in place of the general lantern line | gameplay | S |
+| ~~GT308~~ | ~~Minnows under the lanterns: after dark a jig, spinner, spoon, crankbait or streamer landing among the minnows milling in the dock lanterns' light (the scene's MINNOW_POOL, plus 0.3 m) lands where the hunters pick them off, so the bite comes sooner (0.85) and 35% of bites are a crappie, walleye, smallmouth or largemouth (as the dock can land them; not a beginner's first fish); the cast says so in place of the general lantern line~~ (#1303) | gameplay | S |
+| GT309 | News card 2026-10-19-game21 covers GT307 and GT308: pike teeth and the minnows under the lanterns | ui | S |
 
 ## Risks / open questions for the owner
 
