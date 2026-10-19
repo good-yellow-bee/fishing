@@ -391,17 +391,22 @@ button.field-primary {
     inset: -8px -4px;
   }
 
-  /* The catch form's water and time rows sit 6 px apart: "Nearest water" under the water, "Now" and "−15 min" under
-     the time reach 5 px each way, and the time rows stand 4 px further apart, so no reach runs into the next control. */
+  /* The catch form's "Nearest water to me" under the water, and "Now" and "−15 min · −1 h · −1 day" under the time,
+     reached only 5 px each way so as not to run into the next control: 26-29 px bands. Each is now a 32 px band of
+     its own, so the rows stand apart by themselves. */
+  .water-field .text-button,
+  .time-now.text-button,
+  .time-back .text-button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    box-sizing: border-box;
+  }
+
   .water-field .text-button::after,
   .time-now.text-button::after,
   .time-back .text-button::after {
-    inset: -5px -4px;
-  }
-
-  .time-now,
-  .time-back {
-    margin-top: 4px;
+    inset: 0 -4px;
   }
 
   /* Home's stacked count lines ("6 species", "Last time: …", "Log a catch") were 23 px links 8 px apart: each is
@@ -631,6 +636,17 @@ button.field-primary {
      taller lines part them. */
   p.meta.stand {
     line-height: 2.2;
+  }
+
+  /* With larger text a long link there (a fish's time, its water) broke across two lines, and each half kept only its
+     24 px of text, the reach lost: each link now moves down whole and is its line's full 35 px band. */
+  p.meta.stand a {
+    display: inline-block;
+    max-width: 100%;
+  }
+
+  p.meta.stand a::after {
+    inset: 0 -3px;
   }
 
   /* Copy a summary sat 5 px above a fish's outing link, each reaching into the gap. */
