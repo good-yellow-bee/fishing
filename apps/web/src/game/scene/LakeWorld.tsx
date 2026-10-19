@@ -215,6 +215,8 @@ import { HillBonfire } from "./HillBonfire";
 import { bonfireOut } from "./bonfireSite";
 import { paragliderOut } from "./paraglideRidge";
 import { Sheep } from "./Sheep";
+import { Rapeseed } from "./Rapeseed";
+import { rapeseedOut } from "./rapeseedField";
 import { sheepOut } from "./sheepFlock";
 import { ValleyMist } from "./ValleyMist";
 import { valleyMistOut } from "./valleyMist";
@@ -2309,6 +2311,7 @@ export const LakeWorld = memo(function LakeWorld({
         <Hill key={hill.position.join()} position={hill.position} scale={hill.scale} color={hillColor(hill, hour, season, sky)} />
       ))}
       {balesOut(season) && <HayBales season={season} hour={hour} />}
+      {rapeseedOut(season) && <Rapeseed hour={hour} />}
       <Farmstead season={season} hour={hour} wind={wind} />
       <Windmill season={season} wind={wind} />
       {paragliderOut(hour, sky, season, wind) && <Paraglider />}
