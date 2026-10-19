@@ -18,11 +18,14 @@ import { missBodyLean, missRodPitch, missRodRoll, missView } from "./missMotion"
 import { anglerPose, shortestYaw } from "./pose";
 import { nibbleShiver, waitBodyLean, waitRodPitch, waitTwitchActive, waitView } from "./waitMotion";
 import { Reel } from "./Reel";
+import { CAP_LEAF_START, capLeafAt, capLeafStep, type CapLeafState } from "./capLeaf";
 import { capSnow } from "./capSnow";
 import { rodBowAmount, rodBowOffset, rodTipAt } from "./rodBow";
 import { STILL_TIME, useReducedMotion } from "./reducedMotion";
 import { SCARF_ENDS, SCARF_KNOT, SCARF_NECK, scarfEndShape, scarfSway, scarfWrapShape } from "./scarfKnit";
 import { SIP_IN_HAND, sipView, sipWeight } from "./sipMotion";
+import { LEAF_COLORS } from "./leafFall";
+import { leafGeometry } from "./FallingLeaves";
 import { applyToon, disposeMaterials, toonRamp } from "./toon";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
@@ -62,6 +65,8 @@ type Props = {
   /** Wrapped up in the winter scarf (scarfKnit.ts), its ends blowing in the day's `wind` (a drift on the water, m/s). */
   scarf?: boolean;
   wind?: { x: number; z: number };
+  /** Fall leaves are coming down, so now and then one settles on the cap until a cast shakes it off (capLeaf.ts). */
+  leaf?: boolean;
 };
 
 useGLTF.preload("/models/character-male-c.glb");
@@ -151,7 +156,49 @@ function AnglerScarf({ torso, wind }: { torso: THREE.Object3D; wind: { x: number
   return null;
 }
 
-export function Angler({ phase, powerRef, rodTip, lookAt, snowfall = false, nibble = false, scarf = false, wind = NO_WIND }: Props) {
+/** A fall leaf riding on the cap, on the `head` bone (capLeaf.ts); each throw of a cast shakes it off. */
+function CapLeaf({ head, phase }: { head: THREE.Object3D; phase: ScenePhase }) {
+  const still = useReducedMotion();
+  const state = useRef<CapLeafState>(CAP_LEAF_START);
+  const lastPhase = useRef(phase);
+  const leaf = useMemo(() => {
+    const mesh = new THREE.Mesh(
+      leafGeometry(),
+      new THREE.MeshToonMaterial({ color: LEAF_COLORS[1], gradientMap: toonRamp(), side: THREE.DoubleSide }),
+    );
+    // A little smaller than the falling leaves, to sit on the cap without hanging off it.
+    mesh.scale.setScalar(0.8);
+    mesh.visible = false;
+    return mesh;
+  }, []);
+  useEffect(() => {
+    head.add(leaf);
+    return () => {
+      leaf.removeFromParent();
+    };
+  }, [head, leaf]);
+  useEffect(
+    () => () => {
+      leaf.geometry.dispose();
+      (leaf.material as THREE.Material).dispose();
+    },
+    [leaf],
+  );
+  useFrame(({ clock }) => {
+    // The throw is the wind-up let go, as the line goes out.
+    const threw = lastPhase.current === "casting" && phase === "waiting";
+    lastPhase.current = phase;
+    state.current = capLeafStep(state.current, clock.elapsedTime, threw);
+    const pose = capLeafAt(state.current, clock.elapsedTime, still);
+    leaf.visible = pose.here;
+    if (!pose.here) return;
+    leaf.position.set(pose.x, pose.y, pose.z);
+    leaf.rotation.set(pose.rx, pose.ry, pose.rz);
+  });
+  return null;
+}
+
+export function Angler({ phase, powerRef, rodTip, lookAt, snowfall = false, nibble = false, scarf = false, wind = NO_WIND, leaf = false }: Props) {
   const gltf = useGLTF("/models/character-male-c.glb");
   const rodFile = useGLTF("/models/fishing-rod.glb");
   const root = useRef<THREE.Group>(null);
@@ -441,6 +488,7 @@ export function Angler({ phase, powerRef, rodTip, lookAt, snowfall = false, nibb
     <group ref={root} position={[anglerPose.x, anglerPose.y, anglerPose.z]} rotation={[0, anglerPose.yaw, 0]} scale={1.7}>
       <primitive object={character} />
       {scarf && <AnglerScarf torso={torso} wind={wind} />}
+      {leaf && head && <CapLeaf head={head} phase={phase} />}
       <group ref={grip} rotation={[1.05, 0.05, ROD_REST_Z]}>
         <primitive object={rod} scale={0.19} />
         <Reel />
