@@ -1139,6 +1139,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA94~~ | ~~Settings and the shack on a touch screen: each settings switch was a 24 px row and each volume slider 16 px; both now stand 32 px like the choices, and the shack's Strength, Accuracy and Patience buttons go from 27 to 32 px on touch (#1298)~~ | phone UX | S |
 | ~~PA95~~ | ~~The shack's sections (Line & nerve, Today's requests, The next three days) were h3s straight under the page's h1, so a screen reader's heading list skipped a level: the shack is now named by an unseen h2 that also labels its dialog (#1299)~~ | phone UX | S |
 | ~~PA96~~ | ~~The landed card's rarity tag (common, uncommon, rare, legendary) read 2.3-3.1 to 1 on its parchment, and the quiet stamp just under 4.5: each is inked darker in its own hue, 5 to 1 or more (#1300)~~ | phone UX | S |
+| ~~PA97~~ | ~~The badge toast's small Badge line read 4.4 to 1 on its parchment over a night lake: inked to the legendary tag's brass, 5.5 to 1 (#?)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
