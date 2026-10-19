@@ -227,6 +227,10 @@ import { Cabin } from "./Cabin";
 import { cabinWindowsLit, chimneySmoking } from "./cabinLook";
 import { owlOut } from "./owlMotion";
 import { JumpingFish } from "./JumpingFish";
+import { FryBurst } from "./FryBurst";
+import { fryOut } from "./fryScatter";
+import { DiamondDust } from "./DiamondDust";
+import { diamondDustOut } from "./iceGlitter";
 import { jumpsOn } from "./fishJump";
 import { Otter } from "./Otter";
 import { Osprey } from "./Osprey";
@@ -2327,6 +2331,7 @@ export const LakeWorld = memo(function LakeWorld({
       {hailOut(weather.rain, season) && <HailShower light={weather.rainLight} />}
       {mist > 0 && <LakeMist amount={mist} color={mistColor} />}
       {lakeSmokeOut(hour, sky, season) && <LakeSmoke wind={wind} color={mistColor} />}
+      {diamondDustOut(hour, sky, season, wind) && <DiamondDust wind={wind} />}
       {shafts > 0 && <LightShafts discPos={look.discPos} color={look.sun} strength={shafts} />}
       {firefliesOut(hour, sky, season) && <Fireflies />}
       {midgesOut(hour, sky, season, wind) && <MidgeCloud wind={wind} />}
@@ -2394,6 +2399,7 @@ export const LakeWorld = memo(function LakeWorld({
       {cabinWindowsLit(hour) && <WindowGlow strength={sky === "rain" || sky === "fog" ? 0.4 : 1} />}
       {owlOut(hour, season) && <Owl />}
       {jumpsOn(season) && <JumpingFish hour={hour} />}
+      {fryOut(hour, season) && <FryBurst light={weather.rainLight} />}
       {swallowsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Swallows />}
       {feathersOut(season) && <Feathers wind={wind} />}
       {leavesOut(season) && <FallingLeaves wind={wind} />}
