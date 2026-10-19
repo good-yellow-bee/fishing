@@ -20,7 +20,7 @@ export function monthOfYearTally(catches: readonly CatchEntry[], monthOf: (entry
 
 /** The month's own name ("October", "Październik"); as an exact term the search reads it as every October in the book. */
 /** A month's name inside a sentence: Polish writes it in lower case ("Najlepszy miesiąc: wrzesień"), as a bar label doesn't. */
-function inSentence(word: string): string {
+export function inSentence(word: string): string {
   return getLang() === "pl" ? word.toLocaleLowerCase("pl") : word;
 }
 

@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigationType, useSearchParams } from "react-rou
 import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lakeSeason, localDate, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook, type Measure } from "@stillwater/shared";
 import { pluralOf } from "./pluralWord";
 import { getLang, getUnits, loadPolish, polishBook, tn, useLang, useT } from "../i18n";
+import { inSentence } from "./MonthBars";
 import { CatchCard } from "./cards";
 import { CopySummary } from "./CopySummary";
 import { RenameKind } from "./RenameKind";
@@ -915,7 +916,8 @@ export function CatchSearch() {
             </p>
           ) : null}
           {matches.length > 0 ? (
-            <CopySummary text={() => searchSummary(searchParts(book, settled), matches, (id) => spotById(book, id)?.name ?? null, largest)} file="stillwater-search.txt" />
+            // The angler's own fish, as the count above sums them: a pasted copy doesn't credit them with the sample's.
+            <CopySummary text={() => searchSummary(searchParts(book, settled), mine.length > 0 ? mine : matches, (id) => spotById(book, id)?.name ?? null, largest)} file="stillwater-search.txt" />
           ) : null}
           {matches.length > 1 ? (
             // "Which was my biggest pike at Cedar": the same matches, largest first.
@@ -1041,7 +1043,8 @@ function TopLure({ catches }: { catches: readonly CatchEntry[] }) {
   const lureName = lure ? catches.find((entry) => lureKey(entry) === lure.value)!.lure.trim() : "";
   const lines = [
     lure ? t("Most on {lure}.", { lure: `${t(lureName)} (${lure.count})` }) : null,
-    time ? t("Most at {time}.", { time: `${t(BITE_TIMES.find((row) => row.id === time.value)!.label)} (${time.count})` }) : null,
+    // Polish writes the part of the day in lower case inside a sentence: "Najczęściej o tej porze: świt (2)."
+    time ? t("Most at {time}.", { time: `${inSentence(t(BITE_TIMES.find((row) => row.id === time.value)!.label))} (${time.count})` }) : null,
     water ? t("Most from {water}.", { water: `${spotById(book, water.value)?.name ?? ""} (${water.count})` }) : null,
   ].filter(Boolean);
   return lines.length > 0 ? <p className="meta top-lure">{lines.join(" ")}</p> : null;

@@ -1,6 +1,7 @@
 import { Fragment, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { FISH, biteTimes, localDate, lureTally, measureOf, moonTally, seasonTally, sizePairs, skyTally, type CatchEntry, type Logbook, type Measure } from "@stillwater/shared";
+import { FISH, biteTimes, localDate, measureOf, moonTally, seasonTally, sizePairs, skyTally, type CatchEntry, type Logbook, type Measure } from "@stillwater/shared";
+import { onPiece, pieceTally } from "./pieceTally";
 import { getUnits, num, t, tn, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { FishSum } from "./FishSum";
@@ -78,17 +79,16 @@ export function PhotoStrip({ catches, within, named = false, list }: { catches: 
 function lureBest(book: Logbook, catches: readonly CatchEntry[], lure: string): string | undefined {
   const lengths = catches.filter((entry) => measureOf(entry, "length")).length;
   const kind: Measure["kind"] = lengths * 2 >= catches.length ? "length" : "weight";
-  const want = lure.trim().replace(/\s+/g, " ").toLowerCase();
   let best: Measure | null = null;
   for (const entry of catches) {
-    if (entry.lure.trim().replace(/\s+/g, " ").toLowerCase() !== want) continue;
+    if (!onPiece(entry, lure)) continue;
     const measure = measureOf(entry, kind);
     if (!measure) continue;
     const size = (m: Measure) => (m.kind === "length" ? m.inches : m.pounds);
     if (!best || size(measure) > size(best)) best = measure;
   }
   // The newest fish on it too: a lure that took the kind once, long ago, reads apart from one still taking it.
-  const newest = catches.find((entry) => entry.lure.trim().replace(/\s+/g, " ").toLowerCase() === want);
+  const newest = catches.find((entry) => onPiece(entry, lure));
   // On the day it counts on: a night session's small hours on its outing's, as the page's newest line says it.
   const last = newest ? t("last {day}", { day: formatDay(bookFishDay(book, newest)) }) : null;
   return [best ? t("best {size}", { size: measureText(best) }) : null, last].filter(Boolean).join(" · ") || undefined;
@@ -197,7 +197,7 @@ function SpeciesView() {
         <p className="meta water-range">{t("Caught in water of {temp}.", { temp: waterRange(countedFish(catches))! })}</p>
       ) : null}
       <WaterTipsBox catches={catches} label={t("What it takes")} within={kindTerm} />
-      <CopySummary text={() => speciesSummary(name, catches, waters)} file="stillwater-species.txt" />
+      <CopySummary text={() => speciesSummary(name, catches, waters, (entry) => bookFishDay(book, entry))} file="stillwater-species.txt" />
       <BestGrowth catches={catches} />
       <LengthAndWeight catches={catches} />
       <PhotoStrip catches={catches} within={kindTerm} list={`species:${species}`} />
@@ -269,13 +269,13 @@ function SpeciesView() {
           <TallyBars key={species} rows={moonTally({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(kindTerm, exactTerm("moon", t(row.label))) : undefined }))} />
         </>
       ) : null}
-      {lureTally({ ...book, catches }).length > 1 ? (
+      {pieceTally(catches).length > 1 ? (
         <>
           <div className="section-head">
             <h2>{t("Lures that took it")}</h2>
           </div>
           {/* Each lure opens just this kind's fish on it. */}
-          <TallyBars key={species} rows={lureTally({ ...book, catches }).map((row) => ({ key: row.lure, label: t(row.lure), count: row.count, to: findWithLink(kindTerm, exactTerm("lure", t(row.lure))), note: lureBest(book, catches, row.lure) }))} />
+          <TallyBars key={species} rows={pieceTally(catches).map((row) => ({ key: row.lure, label: t(row.lure), count: row.count, to: findWithLink(kindTerm, exactTerm("lure", t(row.lure))), note: lureBest(book, catches, row.lure) }))} />
         </>
       ) : null}
       <div className="section-head">
@@ -286,7 +286,8 @@ function SpeciesView() {
       <PagedCatches key={String(largest)} items={largest ? largestFirst(catches) : catches} monthOf={largest ? undefined : (entry) => bookFishDay(book, entry).slice(0, 7)}>
         {(entry) => (
           <CatchCard
-            level={4}
+            // Under the month headings (h3) newest first; largest first has none, so straight under the h2.
+            level={largest ? 3 : 4}
             key={entry.id}
             entry={entry}
             spotName={book.spots.find((spot) => spot.id === entry.spotId)?.name ?? t("Unknown water")}
