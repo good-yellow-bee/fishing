@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useState } from "react";
-import { Link, useLocation, useNavigationType } from "react-router-dom";
+import { Link, useLocation, useNavigate, useNavigationType } from "react-router-dom";
 import { CopyPlace } from "../CopyPlace";
 import { MapAnchor } from "../MapAnchor";
 import { WATER_LABELS, localDate, shiftDate, type Spot } from "@stillwater/shared";
@@ -35,10 +35,12 @@ import {
   type SamplePlace,
 } from "./places";
 import { LABEL_HEIGHT, OWN_HEIGHT, type Box, OWN_WIDTH, PHONE_LABEL_HEIGHT, fitFrame, gridLines, labelShifts, projectIn, scaleBar, scaleSpot } from "./ownSheet";
-import { hasSampleWaters, nextRealTrips } from "../bookCopy";
+import { hasSampleWaters, isSampleSpot, nextRealTrips } from "../bookCopy";
 import { PLAY_LAKE_ID } from "../playLake";
 import { daysBetween, kmBetween, lastOutByWater, spotsByLastFish } from "../spotOrder";
-import { distanceText } from "../NearestWater";
+import { NearestWater, canFindNearest, distanceText } from "../NearestWater";
+import { datedName, downloadFile } from "../download";
+import { gpxFor } from "../gpx";
 import { countedBook, countedFish } from "../milestones";
 import { focusPageHeading } from "../pageFocus";
 import "./spot-map.css";
@@ -324,6 +326,7 @@ export function SpotMapPage() {
   // form leaves it nowhere. Either way, on to the heading.
   const { hash } = useLocation();
   const navigation = useNavigationType();
+  const navigate = useNavigate();
   useEffect(() => {
     // Back from the outing form opened by a row's "Plan one": that link, where the page was left.
     const from = plannedFrom;
@@ -407,6 +410,10 @@ export function SpotMapPage() {
     { width: MAP_WIDTH, height: MAP_HEIGHT, ...labelSizeOnScreen(), taken: plotted.filter(({ spot }) => !spot.place).map(({ place }) => project(place)), labels: sampleLabels },
   );
   const sampleShift = new Map(ownOnSample.map(({ spot }, index) => [spot.id, sampleShifts[index]]));
+  // The waters the angler noted a place for, wherever they are drawn: what "nearest" measures to and the GPS file holds.
+  // The sample week's only while there are no others, as on Waters.
+  const withPlace = spots.filter((spot) => spot.place);
+  const ownPlaced = withPlace.some((spot) => !isSampleSpot(spot.id)) ? withPlace.filter((spot) => !isSampleSpot(spot.id)) : withPlace;
 
   return (
     <div className="sheet">
@@ -419,6 +426,12 @@ export function SpotMapPage() {
               ? t("Sample spots on a north-woods sheet. The ink is local — no tile service and no key.")
               : t("Waters you note a place for are drawn here. The ink is local, with no tile service and no key.")}
           </p>
+          {/* Standing at a lake: which of the angler's waters this is, its row marked and focused below. */}
+          {ownPlaced.length >= 2 && canFindNearest(book) ? (
+            <p className="map-note">
+              <NearestWater book={book} onPick={(spotId) => navigate({ hash: `water-${spotId}` }, { replace: true })} />
+            </p>
+          ) : null}
         </div>
       </header>
 
@@ -514,6 +527,15 @@ export function SpotMapPage() {
             </span>
           ))}
           . {t("Open one to note where it is.")}
+        </p>
+      ) : null}
+
+      {/* Every water with a place in one file, for a GPS or sounder, as Waters offers it. */}
+      {ownPlaced.length > 1 ? (
+        <p className="map-note">
+          <button type="button" className="text-button" onClick={() => downloadFile(gpxFor(ownPlaced), "application/gpx+xml", datedName("stillwater-waters.gpx"))}>
+            {t("Save all waters for a GPS (.gpx)")}
+          </button>
         </p>
       ) : null}
     </div>

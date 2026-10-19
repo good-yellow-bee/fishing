@@ -21,6 +21,9 @@ import { useTackle } from "./TackleState";
 import { renamedTackle } from "./renamedTackle";
 import { undoneTackle } from "./undoneTackle";
 import { pieceRecords, type PieceRecord } from "./pieceRecord";
+import { lureRecordCsv } from "./lureCsv";
+import { datedName, downloadFile } from "../download";
+import { fileSlug } from "../gpx";
 import { ChoiceRow } from "../ChoiceRow";
 import { shownPieceKey } from "./pieceKey";
 import { notYetThisYear } from "../bests/notYet";
@@ -295,6 +298,16 @@ function LureRecord({ today }: { today: string }) {
           </span>
         </p>
       ) : null}
+      {/* The whole record as shown, every row and in the order picked, for a notebook or a fishing partner. */}
+      <p className="search-save">
+        <button
+          type="button"
+          className="text-button"
+          onClick={() => downloadFile(lureRecordCsv(records), "text/csv;charset=utf-8", datedName(water ? `${fileSlug(water.name)}-lures.csv` : "stillwater-lures.csv"))}
+        >
+          {t("Download the lure record as a spreadsheet")}
+        </button>
+      </p>
     </>
   );
 }

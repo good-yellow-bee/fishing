@@ -72,7 +72,7 @@ export function catchesCsv(book: Logbook): string {
 }
 
 /** The rows as a file: a byte-order mark tells spreadsheet programs it is UTF-8, so Polish letters survive. */
-function sheet(rows: string[][], separator: string): string {
+export function sheet(rows: string[][], separator: string): string {
   return "﻿" + rows.map((row) => row.map((value) => cell(value, separator)).join(separator)).join("\r\n") + "\r\n";
 }
 
