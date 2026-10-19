@@ -1360,6 +1360,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC189~~ | ~~News card scene43 covers SC186 to SC188~~ (#1420) | scene | S |
 | ~~SC190~~ | ~~Little owl takes fright: strike a fish while the little owl sits on its post and it beats off at once over the lake, back on its next visit (moved into the fishing scene so it sees the strike)~~ (#1423) | scene | S |
 | ~~SC191~~ | ~~Winter scarf: in winter the angler wraps up in a knitted red scarf with cream stripes to match the dock dog's jumper, its fringed ends hanging down the back and lifting and flapping in the wind~~ (#1427) | scene | S |
+| SC192 | Robin takes fright: strike a fish from the dock while the robin sits on the posts and it flies off at once from where it sat, back on its next visit; the dog's head follows it off (robin moved into the fishing scene, one strike hook shared with the little owl) | scene | S |
+| SC193 | News card scene44 covers SC190 to SC192 | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 

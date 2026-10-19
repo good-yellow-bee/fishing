@@ -693,6 +693,8 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "Strike a fish from the dock and the robin or the little owl on the posts takes fright and flies off, to come back another time. And in winter you now wrap up in a red knitted scarf to match your dog's jumper, its ends blowing in the wind.":
+    "Zatnij rybę z pomostu, a rudzik albo pójdźka na słupkach się spłoszy i odleci, by wrócić innym razem. A zimą owijasz się teraz czerwonym, dzierganym szalikiem do pary ze sweterkiem psa, a jego końce powiewają na wietrze.",
   "On nights without rain a little owl now glides in low over the water and lands on the post beside the lantern. It bobs its head, turns it right round to look behind it, follows the moths circling the lantern outside winter, and glides off again. And the swallows on the moored boat's rope now burst off together when you untie it under them.":
     "W bezdeszczowe noce pójdźka nadlatuje teraz nisko nad wodą i siada na słupku obok latarni. Kiwa głową, obraca ją aż do tyłu, poza zimą śledzi ćmy krążące wokół latarni i znów odlatuje. A jaskółki z liny cumowniczej łódki zrywają się teraz razem, gdy ją odwiązujesz.",
   "On a tablet or a phone held sideways, the Map's list of waters gives each water's last fish and next outing room to read in a line, and with larger text a water's details go under its name. The lodge's catch log now scrolls its own table sideways at every width instead of pushing the whole page, and a screen reader now reads out what the season and the sky mean for the fish, and the day's wind.":
@@ -765,8 +767,6 @@ export const PL_GAME: PlBook = {
     "W pogodne wiosenne i letnie dni przed pomostem przepływa czasem powoli mała papierowa łódka. Twój pies odwraca głowę, żeby popatrzeć, jak płynie, a także na rudzika na słupkach, a zimą nosi czerwony sweter z dzianiny.",
   "Level 17, Child of the lake, waits at 57000 points, and from there the shack sells you groundbait and live shiners a fifth cheaper. Take a lodge record from another angler and the catch earns 1.5× points, and so does your first fish of a day that makes three or more days in a row.":
     "Poziom 17, Dziecko jeziora, czeka przy 57000 punktów, a szopa sprzedaje na nim zanętę i żywe złotawce o jedną piątą taniej. Odebranie rekordu przystani innemu wędkarzowi daje 1,5× punktów, tak samo jak pierwsza ryba dnia, który jest trzecim lub dalszym dniem z rzędu.",
-  "While your rowboat lies tied up by the pier, a bow line and a stern line now hold it to the posts, sagging and drawing tight as it rides the chop. And on summer days, if your line sits quiet for a while, a blue dragonfly may come and settle on the tip of your rod until a nibble sends it off.":
-    "Gdy łódka stoi przycumowana przy pomoście, cuma dziobowa i rufowa trzymają ją przy palach, zwisając i napinając się, gdy kołysze się na fali. A w letnie dni, gdy żyłka przez chwilę spokojnie leży w wodzie, na szczytówce wędki może przysiąść niebieska ważka i siedzieć tam, aż spłoszy ją pierwsze skubnięcie.",
   "Its head is turned — reel now to win line": "Ma łeb zwrócony do ciebie — kręć teraz, by odzyskać żyłkę",
   "Wrong way: pulling with the run gives it line — pull the other side": "Nie w tę stronę: ciągnięcie razem z odjazdem oddaje jej żyłkę — ciągnij w drugą stronę",
   "Save picture": "Zapisz obrazek",

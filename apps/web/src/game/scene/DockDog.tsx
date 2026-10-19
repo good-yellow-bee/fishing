@@ -85,15 +85,15 @@ export function dogTailShape() {
 
 type Props = {
   phase: ScenePhase;
-  /** Whether the dock robin is about, and the breeze the paper boat drifts on when one is out (null when not): it watches them. */
-  robin?: boolean;
+  /** When the dock robin is about, when a strike last startled it (useStrikeStartle), else null; and the breeze the paper boat drifts on when one is out (null when not): it watches them. */
+  robin?: Readonly<{ current: number }> | null;
   paperWind?: number | null;
   /** In winter it wears a knitted jumper. Its shape is baked once, so give the dog a fresh key when this changes. */
   winter?: boolean;
 };
 
 /** The angler's dog lying on the dock by day: it watches the line, the robin and the paper boat, dozes, and sits up wagging for a bite (dogMood.ts). */
-export function DockDog({ phase, robin = false, paperWind = null, winter = false }: Props) {
+export function DockDog({ phase, robin = null, paperWind = null, winter = false }: Props) {
   const still = useReducedMotion();
   const root = useRef<THREE.Group>(null);
   const front = useRef<THREE.Group>(null);
@@ -118,7 +118,7 @@ export function DockDog({ phase, robin = false, paperWind = null, winter = false
       track.since = time;
     }
     // The robin on the posts first, then a paper boat going by.
-    const bird = robin && !still ? robinAt(time) : null;
+    const bird = robin && !still ? robinAt(time, false, false, robin.current) : null;
     const boat = paperWind !== null && !still ? paperBoatAt(time, paperWind) : null;
     const seen = bird?.here ? dogLookAt(bird.x, bird.z) : boat?.here ? dogLookAt(boat.x, boat.z) : null;
     const calm = dogMood(phase, time - track.since);
