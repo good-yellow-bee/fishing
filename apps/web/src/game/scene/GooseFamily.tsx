@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { GOSLINGS, PARENTS, gooseAt } from "./gooseGraze";
-import { mergePainted } from "./mergeParts";
+import { mergePainted, poseFromHolders } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 
@@ -55,9 +55,14 @@ export function goslingHeadShape() {
   ]);
 }
 
-/** A pair of Canada geese and their goslings grazing the far bank in spring. */
+/** A pair of Canada geese and their goslings grazing the far bank in spring. Each bird is posed with empty groups, and its parts drawn as four instanced meshes. */
 export function GooseFamily() {
   const still = useReducedMotion();
+  const root = useRef<THREE.Group>(null);
+  const bodies = useRef<THREE.InstancedMesh>(null);
+  const necks = useRef<THREE.InstancedMesh>(null);
+  const goslings = useRef<THREE.InstancedMesh>(null);
+  const goslingHeads = useRef<THREE.InstancedMesh>(null);
   const birds = useRef<(THREE.Group | null)[]>([]);
   const heads = useRef<(THREE.Group | null)[]>([]);
   const shapes = useMemo(() => ({ body: gooseBodyShape(), neck: gooseNeckShape(), gosling: goslingBodyShape(), head: goslingHeadShape() }), []);
@@ -80,28 +85,24 @@ export function GooseFamily() {
       const head = heads.current[i];
       if (head) head.rotation.x = i < PARENTS ? pose.peck * 1.9 : pose.peck * 1.1;
     }
+    if (!root.current) return;
+    root.current.updateMatrixWorld();
+    poseFromHolders(bodies.current, root.current, birds.current.slice(0, PARENTS));
+    poseFromHolders(necks.current, root.current, heads.current.slice(0, PARENTS));
+    poseFromHolders(goslings.current, root.current, birds.current.slice(PARENTS, BIRDS));
+    poseFromHolders(goslingHeads.current, root.current, heads.current.slice(PARENTS, BIRDS));
   });
   return (
-    <group name="goose-family">
+    <group ref={root} name="goose-family">
       {Array.from({ length: BIRDS }, (_, i) => (
         <group key={i} ref={(g) => void (birds.current[i] = g)} scale={SCALE}>
-          {i < PARENTS ? (
-            <>
-              <mesh geometry={shapes.body} material={material} castShadow />
-              <group ref={(g) => void (heads.current[i] = g)} position={[0, 0.32, 0.22]}>
-                <mesh geometry={shapes.neck} material={material} />
-              </group>
-            </>
-          ) : (
-            <>
-              <mesh geometry={shapes.gosling} material={material} />
-              <group ref={(g) => void (heads.current[i] = g)} position={[0, 0.14, 0.07]}>
-                <mesh geometry={shapes.head} material={material} />
-              </group>
-            </>
-          )}
+          <group ref={(g) => void (heads.current[i] = g)} position={i < PARENTS ? [0, 0.32, 0.22] : [0, 0.14, 0.07]} />
         </group>
       ))}
+      <instancedMesh ref={bodies} args={[shapes.body, material, PARENTS]} frustumCulled={false} castShadow />
+      <instancedMesh ref={necks} args={[shapes.neck, material, PARENTS]} frustumCulled={false} />
+      <instancedMesh ref={goslings} args={[shapes.gosling, material, GOSLINGS]} frustumCulled={false} />
+      <instancedMesh ref={goslingHeads} args={[shapes.head, material, GOSLINGS]} frustumCulled={false} />
     </group>
   );
 }
