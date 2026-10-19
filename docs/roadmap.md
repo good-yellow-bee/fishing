@@ -1754,7 +1754,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT359~~ | ~~The walleye dives: in open water (from the boat) its runs bore down as they do off the drop-off (harder pull, faster tiring, the scene's dive), and the fight card and field guide say "Diver: …"~~ (#1466) | gameplay | S |
 | ~~GT360~~ | ~~News card 2026-10-19-game37 covers GT358 and GT359: the point's rock edge and the walleye's dive in open water~~ (#1469) | ui | S |
 | ~~GT361~~ | ~~More reasons: when a cast has more reasons for a sooner or slower bite than the hint's two, the hint ends with "2 more reasons", which opens the rest in the hint (and steps aside so Space still strikes)~~ (#1472) | gameplay | S |
-| GT362 | A packed-up game outing keeps its title and season note in English in the field log and shows them in the reader's language, so switching language switches them (and an edit that keeps them keeps them in English), like the sample week's lines | gameplay | S |
+| ~~GT362~~ | ~~A packed-up game outing keeps its title and season note in English in the field log and shows them in the reader's language, so switching language switches them (and an edit that keeps them keeps them in English), like the sample week's lines~~ (#1475) | gameplay | S |
+| GT363 | News card 2026-10-20-game38 covers GT361 and GT362: the hint's more reasons, and game outings' titles in the reader's language | ui | S |
 
 ## Risks / open questions for the owner
 
