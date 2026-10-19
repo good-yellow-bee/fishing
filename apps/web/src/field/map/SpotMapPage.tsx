@@ -2,10 +2,13 @@ import { useEffect, useLayoutEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useNavigationType } from "react-router-dom";
 import { CopyPlace } from "../CopyPlace";
 import { MapAnchor } from "../MapAnchor";
-import { WATER_LABELS, localDate, shiftDate, type Spot } from "@stillwater/shared";
+import { WATER_LABELS, itemsForTrip, localDate, packedCount, shiftDate, type Spot } from "@stillwater/shared";
 import { bestLureAt } from "../waterLure";
 import { getUnits, t, tn, useT } from "../../i18n";
-import { fishCountLabel, formatDay, tripWhen } from "../format";
+import { fishCountLabel, formatDay, outingName, tripWhen } from "../format";
+import { useTackleItems } from "../gear/TackleState";
+import { stillGoing } from "../tripDates";
+import { inSentence } from "../MonthBars";
 import { useLogbook } from "../LogbookState";
 import {
   ALDERS,
@@ -35,7 +38,7 @@ import {
   type SamplePlace,
 } from "./places";
 import { LABEL_HEIGHT, OWN_HEIGHT, type Box, OWN_WIDTH, PHONE_LABEL_HEIGHT, fitFrame, gridLines, labelShifts, projectIn, scaleBar, scaleSpot } from "./ownSheet";
-import { hasSampleWaters, isSampleSpot, nextRealTrips } from "../bookCopy";
+import { hasSampleWaters, isSampleOuting, isSampleSpot, nextRealTrips } from "../bookCopy";
 import { PLAY_LAKE_ID } from "../playLake";
 import { daysBetween, kmBetween, lastOutByWater, spotsByLastFish } from "../spotOrder";
 import { NearestWater, canFindNearest, distanceText } from "../NearestWater";
@@ -321,6 +324,7 @@ function PlanHere({ spot }: { spot: Spot }) {
 
 export function SpotMapPage() {
   const { book } = useLogbook();
+  const tackle = useTackleItems();
   useT();
   // A first visit loads the page after the shell has moved focus, so it landed on the page itself; Back from a water's
   // form leaves it nowhere. Either way, on to the heading.
@@ -378,13 +382,25 @@ export function SpotMapPage() {
     // What to pack for there: the lure that took the most of its fish, when two or more did and none ties it.
     const best = bestLure(spotId);
     const line = best ? `${dated} · ${t("best on {lure}", { lure: t(best) })}` : dated;
+    // In the small hours, last evening's outing still going there: the one the angler is out on now.
+    const going = book.trips.find((trip) => trip.spotId === spotId && !isSampleOuting(trip) && stillGoing(book, trip));
+    if (going)
+      return (
+        <>
+          {`${line} · `}
+          <Link className="map-next" to={`/trips/${going.id}`}>{t("Out now: {outing}", { outing: outingName(going, book.spots) })}</Link>
+        </>
+      );
     const next = upcoming.find((trip) => trip.spotId === spotId);
-    // The plan itself, one tap away: its list is where the bag gets packed.
+    // The plan itself, one tap away: its list is where the bag gets packed, and how far along the bag is.
+    const bag = next && tackle ? itemsForTrip(tackle, next.id) : [];
     if (next)
       return (
         <>
           {`${line} · `}
           <Link className="map-next" to={`/trips/${next.id}`}>{t("Next outing: {when}", { when: tripWhen(next.date, today, tomorrow) })}</Link>
+          {/* Mid-line, so in lower case where Polish starts the label with a capital. */}
+          {bag.length > 0 ? ` · ${inSentence(packedCount(bag) === bag.length ? t("All packed") : t("{packed} of {total} packed", { packed: packedCount(bag), total: bag.length }))}` : null}
         </>
       );
     // A water left alone a week or more, by its last outing or fish: one that has had a rest.
