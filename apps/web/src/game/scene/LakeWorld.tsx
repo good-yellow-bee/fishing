@@ -23,6 +23,8 @@ import { BRIDGE_SCALE, BRIDGE_SPANS, PIER_BOARDS, PIER_PLANK, PIER_THICK, PIER_T
 import type { Hotspot } from "../hotspot";
 import { BubblingHotspot } from "./BubblingHotspot";
 import { LakeRain } from "./LakeRain";
+import { HailShower } from "./HailShower";
+import { hailOut } from "./hailBurst";
 import { LakeSnow } from "./LakeSnow";
 import { MoonRoad } from "./MoonRoad";
 import { DockRain } from "./DockRain";
@@ -235,6 +237,8 @@ import { LILY_PADS_AT } from "../lilyCover";
 import { FallingLeaves } from "./FallingLeaves";
 import { LeafRaft } from "./LeafRaft";
 import { leavesOut, petalsOut } from "./leafFall";
+import { LeafWhirl } from "./LeafWhirl";
+import { leafWhirlOut } from "./leafEddy";
 import { otterOut } from "./otterMotion";
 import { lanternLevel } from "./lanternLight";
 import { heronOut } from "./heronMotion";
@@ -2314,6 +2318,7 @@ export const LakeWorld = memo(function LakeWorld({
         Array.from({ length: DRAGONFLY_COUNT }, (_, i) => <Dragonfly key={i} index={i} />)}
       {weather.rain &&
         (season === "winter" ? <LakeSnow light={weather.rainLight} wind={wind} /> : <LakeRain light={weather.rainLight} wind={wind} />)}
+      {hailOut(weather.rain, season) && <HailShower light={weather.rainLight} />}
       {mist > 0 && <LakeMist amount={mist} color={mistColor} />}
       {lakeSmokeOut(hour, sky, season) && <LakeSmoke wind={wind} color={mistColor} />}
       {shafts > 0 && <LightShafts discPos={look.discPos} color={look.sun} strength={shafts} />}
@@ -2384,6 +2389,7 @@ export const LakeWorld = memo(function LakeWorld({
       {feathersOut(season) && <Feathers wind={wind} />}
       {leavesOut(season) && <FallingLeaves wind={wind} />}
       {petalsOut(season) && <FallingLeaves wind={wind} petals />}
+      {leafWhirlOut(hour, sky, season) && <LeafWhirl />}
       {leavesOut(season) && <LeafRaft wind={wind} />}
       {fluffOut(season, sky) && <ReedFluff wind={wind} light={weather.rainLight} />}
       {gustsOut(Math.hypot(wind.x, wind.z)) && <Gusts wind={wind} />}
