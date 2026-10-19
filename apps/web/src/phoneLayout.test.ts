@@ -263,3 +263,11 @@ describe("the lodge board's fish of the week on a narrow phone", () => {
     expect(/\n\.weekly-fish span \{([^}]*)\}/.exec(css)?.[1]).toContain("flex: 1 1 8em;");
   });
 });
+
+describe("the lodge's catch log at any width", () => {
+  it("scrolls the catch table on its own rather than pushing the page sideways", () => {
+    const block = /\n\.log-page table \{\n  display: block;\n  overflow-x: auto;\n\}/.exec(css);
+    expect(block).not.toBeNull();
+    expect(css).not.toContain("@media (max-width: 640px) {\n  .log-page table {");
+  });
+});
