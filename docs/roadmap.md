@@ -1626,7 +1626,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT313~~ | ~~Let it flutter: a small fish hooked where a bigger one hunts it (the grab pairs) and left unreeled for 1.2 s of its calm spells out past the halfway mark (a pump of the reel starts the pause again; easing off for a run is no pause) draws the hunter in, a further 25% of them on top of the usual grab; the hookset tells the tip~~ (#1326) | gameplay | S |
 | ~~GT314~~ | ~~Lively shiner: a golden shiner landed in a clean fight goes back out as lively live bait, so 80% of the bites on it are the bank's hunters instead of 60%; the bait button, the hook-on line and the wait line say so, and a shiner landed through the red says a clean one is livelier~~ (#1330) | gameplay | S |
 | ~~GT315~~ | ~~News card 2026-10-19-game23 covers GT313 and GT314: letting a small fish flutter for its hunter, and the lively shiner~~ (#1332) | ui | S |
-| GT316 | It takes again: a fish that drops the bait before the strike (too slow) was never pricked, so on the very next cast at that bank it takes again 40% of the time, common fish too; the miss says to cast straight back, the hookset names it, and a bigger lost fish already about keeps its place | gameplay | S |
+| ~~GT316~~ | ~~It takes again: a fish that drops the bait before the strike (too slow) was never pricked, so on the very next cast at that bank it takes again 40% of the time, common fish too; the miss says to cast straight back, the hookset names it, and a bigger lost fish already about keeps its place~~ (#1333) | gameplay | S |
+| GT317 | Sturgeon stick to the bottom: like a catfish, a sulking sturgeon takes two pumps to lift, not one, and the fight card and field guide say "Bottom-sticker" | gameplay | S |
 
 ## Risks / open questions for the owner
 
