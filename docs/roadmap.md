@@ -2295,3 +2295,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR567~~ | ~~Round 100 trips ideas: Out now on last evening's outing, the blank outings as a link, a last night quick search, the last outing in a copied plan, Home's lure only when it led~~ (#1409) | field | S |
 | ~~BR568~~ | ~~Round 101 catch-page fixes: a loose fish goes to the nearest of a day's outings, lures and kinds by their dictionary name, the first of same-size fish holds the record, the conditions line spaced, "Best time of day"~~ (#1424) | field | S |
 | ~~BR569~~ | ~~Round 101 catch-page ideas: step through the water's fish, the wait since the fish before, That day's outing for an untitled one, lengths in feet and inches~~ (#1428) | field | S |
+| ~~BR570~~ | ~~Round 102 Home and export fixes: a lure or kind typed two ways reads once in sheets and copied texts, Home's last outing is the day's later one, Perch and Worm in Polish~~ (#1435) | field | S |

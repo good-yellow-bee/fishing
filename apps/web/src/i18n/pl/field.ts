@@ -943,6 +943,8 @@ export const PL_FIELD: PlBook = {
   "Goes in as released.": "Zapisze się jako wypuszczona.",
   "Kept it": "Zabrana",
   "European perch": "Okoń",
+  Perch: "Okoń",
+  Worm: "Robak",
   Zander: "Sandacz",
   "Common bream": "Leszcz",
   Roach: "Płoć",

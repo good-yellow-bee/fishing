@@ -23,6 +23,7 @@ import { outingDay } from "./tripDates";
 import { bookFishDay } from "./tripMonths";
 import { t, useT } from "../i18n";
 import { homeScreenTip, installApp, useInstallOffer } from "../installPrompt";
+import { pieceName } from "./gear/pieceKey";
 
 /** When a book's newest fish came in, or "" for a book with none. */
 function newestAt(book: Logbook): string {
@@ -85,7 +86,7 @@ function withoutSampleFor(file: FieldArchive, here: Logbook): FieldArchive {
 
 /** The first few fish by kind and day, then how many more. */
 function fishPreview(entries: readonly { species: string; caughtAt: string }[]): string {
-  const shown = entries.slice(0, PREVIEW_FISH).map((entry) => `${t(entry.species)} ${formatCatchDay(entry.caughtAt)}`).join(", ");
+  const shown = entries.slice(0, PREVIEW_FISH).map((entry) => `${pieceName(entry.species)} ${formatCatchDay(entry.caughtAt)}`).join(", ");
   return entries.length > PREVIEW_FISH ? t("{list} and {n} more", { list: shown, n: entries.length - PREVIEW_FISH }) : shown;
 }
 const PREVIEW_FISH = 3;
