@@ -1,6 +1,7 @@
 import { catchesNewestFirst, measuresOf, spotById, SKY_LABELS, WIND_LABELS, type Logbook } from "@stillwater/shared";
 import { getLang, getUnits, num, t } from "../i18n";
 import { CM_PER_IN, KG_PER_LB } from "../i18n/content";
+import { pieceName } from "./gear/pieceKey";
 import { noteText, outingName, outingNameById } from "./format";
 import { countedBook } from "./milestones";
 import { bookFishDay } from "./tripMonths";
@@ -60,7 +61,7 @@ export function catchesCsv(book: Logbook): string {
       kindName(entry.species),
       length ? num(metric ? length.inches * CM_PER_IN : length.inches) : "",
       weight ? num(metric ? weight.pounds * KG_PER_LB : weight.pounds, 2) : "",
-      t(entry.lure.trim()),
+      pieceName(entry.lure),
       spotById(book, entry.spotId)?.name ?? "",
       // An untitled outing by its water, as the outings sheet names it, so the two sheets join on it.
       entry.tripId ? (outingNameById(book, entry.tripId) ?? "") : "",
@@ -76,7 +77,7 @@ export function catchesCsv(book: Logbook): string {
 
 /** The rows as a file: a byte-order mark tells spreadsheet programs it is UTF-8, so Polish letters survive. */
 export function sheet(rows: string[][], separator: string): string {
-  return "﻿" + rows.map((row) => row.map((value) => cell(value, separator)).join(separator)).join("\r\n") + "\r\n";
+  return "\uFEFF" + rows.map((row) => row.map((value) => cell(value, separator)).join(separator)).join("\r\n") + "\r\n";
 }
 
 /**

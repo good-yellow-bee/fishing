@@ -632,7 +632,7 @@ export const PL_FIELD: PlBook = {
   "Around this date in earlier years here: {fish}, {species}.": "Około tej daty w poprzednich latach: {fish}, {species}.",
   "Water then: {temp}.": "Woda wtedy: {temp}.",
   "Most on {lure}.": "Najczęściej na: {lure}.",
-  "Most at {time}.": "Najczęściej o tej porze: {time}.",
+  "Best time of day: {time}.": "Najczęściej o tej porze: {time}.",
   "Most from {water}.": "Najwięcej z łowiska {water}.",
   "{n} years ago": ["rok temu", "{n} lata temu", "{n} lat temu"],
   "Best day": "Najlepszy dzień",
