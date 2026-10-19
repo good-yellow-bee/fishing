@@ -6,7 +6,7 @@ import { DROPOFF_PAD, OPEN_PAD, POINT_PAD, REEDS_PAD, SHOP_X, SHOP_Z, LAKE_CENTE
 import { ArticulatedFish } from "./ArticulatedFish";
 import { ToonModel } from "./ToonModel";
 import { StaticModels, type StaticModel } from "./StaticModels";
-import { LilyBed } from "./LilyBed";
+import { LilyBed, type LilyAt } from "./LilyBed";
 import { applyToon, disposeMaterials, releaseSharedMaterials, shareMaterials, toonRamp } from "./toon";
 import { bakeToon, lookOf, releaseBaked } from "./toonBake";
 import { SWAY_FOOT, batchPlaced, disposeBatch, placement } from "./scatterBatch";
@@ -294,7 +294,7 @@ import { Beaver } from "./Beaver";
 import { Butterflies } from "./Butterflies";
 import { butterfliesOut } from "./butterflyFlit";
 import { beaverOut } from "./beaverSwim";
-import { lilyOpen } from "./lilyBloom";
+import { lilyOpen, lilyPads } from "./lilyBloom";
 import { LILY_PADS_AT } from "../lilyCover";
 import { FallingLeaves } from "./FallingLeaves";
 import { LeafRaft } from "./LeafRaft";
@@ -565,7 +565,6 @@ function plantVariant(position: Vec3) {
   const s = Math.sin(position[0] * 12.9898 + position[2] * 78.233) * 43758.5453;
   return s - Math.floor(s);
 }
-type Lily = { url: string; position: Vec3; scale: number };
 type BoatProps = { url: string; position: Vec3; heading: number; delay: number; scale: number };
 type FishProps = {
   points: Vec3[];
@@ -677,7 +676,7 @@ const SHORE_TREES: Scatter[] = [...BACK_TREES, ...TREES, ...CREEK_TREES];
 const GROUND_COVER: Scatter[] = [...BUSHES, ...GRASS, ...NEAR_GRASS, ...CREEK_GRASS];
 
 // The pads' places are shared with the casts that land tight to them (lilyCover.ts).
-const LILIES: Lily[] = LILY_PADS_AT.map((pad) => ({ url: pad.large ? MODELS.lilyLarge : MODELS.lilySmall, position: [pad.x, 0.04, pad.z], scale: pad.scale }));
+const LILIES: LilyAt[] = LILY_PADS_AT.map((pad) => ({ url: pad.large ? MODELS.lilyLarge : MODELS.lilySmall, position: [pad.x, 0.04, pad.z], scale: pad.scale }));
 
 const BOATS: BoatProps[] = [
   { url: MODELS.canoe, position: [-8.5, 0.08, -5], heading: 0.72, delay: 0.2, scale: 2.6 },
@@ -2350,7 +2349,7 @@ export const LakeWorld = memo(function LakeWorld({
       <AnchorBuoy />
       <Reeds count={14} origin={[-13.2, 0.03, 1.8]} wind={wind} />
       <Reeds count={6} origin={[11.4, 0.03, -9.7]} wind={wind} />
-      <LilyBed lilies={LILIES} season={season} open={lilyOpen(hour, sky)} />
+      {lilyPads(season) && <LilyBed lilies={LILIES} season={season} open={lilyOpen(hour, sky)} />}
       {frogsOnPads(hour, season) && FROG_PADS.map((_, i) => <PadFrog key={i} index={i} />)}
       {nestsOut(season) && <SunfishNests />}
       {floesOut(season) && <IceFloes wind={wind} />}

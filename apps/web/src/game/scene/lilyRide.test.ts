@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { lilyRide } from "./LilyBed";
+import { MAX_TILT, lilyRide } from "./LilyBed";
 import { waterHeight } from "./water";
 
 describe("lilyRide", () => {
@@ -11,8 +11,8 @@ describe("lilyRide", () => {
     let leaned = 0;
     for (let t = 0; t < 60; t += 0.25) {
       const ride = lilyRide(4, -6, t);
-      expect(Math.abs(ride.rx)).toBeLessThanOrEqual(0.28);
-      expect(Math.abs(ride.rz)).toBeLessThanOrEqual(0.28);
+      expect(Math.abs(ride.rx)).toBeLessThanOrEqual(MAX_TILT);
+      expect(Math.abs(ride.rz)).toBeLessThanOrEqual(MAX_TILT);
       leaned = Math.max(leaned, Math.abs(ride.rx), Math.abs(ride.rz));
     }
     expect(leaned).toBeGreaterThan(0);
