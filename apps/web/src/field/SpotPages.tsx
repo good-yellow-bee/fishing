@@ -412,7 +412,10 @@ function SpotView() {
   const dayOf = new Map(countedTrips.map((trip) => [trip.id, trip.date]));
   // A day's fish logged without its outing count for that day's outing, as Trips counts them: every count of an
   // outing's fish on this page, its cards and lines alike.
-  const fishOn = (id: string) => (fishByTrip.get(id) ?? 0) + (looseByDay.get(dayOf.get(id) ?? "") ?? 0);
+  // Only to the day's one outing here: of a dawn and a dusk, a loose fish is neither's until filed.
+  const outingsOnDay = new Map<string, number>();
+  for (const trip of countedTrips) outingsOnDay.set(trip.date, (outingsOnDay.get(trip.date) ?? 0) + 1);
+  const fishOn = (id: string) => (fishByTrip.get(id) ?? 0) + (outingsOnDay.get(dayOf.get(id) ?? "") === 1 ? (looseByDay.get(dayOf.get(id) ?? "") ?? 0) : 0);
   // The best outing among the angler's own here, as an outing's page names it.
   const top = topOuting(countedTrips, fishOn, fishedBy);
   // A blank spell still running here, once the water has given a fish: whether to try elsewhere.

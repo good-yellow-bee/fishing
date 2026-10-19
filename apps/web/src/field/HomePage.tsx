@@ -6,7 +6,7 @@ import { BookFile, SET_ASIDE_ID } from "./BookFile";
 import { readUnreadableBook } from "./storage";
 import { CatchSearch } from "./CatchSearch";
 import { CatchCard, TripCard } from "./cards";
-import { fishCountLabel, formatDay, formatLongDay, formatTimeOfDay, outingName, outingNameById, tripWhen } from "./format";
+import { fishCountLabel, fishSum, formatDay, formatLongDay, formatTimeOfDay, outingName, outingNameById, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { countedSearch } from "./countedSearch";
 import { RESUME_PARAM } from "./anotherCatch";
@@ -90,13 +90,16 @@ function NextDayLine({ trip, spot, today, now }: { trip: Trip; spot: Spot | unde
 /** How the last outing on the next outing's water went: its fish and the lure that took the most, to plan by. */
 function LastTimeLine({ book, trip, today }: { book: Logbook; trip: Trip; today: string }) {
   // The outings as the outing's own page reads them: the sample week's made-up ones left out once the book has the angler's own.
-  const last = countedBook(book).trips.filter((other) => other.spotId === trip.spotId)
+  const here = countedBook(book).trips.filter((other) => other.spotId === trip.spotId);
+  const last = here
     // Today's outing only once it has given a fish: one still to happen says nothing yet.
     .filter((other) => other.id !== trip.id && other.date < trip.date && (other.date < today || (other.date === today && catchesForTrip(book, other.id).length > 0)))
     .sort((a, b) => b.date.localeCompare(a.date))[0];
   if (!last) return null;
   // That water's fish of it, with those logged loose there that day, as the water's own page counts them.
-  const fish = book.catches.filter((entry) => entry.spotId === trip.spotId && (entry.tripId === last.id || (!entry.tripId && bookFishDay(book, entry) === last.date)));
+  // A loose fish only when that was the day's one outing there: of a dawn and a dusk, it is neither's until filed.
+  const alone = here.filter((other) => other.date === last.date).length === 1;
+  const fish = book.catches.filter((entry) => entry.spotId === trip.spotId && (entry.tripId === last.id || (alone && !entry.tripId && bookFishDay(book, entry) === last.date)));
   const lure = pieceTally(fish, 1)[0];
   // How long the water has rested, as the outing's own page says it: during a night session, to the outing's own day.
   const rest = daysBetween(last.date, trip.date < today ? trip.date : today);
@@ -105,8 +108,8 @@ function LastTimeLine({ book, trip, today }: { book: Logbook; trip: Trip; today:
     <small className="next-last">
       <Link to={`/trips/${last.id}`} state={FROM_LIST}>
         {lure
-          ? t("Last time: {day} · {fish} · {lure}", { day, fish: fishCountLabel(fish.length), lure: lure.count > 1 ? `${pieceName(lure.lure)} ×${lure.count}` : pieceName(lure.lure) })
-          : t("Last time: {day} · {fish}", { day, fish: fishCountLabel(fish.length) })}
+          ? t("Last time: {day} · {fish} · {lure}", { day, fish: fishSum(fish.length), lure: lure.count > 1 ? `${pieceName(lure.lure)} ×${lure.count}` : pieceName(lure.lure) })
+          : t("Last time: {day} · {fish}", { day, fish: fishSum(fish.length) })}
       </Link>
     </small>
   );

@@ -18,9 +18,14 @@ export function pieceTally(catches: readonly CatchEntry[], limit = 5): LureTally
     groups.set(key, group);
   }
   return [...groups.values()]
-    .map((group) => ({ lure: [...group.spellings].reduce((best, row) => (row[1] > best[1] ? row : best))[0], count: group.count }))
+    // A tie of spellings goes to one with a capital, as the kinds list writes them: "Jig", not "jig".
+    .map((group) => ({ lure: [...group.spellings].reduce((best, row) => (row[1] > best[1] || (row[1] === best[1] && capital(row[0]) && !capital(best[0])) ? row : best))[0], count: group.count }))
     .sort((a, b) => b.count - a.count || a.lure.localeCompare(b.lure))
     .slice(0, limit);
+}
+
+function capital(name: string): boolean {
+  return /^\p{Lu}/u.test(name);
 }
 
 /** Whether a fish was taken on the piece `lure` names, however it was spelled. */

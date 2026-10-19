@@ -41,6 +41,7 @@ export function TripMonthHead({ month, trips: all, fishOn, counted }: { month: s
  * An outing still to come, or today's before its first fish; never a round of the game, which is made by playing. In
  * the small hours last evening's is still today's: an outing going on past midnight isn't a blank day yet.
  */
+/** Its day come, an outing that counted a fish lost or a strike missed is under way, though none is landed yet. */
 export function isPlanned(trip: Trip, today: string, fish: number): boolean {
-  return trip.spotId !== PLAY_LAKE_ID && trip.date >= outingDay(today) && fish === 0;
+  return trip.spotId !== PLAY_LAKE_ID && trip.date >= outingDay(today) && fish === 0 && !(trip.date <= today && (trip.lost || trip.missed));
 }

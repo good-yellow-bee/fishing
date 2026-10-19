@@ -4,6 +4,7 @@ import { singularStems } from "./pluralWord";
 import { readSizePlus } from "./sizePlus";
 import { isPlanned } from "./TripMonthHead";
 import { outingDay } from "./tripDates";
+import { bookSpelling } from "./gear/pieceKey";
 import { isSampleOnly, isSampleOuting } from "./bookCopy";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 
@@ -90,7 +91,8 @@ function writeTripText(book: Logbook, trip: Trip, t: (text: string) => string): 
   // The month on its own too: Polish writes it differently beside a day ("września") than alone ("wrzesień").
   const written = DAY_FORMATS.map((format) => format.format(day));
   // "pike", "jig": the kinds and lures of its fish, as stored and as they read in the player's language.
-  const caught = (fishByTrip(book).get(trip.id) ?? []).flatMap((entry) => [entry.species, t(entry.species), entry.lure, t(entry.lure)]);
+  // "spoons" as "Wahadłówka" and "tench" as "Lin" too: the names the pages show them by.
+  const caught = (fishByTrip(book).get(trip.id) ?? []).flatMap((entry) => [entry.species, t(entry.species), t(bookSpelling(entry.species)), entry.lure, t(entry.lure), t(bookSpelling(entry.lure))]);
   return plain([trip.title, trip.note, spot?.name ?? "", spot ? t(WATER_LABELS[spot.waterType]) : "", trip.date, ...written, ...caught].join(" \n "));
 }
 
