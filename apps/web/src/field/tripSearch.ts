@@ -31,7 +31,8 @@ function splitOut(part: string): { rest: string; out: string[] } {
  * beside the angler's own), as a count of `kept` says: "2026-10-12 -game -sample".
  */
 export function tripDaySearch(book: Logbook, day: string, kept: ReadonlySet<string>, t: (text: string) => string): string {
-  const left = book.trips.filter((trip) => trip.date === day && !kept.has(trip.id));
+  // A month ("2026-10") as well as a day: the calendar's month counts open their outings the same way.
+  const left = book.trips.filter((trip) => (trip.date === day || trip.date.startsWith(`${day}-`)) && !kept.has(trip.id));
   return [
     day,
     ...(left.some((trip) => trip.spotId === PLAY_LAKE_ID) ? [`-${t("game|search word")}`] : []),

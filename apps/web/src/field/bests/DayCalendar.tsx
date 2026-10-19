@@ -133,8 +133,23 @@ export function DayCalendar({
             <h3>
               {monthName(month)}
               {/* The month's days out and fish at a glance, counted as its days are. */}
-              {monthDays(month) > 0 ? <small className="day-month-days">{` · ${tn(monthDays(month), "{n} day out", "{n} days out")}`}</small> : null}
-              {monthFish(month) > 0 ? <small className="day-month-fish">{` · ${tn(monthFish(month), "{n} fish", "{n} fish")}`}</small> : null}
+              {/* Each opens what it counts, as the counts on Home and Bests do: the month's outings, and its fish. */}
+              {monthDays(month) > 0 ? (
+                <small className="day-month-days">
+                  {" · "}
+                  <Link to={`/trips?${new URLSearchParams({ find: tripTail(month) }).toString()}`} aria-label={t("{month}: {count}", { month: monthName(month), count: tn(monthDays(month), "{n} day out", "{n} days out") })}>
+                    {tn(monthDays(month), "{n} day out", "{n} days out")}
+                  </Link>
+                </small>
+              ) : null}
+              {monthFish(month) > 0 ? (
+                <small className="day-month-fish">
+                  {" · "}
+                  <Link to={findLink(tail(month))} aria-label={t("{month}: {count}", { month: monthName(month), count: tn(monthFish(month), "{n} fish", "{n} fish") })}>
+                    {tn(monthFish(month), "{n} fish", "{n} fish")}
+                  </Link>
+                </small>
+              ) : null}
               {month === busiest ? <small className="day-month-best">{` · ${t("Busiest month")}`}</small> : null}
             </h3>
             {/* Which column is which day, for the eye; each day's link already says its whole date. */}

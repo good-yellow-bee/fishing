@@ -6,6 +6,7 @@ import { bookFishDay, daysOut } from "./tripMonths";
 import { parseExactTerm } from "./findLinks";
 import { splitLeftOut } from "./CatchSearch";
 import { speciesCounts, speciesWaters } from "./speciesLink";
+import { goalPace } from "./YearGoal";
 
 /**
  * An outing as plain text to paste into a message: the day, the water, then each fish in the order it came.
@@ -114,6 +115,8 @@ export function yearSummary(book: Logbook, year: string, today: string, goal: nu
     .filter((row) => row.name)
     .slice(0, 3)
     .map((row) => `${row.name} (${row.count})`);
+  const [y, m, d] = today.split("-").map(Number) as [number, number, number];
+  const pace = goal !== null && today.startsWith(`${year}-`) ? goalPace(catches.length, goal, new Date(y, m - 1, d)) : null;
   const lures = lureTally({ ...book, catches }, 3)
     .map((row) => `${t(row.lure)} (${row.count})`)
     .join(", ");
@@ -124,6 +127,8 @@ export function yearSummary(book: Logbook, year: string, today: string, goal: nu
     ...(goal !== null
       ? [catches.length >= goal ? t("Goal reached: {count} of {goal} fish in {year}.", { count: catches.length, goal, year }) : t("{count} of {goal} fish in {year}", { count: catches.length, goal, year })]
       : []),
+    // A year still under way, short of its goal: where its pace ends it, as the goal on Bests says.
+    ...(pace ? [t("On pace for {pace} by the year's end", { pace: pace.pace })] : []),
     ...best(bests.longest, "length"),
     ...best(bests.heaviest, "weight"),
     ...(waters.length > 0 ? [t("Waters: {waters}", { waters: waters.join(", ") })] : []),
