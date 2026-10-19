@@ -768,8 +768,8 @@ export const PL_GAME: PlBook = {
   "Turning it!": "Zawracasz ją!",
   "Patience 7 keeps a fish that dropped the bait about, so a cast straight back has it take again more often, and Accuracy 7 drops your lure into the gaps, so a cast into the weeds, the lily pads or the rocks snags half as often. The shack's tackle box now says what rank 7 of each skill brings.":
     "Cierpliwość 7 zatrzymuje rybę, która puściła przynętę, więc rzut od razu w to samo miejsce częściej kończy się braniem, a Celność 7 wpuszcza przynętę w prześwity, więc rzut w zielsko, grzybienie lub kamienie zaczepia się o połowę rzadziej. Skrzynka na sprzęt w szopie mówi teraz, co daje 7. stopień każdej umiejętności.",
-  "Level 18, Breath of the lake, waits at 68000 points, and from there the shack board's requests pay a quarter more. And from Strength 7 one pump lifts a sulking catfish or sturgeon off the bottom, not two.":
-    "Poziom 18, Oddech jeziora, czeka przy 68000 punktów, a od niego prośby z tablicy w szopie płacą o jedną czwartą więcej. A od Siły 7 jedna pompka podrywa z dna zalegającego suma lub jesiotra, nie dwie.",
+  "Out on the boat, the anchor's splash puts the fish down for a few seconds, so give it a moment before you cast. And in a strong wind the anchored hull is held back on its line and follows a run less, so a run takes more line.":
+    "Na łódce plusk kotwicy płoszy ryby na kilka sekund, więc odczekaj chwilę przed rzutem. A przy silnym wietrze kadłub trzymany na linie kotwicy słabiej obraca się za rybą, więc odjazd zabiera więcej linki.",
   "Its head is turned — reel now to win line": "Ma łeb zwrócony do ciebie — kręć teraz, by odzyskać żyłkę",
   "Wrong way: pulling with the run gives it line — pull the other side": "Nie w tę stronę: ciągnięcie razem z odjazdem oddaje jej żyłkę — ciągnij w drugą stronę",
   "Save picture": "Zapisz obrazek",

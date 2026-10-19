@@ -1725,7 +1725,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT350~~ | ~~An accurate caster drops into the gaps: from Accuracy 7 a cast into the reeds' weed, the lily pads or the point's rocks snags half as often; the shack's Accuracy line says so~~ (#1436) | gameplay | S |
 | ~~GT351~~ | ~~News card 2026-10-19-game34 covers GT349 and GT350: Patience 7 brings a dropped fish back more often, and Accuracy 7 snags half as often~~ (#1439) | ui | S |
 | ~~GT352~~ | ~~The anchor's splash puts the fish down: out on the boat a cast within 15 s of the anchor going down bites 1.25x slower without spending the fresh water's first look, and the wait hint says to give it a few seconds~~ (#1442) | gameplay | S |
-| GT353 | A strong wind holds the anchored boat back: out on the boat in a strong wind a run takes 0.85 of the line it would from the bank, not 0.65, and the fight card's Boat line says so | gameplay | S |
+| ~~GT353~~ | ~~A strong wind holds the anchored boat back: out on the boat in a strong wind a run takes 0.85 of the line it would from the bank, not 0.65, and the fight card's Boat line says so~~ (#1444) | gameplay | S |
+| GT354 | News card 2026-10-19-game35 covers GT352 and GT353: the anchor's splash puts the fish down, and a strong wind holds the anchored boat back | ui | S |
 
 ## Risks / open questions for the owner
 
