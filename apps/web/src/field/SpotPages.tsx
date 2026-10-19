@@ -38,7 +38,8 @@ import { CopySummary } from "./CopySummary";
 import { spotSummary } from "./summaries";
 import { EditDelete } from "./EditDelete";
 import { fishCountLabel, formatDay, formatTimeOfDay, messageText, outingName, outingNameById, tripWhen } from "./format";
-import { outingDay, stillGoing } from "./tripDates";
+import { outNow, outingDay, stillGoing } from "./tripDates";
+import { newestOutingFirst } from "./catchNeighbors";
 import { pieceName } from "./gear/pieceKey";
 import { useLogbook } from "./LogbookState";
 import { locale, num, t, tn, useT } from "../i18n";
@@ -430,8 +431,8 @@ function SpotView() {
   // A search finds a water by its name, so while another shares it, this page's links open both waters' fish.
   const twin = book.spots.find((other) => other.id !== spot.id && twinName(other.name, spot.name));
   const lastHere = spot.id === PLAY_LAKE_ID ? undefined : lastOutByWater(counted, fishedBy).get(spot.id);
-  // The outing on this water now, in the small hours of a night session, as the Map says it.
-  const outNow = spot.id === PLAY_LAKE_ID ? undefined : countedTrips.find((trip) => stillGoing(book, trip));
+  // The outing on this water now, as the Map says it: of a dawn and a dusk, the later.
+  const outNowHere = spot.id === PLAY_LAKE_ID ? undefined : countedTrips.filter((trip) => outNow(book, trip)).sort(newestOutingFirst(book))[0];
   // The next outing planned here, as the Waters card names it; today's once it has a fish is under way, not ahead.
   const nextHere = nextRealTrips(book, today).find((trip) => trip.spotId === spot.id);
   const restHere = lastHere ? daysBetween(lastHere, today) : 0;
@@ -517,9 +518,9 @@ function SpotView() {
             <LastHereLine rest={restHere} day={lastHere} trip={countedTrips.filter((trip) => trip.date === lastHere).sort((a, b) => fishOn(b.id) - fishOn(a.id))[0]} fish={fishOn} catches={catches} />
           </p>
         ) : null}
-        {outNow ? (
+        {outNowHere ? (
           <p className="meta out-now">
-            <Link to={`/trips/${outNow.id}`}>{t("Out now: {outing}", { outing: outingName(outNow, book.spots) })}</Link>
+            <Link to={`/trips/${outNowHere.id}`}>{t("Out now: {outing}", { outing: outingName(outNowHere, book.spots) })}</Link>
           </p>
         ) : null}
         {nextHere ? (
