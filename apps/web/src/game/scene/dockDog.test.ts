@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { DOCK_PLANKS } from "@stillwater/shared";
-import { CHEER_SEC, DOG_SPOT, DOZE_IDLE_SEC, DOZE_WAIT_SEC, dogGlance, dogMood, dogOut, easeMood, tailSwing } from "./dockDog";
+import { CHEER_SEC, DOG_LOOK_MAX, DOG_SPOT, DOZE_IDLE_SEC, DOZE_WAIT_SEC, dogGlance, dogLookAt, dogMood, dogOut, easeMood, tailSwing, watching } from "./dockDog";
+import { paperBoatAt } from "./paperBoat";
+import { robinAt } from "./robinVisit";
 import { MOUSE_FROM } from "./mouseScurry";
 import { THERMOS_SPOT } from "./steamWisp";
 
@@ -56,5 +58,32 @@ describe("dock dog", () => {
       expect(Math.abs(tailSwing(t, 1))).toBeLessThanOrEqual(0.6);
       expect(Math.abs(dogGlance(t))).toBeLessThanOrEqual(0.4);
     }
+  });
+
+  it("turns its head to watch the robin on the posts and a paper boat going by, but not round behind it", () => {
+    let robinSeen = 0;
+    for (let t = 0; t < 90; t += 0.5) {
+      const bird = robinAt(t);
+      if (!bird.here || bird.flying) continue;
+      const turn = dogLookAt(bird.x, bird.z);
+      expect(turn).not.toBeNull();
+      robinSeen += 1;
+    }
+    expect(robinSeen).toBeGreaterThan(10);
+    // Out on the water to either side it turns opposite ways, always within reach.
+    const left = dogLookAt(DOG_SPOT.x - 3, DOG_SPOT.z - 3)!;
+    const right = dogLookAt(DOG_SPOT.x + 3, DOG_SPOT.z - 3)!;
+    expect(Math.sign(left)).toBe(-Math.sign(right));
+    expect(Math.abs(left)).toBeLessThanOrEqual(DOG_LOOK_MAX);
+    expect(dogLookAt(DOG_SPOT.x, DOG_SPOT.z - 5)).toBeCloseTo(0, 6);
+    expect(dogLookAt(DOG_SPOT.x, DOG_SPOT.z + 3)).toBeNull();
+    const boat = paperBoatAt(60, 0);
+    expect(boat.here).toBe(true);
+    expect(dogLookAt(boat.x, boat.z)).not.toBeNull();
+  });
+
+  it("wakes to watch, but a watch does not stand it down from sitting", () => {
+    expect(watching({ sit: 0, headUp: 0, wag: 0 }).headUp).toBeGreaterThan(0.5);
+    expect(watching({ sit: 1, headUp: 1, wag: 1 })).toEqual({ sit: 1, headUp: 1, wag: 1 });
   });
 });

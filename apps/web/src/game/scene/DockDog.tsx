@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { DOG_SPOT, DOG_YAW, dogGlance, dogMood, easeMood, tailSwing, type DogMood } from "./dockDog";
+import { DOG_SPOT, DOG_YAW, dogGlance, dogLookAt, dogMood, easeMood, tailSwing, watching, type DogMood } from "./dockDog";
+import { paperBoatAt } from "./paperBoat";
+import { robinAt } from "./robinVisit";
 import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { useSkinnedFigure } from "./skinFigure";
@@ -64,10 +66,15 @@ export function dogTailShape() {
   return mergePainted([{ geometry: new THREE.CylinderGeometry(0.014, 0.03, 0.26, 7), position: [0, 0, -0.13], rotation: [Math.PI / 2, 0, 0], color: COAT }]);
 }
 
-type Props = { phase: ScenePhase };
+type Props = {
+  phase: ScenePhase;
+  /** Whether the dock robin is about, and the breeze the paper boat drifts on when one is out (null when not): it watches them. */
+  robin?: boolean;
+  paperWind?: number | null;
+};
 
-/** The angler's dog lying on the dock by day: it watches the line, dozes, and sits up wagging for a bite (dockDog.ts). */
-export function DockDog({ phase }: Props) {
+/** The angler's dog lying on the dock by day: it watches the line, the robin and the paper boat, dozes, and sits up wagging for a bite (dockDog.ts). */
+export function DockDog({ phase, robin = false, paperWind = null }: Props) {
   const still = useReducedMotion();
   const root = useRef<THREE.Group>(null);
   const front = useRef<THREE.Group>(null);
@@ -82,7 +89,7 @@ export function DockDog({ phase }: Props) {
     },
     [shapes, material],
   );
-  const state = useRef<{ phase: ScenePhase; since: number; mood: DogMood | null }>({ phase, since: 0, mood: null });
+  const state = useRef<{ phase: ScenePhase; since: number; mood: DogMood | null; look: number }>({ phase, since: 0, mood: null, look: 0 });
 
   useFrame(({ clock }, delta) => {
     const time = clock.elapsedTime;
@@ -91,7 +98,12 @@ export function DockDog({ phase }: Props) {
       track.phase = phase;
       track.since = time;
     }
-    const target = dogMood(phase, time - track.since);
+    // The robin on the posts first, then a paper boat going by.
+    const bird = robin && !still ? robinAt(time) : null;
+    const boat = paperWind !== null && !still ? paperBoatAt(time, paperWind) : null;
+    const seen = bird?.here ? dogLookAt(bird.x, bird.z) : boat?.here ? dogLookAt(boat.x, boat.z) : null;
+    const calm = dogMood(phase, time - track.since);
+    const target = seen !== null && calm.sit === 0 ? watching(calm) : calm;
     const mood = (track.mood = still || !track.mood ? target : easeMood(track.mood, target, Math.min(delta, 0.1)));
     // The chest rises about the hips as it sits up; the front legs swing from lying forward to straight down.
     if (front.current) front.current.rotation.x = -mood.sit * SIT_TILT;
@@ -101,7 +113,9 @@ export function DockDog({ phase }: Props) {
       // Asleep its chin drops onto its paws; awake it holds its head up level, glancing about now and then.
       head.current.position.y = 0.12 - (1 - awake) * 0.1;
       head.current.rotation.x = (1 - awake) * 0.45 + mood.sit * SIT_TILT * 0.8;
-      head.current.rotation.y = still ? 0 : awake * (1 - mood.sit) * dogGlance(time);
+      const turn = seen ?? dogGlance(time);
+      track.look += (turn - track.look) * (1 - Math.exp(-4 * Math.min(delta, 0.1)));
+      head.current.rotation.y = still ? 0 : awake * (1 - mood.sit) * track.look;
     }
     if (tail.current) tail.current.rotation.y = still ? 0 : tailSwing(time, mood.wag);
   });
