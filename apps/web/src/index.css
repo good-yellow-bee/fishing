@@ -2393,6 +2393,20 @@ html[data-input="pad"] .fight-bar .on-pad {
   }
 }
 
+/* Under 360 px with larger text the header's links took three rows, which pushed the hint down under the walk stick
+   (71 px of it on a 320 x 568 phone): its rows sit flush, each link keeping its 32 px, and the links drop their
+   letter spacing, so they take two. */
+@media (max-width: 359px) and (min-height: 501px) {
+  html[data-text-size] .hud-stats {
+    row-gap: 0;
+    column-gap: 5px;
+  }
+
+  html[data-text-size] .hud .hud-link {
+    letter-spacing: 0;
+  }
+}
+
 /* On a touch screen the thumb button already says Reel and the status line says when to let go, so the card's
    hold-and-release line goes with larger text too. */
 @media (pointer: coarse) and (max-width: 800px) and (min-height: 501px) {
