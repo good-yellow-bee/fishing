@@ -238,6 +238,11 @@ export function BestsPage() {
   const lastFish = countedFish(whole.catches).reduce<CatchEntry | null>((newest, entry) => (!newest || dayOf(entry) > dayOf(newest) ? entry : newest), null);
   const lastFishDay = lastFish ? dayOf(lastFish) : null;
   const sinceLastFish = lastFishDay ? daysBetween(lastFishDay, today) : 0;
+  // How long an all-time record has stood, from a month on: a season's best is that season's, not a standing mark.
+  const recordAge = (day: string) => {
+    const days = year ? 0 : daysBetween(day, today);
+    return days >= 30 ? ` · ${tn(days, "{n} day ago", "{n} days ago")}` : "";
+  };
   const nameOf = (spotId: string) => spotById(book, spotId)?.name ?? t("Unknown water");
   const titleOf = (tripId: string | null) => (tripId ? outingNameById(book, tripId) : null);
 
@@ -398,7 +403,7 @@ export function BestsPage() {
               t("None")
             )}
           </strong>
-          <small>{bests.longest ? `${kindName(bests.longest.species)} · ${formatDay(dayOf(bests.longest))}` : (emptySeason ?? t("No length in the book"))}</small>
+          <small>{bests.longest ? `${kindName(bests.longest.species)} · ${formatDay(dayOf(bests.longest))}${recordAge(dayOf(bests.longest))}` : (emptySeason ?? t("No length in the book"))}</small>
         </div>
         <div>
           <span className="eyebrow">{t("Heaviest")}</span>
@@ -411,7 +416,7 @@ export function BestsPage() {
               t("None")
             )}
           </strong>
-          <small>{bests.heaviest ? `${kindName(bests.heaviest.species)} · ${formatDay(dayOf(bests.heaviest))}` : (emptySeason ?? t("No weight in the book"))}</small>
+          <small>{bests.heaviest ? `${kindName(bests.heaviest.species)} · ${formatDay(dayOf(bests.heaviest))}${recordAge(dayOf(bests.heaviest))}` : (emptySeason ?? t("No weight in the book"))}</small>
         </div>
         <div>
           <span className="eyebrow">{t("Waters with fish")}</span>

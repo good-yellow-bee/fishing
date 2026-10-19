@@ -43,11 +43,18 @@ export function MonthYearTable({
     const months = [...counts].filter(([month, count]) => month.startsWith(`${year}-`) && count > 0);
     return months.length > 1 ? Math.max(...months.map(([, count]) => count)) : 0;
   };
+  // The best month the book has ever had, beyond the years the table shows too; of two as good, the first.
+  const [bestMonth, bestCount] = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0] ?? ["", 0];
   return (
     <section>
       <div className="section-head">
         <h2>{t("Month by month, year by year")}</h2>
       </div>
+      {bestCount > 1 ? (
+        <p className="meta">
+          {t("Best month ever:")} <Link to={findLink(tail(bestMonth))}>{`${monthName(bestMonth)} · ${fishCountLabel(bestCount)}`}</Link>
+        </p>
+      ) : null}
       <div className="month-year-wrap">
         <table className="month-year">
           <thead>
