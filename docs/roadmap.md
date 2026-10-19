@@ -1247,8 +1247,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC119~~ | ~~News card scene25: hammock, night row, paddleboarder, hail, leaf whirl~~ (#1237) | scene | S |
 | ~~SC120~~ | ~~Dancing midges: on still dry evenings in late spring and summer little clouds of midges hang over the water in front of the dock, darting about and bobbing slowly, glinting gold in the low sun~~ (#1239) | scene | S |
 | ~~SC121~~ | ~~Gossamer: on fine, still fall mornings and days long silk threads from ballooning spiders float across the water in front of the dock, slowly rippling, a glint of sun running along each now and then~~ (#1239) | scene | S |
-| SC122 | Fry burst: now and then from spring to fall something hunting under the open water bursts into a shoal of fry, which spray out of the surface in a fan and patter back down in a scatter of tiny rings round a heavy swirl, always well clear of the dock | scene | S |
-| SC123 | Diamond dust: on bitter, clear, still winter mornings and days tiny ice crystals hang and sink slowly in the air over the lake in front of the dock, each flashing like a spark now and then | scene | S |
+| ~~SC122~~ | ~~Fry burst: now and then from spring to fall something hunting under the open water bursts into a shoal of fry, which spray out of the surface in a fan and patter back down in a scatter of tiny rings round a heavy swirl, always well clear of the dock~~ (#1240) | scene | S |
+| ~~SC123~~ | ~~Diamond dust: on bitter, clear, still winter mornings and days tiny ice crystals hang and sink slowly in the air over the lake in front of the dock, each flashing like a spark now and then~~ (#1240) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
