@@ -495,6 +495,14 @@ export const PL_GAME: PlBook = {
   "Close call": "O włos",
   "A pike grabbed your shiner! {line}. Ease off when it runs.": "Szczupak chwycił twojego złotawca! {line}. Odpuść, gdy odjeżdża.",
   "Took it off your shiner": "Wziął twojego złotawca",
+  "A pike hunts them here: stop reeling and let it flutter a moment, and the pike may take it.":
+    "Poluje tu na nie szczupak: przestań zwijać i daj rybce chwilę się potrzepotać, a szczupak może ją chwycić.",
+  "A largemouth bass hunts them here: stop reeling and let it flutter a moment, and the bass may take it.":
+    "Poluje tu na nie bass wielkogębowy: przestań zwijać i daj rybce chwilę się potrzepotać, a bass może ją chwycić.",
+  "A walleye hunts them here: stop reeling and let it flutter a moment, and the walleye may take it.":
+    "Poluje tu na nie sandacz: przestań zwijać i daj rybce chwilę się potrzepotać, a sandacz może ją chwycić.",
+  "A smallmouth bass hunts them here: stop reeling and let it flutter a moment, and the bass may take it.":
+    "Poluje tu na nie bass małogębowy: przestań zwijać i daj rybce chwilę się potrzepotać, a bass może ją chwycić.",
   "It's the one that got away!": "To ta, która się zerwała!",
   "A largemouth bass followed it in to the bank!": "Bass wielkogębowy odprowadził ją aż do brzegu!",
   "A walleye followed it up to the boat!": "Sandacz odprowadził ją aż pod łódź!",

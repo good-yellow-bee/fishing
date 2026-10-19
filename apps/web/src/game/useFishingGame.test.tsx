@@ -85,7 +85,7 @@ vi.mock("./nibblePlan", async (importOriginal) => {
 // A pike grabs the shiner only when a test says so.
 vi.mock("./grab", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./grab")>();
-  return { ...actual, grabberFor: vi.fn(() => null), followerFor: vi.fn(() => null) };
+  return { ...actual, grabberFor: vi.fn(() => null), followerFor: vi.fn(() => null), flutterGrabberFor: vi.fn(() => null), flutterTip: vi.fn(() => "") };
 });
 // A fish let go on an earlier day comes back only when a test says so.
 vi.mock("./releasedFish", async (importOriginal) => {
@@ -132,7 +132,7 @@ import { tightToLog } from "./sunkenLog";
 import { amongSurfaceBugs } from "./surfaceBugs";
 import { amongLanternMinnows } from "./lanternMinnows";
 import { underMidges } from "./midgeClouds";
-import { followerFor, grabberFor } from "./grab";
+import { flutterGrabberFor, flutterTip, followerFor, grabberFor } from "./grab";
 import { castForGotAway } from "./gotAway";
 
 const profile: Profile = {
@@ -528,6 +528,84 @@ describe("useFishingGame lost fight", () => {
     act(() => frames.at(-1)!(now));
     expect(phase()).toBe("result:landed");
     expect(container!.querySelector("[data-testid=grabbed]")?.textContent).toBe("golden-shiner");
+  });
+
+  it("tells the hunter's tip at the hookset", () => {
+    const surface = mount();
+    vi.mocked(flutterTip).mockReturnValue("A pike hunts them here.");
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "golden-shiner")!);
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 1);
+    expect(hint()).toMatch(/Ease off when it runs\. A pike hunts them here\.$/);
+    vi.mocked(flutterTip).mockReturnValue("");
+  });
+
+  it("sends the pike for a shiner left to flutter out past halfway, not one reeled straight in", () => {
+    const pike = FISH.find((fish) => fish.id === "pike")!;
+    const shiner = FISH.find((fish) => fish.id === "golden-shiner")!;
+    const fightFrames = (count: number) => {
+      for (let i = 0; i < count; i++) {
+        step.mockReturnValueOnce("fighting");
+        now += 50;
+        act(() => frames.at(-1)!(now));
+      }
+    };
+    // Reeled the whole way, or pumped with short pauses, the shiner never flutters.
+    const surface = mount();
+    vi.mocked(flutterGrabberFor).mockReturnValueOnce(pike);
+    vi.mocked(pickBite).mockReturnValueOnce(shiner);
+    fightLine = 0.8;
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 1);
+    fightFrames(30);
+    for (let pump = 0; pump < 3; pump++) {
+      act(() => window.dispatchEvent(pointer("pointerup", 1)));
+      fightFrames(20);
+      act(() => surface.dispatchEvent(pointer("pointerdown", 1)));
+      fightFrames(1);
+    }
+    const reeled = vi.mocked(makeFight).mock.results.at(-1)!.value;
+    reeled.sim.line = 0.4;
+    fightFrames(1);
+    expect(container!.querySelector("[data-testid=fight]")?.textContent).toMatch(/^golden-shiner\|/);
+    // Let off only through its runs, and reeled between them, it doesn't flutter either.
+    step.mockReturnValueOnce("landed");
+    now += 50;
+    act(() => frames.at(-1)!(now));
+    act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
+    vi.mocked(flutterGrabberFor).mockReturnValueOnce(pike);
+    vi.mocked(pickBite).mockReturnValueOnce(shiner);
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 3);
+    act(() => window.dispatchEvent(pointer("pointerup", 3)));
+    const running = vi.mocked(makeFight).mock.results.at(-1)!.value;
+    for (let run = 0; run < 3; run++) {
+      running.sim.surge = 2;
+      act(() => window.dispatchEvent(pointer("pointerup", 3)));
+      fightFrames(30);
+      running.sim.surge = 0;
+      act(() => surface.dispatchEvent(pointer("pointerdown", 3)));
+      fightFrames(10);
+    }
+    running.sim.line = 0.4;
+    fightFrames(1);
+    expect(container!.querySelector("[data-testid=fight]")?.textContent).toMatch(/^golden-shiner\|/);
+    // Let off past halfway between runs, it flutters and the pike comes for it at halfway.
+    step.mockReturnValueOnce("landed");
+    now += 50;
+    act(() => frames.at(-1)!(now));
+    act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
+    vi.mocked(flutterGrabberFor).mockReturnValueOnce(pike);
+    vi.mocked(pickBite).mockReturnValueOnce(shiner);
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 2);
+    act(() => window.dispatchEvent(pointer("pointerup", 2)));
+    fightFrames(30);
+    expect(container!.querySelector("[data-testid=fight]")?.textContent).toMatch(/^golden-shiner\|/);
+    vi.mocked(makeFight).mock.results.at(-1)!.value.sim.line = 0.4;
+    fightFrames(1);
+    expect(container!.querySelector("[data-testid=fight]")?.textContent).toMatch(/^pike\|/);
+    expect(hint()).toContain("A pike grabbed your shiner!");
   });
 
   it("keeps a pike that followed a shiner in about the bank, and says so when it bites", () => {

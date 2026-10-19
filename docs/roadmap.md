@@ -1619,7 +1619,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT309~~ | ~~News card 2026-10-19-game21 covers GT307 and GT308: pike teeth and the minnows under the lanterns~~ (#1306) | ui | S |
 | ~~GT310~~ | ~~Level 14 (30000 lifetime points, "Soul of the lake"): a sound line holds a moment past the red and snaps at 105% strain instead of 100%; a frayed line still snaps at 90%~~ (#1310) | gameplay | S |
 | ~~GT311~~ | ~~Midges at dusk: on a still late-spring or summer dusk a dry fly landing under one of the dancing midge clouds (the scene's MIDGE_CLOUDS, leaned by the wind, plus 0.4 m) lands where the fish rise to the ones that fall, so the bite comes sooner (0.85) and 35% of bites are a bluegill, crappie, golden shiner or rainbow trout; a fly that is also among the surface bugs is told once, as the bugs~~ (#1317) | gameplay | S |
-| GT312 | News card 2026-10-19-game22 covers GT310 and GT311: level 14 and the midge clouds at dusk | ui | S |
+| ~~GT312~~ | ~~News card 2026-10-19-game22 covers GT310 and GT311: level 14 and the midge clouds at dusk~~ (#1319) | ui | S |
+| GT313 | Let it flutter: a small fish hooked where a bigger one hunts it (the grab pairs) and left unreeled for 1.2 s of its calm spells out past the halfway mark (a pump of the reel starts the pause again; easing off for a run is no pause) draws the hunter in, a further 25% of them on top of the usual grab; the hookset tells the tip | gameplay | S |
 
 ## Risks / open questions for the owner
 
