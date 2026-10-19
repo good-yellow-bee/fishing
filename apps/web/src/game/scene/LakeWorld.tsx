@@ -25,6 +25,8 @@ import { BubblingHotspot } from "./BubblingHotspot";
 import { LakeRain } from "./LakeRain";
 import { HailShower } from "./HailShower";
 import { hailOut } from "./hailBurst";
+import { RainCurtain } from "./RainCurtain";
+import { squallOut } from "./rainSquall";
 import { LakeSnow } from "./LakeSnow";
 import { MoonRoad } from "./MoonRoad";
 import { DockRain } from "./DockRain";
@@ -195,6 +197,8 @@ import { StoneSkimmer } from "./StoneSkimmer";
 import { skimOut } from "./skimStones";
 import { Jogger } from "./Jogger";
 import { joggerOut } from "./jogRun";
+import { Crows } from "./Crows";
+import { crowsOut } from "./crowFlush";
 import { Birdwatcher } from "./Birdwatcher";
 import { birderOut } from "./birdWatch";
 import { PorchRocker } from "./PorchRocker";
@@ -2329,6 +2333,7 @@ export const LakeWorld = memo(function LakeWorld({
       {weather.rain &&
         (season === "winter" ? <LakeSnow light={weather.rainLight} wind={wind} /> : <LakeRain light={weather.rainLight} wind={wind} />)}
       {hailOut(weather.rain, season) && <HailShower light={weather.rainLight} />}
+      {squallOut(weather.rain, season) && <RainCurtain light={weather.rainLight} />}
       {mist > 0 && <LakeMist amount={mist} color={mistColor} />}
       {lakeSmokeOut(hour, sky, season) && <LakeSmoke wind={wind} color={mistColor} />}
       {diamondDustOut(hour, sky, season, wind) && <DiamondDust wind={wind} />}
@@ -2377,6 +2382,7 @@ export const LakeWorld = memo(function LakeWorld({
       {headlampOut(hour, sky, season) && <NightAngler />}
       {skimOut(hour, sky, season, wind) && <StoneSkimmer />}
       {joggerOut(hour, sky, season) && <Jogger />}
+      {crowsOut(hour, sky, season) && <Crows jogging={joggerOut(hour, sky, season)} />}
       {birderOut(hour, sky, season) && <Birdwatcher />}
       {porchOut(hour, sky, season) && <PorchRocker />}
       {sandpipersOut(hour, sky, season) && <Sandpipers />}
