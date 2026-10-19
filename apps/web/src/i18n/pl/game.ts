@@ -709,6 +709,8 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "On a smaller phone the fight card now hangs just under the lake's header instead of rising over it, and the header's chips step aside until the fish is in. And while you wait for a bite, the hint's \"2 more reasons\" is much easier to tap.":
+    "Na mniejszym telefonie karta holu wisi teraz tuż pod nagłówkiem jeziora, zamiast na niego nachodzić, a plakietki nagłówka ustępują miejsca, aż ryba będzie na brzegu. A gdy czekasz na branie, „jeszcze 2 powody” na końcu podpowiedzi o wiele łatwiej trafić.",
   "On a phone, the lake's hint now sits below the bank chip when the chip has a lot to say, instead of under it. Held sideways, a long bank note ends in an ellipsis before the shore signs, and with larger text on a short screen the lure moves up beside the bank chip, clear of the walk stick.":
     "Na telefonie podpowiedź na jeziorze stoi teraz pod plakietką brzegu, gdy plakietka ma dużo do powiedzenia, zamiast chować się pod nią. Na telefonie trzymanym poziomo długa notka o brzegu kończy się wielokropkiem przed tabliczkami, a z większym tekstem na niskim ekranie przynęta przesuwa się w górę obok plakietki brzegu, z dala od drążka chodzenia.",
   "On summer evenings a bat now and then swoops in to hawk the moths by the dock's lantern. And on snowy winter nights the little owl comes to the snow-capped post too.":
