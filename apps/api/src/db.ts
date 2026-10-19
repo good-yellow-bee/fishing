@@ -103,6 +103,14 @@ db.exec(`
     claimed_at TEXT NOT NULL,
     PRIMARY KEY (user_id, day, daily_request_id)
   );
+
+  CREATE TABLE IF NOT EXISTS weekly_challenge_claim (
+    user_id TEXT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
+    week TEXT NOT NULL,
+    challenge_id TEXT NOT NULL,
+    claimed_at TEXT NOT NULL,
+    PRIMARY KEY (user_id, week, challenge_id)
+  );
 `);
 
 const catchColumns = db.prepare(`PRAGMA table_info(catch)`).all() as { name: string }[];
@@ -377,6 +385,27 @@ export function releaseCatch(userId: string, requestId: string): { row: CatchRow
       db.prepare(`UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`).run(bonus, bonus, userId);
     }
     return { row, bonus };
+  })();
+}
+
+/** The angler's catches filed under any of these local days. */
+export function listCatchesOnDays(userId: string, days: readonly string[]): CatchRow[] {
+  return db.prepare(`SELECT * FROM catch WHERE user_id = ? AND day IN (${days.map(() => "?").join(", ")})`).all(userId, ...days) as CatchRow[];
+}
+
+export function listWeeklyClaims(userId: string, week: string): string[] {
+  return (db.prepare(`SELECT challenge_id FROM weekly_challenge_claim WHERE user_id = ? AND week = ?`).all(userId, week) as { challenge_id: string }[]).map((row) => row.challenge_id);
+}
+
+/** Pays a week's goal once; false when it was already claimed. */
+export function claimWeeklyChallenge(userId: string, week: string, challengeId: string, reward: number): boolean {
+  return db.transaction(() => {
+    const claim = db
+      .prepare(`INSERT OR IGNORE INTO weekly_challenge_claim (user_id, week, challenge_id, claimed_at) VALUES (?, ?, ?, ?)`)
+      .run(userId, week, challengeId, new Date().toISOString());
+    if (claim.changes !== 1) return false;
+    db.prepare(`UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`).run(reward, reward, userId);
+    return true;
   })();
 }
 
