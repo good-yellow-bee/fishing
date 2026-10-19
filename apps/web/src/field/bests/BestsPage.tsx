@@ -323,7 +323,17 @@ export function BestsPage() {
           ))}
         </p>
       ) : null}
-      {year ? <SeasonRecapBox book={whole} year={year} today={today} dayLink={(date) => findLink(tail(date))} /> : null}
+      {year ? (
+        <SeasonRecapBox
+          book={whole}
+          year={year}
+          today={today}
+          dayLink={(date) => findLink(tail(date))}
+          fishLink={findLink(tail(year))}
+          daysLink={`/trips?${new URLSearchParams({ find: tripDaySearch(all, year, new Set(whole.trips.map((trip) => trip.id)), t) }).toString()}`}
+          kindsId="by-species"
+        />
+      ) : null}
 
       <section className="stat-row" data-cols="4" aria-label={t("Personal bests")}>
         <div>

@@ -2242,6 +2242,18 @@ html:has(.form-save):has(.undo-bar) .field-main {
   min-height: 24px;
 }
 
+/* Each year's best month stands out, and its total sits under a firmer rule. */
+.month-year td.month-year-top {
+  font-weight: 600;
+}
+
+.month-year tfoot th,
+.month-year tfoot td {
+  border-top: 2px solid var(--field-line);
+  border-bottom: 0;
+  font-weight: 600;
+}
+
 /* "Took:" before an outing's lure chips, so they don't read as more kinds of fish. */
 .lure-chips {
   align-items: center;

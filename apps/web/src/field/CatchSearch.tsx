@@ -848,6 +848,7 @@ export function CatchSearch() {
             {/* Summed as /catches sums the book: the angler's own, with the sample week's and the game's said apart. */}
             {/* A search that finds only those ("sample", "game") sums what it found. */}
             <FishSum catches={mine.length > 0 ? mine : matches} />
+            <FishDays book={book} catches={mine.length > 0 ? mine : matches} />
             <TopLure catches={mine.length > 0 ? mine : matches} />
             {mine.length > 0 && mine.length < matches.length ? (
               <p className="meta">{tn(matches.length - mine.length, "Also listed: {n} fish from the sample week or the game.", "Also listed: {n} fish from the sample week or the game.")}</p>
@@ -991,6 +992,27 @@ function MatchSplits({ matches, all, search, largest }: { matches: readonly Catc
       {line(t("By kind:"), kinds, (species) => exactTerm("species", t(species)), (species) => t(species), (entry, species) => entry.species === species)}
       {line(t("By year:"), years, (year) => year, (year) => year, (entry, year) => bookFishDay(book, entry).startsWith(`${year}-`))}
     </>
+  );
+}
+
+/** "3 days out · 2 outings": how many days and outings a search's fish came on, once that is more than one. */
+export function fishDays(book: Logbook, catches: readonly CatchEntry[]): { days: number; outings: number } {
+  const trips = new Set(book.trips.map((trip) => trip.id));
+  return {
+    // A night session's small hours count on its outing's day, as the calendar counts them.
+    days: new Set(catches.map((entry) => bookFishDay(book, entry))).size,
+    outings: new Set(catches.flatMap((entry) => (entry.tripId && trips.has(entry.tripId) ? [entry.tripId] : []))).size,
+  };
+}
+
+function FishDays({ book, catches }: { book: Logbook; catches: readonly CatchEntry[] }) {
+  const { days, outings } = fishDays(book, catches);
+  if (days < 2 && outings < 2) return null;
+  return (
+    <p className="meta fish-days">
+      {tn(days, "{n} day out", "{n} days out")}
+      {outings > 0 ? `\u00a0· ${tn(outings, "{n} outing", "{n} outings")}` : ""}
+    </p>
   );
 }
 
