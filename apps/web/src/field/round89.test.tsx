@@ -43,16 +43,21 @@ describe("round 89: a fish's time", () => {
 });
 
 describe("round 89: Catches' month headings count the angler's own fish", () => {
-  const items = ["a", "s1", "s2"];
-  const html = (counted: (item: string) => boolean) =>
+  // One of the angler's, one of the sample week's and one of the game's.
+  const items = [
+    { id: "a", spotId: "own" },
+    { id: "s1", spotId: "spot-mill" },
+    { id: "g", spotId: "spot-stillwater" },
+  ];
+  const html = (counted: (item: { id: string }) => boolean) =>
     renderToStaticMarkup(
       <PagedCatches items={items} monthOf={() => "2026-10"} headLevel={2} counted={counted}>
-        {(item) => <p key={item}>{item}</p>}
+        {(item) => <p key={item.id}>{item.id}</p>}
       </PagedCatches>,
     );
 
   it("and says the sample week's and the game's apart", () => {
-    expect(html((item) => item === "a")).toContain("October 2026 · 1 fish · +2 from the sample week or the game");
+    expect(html((item) => item.id === "a")).toContain("October 2026 · 1 fish · +2 from the sample week or the game");
   });
 
   it("names a month of only those as theirs", () => {

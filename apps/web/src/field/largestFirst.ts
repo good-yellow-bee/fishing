@@ -1,18 +1,30 @@
-import { measureOf, type CatchEntry } from "@stillwater/shared";
+import { likelyWeight, measureOf, sizePairs, type CatchEntry, type SizePair } from "@stillwater/shared";
+
+/** About a pound for a 14-inch fish: the weight a length suggests when the kind has no weighed and measured pairs to go by. */
+const ROUGH_FACTOR = 1 / 2700;
 
 /**
- * The same fish, largest first: weighed fish by weight, then fish only measured, by length.
- * A pound and an inch don't compare, so weight leads, as a scale settles "biggest". Ties keep the order given.
+ * The same fish, largest first, on one scale: a weighed fish by its weight, a fish only measured by the weight its
+ * length suggests (from its kind's own measured-and-weighed fish where there are two, else roughly), so a 0.4 lb trout
+ * doesn't lead a 28-inch pike. Ties keep the order given.
  */
 export function largestFirst(catches: CatchEntry[]): CatchEntry[] {
-  const rank = (entry: CatchEntry): [number, number] => {
+  const pairsOf = new Map<string, SizePair[]>();
+  const pairs = (entry: CatchEntry) => {
+    const key = entry.species.trim().toLowerCase();
+    let found = pairsOf.get(key);
+    if (!found) pairsOf.set(key, (found = sizePairs(catches.filter((other) => other.species.trim().toLowerCase() === key))));
+    return found;
+  };
+  const rank = (entry: CatchEntry): number => {
     const weight = measureOf(entry, "weight");
-    if (weight?.kind === "weight") return [1, weight.pounds];
+    if (weight?.kind === "weight") return weight.pounds;
     const length = measureOf(entry, "length");
-    return [0, length?.kind === "length" ? length.inches : 0];
+    if (length?.kind !== "length" || !(length.inches > 0)) return 0;
+    return likelyWeight(pairs(entry), length.inches) ?? length.inches ** 3 * ROUGH_FACTOR;
   };
   return catches
     .map((entry, index) => ({ entry, index, rank: rank(entry) }))
-    .sort((a, b) => b.rank[0] - a.rank[0] || b.rank[1] - a.rank[1] || a.index - b.index)
+    .sort((a, b) => b.rank - a.rank || a.index - b.index)
     .map(({ entry }) => entry);
 }
