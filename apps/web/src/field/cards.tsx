@@ -84,7 +84,7 @@ export const CatchCard = memo(function CatchCard({
             {/* An untitled outing goes by its water's name, already on the line above: said once. */}
             {/* A fish after midnight was on the evening before's outing: "That night's outing". */}
             <Link to={`/trips/${entry.tripId}`}>
-              {tripTitle !== spotName ? tripTitle : bookFishDay(book, entry) !== localDate(new Date(entry.caughtAt)) ? t("That night's outing") : t("That day's outing")}
+              {!spotName || !sameName(tripTitle, spotName) ? tripTitle : bookFishDay(book, entry) !== localDate(new Date(entry.caughtAt)) ? t("That night's outing") : t("That day's outing")}
             </Link>
           </p>
         ) : null}

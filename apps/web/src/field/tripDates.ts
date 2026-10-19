@@ -72,8 +72,12 @@ function waterNamed(title: string, spots: Logbook["spots"]): boolean {
 
 /** Whether two names read the same, whatever their case or spacing: an older book can hold "  Pine   Pond ". */
 export function sameName(a: string, b: string): boolean {
-  const plain = (name: string) => name.trim().replace(/\s+/g, " ").toLocaleLowerCase();
-  return plain(a) === plain(b);
+  return plainName(a).toLocaleLowerCase() === plainName(b).toLocaleLowerCase();
+}
+
+/** A name as it reads, its stray spaces gone: "  Pine   Pond " is "Pine Pond". */
+export function plainName(name: string): string {
+  return name.trim().replace(/\s+/g, " ");
 }
 
 /** The title the player gave an outing, for its form: "" for one saved under its water's name, so a new water renames it. */
