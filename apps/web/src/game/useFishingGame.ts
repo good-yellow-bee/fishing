@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   hotBankForDay,
+  GROUNDBAIT_CARRY,
   anglerLevel,
   fishTireMulForLevel,
   lineSnapForLevel,
@@ -54,6 +55,7 @@ import { AGAIN_CASTS, castForGotAway, gotAwayAfterDrop, gotAwayAfterLoss, type G
 import { castForReleased, loadReleased, saveReleased, type Recaught } from "./releasedFish";
 import { weightText } from "../i18n/content";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
+import { loadBag, saveBag } from "./groundbaitBag";
 import { BACKLASH_POWER, COLD_WORK_WAIT, tooQuickForCold, isLongCast, castIntoSchool, castOverGroundbait, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, canBaitShiner, shinerHunter, bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, type Groundbait, castIntoSpooked, castUnderPressure, castNewLure, type LuresShown, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, colourSuits, colourWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, openGlareWaitMul, longShadowWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, waterSwingWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
@@ -449,7 +451,9 @@ export function useFishingGame(
   /** This cast landed in a school; the scene shows it milling round the float while it waits. */
   const [schooled, setSchooled] = useState(false);
   // Handfuls left in the bag this visit, and the bank the last one still feeds, so the page can offer and show it.
-  const [handfuls, setHandfuls] = useState(GROUNDBAIT_HANDFULS);
+  // A handful comes free with each visit; ones bought at the shack stay in the bag across a reload.
+  const [handfuls, setHandfuls] = useState(() => Math.max(GROUNDBAIT_HANDFULS, loadBag()));
+  useEffect(() => saveBag(handfuls), [handfuls]);
   /** The line came out of a fight over the rocks or round a piling frayed, and snaps sooner until retied. */
   const frayedRef = useRef(false);
   const [frayed, setFrayed] = useState(false);
@@ -1739,6 +1743,9 @@ export function useFishingGame(
     setHint(t("You toss a handful of groundbait. The fish will gather to feed here for the next {casts} casts.", { casts: GROUNDBAIT_CASTS }));
   }, [handfuls]);
 
+  /** A handful bought at the shack goes in the bag, which carries no more than GROUNDBAIT_CARRY. */
+  const addHandful = useCallback(() => setHandfuls((left) => Math.min(GROUNDBAIT_CARRY, left + 1)), []);
+
   const dismissResult = () => {
     setOutcome(null);
     resetToIdle(idleHint(stanceRef.current));
@@ -1772,6 +1779,7 @@ export function useFishingGame(
     groundbait,
     fishedHard,
     throwGroundbait,
+    addHandful,
     frayed,
     twisted,
     dulled,

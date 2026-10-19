@@ -114,6 +114,14 @@ describe("daily requests auth", () => {
   });
 });
 
+describe("shack purchases auth", () => {
+  it("turns away a groundbait or skill purchase from anyone not signed in", async () => {
+    session.user = null;
+    expect((await app.request("http://test/api/groundbait", { method: "POST" })).status).toBe(401);
+    expect((await app.request("http://test/api/upgrades", { method: "POST", body: JSON.stringify({ skill: "strength" }) })).status).toBe(401);
+  });
+});
+
 describe("GET /api/daily-requests", () => {
   it("counts only that local day's catches of the species at the bank", async () => {
     const { speciesId, spot } = bankRequest;
