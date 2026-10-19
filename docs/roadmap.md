@@ -1253,9 +1253,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC125~~ | ~~News card scene26: dancing midges, gossamer, fry burst, diamond dust~~ (#1241) | scene | S |
 | ~~SC126~~ | ~~Rain squall: now and then in a spring to fall shower a heavier squall sweeps across the far half of the lake as a grey curtain of rain, the water boiling with rings beneath it~~ (#1243) | scene | S |
 | ~~SC127~~ | ~~Winter crows: on winter mornings and days a few crows strut and peck on the snowy far shore, cawing now and then, and burst up into a loop over the water when the jogger comes running by, dropping back once they are past~~ (#1243) | scene | S |
-| SC128 | Night eyeshine: on nights without fog a pair of eyes, a deer's or a fox's, now and then shines green-gold at the edge of the far bank, holds a while, blinks and is gone | scene | S |
-| SC129 | Paddleboard route: the paddleboarder's run ends further west so the board stays well clear of the swans' loop | scene | S |
-| SC130 | News card scene27: rain squall, winter crows, night eyeshine | scene | S |
+| ~~SC128~~ | ~~Night eyeshine: on nights without fog a pair of eyes, a deer's or a fox's, now and then shines green-gold at the edge of the far bank, holds a while, blinks and is gone~~ (#1245) | scene | S |
+| ~~SC129~~ | ~~Paddleboard route: the paddleboarder's run ends further west so the board stays well clear of the swans' loop~~ (#1245) | scene | S |
+| ~~SC130~~ | ~~News card scene27: rain squall, winter crows, night eyeshine~~ (#1245) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
