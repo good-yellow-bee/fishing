@@ -450,6 +450,8 @@ export function useFishingGame(
   const castWashedRef = useRef(false);
   /** A landed golden shiner hooked back on as live bait, for the next cast. */
   const liveShinerRef = useRef(false);
+  /** The shiner on the hook was landed in a clean fight, so it swims hard and draws more of the hunters. */
+  const livelyShinerRef = useRef(false);
   const [liveShiner, setLiveShiner] = useState(false);
   const [groundbait, setGroundbait] = useState<Groundbait | null>(null);
   /** The bank whose next cast meets wary fish, for the stance chip to say so before the cast. */
@@ -848,10 +850,12 @@ export function useFishingGame(
     if (shadowWait > 1) reasons.unshift(t("The low sun behind you throws your shadow across the water, and the fish shy from it. Try another bank till the sun climbs or sets."));
     // A live shiner on the hook swims down and draws the bank's hunters; it goes out on this one cast, and is told first.
     const shiner = liveShinerRef.current;
+    const lively = shiner && livelyShinerRef.current;
     if (shiner) {
       liveShinerRef.current = false;
+      livelyShinerRef.current = false;
       setLiveShiner(false);
-      reasons.unshift(t("The live shiner swims down off the hook, and the hunters here come to it."));
+      reasons.unshift(lively ? t("The lively shiner swims hard on the hook, and more of the hunters here come to it.") : t("The live shiner swims down off the hook, and the hunters here come to it."));
     }
     waitHintRef.current = [...reasons.slice(0, WAIT_REASONS), waitHintRef.current].join(" ");
     setHint(waitHintRef.current);
@@ -870,7 +874,7 @@ export function useFishingGame(
     recaughtRef.current = released?.fish ?? null;
     // Over the groundbait the feeders crowd in, so some bites are theirs; a beginner's first fish stays an easy one.
     const feeder = bait.baited && !mercyNow ? groundbaitFeeder(spotRef.current, lureRef?.current, short, hour) : null;
-    const hunter = shiner && !lost.again && !recaughtRef.current && !mercyNow ? shinerHunter(spotRef.current, current, hour) : null;
+    const hunter = shiner && !lost.again && !recaughtRef.current && !mercyNow ? shinerHunter(spotRef.current, current, hour, Math.random, lively) : null;
     shinerTakenRef.current = !!hunter;
     // On the sunfish beds some bites are the perch and smallmouth come to raid the eggs; a beginner's first fish stays an easy one.
     const raider = castBedRef.current && !lost.again && !recaughtRef.current && !hunter && !mercyNow ? bedRaider(spotRef.current, lureRef?.current, current, hour) : null;
@@ -1665,9 +1669,11 @@ export function useFishingGame(
   const baitShiner = () => {
     if (outcome?.kind !== "landed" || !canBaitShiner(outcome.species.id)) return;
     liveShinerRef.current = true;
+    // Landed clean, it isn't worn out, so it swims hard on the hook.
+    livelyShinerRef.current = !!outcome.clean;
     setLiveShiner(true);
     setOutcome(null);
-    resetToIdle(t("You hook the shiner on as live bait. Cast it out to the hunters."));
+    resetToIdle(outcome.clean ? t("You hook the lively shiner on as live bait: landed clean, it swims hard and draws more of the hunters. Cast it out.") : t("You hook the shiner on as live bait. Cast it out to the hunters."));
   };
 
   return {
