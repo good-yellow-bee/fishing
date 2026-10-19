@@ -1,6 +1,7 @@
 import type { Logbook } from "@stillwater/shared";
 import { bookFishDay, daysOut } from "../tripMonths";
 import { countedFish } from "../milestones";
+import { sheetOutings } from "../catchCsv";
 
 /** One season's totals beside the season before, and the kinds it brought into the book for the first time. */
 export type SeasonRecap = {
@@ -12,6 +13,11 @@ export type SeasonRecap = {
   daysBefore: number;
   kinds: number;
   kindsBefore: number;
+  /** Outings already fished that season (the one before up to the same day), and the fish landed on them. */
+  outings: number;
+  outingsBefore: number;
+  outingFish: number;
+  outingFishBefore: number;
   /** The season is still going, so the one before counts only up to the same day ("2025-10-16"); else null. */
   beforeUntil: string | null;
   /** Kinds whose first fish in the book came this season, as stored, in the order they first came. */
@@ -40,9 +46,21 @@ export function seasonRecap(book: Logbook, year: string, today: string): SeasonR
     const key = entry.species.trim().toLowerCase();
     if (!first.has(key)) first.set(key, { name: entry.species, at: dayOf(entry) });
   }
+  // The outings counted as the season box's Outings line and the outings page count them, and what they landed.
+  const outingsIn = (season: string) => {
+    const trips = sheetOutings(season === before ? cut : book, today).trips.filter((trip) => trip.date.startsWith(`${season}-`));
+    const ids = new Set(trips.map((trip) => trip.id));
+    return { count: trips.length, fish: book.catches.filter((entry) => entry.tripId !== null && ids.has(entry.tripId)).length };
+  };
+  const outings = outingsIn(year);
+  const outingsBefore = outingsIn(before);
   return {
     year,
     before,
+    outings: outings.count,
+    outingsBefore: outingsBefore.count,
+    outingFish: outings.fish,
+    outingFishBefore: outingsBefore.fish,
     fish: of(year).length,
     fishBefore: of(before).length,
     days: daysOut(book, year, today),

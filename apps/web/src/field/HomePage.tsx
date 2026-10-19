@@ -28,6 +28,7 @@ import { placeFor } from "./map/places";
 import { useTackleItems } from "./gear/TackleState";
 import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "./playLake";
 import { LATE_NIGHT_UNTIL } from "./suggestions";
+import { saveOutingIcs } from "./TripPages";
 
 function deskLine(now: Date): string {
   const hour = now.getHours();
@@ -110,6 +111,7 @@ const NEWS_SHOWN = 4;
 
 export function HomePage() {
   const { book, storedBook, photos, startBlank, dropSample } = useLogbook();
+  const tackleItems = useTackleItems();
   const heading = useRef<HTMLHeadingElement>(null);
   const [setAside, setSetAside] = useState(() => readUnreadableBook() !== null);
   // The news the game's dock shows, here too for an angler who only keeps the book: decided once per visit.
@@ -163,7 +165,8 @@ export function HomePage() {
   // The goal counts a night session's small hours on its outing's day, as Bests does.
   const yearRows = book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${thisYear}-`));
   const yearFish = yearRows.filter((entry) => counted.has(entry.id)).length;
-  const goal = readYearGoal(thisYear);
+  // The goal is the angler's own: the sample week's invented fish don't fill it, so a book of only those shows none.
+  const goal = sampleOnly ? null : readYearGoal(thisYear);
   const pace = goal !== null ? goalPace(yearFish, goal, now) : null;
   // Last year up to this same date, once last year has any fish: is this year on pace?
   const lastYear = String(Number(thisYear) - 1);
@@ -174,7 +177,7 @@ export function HomePage() {
   const firstDay = real.reduce((first, entry) => (bookFishDay(book, entry) < first ? bookFishDay(book, entry) : first), "9999");
   const comparable = lastYearDays.length > 0 && firstDay <= `${lastYear}-${today.slice(5)}`;
   // Early January: how last year's goal ended, before the new year's count says much.
-  const lastGoal = today.slice(5) < "01-14" ? readYearGoal(lastYear) : null;
+  const lastGoal = today.slice(5) <= "01-14" ? readYearGoal(lastYear) : null;
   const ownAny = countedOwn.trips.some((trip) => !isSampleOuting(trip)) || countedOwn.catches.some((entry) => !isSampleCatch(entry.id));
   const ownWaters = (ownAny ? withoutSample(book) : book).spots.filter((spot) => spot.id !== PLAY_LAKE_ID).length;
   // Today's outing counts once it has a fish, as the averages take it.
@@ -306,7 +309,7 @@ export function HomePage() {
                 </>
               ) : null}
               {/* A year with fish but no goal yet: one tap to Bests with the goal's form open. */}
-              {goal === null && yearFish > 0 ? (
+              {goal === null && yearFish > 0 && !sampleOnly ? (
                 <>
                   {" · "}
                   <Link to={`/bests?${GOAL_PARAM}=set`}>{t("Set a goal for {year}", { year: thisYear })}</Link>
@@ -380,6 +383,14 @@ export function HomePage() {
           </small>
           {next && next !== lateOuting && next.date <= tomorrow ? <NextDayLine trip={next} spot={nextSpot} today={today} now={now} /> : null}
           {next ? <LastTimeLine book={book} trip={next} today={today} /> : null}
+          {/* A plan still ahead goes on the phone's calendar from here, as from its own page. */}
+          {next && next.date > today && next !== lateOuting && !isSampleOuting(next) ? (
+            <small className="next-log">
+              <button type="button" className="text-button" onClick={() => saveOutingIcs(book, next, tackleItems ?? [], today)}>
+                {t("Add to calendar")}
+              </button>
+            </small>
+          ) : null}
           {/* On the day, a fish goes straight onto this outing. */}
           {next && (next.date === today || next === lateOuting) ? (
             <small className="next-log">

@@ -1,0 +1,83 @@
+import { readFileSync } from "node:fs";
+import { describe, expect, it } from "vitest";
+
+const css = readFileSync(`${import.meta.dirname}/index.css`, "utf8");
+
+function luminance(hex: string) {
+  const [r, g, b] = [1, 3, 5].map((i) => {
+    const c = parseInt(hex.slice(i, i + 2), 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
+}
+
+function contrast(a: string, b: string) {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi! + 0.05) / (lo! + 0.05);
+}
+
+// The card is rgba(239, 224, 194, 0.95): over a night lake it is about this dark.
+const PARCHMENT_AT_NIGHT = "#e3d5b8";
+
+describe("the landed card's small words", () => {
+  it("ink each rarity tag, the quiet stamp and the fish's lore at 4.5 to 1 or more on the parchment", () => {
+    const selectors = [".rarity-common .rarity-tag", ".rarity-uncommon .rarity-tag", ".rarity-rare .rarity-tag", ".rarity-legendary .rarity-tag", " .catch-stamp.quiet", " .catch-lore"];
+    for (const selector of selectors) {
+      const escaped = selector.replace(/[.]/g, "\\.");
+      const rule = new RegExp(`\\n\\.landed-card${escaped} \\{([^}]*)\\}`).exec(css)?.[1];
+      const color = /\n  color: (#[0-9a-f]{6});/.exec(rule ?? "")?.[1];
+      expect(color, selector).toBeDefined();
+      expect(contrast(color!, PARCHMENT_AT_NIGHT), selector).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it("ink the badge toast's Badge line at 4.5 to 1 or more on the same parchment", () => {
+    const rule = /\n\.badge-toast \.eyebrow \{([^}]*)\}/.exec(css)?.[1];
+    const color = /\n  color: (#[0-9a-f]{6});/.exec(rule ?? "")?.[1];
+    expect(color).toBeDefined();
+    expect(contrast(color!, PARCHMENT_AT_NIGHT)).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+describe("the fight card's words", () => {
+  it("ink every coloured line at 4.5 to 1 or more on its parchment", () => {
+    const rules = [...css.matchAll(/\n(\.fight-bar[^{]*) \{([^}]*)\}/g)];
+    const inked = rules.flatMap(([, selector, body]) => {
+      const color = /\n  color: (#[0-9a-f]{6});/.exec(body!)?.[1];
+      return color ? [{ selector: selector!, color }] : [];
+    });
+    expect(inked.length).toBeGreaterThan(10);
+    for (const { selector, color } of inked) expect(contrast(color, PARCHMENT_AT_NIGHT), selector).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+// The shack panel behind the board, as axe measures it.
+const SHACK = "#181d19";
+
+function blend(hex: string, under: string, alpha: number) {
+  return `#${[1, 3, 5].map((i) => Math.round(parseInt(hex.slice(i, i + 2), 16) * alpha + parseInt(under.slice(i, i + 2), 16) * (1 - alpha)).toString(16).padStart(2, "0")).join("")}`;
+}
+
+describe("the shack board's Claimed", () => {
+  it("reads at 4.5 to 1 or more through its dimmed row", () => {
+    const row = /\n\.daily-requests li\[data-claimed="1"\] \{([^}]*)\}/.exec(css)?.[1];
+    const alpha = Number(/\n  opacity: ([0-9.]+);/.exec(row ?? "")?.[1]);
+    const rule = /\n\.daily-request-claimed \{([^}]*)\}/.exec(css)?.[1];
+    const color = /\n  color: (#[0-9a-f]{6});/.exec(rule ?? "")?.[1];
+    expect(alpha).toBeGreaterThan(0);
+    expect(color).toBeDefined();
+    expect(contrast(blend(color!, SHACK, alpha), SHACK)).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+describe("the focus ring on the parchment cards", () => {
+  it("rings a focused button on the landed card, a toast and the fight card at 3 to 1 or more", () => {
+    const match = /\n:is\(([^)]*)\) :is\(button, a\):focus-visible \{([^}]*)\}/.exec(css);
+    expect(match?.[1]).toContain(".landed-card");
+    expect(match?.[1]).toContain(".toast");
+    expect(match?.[1]).toContain(".fight-bar");
+    const color = /\n  outline-color: (#[0-9a-f]{6});/.exec(match?.[2] ?? "")?.[1];
+    expect(color).toBeDefined();
+    expect(contrast(color!, PARCHMENT_AT_NIGHT)).toBeGreaterThanOrEqual(3);
+  });
+});

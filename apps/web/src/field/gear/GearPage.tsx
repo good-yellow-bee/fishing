@@ -21,6 +21,9 @@ import { useTackle } from "./TackleState";
 import { renamedTackle } from "./renamedTackle";
 import { undoneTackle } from "./undoneTackle";
 import { pieceRecords, type PieceRecord } from "./pieceRecord";
+import { lureRecordCsv } from "./lureCsv";
+import { datedName, downloadFile } from "../download";
+import { fileSlug } from "../gpx";
 import { ChoiceRow } from "../ChoiceRow";
 import { shownPieceKey } from "./pieceKey";
 import { notYetThisYear } from "../bests/notYet";
@@ -131,7 +134,9 @@ function LureRecord({ today }: { today: string }) {
   const quiet = notYetThisYear(countedBook(atWater).catches, new Date(), (entry) => entry.lure, (entry) => bookFishDay(book, entry));
   const [all, setAll] = useState(false);
   // A lure that took fish goes straight into the next outing's bag, unless it is already there.
-  const next = upcomingRealTrips(book, today)[0];
+  // Only for an outing on the water picked: another water's lures are no tip for it.
+  const coming = upcomingRealTrips(book, today)[0];
+  const next = coming && (!water || water.id === coming.spotId) ? coming : undefined;
   const onNext = new Set(next ? items.filter((item) => item.tripId === next.id).map((item) => shownPieceKey(item.label)) : []);
   const [justPacked, setJustPacked] = useState<string | null>(null);
   // The button goes once the lure is on the list: focus moves to the line saying so.
@@ -180,7 +185,7 @@ function LureRecord({ today }: { today: string }) {
           <li key={row.label}>
             {/* A lure that took fish opens them in the catch search. */}
             {/* With a water picked, its fish there. */}
-            {row.lure ? <Link to={findLink(countedSearch(book, [exactTerm("lure", t(row.lure)), ...(water ? [exactTerm("water", water.name)] : [])].join(" "), atWater.catches.filter((entry) => entry.lure.trim().toLowerCase() === row.lure!.trim().toLowerCase())))}>{t(row.label)}</Link> : <span>{t(row.label)}</span>}
+            {row.lure ? <Link to={findLink(countedSearch(book, [exactTerm("lure", t(row.lure)), ...(water ? [exactTerm("water", water.name)] : [])].join(" + "), atWater.catches.filter((entry) => entry.lure.trim().toLowerCase() === row.lure!.trim().toLowerCase())))}>{t(row.label)}</Link> : <span>{t(row.label)}</span>}
             <span className="meta">
               {fishCountLabel(row.fish)} · {tn(row.outings, "{n} outing", "{n} outings")}
               {/* How often it pays, once it has been out more than once. */}
@@ -286,12 +291,23 @@ function LureRecord({ today }: { today: string }) {
             {quiet.map((lure, index) => (
               <Fragment key={lure}>
                 {index > 0 ? ", " : null}
-                <Link to={findLink(countedSearch(book, exactTerm("lure", t(lure)), book.catches.filter((entry) => entry.lure.trim().toLowerCase() === lure.trim().toLowerCase())))}>{t(lure)}</Link>
+                {/* Counted for the water picked, so each opens that water's fish on it. */}
+                <Link to={findLink(countedSearch(book, [exactTerm("lure", t(lure)), ...(water ? [exactTerm("water", water.name)] : [])].join(" + "), atWater.catches.filter((entry) => entry.lure.trim().toLowerCase() === lure.trim().toLowerCase())))}>{t(lure)}</Link>
               </Fragment>
             ))}
           </span>
         </p>
       ) : null}
+      {/* The whole record as shown, every row and in the order picked, for a notebook or a fishing partner. */}
+      <p className="search-save">
+        <button
+          type="button"
+          className="text-button"
+          onClick={() => downloadFile(lureRecordCsv(records), "text/csv;charset=utf-8", datedName(water ? `${fileSlug(water.name)}-lures.csv` : "stillwater-lures.csv"))}
+        >
+          {t("Download the lure record as a spreadsheet")}
+        </button>
+      </p>
     </>
   );
 }

@@ -41,8 +41,12 @@ export function sizeBands(catches: readonly CatchEntry[], kind: Measure["kind"],
   const high = Math.max(...shown);
   const steps = STEPS[unit]!;
   const step = steps.find((size) => Math.floor(high / size) - Math.floor(low / size) + 1 <= MOST_BANDS) ?? steps[steps.length - 1]!;
+  // A fish whose reading rounds up onto the first band's edge ("0.5 kg" from 1.1 lb) is under that band's search, so
+  // the bands start one lower: every fish lands in a band, and the counts add up to the fish measured.
+  let start = Math.floor(low / step) * step;
+  while (start > 0 && measures.some((measure) => !sizeMatches(measure, parseSizeQuery(`>${bound(start)} ${unit}`)!))) start -= step;
   const bands: SizeBand[] = [];
-  for (let from = Math.floor(low / step) * step; from <= high + 1e-9; from += step) {
+  for (let from = start; from <= high + 1e-9; from += step) {
     const to = from + step;
     const search = `>${bound(from)} ${unit} + <${bound(to)} ${unit}`;
     const over = parseSizeQuery(`>${bound(from)} ${unit}`)!;

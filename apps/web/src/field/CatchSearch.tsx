@@ -1,8 +1,9 @@
 import { Fragment, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigationType, useSearchParams } from "react-router-dom";
-import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lakeSeason, localDate, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook, type Measure } from "@stillwater/shared";
+import { BITE_TIMES, MOON_QUARTER_LABELS, measureOf, personalBests, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lakeSeason, localDate, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook, type Measure } from "@stillwater/shared";
 import { pluralOf } from "./pluralWord";
 import { getLang, getUnits, loadPolish, polishBook, tn, useLang, useT } from "../i18n";
+import { inSentence } from "./MonthBars";
 import { CatchCard } from "./cards";
 import { CopySummary } from "./CopySummary";
 import { RenameKind } from "./RenameKind";
@@ -10,6 +11,7 @@ import { bookBadges } from "./catchBadge";
 import { countedBook, countedFish } from "./milestones";
 import { countedSearch } from "./countedSearch";
 import { typicalSize } from "./sizeBands";
+import { measureText } from "../i18n/content";
 import { searchSummary } from "./summaries";
 import { catchesCsv } from "./catchCsv";
 import { datedName, downloadFile } from "./download";
@@ -164,10 +166,10 @@ const TIME_WORDS: Partial<Record<(typeof BITE_TIMES)[number]["id"], string[]>> =
   // Not "wschód" or "zachód": they are the east and west of a wind as well ("ze wschodu").
   // The Polish "at dawn", "in the evening" and "at night" forms too ("o świcie", "wieczorem", "nocą", "w nocy").
   dawn: ["sunrise", "first light", "daybreak", "świt", "świcie", "brzask"],
-  morning: ["rankiem"],
+  morning: ["rankiem", "rano"],
   midday: ["noon", "południe"],
   afternoon: ["popołudniu"],
-  evening: ["dusk", "sunset", "zmierzch", "zmrok", "wieczorem"],
+  evening: ["dusk", "sunset", "zmierzch", "zmierzchu", "zmrok", "zmroku", "wieczorem"],
   night: ["dark", "noc", "nocą", "nocy"],
 };
 
@@ -199,6 +201,11 @@ export function isTimeWord(want: string, t: (text: string) => string): boolean {
   const typed = normalize(want);
   if (typed.length < 3) return false;
   return BITE_TIMES.some((band) => [band.label, t(band.label), ...(TIME_WORDS[band.id] ?? [])].some((word) => normalize(word).startsWith(typed)));
+}
+
+/** True when what was typed is a part of the day said as a phrase ("w nocy", "o świcie", "at dawn"), as the fish search reads it. */
+export function isTimePhrase(want: string, t: (text: string) => string): boolean {
+  return wholeTimeWord(normalize(want), t) !== null;
 }
 
 /** The part of the day a whole search names ("night", "at dusk", "o świcie", "wieczór"), in either language, or null. */
@@ -382,6 +389,8 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
   if (want === normalize(t("Kept")) || ["zabrane", "zabrany"].includes(want)) return catchesNewestFirst(book).filter((entry) => !entry.released);
   // "photo" whole: the fish with a picture kept, in either language.
   if (["photo", "photos", normalize(t("Photo")), normalize(t("Photos"))].includes(want)) return catchesNewestFirst(book).filter((entry) => pictured(entry.id));
+  // "note" whole: the fish written up with a note, in either language; "-note" the ones left bare.
+  if (["note", "notes", "notatka", "notatki", normalize(t("Note"))].includes(want)) return catchesNewestFirst(book).filter((entry) => entry.note.trim() !== "");
   // "night", "w nocy", "rain" whole: just the fish then or in it, not a Nightcrawler at noon or a Rainbow trout.
   const band = wholeTimeWord(want, t);
   if (band) return catchesNewestFirst(book).filter((entry) => whenOf(entry)?.bite === band);
@@ -791,6 +800,7 @@ export function CatchSearch() {
     const own = new Set(countedBook(book).catches.map((entry) => entry.id));
     return matches.filter((entry) => own.has(entry.id));
   }, [book, matches]);
+  const mineIds = useMemo(() => new Set(mine.map((entry) => entry.id)), [mine]);
   // Found only the sample week's or the game's fish, once those no longer count: said, so they aren't read as the angler's.
   const othersOnly = mine.length === 0 && matches.length > 0;
 
@@ -891,7 +901,7 @@ export function CatchSearch() {
           ) : null}
           {matches.length === 0 && !nightDay ? (
             <p className="search-tip">
-              {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “{size}”, a water temperature such as “{temp}”, a word from a note, a day such as “2026-10-12” or “last weekend”, a year such as “2025”, “photo”, “record”, “first”, “big”, “loose”, “weighed” or “measured”, or “released” or “kept”. Join two with “+”.", { size: metric ? ">1 kg" : ">2 lb", temp: metric ? ">15°C" : ">60°F" })}{" "}
+              {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “{size}”, a water temperature such as “{temp}”, a word from a note, a day such as “2026-10-12” or “last weekend”, a year such as “2025”, “photo”, “note”, “record”, “first”, “big”, “loose”, “weighed” or “measured”, or “released” or “kept”. Join two with “+”.", { size: metric ? ">1 kg" : ">2 lb", temp: metric ? ">15°C" : ">60°F" })}{" "}
               {t("Put “-” before a word to leave those fish out.")}
             </p>
           ) : null}
@@ -907,7 +917,8 @@ export function CatchSearch() {
             </p>
           ) : null}
           {matches.length > 0 ? (
-            <CopySummary text={() => searchSummary(searchParts(book, settled), matches, (id) => spotById(book, id)?.name ?? null, largest)} file="stillwater-search.txt" />
+            // The angler's own fish, as the count above sums them: a pasted copy doesn't credit them with the sample's.
+            <CopySummary text={() => searchSummary(searchParts(book, settled), mine.length > 0 ? mine : matches, (id) => spotById(book, id)?.name ?? null, largest)} file="stillwater-search.txt" />
           ) : null}
           {matches.length > 1 ? (
             // "Which was my biggest pike at Cedar": the same matches, largest first.
@@ -915,11 +926,13 @@ export function CatchSearch() {
           ) : null}
           {matches.length > 0 && (
             // Month headings only make sense newest first.
-            <PagedCatches key={`${settled}:${largest}`} items={matches} monthOf={largest ? undefined : (entry) => bookFishDay(book, entry).slice(0, 7)} headLevel={2}>
+            <PagedCatches key={`${settled}:${largest}`} items={matches} monthOf={largest ? undefined : (entry) => bookFishDay(book, entry).slice(0, 7)} headLevel={2} counted={(entry) => mineIds.has(entry.id)}>
               {(entry) => (
                 <CatchCard
                   key={entry.id}
                   entry={entry}
+                  // Largest first has no month headings, so the cards head the list under the page's h1.
+                  level={largest ? 2 : 3}
                   spotName={spotById(book, entry.spotId)?.name ?? t("Unknown water")}
                   tripTitle={entry.tripId ? outingNameById(book, entry.tripId) : null}
                   list={`${onCatches ? "catches" : "find"}${largest ? "-largest" : ""}:${settled}`}
@@ -973,16 +986,36 @@ function MatchSplits({ matches, all, search, largest }: { matches: readonly Catc
   };
   const kinds = tally((entry) => entry.species).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
   const years = tally((entry) => bookFishDay(book, entry).slice(0, 4)).sort((a, b) => b[0].localeCompare(a[0]));
-  const line = (label: string, rows: [string, number][], term: (value: string) => string, name: (value: string) => string, of: (entry: CatchEntry, value: string) => boolean) =>
+  // One kind found: each year's biggest beside its count, by the measure most of them were taken in, so "are my pike
+  // getting bigger" reads off any search. Across kinds a biggest says nothing.
+  const byLength = matches.filter((entry) => measureOf(entry, "length")).length * 2 >= matches.length;
+  const bestIn = (year: string) => {
+    if (kinds.length !== 1) return null;
+    const bests = personalBests({ spots: [], trips: [], catches: matches.filter((entry) => bookFishDay(book, entry).startsWith(`${year}-`)) });
+    const best = byLength ? bests.longest : bests.heaviest;
+    return best ? t("best {size}", { size: measureText(measureOf(best, byLength ? "length" : "weight")!) }) : null;
+  };
+  const line = (
+    label: string,
+    rows: [string, number][],
+    term: (value: string) => string,
+    name: (value: string) => string,
+    of: (entry: CatchEntry, value: string) => boolean,
+    note: (value: string) => string | null = () => null,
+  ) =>
     rows.length > 1 ? (
       <p className="meta match-split">
         {label}{" "}
         {rows.map(([value, count], index) => (
           <Fragment key={value}>
             {index > 0 ? " · " : null}
-            <Link to={narrow(term(value), all.filter((entry) => of(entry, value)))} aria-label={`${name(value)}: ${tn(count, "{n} fish", "{n} fish")}`}>
-              {`${name(value)} ${count}`}
-            </Link>
+            {/* A year's biggest stays with the year, not wrapped onto the next line on its own. */}
+            <span className={note(value) ? "split-item" : undefined}>
+              <Link to={narrow(term(value), all.filter((entry) => of(entry, value)))} aria-label={`${name(value)}: ${tn(count, "{n} fish", "{n} fish")}`}>
+                {`${name(value)} ${count}`}
+              </Link>
+              {note(value) ? ` (${note(value)})` : null}
+            </span>
           </Fragment>
         ))}
       </p>
@@ -990,12 +1023,12 @@ function MatchSplits({ matches, all, search, largest }: { matches: readonly Catc
   return (
     <>
       {line(t("By kind:"), kinds, (species) => exactTerm("species", t(species)), (species) => t(species), (entry, species) => entry.species === species)}
-      {line(t("By year:"), years, (year) => year, (year) => year, (entry, year) => bookFishDay(book, entry).startsWith(`${year}-`))}
+      {line(t("By year:"), years, (year) => year, (year) => year, (entry, year) => bookFishDay(book, entry).startsWith(`${year}-`), bestIn)}
     </>
   );
 }
 
-/** "3 days out · 2 outings": how many days and outings a search's fish came on, once that is more than one. */
+/** "Fish on 3 days · 2 outings": how many days and outings a search's fish came on, once that is more than one. */
 export function fishDays(book: Logbook, catches: readonly CatchEntry[]): { days: number; outings: number } {
   const trips = new Set(book.trips.map((trip) => trip.id));
   return {
@@ -1010,7 +1043,8 @@ function FishDays({ book, catches }: { book: Logbook; catches: readonly CatchEnt
   if (days < 2 && outings < 2) return null;
   return (
     <p className="meta fish-days">
-      {tn(days, "{n} day out", "{n} days out")}
+      {/* The days these fish came on, not every day out: Home's "days out" counts outings with no fish too. */}
+      {tn(days, "Fish on {n} day", "Fish on {n} days")}
       {outings > 0 ? `\u00a0· ${tn(outings, "{n} outing", "{n} outings")}` : ""}
     </p>
   );
@@ -1019,16 +1053,19 @@ function FishDays({ book, catches }: { book: Logbook; catches: readonly CatchEnt
 function TopLure({ catches }: { catches: readonly CatchEntry[] }) {
   const t = useT();
   const { book } = useLogbook();
-  const lure = leader(catches, (entry) => entry.lure.trim().replace(/\s+/g, " ").toLowerCase() || null);
+  // "Spinnerbait" and "Spinnerbaits" are one lure, as the exact lure search and Gear count them.
+  const lureKey = (entry: CatchEntry) => (entry.lure.trim() ? shownPieceKey(entry.lure.trim()) || null : null);
+  const lure = leader(catches, lureKey);
   const time = leader(catches, (entry) => {
     const at = new Date(entry.caughtAt);
     return Number.isNaN(at.getTime()) ? null : biteTimeOf(at.getHours());
   });
   const water = leader(catches, (entry) => entry.spotId);
-  const lureName = lure ? catches.find((entry) => entry.lure.trim().replace(/\s+/g, " ").toLowerCase() === lure.value)!.lure.trim() : "";
+  const lureName = lure ? catches.find((entry) => lureKey(entry) === lure.value)!.lure.trim() : "";
   const lines = [
     lure ? t("Most on {lure}.", { lure: `${t(lureName)} (${lure.count})` }) : null,
-    time ? t("Most at {time}.", { time: `${t(BITE_TIMES.find((row) => row.id === time.value)!.label)} (${time.count})` }) : null,
+    // Polish writes the part of the day in lower case inside a sentence: "Najczęściej o tej porze: świt (2)."
+    time ? t("Most at {time}.", { time: `${inSentence(t(BITE_TIMES.find((row) => row.id === time.value)!.label))} (${time.count})` }) : null,
     water ? t("Most from {water}.", { water: `${spotById(book, water.value)?.name ?? ""} (${water.count})` }) : null,
   ].filter(Boolean);
   return lines.length > 0 ? <p className="meta top-lure">{lines.join(" ")}</p> : null;

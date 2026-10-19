@@ -444,6 +444,16 @@ export function jigWinterWaitMul(lure: string | undefined, season: LakeSeason | 
   return season === "winter" && lure?.trim() && lureClass(lure).id === "jig" ? JIG_WINTER_WAIT : 1;
 }
 
+/** In winter the cold fish are slow: a hop, lift, pop or strip within this long of the lure landing or the last one comes too quick for them. */
+export const COLD_WORK_GAP_MS = 1000;
+/** Working the lure too quick in the cold puts the fish off: what is left of the wait stretches this much. */
+export const COLD_WORK_WAIT = 1.25;
+
+/** Whether this touch of the lure comes too quick for the cold fish: in winter, sooner than COLD_WORK_GAP_MS after the last. */
+export function tooQuickForCold(season: LakeSeason | undefined, sinceLastMs: number) {
+  return season === "winter" && sinceLastMs < COLD_WORK_GAP_MS;
+}
+
 /** In spring the reeds' shallows warm first, and the fish crowd in there, so any cast to the reeds draws the bite sooner. */
 export const SPRING_SHALLOWS_WAIT = 0.85;
 
@@ -710,10 +720,12 @@ export function canBaitShiner(speciesId: string) {
 export const SHINER_HUNTERS: ReadonlySet<string> = new Set(["pike", "tiger-muskie", "largemouth-bass", "smallmouth-bass", "walleye"]);
 /** Chance a bite on a live shiner is one of the bank's hunters. */
 export const LIVE_SHINER_SHARE = 0.6;
+/** A shiner landed in a clean fight goes back out lively and swims hard on the hook, so more of the bites are hunters. */
+export const LIVELY_SHINER_SHARE = 0.8;
 
 /** A hunter drawn to the live shiner for this bite, from the bank's own and weighed as the bank draws them, only one the angler could land, or none. */
-export function shinerHunter(spot: SpotId, profile: Pick<Profile, "strength" | "accuracy">, hour: LakeHour, random = Math.random): FishSpecies | null {
-  if (random() >= LIVE_SHINER_SHARE) return null;
+export function shinerHunter(spot: SpotId, profile: Pick<Profile, "strength" | "accuracy">, hour: LakeHour, random = Math.random, lively = false): FishSpecies | null {
+  if (random() >= (lively ? LIVELY_SHINER_SHARE : LIVE_SHINER_SHARE)) return null;
   const hunters = FISH.filter((fish) => fish.spots.includes(spot) && SHINER_HUNTERS.has(fish.id) && canLand(profile, fish));
   let roll = random() * hunters.reduce((sum, fish) => sum + appeal(fish, hour), 0);
   for (const fish of hunters) {
@@ -764,6 +776,56 @@ export const TADPOLE_EATER_SHARE = 0.35;
 /** A fish feeding on the tadpoles drawn to the cast for this bite, or none. */
 export function tadpoleEater(spot: SpotId, lure: string | undefined, profile: Pick<Profile, "strength" | "accuracy">, hour: LakeHour, random = Math.random): FishSpecies | null {
   return drawnFrom(TADPOLE_EATERS, TADPOLE_EATER_SHARE, spot, lure, profile, hour, random);
+}
+
+/** The fish that hunt the fry shoal under the kingfisher's snag off the dock. */
+export const FRY_HUNTERS: ReadonlySet<string> = new Set(["perch", "smallmouth-bass", "largemouth-bass", "pike"]);
+/** Chance a bite over the kingfisher's fry is one of the fish hunting them. */
+export const FRY_HUNTER_SHARE = 0.35;
+
+/** A fish hunting the kingfisher's fry drawn to the cast for this bite, or none. */
+export function fryHunter(spot: SpotId, lure: string | undefined, profile: Pick<Profile, "strength" | "accuracy">, hour: LakeHour, random = Math.random): FishSpecies | null {
+  return drawnFrom(FRY_HUNTERS, FRY_HUNTER_SHARE, spot, lure, profile, hour, random);
+}
+
+/** The fish that hold in the shade under the half-sunk log off the west bank. */
+export const LOG_HOLDERS: ReadonlySet<string> = new Set(["largemouth-bass", "bluegill", "crappie", "pike"]);
+/** Chance a bite tight to the log is one of the fish holding under it. */
+export const LOG_HOLDER_SHARE = 0.35;
+
+/** A fish holding under the sunken log drawn to the cast for this bite, or none. */
+export function logHolder(spot: SpotId, lure: string | undefined, profile: Pick<Profile, "strength" | "accuracy">, hour: LakeHour, random = Math.random): FishSpecies | null {
+  return drawnFrom(LOG_HOLDERS, LOG_HOLDER_SHARE, spot, lure, profile, hour, random);
+}
+
+/** The fish off the dock that sip bugs from the surface film. */
+export const BUG_SIPPERS: ReadonlySet<string> = new Set(["crappie", "golden-shiner", "smallmouth-bass", "rainbow-trout"]);
+/** Chance a bite on a lure among the surface bugs is one of the fish looking up for them. */
+export const BUG_SIPPER_SHARE = 0.35;
+
+/** A fish looking up for the surface bugs drawn to the lure for this bite, or none. */
+export function bugSipper(spot: SpotId, lure: string | undefined, profile: Pick<Profile, "strength" | "accuracy">, hour: LakeHour, random = Math.random): FishSpecies | null {
+  return drawnFrom(BUG_SIPPERS, BUG_SIPPER_SHARE, spot, lure, profile, hour, random);
+}
+
+/** The fish off the dock that hunt the minnows in the lanterns' light after dark. */
+export const LIGHT_HUNTERS: ReadonlySet<string> = new Set(["crappie", "walleye", "smallmouth-bass", "largemouth-bass"]);
+/** Chance a bite on a lure among the lit minnows is one of the fish hunting them. */
+export const LIGHT_HUNTER_SHARE = 0.35;
+
+/** A fish hunting the minnows under the dock lanterns drawn to the lure for this bite, or none. */
+export function lightHunter(spot: SpotId, lure: string | undefined, profile: Pick<Profile, "strength" | "accuracy">, hour: LakeHour, random = Math.random): FishSpecies | null {
+  return drawnFrom(LIGHT_HUNTERS, LIGHT_HUNTER_SHARE, spot, lure, profile, hour, random);
+}
+
+/** The fish off the dock and the point that rise to midges falling from the dusk clouds. */
+export const MIDGE_RISERS: ReadonlySet<string> = new Set(["bluegill", "crappie", "golden-shiner", "rainbow-trout"]);
+/** Chance a bite on a fly under the midges is one of the fish rising to them. */
+export const MIDGE_RISER_SHARE = 0.35;
+
+/** A fish rising to the midges drawn to the fly for this bite, or none. */
+export function midgeRiser(spot: SpotId, lure: string | undefined, profile: Pick<Profile, "strength" | "accuracy">, hour: LakeHour, random = Math.random): FishSpecies | null {
+  return drawnFrom(MIDGE_RISERS, MIDGE_RISER_SHARE, spot, lure, profile, hour, random);
 }
 
 /** The first cast of a visit at a bank meets fish that haven't seen a lure today, so it bites this much sooner. */

@@ -6,7 +6,7 @@ export const INLET_LEVEL = 6;
 export const OPEN_LEVEL = 7;
 export const SPOT_IDS: SpotId[] = ["dock", "reeds", "dropoff", "point", "inlet", "open"];
 
-export const LEVEL_THRESHOLDS = [0, 50, 150, 350, 700, 1200, 2000, 3200, 5000, 8000, 12000, 17000, 23000];
+export const LEVEL_THRESHOLDS = [0, 50, 150, 350, 700, 1200, 2000, 3200, 5000, 8000, 12000, 17000, 23000, 30000];
 
 export function anglerLevel(lifetimePoints: number): number {
   let level = 1;
@@ -51,6 +51,7 @@ export const ANGLER_TITLES = [
   "Lake elder",
   "Spirit of the lake",
   "Heart of the lake",
+  "Soul of the lake",
 ] as const;
 
 export function anglerTitle(level: number): string {
@@ -82,6 +83,7 @@ const LEVEL_UNLOCKS: Record<number, string> = {
   11: "Fish hold the bait 20% longer before they let go.",
   12: "The gold perfect-cast mark is wider.",
   13: "Working a lure (pops, hops, lifts and strips) draws the fish sooner three times, not two.",
+  14: "Your line holds a moment past the red: it snaps at 105% strain, not 100%.",
 };
 
 export function levelUnlock(level: number): string | null {
@@ -104,6 +106,11 @@ export function castRangeMultiplier(level: number): number {
 /** How much faster a hooked fish tires at this level. */
 export function fishTireMulForLevel(level: number): number {
   return level >= 9 ? 1.2 : 1;
+}
+
+/** The strain a sound line snaps at, as a share of the tension bar: from level 14 it holds a moment past the red. */
+export function lineSnapForLevel(level: number): number {
+  return level >= 14 ? 1.05 : 1;
 }
 
 /** How much more often rare and legendary fish are drawn at this level, within what the angler can land. */

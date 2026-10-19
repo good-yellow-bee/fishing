@@ -30,8 +30,26 @@ function newestAt(book: Logbook): string {
 /** Fish in this browser's book that the file doesn't have: what replacing it with the file would drop. */
 function lostOnLoad(here: Logbook, file: Logbook): number {
   const kept = new Set(file.catches.map((entry) => entry.id));
-  // The sample week's invented fish are no loss.
-  return here.catches.filter((entry) => !kept.has(entry.id) && !isSampleCatch(entry.id)).length;
+  // The sample week's invented fish are no loss, and the game's stay (withPlayFrom).
+  return here.catches.filter((entry) => !kept.has(entry.id) && !isSampleCatch(entry.id) && offPlayLake(entry)).length;
+}
+
+/**
+ * The file with this browser's game beside it: its lake, rounds and fish (and their snapshots) come from play here,
+ * not from the book in the file, so Replace keeps them, as Restore sample and Start my own book do.
+ */
+export function withPlayFrom(file: FieldArchive, here: Logbook, photos: CatchPhotoMap): FieldArchive {
+  const has = new Set([...file.book.spots, ...file.book.trips, ...file.book.catches].map((each) => each.id));
+  const spots = here.spots.filter((spot) => spot.id === PLAY_LAKE_ID && !has.has(spot.id));
+  const trips = here.trips.filter((trip) => !offPlayLake(trip) && !has.has(trip.id));
+  const catches = here.catches.filter((entry) => !offPlayLake(entry) && !has.has(entry.id));
+  if (spots.length + trips.length + catches.length === 0) return file;
+  const shots = Object.fromEntries(catches.filter((entry) => photos[entry.id] !== undefined).map((entry) => [entry.id, photos[entry.id]!]));
+  return {
+    ...file,
+    book: { ...file.book, spots: [...file.book.spots, ...spots], trips: [...file.book.trips, ...trips], catches: [...file.book.catches, ...catches] },
+    photos: { ...shots, ...file.photos },
+  };
 }
 
 /** This book's waters and outings a file doesn't have, which replacing would drop; the game's lake comes back on its own. */
@@ -304,7 +322,7 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
     loadButton.current?.focus();
   };
   const onReplace = () => {
-    if (pending) load(pending, false);
+    if (pending) load(withPlayFrom(pending, storedBook, photos), false);
   };
   /** `withDeleted` takes back the fish deleted here too, when the file still has them. */
   const onAddNew = (withDeleted = false) => {

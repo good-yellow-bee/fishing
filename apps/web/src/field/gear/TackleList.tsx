@@ -238,7 +238,8 @@ export function TackleList({
                   }}
                 />
                 <span className={item.packed ? "is-packed" : undefined}>{t(item.label)}</span>
-                {isLureLabel(item.label) && <span className="lure-tag">{t(lureClass(item.label).label)}</span>}
+                {/* Its kind, unless it is named just that: "Jig · Jig" said the name twice. */}
+                {isLureLabel(item.label) && shownPieceKey(t(lureClass(item.label).label)) !== shownPieceKey(t(item.label)) && <span className="lure-tag">{t(lureClass(item.label).label)}</span>}
                 {took.get(readKey(item.label)) ? (
                   <span className="tackle-caught">{fishCountLabel(took.get(readKey(item.label))!)}</span>
                 ) : tipKeys.has(readKey(item.label)) ? (
@@ -294,6 +295,20 @@ export function TackleList({
               {t("+ {lure}", { lure: t(lure) })}
             </button>
           ))}
+          {/* A fresh list takes them all in one tap, rather than one tap each with the tips scrolling away. */}
+          {missing.length > 1 ? (
+            <button
+              type="button"
+              className="lure-tip"
+              onClick={() => {
+                const message = missing.map((lure) => add(tripId, lure)).find(Boolean);
+                setError(message ?? "");
+                focusAfter();
+              }}
+            >
+              {t("+ All {n}", { n: missing.length })}
+            </button>
+          ) : null}
         </p>
       ) : null}
       <form className="tackle-add" onSubmit={onSubmit}>

@@ -98,6 +98,12 @@ export type CatchDraft = {
   released?: boolean;
   /** The other measure (a weight for a fish measured by length, or the other way), left blank when not taken. */
   alsoAmount?: string;
+  /**
+   * The instant an edited fish was stored at, sent when the edit leaves its time and outing as they were: the fish
+   * keeps it exactly, and the outing it was saved on still holds, though the phone has since crossed a time zone
+   * and reads the same instant on another day.
+   */
+  keptAt?: string;
 };
 
 export type SpotDraft = {
@@ -651,13 +657,17 @@ export function parseCatchDraft(draft: CatchDraft, book: Logbook): Parsed<Omit<C
   if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(draft.caughtAt)) {
     return fail("caughtAt", "Set the time you landed it.");
   }
-  const when = new Date(draft.caughtAt);
+  const kept = draft.keptAt ? new Date(draft.keptAt) : null;
+  const keptTime = kept !== null && !Number.isNaN(kept.getTime());
+  const when = keptTime ? kept : new Date(draft.caughtAt);
   if (Number.isNaN(when.getTime())) return fail("caughtAt", "Set the time you landed it.");
+  // A slip of the keys ("1026") would file the fish as the book's oldest: from 1900 on, as an outing's date.
+  if (Number(draft.caughtAt.slice(0, 4)) < 1900) return fail("caughtAt", "Check the year.");
   if (when.getTime() > Date.now() + 5 * 60 * 1000) {
     return fail("caughtAt", "That time is still ahead of you.");
   }
   // A fish goes on its own day's outing or the night before's, never on one planned for later.
-  if (tripId && tripById(book, tripId)!.date > draft.caughtAt.slice(0, 10)) {
+  if (tripId && !keptTime && tripById(book, tripId)!.date > draft.caughtAt.slice(0, 10)) {
     return fail("tripId", "That outing comes after the time this fish was landed.");
   }
 
@@ -711,13 +721,13 @@ export function parseSpotDraft(draft: SpotDraft): Parsed<Omit<Spot, "id">> {
 }
 
 export function parseTripDraft(draft: TripDraft, book: Logbook): Parsed<Omit<Trip, "id">> {
-  // "2026-02-30" parses as 2 March: the day has to come back as typed.
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(draft.date) || localDate(new Date(`${draft.date}T12:00:00`)) !== draft.date) {
-    return fail("date", "Pick a date.");
-  }
-  // A slip of the keys ("2062", "0202") would file the outing decades away: a year from 1900 to five years ahead.
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(draft.date)) return fail("date", "Pick a date.");
+  // A slip of the keys ("2062", "0202") would file the outing decades away: a year from 1900 to five years ahead. Read
+  // first, as a year before 1000 doesn't come back as typed below.
   const year = Number(draft.date.slice(0, 4));
   if (year < 1900 || year > new Date().getFullYear() + 5) return fail("date", "Check the year.");
+  // "2026-02-30" parses as 2 March: the day has to come back as typed.
+  if (localDate(new Date(`${draft.date}T12:00:00`)) !== draft.date) return fail("date", "Pick a date.");
   const spot = spotById(book, draft.spotId);
   if (!spot) return fail("spotId", "Pick a spot.");
   const title = cleanLine(draft.title) || spot.name;

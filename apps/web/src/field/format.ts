@@ -1,5 +1,6 @@
 import { SPOT_LABELS } from "@stillwater/shared";
 import { getLang, locale, t, tn } from "../i18n";
+import { outingDay } from "./tripDates";
 
 /** Formatters per language, built on first use so a language change takes effect. */
 const formats = new Map<string, { format(date: Date): string }>();
@@ -69,9 +70,10 @@ export function formatTimeOfDay(iso: string): string {
   return format("time").format(new Date(iso));
 }
 
-export function formatClock(iso: string): string {
+/** A day and time, with the year when it isn't this one, or always with `withYear`. */
+export function formatClock(iso: string, withYear?: boolean): string {
   const date = new Date(iso);
-  return format("clock", otherYear(date)).format(date);
+  return format("clock", withYear ?? otherYear(date)).format(date);
 }
 
 /** "in 6 days" for an outing still ahead past tomorrow, "" otherwise: plans are made around the days left. */
@@ -82,6 +84,8 @@ export function daysAheadLabel(ymd: string, today: string): string {
 
 export function tripWhen(ymd: string, today: string, tomorrow: string): string {
   if (ymd === today) return t("Today");
+  // In the small hours, last evening's outing is still going: "Last night", as the outing form's pick names it.
+  if (ymd === outingDay(today)) return t("Last night");
   if (ymd === tomorrow) return t("Tomorrow");
   return formatDay(ymd);
 }
@@ -89,6 +93,11 @@ export function tripWhen(ymd: string, today: string, tomorrow: string): string {
 export function toLocalInput(date: Date): string {
   const pad = (value: number) => String(value).padStart(2, "0");
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+/** "0 fish", "3 fish": a count set among other counts, where "Nothing logged" would read as a sentence. */
+export function fishSum(count: number): string {
+  return tn(count, "{n} fish", "{n} fish");
 }
 
 export function fishCountLabel(count: number): string {

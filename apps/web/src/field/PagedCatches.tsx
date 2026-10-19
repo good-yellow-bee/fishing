@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { locale, t } from "../i18n";
+import { locale, t, tn } from "../i18n";
 import { fishCountLabel } from "./format";
 import { monthName } from "./tripMonths";
 
@@ -143,27 +143,33 @@ function jumpLabel(month: string, byYear: boolean): string {
  * A stack of catch cards, a page at a time, with a Show more button under it while any are left.
  * Given monthOf ("2026-10"), a month heading goes above the first card of each month, at headLevel
  * (2 where nothing else heads the list, 3 under a section's h2), counting that month's fish in the whole list.
+ * `counted` says which fish are the angler's own, as Home and Bests count them; the sample week's and the game's are
+ * said apart, as Trips' month headings say their outings.
  */
 export function PagedCatches<T>({
   items,
   children,
   monthOf,
   headLevel = 3,
+  counted,
 }: {
   items: readonly T[];
   children: (item: T) => ReactNode;
   monthOf?: (item: T) => string;
   headLevel?: 2 | 3;
+  counted?: (item: T) => boolean;
 }) {
   const Head = headLevel === 2 ? "h2" : "h3";
   const { shown, start, showMore, showFrom, showNewer, box } = useShowMore("catches");
   const { visible, more } = catchPage(items, shown, start);
   const monthCounts = new Map<string, number>();
+  const monthOthers = new Map<string, number>();
   const firstOf = new Map<string, number>();
   if (monthOf)
     items.forEach((item, index) => {
       const month = monthOf(item);
-      monthCounts.set(month, (monthCounts.get(month) ?? 0) + 1);
+      if (!counted || counted(item)) monthCounts.set(month, (monthCounts.get(month) ?? 0) + 1);
+      else monthOthers.set(month, (monthOthers.get(month) ?? 0) + 1);
       if (!firstOf.has(month)) firstOf.set(month, index);
     });
   const marks = jumpMarks([...firstOf.keys()], items.length);
@@ -214,7 +220,7 @@ export function PagedCatches<T>({
               <Fragment key={start + index}>
                 {head ? (
                   <Head className="month-head" id={headId(month)} tabIndex={-1}>
-                    {monthName(month)} · {fishCountLabel(monthCounts.get(month) ?? 0)}
+                    {monthName(month)} · {monthHeadCount(monthCounts.get(month) ?? 0, monthOthers.get(month) ?? 0)}
                   </Head>
                 ) : null}
                 {children(item)}
@@ -232,4 +238,10 @@ export function PagedCatches<T>({
       )}
     </div>
   );
+}
+
+/** A month heading's count: the angler's own fish, then the sample week's and the game's apart; only those when none are own. */
+function monthHeadCount(own: number, others: number): string {
+  if (own === 0 && others > 0) return tn(others, "{n} from the sample week or the game", "{n} from the sample week or the game");
+  return `${fishCountLabel(own)}${others > 0 ? ` · ${tn(others, "+{n} from the sample week or the game", "+{n} from the sample week or the game")}` : ""}`;
 }

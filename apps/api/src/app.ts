@@ -1,6 +1,9 @@
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { auth } from "./auth.ts";
+import { auth, trustedOrigins } from "./auth.ts";
+import { serveClient } from "./client.ts";
 import { boardRoutes } from "./routes/board.ts";
 import { catchRoutes } from "./routes/catches.ts";
 import { dailyRequestRoutes } from "./routes/dailyRequests.ts";
@@ -14,7 +17,7 @@ export const app = new Hono();
 app.use(
   "*",
   cors({
-    origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+    origin: trustedOrigins,
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["POST", "GET", "OPTIONS"],
     credentials: true,
@@ -41,3 +44,8 @@ app.route("/api", boardRoutes);
 app.route("/api", lodgeRoutes);
 
 app.get("/api/health", (c) => c.json({ ok: true }));
+
+// In development Vite serves the client and proxies /api here.
+if (process.env.NODE_ENV === "production") {
+  serveClient(app, join(dirname(fileURLToPath(import.meta.url)), "../../web/dist"));
+}

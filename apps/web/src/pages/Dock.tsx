@@ -1100,7 +1100,7 @@ export function DockPage() {
               </button>
               {/* A shiner goes back out on the hook as live bait, for the pike and bass that hunt it. */}
               {!landedReleased && canBaitShiner(game.outcome.species.id) && (
-                <button className="panel-btn" type="button" onClick={game.baitShiner} title={t("Hook it on as live bait: the next cast draws the hunters here.")}>
+                <button className="panel-btn" type="button" onClick={game.baitShiner} title={game.outcome.clean ? t("Hook it on as live bait: landed clean, it's lively and draws more of the hunters here.") : t("Hook it on as live bait: the next cast draws the hunters here. A shiner landed in a clean fight is livelier.")}>
                   {t("Use it as bait")}
                 </button>
               )}
@@ -1176,7 +1176,11 @@ export function DockPage() {
           )}
         </div>
         {shopOpen && (
-          <div className="shop-overlay" role="dialog" aria-modal="true" aria-label={t("The shack")} ref={shopPanel} tabIndex={-1}>
+          <div className="shop-overlay" role="dialog" aria-modal="true" aria-labelledby="shop-title" ref={shopPanel} tabIndex={-1}>
+            {/* The shack's sections are h3s: its own name, unseen, is the h2 between them and the page's h1. */}
+            <h2 id="shop-title" className="sr-only">
+              {t("The shack")}
+            </h2>
             <UpgradePanel profile={me.profile} busy={busy || scenePhase !== "idle"} onBuy={onBuy} />
             <DailyRequestsPanel key={userId} catchKey={me.catches[0]?.id} onClaimed={refresh} />
             <ForecastBoard />

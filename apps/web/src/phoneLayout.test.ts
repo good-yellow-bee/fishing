@@ -141,16 +141,16 @@ describe("the trip recap on a phone", () => {
 });
 
 describe("the news card on a phone", () => {
-  it("is solid, pins Got it at its foot, sits under the header and ends on screen at any text size", () => {
+  it("is solid, pins Got it at its foot, sits under the header and ends above the banks' row at any text size", () => {
     const card = /\n\.whats-new \{([^}]*)\}/.exec(css)?.[1];
-    expect(card).toContain("max-height: calc((100dvh - 38px) / var(--text-zoom, 1) - 102px);");
+    expect(card).toContain("max-height: calc((100dvh - 38px) / var(--text-zoom, 1) - 102px - var(--hud-drop, 0px));");
     expect(card).toContain("background: rgb(20, 28, 25);");
     const foot = /\n\.whats-new-foot \{([^}]*)\}/.exec(css)?.[1];
     expect(foot).toContain("position: sticky;");
     expect(foot).toContain("background: inherit;");
     const from = css.indexOf("@media (max-width: 800px) and (min-height: 501px)");
     const upright = css.slice(from, css.indexOf("@media (max-width: 520px)", from));
-    expect(upright).toMatch(/\.whats-new \{\n    top: calc\(var\(--hud-bottom, 140px\) \+ 8px\);\n    max-height: calc\(\(100dvh - 38px\) \/ var\(--text-zoom, 1\) - var\(--hud-bottom, 140px\) - 8px\);/);
+    expect(upright).toMatch(/\.whats-new \{\n    top: calc\(var\(--hud-bottom, 140px\) \+ 8px\);\n    max-height: calc\(100dvh \/ var\(--text-zoom, 1\) - var\(--hud-bottom, 140px\) - 68px\);/);
   });
 });
 
@@ -207,9 +207,9 @@ describe("the lure panel on a touch tablet", () => {
     const from = css.indexOf("@media (pointer: coarse) and (min-width: 801px) and (min-height: 501px) {\n  html:not([data-hand=\"left\"]) .lure-choice {");
     expect(from).toBeGreaterThan(-1);
     const block = css.slice(from, css.indexOf("\n}\n", from));
-    expect(block).toContain("max-height: calc((100dvh - 216px) / var(--text-zoom, 1) - 154px);");
+    expect(block).toContain("max-height: calc((100dvh - 216px) / var(--text-zoom, 1) - 154px - var(--hud-drop, 0px));");
     expect(block).toContain("overflow-y: auto;");
-    expect(/\n\.lure-choice \{([^}]*)\}/.exec(css)?.[1]).toContain("top: 154px;");
+    expect(/\n\.lure-choice \{([^}]*)\}/.exec(css)?.[1]).toContain("top: calc(154px + var(--hud-drop, 0px));");
     expect(/@media \(pointer: coarse\) \{\n  \.walk-stick \{([^}]*)\}/.exec(css)?.[1]).toMatch(/bottom: 104px;[\s\S]*height: 104px;/);
   });
 });

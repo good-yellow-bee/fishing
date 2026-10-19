@@ -1,5 +1,5 @@
 import type { Logbook } from "@stillwater/shared";
-import { fishDay } from "../tripMonths";
+import { fishDay, looseNights } from "../tripMonths";
 
 /**
  * One day of a season: its fish, the outings planned for it, and `lateTrip`, the outing whose small-hours fish were
@@ -34,7 +34,8 @@ function countDays(book: Logbook, year: string): Map<string, DayMark> {
   const late = new Set<string>();
   const fishTrips = new Map<string, Set<string | null>>();
   for (const entry of book.catches) {
-    const { day, late: small } = fishDay(entry, tripDays);
+    // A night session's fish logged loose counts on its evening's day too; the day keeps its search, as no outing holds it.
+    const { day, late: small } = fishDay(entry, tripDays, looseNights(book));
     if (!day.startsWith(`${year}-`)) continue;
     mark(day).fish += 1;
     if (small) late.add(day);

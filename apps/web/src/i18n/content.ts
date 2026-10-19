@@ -32,9 +32,12 @@ export function weightText(pounds: number): string {
   return getUnits() === "metric" ? `${num(pounds * KG_PER_LB, pounds * KG_PER_LB < 1 ? 2 : 1)} kg` : `${num(pounds, pounds < 1 ? 2 : 1)} lb`;
 }
 
-/** "28 in", or "71 cm" for a metric reader. The book keeps inches. */
+/**
+ * "28 in", or "71,1 cm" for a metric reader. The book keeps inches. Centimetres to the tenth, as inches are: a length
+ * typed "45,5" comes back as typed, and a best a few millimetres longer never reads the same as the one it beat.
+ */
 export function lengthText(inches: number): string {
-  return getUnits() === "metric" ? `${num(inches * CM_PER_IN, 0)} cm` : `${num(inches)} in`;
+  return getUnits() === "metric" ? `${num(inches * CM_PER_IN)} cm` : `${num(inches)} in`;
 }
 
 /** "61°F", or "16°C" for a metric reader. The book keeps °F. */

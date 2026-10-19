@@ -71,6 +71,37 @@ describe("the field log on a touch screen", () => {
     const block = /\.map-index a:not\(\.map-plan, \.map-coord-link, \.map-next\)::after \{([^}]*)\}/.exec(mapCss)?.[1];
     expect(block).toContain("inset: -6px -3px;");
   });
+
+  it("makes each water in the Map's not-on-a-map-yet line a 32 px band, on touch only", () => {
+    const touch = mapCss.slice(mapCss.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.map-note a \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-height: 32px;");
+    expect(mapCss.slice(0, mapCss.indexOf("@media (pointer: coarse) {"))).not.toContain(".map-note a");
+  });
+
+  it("makes Photos' no-photo links 32 px bands that don't reach into each other", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.photo-missing span a \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-height: 32px;");
+    expect(/\n  \.photo-missing span a::after \{([^}]*)\}/.exec(touch)?.[1]).toContain("content: none;");
+  });
+
+  it("drops a water's Copy the place 16 px below its coordinates when the two wrap, on touch only", () => {
+    const touch = mapCss.slice(mapCss.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.map-index \.map-place \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("flex-wrap: wrap;");
+    expect(block).toContain("row-gap: 16px;");
+  });
+
+  it("makes a water's Next outing in the Map's list a 32 px band with room under it, on touch only", () => {
+    const touch = mapCss.slice(mapCss.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.map-index a\.map-next \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-height: 32px;");
+    expect(block).toContain("margin-bottom: 6px;");
+  });
 });
 
 describe("the field log's tab bar on a 320 px phone", () => {
@@ -106,6 +137,14 @@ describe("a fish's page on a touch screen", () => {
   });
 });
 
+describe("a sheet's Edit and Delete on a touch screen", () => {
+  it("stack far enough apart that Delete's reach leaves Edit a full band", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    expect([...touch.matchAll(/\n  \.sheet-actions \{([^}]*)\}/g)].some((rule) => rule[1]!.includes("row-gap: 16px;"))).toBe(true);
+    expect([...touch.matchAll(/\n  \.sheet-head a:not\(\.field-primary\)::after \{([^}]*)\}/g)].some((rule) => rule[1]!.includes("inset: -7px -3px;"))).toBe(true);
+  });
+});
+
 describe("a list's Show all on a touch screen", () => {
   it("stands far enough below the last row that its reach leaves that row's link alone", () => {
     const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
@@ -132,6 +171,131 @@ describe("Bests' days calendar on a touch screen", () => {
     const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
     expect(/\n  \.day-calendar \.day-grid \{([^}]*)\}/.exec(touch)?.[1]).toContain("grid-template-columns: repeat(7, minmax(0, 32px));");
     expect(/\n  \.day-calendar \.day-grid li \{([^}]*)\}/.exec(touch)?.[1]).toContain("aspect-ratio: 1;");
+  });
+});
+
+describe("Bests' season box on a touch screen", () => {
+  it("gives each stacked count link a 32 px band of its own, and leaves desktop's plain inline links alone", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.season-recap p a \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-height: 32px;");
+    expect(block).toContain("box-sizing: border-box;");
+    // Off a touch screen they stay inline links, which keep axe's inline-text exception (see Home's count links).
+    expect(css.slice(0, css.indexOf("@media (pointer: coarse) {"))).not.toMatch(/\n\.season-recap p a \{/);
+  });
+});
+
+describe("a water's tips box on a touch screen", () => {
+  it("makes each linked word a 32 px band, at least 32 px wide, and leaves desktop's inline links alone", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.water-tips p a \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-width: 32px;");
+    expect(block).toContain("min-height: 32px;");
+    expect(block).toContain("box-sizing: border-box;");
+    expect(css.slice(0, css.indexOf("@media (pointer: coarse) {"))).not.toMatch(/\n\.water-tips p a \{/);
+  });
+});
+
+describe("a catch's conditions box on a touch screen", () => {
+  it("makes the sky, wind, temperature and moon links 32 px bands, and leaves desktop's inline links alone", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.catch-conditions > p:not\(\.meta\) a \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-height: 32px;");
+    expect(block).toContain("box-sizing: border-box;");
+    expect(css.slice(0, css.indexOf("@media (pointer: coarse) {"))).not.toContain(".catch-conditions");
+    expect(readFileSync(`${import.meta.dirname}/CatchPages.tsx`, "utf8")).toContain('<aside className="conditions catch-conditions"');
+  });
+});
+
+describe("an empty list's link on a touch screen", () => {
+  it("makes the link that fills it a 32 px band, and leaves desktop's inline link alone", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.empty a \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-height: 32px;");
+    expect(block).toContain("box-sizing: border-box;");
+    expect(css.slice(0, css.indexOf("@media (pointer: coarse) {"))).not.toMatch(/\n\.empty a \{/);
+  });
+});
+
+describe("a page's one-link lines on a touch screen", () => {
+  it("makes Add a photo, Write up the day, Go again and a missing page's way back 32 px bands, and leaves desktop's inline links alone", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  :is\(\.add-photo, \.trip-write-up, \.trip-again, \.lone-link\) > a \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-height: 32px;");
+    expect(block).toContain("box-sizing: border-box;");
+    expect(css.slice(0, css.indexOf("@media (pointer: coarse) {"))).not.toContain(".lone-link");
+    expect(readFileSync(`${import.meta.dirname}/NotFoundPage.tsx`, "utf8")).toContain('<p className="lone-link">');
+  });
+});
+
+describe("a month's heading in Bests' days calendar on a touch screen", () => {
+  it("makes its outings and fish links 32 px bands, and leaves desktop's inline links alone", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.day-month h3 a \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("min-width: 32px;");
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-height: 32px;");
+    expect(block).toContain("box-sizing: border-box;");
+    expect(css.slice(0, css.indexOf("@media (pointer: coarse) {"))).not.toContain(".day-month h3 a");
+  });
+});
+
+describe("a log form's note on a touch screen", () => {
+  it("makes the fish or outing it links a 32 px band, and leaves desktop's inline link alone", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.form-note a \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-height: 32px;");
+    expect(block).toContain("box-sizing: border-box;");
+    expect(css.slice(0, css.indexOf("@media (pointer: coarse) {"))).not.toMatch(/\n\.form-note a \{/);
+  });
+});
+
+describe("a tally's rows on a touch screen", () => {
+  it("makes each row's linked name a 32 px band, and leaves desktop's inline links alone", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.tally-label a \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-height: 32px;");
+    expect(block).toContain("box-sizing: border-box;");
+    expect(css.slice(0, css.indexOf("@media (pointer: coarse) {"))).not.toContain(".tally-label a");
+  });
+});
+
+describe("a kind's first and newest dates on a touch screen", () => {
+  it("makes each date link a 32 px band, and leaves desktop's inline links alone", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.species-span a \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-height: 32px;");
+    expect(block).toContain("box-sizing: border-box;");
+    expect(css.slice(0, css.indexOf("@media (pointer: coarse) {"))).not.toContain(".species-span a");
+  });
+});
+
+describe("a kind's water's sizes on a touch screen", () => {
+  it("drops a wrapped line of count and sizes 8 px so the links' reaches don't overlap", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.species-waters li > span\.meta\.sizes \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: flex;");
+    expect(block).toContain("flex-wrap: wrap;");
+    expect(block).toContain("row-gap: 8px;");
+  });
+});
+
+describe("Bests' month-by-year table on a touch screen", () => {
+  it("reaches each 24 px count 4 px out to its cell's edges, a 32 px band meeting the next row's", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    expect(/\n  \.month-year td a \{([^}]*)\}/.exec(touch)?.[1]).toContain("position: relative;");
+    expect(/\n  \.month-year td a::after \{([^}]*)\}/.exec(touch)?.[1]).toContain("inset: -4px;");
+    // The reach adds to the 24 px link and its 4 px cell padding above and below.
+    expect(/\n\.month-year td a \{([^}]*)\}/.exec(css)?.[1]).toContain("min-height: 24px;");
+    expect(/\n\.month-year td \{([^}]*)\}/.exec(css.replace(".month-year th,\n.month-year td {", ".month-year td {"))?.[1]).toContain("padding: 4px 12px 4px 0;");
   });
 });
 

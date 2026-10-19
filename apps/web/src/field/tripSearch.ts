@@ -3,6 +3,7 @@ import { dateWords, monthWord } from "./dateWords";
 import { singularStems } from "./pluralWord";
 import { readSizePlus } from "./sizePlus";
 import { isPlanned } from "./TripMonthHead";
+import { outingDay } from "./tripDates";
 import { isSampleOnly, isSampleOuting } from "./bookCopy";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 
@@ -132,7 +133,7 @@ export function findTrips(
     // "game" and "sample" on their own ask for those outings, as "-game" and "-sample" leave them out.
     if (GAME.includes(part)) return !offPlayLake(trip);
     if (SAMPLE.includes(part)) return isSampleOuting(trip);
-    if (NO_FISH.includes(part)) return trip.date < today && fishOn(trip.id) === 0;
+    if (NO_FISH.includes(part)) return trip.date < outingDay(today, now) && fishOn(trip.id) === 0;
     if (LOST.includes(part)) return (trip.lost ?? 0) > 0;
     if (MISSED.includes(part)) return (trip.missed ?? 0) > 0;
     if (PLANNED.includes(part)) return isPlanned(trip, today, fishOn(trip.id));
@@ -149,11 +150,12 @@ export function findTrips(
     // "szczupaki" finds the outings that took a "szczupak": a plural stands for its shorter form.
     return part.split(" ").every((word) => text.includes(word) || singularStems(word).some((stem) => text.includes(stem)));
   };
-  // The sample week's plans still ahead stay hidden once the book has the angler's own, as Coming up hides them.
+  // The sample week's plans stay hidden once the book has the angler's own, as Coming up hides them, and once their day
+  // has passed too: a made-up plan is no blank day.
   const hideSamplePlans = !isSampleOnly(book);
   return book.trips
     .filter((trip) => {
-      if (hideSamplePlans && isSampleOuting(trip) && trip.date >= today) return false;
+      if (hideSamplePlans && isSampleOuting(trip) && (trip.date >= today || fishOn(trip.id) === 0)) return false;
       const text = tripText(book, trip, t);
       return !left(trip, text) && parts.every((part) => matches(trip, text, part));
     })

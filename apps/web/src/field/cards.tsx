@@ -10,8 +10,8 @@ import {
   type WaterType,
 } from "@stillwater/shared";
 import { tn, useT } from "../i18n";
-import { measuresText } from "../i18n/content";
-import { daysAheadLabel, fishCountLabel, formatClock, formatDay, noteText, outingName, tripWhen } from "./format";
+import { measuresText, tempText } from "../i18n/content";
+import { daysAheadLabel, fishCountLabel, fishSum, formatClock, formatDay, noteText, outingName, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { catchBadge } from "./catchBadge";
 import { WeatherLine } from "./Weather";
@@ -20,6 +20,7 @@ import { useTackleItems } from "./gear/TackleState";
 import { catchLink, type ListKey } from "./catchList";
 import { FROM_LIST } from "./leaveDeleted";
 import { isPlanned } from "./TripMonthHead";
+import { outingDay } from "./tripDates";
 
 /** A card's heading sits one below the section it is listed under. */
 type CardLevel = 2 | 3 | 4;
@@ -108,14 +109,17 @@ export function TripCard({
   const tackle = useTackleItems();
   const { book } = useLogbook();
   // An outing still ahead with nothing logged: how the bag is coming along says more than "Nothing logged".
-  const bag = tackle && fishCount === 0 && trip.date >= today ? itemsForTrip(tackle, trip.id) : [];
+  const bag = tackle && fishCount === 0 && trip.date >= outingDay(today) ? itemsForTrip(tackle, trip.id) : [];
   const packed = packedCount(bag);
   const tally =
     bag.length === 0
       ? // Still ahead, or today's before its first fish, with nothing packed: planned, not a blank day.
         isPlanned(trip, today, fishCount)
         ? t("Planned")
-        : fishCountLabel(fishCount)
+        : // Beside "3 lost", a count: "0 fish · 3 lost", not "Nothing logged · 3 lost".
+          fishCount === 0 && (trip.lost || trip.missed)
+          ? fishSum(0)
+          : fishCountLabel(fishCount)
       : packed === bag.length
         ? t("All packed")
         : t("{packed} of {total} packed", { packed, total: bag.length });
@@ -125,9 +129,9 @@ export function TripCard({
       <div>
         <Head>{outingName(trip, book.spots)}</Head>
         <p className="meta">
-          {/* The fish that got away too, so a hard day stands out in the list. */}
+          {/* The fish that got away and the strikes missed too, so a hard day stands out in the list. */}
           {/* An untitled outing is already named after its water. */}
-          {[spotName === outingName(trip, book.spots) ? null : spotName, waterType ? t(WATER_LABELS[waterType]) : null, tally, fishCount === 0 ? daysAheadLabel(trip.date, today) : null, trip.lost ? tn(trip.lost, "{n} lost", "{n} lost") : null].filter(Boolean).join(" · ")}
+          {[spotName === outingName(trip, book.spots) ? null : spotName, waterType ? t(WATER_LABELS[waterType]) : null, tally, fishCount === 0 ? daysAheadLabel(trip.date, today) : null, trip.lost ? tn(trip.lost, "{n} lost", "{n} lost") : null, trip.missed ? tn(trip.missed, "{n} missed", "{n} missed") : null].filter(Boolean).join(" · ")}
         </p>
       </div>
     </Link>
@@ -142,6 +146,7 @@ export function SpotCard({
   restDays = null,
   nextOuting = null,
   bestLure = null,
+  waterTemp = null,
 }: {
   spot: Spot;
   fishCount: number;
@@ -153,6 +158,8 @@ export function SpotCard({
   restDays?: number | null;
   /** The soonest planned outing here, already in words. */
   nextOuting?: string | null;
+  /** The water's last temperature noted with a fish, while it is recent enough to go by. */
+  waterTemp?: { fahrenheit: number; day: string; trend?: "warming" | "cooling" } | null;
 }) {
   const t = useT();
   return (
@@ -171,6 +178,16 @@ export function SpotCard({
       </p>
       {restDays !== null ? <p className="meta">{restDays === 0 ? t("Fished here today") : restDays === 1 ? t("Last fished here yesterday") : tn(restDays, "Last fished here {n} day ago", "Last fished here {n} days ago")}</p> : null}
       {nextOuting ? <p className="meta next-outing">{nextOuting}</p> : null}
+      {waterTemp ? (
+        <p className="meta water-temp">
+          {/* Which way it is going matters as much as the number in spring and fall. */}
+          {waterTemp.trend === "warming"
+            ? t("Water {temp}, warming, on {day}", { temp: tempText(waterTemp.fahrenheit), day: formatDay(waterTemp.day) })
+            : waterTemp.trend === "cooling"
+              ? t("Water {temp}, cooling, on {day}", { temp: tempText(waterTemp.fahrenheit), day: formatDay(waterTemp.day) })
+              : t("Water {temp} on {day}", { temp: tempText(waterTemp.fahrenheit), day: formatDay(waterTemp.day) })}
+        </p>
+      ) : null}
     </Link>
   );
 }

@@ -48,7 +48,7 @@ import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { bookFishDay } from "./tripMonths";
-import { byTime, countedFish, milestoneOf, ownFish } from "./milestones";
+import { byTime, countedBook, countedFish, milestoneOf, ownFish } from "./milestones";
 import { bookLures, closeSpecies, dayWeather, fullSpecies, LATE_NIGHT_UNTIL, dayAfter, fishOnOutingDay, farPastBest, kindMeasure, lastMeasureKind, lastReleased, looksLikeOtherMeasure, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripForFish, tripLure, tripWeather } from "./suggestions";
 import { sunMark, type SunMark } from "./sunLight";
 import { placeFor } from "./map/places";
@@ -189,7 +189,15 @@ export function CatchesPage() {
   const { book, photos } = useLogbook();
   useT();
   const catches = catchesNewestFirst(book);
-  const counted = countedFish(catches);
+  // The angler's own as Home and Bests count them: the sample week goes with their first fish or outing.
+  const ownIds = new Set(countedBook(book).catches.map((entry) => entry.id));
+  const counted = catches.filter((entry) => ownIds.has(entry.id));
+  // The words that leave out the fish listed but not counted as the angler's own.
+  const notMine = catches.filter((entry) => !ownIds.has(entry.id));
+  const onlyMine = [
+    ...(notMine.some((entry) => isSampleCatch(entry.id)) ? [`-${t("sample|search word")}`] : []),
+    ...(notMine.some((entry) => !offPlayLake(entry)) ? [`-${t("game|search word")}`] : []),
+  ].join(" ");
   const photoCount = catches.filter((entry) => photos[entry.id]).length;
   // While a search is typed, its matches take the list's place.
   const [params] = useSearchParams();
@@ -225,17 +233,28 @@ export function CatchesPage() {
               {/* With only the game's fish, none are the angler's own: the list says so rather than summing them as theirs. */}
               {counted.length > 0 ? <FishSum catches={counted} /> : null}
               {counted.length > 0 && counted.length < catches.length ? (
-                <p className="meta">{tn(catches.length - counted.length, "Also listed: {n} fish from the sample week or the game.", "Also listed: {n} fish from the sample week or the game.")}</p>
+                <p className="meta">
+                  {tn(catches.length - counted.length, "Also listed: {n} fish from the sample week or the game.", "Also listed: {n} fish from the sample week or the game.")}{" "}
+                  {/* One tap leaves them out of the list, as Trips' "Only my outings" does, without deleting the sample week. */}
+                  <Link to={`/catches?${new URLSearchParams({ [FIND_PARAM]: onlyMine }).toString()}`}>{t("Only my fish")}</Link>
+                </p>
               ) : counted.length === 0 ? (
-                <p className="meta">{tn(catches.length, "Listed: {n} fish from the game.", "Listed: {n} fish from the game.")}</p>
+                <p className="meta">
+                  {catches.some((entry) => isSampleCatch(entry.id))
+                    ? tn(catches.length, "Listed: {n} fish from the sample week or the game.", "Listed: {n} fish from the sample week or the game.")
+                    : tn(catches.length, "Listed: {n} fish from the game.", "Listed: {n} fish from the game.")}
+                </p>
               ) : null}
-              <SpeciesChips catches={catches} />
+              {/* The kinds the angler has caught, once they have any; the sample week's and the game's kinds stay in the list below. */}
+              <SpeciesChips catches={counted.length > 0 ? counted : catches} />
               {catches.length > 1 ? <MatchOrder largest={largest} onChange={setLargest} /> : null}
-              <PagedCatches key={String(largest)} items={largest ? largestFirst(catches) : catches} monthOf={largest ? undefined : (entry) => bookFishDay(book, entry).slice(0, 7)} headLevel={2}>
+              <PagedCatches key={String(largest)} items={largest ? largestFirst(catches) : catches} monthOf={largest ? undefined : (entry) => bookFishDay(book, entry).slice(0, 7)} headLevel={2} counted={(entry) => ownIds.has(entry.id)}>
                 {(entry) => (
                   <CatchCard
                     key={entry.id}
                     entry={entry}
+                    // Largest first has no month headings, so the cards head the list under the page's h1.
+                    level={largest ? 2 : 3}
                     spotName={spotById(book, entry.spotId)?.name ?? t("Unknown water")}
                     tripTitle={entry.tripId ? outingNameById(book, entry.tripId) : null}
                     // Shown largest first, a fish steps on to the next smaller and has a way back to this list.
@@ -500,11 +519,23 @@ function CatchForm() {
     setReleased(kept.released === true);
     setSky(kept.sky);
     setWind(kept.wind);
-    // Numbers typed in other units would mean something else now.
+    // Numbers typed in other units come back in these: 62 cm kept, picked up in inches, is 24.4.
     if (kept.units === units) {
       setAmount(kept.amount);
       setAlsoAmount(kept.alsoAmount ?? "");
       setWaterTemp(kept.waterTemp);
+    } else {
+      const keptUnits: Units = kept.units === "metric" ? "metric" : "imperial";
+      const keptAmount = (text: string, kind: "length" | "weight") => {
+        const value = Number(toBookAmount(text, kind, keptUnits));
+        if (!text.trim() || !Number.isFinite(value)) return "";
+        // To a tenth of an inch or a hundredth of a pound, as a tape or a scale reads, not the book's 24.409.
+        return inputNumber(units === "imperial" ? String(Number(value.toFixed(kind === "length" ? 1 : 2))) : fromBookAmount(value, kind, units));
+      };
+      const keptTemp = Number(toBookTemp(kept.waterTemp, keptUnits));
+      setAmount(keptAmount(kept.amount, kept.measureKind));
+      setAlsoAmount(keptAmount(kept.alsoAmount ?? "", kept.measureKind === "length" ? "weight" : "length"));
+      setWaterTemp(kept.waterTemp.trim() && Number.isFinite(keptTemp) ? inputNumber(fromBookTemp(keptTemp, units)) : "");
     }
     // Picked up counts as typed: it stays kept even before the next keystroke.
     opened.current = "";
@@ -602,6 +633,15 @@ function CatchForm() {
   const canLocate = !existing && canFindNearest(book);
 
   const pickedTrip = tripId ? tripById(book, tripId) : undefined;
+  // The note on the latest fish of this outing, offered to a new fish on it.
+  const lastNote = useMemo(() => {
+    if (existing || !tripId) return "";
+    const onTrip = book.catches.filter((entry) => entry.tripId === tripId && entry.note.trim());
+    return onTrip.reduce<CatchEntry | null>((last, entry) => (!last || entry.caughtAt > last.caughtAt ? entry : last), null)?.note.trim() ?? "";
+  }, [book, existing, tripId]);
+  // An edit that leaves the time and the outing as they were keeps the stored instant: a phone in another time zone
+  // reads it on another day, but the fish was on its outing's day where it was landed.
+  const timeKept = Boolean(existing && caughtAt === toLocalInput(new Date(existing.caughtAt)) && tripId === (existing.tripId ?? ""));
   const soFar = pickedTrip ? book.catches.filter((entry) => entry.tripId === pickedTrip.id).length : 0;
   const lastOnTrip = pickedTrip ? lastFishOn(book, pickedTrip.id) : undefined;
   // The angler's own fish of the kind kept on this fish's day (its outing's, for a night session).
@@ -738,6 +778,7 @@ function CatchForm() {
       waterTemp:
         heldTemp && waterTemp === heldTemp.shown ? String(heldTemp.tempF) : toBookTemp(waterTemp, units),
       released,
+      ...(timeKept ? { keptAt: existing!.caughtAt } : {}),
     };
     // Worked out against the book before this fish joins it.
     const parsed = existing ? null : parseCatchDraft(draft, book);
@@ -1275,7 +1316,7 @@ function CatchForm() {
             <p className="wide form-note" role="status">
               {t("This outing is still to come.")}
             </p>
-          ) : pickedTrip && caughtAt && !fishOnOutingDay(book, pickedTrip.spotId, caughtAt, pickedTrip.date, true) ? (
+          ) : pickedTrip && caughtAt && !timeKept && !fishOnOutingDay(book, pickedTrip.spotId, caughtAt, pickedTrip.date, true) ? (
             <p className="wide form-note" role="status">
               {t("This outing was on {day}; the fish is dated another day.", { day: formatDay(pickedTrip.date) })}{" "}
               {/* The same clock time, on the outing's day: a fish moved to another outing keeps its old date otherwise. */}
@@ -1379,6 +1420,21 @@ function CatchForm() {
               placeholder={t("Where it hit, and what you would repeat.")}
             />
           </label>
+          {/* A run of fish off one weed edge: the outing's last note comes back in a tap, as its weather does. */}
+          {lastNote && !note.trim() ? (
+            <p className="wide form-note lure-tips">
+              <button
+                type="button"
+                className="lure-tip"
+                onClick={() => {
+                  setNote(lastNote);
+                  focusSoon('textarea[name="note"]');
+                }}
+              >
+                {t("Same note as the last fish: “{note}”", { note: lastNote.length > 60 ? `${lastNote.slice(0, 59).trimEnd()}…` : lastNote })}
+              </button>
+            </p>
+          ) : null}
 
           <div className="wide photo-field">
             <label>
@@ -1467,14 +1523,31 @@ function CatchForm() {
   );
 }
 
+/** "40 min", "2 h", "1 h 5 min". */
+function spanText(away: number): string {
+  const hours = Math.floor(away / 60);
+  const minutes = away % 60;
+  return hours === 0 ? t("{n} min", { n: minutes }) : minutes === 0 ? t("{n} h", { n: hours }) : t("{h} h {n} min", { h: hours, n: minutes });
+}
+
+/**
+ * How far into its outing a fish came, "2 h 10 min after the outing's first fish": when the bite window opened and how
+ * long it ran. Null for the outing's first fish, one within the same minute, or a fish filed a day or more apart.
+ */
+export function intoOuting(book: Logbook, entry: CatchEntry): string | null {
+  if (!entry.tripId) return null;
+  const first = book.catches.reduce((min, other) => (other.tripId === entry.tripId ? Math.min(min, Date.parse(other.caughtAt)) : min), Infinity);
+  const minutes = Math.round((Date.parse(entry.caughtAt) - first) / 60_000);
+  if (!Number.isFinite(minutes) || minutes < 1 || minutes >= 24 * 60) return null;
+  return t("{time} after the outing's first fish", { time: spanText(minutes) });
+}
+
 /** "40 min after sunrise", "1 h 5 min before sunset", "At sunrise", or "In daylight" / "After dark" away from both. */
 function sunMarkText(mark: SunMark): string {
   if (!mark.edge) return mark.light === "day" ? t("In daylight") : t("After dark");
   const away = Math.abs(mark.minutes);
   if (away < 3) return mark.edge === "rise" ? t("At sunrise") : t("At sunset");
-  const hours = Math.floor(away / 60);
-  const minutes = away % 60;
-  const time = hours === 0 ? t("{n} min", { n: minutes }) : minutes === 0 ? t("{n} h", { n: hours }) : t("{h} h {n} min", { h: hours, n: minutes });
+  const time = spanText(away);
   if (mark.edge === "rise") return mark.minutes < 0 ? t("{time} before sunrise", { time }) : t("{time} after sunrise", { time });
   return mark.minutes < 0 ? t("{time} before sunset", { time }) : t("{time} after sunset", { time });
 }
@@ -1541,7 +1614,7 @@ function CatchView() {
   const kindNumber = eyebrowKind.length - eyebrowKind.findIndex((other) => other.id === entry.id);
   // Own against sample decided for the whole book, as the badges, Home and Bests decide it, then narrowed to the kind:
   // a sample fish of a kind the angler hasn't caught yet isn't theirs either.
-  const bookCounted = new Set(countedFish(book.catches).map((other) => other.id));
+  const bookCounted = new Set(countedBook(book).catches.map((other) => other.id));
   const counted = kind.filter((other) => bookCounted.has(other.id));
   const isCounted = counted.some((other) => other.id === entry.id);
   // The counts below hold the angler's own fish of the kind; when the sample week still has some, their links leave it out.
@@ -1627,8 +1700,8 @@ function CatchView() {
     saveShareCard(text, photo ?? null, shareCardFileName(entry.species, caught)).catch(() => setPictureError(true));
   };
   // Which best the badge is for: a fish both measured and weighed may hold either. Among the fish the badge was
-  // drawn from (countedFish), or a sample fish would hold the weight and the angler's own heaviest read as "longest".
-  const bests = badge ? personalBests({ ...book, catches: countedFish(book.catches) }) : null;
+  // drawn from (countedBook), or a sample fish would hold the weight and the angler's own heaviest read as "longest".
+  const bests = badge ? personalBests({ ...book, catches: countedBook(book).catches }) : null;
   const kindBests = bests?.species.find((row) => row.species.trim().toLowerCase() === entry.species.trim().toLowerCase());
   const heavy = (badge === "book" ? bests?.heaviest : kindBests?.heaviest)?.id === entry.id;
 
@@ -1793,7 +1866,7 @@ function CatchView() {
           at={listPhotos.findIndex((row) => row.id === entry.id)}
         />
       ) : null}
-      <aside className="conditions" aria-label={t("Conditions")}>
+      <aside className="conditions catch-conditions" aria-label={t("Conditions")}>
         {entry.weather ? (
           <>
             <span className="eyebrow">{t("Weather")}</span>
@@ -1837,6 +1910,7 @@ function CatchView() {
         <p className="trip-link">
           {t("Outing:")} <Link id="catch-outing" to={`/trips/${trip.id}`}>{outingName(trip, book.spots)}</Link>
           {tripFish > 1 ? ` · ${fishCountLabel(tripFish)}` : null}
+          {tripFish > 1 && intoOuting(book, entry) ? ` · ${intoOuting(book, entry)}` : null}
         </p>
       ) : looseTrip ? (
         <p className="trip-link">

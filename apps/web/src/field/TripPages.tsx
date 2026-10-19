@@ -13,7 +13,6 @@ import {
   moonPhase,
   catchesForSpot,
   catchesForTrip,
-  fishCountsByTrip,
   localDate,
   measureOf,
   shiftDate,
@@ -21,7 +20,6 @@ import {
   tripById,
   recentTrips,
   itemsForTrip,
-  lureTally,
   tripsForSpot,
   type CatchEntry,
   type Logbook,
@@ -36,7 +34,7 @@ import { EditDelete } from "./EditDelete";
 import { TackleList } from "./gear/TackleList";
 import { useTackle } from "./gear/TackleState";
 import { measureText } from "../i18n/content";
-import { daysAheadLabel, fishCountLabel, formatClock, formatDay, formatTimeOfDay, messageText, outingName, toLocalInput, tripWhen } from "./format";
+import { daysAheadLabel, fishCountLabel, fishSum, formatClock, formatDay, formatTimeOfDay, messageText, outingName, toLocalInput, tripWhen } from "./format";
 import { PagedTrips } from "./PagedTrips";
 import { SAME_TIME_DAYS, thisWeekInPastYears } from "./yearsAgo";
 import { FishSum } from "./FishSum";
@@ -64,14 +62,16 @@ import { isPlanned } from "./TripMonthHead";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { useKeptForm } from "./keptForm";
 import { addedWater, forgetAddedWater } from "./addedWater";
-import { findCatches, isTimeWord } from "./CatchSearch";
+import { findCatches, isTimePhrase, isTimeWord } from "./CatchSearch";
 import { findTrips } from "./tripSearch";
 import { LATE_NIGHT_UNTIL, fishOnOutingDay } from "./suggestions";
 import { countedBook, countedFish, ownFish } from "./milestones";
-import { isSampleOnly, isSampleSpot, isSampleOuting, upcomingRealTrips } from "./bookCopy";
+import { isSampleOnly, isSamplePlan, isSampleSpot, isSampleOuting, upcomingRealTrips } from "./bookCopy";
+import { looseFishDays, outingFish } from "./outingFish";
+import { pieceTally } from "./pieceTally";
 import { WaterOptions } from "./WaterOptions";
 import { speciesLink } from "./speciesLink";
-import { datePicks, ownTitle, pastTitles } from "./tripDates";
+import { datePicks, outingDay, ownTitle, pastTitles } from "./tripDates";
 import "./search.css";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 import { bestFishDay, bookFishDay } from "./tripMonths";
@@ -89,7 +89,9 @@ function tripNight(date: string) {
 /** "Fish came between 06:40 and 09:15", with the day too when the first and last fish fell on different days, and the pace when it says something. */
 function fishSpan(first: string, last: string, count: number): string {
   const sameDay = localDate(new Date(first)) === localDate(new Date(last));
-  const show = sameDay ? formatTimeOfDay : formatClock;
+  // Across New Year both ends carry their year, not one end dated and the other not.
+  const newYear = new Date(first).getFullYear() !== new Date(last).getFullYear();
+  const show = sameDay ? formatTimeOfDay : (iso: string) => formatClock(iso, newYear || undefined);
   // Two fish in the same minute: one time, not "between 4:05 PM and 4:05 PM".
   const span = show(first) === show(last) ? t("Fish came at {time}", { time: show(first) }) : t("Fish came between {from} and {to}", { from: show(first), to: show(last) });
   const pace = fishPace(first, last, count);
@@ -110,14 +112,32 @@ function SinceLast({ caughtAt }: { caughtAt: string }) {
 /** The search for outings, kept in the address so Back from an outing returns to the same matches. */
 const TRIP_FIND = "find";
 
+/** Words Find an outing reads that no outing's own text would hold, offered under the box until something is typed. */
+const QUICK_FINDS = ["this year|search word", "weekend|search word", "night|search word", "no fish|search word", "lost|search word", "planned|search word"];
+
 /** Read the evening before, when the bag is packed: what has worked on the outing's water, and what isn't in it yet. */
-function calendarNotes(book: Logbook, trip: Trip, tackleItems: TackleItem[]): string[] {
-  const works = lureTally({ ...book, catches: countedFish(catchesForSpot(book, trip.spotId)) }, 3).map((row) => t(row.lure));
-  const toPack = itemsForTrip(tackleItems, trip.id).filter((item) => !item.packed).map((item) => item.label);
+export function calendarNotes(book: Logbook, trip: Trip, tackleItems: TackleItem[]): string[] {
+  // Grouped as the page's "What works here" box groups them: one lure written two ways is one.
+  const works = pieceTally(countedFish(catchesForSpot(book, trip.spotId)), 3).map((row) => t(row.lure));
+  // In the reader's language, as the list on the page and "Copy the list" name them.
+  const toPack = itemsForTrip(tackleItems, trip.id).filter((item) => !item.packed).map((item) => t(item.label));
+  // When to leave: the day's light at the water, and the moon that night, as the outing's page gives them.
+  const spot = spotById(book, trip.spotId);
   return [
+    (spot && sunText(trip.date, spot)) || "",
+    t("Moon that night: {moon}", { moon: t(MOON_LABELS[moonName(moonPhase(new Date(`${trip.date}T22:00:00`)))]) }),
     works.length > 0 ? t("Works here: {lures}", { lures: works.join(", ") }) : "",
     toPack.length > 0 ? t("Still to pack: {items}", { items: toPack.join(", ") }) : "",
   ].filter(Boolean);
+}
+
+/** One outing as a calendar file, with its notes, and the evening-before alarm for an outing still to come. */
+export function saveOutingIcs(book: Logbook, trip: Trip, tackleItems: TackleItem[], today: string) {
+  const spot = spotById(book, trip.spotId);
+  // An untitled outing goes by its water's name, as its heading does.
+  const named = { ...trip, title: outingName(trip, book.spots) };
+  const alarm = trip.date > today ? t("Pack for {outing} tomorrow", { outing: named.title }) : undefined;
+  downloadFile(tripIcs(named, spot?.name ?? null, new Date(), spot?.place, calendarNotes(book, trip, tackleItems), alarm), "text/calendar;charset=utf-8", tripIcsName(named));
 }
 
 export function TripsPage() {
@@ -127,28 +147,54 @@ export function TripsPage() {
   const [query, setQuery] = useTypedParam(TRIP_FIND);
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
-  const upcoming = upcomingRealTrips(book, today);
+  // In the small hours last evening's outing is still going: still "Coming up", not a blank day in Recent.
+  const fishedBy = outingDay(today);
+  const upcoming = upcomingRealTrips(book, fishedBy);
   // Today's round of the game too: "Coming up" leaves it out, and "Recent" starts from yesterday.
-  const recent = [...book.trips.filter((trip) => trip.date === today && !offPlayLake(trip)), ...recentTrips(book, today)];
-  const fishByTrip = fishCountsByTrip(book);
+  // The sample week's plans stay out once their day has passed too: made up, they are no blank days of the angler's.
+  const recent = [
+    ...book.trips.filter((trip) => trip.date >= fishedBy && trip.date <= today && !offPlayLake(trip)),
+    ...recentTrips(book, fishedBy).filter((trip) => !isSamplePlan(book, trip)),
+  ];
+  // Each outing's fish with those logged loose that day on its water, as the average counts them.
+  const fishOn = outingFish(book);
+  // The angler's own outings, as Home and Bests count them: Recent's month headings count these and say the rest apart.
+  const countedIds = new Set(countedBook(book).trips.map((trip) => trip.id));
+  // The words that leave out the outings in Recent not counted as the angler's own, once there are some of theirs: a
+  // book of only the sample week has none to show, and "mine" would open the made-up week.
+  const notMine = countedIds.size > 0 && !isSampleOnly(book) ? recent.filter((trip) => !countedIds.has(trip.id)) : [];
+  const onlyMine = [
+    ...(notMine.some(isSampleOuting) ? [`-${t("sample|search word")}`] : []),
+    ...(notMine.some((trip) => !offPlayLake(trip)) ? [`-${t("game|search word")}`] : []),
+  ].join(" ");
   // How the outings already fished have gone, across every water.
   // Counted as Bests counts them: the sample week's outings go with the angler's first own outing or fish.
-  const average = outingAverage(countedBook(book).trips, (id) => fishByTrip.get(id) ?? 0, today);
+  // A day's fish logged without its outing count for that day's outing on that water, as a water's page and Bests count them.
+  const own = countedBook(book);
+  const average = outingAverage(own.trips, fishOn, fishedBy);
   // A run of outings with a fish still going, once it is three long: worth keeping up.
-  const streak = outingStreak(countedBook(book).trips, (id) => fishByTrip.get(id) ?? 0, today);
+  const streak = outingStreak(own.trips, fishOn, fishedBy, looseFishDays(book));
   const runNow = streak.going && streak.best >= 3 ? streak.best : 0;
   // The sample's planned outings are made up: they stay out of a real calendar.
-  const toCalendar = upcoming.filter((trip) => !isSampleOuting(trip));
+  // Today's outing with a fish in is under way, not a plan to put in a calendar.
+  // Last evening's, still going in the small hours, is no day to add either.
+  const toCalendar = upcoming.filter((trip) => !isSampleOuting(trip) && trip.date >= today && !(trip.date === today && fishOn(trip.id) > 0));
   const needle = query.trim();
   // A size in the search is read as the catch search reads it, and finds the outings of the fish it found.
   const fishTrips = (part: string) => new Set(findCatches(book, part, t).flatMap((entry) => (entry.tripId ? [entry.tripId] : [])));
-  const timeTrips = (part: string) => (isTimeWord(part, t) ? fishTrips(part) : null);
-  const found = needle ? findTrips(book, needle, (id) => fishByTrip.get(id) ?? 0, today, t, new Date(), fishTrips, timeTrips) : [];
+  // "w nocy" and "at dawn" as well as "noc" and "dawn": the outings with a fish then, as Find a fish reads the phrase.
+  const timeTrips = (part: string) => (isTimeWord(part, t) || isTimePhrase(part, t) ? fishTrips(part) : null);
+  const found = needle ? findTrips(book, needle, fishOn, today, t, new Date(), fishTrips, timeTrips) : [];
+  // The words the search reads best, one tap each: only those that would find an outing in this book.
+  const quick = needle
+    ? []
+    : QUICK_FINDS.map((word) => t(word)).filter((word) => findTrips(book, word, fishOn, today, t, new Date(), fishTrips, timeTrips).length > 0);
   // The plans among them said apart, as the month headings under the count say them.
-  const foundPlanned = found.filter((trip) => isPlanned(trip, today, fishByTrip.get(trip.id) ?? 0)).length;
+  const foundPlanned = found.filter((trip) => isPlanned(trip, today, fishOn(trip.id))).length;
   const foundLine = [
     ...(found.length > foundPlanned || foundPlanned === 0
-      ? [t("Outings: {count} · {fish}", { count: found.length - foundPlanned, fish: fishCountLabel(found.reduce((sum, trip) => sum + (fishByTrip.get(trip.id) ?? 0), 0)) })]
+      ? // A count among counts: "0 fish", where a card says "Nothing logged".
+        [t("Outings: {count} · {fish}", { count: found.length - foundPlanned, fish: fishSum(found.reduce((sum, trip) => sum + fishOn(trip.id), 0)) })]
       : []),
     ...(foundPlanned > 0 ? [tn(foundPlanned, "{n} planned", "{n} planned")] : []),
   ].join(" · ");
@@ -159,7 +205,7 @@ export function TripsPage() {
       trip={trip}
       spotName={spotById(book, trip.spotId)?.name ?? t("Unknown water")}
       waterType={spotById(book, trip.spotId)?.waterType ?? null}
-      fishCount={fishByTrip.get(trip.id) ?? 0}
+      fishCount={fishOn(trip.id)}
       today={today}
       tomorrow={tomorrow}
     />
@@ -192,11 +238,29 @@ export function TripsPage() {
             autoComplete="off"
             onChange={(event) => setQuery(event.target.value)}
           />
+          {quick.length > 1 ? (
+            <div className="lure-tips trip-quick" role="group" aria-label={t("Quick searches")}>
+              {quick.map((word) => (
+                <button
+                  key={word}
+                  type="button"
+                  className="lure-tip"
+                  onClick={() => {
+                    setQuery(word);
+                    // The chips go once the box holds a word: focus stays with the search, by its matches.
+                    requestAnimationFrame(() => document.getElementById("trip-search")?.focus());
+                  }}
+                >
+                  {word}
+                </button>
+              ))}
+            </div>
+          ) : null}
           <div role="status" className={needle ? (found.length === 0 ? "empty" : "search-count") : undefined}>
             {needle ? <p>{found.length === 0 ? t("No outing matches that.") : foundLine}</p> : null}
           </div>
           {found.length > 0 ? (
-            <PagedTrips key={needle} trips={found} fishOn={(id) => fishByTrip.get(id) ?? 0} stack>
+            <PagedTrips key={needle} trips={found} fishOn={fishOn} stack>
               {(trip) => card(trip, 4)}
             </PagedTrips>
           ) : null}
@@ -224,7 +288,7 @@ export function TripsPage() {
                   const outings = toCalendar.map((trip) => {
                     const spot = spotById(book, trip.spotId);
                     const title = outingName(trip, book.spots);
-                    return { trip: { ...trip, title }, place: spot?.name ?? null, at: spot?.place, more: calendarNotes(book, trip, tackleItems), alarm: t("Pack for {outing} tomorrow", { outing: title }) };
+                    return { trip: { ...trip, title }, place: spot?.name ?? null, at: spot?.place, more: calendarNotes(book, trip, tackleItems), alarm: trip.date > today ? t("Pack for {outing} tomorrow", { outing: title }) : undefined };
                   });
                   downloadFile(tripsIcs(outings), "text/calendar;charset=utf-8", datedName("stillwater-coming-up.ics"));
                 }}
@@ -236,9 +300,23 @@ export function TripsPage() {
           <h2 className="subhead">{t("Recent")}</h2>
           {average ? <p className="meta">{average}</p> : null}
           {runNow > 0 ? <p className="meta outing-run">{tn(runNow, "A fish on each of your last {n} outings", "A fish on each of your last {n} outings")}</p> : null}
-          {sheetOutings(book, today).trips.length > 0 ? (
+          {/* A blank spell still running, as Bests says it: the moment to change water or lure. */}
+          {streak.dryNow > 1 && streak.best > 0 ? <p className="meta">{t("Outings since your last fish: {count}", { count: streak.dryNow })}</p> : null}
+          {/* The sample week's and the game's outings sit among the angler's own: one tap leaves them out. */}
+          {onlyMine ? (
+            <p className="meta only-mine">
+              {/* The link goes with Recent once the search is set: focus goes to the search, which now holds the words. */}
+              <Link
+                to={`/trips?${new URLSearchParams({ [TRIP_FIND]: onlyMine }).toString()}`}
+                onClick={() => requestAnimationFrame(() => document.getElementById("trip-search")?.focus())}
+              >
+                {t("Only my outings")}
+              </Link>
+            </p>
+          ) : null}
+          {sheetOutings(book, fishedBy).trips.length > 0 ? (
             <p className="fish-csv">
-              <button type="button" className="text-button" onClick={() => downloadFile(tripsCsv(book, today), "text/csv;charset=utf-8", datedName("stillwater-outings.csv"))}>
+              <button type="button" className="text-button" onClick={() => downloadFile(tripsCsv(book, fishedBy), "text/csv;charset=utf-8", datedName("stillwater-outings.csv"))}>
                 {t("Download the outings as a spreadsheet")}
               </button>
             </p>
@@ -246,7 +324,7 @@ export function TripsPage() {
           {recent.length === 0 ? (
             <p className="empty">{t("No past outings.")}</p>
           ) : (
-            <PagedTrips trips={recent} fishOn={(id) => fishByTrip.get(id) ?? 0} stack>
+            <PagedTrips trips={recent} fishOn={fishOn} counted={(trip) => countedIds.has(trip.id)} stack>
               {(trip) => card(trip, 4)}
             </PagedTrips>
           )}
@@ -272,18 +350,20 @@ function peakTime(catches: readonly CatchEntry[]): { label: string; count: numbe
 /** The day's sunrise and sunset at the water, for a water with a place, in this device's clock. */
 /** Not from the sample sheet's pin: its made-up waters sit far away, and their sunrise read on this clock would mislead (as Home leaves it out). */
 function SunLine({ date, spot }: { date: string; spot: Spot }) {
+  const text = sunText(date, spot);
+  return text ? <p className="meta sun-line">{text}</p> : null;
+}
+
+/** The sun line's words, or null for a water with no place to read them at. */
+function sunText(date: string, spot: Spot): string | null {
   const place = spot.place ?? (isSampleSpot(spot.id) ? undefined : placeFor(spot.id));
   if (!place) return null;
   const sun = sunTimes(date, place.lat, place.lng);
-  return (
-    <p className="meta sun-line">
-      {"rise" in sun
-        ? t("Sunrise {rise} · sunset {set}", { rise: formatTimeOfDay(sun.rise.toISOString()), set: formatTimeOfDay(sun.set.toISOString()) })
-        : sun.always === "up"
-          ? t("The sun doesn't set that day.")
-          : t("The sun doesn't rise that day.")}
-    </p>
-  );
+  return "rise" in sun
+    ? t("Sunrise {rise} · sunset {set}", { rise: formatTimeOfDay(sun.rise.toISOString()), set: formatTimeOfDay(sun.set.toISOString()) })
+    : sun.always === "up"
+      ? t("The sun doesn't set that day.")
+      : t("The sun doesn't rise that day.");
 }
 
 function TripView() {
@@ -311,7 +391,7 @@ function TripView() {
   // A blank day past: the water's last fish before it, and what took it, to try next time.
   // Not when that day's fish were only logged without the outing: those are offered just above.
   const lastFishHere =
-    catches.length === 0 && trip.date < localDate(new Date()) && trip.spotId !== PLAY_LAKE_ID
+    catches.length === 0 && trip.date < outingDay(localDate(new Date())) && trip.spotId !== PLAY_LAKE_ID
       ? // Another outing here the same day counts too: a blank dusk names the morning's fish, not last month's.
         catchesForSpot(book, trip.spotId).filter(ownFish).find((entry) => entry.tripId !== trip.id && bookFishDay(book, entry) <= trip.date)
       : undefined;
@@ -330,25 +410,28 @@ function TripView() {
   );
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
+  // In the small hours last evening's outing is still going: not yet a blank day to set against the others.
+  const fishedBy = outingDay(today);
   const { newer, older } = tripNeighbors(book, trip.id);
-  const fishByTrip = fishCountsByTrip(book);
+  // With the fish logged loose that day on the water, as the outings list and the average count them.
+  const fishOn = outingFish(book);
   // A day fished on a real water, against the other outings fished there, counted as the average is.
   const ownTrips = countedBook(book).trips.filter((other) => other.spotId === trip.spotId);
   // The outings set beside this one: the angler's own on a real water, the game's on its lake.
   const tripsHere = trip.spotId === PLAY_LAKE_ID ? tripsForSpot(book, trip.spotId) : ownTrips;
-  const best = bestOutingHere(tripsHere, (id) => fishByTrip.get(id) ?? 0, trip.id, today);
-  const fished = trip.date < today || (trip.date === today && catches.length > 0);
-  const meanHere = fished && trip.spotId !== PLAY_LAKE_ID && ownTrips.some((other) => other.id === trip.id) ? outingMean(ownTrips, (id) => fishByTrip.get(id) ?? 0, today, trip.id) : null;
+  const best = bestOutingHere(tripsHere, fishOn, trip.id, fishedBy);
+  const fished = trip.date < fishedBy || (trip.date <= today && catches.length > 0);
+  const meanHere = fished && trip.spotId !== PLAY_LAKE_ID && ownTrips.some((other) => other.id === trip.id) ? outingMean(ownTrips, fishOn, fishedBy, trip.id) : null;
   // The day's largest against the water's, from the fish counted for it: the angler's own once it has any.
   const countedHere = countedFish(catchesForSpot(book, trip.spotId));
   const countedIds = new Set(countedHere.map((entry) => entry.id));
   const sizeHere = trip.spotId === PLAY_LAKE_ID ? null : recordHere(catches.filter((entry) => countedIds.has(entry.id)), countedHere);
   // The outing on this water before this one, to set the two side by side.
-  const lastHere = lastOutingBefore(tripsHere, trip.date, today, (id) => fishByTrip.get(id) ?? 0);
+  const lastHere = lastOutingBefore(tripsHere, trip.date, fishedBy, fishOn);
   const sameDayHere = tripsHere.filter((other) => other.date === trip.date && other.id !== trip.id);
   // And the one after it there, looking back from a day already fished: how the water did the next time.
   const nextHere = fished ? tripsHere.filter((other) => other.date > trip.date).sort((a, b) => a.date.localeCompare(b.date))[0] : undefined;
-  const nextPlanned = nextHere && (nextHere.date > today || (nextHere.date === today && (fishByTrip.get(nextHere.id) ?? 0) === 0));
+  const nextPlanned = nextHere && isPlanned(nextHere, today, fishOn(nextHere.id));
 
   // Fish from this water on the outing's day (or its small hours) that were logged without it.
   const loose = book.catches.filter(
@@ -399,7 +482,7 @@ function TripView() {
       {best ? <p className="meta best-outing">{best}</p> : null}
       {meanHere !== null ? (
         <p className="meta against-average">
-          {t("{fish}; your average here is {mean}", { fish: fishCountLabel(catches.length), mean: num(meanHere, meanHere > 0 && meanHere < 0.1 ? 2 : 1) })}
+          {t("{fish}; your average here is {mean}", { fish: fishCountLabel(fishOn(trip.id)), mean: num(meanHere, meanHere > 0 && meanHere < 0.1 ? 2 : 1) })}
         </p>
       ) : null}
       {bestDay ? (
@@ -411,7 +494,7 @@ function TripView() {
       {lastHere ? (
         <p className="meta last-here">
           <Link to={`/trips/${lastHere.id}`}>
-            {t("Last time here, {day}: {fish}", { day: formatDay(lastHere.date), fish: fishCountLabel(fishByTrip.get(lastHere.id) ?? 0) })}
+            {t("Last time here, {day}: {fish}", { day: formatDay(lastHere.date), fish: fishCountLabel(fishOn(lastHere.id)) })}
           </Link>
           {/* Before going back: how long the water has rested. */}
           {trip.date >= today && daysBetween(lastHere.date, today) >= 2 ? ` · ${tn(daysBetween(lastHere.date, today), "{n} day ago", "{n} days ago")}` : null}
@@ -424,7 +507,7 @@ function TripView() {
           {sameDayHere.map((other, index) => (
             <Fragment key={other.id}>
               {index > 0 ? "; " : null}
-              <Link to={`/trips/${other.id}`}>{`${outingName(other, book.spots)}, ${fishCountLabel(fishByTrip.get(other.id) ?? 0)}`}</Link>
+              <Link to={`/trips/${other.id}`}>{`${outingName(other, book.spots)}, ${fishCountLabel(fishOn(other.id))}`}</Link>
             </Fragment>
           ))}
         </p>
@@ -434,7 +517,7 @@ function TripView() {
           <Link to={`/trips/${nextHere.id}`}>
             {nextPlanned
               ? t("Next time here: {day}", { day: formatDay(nextHere.date) })
-              : t("Next time here, {day}: {fish}", { day: formatDay(nextHere.date), fish: fishCountLabel(fishByTrip.get(nextHere.id) ?? 0) })}
+              : t("Next time here, {day}: {fish}", { day: formatDay(nextHere.date), fish: fishCountLabel(fishOn(nextHere.id)) })}
           </Link>
         </p>
       ) : null}
@@ -472,7 +555,7 @@ function TripView() {
       ) : null}
       {catches.length === 0 ? (
         <p className="empty">
-          {trip.date > today ? t("Fish you log on the day show up here.") : trip.date === today ? t("No fish logged yet today.") : t("Nothing logged for this trip yet.")}
+          {trip.date > today ? t("Fish you log on the day show up here.") : trip.date >= fishedBy ? t("No fish logged yet today.") : t("Nothing logged for this trip yet.")}
           {lastFishHere && loose.length === 0 ? (
             <>
               {" "}
@@ -483,7 +566,7 @@ function TripView() {
               </Link>
             </>
           ) : null}
-          {trip.date === today && !play && !samplePlan ? (
+          {trip.date >= fishedBy && trip.date <= today && !play && !samplePlan ? (
             <>
               {" "}
               <Link to={`/catches/new?trip=${trip.id}&spot=${trip.spotId}`}>{t("Log the first one")}</Link>
@@ -582,16 +665,14 @@ function TripView() {
         </p>
       ) : null}
       {/* The sample week's planned days stay off a calendar, as "Add all to calendar" leaves them out. */}
-      {play || isSampleOuting(trip) ? null : trip.date >= today ? (
+      {/* Today's outing under way (a fish in) is no plan any more: it goes on to Go again, as a past one does. */}
+      {play || isSampleOuting(trip) ? null : !fished ? (
+        <>
         <p className="trip-calendar">
           <button
             type="button"
             className="text-button"
-            onClick={() => {
-              // An untitled outing goes by its water's name, as its heading does.
-              const named = { ...trip, title: outingName(trip, book.spots) };
-              downloadFile(tripIcs(named, spot?.name ?? null, new Date(), spot?.place, calendarNotes(book, trip, tackleItems), t("Pack for {outing} tomorrow", { outing: named.title })), "text/calendar;charset=utf-8", tripIcsName(named));
-            }}
+            onClick={() => saveOutingIcs(book, trip, tackleItems, today)}
           >
             {t("Add to calendar")}
           </button>
@@ -601,6 +682,15 @@ function TripView() {
             {t("Print the packing list")}
           </button>
         </p>
+          {/* Plans are made with someone: the day, the water, what works there and what is still to pack, for a message. */}
+          <CopySummary
+            text={() => [`${outingName(trip, book.spots)} · ${formatDay(trip.date)} · ${spot?.name ?? t("Unknown water")}`, ...calendarNotes(book, trip, tackleItems), trip.note.trim()].filter(Boolean).join("\n")}
+            file="stillwater-plan.txt"
+            label={t("Copy the plan")}
+            copied={t("Plan copied.")}
+            saved={t("Plan saved as a file.")}
+          />
+        </>
       ) : (
         spot ? (
           <p className="trip-again">
@@ -608,10 +698,10 @@ function TripView() {
           </p>
         ) : null
       )}
-      {/* A hard day is worth telling too: a past blank outing with a note or fish lost or missed. */}
-      {catches.length > 0 || (trip.date <= today && (trip.note.trim() || trip.lost || trip.missed)) ? <CopySummary text={() => tripSummary(trip, spot?.name ?? null, catches, (id) => spotById(book, id)?.name ?? null)} file="stillwater-outing.txt" /> : null}
+      {/* A hard day is worth telling too: a past blank outing with a note, or fish lost or missed. Today's plan with only a note isn't a day yet. */}
+      {catches.length > 0 || (!samplePlan && (trip.date < fishedBy || trip.lost || trip.missed) && (trip.note.trim() || trip.lost || trip.missed)) ? <CopySummary text={() => tripSummary(trip, spot?.name ?? null, catches, (id) => spotById(book, id)?.name ?? null)} file="stillwater-outing.txt" /> : null}
       {/* Planning ahead: what has worked on this water before. */}
-      {trip.date >= today && spot && !play ? <WaterTipsBox catches={countedFish(catchesForSpot(book, spot.id))} on={trip.date} within={exactTerm("water", spot.name)} /> : null}
+      {!fished && spot && !play ? <WaterTipsBox catches={countedFish(catchesForSpot(book, spot.id))} on={trip.date} within={exactTerm("water", spot.name)} /> : null}
       <TripWeather catches={catches} />
       {/* Once the day comes, the fish lead; before that, the bag does. */}
       {fishFirst ? fish : tackle}
@@ -705,8 +795,8 @@ function TripForm() {
     : lastOutingBefore(
         spotId === PLAY_LAKE_ID ? tripsForSpot(book, spotId) : countedBook(book).trips.filter((trip) => trip.spotId === spotId),
         /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : "9999",
-        localDate(new Date()),
-        (id) => catchesForTrip(book, id).length,
+        outingDay(localDate(new Date())),
+        outingFish(book),
       );
   const pickedSpot = spotById(book, spotId);
   const notesBefore =
@@ -877,11 +967,11 @@ function TripForm() {
               <small className="field-hint" id="last-here">
                 {/* An untitled outing goes by the water's name, which the field above already shows. */}
                 {outingName(lastHere, book.spots) === spotById(book, lastHere.spotId)?.name
-                  ? t("Last here: {day} · {fish}", { day: formatDay(lastHere.date), fish: fishCountLabel(catchesForTrip(book, lastHere.id).length) })
+                  ? t("Last here: {day} · {fish}", { day: formatDay(lastHere.date), fish: fishCountLabel(outingFish(book)(lastHere.id)) })
                   : t("Last here: {title}, {day} · {fish}", {
                       title: outingName(lastHere, book.spots),
                       day: formatDay(lastHere.date),
-                      fish: fishCountLabel(catchesForTrip(book, lastHere.id).length),
+                      fish: fishCountLabel(outingFish(book)(lastHere.id)),
                     })}
               </small>
             ) : null}

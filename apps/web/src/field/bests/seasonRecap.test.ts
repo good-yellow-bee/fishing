@@ -21,6 +21,10 @@ describe("a season against the one before", () => {
     expect(seasonRecap(book, "2026", "2026-10-16")).toEqual({
       year: "2026",
       before: "2025",
+      outings: 0,
+      outingsBefore: 0,
+      outingFish: 0,
+      outingFishBefore: 0,
       fish: 3,
       fishBefore: 2,
       days: 2,

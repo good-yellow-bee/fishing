@@ -491,6 +491,18 @@ describe("touch play", () => {
     expect(page.querySelector(".walk-signs")).toBeNull();
     expect(page.querySelector(".hint")?.getAttribute("aria-live")).toBe("polite");
   });
+
+  it("names the shop by an h2 between the page's h1 and its sections' h3s", async () => {
+    const page = await openDock("/?hour=day&sky=clear");
+    act(() => page.querySelector<HTMLButtonElement>(".walk-shop")!.click());
+    const shop = page.querySelector(".shop-overlay")!;
+    const title = document.getElementById(shop.getAttribute("aria-labelledby")!)!;
+    expect(title.tagName).toBe("H2");
+    expect(title.textContent).toBe("The shack");
+    const headings = [...shop.querySelectorAll("h2, h3")].map((h) => h.tagName);
+    expect(headings[0]).toBe("H2");
+    expect(headings.slice(1).every((tag) => tag === "H3")).toBe(true);
+  });
 });
 
 describe("first-cast walkthrough", () => {

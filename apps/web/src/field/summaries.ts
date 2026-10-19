@@ -1,4 +1,7 @@
-import { MOON_LABELS, WATER_LABELS, localDate, lureTally, moonName, moonPhase, measureOf, personalBests, type CatchEntry, type Logbook, type Spot, type Trip } from "@stillwater/shared";
+import { MOON_LABELS, WATER_LABELS, localDate, moonName, moonPhase, measureOf, personalBests, type CatchEntry, type Logbook, type Spot, type Trip } from "@stillwater/shared";
+import { pieceTally } from "./pieceTally";
+import { formatCoord } from "./map/places";
+import { osmLink } from "./osmLink";
 import { t, tn } from "../i18n";
 import { measureText, measuresText, weatherText } from "../i18n/content";
 import { fishCountLabel, formatDatedDay, formatDay, formatTimeOfDay, noteText, outingName } from "./format";
@@ -7,6 +10,7 @@ import { parseExactTerm } from "./findLinks";
 import { splitLeftOut } from "./CatchSearch";
 import { speciesCounts, speciesWaters } from "./speciesLink";
 import { goalPace } from "./YearGoal";
+import { sheetOutings } from "./catchCsv";
 
 /**
  * An outing as plain text to paste into a message: the day, the water, then each fish in the order it came.
@@ -22,7 +26,9 @@ export function tripSummary(trip: Trip, spotName: string | null, catches: readon
       const elsewhere = entry.spotId !== trip.spotId ? waterOf(entry.spotId) : null;
       // A night session's fish after midnight say their own day, so the list doesn't seem to run back to the evening.
       const day = localDate(new Date(entry.caughtAt));
-      const when = day === trip.date ? formatTimeOfDay(entry.caughtAt) : `${formatDay(day)}, ${formatTimeOfDay(entry.caughtAt)}`;
+      // Past New Year it carries its year, as the outing's day above does.
+      const shown = day.slice(0, 4) === trip.date.slice(0, 4) ? formatDay(day) : formatDatedDay(new Date(`${day}T12:00:00`));
+      const when = day === trip.date ? formatTimeOfDay(entry.caughtAt) : `${shown}, ${formatTimeOfDay(entry.caughtAt)}`;
       const parts = [`${when} ${t(entry.species)}`, measuresText(entry), t(entry.lure), ...(elsewhere ? [elsewhere] : []), ...(entry.released ? [t("Released")] : [])];
       return `- ${parts.join(", ")}`;
     });
@@ -55,11 +61,13 @@ export function spotSummary(
   average: string | null,
   best: { trip: Trip; fish: number } | null,
 ): string {
-  const lures = lureTally({ spots: [], trips: [], catches: [...catches] }, 3)
+  const lures = pieceTally(catches, 3)
     .map((row) => `${t(row.lure)} (${row.count})`)
     .join(", ");
   return [
     `${spot.name} · ${t(WATER_LABELS[spot.waterType])}`,
+    // Where it is, for "meet me here": the numbers and a map that opens on any phone.
+    ...(spot.place ? [`${formatCoord(spot.place.lat, spot.place.lng)} · ${osmLink(spot.place.lat, spot.place.lng)}`] : []),
     `${tn(outings, "{n} outing", "{n} outings")} · ${fishCountLabel(catches.length)}`,
     ...(average ? [average] : []),
     ...(best ? [`${t("Best outing here:")} ${outingName(best.trip, [spot])} · ${formatDatedDay(new Date(`${best.trip.date}T12:00:00`))}, ${fishCountLabel(best.fish)}`] : []),
@@ -72,9 +80,16 @@ export function spotSummary(
 /**
  * One kind of fish as plain text: how many and how many went back, its longest and heaviest,
  * its first and newest day, the waters that gave it, and the lures that took it.
- * `catches` are newest first, as the species page has them.
+ * `catches` are newest first, as the species page has them. `dayOf` gives the day a fish counts on (a night session's
+ * small hours on its outing's), so the copy dates them as the page does; without it, the clock's day.
  */
-export function speciesSummary(species: string, catches: readonly CatchEntry[], waters: ReadonlyArray<{ name: string | null; count: number }>): string {
+export function speciesSummary(
+  species: string,
+  catches: readonly CatchEntry[],
+  waters: ReadonlyArray<{ name: string | null; count: number }>,
+  dayOf: (entry: CatchEntry) => string = (entry) => localDate(new Date(entry.caughtAt)),
+): string {
+  const dated = (entry: CatchEntry) => formatDatedDay(new Date(`${dayOf(entry)}T12:00:00`));
   const released = catches.filter((entry) => entry.released).length;
   const bests = personalBests({ spots: [], trips: [], catches: [...catches] });
   const sizes = [
@@ -84,7 +99,7 @@ export function speciesSummary(species: string, catches: readonly CatchEntry[], 
   const first = catches[catches.length - 1];
   const newest = catches[0];
   const named = waters.filter((row) => row.name).map((row) => `${row.name} (${row.count})`);
-  const lures = lureTally({ spots: [], trips: [], catches: [...catches] }, 3)
+  const lures = pieceTally(catches, 3)
     .map((row) => `${t(row.lure)} (${row.count})`)
     .join(", ");
   return [
@@ -92,7 +107,7 @@ export function speciesSummary(species: string, catches: readonly CatchEntry[], 
     [fishCountLabel(catches.length), ...(released > 0 ? [tn(released, "{n} released", "{n} released")] : [])].join(" · "),
     ...(sizes.length > 0 ? [sizes.join(" · ")] : []),
     ...(first && newest && catches.length > 1
-      ? [`${t("First in the book")} ${formatDatedDay(new Date(first.caughtAt))} · ${t("newest")} ${formatDatedDay(new Date(newest.caughtAt))}`]
+      ? [`${t("First in the book")} ${dated(first)} · ${t("newest")} ${dated(newest)}`]
       : []),
     ...(named.length > 0 ? [t("Waters: {waters}", { waters: named.join(", ") })] : []),
     ...(lures ? [t("Lures that took the most: {lures}", { lures })] : []),
@@ -106,6 +121,8 @@ export function speciesSummary(species: string, catches: readonly CatchEntry[], 
 export function yearSummary(book: Logbook, year: string, today: string, goal: number | null): string {
   const catches = book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${year}-`));
   const days = daysOut(book, year, today);
+  // The outings fished that year, as the outings sheet lists them: the number anglers set season against season.
+  const outings = sheetOutings(book, today).trips.filter((trip) => trip.date.startsWith(`${year}-`)).length;
   const bests = personalBests({ ...book, catches });
   const best = (entry: CatchEntry | null | undefined, kind: "length" | "weight") =>
     entry
@@ -117,13 +134,14 @@ export function yearSummary(book: Logbook, year: string, today: string, goal: nu
     .map((row) => `${row.name} (${row.count})`);
   const [y, m, d] = today.split("-").map(Number) as [number, number, number];
   const pace = goal !== null && today.startsWith(`${year}-`) ? goalPace(catches.length, goal, new Date(y, m - 1, d)) : null;
-  const lures = lureTally({ ...book, catches }, 3)
+  const lures = pieceTally(catches, 3)
     .map((row) => `${t(row.lure)} (${row.count})`)
     .join(", ");
   return [
     t("{year} in the book", { year }),
     `${fishCountLabel(catches.length)} · ${tn(speciesCounts(catches).length, "{n} species", "{n} species")}`,
     ...(days > 0 ? [t("Days on the water in {year}: {count}", { year, count: days })] : []),
+    ...(outings > 0 ? [t("Outings: {count}", { count: outings })] : []),
     ...(goal !== null
       ? [catches.length >= goal ? t("Goal reached: {count} of {goal} fish in {year}.", { count: catches.length, goal, year }) : t("{count} of {goal} fish in {year}", { count: catches.length, goal, year })]
       : []),

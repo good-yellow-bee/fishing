@@ -27,7 +27,8 @@ export function catchNews(book: Logbook, fish: Pick<CatchEntry, "species" | "mea
     }
     const amount = size.kind === "length" ? size.inches : size.pounds;
     // Beating a size, not being the first weighed: a kind never weighed before has nothing to beat.
-    if (best !== null && amount > best) return t("New best {species}: {size} (was {was}).", { species: name, size: measureText(size), was: measureText(bestSize) });
+    // Two sizes that read the same, a hair apart, make no news worth a line.
+    if (best !== null && amount > best && measureText(size) !== measureText(bestSize)) return t("New best {species}: {size} (was {was}).", { species: name, size: measureText(size), was: measureText(bestSize) });
   }
   return null;
 }

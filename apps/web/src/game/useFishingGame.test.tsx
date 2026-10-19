@@ -3,9 +3,9 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind } from "@stillwater/shared";
-import { floodedInlet, makeFight, springRunTireMul, SPRING_RUN_TIRE, currentTireMul, CURRENT_FIGHTER_TIRE, type FightOutcome, type FightPerformance } from "./fight";
+import { floodedInlet, makeFight, springRunTireMul, SPRING_RUN_TIRE, currentTireMul, CURRENT_FIGHTER_TIRE, type FightOutcome, type FightPerformance, type FightSim } from "./fight";
 import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
-import { bedRaider, crayfishHunter, tadpoleEater, castIntoSpooked, isSkipCast, castOnFreshWater, TWIST_CASTS, twistAfterCast, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, PRESSURE_CASTS, GROUNDBAIT_CASTS, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WARMING_WAIT, COOLING_WAIT, waterSwingWaitMul } from "./logic";
+import { bedRaider, COLD_WORK_GAP_MS, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, castIntoSpooked, isSkipCast, castOnFreshWater, TWIST_CASTS, twistAfterCast, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, PRESSURE_CASTS, GROUNDBAIT_CASTS, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WARMING_WAIT, COOLING_WAIT, waterSwingWaitMul } from "./logic";
 import { LIGHT_HOLD, stealsBait } from "./nibblePlan";
 import { castForReleased } from "./releasedFish";
 
@@ -16,7 +16,7 @@ let fightPerformance: FightPerformance = { peakTension: 0.2, maxLine: 1 };
 let fightLine = 1;
 
 vi.mock("./fx", () => ({
-  fx: { cast: vi.fn(), splash: vi.fn(), bite: vi.fn(), nibble: vi.fn(), plop: vi.fn(), rodBell: vi.fn(), snap: vi.fn(), land: vi.fn(), surge: vi.fn(), reel: vi.fn(), lift: vi.fn(), haptic: vi.fn(), drag: { set: vi.fn(), stop: vi.fn() } },
+  fx: { cast: vi.fn(), splash: vi.fn(), bite: vi.fn(), nibble: vi.fn(), plop: vi.fn(), rodBell: vi.fn(), snap: vi.fn(), land: vi.fn(), surge: vi.fn(), reel: vi.fn(), lift: vi.fn(), scrape: vi.fn(), haptic: vi.fn(), drag: { set: vi.fn(), stop: vi.fn() } },
 }));
 // The tests time bites to the usual wait; the day's hot bank is kept off the dock.
 vi.mock("@stillwater/shared", async (importOriginal) => {
@@ -49,6 +49,26 @@ vi.mock("./crayfishJig", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./crayfishJig")>();
   return { ...actual, onCrayfishBed: vi.fn(() => false) };
 });
+vi.mock("./midgeClouds", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./midgeClouds")>();
+  return { ...actual, underMidges: vi.fn(() => false) };
+});
+vi.mock("./lanternMinnows", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./lanternMinnows")>();
+  return { ...actual, amongLanternMinnows: vi.fn(() => false) };
+});
+vi.mock("./surfaceBugs", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./surfaceBugs")>();
+  return { ...actual, amongSurfaceBugs: vi.fn(() => false) };
+});
+vi.mock("./sunkenLog", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./sunkenLog")>();
+  return { ...actual, tightToLog: vi.fn(() => false) };
+});
+vi.mock("./kingfisherFry", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./kingfisherFry")>();
+  return { ...actual, overKingfisherFry: vi.fn(() => false) };
+});
 vi.mock("./tadpoleShallows", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./tadpoleShallows")>();
   return { ...actual, amongTadpoles: vi.fn(() => false) };
@@ -65,7 +85,7 @@ vi.mock("./nibblePlan", async (importOriginal) => {
 // A pike grabs the shiner only when a test says so.
 vi.mock("./grab", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./grab")>();
-  return { ...actual, grabberFor: vi.fn(() => null), followerFor: vi.fn(() => null) };
+  return { ...actual, grabberFor: vi.fn(() => null), followerFor: vi.fn(() => null), flutterGrabberFor: vi.fn(() => null), flutterTip: vi.fn(() => "") };
 });
 // A fish let go on an earlier day comes back only when a test says so.
 vi.mock("./releasedFish", async (importOriginal) => {
@@ -83,7 +103,7 @@ vi.mock("./logic", async (importOriginal) => {
   // Feeders over the groundbait and fresh water are tested on their own; elsewhere they leave the drawn fish and the wait as they were.
   // Skip casts off the dock are tested on their own; elsewhere a cast in the band's low end lands as it always did.
   // The day's water warming or cooling is tested on its own; elsewhere the water holds steady whatever the test's date.
-  return { ...actual, isSkipCast: vi.fn(() => false), pickBite: vi.fn(actual.pickBite), groundbaitFeeder: vi.fn(() => null), bedRaider: vi.fn(() => null), crayfishHunter: vi.fn(() => null), tadpoleEater: vi.fn(() => null), castOnFreshWater: vi.fn((fished: ReadonlySet<string>) => ({ fresh: false, next: fished })), twistAfterCast: vi.fn(actual.twistAfterCast), soakAfterCast: vi.fn(actual.soakAfterCast), castIntoSpooked: vi.fn(() => false), springShallowsWaitMul: vi.fn(actual.springShallowsWaitMul), rainInletWaitMul: vi.fn(actual.rainInletWaitMul), winterSunWaitMul: vi.fn(actual.winterSunWaitMul), windPointWaitMul: vi.fn(actual.windPointWaitMul), lanternDockWaitMul: vi.fn(actual.lanternDockWaitMul), openGlareWaitMul: vi.fn(actual.openGlareWaitMul), longShadowWaitMul: vi.fn(actual.longShadowWaitMul), darkNightWaitMul: vi.fn(actual.darkNightWaitMul), spoonOpenWaitMul: vi.fn(actual.spoonOpenWaitMul), spinnerReedWaitMul: vi.fn(actual.spinnerReedWaitMul), floatReedWaitMul: vi.fn(actual.floatReedWaitMul), streamerLedgeWaitMul: vi.fn(actual.streamerLedgeWaitMul), wormInletWaitMul: vi.fn(actual.wormInletWaitMul), spinnerInletWaitMul: vi.fn(actual.spinnerInletWaitMul), crankPilingWaitMul: vi.fn(actual.crankPilingWaitMul), waitMs: vi.fn(actual.waitMs), waterSwingWaitMul: vi.fn(() => 1) };
+  return { ...actual, isSkipCast: vi.fn(() => false), pickBite: vi.fn(actual.pickBite), groundbaitFeeder: vi.fn(() => null), bedRaider: vi.fn(() => null), crayfishHunter: vi.fn(() => null), tadpoleEater: vi.fn(() => null), fryHunter: vi.fn(() => null), logHolder: vi.fn(() => null), bugSipper: vi.fn(() => null), lightHunter: vi.fn(() => null), midgeRiser: vi.fn(() => null), castOnFreshWater: vi.fn((fished: ReadonlySet<string>) => ({ fresh: false, next: fished })), twistAfterCast: vi.fn(actual.twistAfterCast), soakAfterCast: vi.fn(actual.soakAfterCast), castIntoSpooked: vi.fn(() => false), springShallowsWaitMul: vi.fn(actual.springShallowsWaitMul), rainInletWaitMul: vi.fn(actual.rainInletWaitMul), winterSunWaitMul: vi.fn(actual.winterSunWaitMul), windPointWaitMul: vi.fn(actual.windPointWaitMul), lanternDockWaitMul: vi.fn(actual.lanternDockWaitMul), openGlareWaitMul: vi.fn(actual.openGlareWaitMul), longShadowWaitMul: vi.fn(actual.longShadowWaitMul), darkNightWaitMul: vi.fn(actual.darkNightWaitMul), spoonOpenWaitMul: vi.fn(actual.spoonOpenWaitMul), spinnerReedWaitMul: vi.fn(actual.spinnerReedWaitMul), floatReedWaitMul: vi.fn(actual.floatReedWaitMul), streamerLedgeWaitMul: vi.fn(actual.streamerLedgeWaitMul), wormInletWaitMul: vi.fn(actual.wormInletWaitMul), spinnerInletWaitMul: vi.fn(actual.spinnerInletWaitMul), crankPilingWaitMul: vi.fn(actual.crankPilingWaitMul), waitMs: vi.fn(actual.waitMs), waterSwingWaitMul: vi.fn(() => 1) };
 });
 vi.mock("./fight", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./fight")>();
@@ -107,7 +127,12 @@ import { onSunfishBed } from "./sunfishBeds";
 import { inDuckweed } from "./duckweedCast";
 import { onCrayfishBed } from "./crayfishJig";
 import { amongTadpoles } from "./tadpoleShallows";
-import { followerFor, grabberFor } from "./grab";
+import { overKingfisherFry } from "./kingfisherFry";
+import { tightToLog } from "./sunkenLog";
+import { amongSurfaceBugs } from "./surfaceBugs";
+import { amongLanternMinnows } from "./lanternMinnows";
+import { underMidges } from "./midgeClouds";
+import { flutterGrabberFor, flutterTip, followerFor, grabberFor } from "./grab";
 import { castForGotAway } from "./gotAway";
 
 const profile: Profile = {
@@ -337,6 +362,8 @@ describe("useFishingGame live shiner", () => {
 
   it("hooks a landed shiner on as bait, and the next cast draws the bank's hunter to it once", () => {
     const surface = mount();
+    // A fight that went into the red leaves the shiner worn, not lively.
+    fightPerformance = { peakTension: 0.9, maxLine: 1 };
     vi.mocked(pickBite).mockReturnValueOnce(shiner);
     step.mockReturnValueOnce("landed");
     castAndFight(surface, 1);
@@ -353,6 +380,22 @@ describe("useFishingGame live shiner", () => {
     act(() => vi.advanceTimersByTime(2_201));
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
     expect(hint()).toMatch(/^It took the live shiner! /);
+  });
+
+  it("sends a shiner landed clean out lively, drawing more of the hunters", () => {
+    const surface = mount();
+    vi.mocked(pickBite).mockReturnValueOnce(shiner);
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 1);
+    expect(container!.querySelector("[data-testid=clean]")?.textContent).toBe("true");
+    baitShiner();
+    expect(hint()).toBe("You hook the lively shiner on as live bait: landed clean, it swims hard and draws more of the hunters. Cast it out.");
+    const random = vi.spyOn(Math, "random").mockReturnValue(0.7);
+    cast(surface);
+    expect(hint()).toMatch(/^The lively shiner swims hard on the hook, and more of the hunters here come to it\./);
+    // A roll of 0.7 misses a plain live shiner's 60% but lands in a lively one's 80%.
+    expect(container!.querySelector("[data-testid=bite]")?.textContent).toMatch(/^smallmouth-bass\|/);
+    random.mockRestore();
   });
 
   it("leaves any other landed fish on the card", () => {
@@ -447,6 +490,20 @@ describe("useFishingGame frayed line", () => {
     expect(container!.querySelector("[data-testid=washed]")?.textContent).toBe("false");
   });
 
+  it("holds the line a moment past the red from level 14", () => {
+    const strain = () => vi.mocked(makeFight).mock.calls.at(-1)?.[14];
+    let surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 23000 });
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 1);
+    expect(strain()).toBe(1);
+    act(() => root!.unmount());
+    container!.remove();
+    surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 30000 });
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 2);
+    expect(strain()).toBe(1.05);
+  });
+
   it("ties on a fresh line after a break", () => {
     const surface = mount();
     fightPerformance = { peakTension: 0.5, maxLine: 1, scuffed: true };
@@ -461,6 +518,17 @@ describe("useFishingGame frayed line", () => {
 
 describe("useFishingGame lost fight", () => {
   const hint = () => container!.querySelector("[data-testid=hint]")?.textContent;
+
+  it("names the pike when it takes a perch, not the walleye that takes them out in the open", () => {
+    const surface = mount();
+    vi.mocked(grabberFor).mockReturnValueOnce(FISH.find((fish) => fish.id === "pike")!);
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "perch")!);
+    fightLine = 0.4;
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 1);
+    expect(container!.querySelector("[data-testid=fight]")?.textContent).toMatch(/^pike\|/);
+    expect(hint()).toContain("A pike grabbed your perch!");
+  });
 
   it("lets a pike take the hooked fish halfway in, and fights the pike from there", () => {
     const surface = mount();
@@ -478,6 +546,84 @@ describe("useFishingGame lost fight", () => {
     act(() => frames.at(-1)!(now));
     expect(phase()).toBe("result:landed");
     expect(container!.querySelector("[data-testid=grabbed]")?.textContent).toBe("golden-shiner");
+  });
+
+  it("tells the hunter's tip at the hookset", () => {
+    const surface = mount();
+    vi.mocked(flutterTip).mockReturnValue("A pike hunts them here.");
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "golden-shiner")!);
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 1);
+    expect(hint()).toMatch(/Ease off when it runs\. A pike hunts them here\.$/);
+    vi.mocked(flutterTip).mockReturnValue("");
+  });
+
+  it("sends the pike for a shiner left to flutter out past halfway, not one reeled straight in", () => {
+    const pike = FISH.find((fish) => fish.id === "pike")!;
+    const shiner = FISH.find((fish) => fish.id === "golden-shiner")!;
+    const fightFrames = (count: number) => {
+      for (let i = 0; i < count; i++) {
+        step.mockReturnValueOnce("fighting");
+        now += 50;
+        act(() => frames.at(-1)!(now));
+      }
+    };
+    // Reeled the whole way, or pumped with short pauses, the shiner never flutters.
+    const surface = mount();
+    vi.mocked(flutterGrabberFor).mockReturnValueOnce(pike);
+    vi.mocked(pickBite).mockReturnValueOnce(shiner);
+    fightLine = 0.8;
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 1);
+    fightFrames(30);
+    for (let pump = 0; pump < 3; pump++) {
+      act(() => window.dispatchEvent(pointer("pointerup", 1)));
+      fightFrames(20);
+      act(() => surface.dispatchEvent(pointer("pointerdown", 1)));
+      fightFrames(1);
+    }
+    const reeled = vi.mocked(makeFight).mock.results.at(-1)!.value;
+    reeled.sim.line = 0.4;
+    fightFrames(1);
+    expect(container!.querySelector("[data-testid=fight]")?.textContent).toMatch(/^golden-shiner\|/);
+    // Let off only through its runs, and reeled between them, it doesn't flutter either.
+    step.mockReturnValueOnce("landed");
+    now += 50;
+    act(() => frames.at(-1)!(now));
+    act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
+    vi.mocked(flutterGrabberFor).mockReturnValueOnce(pike);
+    vi.mocked(pickBite).mockReturnValueOnce(shiner);
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 3);
+    act(() => window.dispatchEvent(pointer("pointerup", 3)));
+    const running = vi.mocked(makeFight).mock.results.at(-1)!.value;
+    for (let run = 0; run < 3; run++) {
+      running.sim.surge = 2;
+      act(() => window.dispatchEvent(pointer("pointerup", 3)));
+      fightFrames(30);
+      running.sim.surge = 0;
+      act(() => surface.dispatchEvent(pointer("pointerdown", 3)));
+      fightFrames(10);
+    }
+    running.sim.line = 0.4;
+    fightFrames(1);
+    expect(container!.querySelector("[data-testid=fight]")?.textContent).toMatch(/^golden-shiner\|/);
+    // Let off past halfway between runs, it flutters and the pike comes for it at halfway.
+    step.mockReturnValueOnce("landed");
+    now += 50;
+    act(() => frames.at(-1)!(now));
+    act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
+    vi.mocked(flutterGrabberFor).mockReturnValueOnce(pike);
+    vi.mocked(pickBite).mockReturnValueOnce(shiner);
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 2);
+    act(() => window.dispatchEvent(pointer("pointerup", 2)));
+    fightFrames(30);
+    expect(container!.querySelector("[data-testid=fight]")?.textContent).toMatch(/^golden-shiner\|/);
+    vi.mocked(makeFight).mock.results.at(-1)!.value.sim.line = 0.4;
+    fightFrames(1);
+    expect(container!.querySelector("[data-testid=fight]")?.textContent).toMatch(/^pike\|/);
+    expect(hint()).toContain("A pike grabbed your shiner!");
   });
 
   it("keeps a pike that followed a shiner in about the bank, and says so when it bites", () => {
@@ -528,6 +674,30 @@ describe("useFishingGame lost fight", () => {
     now += 16;
     act(() => frames.at(-1)!(now));
     expect(container!.querySelector("[data-testid=got-away]")?.textContent).toBe("true");
+  });
+
+  it("keeps a fish that dropped the bait about for the next cast, and names it when it takes again", () => {
+    const surface = mount();
+    const crappie = FISH.find((fish) => fish.id === "crappie")!;
+    vi.mocked(pickBite).mockReturnValueOnce(crappie);
+    cast(surface);
+    for (let waited = 0; phase() !== "result:miss" && waited < 25_000; waited += 100) act(() => vi.advanceTimersByTime(100));
+    expect(phase()).toBe("result:miss");
+    expect(hint()).toMatch(/It wasn't hooked, so it may take again: cast straight back here\.$/);
+    const missed = vi.mocked(castForGotAway).mock.calls.length;
+    act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
+    vi.mocked(castForGotAway).mockImplementationOnce((waiting) => ({ again: waiting, next: null }));
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 2);
+    const waiting = vi.mocked(castForGotAway).mock.calls[missed]?.[0];
+    expect(waiting).toMatchObject({ spot: "dock", species: { id: "crappie" }, casts: 1, dropped: true });
+    expect(container!.querySelector("[data-testid=fight]")?.textContent).toBe(`crappie|${waiting!.weight}`);
+    expect(hint()).toMatch(/^It's the one that dropped your bait! /);
+    step.mockReturnValueOnce("landed");
+    now += 16;
+    act(() => frames.at(-1)!(now));
+    // It didn't get away from a fight, so the landed card doesn't call it that.
+    expect(container!.querySelector("[data-testid=got-away]")?.textContent).toBe("false");
   });
 
   it("calls a trophy-sized fish heavy on the hook, with a thud on the rod", () => {
@@ -931,6 +1101,45 @@ describe("useFishingGame strike timing", () => {
     expect(hint()).toMatch(/^It swallowed the bait: hooked deep in 1\.10 s\. .*Ease off when it runs\.$/);
     // A swallowed hook holds like a treble: it takes longer in the red to tear free.
     expect(vi.mocked(makeFight).mock.calls.at(-1)![8]).toBe(true);
+  });
+
+  it("warns that a pike which swallowed the bait has its teeth on the line, and says so when they fray it", () => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Nightcrawler");
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "pike")!);
+    cast(surface);
+    act(() => vi.advanceTimersByTime(2_201));
+    now += 1_100;
+    act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+    expect(hint()).toMatch(/^It swallowed the bait: hooked deep in 1\.10 s, with its teeth on the line\. Land it quick\. .*Ease off when it runs\.$/);
+    // The swallowed hook goes to the fight, so the teeth can fray the line.
+    expect(vi.mocked(makeFight).mock.calls.at(-1)![13]).toBe(true);
+    const sim = vi.mocked(makeFight).mock.results.at(-1)!.value.sim as FightSim;
+    sim.bitten = true;
+    sim.frayed = true;
+    step.mockReturnValueOnce("fighting");
+    act(() => frames.at(-1)!(now));
+    expect(hint()).toBe("Its teeth have frayed the line! It snaps sooner now, so land it quick.");
+    vi.mocked(makeFight).mock.results.at(-1)!.value.performance.bitten = true;
+    step.mockReturnValueOnce("landed");
+    act(() => frames.at(-1)!(now));
+    expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toContain("Its teeth frayed your line: it snaps sooner until you retie it.");
+    expect(container!.querySelector("[data-testid=frayed]")?.textContent).toBe("true");
+  });
+
+  it("blames the teeth when a pike snaps the line they frayed", () => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Nightcrawler");
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "pike")!);
+    cast(surface);
+    act(() => vi.advanceTimersByTime(2_201));
+    now += 1_100;
+    act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+    const sim = vi.mocked(makeFight).mock.results.at(-1)!.value.sim as FightSim;
+    sim.bitten = true;
+    sim.frayed = true;
+    step.mockReturnValueOnce("snapped");
+    act(() => frames.at(-1)!(now));
+    expect(container!.querySelector("[data-testid=broke]")?.textContent).toContain("The Northern pike's teeth wore through the line before you could land it.");
+    expect(hint()).toContain("Given time, a pike or muskie swallows the bait: strike sooner, or land it quick.");
   });
 
   it.each([
@@ -1524,6 +1733,43 @@ describe("level unlock integration", () => {
     expect(untilBite(TOPWATER_POPS + 1)).toBe(hopped);
   });
 
+  it("puts the slow winter fish off when the jig is hopped too quick, but not when each hop gets a slow count", () => {
+    const untilBite = (hops: number, gap: number) => {
+      const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Green pumpkin tube", undefined, undefined, "winter");
+      vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "perch")!);
+      // A long wait, so two slow hops fit before the bite.
+      const random = vi.spyOn(Math, "random").mockReturnValue(0.99);
+      cast(surface);
+      // The gap between hops is timed by the page clock, so from here it runs on the fake one.
+      const [real, fake] = [performance.now(), Date.now()];
+      const now = vi.spyOn(performance, "now").mockImplementation(() => real + Date.now() - fake);
+      act(() => vi.advanceTimersByTime(300));
+      let waited = 300;
+      for (let hop = 0; hop < hops; hop++) {
+        act(() => vi.advanceTimersByTime(gap));
+        waited += gap;
+        expect(phase()).toBe("waiting:none");
+        act(() => surface.dispatchEvent(pointer("pointerdown", 2 + hop)));
+        expect(hint()).toBe(
+          gap < COLD_WORK_GAP_MS
+            ? "Too quick for the cold water: the slow fish turn from it. Give it a slow count before the next one."
+            : "Hop! The jig lifts off the bottom and flutters down. Let it fall…",
+        );
+        act(() => window.dispatchEvent(pointer("pointerup", 2 + hop)));
+      }
+      for (; phase() !== "hookset:none" && waited < 30_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+      random.mockRestore();
+      now.mockRestore();
+      act(() => root!.unmount());
+      root = null;
+      container!.remove();
+      return waited;
+    };
+    const sat = untilBite(0, 0);
+    expect(untilBite(TOPWATER_POPS, 0)).toBeGreaterThan(sat * 1.2);
+    expect(untilBite(TOPWATER_POPS, COLD_WORK_GAP_MS + 500)).toBeLessThan(sat * 0.8);
+  });
+
   it("brings a fish up sooner when a streamer is stripped, for the first two strips", () => {
     const untilBite = (strips: number) => {
       const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Woolly bugger");
@@ -1759,7 +2005,7 @@ describe("level unlock integration", () => {
     expect(hint()).toBe("The float lifts and lies flat — strike!");
     for (let waited = 0; phase() !== "result:miss" && waited < 5_000; waited += 100) act(() => vi.advanceTimersByTime(100));
     expect(phase()).toBe("result:miss");
-    expect(hint()).toBe("Strike the moment the float lifts.");
+    expect(hint()).toBe("Strike the moment the float lifts. It wasn't hooked, so it may take again: cast straight back here.");
   });
 
   it("calls a walleye's light take and gives it longer before it drops the bait", () => {
@@ -1959,6 +2205,119 @@ describe("level unlock integration", () => {
     expect(hint()).toMatch(/^Among the tadpoles in the warm shallows, where the fish come to gorge on them\. /);
     expect(tadpoleEater).toHaveBeenCalledWith("dock", undefined, expect.objectContaining({ lifetimePoints: 700 }), "day");
     expect(container!.querySelector("[data-testid=bite]")?.textContent).toMatch(/^perch\|/);
+  });
+
+  it("says a popper among the surface bugs draws the fish looking up for them, and lets one take the bite", () => {
+    vi.mocked(amongSurfaceBugs).mockReturnValueOnce(true);
+    vi.mocked(bugSipper).mockReturnValueOnce(FISH.find((fish) => fish.id === "crappie")!);
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "golden-shiner")!);
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, "Popper");
+    cast(surface);
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toMatch(/^Among the bugs skating on the surface, where the fish are looking up for them\. /);
+    expect(bugSipper).toHaveBeenCalledWith("dock", "Popper", expect.objectContaining({ lifetimePoints: 700 }), "day");
+    expect(container!.querySelector("[data-testid=bite]")?.textContent).toMatch(/^crappie\|/);
+  });
+
+  it("says a fly under the dusk midges draws the fish rising to them, and lets one take the bite", () => {
+    vi.mocked(underMidges).mockReturnValueOnce(true);
+    vi.mocked(midgeRiser).mockReturnValueOnce(FISH.find((fish) => fish.id === "bluegill")!);
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "golden-shiner")!);
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "dusk", false, "Elk hair caddis");
+    cast(surface);
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toContain("Under a cloud of dancing midges, where the fish rise to the ones that fall to the water. ");
+    expect(vi.mocked(underMidges).mock.lastCall?.[0]).toBe("dusk");
+    expect(midgeRiser).toHaveBeenCalledWith("dock", "Elk hair caddis", expect.objectContaining({ lifetimePoints: 700 }), "dusk");
+    expect(container!.querySelector("[data-testid=bite]")?.textContent).toMatch(/^bluegill\|/);
+  });
+
+  it("tells a fly among the surface bugs under a midge cloud as the bugs, once", () => {
+    vi.mocked(underMidges).mockReturnValue(true);
+    vi.mocked(amongSurfaceBugs).mockReturnValue(true);
+    try {
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "dusk", false, "Elk hair caddis");
+      cast(surface);
+      expect(hint()).toContain("Among the bugs skating on the surface");
+      expect(hint()).not.toMatch(/dancing midges/);
+      expect(midgeRiser).not.toHaveBeenCalled();
+    } finally {
+      vi.mocked(underMidges).mockReturnValue(false);
+      vi.mocked(amongSurfaceBugs).mockReturnValue(false);
+    }
+  });
+
+  it("keeps the midges' line off a lure that isn't a fly", () => {
+    vi.mocked(underMidges).mockReturnValue(true);
+    try {
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "dusk", false, "Popper");
+      cast(surface);
+      expect(hint()).not.toMatch(/dancing midges/);
+      expect(midgeRiser).not.toHaveBeenCalled();
+    } finally {
+      vi.mocked(underMidges).mockReturnValue(false);
+    }
+  });
+
+  it("says a jig among the lanterns' minnows draws the fish hunting them, and lets one take the bite", () => {
+    vi.mocked(amongLanternMinnows).mockReturnValueOnce(true);
+    vi.mocked(lightHunter).mockReturnValueOnce(FISH.find((fish) => fish.id === "walleye")!);
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "golden-shiner")!);
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "night", false, "Marabou jig");
+    cast(surface);
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toMatch(/^Among the minnows in the lanterns' light, where the crappie, walleye and bass hunt them\. /);
+    expect(vi.mocked(amongLanternMinnows).mock.lastCall?.[0]).toBe("night");
+    expect(lightHunter).toHaveBeenCalledWith("dock", "Marabou jig", expect.objectContaining({ lifetimePoints: 700 }), "night");
+    expect(container!.querySelector("[data-testid=bite]")?.textContent).toMatch(/^walleye\|/);
+  });
+
+  it("keeps the minnows' line off bait cast into the light", () => {
+    vi.mocked(amongLanternMinnows).mockReturnValue(true);
+    try {
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "night", false, "Nightcrawlers");
+      cast(surface);
+      expect(hint()).not.toMatch(/Among the minnows/);
+      expect(lightHunter).not.toHaveBeenCalled();
+    } finally {
+      vi.mocked(amongLanternMinnows).mockReturnValue(false);
+    }
+  });
+
+  it("keeps the bugs' line off a sinking lure cast among them", () => {
+    vi.mocked(amongSurfaceBugs).mockReturnValue(true);
+    try {
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, "#5 Mepps");
+      cast(surface);
+      expect(hint()).not.toMatch(/Among the bugs/);
+      expect(bugSipper).not.toHaveBeenCalled();
+    } finally {
+      vi.mocked(amongSurfaceBugs).mockReturnValue(false);
+    }
+  });
+
+  it("says a cast tight to the sunken log draws the fish holding under it, and lets one take the bite", () => {
+    vi.mocked(tightToLog).mockReturnValueOnce(true);
+    vi.mocked(logHolder).mockReturnValueOnce(FISH.find((fish) => fish.id === "crappie")!);
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "golden-shiner")!);
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 });
+    cast(surface);
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toMatch(/^Tight to the sunken log, where the fish hold in its shade\. /);
+    expect(logHolder).toHaveBeenCalledWith("dock", undefined, expect.objectContaining({ lifetimePoints: 700 }), "day");
+    expect(container!.querySelector("[data-testid=bite]")?.textContent).toMatch(/^crappie\|/);
+  });
+
+  it("says a cast over the kingfisher's fry draws the fish hunting them, and lets one take the bite", () => {
+    vi.mocked(overKingfisherFry).mockReturnValueOnce(true);
+    vi.mocked(fryHunter).mockReturnValueOnce(FISH.find((fish) => fish.id === "smallmouth-bass")!);
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "golden-shiner")!);
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 });
+    cast(surface);
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toMatch(/^Over the fry the kingfisher dives on, where the perch and bass hunt them too\. /);
+    expect(fryHunter).toHaveBeenCalledWith("dock", undefined, expect.objectContaining({ lifetimePoints: 700 }), "day");
+    expect(container!.querySelector("[data-testid=bite]")?.textContent).toMatch(/^smallmouth-bass\|/);
   });
 
   it("says a jig hopped over the crayfish by the pilings draws their hunters, and lets one take the bite", () => {

@@ -18,6 +18,7 @@ vi.mock("../auth.ts", () => ({
     handler: () => new Response(null, { status: 404 }),
     api: { getSession: async () => (session.user ? { user: session.user } : null) },
   },
+  trustedOrigins: ["http://localhost:5173"],
 }));
 
 const days = Array.from({ length: 60 }, (_, index) => new Date(Date.UTC(2026, 9, 8 + index)).toISOString().slice(0, 10));

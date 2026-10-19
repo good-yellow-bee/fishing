@@ -6,7 +6,7 @@ export const WHIRLIGIG_RAFT = { x: 2.5, z: 4.0, r: 0.42 } as const;
 /** The fastest drift (as WIND_DRIFT gives it) they still gather in. */
 export const WHIRLIGIG_MAX_WIND = 0.08;
 /** How far the whole raft drifts about its place, in metres. */
-const RAFT_DRIFT = 0.22;
+export const RAFT_DRIFT = 0.22;
 
 /** On warm, dry days from spring to the end of summer, when the water is no rougher than a breeze. */
 export function whirligigsOut(hour: LakeHour, sky: Sky | undefined, season: LakeSeason, windSpeed: number) {

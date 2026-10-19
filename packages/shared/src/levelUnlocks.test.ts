@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { FISH, fishById } from "./fish.ts";
 import { CAST_RANGE, DROPOFF_PAD, inCastRange, resolveCast, resolveLanding } from "./lake.ts";
-import { anglerLevel, anglerTitle, canPreviewFish, showsSolidMark, fishTireMulForLevel, hookWindowMulForLevel, LEVEL_THRESHOLDS, levelProgress, levelUnlock, lureWorkTapsForLevel, perfectCastHalfForLevel, rareBiteMulForLevel } from "./progression.ts";
+import { anglerLevel, anglerTitle, canPreviewFish, showsSolidMark, fishTireMulForLevel, hookWindowMulForLevel, LEVEL_THRESHOLDS, levelProgress, levelUnlock, lineSnapForLevel, lureWorkTapsForLevel, perfectCastHalfForLevel, rareBiteMulForLevel } from "./progression.ts";
 import { legendaryCanBite, rollWeight } from "./rules.ts";
 
 describe("level unlock boundaries", () => {
@@ -56,16 +56,16 @@ describe("level unlock boundaries", () => {
 });
 
 describe("anglerTitle", () => {
-  it("gives every level its own title, Greenhorn to Heart of the lake", () => {
+  it("gives every level its own title, Greenhorn to Soul of the lake", () => {
     const titles = Array.from({ length: LEVEL_THRESHOLDS.length }, (_, i) => anglerTitle(i + 1));
     expect(titles[0]).toBe("Greenhorn");
-    expect(titles.at(-1)).toBe("Heart of the lake");
+    expect(titles.at(-1)).toBe("Soul of the lake");
     expect(new Set(titles).size).toBe(titles.length);
   });
 
   it("clamps levels outside the ladder", () => {
     expect(anglerTitle(0)).toBe("Greenhorn");
-    expect(anglerTitle(99)).toBe("Heart of the lake");
+    expect(anglerTitle(99)).toBe("Soul of the lake");
   });
 });
 
@@ -137,5 +137,16 @@ describe("level 13", () => {
     expect(anglerTitle(13)).toBe("Heart of the lake");
     expect(lureWorkTapsForLevel(12)).toBe(2);
     expect(lureWorkTapsForLevel(13)).toBe(3);
+  });
+});
+
+describe("level 14", () => {
+  it("opens at 30000 lifetime points with its unlock and title, and holds the line a moment past the red", () => {
+    expect(anglerLevel(29999)).toBe(13);
+    expect(anglerLevel(30000)).toBe(14);
+    expect(levelUnlock(14)).toMatch(/105%/);
+    expect(anglerTitle(14)).toBe("Soul of the lake");
+    expect(lineSnapForLevel(13)).toBe(1);
+    expect(lineSnapForLevel(14)).toBe(1.05);
   });
 });
