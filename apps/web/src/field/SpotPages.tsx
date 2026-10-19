@@ -38,7 +38,7 @@ import { CopySummary } from "./CopySummary";
 import { spotSummary } from "./summaries";
 import { EditDelete } from "./EditDelete";
 import { fishCountLabel, formatDay, formatTimeOfDay, messageText, outingName, outingNameById, tripWhen } from "./format";
-import { outNow, outingDay, stillGoing } from "./tripDates";
+import { outNowAt, outingDay, stillGoing } from "./tripDates";
 import { newestOutingFirst } from "./catchNeighbors";
 import { pieceName } from "./gear/pieceKey";
 import { useLogbook } from "./LogbookState";
@@ -61,7 +61,7 @@ import { notesHere } from "./outingNotes";
 import { largestFirst } from "./largestFirst";
 import { MatchOrder, useLargestOrder } from "./MatchOrder";
 import { PLAY_LAKE_ID } from "./playLake";
-import { isSampleOuting, isSampleSpot, nextRealTrips } from "./bookCopy";
+import { isSampleSpot, nextRealTrips } from "./bookCopy";
 import { canGoBack, pageBefore } from "./FieldShell";
 import { noteAddedWater } from "./addedWater";
 import { bestLureAt } from "./waterLure";
@@ -148,10 +148,9 @@ export function SpotsPage() {
   // The order picked holds while its control shows: a list cut to two waters goes back to the last fish.
   const order: SpotOrder = rows.length > 2 ? storedOrder : "fish";
   const fishOnTrip = fishCountsByTrip(book);
-  // The outing the angler is out on at each water, as the water's page and the Map say it: of a dawn and a dusk, the later.
-  const newest = newestOutingFirst(book);
+  // The outing the angler is out on at each water, as the water's page and the Map say it.
   const outNowName = (spotId: string) => {
-    const going = book.trips.filter((trip) => trip.spotId === spotId && !isSampleOuting(trip) && outNow(book, trip)).sort(newest)[0];
+    const going = outNowAt(book, spotId);
     return going ? outingName(going, book.spots) : null;
   };
   if (order === "name") rows.sort((a, b) => a.spot.name.trim().localeCompare(b.spot.name.trim(), locale()));
@@ -439,11 +438,13 @@ function SpotView() {
   const twin = book.spots.find((other) => other.id !== spot.id && twinName(other.name, spot.name));
   const lastHere = spot.id === PLAY_LAKE_ID ? undefined : lastOutByWater(counted, fishedBy).get(spot.id);
   // The outing on this water now, as the Map says it: of a dawn and a dusk, the later.
-  const outNowHere = spot.id === PLAY_LAKE_ID ? undefined : countedTrips.filter((trip) => outNow(book, trip)).sort(newestOutingFirst(book))[0];
+  const outNowHere = outNowAt(book, spot.id);
   // The next outing planned here, as the Waters card names it; today's once it has a fish is under way, not ahead.
   const nextHere = nextRealTrips(book, today).find((trip) => trip.spotId === spot.id);
   const restHere = lastHere ? daysBetween(lastHere, today) : 0;
-  const firstHere = spot.id === PLAY_LAKE_ID ? undefined : summed.map((entry) => bookFishDay(book, entry)).sort()[0];
+  // Its first fish and its last, by the days they count on: the first said once a later fish day has followed it.
+  const fishDays = spot.id === PLAY_LAKE_ID ? [] : summed.map((entry) => bookFishDay(book, entry)).filter((day) => day <= today).sort();
+  const firstHere = fishDays[0] !== fishDays.at(-1) ? fishDays[0] : undefined;
   // For the copied summary: the day it was last fished and what that day's outing gave, the first thing a mate asks.
   // Of a dawn and a dusk, the later, as Out now takes it.
   const lastHereTrip = lastHere ? countedTrips.filter((trip) => trip.date === lastHere).sort(newestOutingFirst(book))[0] : undefined;
@@ -527,8 +528,8 @@ function SpotView() {
             <LastHereLine rest={restHere} day={lastHere} trip={lastHereTrip} fish={fishOn} catches={catches} />
           </p>
         ) : null}
-        {/* How long the angler has known this water: its first fish, once another day has followed it. */}
-        {firstHere && firstHere !== lastHere ? <p className="meta first-here">{t("First fish here: {day}", { day: formatDay(firstHere) })}</p> : null}
+        {/* How long the angler has known this water: its first fish, once another fish day has followed it. */}
+        {firstHere ? <p className="meta first-here">{t("First fish here: {day}", { day: formatDay(firstHere) })}</p> : null}
         {outNowHere ? (
           <p className="meta out-now">
             <Link to={`/trips/${outNowHere.id}`}>{t("Out now: {outing}", { outing: outingName(outNowHere, book.spots) })}</Link>

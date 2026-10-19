@@ -2,6 +2,7 @@ import { catchesForTrip, localDate, shiftDate, type Logbook, type Trip } from "@
 import { PLAY_LAKE_ID } from "./playLake";
 import { LATE_NIGHT_UNTIL } from "./suggestions";
 import { isSampleOuting } from "./bookCopy";
+import { newestOutingFirst } from "./catchNeighbors";
 
 export type DatePick = { label: "Last night" | "Today" | "Tomorrow" | "Saturday" | "Sunday" | "Next Saturday"; date: string };
 
@@ -40,7 +41,13 @@ export function outingDay(today: string, now = new Date()): string {
 export function stillGoing(book: Logbook, trip: Trip, now = new Date()): boolean {
   if (now.getHours() >= LATE_NIGHT_UNTIL || trip.date !== shiftDate(now, -1)) return false;
   const fish = catchesForTrip(book, trip.id);
-  return fish.length === 0 || fish.some((entry) => now.getTime() - Date.parse(entry.caughtAt) < 12 * 3_600_000);
+  return fish.length === 0 || fish.some((entry) => recentFish(entry.caughtAt, now));
+}
+
+/** A fish in the last twelve hours; never one logged ahead of the clock. */
+function recentFish(caughtAt: string, now: Date): boolean {
+  const since = now.getTime() - Date.parse(caughtAt);
+  return since >= 0 && since < 12 * 3_600_000;
 }
 
 /**
@@ -49,10 +56,13 @@ export function stillGoing(book: Logbook, trip: Trip, now = new Date()): boolean
  */
 export function outNow(book: Logbook, trip: Trip, now = new Date()): boolean {
   if (stillGoing(book, trip, now)) return true;
-  return trip.date === localDate(now) && catchesForTrip(book, trip.id).some((entry) => {
-    const since = now.getTime() - Date.parse(entry.caughtAt);
-    return since >= 0 && since < 12 * 3_600_000;
-  });
+  return trip.date === localDate(now) && catchesForTrip(book, trip.id).some((entry) => recentFish(entry.caughtAt, now));
+}
+
+/** The angler's outing out now at this water, of a dawn and a dusk the later; none on the game's lake or a sample plan. */
+export function outNowAt(book: Logbook, spotId: string, now = new Date()): Trip | undefined {
+  if (spotId === PLAY_LAKE_ID) return undefined;
+  return book.trips.filter((trip) => trip.spotId === spotId && !isSampleOuting(trip) && outNow(book, trip, now)).sort(newestOutingFirst(book))[0];
 }
 
 /** Whether an outing's title is only the name of a water: what an untitled outing is saved under. */
