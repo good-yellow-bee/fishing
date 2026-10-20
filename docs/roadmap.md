@@ -1461,6 +1461,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | SC269 | The other angler at the crowded bank: GT413's angler who fishes one bank each day was only words on the stance chip; now they sit there on a camp chair at the water's edge a few steps from where the player stands, red jacket and bucket hat, rod out on its rest, from dawn to dusk (one draw); each bank's spot is picked so its camera sees them beside the player, clear of the walk boards | scene | S |
 | SC270 | The figure-eight seen: GT415's pike that follows the lure to the bank was only words; now its long shadow trails just behind the float while it follows, coming in a little from one side so its length shows, and swings round the float and away as it turns (useFishingGame exposes the follow as follow/turn) | scene | S |
 | SC271 | News card scene64 covers SC269 and SC270: the other angler at the crowded bank and the figure-eight seen | scene | S |
+| SC272 | Signs of the giants: while a bank's giant (GT417) is still out this week, now and then (about once a minute, the banks taking turns) it rolls out on that bank's water, two wide rings spreading round a dark back that rises and sinks; drawn only while it swirls, none with reduced motion | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
