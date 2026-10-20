@@ -9,8 +9,8 @@ import type { SpotId } from "@stillwater/shared";
 /** Where each bank's lost float drifts: out on that bank's own water, clear of where its giant swirls (giantWake.ts). */
 const HOME: Partial<Record<SpotId, { x: number; z: number }>> = {
   dock: { x: 1.8, z: 3.2 },
-  point: { x: -5.3, z: 8.4 },
-  reeds: { x: -11.9, z: 7 },
+  point: { x: -4.1, z: 10 },
+  reeds: { x: -8.4, z: 8.9 },
   dropoff: { x: 13.6, z: -3 },
   inlet: { x: -19.2, z: -5.4 },
 };
