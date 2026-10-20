@@ -1,4 +1,4 @@
-import { catchesForTrip, localDate, shiftDate, type Logbook, type Trip } from "@stillwater/shared";
+import { catchesForTrip, localDate, shiftDate, type CatchEntry, type Logbook, type Trip } from "@stillwater/shared";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 import { LATE_NIGHT_UNTIL } from "./suggestions";
 import { isSampleOuting, upcomingRealTrips } from "./bookCopy";
@@ -40,10 +40,19 @@ export function outingDay(today: string, now = new Date()): string {
  */
 export function stillGoing(book: Logbook, trip: Trip, now = new Date()): boolean {
   if (now.getHours() >= LATE_NIGHT_UNTIL || trip.date !== shiftDate(now, -1)) return false;
-  // Its own fish; with none, those logged loose on its water since its day began, so a morning's loose fish end it.
-  const own = catchesForTrip(book, trip.id);
-  const fish = own.length > 0 ? own : book.catches.filter((entry) => entry.tripId === null && entry.spotId === trip.spotId && localDate(new Date(entry.caughtAt)) >= trip.date);
+  const fish = fishOf(book, trip);
   return fish.length === 0 || fish.some((entry) => recentFish(entry.caughtAt, now));
+}
+
+/** An outing's own fish; with none, those logged loose on its water since its day began, which say how it went. */
+function fishOf(book: Logbook, trip: Trip): CatchEntry[] {
+  const own = catchesForTrip(book, trip.id);
+  return own.length > 0 ? own : book.catches.filter((entry) => entry.tripId === null && entry.spotId === trip.spotId && localDate(new Date(entry.caughtAt)) >= trip.date);
+}
+
+/** Whether an outing is under way: a fish (its own or loose on its water that day), a lost fish or a missed strike. */
+export function underWay(book: Logbook, trip: Trip): boolean {
+  return fishOf(book, trip).length > 0 || Boolean(trip.lost || trip.missed);
 }
 
 /**
@@ -71,7 +80,7 @@ function recentFish(caughtAt: string, now: Date): boolean {
  */
 export function outNow(book: Logbook, trip: Trip, now = new Date()): boolean {
   if (stillGoing(book, trip, now)) return true;
-  return trip.date === localDate(now) && catchesForTrip(book, trip.id).some((entry) => recentFish(entry.caughtAt, now));
+  return trip.date === localDate(now) && fishOf(book, trip).some((entry) => recentFish(entry.caughtAt, now));
 }
 
 /** The angler's outing out now at this water, of a dawn and a dusk the later; none on the game's lake or a sample plan. */

@@ -710,6 +710,7 @@ export const PL_FIELD: PlBook = {
   "Every fish in the book with a picture, largest first.": "Każda ryba z dziennika, która ma zdjęcie, od największej.",
   "Kinds": "Gatunki",
   "Lures": "Przynęty",
+  "Released fish": "Wypuszczone ryby",
   "Only my outings": "Tylko moje wyprawy",
   "Copy the plan": "Skopiuj plan",
   "Plan copied.": "Skopiowano plan.",
