@@ -1908,7 +1908,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT432~~ | ~~The old foe: a trophy that breaks off is remembered per angler at its bank for three days; on a later day a cast there may bring it back (8%), and landing it says it still had your lure in its jaw~~ (#1655) | gameplay | M |
 | ~~GT433~~ | ~~A nest guarder hooked off its spring nest (a bass at the Reeds or the Dock) pays 15 points more when let go, on top of any trophy bonus; the server pays it from the catch's season and bank, and the card shows it~~ (#1657) | gameplay | S |
 | ~~GT434~~ | ~~News card 2026-10-20-game60 covers GT432-GT433: the old foe and the nest release~~ (#1659) | ui | S |
-| ~~GT435~~ | ~~The lodge's lost trophies: a trophy that breaks an angler's line is filed with the lodge for a week; another angler's cast at that bank may bring it up (5%), naming who lost it and the lure in its jaw, and the first to land it is paid 30 by the server; the angler who lost it stops meeting it as their old foe once someone lands it~~ (#PR) | gameplay | M |
+| ~~GT435~~ | ~~The lodge's lost trophies: a trophy that breaks an angler's line is filed with the lodge for a week; another angler's cast at that bank may bring it up (5%), naming who lost it and the lure in its jaw, and the first to land it is paid 30 by the server; the angler who lost it stops meeting it as their old foe once someone lands it~~ (#1660) | gameplay | M |
 
 ## Risks / open questions for the owner
 
