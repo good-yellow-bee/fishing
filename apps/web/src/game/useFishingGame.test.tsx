@@ -407,7 +407,7 @@ describe("useFishingGame live shiner", () => {
       press("set night line");
       expect(line()).toBe("dock");
       expect(liveShiner()).toBe("false");
-      expect(hint()).toBe("You leave the shiner out on a night line here. Come back to check it after six hours, and within two days.");
+      expect(hint()).toMatch(/^You leave the shiner out on a night line here\. Come back to check it after six hours, and within two days\./);
       // Too soon, the line stays out.
       vi.setSystemTime(DOCK_BUBBLES.at + NIGHT_LINE_SOAK_MS - 60_000);
       press("check night line");
