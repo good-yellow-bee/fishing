@@ -49,12 +49,6 @@ describe("a phone held sideways", () => {
     expect(dock).toContain('wrap.style.setProperty("--stance-h"');
   });
 
-  it("hangs the fight card from the header on a short upright phone, with the chips stepping aside", () => {
-    const short = css.slice(css.indexOf("@media (max-width: 800px) and (min-height: 501px) and (max-height: 700px) {"));
-    expect(/\n  \.fight-bar \{([^}]*)\}/.exec(short)?.[1]).toContain("top: calc(var(--hud-bottom, 140px) + 8px);");
-    expect(short).toMatch(/\.scene-wrap\[data-phase="fight"\] :is\(\.walkthrough, \.stance-chip\) \{\s*display: none;/);
-  });
-
   it("fits a narrow phone's header links into two rows with larger text, each link keeping its 32 px", () => {
     const narrow = css.slice(css.indexOf("@media (max-width: 359px) and (min-height: 501px) {"));
     expect(/html\[data-text-size\] \.hud-stats \{([^}]*)\}/.exec(narrow)?.[1]).toContain("row-gap: 0;");
@@ -88,14 +82,31 @@ describe("larger text on a phone held upright", () => {
   });
 });
 
-describe("a fight on a phone held upright with larger text", () => {
+describe("the fight card on a phone held upright", () => {
   const from = css.indexOf("@media (max-width: 800px) and (min-height: 501px)");
   const upright = css.slice(from, css.indexOf("@media (max-width: 520px)", from));
+  const touch = css.slice(css.indexOf("@media (pointer: coarse) and (max-width: 800px) and (min-height: 501px) {"));
 
-  it("clears the header's status chips, the coach and the bank chip so the card ends above the thumb button", () => {
-    expect(upright).toContain('html[data-text-size] .hud:has(+ .scene-wrap[data-phase="fight"]) :is(.hour-chip, .sky-chip, .level-chip, .points-chip),');
-    expect(upright).toMatch(/html\[data-text-size\] \.scene-wrap\[data-phase="fight"\] :is\(\.walkthrough, \.stance-chip\) \{\n    display: none;/);
-    expect(upright).toMatch(/@media \(pointer: coarse\) and \(max-width: 800px\) and \(min-height: 501px\) \{\n  html\[data-text-size\] \.fight-bar \.fight-controls \{\n    display: none;/);
+  it("sits at the foot of the screen, below the fight, with the coach and the bank chip stepping aside", () => {
+    const card = /\n  \.fight-bar \{([^}]*)\}/.exec(upright)?.[1];
+    expect(card).toContain("top: auto;");
+    expect(card).toContain("bottom: calc(8px + env(safe-area-inset-bottom));");
+    expect(upright).toMatch(/\.scene-wrap\[data-phase="fight"\] :is\(\.walkthrough, \.stance-chip\) \{\n    display: none;/);
+    expect(upright).not.toContain("top: calc(var(--hud-bottom, 140px) + 8px);\n    bottom: auto;");
+  });
+
+  it("stops short of the Reel button on either hand, and keeps to what a fight is read from", () => {
+    expect(/\n  \.fight-bar \{([^}]*)\}/.exec(touch)?.[1]).toContain("right: 112px;");
+    expect(touch).toMatch(/html\[data-hand="left"\] \.fight-bar \{\n    right: 8px;\n    left: 112px;/);
+    expect(touch).toContain("html[data-text-size] .fight-bar :is(.fight-clean, .fight-habit) {");
+    expect(css).toMatch(/and \(max-height: 760px\) \{\n  \.fight-bar \.fight-clean \{\n    display: none;/);
+    expect(css).toMatch(/and \(max-height: 600px\) \{\n  \.fight-bar \.fight-habit \{\n    display: none;/);
+  });
+
+  it("shivers on its own translate, so a layout without a centring transform stays put", () => {
+    const shiver = css.slice(css.indexOf("@keyframes fight-shiver"));
+    expect(shiver.slice(0, 200)).toContain("translate: -2px 0;");
+    expect(shiver.slice(0, 200)).not.toContain("translateX(-50%)");
   });
 });
 
@@ -135,9 +146,10 @@ describe("a fight on a phone held sideways with larger text", () => {
     expect(block).toContain('html[data-text-size] .hud:has(+ .scene-wrap[data-phase="fight"]) :is(.hour-chip, .sky-chip, .level-chip, .points-chip),');
   });
 
-  it("centres the card in the room beside the Reel button, on either hand", () => {
-    expect(block).toMatch(/\n  \.fight-bar \{\n    left: calc\(50% - 56px\);/);
-    expect(block).toMatch(/html\[data-hand="left"\] \.fight-bar \{\n    left: calc\(50% \+ 56px\);/);
+  it("puts the card on the side away from the Reel button, clear of the fight in the middle", () => {
+    expect(block).toMatch(/\n  \.fight-bar \{\n    left: 8px;\n    width: min\(320px, calc\(32vw \/ var\(--text-zoom, 1\)\)\);/);
+    expect(block).toMatch(/html\[data-hand="left"\] \.fight-bar \{\n    right: 8px;\n    left: auto;/);
+    expect(block).toContain(".fight-bar :is(.fight-controls, .fight-clean, .fight-habit) {");
   });
 });
 
