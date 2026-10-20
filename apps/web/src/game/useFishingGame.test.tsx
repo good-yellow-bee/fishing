@@ -1783,8 +1783,9 @@ describe("level unlock integration", () => {
 
     it("strikes on a figure-eight as it turns", () => {
       follow();
-      now += FIGURE_TURN_MS + 50;
-      act(() => vi.advanceTimersByTime(FIGURE_TURN_MS + 50));
+      act(() => vi.advanceTimersByTime(FIGURE_TURN_MS + 10));
+      expect(hint()).toBe("NOW — it's turning!");
+      now += 100;
       tap();
       expect(phase()).toBe("hookset:none");
       expect(hint()).toBe("It turned on the figure-eight and hit! Strike!");
@@ -1797,6 +1798,8 @@ describe("level unlock integration", () => {
       follow();
       act(() => vi.advanceTimersByTime(FIGURE_TURN_MS + FIGURE_WINDOW_MS + 50));
       expect(phase()).toBe("result:miss");
+      // Untouched, it stays about the bank like a fish that dropped the bait.
+      expect(container!.querySelector("[data-testid=missed]")?.textContent).toMatch(/^pike\|/);
     });
   });
 

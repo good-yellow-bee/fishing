@@ -509,7 +509,14 @@ export function useFishingGame(
     return true;
   };
   /** A pike-family fish following the lure to the bank: when it turns, when it leaves, and its take if the angler times the figure-eight. */
-  const figureRef = useRef<{ turnAt: number; endAt: number; take: () => void } | null>(null);
+  const figureRef = useRef<{ turnAt: number; endAt: number; take: () => void; fish: { species: FishSpecies; weight: number } } | null>(null);
+  /** A follower that turned away without taking: like a dropped fish, it stays about for a cast straight back. */
+  const turnAway = (figure: { fish: { species: FishSpecies; weight: number } }, message = t("It turned away and sank back into the deep."), hint = t("A follower turns away unless you figure-eight the lure as it turns. Cast again.")) => {
+    figureRef.current = null;
+    setOutcome({ kind: "miss", message, fish: figure.fish });
+    if (!gotAwayRef.current) gotAwayRef.current = gotAwayAfterDrop(figure.fish.species, figure.fish.weight, spotRef.current, recaughtRef.current);
+    resetToIdle(hint, "result");
+  };
   const popRef = useRef<{ dueAt: number; take: () => void; pops: number; work: "pop" | "hop" | "lift" | "strip" | "pause" | "twitch"; taps: number; lastAt: number; season: LakeSeason | undefined } | null>(null);
   /** Clean fights landed in a row this session; a dirty landing or a lost fish starts it again. */
   const cleanRunRef = useRef(0);
@@ -1193,22 +1200,43 @@ export function useFishingGame(
         // A pike on a flashing lure may follow it to the bank instead of taking: the angler figure-eights it as it turns.
         if (!followed && !secondTake && !mercyNow && FIGURE_EIGHTERS.has(species.id) && drawsFollow(lureRef?.current) && Math.random() < FIGURE_EIGHT_ODDS) {
           followed = true;
-          const now = performance.now();
-          figureRef.current = { turnAt: now + FIGURE_TURN_MS, endAt: now + FIGURE_TURN_MS + FIGURE_WINDOW_MS, take: takeBait };
-          setHint(t("{fish} followed it to the bank! Figure-eight: tap as it turns…", { fish: t(species.name) }));
-          timers.current.figure = [
-            window.setTimeout(() => {
-              if (figureRef.current) setHint(t("NOW — it's turning!"));
-            }, FIGURE_TURN_MS),
-            window.setTimeout(() => {
-              if (!figureRef.current || phaseRef.current !== "waiting") return;
-              figureRef.current = null;
-              setOutcome({ kind: "miss", message: t("It turned away and sank back into the deep."), fish: bitten });
-              resetToIdle(t("A follower turns away unless you figure-eight the lure as it turns. Cast again."), "result");
-            }, FIGURE_TURN_MS + FIGURE_WINDOW_MS),
-          ];
+          const startFollow = () => {
+            if (phaseRef.current !== "waiting") return;
+            // Not turning yet: a tap now is too soon.
+            figureRef.current = { turnAt: Infinity, endAt: Infinity, take: takeBait, fish: bitten };
+            setHint(t("{fish} followed it to the bank! Figure-eight: tap as it turns…", { fish: t(species.name) }));
+            fx.nibble();
+            fx.haptic("nibble");
+            timers.current.figure = [
+              window.setTimeout(() => {
+                const figure = figureRef.current;
+                if (!figure || phaseRef.current !== "waiting") return;
+                // Out of sight, it waits: the follow starts over when the angler is back.
+                if (document.visibilityState === "hidden") {
+                  figureRef.current = null;
+                  timers.current.shown = whenShown(startFollow, document, 0);
+                  return;
+                }
+                // The window runs from the call the angler sees, whatever the frame rate.
+                figure.turnAt = performance.now();
+                figure.endAt = figure.turnAt + FIGURE_WINDOW_MS;
+                setHint(t("NOW — it's turning!"));
+                fx.plop();
+                fx.haptic("bite");
+                timers.current.figure?.push(
+                  window.setTimeout(() => {
+                    if (figureRef.current !== figure || phaseRef.current !== "waiting") return;
+                    turnAway(figure);
+                  }, FIGURE_WINDOW_MS),
+                );
+              }, FIGURE_TURN_MS),
+            ];
+          };
+          startFollow();
           return;
         }
+        // A fish taking for real ends any follow.
+        figureRef.current = null;
         fx.bite();
         if (hour === "night") fx.rodBell("ring");
         fx.haptic("bite");
@@ -1441,8 +1469,7 @@ export function useFishingGame(
             figure.take();
             setHint(t("It turned on the figure-eight and hit! Strike!"));
           } else {
-            setOutcome({ kind: "miss", message: t("Too soon: it saw the rod move and sank away.") });
-            resetToIdle(t("Wait for it to turn, then figure-eight. Cast again."), "result");
+            turnAway(figure, t("Too soon: it saw the rod move and sank away."), t("Wait for it to turn, then figure-eight. Cast again."));
           }
           break;
         }
