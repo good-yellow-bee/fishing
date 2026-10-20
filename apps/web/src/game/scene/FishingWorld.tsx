@@ -148,6 +148,7 @@ import { frameDue, frameThrottle, idleNow } from "./frameCap";
 import { GOLDEN_ACCENT, GOLDEN_COLOR } from "../../components/FishMark";
 import { LIFT_RISE, LIGHT_PLUNGE, liftTilt, ROLL_SPLASH, RUN_PLUNGE, runSlide, takeStyle } from "../nibblePlan";
 import { DEFAULT_SEASON, lazyPart, usePartsFor, useSceneParts } from "./lazyPart";
+import { assignShadowDepths } from "./shadowDepth";
 
 const DockDog = lazyPart("day", "DockDog");
 const Lightning = lazyPart("weather", "Lightning");
@@ -339,6 +340,15 @@ function placeBobber(
 
 function isAiming(phase: ScenePhase) {
   return phase === "idle" || phase === "casting";
+}
+
+/** Gives the shadow casters depth materials of their own kind, checking about once a second for ones that came out since (shadowDepth.ts). */
+function ShadowDepths() {
+  const frames = useRef(0);
+  useFrame(({ scene }) => {
+    if (frames.current++ % 60 === 0) assignShadowDepths(scene);
+  });
+  return null;
 }
 
 /** Lets later scene parts load on their own once the scene is in, and fetches the likely ones ahead (lazyPart.tsx). */
@@ -2220,6 +2230,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       <FightMotion phase={phase} sim={sim} ambush={take === "ambush"} light={take === "light"} lift={take === "lift"} run={take === "run"} boatSwing={boatSwing} />
       <CameraRig phase={phase} sim={sim} />
       <PartsAhead />
+      <ShadowDepths />
       <FitFov />
       <Tone hour={hour} />
       <FrameWatch />
