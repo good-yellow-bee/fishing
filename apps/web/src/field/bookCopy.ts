@@ -1,4 +1,4 @@
-import { sampleLogbook, type Logbook, type TackleItem } from "@stillwater/shared";
+import { localDate, sampleLogbook, type Logbook, type TackleItem } from "@stillwater/shared";
 import { PLAY_LAKE_ID, offPlayLake, upcomingOwnTrips } from "./playLake";
 
 export const BOOK_COPY_STORAGE_KEY = "stillwater.field-log.copied.v1";
@@ -86,7 +86,9 @@ export function upcomingRealTrips(book: Logbook, today: string) {
 /** The outings still to start, for "Next outing": today's once it has a fish is under way, not ahead. */
 export function nextRealTrips(book: Logbook, today: string) {
   const fished = new Set(book.catches.map((entry) => entry.tripId));
-  return upcomingRealTrips(book, today).filter((trip) => trip.date > today || !fished.has(trip.id));
+  // A fish logged loose on its water today puts it under way too, as underWay and Out now take it.
+  const looseAt = new Set(book.catches.filter((entry) => entry.tripId === null && localDate(new Date(entry.caughtAt)) === today).map((entry) => entry.spotId));
+  return upcomingRealTrips(book, today).filter((trip) => trip.date > today || !(fished.has(trip.id) || looseAt.has(trip.spotId) || trip.lost || trip.missed));
 }
 
 /** Whether taking the sample week out would take anything: a fish, an outing or a water of it with none of the player's own. */

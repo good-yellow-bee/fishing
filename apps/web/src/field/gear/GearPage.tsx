@@ -40,7 +40,7 @@ import { offPlayLake } from "../playLake";
 import { countedBook, ownFish } from "../milestones";
 import { isSampleOnly, nextRealTrips, upcomingRealTrips } from "../bookCopy";
 import { outingFish } from "../outingFish";
-import { lateOutings, plainName, sameName, stillGoing, underWay } from "../tripDates";
+import { lateOutings, outNow, plainName, sameName, underWay } from "../tripDates";
 import { focusPageHeading } from "../pageFocus";
 import { onPiece } from "../pieceTally";
 import { newestOutingFirst } from "../catchNeighbors";
@@ -62,7 +62,7 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
           <Link to={`/trips/${trip.id}`}>{outingName(trip, book.spots)}</Link>
         </h3>
         <span className="meta">
-          {tripWhen(trip.date, today, tomorrow, stillGoing(book, trip))}
+          {tripWhen(trip.date, today, tomorrow, outNow(book, trip))}
           {spot && !sameName(spot.name, outingName(trip, book.spots)) ? ` · ${plainName(spot.name)}` : ""}
         </span>
       </div>
@@ -243,7 +243,8 @@ function LureRecord({ today }: { today: string }) {
                     type="button"
                     className="text-button"
                     onClick={() => {
-                      if (add(next.id, row.label) !== null) return;
+                      // As the button names it: the book's own spelling, or the dictionary's in Polish.
+                      if (add(next.id, pieceName(row.name)) !== null) return;
                       focusPacked.current = true;
                       setJustPacked(row.label);
                     }}
@@ -278,7 +279,7 @@ function LureRecord({ today }: { today: string }) {
             type="button"
             className="text-button"
             onClick={() => {
-              const packed = best.filter((row) => add(next.id, row.label) === null).map((row) => row.label);
+              const packed = best.filter((row) => add(next.id, pieceName(row.name)) === null).map((row) => row.name);
               if (packed.length === 0) return;
               focusPackedBest.current = true;
               setPackedBest(packed);
@@ -434,7 +435,7 @@ function PastTripTackle({ trip, today, tomorrow, fishCount, open, onToggle }: { 
       <summary>
         <span className="tackle-past-title">{outingName(trip, book.spots)}</span>
         <span className="meta">
-          {tripWhen(trip.date, today, tomorrow, stillGoing(book, trip))}
+          {tripWhen(trip.date, today, tomorrow, outNow(book, trip))}
           {spot && !sameName(spot.name, outingName(trip, book.spots)) ? ` · ${plainName(spot.name)}` : ""}
           {` · ${fishCountLabel(fishCount)}`}
         </span>
@@ -485,7 +486,7 @@ export function GearPage() {
             <p className="eyebrow">
               <Link to="/gear">{t("Tackle")}</Link>
               {" · "}
-              {tripWhen(trip.date, today, tomorrow, stillGoing(book, trip))}
+              {tripWhen(trip.date, today, tomorrow, outNow(book, trip))}
             </p>
             <h1>{outingName(trip, book.spots)}</h1>
             <p className="meta stand">

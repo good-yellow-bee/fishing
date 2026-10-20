@@ -22,7 +22,7 @@ import { useTackleItems } from "./gear/TackleState";
 import { catchLink, type ListKey } from "./catchList";
 import { FROM_LIST } from "./leaveDeleted";
 import { isPlanned } from "./TripMonthHead";
-import { outingDay, sameName, stillGoing } from "./tripDates";
+import { outingDay, outNow, sameName, stillGoing } from "./tripDates";
 import { bookSpelling, pieceName } from "./gear/pieceKey";
 import { bookFishDay } from "./tripMonths";
 
@@ -135,7 +135,7 @@ export function TripCard({
         : t("{packed} of {total} packed", { packed, total: bag.length });
   return (
     <Link to={`/trips/${trip.id}`} className="trip-card" state={FROM_LIST}>
-      <p className="when">{tripWhen(trip.date, today, tomorrow, stillGoing(book, trip))}</p>
+      <p className="when">{tripWhen(trip.date, today, tomorrow, outNow(book, trip))}</p>
       <div>
         <Head>{outingName(trip, book.spots)}</Head>
         <p className="meta">

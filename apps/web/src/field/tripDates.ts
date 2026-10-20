@@ -79,7 +79,8 @@ function recentFish(caughtAt: string, now: Date): boolean {
  * hours last evening's still going. The Map and the water's page say "Out now" by it.
  */
 export function outNow(book: Logbook, trip: Trip, now = new Date()): boolean {
-  if (stillGoing(book, trip, now)) return true;
+  // Last evening's only while Home and Trips still list it first (lateOutings), not once today's is under way.
+  if (trip.date !== localDate(now)) return lateOutings(book, now).some((late) => late.id === trip.id);
   return trip.date === localDate(now) && fishOf(book, trip).some((entry) => recentFish(entry.caughtAt, now));
 }
 
