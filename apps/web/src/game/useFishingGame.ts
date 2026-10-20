@@ -163,6 +163,8 @@ export type Fight = {
   edge?: boolean;
   /** An egg raider hooked on the sunfish beds, so its first run, fleeing the guarding sunfish, is the long one. */
   bed?: boolean;
+  /** Hooked in a foam lane on a windy day, so a slack line drifts out faster still. */
+  foam?: boolean;
   /** A breezy or strong day, when the wind bellies a slack line. */
   windy?: FightWind;
   /** A catfish or sturgeon the angler's Strength lifts off the bottom in one pump. */
@@ -693,7 +695,9 @@ export function useFishingGame(
     const edge = castEdgeRef.current && water === "rocks";
     // An egg raider hooked on the sunfish beds bolts from the guarding sunfish.
     const bed = castBedRef.current && BED_RAIDERS.has(species.id);
-    const next = { species, weight, underpowered, water, windy, lightHook, pads, farRock, weedBall, edge, bed, strongLift: liftsStickerInOne(species.id, current.strength) };
+    // One hooked in a foam lane on a windy day fights where the wind's drift is strongest.
+    const foam = castFoamRef.current && windy !== undefined;
+    const next = { species, weight, underpowered, water, windy, lightHook, pads, farRock, weedBall, edge, bed, foam, strongLift: liftsStickerInOne(species.id, current.strength) };
     fightRef.current = next;
     setFight(next);
     setPhaseBoth("fight");
@@ -706,7 +710,7 @@ export function useFishingGame(
         resetToIdle(current.strength < species.minStrength ? t("Line parted. Spend points on Strength.") : t("Line parted. Spend points on Accuracy."));
       }, 1400);
     } else {
-      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)) * seasonTireMul(season, species.id) * warmTireMul(season, species.id, sky, spotRef.current) * runTireMul(season, species.id) * nestTireMul(season, species.id, spotRef.current) * nightTireMul(hourRef.current, species.id) * spentTireMul(season, species.id) * twilightTireMul(hourRef.current, species.id) * springRunTireMul(season, species.id, spotRef.current) * currentTireMul(species.id, spotRef.current) * fallFeedTireMul(season, species.id) * rainHunterTireMul(sky, species.id) * summerStrengthTireMul(season, species.id), water, windy, isTopwater(lureRef?.current), hasTrebles(lureRef?.current) || deep, seasonTireMul(season, species.id) > 1, isTrophyWeight(species, weight), floodedInlet(spotRef.current, season, sky), frayedRef.current, deep, lineSnapForLevel(anglerLevel(current.lifetimePoints)), turnCutMulForLevel(anglerLevel(current.lifetimePoints)), netsFish(species, mercyRef.current), { farRock, weedBall, edge, bed });
+      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)) * seasonTireMul(season, species.id) * warmTireMul(season, species.id, sky, spotRef.current) * runTireMul(season, species.id) * nestTireMul(season, species.id, spotRef.current) * nightTireMul(hourRef.current, species.id) * spentTireMul(season, species.id) * twilightTireMul(hourRef.current, species.id) * springRunTireMul(season, species.id, spotRef.current) * currentTireMul(species.id, spotRef.current) * fallFeedTireMul(season, species.id) * rainHunterTireMul(sky, species.id) * summerStrengthTireMul(season, species.id), water, windy, isTopwater(lureRef?.current), hasTrebles(lureRef?.current) || deep, seasonTireMul(season, species.id) > 1, isTrophyWeight(species, weight), floodedInlet(spotRef.current, season, sky), frayedRef.current, deep, lineSnapForLevel(anglerLevel(current.lifetimePoints)), turnCutMulForLevel(anglerLevel(current.lifetimePoints)), netsFish(species, mercyRef.current), { farRock, weedBall, edge, bed, foam });
       runtimeRef.current = runtime;
       simRef.current = runtime.sim;
       performanceRef.current = runtime.performance;
@@ -1641,6 +1645,7 @@ export function useFishingGame(
             castWeedRef.current = null;
             castEdgeRef.current = false;
             castBedRef.current = false;
+            castFoamRef.current = false;
             beginFight(taken.species, taken.weight, grab.profile);
             // The pike is where the shiner was, not back at the far end of the line.
             if (runtimeRef.current) runtimeRef.current.sim.line = sim.line;
