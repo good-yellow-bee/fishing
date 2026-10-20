@@ -15,10 +15,16 @@ export const BEAM_REACH = 8;
 
 type Point = { x: number; y: number; z: number };
 
-/** Where the beam lands: on the float while it is out, else a few steps ahead, at `surface`'s height there (the boards, the bank or the water). */
-export function headlampTarget(phase: ScenePhase, angler: Point & { yaw: number }, float: Point, surface: (x: number, z: number) => number): Point {
-  if (phase === "waiting" || phase === "hookset" || phase === "fight") return { x: float.x, y: float.y, z: float.z };
-  const x = angler.x + Math.sin(angler.yaw) * GROUND_AHEAD;
-  const z = angler.z + Math.cos(angler.yaw) * GROUND_AHEAD;
-  return { x, y: surface(x, z), z };
+/** Where the beam lands, written into `out`: on the float from the cast on, else a few steps ahead, at `surface`'s height there (the boards, the bank or the water). */
+export function headlampTarget<T extends Point>(out: T, phase: ScenePhase, angler: Point & { yaw: number }, float: Point, surface: (x: number, z: number) => number): T {
+  if (phase === "casting" || phase === "waiting" || phase === "hookset" || phase === "fight") {
+    out.x = float.x;
+    out.y = float.y;
+    out.z = float.z;
+    return out;
+  }
+  out.x = angler.x + Math.sin(angler.yaw) * GROUND_AHEAD;
+  out.z = angler.z + Math.cos(angler.yaw) * GROUND_AHEAD;
+  out.y = surface(out.x, out.z);
+  return out;
 }

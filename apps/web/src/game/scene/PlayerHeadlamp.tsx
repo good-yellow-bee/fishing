@@ -10,6 +10,12 @@ import type { ScenePhase } from "./types";
 import { waterHeight } from "./water";
 
 const LAMP = "#fffbe8";
+let surfaceTime = 0;
+/** The boards or the bank where they are, else the water's chop at `surfaceTime`. */
+function surfaceAt(x: number, z: number) {
+  return walkableAt(x, z) ? footHeight(x, z) : waterHeight(x, z, surfaceTime);
+}
+
 /** The beam opens this wide for each metre it reaches. */
 const SPREAD = 0.2;
 
@@ -43,8 +49,8 @@ export function PlayerHeadlamp({ phase, float }: { phase: ScenePhase; float: THR
     const fx = Math.sin(anglerPose.yaw);
     const fz = Math.cos(anglerPose.yaw);
     const lamp = scratch.lamp.set(anglerPose.x + fx * LAMP_AHEAD, anglerPose.y + anglerPose.bob + LAMP_UP, anglerPose.z + fz * LAMP_AHEAD);
-    const mark = headlampTarget(phase, anglerPose, float, (x, z) => (walkableAt(x, z) ? footHeight(x, z) : waterHeight(x, z, clock.elapsedTime)));
-    const target = scratch.target.set(mark.x, mark.y, mark.z);
+    surfaceTime = clock.elapsedTime;
+    const target = headlampTarget(scratch.target, phase, anglerPose, float, surfaceAt);
     // The head turns to a new mark over a moment rather than snapping round.
     if (!aim.current) aim.current = target.clone();
     else aim.current.lerp(target, 1 - Math.exp(-6 * Math.min(delta, 0.1)));
@@ -53,6 +59,8 @@ export function PlayerHeadlamp({ phase, float }: { phase: ScenePhase; float: THR
     ray.lookAt(aim.current);
     ray.scale.set(reach * SPREAD, reach * SPREAD, reach);
     glow.current.position.copy(lamp);
+    // Past the beam's reach the light has faded before it lands.
+    pool.current.visible = lamp.distanceTo(aim.current) <= BEAM_REACH;
     pool.current.position.set(aim.current.x, aim.current.y + 0.08, aim.current.z);
     pool.current.scale.setScalar(Math.max(0.3, reach * SPREAD));
   });
