@@ -2193,14 +2193,6 @@ function Tone({ hour }: { hour: LakeHour }) {
   return null;
 }
 
-function ProbeGl() {
-  const gl = useThree((state) => state.gl);
-  const scene = useThree((state) => state.scene);
-  (window as unknown as { __gl: unknown; __scene: unknown }).__gl = gl;
-  (window as unknown as { __scene: unknown }).__scene = scene;
-  return null;
-}
-
 function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, topwater = false, hour, sky, season = DEFAULT_SEASON, species, weight, golden = false, released = false, moon, wind, boatSwing = 0, headlamp = false, hotspot, groundbait = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
   // How this fish takes the bait: a topwater lure makes every take a hit at the top.
   const take = species !== null ? takeStyle(species.id, topwater) : null;
@@ -2232,7 +2224,6 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       <Tone hour={hour} />
       <FrameWatch />
       <FrameCap />
-      <ProbeGl />
       <LakeWorld spot={spot} hour={hour} sky={sky} season={season} hotspot={hotspot} moon={moon} wind={wind} />
       {tracks && tracks.length > 0 && <ShoreTracks tracks={tracks} />}
       {groundbait && <GroundbaitCloud bait={groundbait} />}
