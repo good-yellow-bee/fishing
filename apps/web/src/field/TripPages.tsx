@@ -132,7 +132,7 @@ function AverageWithBlank({ average, blank, to }: { average: string; blank: stri
 const TRIP_FIND = "find";
 
 /** Words Find an outing reads that no outing's own text would hold, offered under the box until something is typed. */
-const QUICK_FINDS = ["this year|search word", "weekend|search word", "night|search word", "no fish|search word", "lost|search word", "planned|search word"];
+const QUICK_FINDS = ["this year|search word", "weekend|search word", "night|search word", "no fish|search word", "lost|search word", "planned|search word", "with a note|search word", "untitled|search word"];
 
 /** Read the evening before, when the bag is packed: what has worked on the outing's water, and what isn't in it yet. */
 export function calendarNotes(book: Logbook, trip: Trip, tackleItems: TackleItem[]): string[] {

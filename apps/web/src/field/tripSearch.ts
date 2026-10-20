@@ -3,7 +3,7 @@ import { dateWords, monthWord } from "./dateWords";
 import { singularStems } from "./pluralWord";
 import { readSizePlus } from "./sizePlus";
 import { isPlanned } from "./TripMonthHead";
-import { gaveWay, outingDay } from "./tripDates";
+import { gaveWay, outingDay, ownTitle } from "./tripDates";
 import { bookSpelling } from "./gear/pieceKey";
 import { isSampleOnly, isSampleOuting } from "./bookCopy";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
@@ -48,6 +48,12 @@ const LOST = ["lost", "lost fish", "spięte", "spięta", "spiętych"].map(plain)
 const MISSED = ["missed", "missed strikes", "puste brania", "puste branie"].map(plain);
 /** Words that ask for the outings still planned: ahead, or today's before its first fish, as the month headings count them. */
 const PLANNED = ["planned", "plans", "zaplanowane", "zaplanowana", "zaplanowanych"].map(plain);
+/**
+ * Words that ask for the outings with a write-up, and for those never given a title of their own (saved under their
+ * water's name). Whole phrases only, so "notes" still finds an outing called "Field notes".
+ */
+const NOTED = ["with a note", "z notatka"].map(plain);
+const UNTITLED = ["untitled", "bez tytulu"].map(plain);
 /** Words that ask for the outings on a Saturday or Sunday, or on the days between, as Bests splits them. */
 const WEEKEND = ["weekend", "weekends", "weekendy", "weekendowe"].map(plain);
 const WEEKDAY = ["weekday", "weekdays", "dni powszednie", "dzien powszedni", "w tygodniu"].map(plain);
@@ -100,7 +106,7 @@ function writeTripText(book: Logbook, trip: Trip, t: (text: string) => string): 
 /**
  * The outings a search names, newest first. Parts joined with "+" must all hold; each part is a date word ("last
  * week", "Oct 12"), "no fish" for a past outing that landed nothing, a time of day for one with a fish then ("night"), "lost" or "missed" for one that counted a fish
- * lost or a strike missed, or words that all appear in the outing's title, note, water, written-out day, or its fish's
+ * lost or a strike missed, "with a note" or "untitled", or words that all appear in the outing's title, note, water, written-out day, or its fish's
  * kinds and lures ("october", "cedar dawn", "pike jig").
  */
 export function findTrips(
@@ -140,6 +146,8 @@ export function findTrips(
     if (LOST.includes(part)) return (trip.lost ?? 0) > 0;
     if (MISSED.includes(part)) return (trip.missed ?? 0) > 0;
     if (PLANNED.includes(part)) return isPlanned(trip, today, fishOn(trip.id), book);
+    if (NOTED.includes(part)) return trip.note.trim() !== "";
+    if (UNTITLED.includes(part)) return !ownTitle(trip, book.spots).trim();
     // The game's rounds stay out, as Bests leaves them out of the split these words open.
     if (WEEKEND.includes(part) || WEEKDAY.includes(part)) {
       if (!offPlayLake(trip)) return false;
