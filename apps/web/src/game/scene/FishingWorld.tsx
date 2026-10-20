@@ -88,6 +88,8 @@ import { LurkerShadow } from "./LurkerShadow";
 import { FollowShadow } from "./FollowShadow";
 import { GiantSwirl } from "./GiantSwirl";
 import { NightLineStake } from "./NightLineStake";
+import { BaitBucket } from "./BaitBucket";
+import { weedClumpShape } from "./weedClump";
 import { fishSize, landedScale } from "./fishSize";
 import {
   LAND_DRIPS,
@@ -134,7 +136,7 @@ import {
 import { markSplash } from "./duckFlush";
 import { releaseDrop, releaseEntry, releasePitch, releasePoint, releaseRing } from "./releaseMotion";
 import { bobberRingHeight, waterHeight, waterRayHit } from "./water";
-import { applyToon, disposeMaterials } from "./toon";
+import { applyToon, disposeMaterials, toonRamp } from "./toon";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
 import { aimInputs, listenForWaterAim, sameAim } from "./pointerAim";
@@ -187,6 +189,8 @@ type Props = {
   giantBanks?: readonly SpotId[];
   /** The bank where the angler's night line is out, if it is. */
   nightLineSpot?: SpotId | null;
+  /** Spare live shiners in the angler's bait bucket. */
+  baitBucket?: number;
   /** A topwater lure is tied on: every fish hits it at the top, like an ambush, in a big splash. */
   topwater?: boolean;
   hour: LakeHour;
@@ -1410,6 +1414,16 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
   restOpacity.current = look.opacity;
   const bobber = useRef<THREE.Group>(null);
   const hooked = useRef<THREE.Group>(null);
+  const weedBall = useRef<THREE.Mesh>(null);
+  const weedShape = useMemo(weedClumpShape, []);
+  const weedMaterial = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
+  useEffect(
+    () => () => {
+      weedShape.dispose();
+      weedMaterial.dispose();
+    },
+    [weedShape, weedMaterial],
+  );
   const leapStart = useRef<number | null>(null);
   const rollStart = useRef<number | null>(null);
   const shakeStart = useRef<number | null>(null);
@@ -1475,6 +1489,8 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
     const power = powerRef.current;
     const t = state.clock.elapsedTime;
     if (isFrozen(t, fightView.freezeUntil)) return;
+    // Off unless this frame's fight shows it below; several paths return before getting there.
+    if (weedBall.current) weedBall.current.visible = false;
     const aiming = isAiming(phase);
     const castStarted = prevPhase.current === "casting" && phase === "waiting";
     const fightStarted = prevPhase.current !== "fight" && phase === "fight";
@@ -1742,6 +1758,11 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
         fightView.localZ = g.position.z;
       }
     }
+    // A fish hooked through duckweed comes in under a ball of weed till its first run strips it (fight.ts weedBall).
+    if (weedBall.current && hookedPose?.show && phase === "fight" && sim.current?.weedBall === true) {
+      weedBall.current.visible = true;
+      weedBall.current.position.set(hookedPose.x, waterHeight(hookedPose.x, hookedPose.z, t) + 0.02, hookedPose.z);
+    }
     // A leap: the fish clears the water nose first, then turns over and falls back.
     const leaping = phase === "fight" && sim.current?.jump === true && sim.current.surge === 2;
     if (!leaping) leapStart.current = null;
@@ -1881,6 +1902,7 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
       {phase === "waiting" && <NibbleRings nibble={nibble} weight={weight} />}
       {phase === "result" && <MissDrips />}
       {phase === "fight" && <RetrieveSplash />}
+      <mesh ref={weedBall} geometry={weedShape} material={weedMaterial} visible={false} />
       <mesh ref={sitRing} visible={false} rotation={[-Math.PI / 2, 0, 0]} renderOrder={3}>
         <ringGeometry args={[0.4, 0.55, 32]} />
         <meshBasicMaterial color="#e7f4ee" transparent opacity={0.78} depthWrite={false} />
@@ -2267,7 +2289,11 @@ function HoldFrames({ onReady }: { onReady: () => void }) {
         return program ? !program.isReady() : false;
       });
       if (compiling && performance.now() - started < PRECOMPILE_MAX_MS) timer = window.setTimeout(check, 10);
-      else onReady();
+      else {
+        // The lake is loaded and ready to draw; the visual tests wait for this (e2e/visual).
+        gl.domElement.dataset.ready = "true";
+        onReady();
+      }
     };
     check();
     return () => window.clearTimeout(timer);
@@ -2298,7 +2324,7 @@ function Tone({ hour }: { hour: LakeHour }) {
 
 const NO_BANKS: readonly SpotId[] = [];
 
-function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, follow = null, giantBanks = NO_BANKS, nightLineSpot = null, topwater = false, hour, sky, season = DEFAULT_SEASON, species, weight, golden = false, released = false, moon, wind, boatSwing = 0, headlamp = false, hotspot, groundbait = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
+function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, follow = null, giantBanks = NO_BANKS, nightLineSpot = null, baitBucket = 0, topwater = false, hour, sky, season = DEFAULT_SEASON, species, weight, golden = false, released = false, moon, wind, boatSwing = 0, headlamp = false, hotspot, groundbait = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
   // How this fish takes the bait: a topwater lure makes every take a hit at the top.
   const take = species !== null ? takeStyle(species.id, topwater) : null;
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
@@ -2374,6 +2400,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       <FollowShadow phase={phase} follow={follow} bobber={bobberWorld} rodTip={rodTip} />
       <GiantSwirl banks={giantBanks} />
       {nightLineSpot && <NightLineStake bank={nightLineSpot} />}
+      <BaitBucket count={baitBucket} />
       {species && <FishShadow level={level} phase={phase} weight={weight} bobber={bobberWorld} speciesId={species.id} />}
       <StrikeSplash phase={phase} roll={take === "roll" || (species !== null && topwater)} />
       <CaughtFish

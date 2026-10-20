@@ -177,6 +177,31 @@ export const PL_GAME: PlBook = {
   "{bank}: bring in your night line": "{bank}: wyciągnij swoją nocną linkę",
   "{note} · your night line is out here": "{note} · tu stoi twoja nocna linka",
   "Night line": "Nocna linka",
+  "It has felt the hook before: its first run doesn't tire it at all": "Już raz poczuła haczyk: pierwszy odjazd wcale jej nie męczy",
+  "{n} of the shiners in your bait bucket died while you were away: they keep three days.": "Część złotawców z wiaderka padła pod twoją nieobecność ({n}): żyją trzy dni.",
+  "foe about": "rywal w pobliżu",
+  "lost trophy": "zgubione trofeum",
+  "You leave a worm out on a night line here. Come back to check it once the night is out, and within two days.": "Zostawiasz robaka na nocnej lince. Wróć ją sprawdzić, gdy minie noc, ale przed upływem dwóch dni.",
+  "{fish} took the worm on your night line.": "{fish} wziął robaka na twojej nocnej lince.",
+  "The night line comes in empty: something stole the worm in the dark.": "Nocna linka wraca pusta: coś ukradło robaka w ciemności.",
+  "{bank}: leave a worm out on a night line here": "{bank}: zostaw tu robaka na nocnej lince",
+  "{name} is out again for the week": "{name} znów czeka do końca tygodnia",
+  "Your arm is tiring — rest it a moment between pumps.": "Ręka ci słabnie — daj jej chwilę odpocząć między pompowaniami.",
+  "The groundbait you left at the {bank} has the feeders gathered there: {casts} casts of it.": "Zanęta zostawiona na łowisku {bank} zwabiła tam ryby: starczy jej na {casts} rzutów.",
+  "Your lost trophy was found": "Twoje zgubione trofeum się znalazło",
+  "{name} landed the {fish} that broke your line": "Trofeum, które zerwało ci żyłkę ({fish}), złowione przez: {name}",
+  "{weight} at the {bank}": "{weight}, łowisko: {bank}",
+  "A wet night: a good one to leave a night line out.": "Mokra noc: dobra, by zostawić nocną linkę.",
+  "It's the trophy {name} lost!": "To trofeum, które zerwało się osobie {name}!",
+  "{fish}: the trophy {name} lost here.": "{fish}: trofeum, które zerwało się tu osobie {name}.",
+  "{name}'s lost trophy · +{points} pts": "Trofeum, które zerwało się osobie {name} · +{points} pkt",
+  "Released back to its nest · +{bonus} pts": "Wypuszczony z powrotem do gniazda · +{bonus} pkt",
+  "Released back to its nest · +{bonus} pts for a trophy guarder": "Wypuszczony z powrotem do gniazda · +{bonus} pkt za trofeum strzegące gniazda",
+  "Release to its nest · +{bonus} pts": "Wypuść do gniazda · +{bonus} pkt",
+  "It's the trophy that broke you off!": "To to trofeum, które ci się zerwało!",
+  "{fish}: the trophy that broke you off here on {date}, still with your {lure} in its jaw.": "{fish}: trofeum, które ci się tu zerwało {date}, wciąż z twoją przynętą ({lure}) w pysku.",
+  "{fish}: the trophy that broke you off here on {date}.": "{fish}: trofeum, które ci się tu zerwało {date}.",
+  "It will be about this bank in the days to come.": "Przez najbliższe dni będzie krążyć przy tym łowisku.",
   "The shiner goes in your bait bucket: {n} of {max}.": "Złotawiec trafia do wiaderka na przynętę: {n} z {max}.",
   "You hook a shiner from your bucket on as live bait. Cast it out to the hunters.": "Zakładasz złotawca z wiaderka jako żywą przynętę. Zarzuć go drapieżnikom.",
   "Your hook and your bait bucket are full.": "Haczyk i wiaderko na przynętę są pełne.",
@@ -246,8 +271,10 @@ export const PL_GAME: PlBook = {
   "Not yet": "Jeszcze nie",
   "All three found: the {legend} bites far more often at the {bank} for the rest of the week.": "Wszystkie trzy znalezione: {legend} bierze dużo częściej na łowisku {bank} do końca tygodnia.",
   "The {fish} your hunt tracked down haunts this water.": "{fish}, którego wytropiono, krąży po tej wodzie.",
-  "A night line now fishes through its night and comes in once the night is out, and the sky over that night matters: rain fills more lines, a clear night fewer, so the forecast tells when to set one. And a fish you let go remembers the lure it was caught on: back at its bank it won't take that lure again, though another may bring it up.":
-    "Nocna linka łowi teraz przez całą noc i można ją wyciągnąć, gdy noc minie, a niebo tej nocy ma znaczenie: deszcz daje więcej ryb, pogodna noc mniej, więc prognoza podpowiada, kiedy ją zastawić. A wypuszczona ryba pamięta przynętę, na którą ją złowiono: na swoim łowisku już jej nie weźmie, choć inna przynęta może ją wywabić.",
+  "A giant you land can now be let go back to its bank for the rest of the week: you keep it toward Giant hunter, the Board says you let it go, and the next angler to land it is paid 100 points.":
+    "Złowionego olbrzyma można teraz wypuścić z powrotem na jego łowisko do końca tygodnia: zachowujesz go do odznaki Łowca olbrzymów, tablica podaje, kto go wypuścił, a następna osoba, która go wyląduje, dostaje 100 punktów.",
+  "While your bait bucket holds spare shiners, it now stands at your feet on the dock or at the bank. And a fish hooked through the duckweed comes in under a green ball of weed until its first run strips it off.":
+    "Dopóki w wiaderku na przynętę są zapasowe złotawce, stoi ono teraz u twoich stóp na pomoście albo na brzegu. A ryba zacięta w rzęsie płynie pod zieloną kulą zielska, aż pierwszy odjazd ją zerwie.",
   "On a clear dawn or dusk the low sun now lays long shadows across the lake, yours among them: at the drop-off at dawn and the inlet at dusk you can see it fall on the water the fish are watching. And on a phone held upright the lake sits a little lower, so the far bank and the hills show clear of the panels at the top.":
     "O pogodnym świcie i zmierzchu nisko stojące słońce kładzie teraz na jeziorze długie cienie, także twój: na uskoku o świcie i przy ujściu o zmierzchu widać, jak pada na wodę, którą obserwują ryby. A na telefonie trzymanym pionowo jezioro jest nieco niżej, więc drugi brzeg i wzgórza widać spod paneli u góry.",
   "While a bank's giant is still out there this week, now and then it rolls on that bank's water in a big swirl. And a night line you leave out now shows at its bank: a forked stick leaning over the water, the line running down into it.":
@@ -260,8 +287,8 @@ export const PL_GAME: PlBook = {
     "Żywopłoty dzielą teraz górne zbocza wzgórz na pola, widoczne nad farmą na telefonie trzymanym pionowo: zielone wiosną i latem, przebarwione jesienią i nagie na zimowym śniegu. A nocą księżycowa ścieżka i światła odbite w jeziorze migoczą łagodnie zamiast leżeć twardymi pasami.",
   "The lake asks a little less of your phone again: shadows are redrawn at most thirty times a second, the shore's foam does less work each frame, and the anglers you only see in rain or fog and the deer, moose and hare of dawn and dusk now load only when they come out.":
     "Jezioro znów trochę mniej obciąża twój telefon: cienie odświeżają się najwyżej trzydzieści razy na sekundę, piana przy brzegu wymaga mniej pracy w każdej klatce, a wędkarze widoczni tylko w deszczu lub mgle oraz jelenie, łosie i zające o świcie i zmierzchu wczytują się dopiero, gdy się pojawiają.",
-  "With a live shiner on the hook, the sign of the bank you stand at can now leave it out on a night line. Come back six hours to two days later and the same sign brings it in, often with one of the bank's night feeders on it. And a new badge, Giant hunter, waits for whoever is first to land three of the weekly giants.":
-    "Z żywym złotawcem na haczyku drogowskaz łowiska, na którym stoisz, pozwala teraz zostawić go na nocnej lince. Wróć po sześciu godzinach, ale przed upływem dwóch dni, a ten sam drogowskaz ją wyciągnie, często z jedną z nocnych ryb tego łowiska. Czeka też nowa odznaka, Łowca olbrzymów, dla osoby, która jako pierwsza złowi trzy cotygodniowe olbrzymy.",
+  "With no shiner to spare, a worm tied on can now go out on a night line at dusk or night: free, but fewer night feeders come to it. And where you stand, the bank's chip now says when your old foe or another angler's lost trophy is about.":
+    "Bez zapasowego złotawca robak na haczyku może teraz trafić o zmierzchu lub w nocy na nocną linkę: za darmo, ale przychodzi do niego mniej nocnych ryb. A tam, gdzie stoisz, plakietka łowiska mówi, kiedy krąży w pobliżu twój stary rywal albo zgubione trofeum innej osoby.",
   "Tight to the lily pads, where the bass and pike wait in ambush.": "Tuż przy liściach grzybieni, gdzie w zasadzce czekają bassy i szczupaki.",
   "Tight to the far rock, where the walleye hold in its shadow.": "Tuż przy dalekiej skale, gdzie w jej cieniu trzymają się sandacze.",
   "Along the rock edge, where the point drops off and the bass hold.": "Wzdłuż skalnej krawędzi, gdzie cypel opada w głąb i trzymają się bassy.",

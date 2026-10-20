@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { dailyWind, forecast, hotBankForDay, moonName, moonPhase, SKY_LABELS, SPOT_LABELS, skyTurnForDay, weatherForDay } from "@stillwater/shared";
 import { isTurnover, rainedYesterday, turnoverStart, waterSwing, waterTempFor } from "../game/logic";
 import { daytimeMoonPass } from "../game/solunar";
+import { nightSkyFor } from "../game/nightLine";
 import { ForecastBoard } from "./ForecastBoard";
 
 afterEach(() => vi.unstubAllGlobals());
@@ -22,6 +23,20 @@ describe("ForecastBoard", () => {
     expect(days.map((day) => day.querySelector(".forecast-bank")?.textContent)).toEqual(
       [11, 12, 13].map((date) => `Biting best at the ${SPOT_LABELS[hotBankForDay(new Date(2026, 9, date))]}`),
     );
+    act(() => root.unmount());
+  });
+
+  it("names a wet night as one for a night line, and says nothing on a clear or foggy one", () => {
+    vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+    const host = document.createElement("div");
+    const root = createRoot(host);
+    const nightOf = (day: Date) => nightSkyFor(new Date(day.getFullYear(), day.getMonth(), day.getDate(), 20).getTime());
+    const tip = () => [...host.querySelectorAll("li:first-child .forecast-tip")].some((one) => one.textContent === "A wet night: a good one to leave a night line out.");
+    const days = Array.from({ length: 60 }, (_, n) => new Date(2026, 9, 1 + n, 9));
+    act(() => root.render(<ForecastBoard now={days.find((day) => nightOf(day) === "rain")!} />));
+    expect(tip()).toBe(true);
+    act(() => root.render(<ForecastBoard now={days.find((day) => nightOf(day) === "clear")!} />));
+    expect(tip()).toBe(false);
     act(() => root.unmount());
   });
 

@@ -65,6 +65,28 @@ export function isTrophyWeight(species: FishSpecies, weight: number): boolean {
   return weight >= trophyWeight(species);
 }
 
+/** Nest guarders: in spring they guard a nest in the shallows and fight hard for it. A bluegill fans its nest in the same shallows and chases off anything that comes near. */
+export const NEST_GUARDERS: ReadonlySet<string> = new Set(["largemouth-bass", "smallmouth-bass", "bluegill"]);
+/** The shallow spots where a nest guarder makes its nest. */
+export const NEST_SPOTS: ReadonlySet<string> = new Set(["reeds", "dock"]);
+/** Letting a nest guarder go back to its spring nest pays this on top, so the nest is not left to the egg thieves. */
+export const NEST_RELEASE_BONUS = 15;
+
+/** Whether a fish was hooked off its nest: a nest guarder in the shallows in spring. */
+export function offItsNest(speciesId: string, spot: string, season: string | null | undefined): boolean {
+  return season === "spring" && NEST_GUARDERS.has(speciesId) && NEST_SPOTS.has(spot);
+}
+
+/** Whether letting it go sends a guarder back to its nest: one off its nest and grown enough to hold one, past the middle of its kind's weights. */
+export function backToItsNest(species: FishSpecies, weight: number, spot: string, season: string | null | undefined): boolean {
+  return offItsNest(species.id, spot, season) && weight >= (species.minWeight + species.maxWeight) / 2;
+}
+
+/** What letting a fish go pays on top of its points: for a trophy, and for a guarder sent back to its nest. */
+export function releaseBonus(species: FishSpecies, weight: number, spot: string, season: string | null | undefined): number {
+  return (isTrophyWeight(species, weight) ? TROPHY_RELEASE_BONUS : 0) + (backToItsNest(species, weight, spot, season) ? NEST_RELEASE_BONUS : 0);
+}
+
 export type ShadowSize = "small" | "medium" | "large" | "huge";
 
 export function shadowSize(species: FishSpecies): ShadowSize {

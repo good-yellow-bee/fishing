@@ -5,11 +5,12 @@ import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { badgeProgress, catchPoints, CLEAN_RUN_BONUS, DAY_RUN_BONUS, GOLDEN_BONUS, LODGE_RECORD_BONUS, PB_BONUS, isGolden, weeklyBonus, dailyConditions, skyTurnForDay, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky, type SpotId, MASTER_BONUS, localDate } from "@stillwater/shared";
-import { buyGroundbait, buyShiner, getGiants, getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
+import { buyGroundbait, buyShiner, getGiants, getLodgeLost, getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { bagKey, shinerKey } from "../game/groundbaitBag";
 import { nightLineKey } from "../game/nightLine";
+import { oldFoeKey } from "../game/oldFoe";
 import { baitBucketKey } from "../game/baitBucket";
 import { sessionKey, startSession } from "../game/session";
 import type { Outcome } from "../game/useFishingGame";
@@ -25,6 +26,8 @@ vi.mock("../api", async (importOriginal) => ({
   getLodgeReleased: vi.fn(async () => []),
   getBankWeek: vi.fn(async () => ({})),
   getGiants: vi.fn(async () => []),
+  getLodgeLost: vi.fn(async () => ({ lost: [], mineFound: [] })),
+  reportLost: vi.fn(async () => ({ id: "lost" })),
   recordCatch: vi.fn(),
   releaseCatch: vi.fn(),
   buyGroundbait: vi.fn(),
@@ -200,9 +203,9 @@ describe("dock weather", () => {
   it("marks the walk signs of the banks whose giant is still out there, and the stance it is at", async () => {
     landed.stance = "dock";
     vi.mocked(getGiants).mockResolvedValue([
-      { spot: "reeds", name: "Iron Jaw", speciesId: "pike", weight: 19, landedBy: null, landedAt: null },
-      { spot: "point", name: "Old Moss", speciesId: "carp", weight: 17, landedBy: "Mara", landedAt: "2026-10-20T10:00:00Z" },
-      { spot: "dock", name: "Tarnish", speciesId: "smallmouth-bass", weight: 3.9, landedBy: null, landedAt: null },
+      { spot: "reeds", name: "Iron Jaw", speciesId: "pike", weight: 19, landedBy: null, landedAt: null, letGoBy: null, letGoByYou: false, bonus: 200 },
+      { spot: "point", name: "Old Moss", speciesId: "carp", weight: 17, landedBy: "Mara", landedAt: "2026-10-20T10:00:00Z", letGoBy: null, letGoByYou: false, bonus: 0 },
+      { spot: "dock", name: "Tarnish", speciesId: "smallmouth-bass", weight: 3.9, landedBy: null, landedAt: null, letGoBy: null, letGoByYou: false, bonus: 200 },
     ]);
     const spring = await openDock("/?hour=day&sky=partly-cloudy&season=spring");
     const sign = (name: string) => [...spring.querySelectorAll(".walk-signs button")].find((button) => button.textContent?.startsWith(name));
@@ -231,6 +234,18 @@ describe("dock weather", () => {
     expect(reeds?.getAttribute("aria-label")).toMatch(/your night line is out here$/);
     // With a line out, the shiner stays on the hook rather than setting a second one.
     expect([...later.querySelectorAll(".walk-signs button")].some((button) => button.textContent === "Night line")).toBe(false);
+  });
+
+  it("names on the stance chip an old foe about the bank and another angler's lost trophy there", async () => {
+    landed.stance = "dock";
+    localStorage.setItem(oldFoeKey("u1"), JSON.stringify({ species: "smallmouth-bass", weight: 3.8, spot: "dock", at: Date.now() - 26 * 3_600_000 }));
+    vi.mocked(getLodgeLost).mockResolvedValue({ lost: [{ id: "l1", speciesId: "smallmouth-bass", weight: 3.7, spot: "dock", at: "2026-10-19T10:00:00.000Z", by: "Mara" }], mineFound: [] });
+    const page = await openDock("/?hour=day&sky=clear");
+    const chip = page.querySelector(".stance-chip")?.textContent;
+    expect(chip).toContain("· foe about");
+    expect(chip).toContain("· lost trophy");
+    localStorage.removeItem(oldFoeKey("u1"));
+    vi.mocked(getLodgeLost).mockResolvedValue({ lost: [], mineFound: [] });
   });
 
   it("dims the walk signs of the banks fished hard, and says so to a screen reader", async () => {
@@ -798,7 +813,7 @@ describe("the shack's bait tin", () => {
     expect(buyShiner).toHaveBeenCalledTimes(2);
     expect(note.textContent).toBe("A shiner is on your hook, so another goes in your bait bucket, which holds 1 of 3.");
     expect(localStorage.getItem(shinerKey("u1"))).toBe("live");
-    expect(localStorage.getItem(baitBucketKey("u1"))).toBe("1");
+    expect(JSON.parse(localStorage.getItem(baitBucketKey("u1"))!)).toHaveLength(1);
     localStorage.removeItem(shinerKey("u1"));
   });
 });

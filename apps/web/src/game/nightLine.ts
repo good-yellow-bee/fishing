@@ -22,13 +22,21 @@ export function nightSkyFor(setAt: number): Sky {
   return skyAt(night);
 }
 
-/** A shiner left out on a set line at a bank, and when. */
-export type NightLine = { spot: SpotId; setAt: number };
+/** A worm on a night line draws this share of a shiner's odds: free, but the night feeders come to it less. */
+export const WORM_LINE_ODDS = 0.6;
+
+/** A worm goes out on a line as the light goes, at dusk or night; a bought or landed shiner may go out any time. */
+export function wormLineHour(hour: string): boolean {
+  return hour === "dusk" || hour === "night";
+}
+
+/** A bait left out on a set line at a bank, and when; lines from before worms were left out carry a shiner. */
+export type NightLine = { spot: SpotId; setAt: number; bait?: "shiner" | "worm" };
 
 export function loadNightLine(userId: string): NightLine | null {
   try {
     const line = JSON.parse(localStorage.getItem(nightLineKey(userId)) ?? "null") as Partial<NightLine> | null;
-    return line && typeof line.spot === "string" && typeof line.setAt === "number" ? { spot: line.spot, setAt: line.setAt } : null;
+    return line && typeof line.spot === "string" && typeof line.setAt === "number" ? { spot: line.spot, setAt: line.setAt, ...(line.bait === "worm" ? { bait: "worm" as const } : {}) } : null;
   } catch {
     return null;
   }
@@ -62,7 +70,7 @@ export function nightLineKinds(spot: SpotId, angler: Pick<Profile, "strength" | 
 
 /** What a line checked in time holds: one of the bank's night feeders, or nothing. */
 export function nightLineCatch(line: NightLine, now: number, angler: Pick<Profile, "strength" | "accuracy" | "patience">, level: number, random: () => number): { species: FishSpecies; weight: number } | null {
-  if (nightLineState(line, now) !== "ready" || random() >= NIGHT_LINE_ODDS[nightSkyFor(line.setAt)]) return null;
+  if (nightLineState(line, now) !== "ready" || random() >= NIGHT_LINE_ODDS[nightSkyFor(line.setAt)] * (line.bait === "worm" ? WORM_LINE_ODDS : 1)) return null;
   const kinds = nightLineKinds(line.spot, angler);
   if (kinds.length === 0) return null;
   const species = kinds[Math.floor(random() * kinds.length)]!;

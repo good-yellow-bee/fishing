@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { LODGE_RECAPTURE_ODDS, type LodgeRelease } from "@stillwater/shared";
-import { castForLodgeTag, castForReleased, grownWeight, loadReleased, RECAPTURE_GROWTH_CAP, RECAPTURE_ODDS, RELEASED_KEEP, RELEASED_KEY, rememberReleased } from "./releasedFish";
+import { LODGE_LOST_ODDS, LODGE_RECAPTURE_ODDS, type LodgeLost, type LodgeRelease } from "@stillwater/shared";
+import { castForLodgeLost, castForLodgeTag, castForReleased, grownWeight, loadReleased, RECAPTURE_GROWTH_CAP, RECAPTURE_ODDS, RELEASED_KEEP, RELEASED_KEY, rememberReleased } from "./releasedFish";
 
 const pike = FISH.find((fish) => fish.id === "pike")!;
 const common = FISH.find((fish) => fish.rarity === "common")!;
@@ -84,5 +84,18 @@ describe("fish other anglers let go", () => {
     expect(castForLodgeTag(list, "dock", now, 0, new Set(), strong)).toBeNull();
     expect(castForLodgeTag(list, "reeds", now, LODGE_RECAPTURE_ODDS, new Set(), strong)).toBeNull();
     expect(castForLodgeTag(list, "reeds", now, 0, new Set(["b"]), strong)).toBeNull();
+  });
+});
+
+describe("trophies other anglers lost", () => {
+  const strong = { strength: 10, accuracy: 10 };
+  const list: LodgeLost[] = [{ id: "l1", speciesId: "pike", weight: 14.5, spot: "reeds", at: "2026-10-19T10:00:00.000Z", by: "Mara" }];
+
+  it("brings one up at its bank on a lucky cast, with who lost it, once a visit, and only if the line can hold it", () => {
+    expect(castForLodgeLost(list, "dock", 0, new Set(), strong)).toBeNull();
+    expect(castForLodgeLost(list, "reeds", LODGE_LOST_ODDS, new Set(), strong)).toBeNull();
+    expect(castForLodgeLost(list, "reeds", 0, new Set(["l1"]), strong)).toBeNull();
+    expect(castForLodgeLost(list, "reeds", 0, new Set(), { strength: 1, accuracy: 1 })).toBeNull();
+    expect(castForLodgeLost(list, "reeds", 0, new Set(), strong)).toMatchObject({ species: pike, weight: 14.5, lost: { id: "l1", by: "Mara" } });
   });
 });

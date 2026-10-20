@@ -5,6 +5,7 @@ import { errorText, getBoard, getSpeciesRecords } from "../api";
 import { DayBagCard } from "../components/DayBagCard";
 import { StewardsCard } from "../components/StewardsCard";
 import { GiantsCard } from "../components/GiantsCard";
+import { LostCard } from "../components/LostCard";
 import { DerbyCard } from "../components/DerbyCard";
 import { FishMark } from "../components/FishMark";
 import { t, tn, useT } from "../i18n";
@@ -125,6 +126,7 @@ export function BoardPage() {
       <DayBagCard />
       <StewardsCard />
       <GiantsCard />
+      <LostCard />
       <div id="board-panel" role="tabpanel" aria-labelledby={`board-tab-${board.period}`}>
         <p>
           {week

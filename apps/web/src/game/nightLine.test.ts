@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { skyAt, type Sky } from "@stillwater/shared";
-import { NIGHT_LINE_ODDS, NIGHT_LINE_SOAK_MS, NIGHT_LINE_STALE_MS, nightLineCatch, nightLineKinds, nightLineReadyAt, nightLineState, nightSkyFor } from "./nightLine";
+import { loadNightLine, saveNightLine, wormLineHour, NIGHT_LINE_ODDS, NIGHT_LINE_SOAK_MS, WORM_LINE_ODDS, NIGHT_LINE_STALE_MS, nightLineCatch, nightLineKinds, nightLineReadyAt, nightLineState, nightSkyFor } from "./nightLine";
 
 const strong = { strength: 10, accuracy: 10, patience: 5 };
 const at = (day: number, hour: number) => new Date(2026, 9, day, hour).getTime();
@@ -38,6 +38,26 @@ describe("a night line", () => {
     const check = (setAt: number) => nightLineCatch({ spot: "dropoff", setAt }, nightLineReadyAt(setAt), strong, 5, roll);
     expect(check(nightOf("rain"))).not.toBeNull();
     expect(check(nightOf("clear"))).toBeNull();
+  });
+
+  it("draws fewer night feeders to a worm than to a shiner", () => {
+    const odds = NIGHT_LINE_ODDS[nightSkyFor(line.setAt)];
+    const roll = () => odds * (1 + WORM_LINE_ODDS) / 2;
+    expect(nightLineCatch(line, ready, strong, 5, roll)).not.toBeNull();
+    expect(nightLineCatch({ ...line, bait: "worm" }, ready, strong, 5, roll)).toBeNull();
+  });
+
+  it("goes out on a worm only as the light goes, and remembers which bait is out", () => {
+    expect(wormLineHour("dusk")).toBe(true);
+    expect(wormLineHour("day")).toBe(false);
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    try {
+      saveNightLine("ash", { ...line, bait: "worm" });
+      expect(loadNightLine("ash")).toEqual({ ...line, bait: "worm" });
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it("catches nothing a new angler could not land, and nothing at the inlet", () => {

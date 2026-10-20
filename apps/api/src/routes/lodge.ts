@@ -1,7 +1,8 @@
 import { Hono } from "hono";
-import { BANK_STOCK_DAYS, giantsForWeek, giantWeek, tagWindow, TRACK_LIMIT, TRACK_WINDOW_MS, type LodgeTrack } from "@stillwater/shared";
-import { listBankCounts, listGiantsLanded, listLodgeReleases, listRecentLodgeCatches } from "../db.ts";
+import { BANK_STOCK_DAYS, fishById, GIANT_AGAIN_BONUS, GIANT_BONUS, giantsForWeek, giantWeek, lostSince, reportsLost, SPOT_IDS, tagWindow, TRACK_LIMIT, TRACK_WINDOW_MS, type LodgeTrack } from "@stillwater/shared";
+import { countReportedLost, ownsLost, listBankCounts, listGiantsLanded, listLodgeLost, listLodgeReleases, listMineFound, listRecentLodgeCatches, reportLost } from "../db.ts";
 import type { SessionUser } from "../session.ts";
+import { requestIdPattern } from "./catches.ts";
 
 export const lodgeRoutes = new Hono();
 
@@ -42,11 +43,61 @@ lodgeRoutes.get("/lodge/bank-week", (c) => {
 
 /** The week's giants, one per bank, and who landed each, if anyone has. */
 lodgeRoutes.get("/lodge/giants", (c) => {
+  const user = c.get("user") as SessionUser;
   const landed = new Map(listGiantsLanded(giantWeek()).map((row) => [row.spot, row]));
   return c.json({
     giants: giantsForWeek().map((giant) => {
       const by = landed.get(giant.spot);
-      return { ...giant, landedBy: by?.displayName ?? null, landedAt: by?.landedAt ?? null };
+      // Let go by its first angler and not landed since, it is out again, for half the bonus.
+      const out = !by || (by.released === 1 && !by.againName);
+      return {
+        ...giant,
+        landedBy: out ? null : (by.againName ?? by.displayName),
+        landedAt: out ? null : (by.againAt ?? by.landedAt),
+        letGoBy: by && by.released === 1 ? by.displayName : null,
+        // The angler who let it go can't land it again for pay, so it is not out for them.
+        letGoByYou: !!by && by.released === 1 && by.userId === user.id,
+        bonus: !out ? 0 : by ? GIANT_AGAIN_BONUS : GIANT_BONUS,
+      };
     }),
   });
+});
+
+/** Lost reports one angler may file in LOST_DAYS, landed since or not, so a flood of them can't crowd the lodge's list or be farmed. */
+const LOST_REPORT_LIMIT = 3;
+
+/** Files a trophy that broke the angler's line, for the rest of the lodge to meet at its bank. */
+lodgeRoutes.post("/lodge/lost", async (c) => {
+  const user = c.get("user") as SessionUser;
+  const body = (await c.req.json().catch(() => null)) as { id?: unknown; speciesId?: unknown; weight?: unknown; spot?: unknown } | null;
+  const species = typeof body?.speciesId === "string" ? fishById(body.speciesId) : undefined;
+  const weight = typeof body?.weight === "number" ? body.weight : NaN;
+  const spot = body?.spot;
+  if (
+    !species ||
+    !Number.isFinite(weight) ||
+    weight > species.maxWeight ||
+    typeof spot !== "string" ||
+    !(SPOT_IDS as readonly string[]).includes(spot) ||
+    !species.spots.includes(spot as (typeof species.spots)[number]) ||
+    !reportsLost(species, weight) ||
+    (body?.id !== undefined && (typeof body.id !== "string" || !requestIdPattern.test(body.id)))
+  ) {
+    return c.json({ error: "invalid lost fish" }, 400);
+  }
+  // The client's id, as for a catch's request; one casing of it, so a retry matches.
+  const id = typeof body?.id === "string" ? body.id.toLowerCase() : undefined;
+  // A retry of a report already filed by this angler answers as filed, and doesn't count again.
+  if (id && ownsLost(user.id, id)) return c.json({ id });
+  if (countReportedLost(user.id, lostSince()) >= LOST_REPORT_LIMIT) return c.json({ error: "too many lost fish" }, 429);
+  const filed = reportLost(user.id, { speciesId: species.id, weight, spot }, id);
+  if (!filed) return c.json({ error: "lost fish id taken" }, 409);
+  return c.json({ id: filed });
+});
+
+/** Other anglers' lost trophies still about their banks, and which of this angler's own someone else has landed. */
+lodgeRoutes.get("/lodge/lost", (c) => {
+  const user = c.get("user") as SessionUser;
+  const since = lostSince();
+  return c.json({ lost: listLodgeLost(user.id, since, 30), mineFound: listMineFound(user.id, since) });
 });

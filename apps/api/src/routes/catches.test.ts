@@ -1,7 +1,7 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { Hono } from "hono";
 import { catchPoints, CLEAN_RUN_BONUS, DAY_RUN_BONUS, fishById, GOLDEN_BONUS, GROUNDBAIT_PRICE, isGolden, LODGE_RECORD_BONUS, MASTER_BONUS, PB_BONUS, SHINER_PRICE, GIANT_BONUS, giantAt, TAG_FINDER_BONUS, TAG_RETURN_BONUS, weeklyBonus } from "@stillwater/shared";
 
@@ -31,7 +31,7 @@ beforeAll(async () => {
 });
 
 beforeEach(() => {
-  db.exec(`DELETE FROM giant_landed; DELETE FROM catch; DELETE FROM profile; DELETE FROM "user";`);
+  db.exec(`DELETE FROM lost_fish; DELETE FROM giant_landed; DELETE FROM catch; DELETE FROM profile; DELETE FROM "user";`);
   db.prepare(
     `INSERT INTO "user" (id, name, email, emailVerified, createdAt, updatedAt) VALUES (?, ?, ?, 0, ?, ?)`,
   ).run(user.id, user.name, user.email, new Date().toISOString(), new Date().toISOString());
@@ -290,6 +290,25 @@ describe("POST /catches", () => {
     expect(after.lifetime_points).toBe(before.lifetime_points + TROPHY_RELEASE_BONUS);
   });
 
+  it("pays a nest guarder's release bonus for one saved off its spring nest, by the server's season, not the client's", async () => {
+    const { NEST_RELEASE_BONUS } = await import("@stillwater/shared");
+    db.prepare(`UPDATE profile SET strength = 10, accuracy = 10 WHERE user_id = ?`).run(user.id);
+    const release = (id: string) => app.request(`http://test/catches/${id}/release`, { method: "POST" });
+    vi.useFakeTimers({ toFake: ["Date"] });
+    try {
+      vi.setSystemTime(new Date(2026, 3, 20, 12));
+      await post({ requestId, speciesId: "smallmouth-bass", weight: 3.5, spot: "dock", season: "spring" });
+      expect(await (await release(requestId)).json()).toMatchObject({ released: true, bonus: NEST_RELEASE_BONUS });
+      // Saved in the fall, a catch that says spring pays nothing extra.
+      vi.setSystemTime(new Date(2026, 9, 20, 12));
+      const fall = "6a5b4c3d-2e1f-4a0b-9c8d-7e6f5a4b3c2d";
+      await post({ requestId: fall, speciesId: "smallmouth-bass", weight: 3.5, spot: "dock", season: "spring" });
+      expect(await (await release(fall)).json()).toMatchObject({ released: true, bonus: 0 });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("refuses to release a catch that is not saved, or a malformed ID", async () => {
     expect((await app.request(`http://test/catches/${requestId}/release`, { method: "POST" })).status).toBe(404);
     expect((await app.request("http://test/catches/nope/release", { method: "POST" })).status).toBe(400);
@@ -371,6 +390,46 @@ describe("POST /catches", () => {
     const off = await post({ requestId: "5e4f3a2b-7c8d-4e9f-8a1b-2c3d4e5f6a70", speciesId: giant.speciesId, weight: Math.max(0.1, giant.weight - 0.5), spot: "dock", giant: true });
     expect(off.status).toBe(200);
     expect((db.prepare(`SELECT COUNT(*) as n FROM giant_landed`).get() as { n: number }).n).toBe(0);
+  });
+
+  it("lets a landed giant go back for the week: its angler keeps the credit, and the next angler to land it is paid half", async () => {
+    const { claimAndPayGiant, countGiantsLanded } = await import("../db.ts");
+    const { GIANT_AGAIN_BONUS, giantWeek } = await import("@stillwater/shared");
+    db.prepare(`UPDATE profile SET strength = 10, accuracy = 10 WHERE user_id = ?`).run(user.id);
+    const giant = giantAt("dock")!;
+    await post({ requestId, speciesId: giant.speciesId, weight: giant.weight, spot: "dock", giant: true });
+    expect((await app.request(`http://test/catches/${requestId}/release`, { method: "POST" })).status).toBe(200);
+    const row = () => db.prepare(`SELECT released_at, again_user_id FROM giant_landed`).get() as { released_at: string | null; again_user_id: string | null };
+    expect(row().released_at).not.toBeNull();
+    // The angler who let it go can't land it again for pay.
+    const own = await post({ requestId: "8c7d6e5f-4a3b-4c2d-9e1f-0a9b8c7d6e5f", speciesId: giant.speciesId, weight: giant.weight, spot: "dock", giant: true });
+    expect(own.status).toBe(200);
+    expect(row().again_user_id).toBeNull();
+    const at = new Date().toISOString();
+    db.prepare(`INSERT INTO "user" (id, name, email, emailVerified, createdAt, updatedAt) VALUES ('mara', 'Mara', 'mara@x.test', 0, ?, ?)`).run(at, at);
+    db.prepare(`INSERT INTO profile (user_id, display_name) VALUES ('mara', 'Mara')`).run();
+    expect(claimAndPayGiant(giantWeek(), "dock", "mara", "none")).toBe(GIANT_AGAIN_BONUS);
+    expect(claimAndPayGiant(giantWeek(), "dock", "mara", "none")).toBe(0);
+    expect(countGiantsLanded(user.id)).toBe(1);
+    expect(countGiantsLanded("mara")).toBe(1);
+  });
+
+  it("pays the finder of another angler's lost trophy once, on a catch that matches it", async () => {
+    const { reportLost } = await import("../db.ts");
+    const { LOST_FINDER_BONUS } = await import("@stillwater/shared");
+    db.prepare(`UPDATE profile SET strength = 10, accuracy = 10 WHERE user_id = ?`).run(user.id);
+    const at = new Date().toISOString();
+    db.prepare(`INSERT INTO "user" (id, name, email, emailVerified, createdAt, updatedAt) VALUES ('mara', 'Mara', 'mara@x.test', 0, ?, ?)`).run(at, at);
+    db.prepare(`INSERT INTO profile (user_id, display_name) VALUES ('mara', 'Mara')`).run();
+    const lostFrom = reportLost("mara", { speciesId: "pike", weight: 14.5, spot: "reeds" })!;
+    await post({ requestId, speciesId: "pike", weight: 14.5, spot: "reeds", lostFrom });
+    const second = "7b6c5d4e-3f2a-4b1c-8d9e-0f1a2b3c4d5e";
+    await post({ requestId: second, speciesId: "pike", weight: 14.5, spot: "reeds", lostFrom });
+    const bonuses = (id: string) => (db.prepare(`SELECT bonuses FROM catch WHERE request_id = ?`).get(id) as { bonuses: string }).bonuses.split(",");
+    expect(bonuses(requestId)).toContain("found");
+    expect(bonuses(second)).not.toContain("found");
+    const pts = (id: string) => (db.prepare(`SELECT points FROM catch WHERE request_id = ?`).get(id) as { points: number }).points;
+    expect(pts(requestId) - pts(second)).toBeGreaterThanOrEqual(LOST_FINDER_BONUS - 1);
   });
 
   it("limits successful catch submissions per minute", async () => {

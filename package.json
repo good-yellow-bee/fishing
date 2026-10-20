@@ -5,9 +5,13 @@
   "scripts": {
     "dev": "pnpm --parallel --filter @stillwater/web --filter @stillwater/api dev",
     "test": "pnpm --filter @stillwater/shared --filter @stillwater/web --filter @stillwater/api test",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "visual": "playwright test --config e2e/visual/playwright.config.ts"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["better-sqlite3", "esbuild"]
+  },
+  "devDependencies": {
+    "@playwright/test": "1.58.2"
   }
 }

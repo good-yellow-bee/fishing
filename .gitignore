@@ -7,3 +7,4 @@ dist
 .env
 apps/api/data/*.sqlite
 test-results/
+/e2e/visual/.auth/

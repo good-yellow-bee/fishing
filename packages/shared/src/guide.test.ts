@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, fishById } from "./fish.ts";
-import { catchStamp, isTrophyWeight, shadowSize, trophyWeight } from "./guide.ts";
+import { catchStamp, isTrophyWeight, NEST_RELEASE_BONUS, releaseBonus, shadowSize, TROPHY_RELEASE_BONUS, trophyWeight } from "./guide.ts";
 import { rollWeight } from "./rules.ts";
 
 const species = (id: string) => fishById(id)!;
@@ -58,5 +58,19 @@ describe("field guide clues", () => {
       walleye: "large",
       "ghost-pike": "huge",
     });
+  });
+});
+
+describe("the release bonus", () => {
+  const bass = fishById("smallmouth-bass")!;
+  it("pays for a trophy, for a guarder sent back to its spring nest, and for both", () => {
+    const guarder = (bass.minWeight + bass.maxWeight) / 2;
+    expect(releaseBonus(bass, guarder, "dock", "summer")).toBe(0);
+    expect(releaseBonus(bass, guarder, "dock", "spring")).toBe(NEST_RELEASE_BONUS);
+    expect(releaseBonus(bass, guarder, "point", "spring")).toBe(0);
+    // Too small to hold a nest, it pays nothing extra.
+    expect(releaseBonus(bass, bass.minWeight, "dock", "spring")).toBe(0);
+    expect(releaseBonus(bass, bass.maxWeight, "dock", "spring")).toBe(TROPHY_RELEASE_BONUS + NEST_RELEASE_BONUS);
+    expect(releaseBonus(bass, bass.maxWeight, "dock", null)).toBe(TROPHY_RELEASE_BONUS);
   });
 });

@@ -1,8 +1,9 @@
+import { randomUUID } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Database from "better-sqlite3";
-import { BAG_SIZE, SLAMS, fishById, TAG_RETURN_BONUS, TAGGABLE_IDS, isLakeHour, isTrophyWeight, TROPHY_RELEASE_BONUS, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type BonusId, type LodgeRelease, type LodgeTrack, type StudyFact, type TagReturn, type SpeciesRecord, type SpotId } from "@stillwater/shared";
+import { BAG_SIZE, SLAMS, fishById, TAG_RETURN_BONUS, TAGGABLE_IDS, isLakeHour, lakeSeason, releaseBonus, giantWeek, GIANT_BONUS, GIANT_AGAIN_BONUS, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type BonusId, type LodgeLost, type LostFound, type LodgeRelease, type LodgeTrack, type StudyFact, type TagReturn, type SpeciesRecord, type SpotId } from "@stillwater/shared";
 
 const dir = dirname(fileURLToPath(import.meta.url));
 export const dataDir = join(dir, "../data");
@@ -96,6 +97,19 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS catch_species_created ON catch (species_id, created_at);
   CREATE INDEX IF NOT EXISTS catch_created ON catch (created_at);
 
+  CREATE TABLE IF NOT EXISTS lost_fish (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
+    species_id TEXT NOT NULL,
+    weight REAL NOT NULL,
+    spot TEXT NOT NULL,
+    lost_at TEXT NOT NULL,
+    found_by TEXT,
+    found_at TEXT
+  );
+  CREATE INDEX IF NOT EXISTS lost_fish_lost_at ON lost_fish (lost_at);
+  CREATE INDEX IF NOT EXISTS lost_fish_user ON lost_fish (user_id, lost_at);
+
   CREATE TABLE IF NOT EXISTS giant_landed (
     week TEXT NOT NULL,
     spot TEXT NOT NULL,
@@ -162,6 +176,13 @@ if (!catchColumns.some((column) => column.name === "day")) {
 // The bonuses the catch was paid, comma-separated, so the landed card stamps only those.
 if (!catchColumns.some((column) => column.name === "bonuses")) {
   db.exec(`ALTER TABLE catch ADD COLUMN bonuses TEXT`);
+}
+// A giant its first angler let go is out again for the week, once: who landed it after, and when.
+const giantColumns = db.prepare(`PRAGMA table_info(giant_landed)`).all() as { name: string }[];
+if (!giantColumns.some((column) => column.name === "released_at")) {
+  db.exec(`ALTER TABLE giant_landed ADD COLUMN released_at TEXT`);
+  db.exec(`ALTER TABLE giant_landed ADD COLUMN again_user_id TEXT`);
+  db.exec(`ALTER TABLE giant_landed ADD COLUMN again_at TEXT`);
 }
 // When the angler let the fish go; older releases have only their catch's time.
 if (!catchColumns.some((column) => column.name === "released_at")) {
@@ -326,33 +347,98 @@ export function claimGiant(week: string, spot: string, userId: string): boolean 
   return db.prepare(`INSERT OR IGNORE INTO giant_landed (week, spot, user_id, landed_at) VALUES (?, ?, ?, ?)`).run(week, spot, userId, new Date().toISOString()).changes === 1;
 }
 
-/** Claims the giant and pays its bonus together, or neither; false when someone landed it first. */
-export function claimAndPayGiant(week: string, spot: string, userId: string, catchId: string, bonus: number): boolean {
+/** Claims the giant and pays its bonus together, or neither: GIANT_BONUS to the first to land it, GIANT_AGAIN_BONUS to the next after its first angler let it go; 0 when it was not out. */
+export function claimAndPayGiant(week: string, spot: string, userId: string, catchId: string): number {
   return db.transaction(() => {
-    if (!claimGiant(week, spot, userId)) return false;
-    payGiant(catchId, userId, bonus);
-    return true;
+    const bonus = claimGiant(week, spot, userId)
+      ? GIANT_BONUS
+      : db
+            .prepare(`UPDATE giant_landed SET again_user_id = ?, again_at = ? WHERE week = ? AND spot = ? AND released_at IS NOT NULL AND again_user_id IS NULL AND user_id != ?`)
+            .run(userId, new Date().toISOString(), week, spot, userId).changes === 1
+        ? GIANT_AGAIN_BONUS
+        : 0;
+    if (bonus) payBonus(catchId, userId, bonus, "giant");
+    return bonus;
   })();
 }
 
-/** Pays a catch the giant's bonus, on the catch and the angler's points. */
-export function payGiant(catchId: string, userId: string, bonus: number) {
+/** Lets a landed giant go back for the rest of its week, once, so the next angler may land it. */
+export function releaseGiant(week: string, spot: string, userId: string) {
+  db.prepare(`UPDATE giant_landed SET released_at = ? WHERE week = ? AND spot = ? AND user_id = ? AND released_at IS NULL`).run(new Date().toISOString(), week, spot, userId);
+}
+
+/** Pays a saved catch a bonus it won after saving, on the catch (with its id in bonuses) and the angler's points. */
+export function payBonus(catchId: string, userId: string, bonus: number, id: BonusId) {
   db.transaction(() => {
-    db.prepare(`UPDATE catch SET points = points + ?, bonuses = CASE WHEN bonuses IS NULL OR bonuses = '' THEN 'giant' ELSE bonuses || ',giant' END WHERE id = ?`).run(bonus, catchId);
+    db.prepare(`UPDATE catch SET points = points + ?, bonuses = CASE WHEN bonuses IS NULL OR bonuses = '' THEN ? ELSE bonuses || ',' || ? END WHERE id = ?`).run(bonus, id, id, catchId);
     db.prepare(`UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`).run(bonus, bonus, userId);
   })();
 }
 
-/** How many of the weekly giants the angler was first to land. */
-export function countGiantsLanded(userId: string): number {
-  return (db.prepare(`SELECT COUNT(*) as n FROM giant_landed WHERE user_id = ?`).get(userId) as { n: number }).n;
+/** Files a trophy the angler lost, for the rest of the lodge to meet at its bank, under the client's id when it sends one; null when that id is already another report's. */
+export function reportLost(userId: string, fish: { speciesId: string; weight: number; spot: string }, id: string = randomUUID()): string | null {
+  const filed = db
+    .prepare(`INSERT INTO lost_fish (id, user_id, species_id, weight, spot, lost_at) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT (id) DO NOTHING`)
+    .run(id, userId, fish.speciesId, fish.weight, fish.spot, new Date().toISOString());
+  return filed.changes === 1 ? id : null;
 }
 
-/** Who landed each of a week's giants, and when. */
-export function listGiantsLanded(week: string): { spot: string; displayName: string; landedAt: string }[] {
+/** Other anglers' lost trophies since `since` that no one has landed yet, the newest first. */
+export function listLodgeLost(userId: string, since: string, limit: number): LodgeLost[] {
   return db
-    .prepare(`SELECT g.spot, p.display_name as displayName, g.landed_at as landedAt FROM giant_landed g JOIN profile p ON p.user_id = g.user_id WHERE g.week = ?`)
-    .all(week) as { spot: string; displayName: string; landedAt: string }[];
+    .prepare(
+      `SELECT l.id, l.species_id as speciesId, l.weight, l.spot, l.lost_at as at, p.display_name as by FROM lost_fish l JOIN profile p ON p.user_id = l.user_id
+       WHERE l.user_id != ? AND l.found_by IS NULL AND l.lost_at >= ? ORDER BY l.lost_at DESC LIMIT ?`,
+    )
+    .all(userId, since, limit) as LodgeLost[];
+}
+
+/** Whether a lost report is this angler's own. */
+export function ownsLost(userId: string, id: string): boolean {
+  return db.prepare(`SELECT 1 FROM lost_fish WHERE id = ? AND user_id = ?`).get(id, userId) !== undefined;
+}
+
+/** How many trophies the angler has reported lost since `since`, landed by anyone since or not. */
+export function countReportedLost(userId: string, since: string): number {
+  return (db.prepare(`SELECT COUNT(*) as n FROM lost_fish WHERE user_id = ? AND lost_at >= ?`).get(userId, since) as { n: number }).n;
+}
+
+/** The angler's own lost trophies since `since` that someone else has landed. */
+export function listMineFound(userId: string, since: string): LostFound[] {
+  return db
+    .prepare(
+      `SELECT l.id, l.species_id as speciesId, l.weight, l.spot, p.display_name as by, l.found_at as at FROM lost_fish l JOIN profile p ON p.user_id = l.found_by
+       WHERE l.user_id = ? AND l.found_by IS NOT NULL AND l.found_by != l.user_id AND l.lost_at >= ? ORDER BY l.found_at DESC`,
+    )
+    .all(userId, since) as LostFound[];
+}
+
+/** Claims a lost trophy for the catch that landed it, and pays a finder who isn't the angler who lost it, together or neither; false when nothing was paid. The angler landing their own lost trophy only closes it. */
+export function claimAndPayLost(lostId: string, fish: { speciesId: string; weight: number; spot: string }, since: string, userId: string, catchId: string, bonus: number): boolean {
+  return db.transaction(() => {
+    const row = db.prepare(`SELECT user_id FROM lost_fish WHERE id = ?`).get(lostId) as { user_id: string } | undefined;
+    const claimed = db
+      .prepare(`UPDATE lost_fish SET found_by = ?, found_at = ? WHERE id = ? AND found_by IS NULL AND lost_at >= ? AND species_id = ? AND spot = ? AND ABS(weight - ?) < 0.005`)
+      .run(userId, new Date().toISOString(), lostId, since, fish.speciesId, fish.spot, fish.weight);
+    if (claimed.changes !== 1 || row?.user_id === userId) return false;
+    payBonus(catchId, userId, bonus, "found");
+    return true;
+  })();
+}
+
+/** How many of the weekly giants the angler landed for pay: first, or again after its first angler let it go. */
+export function countGiantsLanded(userId: string): number {
+  return (db.prepare(`SELECT COUNT(*) as n FROM giant_landed WHERE user_id = ? OR again_user_id = ?`).get(userId, userId) as { n: number }).n;
+}
+
+/** Who landed each of a week's giants and when, whether they let it go, and who landed it again after. */
+export function listGiantsLanded(week: string): { spot: string; userId: string; displayName: string; landedAt: string; released: 0 | 1; againName: string | null; againAt: string | null }[] {
+  return db
+    .prepare(
+      `SELECT g.spot, g.user_id as userId, p.display_name as displayName, g.landed_at as landedAt, g.released_at IS NOT NULL as released, a.display_name as againName, g.again_at as againAt
+       FROM giant_landed g JOIN profile p ON p.user_id = g.user_id LEFT JOIN profile a ON a.user_id = g.again_user_id WHERE g.week = ?`,
+    )
+    .all(week) as { spot: string; userId: string; displayName: string; landedAt: string; released: 0 | 1; againName: string | null; againAt: string | null }[];
 }
 
 /** The kinds whose studies the angler has been paid for. */
@@ -566,14 +652,17 @@ export function recordCatch(row: CatchRow): RecordCatchResult {
 }
 
 /** A catch the offline queue posts late counts on the day the server saved it, not the day it was landed. */
-/** Marks the angler's catch released; it keeps its points, and the first release of a trophy-weight fish pays TROPHY_RELEASE_BONUS. Undefined when there is no such catch. */
+/** Marks the angler's catch released; it keeps its points, and its first release pays releaseBonus (a trophy, a guarder off its nest). Undefined when there is no such catch. */
 export function releaseCatch(userId: string, requestId: string): { row: CatchRow; bonus: number } | undefined {
   return db.transaction(() => {
     const change = db.prepare(`UPDATE catch SET released = 1, released_at = ? WHERE user_id = ? AND request_id = ? AND released = 0`).run(new Date().toISOString(), userId, requestId);
     const row = findCatchByRequestId(userId, requestId);
     if (!row) return undefined;
     const species = fishById(row.species_id);
-    const bonus = change.changes === 1 && species && isTrophyWeight(species, row.weight) ? TROPHY_RELEASE_BONUS : 0;
+    // The season is the server's own, from when the catch was saved, not the one the client sent.
+    const bonus = change.changes === 1 && species ? releaseBonus(species, row.weight, row.spot, lakeSeason(new Date(row.created_at))) : 0;
+    // A giant let go goes back to its bank for the rest of its week: the week it was landed in, as its claim was made.
+    if (change.changes === 1 && (row.bonuses ?? "").split(",").includes("giant")) releaseGiant(giantWeek(row.day ? new Date(`${row.day}T12:00:00.000Z`) : new Date(row.created_at)), row.spot, userId);
     if (bonus) {
       db.prepare(`UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`).run(bonus, bonus, userId);
     }

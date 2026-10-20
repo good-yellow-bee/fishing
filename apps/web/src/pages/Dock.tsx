@@ -24,6 +24,9 @@ import {
   type BonusId,
   type LodgeRelease,
   TAG_FINDER_BONUS,
+  LOST_FINDER_BONUS,
+  type LodgeLost,
+  type LostFound,
   GIANT_BONUS,
   TAG_RETURN_BONUS,
   fishById,
@@ -59,12 +62,14 @@ import {
   moonLight,
   moonName,
   moonPhase,
-  isTrophyWeight,
   showsSolidMark,
   skyBlurb,
   skyLabel,
   weatherFromSearch,
+  releaseBonus,
+  NEST_RELEASE_BONUS,
   TROPHY_RELEASE_BONUS,
+  backToItsNest,
   type CatchSubmission,
   type LakeHour,
   type LakeSeason,
@@ -72,7 +77,7 @@ import {
   type SkillId,
   type StanceId,
 } from "@stillwater/shared";
-import { buyGroundbait, buyShiner, buyUpgrade, errorText, getBankWeek, getGiants, type GiantStatus, getLodgeReleased, getMe, getSpeciesRecords, getWeeklyChallenges, releaseCatch, type Me, type WeeklyBoard } from "../api";
+import { buyGroundbait, buyShiner, buyUpgrade, errorText, getBankWeek, getGiants, getLodgeLost, reportLost, type GiantStatus, getLodgeReleased, getMe, getSpeciesRecords, getWeeklyChallenges, releaseCatch, type Me, type WeeklyBoard } from "../api";
 import { DailyRequestsPanel } from "../components/DailyRequestsPanel";
 import { WeeklyChallengesPanel } from "../components/WeeklyChallengesPanel";
 import { FightBar } from "../components/FightBar";
@@ -105,7 +110,7 @@ import { saveLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { canBaitShiner, GROUNDBAIT_CASTS, hookWindowMs, isMercy, lampLit, longShadowWaitMul, solidStrikeMs } from "../game/logic";
 import { useBadgeToast } from "../game/useBadgeToast";
-import { useTagNewsToast } from "../game/useTagNewsToast";
+import { lostNewsKey, useNewsToast, useTagNewsToast } from "../game/useTagNewsToast";
 import { bookSeasonNote, bookSessionTitle, loadSession, saveSession, sessionTitle, startSession, withSessionFish, type SessionDraft } from "../game/session";
 import { TripRecap } from "../components/TripRecap";
 import { useLodgeTracks } from "../game/useLodgeTracks";
@@ -121,9 +126,10 @@ import { bankSuitsNow } from "../game/bankNow";
 import { PowerMeter } from "../game/scene/PowerMeter";
 import { prefersReducedMotion } from "../game/scene/reducedMotion";
 import { shyOf } from "../game/giantShy";
-import { nightLineKinds, nightLineState } from "../game/nightLine";
+import { nightLineKinds, nightLineState, wormLineHour } from "../game/nightLine";
+import { foeAbout, isOldFoe, loadOldFoe, saveOldFoe } from "../game/oldFoe";
 import { BUCKET_SIZE } from "../game/baitBucket";
-import { isLiveBait, isTopwater, touchScreen, useFishingGame } from "../game/useFishingGame";
+import { isLiveBait, isTopwater, touchScreen, useFishingGame, type Outcome } from "../game/useFishingGame";
 import { useCatchSync } from "../game/useCatchSync";
 import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
 import { rarityLabel } from "../game/logic";
@@ -185,6 +191,9 @@ const EFFECTS_NOTICE_MS = 5000;
 /** The walk signs' line button, naming the line on the reel. */
 const LINE_WORD: Record<LineWeight, string> = { light: "Line: light", standard: "Line: standard", heavy: "Line: heavy" };
 const LINE_SHORT: Record<LineWeight, string> = { light: "Thin", standard: "Line", heavy: "Thick" };
+
+/** A lost trophy's news is told once by its report's id. */
+const lostNewsId = (one: LostFound) => one.id;
 
 export function DockPage() {
   useT();
@@ -300,7 +309,9 @@ export function DockPage() {
     () => new Set((Object.keys({ ...bankWeek, ...keptHere }) as SpotId[]).filter((bank) => fishedDown((bankWeek[bank] ?? 0) + (keptHere[bank] ?? 0)))),
     [bankWeek, keptHere],
   );
-  // The week's giants, read when the visit opens and again after each saved catch, so one landed by anyone leaves the lake.
+  // The week's giants, read when the visit opens, again after each saved catch, so one landed by anyone leaves the lake,
+  // and after the angler lets one go, so it shows out again.
+  const [giantLetGo, setGiantLetGo] = useState(0);
   const [giants, setGiants] = useState<GiantStatus[]>([]);
   useEffect(() => {
     if (!angler) return;
@@ -312,10 +323,47 @@ export function DockPage() {
     return () => {
       live = false;
     };
+  }, [angler, latestCatch, giantLetGo]);
+  const openGiants = useMemo(() => giants.filter((giant) => !giant.landedBy && !giant.letGoByYou), [giants]);
+  // Other anglers' lost trophies, read like the giants; one of the angler's own that someone landed is no foe of theirs any more.
+  const [lodgeLost, setLodgeLost] = useState<LodgeLost[]>([]);
+  const [lostFound, setLostFound] = useState<LostFound[]>([]);
+  useEffect(() => {
+    if (!angler) return;
+    let live = true;
+    getLodgeLost()
+      .then(({ lost, mineFound }) => {
+        if (!live) return;
+        setLodgeLost(lost);
+        setLostFound(mineFound);
+        const foe = loadOldFoe(angler);
+        if (foe && mineFound.some((found) => found.spot === foe.spot && isOldFoe(foe, { species: { id: found.speciesId }, weight: found.weight }))) saveOldFoe(angler, null);
+      })
+      // Without the list no other angler's lost trophy comes up this visit.
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
   }, [angler, latestCatch]);
-  const openGiants = useMemo(() => giants.filter((giant) => !giant.landedBy), [giants]);
   const giantBanks = useMemo(() => openGiants.map((giant) => giant.spot), [openGiants]);
-  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind, legend, lodgeReleased, luckyLures, fishedDownBanks, openGiants);
+  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind, legend, lodgeReleased, luckyLures, fishedDownBanks, openGiants, lodgeLost);
+  // The angler's own old foe, read again whenever a cast ends, as a loss or a landing changes it.
+  const oldFoe = useMemo(() => (angler ? loadOldFoe(angler) : null), [angler, game.outcome]);
+  // A trophy that broke the line is filed with the lodge once, for other anglers to meet at its bank.
+  const reportedLost = useRef<string | null>(null);
+  useEffect(() => {
+    const lost = game.lostReport;
+    if (!lost || reportedLost.current === lost.id) return;
+    reportedLost.current = lost.id;
+    // A report that fails only means the rest of the lodge never meets this one; the foe then holds no id the lodge never filed.
+    reportLost(lost).catch(() => {
+      const foe = angler ? loadOldFoe(angler) : null;
+      if (angler && foe?.reportId === lost.id) {
+        const { reportId: _unfiled, ...kept } = foe;
+        saveOldFoe(angler, kept);
+      }
+    });
+  }, [game.lostReport]);
   useEffect(() => {
     if (game.outcome?.kind !== "landed") return;
     const bank = game.outcome.spot;
@@ -557,7 +605,7 @@ export function DockPage() {
   const retryServerSave = () => {
     const outcome = game.outcome;
     if (outcome?.kind === "landed" && posted.current !== outcome.id) {
-      void saveOutcome(outcome.id, { requestId: outcome.id, speciesId: outcome.species.id, weight: outcome.weight, spot: outcome.spot, clean: outcome.clean, cleanRun: outcome.notes?.cleanRun, hour: outcome.hour ?? hour, sky, season, day: landedDay.current, taggedFrom: outcome.tag?.id, giant: outcome.giant ? true : undefined });
+      void saveOutcome(outcome.id, { requestId: outcome.id, speciesId: outcome.species.id, weight: outcome.weight, spot: outcome.spot, clean: outcome.clean, cleanRun: outcome.notes?.cleanRun, hour: outcome.hour ?? hour, sky, season, day: landedDay.current, taggedFrom: outcome.tag?.id, giant: outcome.giant ? true : undefined, lostFrom: outcome.lostFrom?.id ?? outcome.closesLost });
       return;
     }
     void catchSync.sync();
@@ -653,8 +701,10 @@ export function DockPage() {
   // A level-up has the floor first; the badge waits its turn behind it.
   const shownBadges = useBadgeToast(me?.badges, bankClear && !shownLevel);
   const shownTag = useTagNewsToast(me?.tagReturns, bankClear && !shownLevel && !shownBadges);
+  // Told once, as a tag's return is, when another angler landed a trophy that broke this angler's line.
+  const shownLost = useNewsToast(lostFound, bankClear && !shownLevel && !shownBadges && !shownTag, lostNewsId, lostNewsKey(userId ?? ""));
   // The effects notice waits its turn too, behind both: in a fight it covered the tension bar and the let-go cue.
-  const effectsNotice = useEffectsNotice(steppedDownAt, !bankClear || !!shownLevel || !!shownBadges || !!shownTag, EFFECTS_NOTICE_MS);
+  const effectsNotice = useEffectsNotice(steppedDownAt, !bankClear || !!shownLevel || !!shownBadges || !!shownTag || !!shownLost, EFFECTS_NOTICE_MS);
 
   // Watch the clock; a new lake hour or sky waits for a calm moment so it never lands mid-strike or mid-fight.
   // One change at a time: the hour goes first and the sky follows on a later check.
@@ -721,8 +771,15 @@ export function DockPage() {
   const [releasedId, setReleasedId] = useState<string | null>(null);
   const [releasing, setReleasing] = useState(false);
   const [releaseError, setReleaseError] = useState(false);
-  const [releaseBonus, setReleaseBonus] = useState(0);
+  const [paidReleaseBonus, setPaidReleaseBonus] = useState(0);
   const landedReleased = game.outcome?.kind === "landed" && releasedId === game.outcome.id;
+  // Only the first angler paid for a giant sends it back out by letting it go.
+  const firstGiant = (outcome: Outcome) => outcome.kind === "landed" && !!outcome.giant && (outcome.giantBonus ?? GIANT_BONUS) === GIANT_BONUS && paid("giant", true);
+  // What letting the landed fish go would pay, and whether it goes back to its nest.
+  const releaseOffer =
+    game.outcome?.kind === "landed"
+      ? { bonus: releaseBonus(game.outcome.species, game.outcome.weight, game.outcome.spot, season), nest: backToItsNest(game.outcome.species, game.outcome.weight, game.outcome.spot, season) }
+      : { bonus: 0, nest: false };
   // Release gives way to "Released back into the lake": the note takes focus so a screen reader reads it and the keyboard
   // stays on the card. Space still casts again from it.
   const releasedNote = useRef<HTMLParagraphElement>(null);
@@ -741,8 +798,9 @@ export function DockPage() {
       // A catch still in the queue goes up first, so the server has it to let go.
       await catchSync.sync();
       const { bonus } = await releaseCatch(outcome.id);
-      setReleaseBonus(bonus);
+      setPaidReleaseBonus(bonus);
       setReleasedId(outcome.id);
+      if (firstGiant(outcome)) setGiantLetGo((count) => count + 1);
       // The lake remembers the fish, so it may bite again at this bank another day, a little heavier.
       rememberReleased(outcome.species, outcome.weight, outcome.spot, Date.now(), outcome.lure);
       // Let go, it went back to its bank, so the bank's week no longer counts it.
@@ -816,12 +874,12 @@ export function DockPage() {
       setReleaseError(false);
       return;
     }
-    const { id, species, weight, spot: catchSpot, clean, notes, tag, giant, hour: caughtAt } = game.outcome;
+    const { id, species, weight, spot: catchSpot, clean, notes, tag, giant, hour: caughtAt, lostFrom, closesLost } = game.outcome;
     if (posted.current === id) return;
     landedDay.current = localDate(new Date());
     saveFieldLog();
     if (!userId) return;
-    void saveOutcome(id, { requestId: id, speciesId: species.id, weight, spot: catchSpot, clean, cleanRun: notes?.cleanRun, hour: caughtAt ?? hour, sky, season, day: landedDay.current, taggedFrom: tag?.id, giant: giant ? true : undefined });
+    void saveOutcome(id, { requestId: id, speciesId: species.id, weight, spot: catchSpot, clean, cleanRun: notes?.cleanRun, hour: caughtAt ?? hour, sky, season, day: landedDay.current, taggedFrom: tag?.id, giant: giant ? true : undefined, lostFrom: lostFrom?.id ?? closesLost });
   }, [game.outcome, saveFieldLog, saveOutcome, userId, hour, sky, season]);
 
   useEffect(() => {
@@ -968,20 +1026,22 @@ export function DockPage() {
   const giantAt = (bank: string) => openGiants.find((giant) => giant.spot === bank);
   const lineState = game.nightLine ? nightLineState(game.nightLine, Date.now()) : null;
   const lineAt = (bank: string) => (game.nightLine?.spot === bank ? lineState : null);
-  // The bank underfoot's own sign sets a night line with the shiner on the hook, or brings in the one out there.
+  // A shiner to spare, or a worm tied on as the light goes, can go out on a night line.
+  const lineBait = game.liveShiner || game.bucket > 0 ? "shiner" : isLiveBait(lure) && wormLineHour(hour) ? "worm" : null;
+  // The bank underfoot's own sign sets a night line with that bait, or brings in the one out there.
   const stanceLine =
     !me || rowing
       ? null
       : lineAt(game.stance) && lineAt(game.stance) !== "soaking"
         ? "check"
-        : !game.nightLine && (game.liveShiner || game.bucket > 0) && isFishingStance(game.stance) && game.stance !== "open" && nightLineKinds(game.stance, me.profile).length > 0
+        : !game.nightLine && lineBait && isFishingStance(game.stance) && game.stance !== "open" && nightLineKinds(game.stance, me.profile).length > 0
           ? "set"
           : null;
   const lineAction = (target: WalkTarget) => (target === game.stance ? stanceLine : null);
   // A bank whose giant is still out there, or where the night line is out, says so after its other news.
   const signNote = (target: WalkTarget, label: string) => {
     const action = lineAction(target);
-    if (action) return action === "set" ? t("{bank}: leave the shiner out on a night line here", { bank: t(label) }) : t("{bank}: bring in your night line", { bank: t(label) });
+    if (action) return action === "set" ? (lineBait === "shiner" ? t("{bank}: leave the shiner out on a night line here", { bank: t(label) }) : t("{bank}: leave a worm out on a night line here", { bank: t(label) })) : t("{bank}: bring in your night line", { bank: t(label) });
     const giant = giantAt(target);
     const note = bankNote(target, label);
     const withGiant = giant ? t("{note} · {name}, its giant, is still out there", { note: note ?? t(label), name: t(giant.name) }) : note;
@@ -1066,6 +1126,7 @@ export function DockPage() {
           follow={game.follow}
           giantBanks={giantBanks}
           nightLineSpot={game.nightLine?.spot ?? null}
+          baitBucket={game.bucket}
           topwater={isTopwater(lure)}
           hour={hour}
           sky={sky}
@@ -1174,7 +1235,9 @@ export function DockPage() {
           {!rowing && !mercy && game.stance === crowdedBank && <small className="stance-cold"> · {t("another angler here today")}</small>}
           {!rowing && isFishingStance(game.stance) && game.stance !== "open" && favoredNow(game.stance) && <small className="stance-hot"> · {t("bites sooner now")}</small>}
           {!rowing && lineAt(game.stance) && (lineAt(game.stance) === "ready" ? <small className="stance-hot"> · {t("night line ready")}</small> : <small className="stance-cold"> · {t(lineAt(game.stance) === "soaking" ? "night line soaking" : "night line left too long")}</small>)}
-          {!rowing && game.nightLine && game.nightLine.spot !== game.stance && (game.liveShiner || game.bucket > 0) && <small className="stance-cold"> · {t("night line out at the {bank}", { bank: t(SPOT_LABELS[game.nightLine.spot]) })}</small>}
+          {!rowing && game.nightLine && game.nightLine.spot !== game.stance && lineBait && <small className="stance-cold"> · {t("night line out at the {bank}", { bank: t(SPOT_LABELS[game.nightLine.spot]) })}</small>}
+          {!rowing && foeAbout(oldFoe, game.stance, Date.now()) && <small className="stance-hot"> · {t("foe about")}</small>}
+          {!rowing && lodgeLost.some((lost) => lost.spot === game.stance) && <small className="stance-hot"> · {t("lost trophy")}</small>}
           {!rowing && giantAt(game.stance) && (
             game.giantShy && isFishingStance(game.stance) && shyOf(game.giantShy, game.stance, giantAt(game.stance)!.name, lure)
               ? <small className="stance-cold"> · {t("giant: {name}, shy of this lure", { name: t(giantAt(game.stance)!.name) })}</small>
@@ -1386,11 +1449,12 @@ export function DockPage() {
                   game.outcome.weight,
                   game.outcome.clean,
                   weeklyBonus(game.outcome.species.id, landedDay.current) * (landedGolden ? GOLDEN_BONUS : 1) * cleanRunBonus(game.outcome.clean, game.outcome.notes?.cleanRun) * (lodgeTaken ? LODGE_RECORD_BONUS : stamp?.kind === "pb" ? PB_BONUS : 1) * (dayRun > 0 ? DAY_RUN_BONUS : 1) * masteryBonus(priorCaught),
-                ) + (game.outcome.tag ? TAG_FINDER_BONUS : 0) + (game.outcome.giant ? GIANT_BONUS : 0),
+                ) + (game.outcome.tag ? TAG_FINDER_BONUS : 0) + (game.outcome.giant ? (game.outcome.giantBonus ?? GIANT_BONUS) : 0) + (game.outcome.lostFrom ? LOST_FINDER_BONUS : 0),
               })}
             </p>
             {landedGolden && paid("golden", true) && <p className="catch-stamp golden">{t("Golden fish · 2× points")}</p>}
-            {game.outcome.giant && paid("giant", true) && <p className="catch-stamp golden">{t("{name}, the bank's giant · +{points} pts", { name: t(game.outcome.giant), points: GIANT_BONUS })}</p>}
+            {game.outcome.giant && paid("giant", true) && <p className="catch-stamp golden">{t("{name}, the bank's giant · +{points} pts", { name: t(game.outcome.giant), points: game.outcome.giantBonus ?? GIANT_BONUS })}</p>}
+            {game.outcome.lostFrom && paid("found", true) && <p className="catch-stamp">{t("{name}'s lost trophy · +{points} pts", { name: game.outcome.lostFrom.by, points: LOST_FINDER_BONUS })}</p>}
             {game.outcome.tag && paid("tag", true) && <p className="catch-stamp">{t("Tagged by {name} · +{points} pts, and {back} for them", { name: game.outcome.tag.by, points: TAG_FINDER_BONUS, back: TAG_RETURN_BONUS })}</p>}
             {paid("weekly", weeklyBonus(game.outcome.species.id, landedDay.current) > 1) && <p className="catch-stamp">{t("Fish of the week · 1.5× points")}</p>}
             {game.outcome.clean && (
@@ -1461,19 +1525,27 @@ export function DockPage() {
               )}
               {landedReleased ? (
                 <p className="catch-stamp released" ref={releasedNote} tabIndex={-1}>
-                  {releaseBonus > 0
-                    ? t("Released back into the lake · +{bonus} pts for letting a trophy go", { bonus: releaseBonus })
-                    : t("Released back into the lake")}
+                  {/* Named by what the server paid: a trophy, a guarder back to its nest, or both. */}
+                  {paidReleaseBonus === TROPHY_RELEASE_BONUS + NEST_RELEASE_BONUS
+                    ? t("Released back to its nest · +{bonus} pts for a trophy guarder", { bonus: paidReleaseBonus })
+                    : paidReleaseBonus === NEST_RELEASE_BONUS
+                      ? t("Released back to its nest · +{bonus} pts", { bonus: paidReleaseBonus })
+                      : paidReleaseBonus > 0
+                        ? t("Released back into the lake · +{bonus} pts for letting a trophy go", { bonus: paidReleaseBonus })
+                        : t("Released back into the lake")}
                   {/* A fish the lake remembers shies from the lure it was caught on. */}
                   {game.outcome.lure && remembersReleased(game.outcome.species) && ` · ${t("it will shy from the {lure} now", { lure: t(game.outcome.lure) })}`}
+                  {firstGiant(game.outcome) && ` · ${t("{name} is out again for the week", { name: t(game.outcome.giant!) })}`}
                 </p>
               ) : (
                 <button className="panel-btn" type="button" onClick={() => void releaseFish()} aria-disabled={releasing || undefined}>
                   {releasing
                     ? t("Releasing…")
-                    : isTrophyWeight(game.outcome.species, game.outcome.weight)
-                      ? t("Release · +{bonus} pts", { bonus: TROPHY_RELEASE_BONUS })
-                      : t("Release")}
+                    : releaseOffer.nest
+                      ? t("Release to its nest · +{bonus} pts", { bonus: releaseOffer.bonus })
+                      : releaseOffer.bonus > 0
+                        ? t("Release · +{bonus} pts", { bonus: releaseOffer.bonus })
+                        : t("Release")}
                 </button>
               )}
               {releaseError && (
@@ -1570,6 +1642,13 @@ export function DockPage() {
               <span className="eyebrow">{t("Your tag came back")}</span>
               <h2>{t("{name} landed your {fish}", { name: shownTag.by, fish: t(fishById(shownTag.speciesId)?.name ?? shownTag.speciesId).toLowerCase() })}</h2>
               <p>{t("You let it go at {was}; it came back at {weight} · +{points} pts", { was: weightText(shownTag.was), weight: weightText(shownTag.weight), points: TAG_RETURN_BONUS })}</p>
+            </div>
+          )}
+          {shownLost && (
+            <div className="toast level-toast badge-toast">
+              <span className="eyebrow">{t("Your lost trophy was found")}</span>
+              <h2>{t("{name} landed the {fish} that broke your line", { name: shownLost.by, fish: t(fishById(shownLost.speciesId)?.name ?? shownLost.speciesId).toLowerCase() })}</h2>
+              <p>{t("{weight} at the {bank}", { weight: weightText(shownLost.weight), bank: t(SPOT_LABELS[shownLost.spot]) })}</p>
             </div>
           )}
         </div>

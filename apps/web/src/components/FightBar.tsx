@@ -148,6 +148,8 @@ export function FightBar({ fight, sim, performance, best = null, note = null, cl
               ? t("It's dragging the line over the rocks — turn it!")
               : state.surge === 0 && tired === "spent"
               ? t("It's played out — reel it in!")
+              : state.surge === 0 && state.armTired
+              ? t("Your arm is tiring — rest it a moment between pumps.")
               : (state.jump ? leapLines : lines)[state.surge]!;
         if (status.current && status.current.textContent !== call) status.current.textContent = call;
         // Screen readers get the bars as meters, refreshed four times a second rather than every frame,
@@ -300,6 +302,7 @@ export function FightBar({ fight, sim, performance, best = null, note = null, cl
           {fight.rising && LEAPERS.has(fight.species.id) && <p className="fight-water">{t("Risen to the hatch: it is at the top already, so its first run is a leap — bow")}</p>}
           {fight.lantern && !NET_SHY.has(fight.species.id) && <p className="fight-water">{t("Lantern light: it will see the net in the light and bolt from it once, so be ready to bring it back")}</p>}
           {fight.fired && <p className="fight-water">{t("Fired up on the fry: its first run doesn't tire it at all")}</p>}
+          {fight.hookWise && !fight.fired && <p className="fight-water">{t("It has felt the hook before: its first run doesn't tire it at all")}</p>}
           {fight.foam && <p className="fight-water">{t("Foam lane: the wind's drift is strongest here, so a slack line drifts out faster still")}</p>}
           {fight.bed && <p className="fight-water">{t("Egg raider: chased off the beds by the sunfish, its first run is the long one")}</p>}
           {fight.edge && <p className="fight-water">{t("Rock edge: runs dive off the ledge, pulling harder but tiring the fish faster")}</p>}

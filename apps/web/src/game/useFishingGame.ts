@@ -28,6 +28,8 @@ import {
   type LakeSeason,
   type LodgeRelease,
   type Giant,
+  type LodgeLost,
+  reportsLost,
   GIANT_ODDS,
   type Profile,
   type Sky,
@@ -62,13 +64,15 @@ import { DUCKWEED_FOUL_WAIT, DUCKWEED_TOPWATER_WAIT, duckweedCast, inDuckweed } 
 import { FAR_ROCK_WAIT, tightToFarRock } from "./farRock";
 import { castSnags, onRockEdge, onShoreIce, ROCK_EDGE_WAIT, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { FLUTTER_SEC, flutterGrabberFor, flutterTip, followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
-import { BUCKET_SIZE, loadBucket, saveBucket } from "./baitBucket";
-import { loadNightLine, nightLineCatch, nightLineKinds, nightLineState, nightSkyFor, saveNightLine, type NightLine } from "./nightLine";
+import { BUCKET_SIZE, liveShiners, loadBucket, saveBucket } from "./baitBucket";
+import { loadSwim, saveSwim, swimNow } from "./swim";
+import { castForFoe, foeGone, isOldFoe, loadOldFoe, saveOldFoe } from "./oldFoe";
+import { loadNightLine, nightLineCatch, nightLineKinds, nightLineState, nightSkyFor, saveNightLine, wormLineHour, type NightLine } from "./nightLine";
 import { markShy, loadGiantShy, rollGiantShy, saveGiantShy, shyOf, type GiantShy } from "./giantShy";
 import { AGAIN_CASTS, backAgain, castForGotAway, gotAwayAfterDrop, PATIENT_DROP_RANK, gotAwayAfterLoss, type GotAway } from "./gotAway";
 import { LINE_SNAP, LINE_WAIT, type LineWeight } from "./lineWeight";
 import { countAtBank, loadBankMemory, rollBankMemory, saveBankMemory, waryFromYesterday, YESTERDAY_WAIT, type BankMemory } from "./bankMemory";
-import { castForLodgeTag, castForReleased, loadReleased, saveReleased, type Recaught } from "./releasedFish";
+import { castForLodgeLost, castForLodgeTag, castForReleased, loadReleased, saveReleased, type Recaught } from "./releasedFish";
 import { weightText } from "../i18n/content";
 import { FRENZY_SLOT_MS, frenzyOn, HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, slotFrenzy, type Hotspot } from "./hotspot";
 import { loadBag, loadShiner, saveBag, saveShiner, type HookedShiner } from "./groundbaitBag";
@@ -183,6 +187,8 @@ export type Fight = {
   lantern?: boolean;
   /** Hooked chasing the kingfisher's fry, so its first run doesn't tire it. */
   fired?: boolean;
+  /** A trophy that broke a line before, the angler's own old foe or another's lost one: it knows the hook, so its first run doesn't tire it either. */
+  hookWise?: boolean;
   /** A breezy or strong day, when the wind bellies a slack line. */
   windy?: FightWind;
   /** A catfish or sturgeon the angler's Strength lifts off the bottom in one pump. */
@@ -199,7 +205,7 @@ export function lostTrophy(species: FishSpecies, weight: number) {
 export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; lightHook?: boolean; turnedRuns: number; cleanRun?: number; closeCall?: boolean; fightSec?: number; bowedLeaps?: number; easedShakes?: number; followedDarts?: number; encore?: boolean; secondWind?: boolean; secondTake?: boolean; grabbed?: string; gotAway?: boolean; followedIn?: boolean; recaught?: boolean; clearOf?: "weeds" | "rocks" | "pilings" | "log" | "current" };
 
 export type Outcome =
-  | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes; note?: string; tag?: { id: string; by: string }; giant?: string; hour?: LakeHour; lure?: string }
+  | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes; note?: string; tag?: { id: string; by: string }; giant?: string; giantBonus?: number; hour?: LakeHour; lure?: string; lostFrom?: { id: string; by: string }; closesLost?: string }
   | { kind: "broke"; message: string }
   | { kind: "miss"; message: string; fish?: { species: FishSpecies; weight: number } }
   | { kind: "error"; message: string };
@@ -382,11 +388,19 @@ export function useFishingGame(
   luckyLures: ReadonlySet<string> = new Set(),
   /** Banks the angler has fished down this week: their fish come smaller till they rest. */
   fishedDownBanks: ReadonlySet<SpotId> = new Set(),
-  /** The week's giants no one has landed yet, one per bank. */
-  openGiants: readonly Giant[] = [],
+  /** The week's giants no one has landed yet, one per bank, with what landing each pays when the lodge says. */
+  openGiants: readonly (Giant & { bonus?: number })[] = [],
+  /** Other anglers' lost trophies still about their banks. */
+  lodgeLost: readonly LodgeLost[] = [],
 ) {
   const openGiantsRef = useRef(openGiants);
   openGiantsRef.current = openGiants;
+  const lodgeLostRef = useRef(lodgeLost);
+  lodgeLostRef.current = lodgeLost;
+  /** Other anglers' lost trophies landed this visit, so one never bites twice before the list is read again. */
+  const landedLostRef = useRef(new Set<string>());
+  /** The trophy this angler last lost, for the Dock to file with the lodge; a fresh id each loss. */
+  const [lostReport, setLostReport] = useState<{ id: string; speciesId: string; weight: number; spot: SpotId } | null>(null);
   const fishedDownRef = useRef(fishedDownBanks);
   fishedDownRef.current = fishedDownBanks;
   const luckyLuresRef = useRef(luckyLures);
@@ -421,7 +435,7 @@ export function useFishingGame(
   useEffect(() => {
     setGiantShy(profile?.userId ? giantShyNow(profile.userId) : null);
   }, [profile?.userId]);
-  /** A shiner the angler left out on a night line, read from the browser once per angler. */
+  /** A shiner or worm the angler left out on a night line, read from the browser once per angler. */
   const [nightLine, setNightLineOut] = useState<NightLine | null>(null);
   useEffect(() => {
     setNightLineOut(profile?.userId ? loadNightLine(profile.userId) : null);
@@ -431,17 +445,28 @@ export function useFishingGame(
     setNightLineOut(line);
   };
   /** Spare live shiners in the angler's bait bucket, read from the browser once per angler; the ref is what actions count from. */
-  const [bucket, setBucket] = useState(() => (profile?.userId ? loadBucket(profile.userId) : 0));
-  const bucketRef = useRef(bucket);
+  const [bucket, setBucket] = useState(0);
+  /** When each spare shiner went in, oldest first: the oldest goes out first, before it dies. */
+  const bucketRef = useRef<number[]>([]);
   useEffect(() => {
-    bucketRef.current = profile?.userId ? loadBucket(profile.userId) : 0;
-    setBucket(bucketRef.current);
+    const kept = profile?.userId ? loadBucket(profile.userId) : { shiners: [], died: 0 };
+    bucketRef.current = kept.shiners;
+    setBucket(kept.shiners.length);
+    if (profile?.userId && kept.died > 0) {
+      saveBucket(profile.userId, kept.shiners);
+      setHint(t("{n} of the shiners in your bait bucket died while you were away: they keep three days.", { n: kept.died }));
+    }
   }, [profile?.userId]);
-  const keepBucket = (userId: string, count: number) => {
-    bucketRef.current = count;
-    saveBucket(userId, count);
-    setBucket(count);
+  const keepBucket = (userId: string, shiners: number[]) => {
+    bucketRef.current = liveShiners(shiners, Date.now());
+    saveBucket(userId, bucketRef.current);
+    setBucket(bucketRef.current.length);
   };
+  /** The spare shiners alive right now: one whose three days ran out during the visit has died. */
+  const bucketNow = () => liveShiners(bucketRef.current, Date.now());
+  /** The bucket with a fresh shiner in, or with its oldest one taken out. */
+  const bucketIn = () => [...bucketNow(), Date.now()];
+  const bucketOut = () => bucketNow().slice(1);
   const legendRef = useRef(legend);
   legendRef.current = legend;
   const lodgeReleasedRef = useRef(lodgeReleased);
@@ -686,6 +711,27 @@ export function useFishingGame(
     setLivelyShiner(kept === "lively");
   }, [profile?.userId]);
   const [groundbait, setGroundbait] = useState<Groundbait | null>(null);
+  /** When the swim's handful went in, and whether it has primed once, kept with it for the next visit. */
+  const swimRef = useRef<{ at: number; primed: boolean }>({ at: 0, primed: false });
+  const keepGroundbait = (next: Groundbait | null, thrown?: number) => {
+    if (thrown !== undefined) swimRef.current = { at: thrown, primed: false };
+    groundbaitRef.current = next;
+    setGroundbait(next);
+    if (anglerIdRef.current) saveSwim(anglerIdRef.current, next ? { ...next, at: swimRef.current.at, ...(swimRef.current.primed ? { primed: true } : {}) } : null);
+  };
+  // The angler's swim from an earlier visit, read when they sign in: left overnight, the feeders have gathered over it, once.
+  useEffect(() => {
+    const swim = profile?.userId ? loadSwim(profile.userId) : null;
+    const now = swimNow(swim, Date.now());
+    groundbaitRef.current = now ? { spot: now.spot, casts: now.casts } : null;
+    swimRef.current = { at: now?.at ?? 0, primed: !!now?.primed };
+    setGroundbait(groundbaitRef.current);
+    if (profile?.userId && swim && !now) saveSwim(profile.userId, null);
+    if (now?.primedNow && profile?.userId) {
+      saveSwim(profile.userId, { spot: now.spot, casts: now.casts, at: now.at, primed: true });
+      setHint(t("The groundbait you left at the {bank} has the feeders gathered there: {casts} casts of it.", { bank: t(SPOT_LABELS[now.spot]), casts: now.casts }));
+    }
+  }, [profile?.userId]);
   /** The bank whose next cast meets wary fish, for the stance chip to say so before the cast. */
   const [fishedHard, setFishedHard] = useState<readonly SpotId[]>([]);
   const [lurking, setLurking] = useState(false);
@@ -834,7 +880,8 @@ export function useFishingGame(
     const lantern = castMinnowRef.current && netsFish(species, mercyRef.current);
     // One hooked chasing the kingfisher's fry is fired up.
     const fired = castFryRef.current;
-    const next = { species, weight, underpowered, water, windy, lightHook, line: castLineRef.current, pads, farRock, weedBall, edge, bed, foam, rising, lantern, fired, strongLift: liftsStickerInOne(species.id, current.strength) };
+    const hookWise = !!(recaughtRef.current?.foe || recaughtRef.current?.lost);
+    const next = { species, weight, underpowered, water, windy, lightHook, line: castLineRef.current, pads, farRock, weedBall, edge, bed, foam, rising, lantern, fired, hookWise, strongLift: liftsStickerInOne(species.id, current.strength) };
     fightRef.current = next;
     setFight(next);
     setPhaseBoth("fight");
@@ -847,7 +894,7 @@ export function useFishingGame(
         resetToIdle(current.strength < species.minStrength ? t("Line parted. Spend points on Strength.") : t("Line parted. Spend points on Accuracy."));
       }, 1400);
     } else {
-      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)) * seasonTireMul(season, species.id) * warmTireMul(season, species.id, sky, spotRef.current) * runTireMul(season, species.id) * nestTireMul(season, species.id, spotRef.current) * nightTireMul(hourRef.current, species.id) * spentTireMul(season, species.id) * twilightTireMul(hourRef.current, species.id) * springRunTireMul(season, species.id, spotRef.current) * currentTireMul(species.id, spotRef.current) * fallFeedTireMul(season, species.id) * rainHunterTireMul(sky, species.id) * summerStrengthTireMul(season, species.id), water, windy, isTopwater(lureRef?.current) || rising, hasTrebles(lureRef?.current) || deep, seasonTireMul(season, species.id) > 1, isTrophyWeight(species, weight), floodedInlet(spotRef.current, season, sky), frayedRef.current, deep, lineSnapForLevel(anglerLevel(current.lifetimePoints)), turnCutMulForLevel(anglerLevel(current.lifetimePoints)), netsFish(species, mercyRef.current), { farRock, weedBall, edge, bed, foam, lantern, fired, lineSnap: LINE_SNAP[castLineRef.current] });
+      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)) * seasonTireMul(season, species.id) * warmTireMul(season, species.id, sky, spotRef.current) * runTireMul(season, species.id) * nestTireMul(season, species.id, spotRef.current) * nightTireMul(hourRef.current, species.id) * spentTireMul(season, species.id) * twilightTireMul(hourRef.current, species.id) * springRunTireMul(season, species.id, spotRef.current) * currentTireMul(species.id, spotRef.current) * fallFeedTireMul(season, species.id) * rainHunterTireMul(sky, species.id) * summerStrengthTireMul(season, species.id), water, windy, isTopwater(lureRef?.current) || rising, hasTrebles(lureRef?.current) || deep, seasonTireMul(season, species.id) > 1, isTrophyWeight(species, weight), floodedInlet(spotRef.current, season, sky), frayedRef.current, deep, lineSnapForLevel(anglerLevel(current.lifetimePoints)), turnCutMulForLevel(anglerLevel(current.lifetimePoints)), netsFish(species, mercyRef.current), { farRock, weedBall, edge, bed, foam, lantern, fired: fired || hookWise, lineSnap: LINE_SNAP[castLineRef.current] });
       runtimeRef.current = runtime;
       simRef.current = runtime.sim;
       performanceRef.current = runtime.performance;
@@ -869,7 +916,7 @@ export function useFishingGame(
       // A late strike only just catches, so the hook can pull out like a soft mouth's.
       runtime.sim.lightHook = lightHook;
       const line = fightLines(species.challenge)[0];
-      const again = !strike ? "" : againRef.current ? `${followedRef.current ? t("It's the one that followed your fish in!") : droppedRef.current ? t("It's the one that dropped your bait!") : t("It's the one that got away!")} ` : recaughtRef.current ? `${recaughtRef.current.giant ? t("It's {name}, the bank's giant!", { name: t(recaughtRef.current.giant) }) : recaughtRef.current.tag ? t("It's a fish {name} let go!", { name: recaughtRef.current.tag.by }) : t("It's a fish you let go here before!")} ` : shinerTakenRef.current ? `${t("It took the live shiner!")} ` : "";
+      const again = !strike ? "" : againRef.current ? `${followedRef.current ? t("It's the one that followed your fish in!") : droppedRef.current ? t("It's the one that dropped your bait!") : t("It's the one that got away!")} ` : recaughtRef.current ? `${recaughtRef.current.lost ? t("It's the trophy {name} lost!", { name: recaughtRef.current.lost.by }) : recaughtRef.current.foe ? t("It's the trophy that broke you off!") : recaughtRef.current.giant ? t("It's {name}, the bank's giant!", { name: t(recaughtRef.current.giant) }) : recaughtRef.current.tag ? t("It's a fish {name} let go!", { name: recaughtRef.current.tag.by }) : t("It's a fish you let go here before!")} ` : shinerTakenRef.current ? `${t("It took the live shiner!")} ` : "";
       // A trophy-sized fish is felt on the rod the moment it's hooked.
       const heavy = isTrophyWeight(species, weight) ? `${t("It feels heavy — could be a trophy!")} ${t("A fish this big makes a long first run.")} ` : "";
       // Cold water makes a fish sluggish, and the angler feels it at once.
@@ -985,9 +1032,8 @@ export function useFishingGame(
     const spooked = spookedBank && !rainCover;
     spookRef.current = null;
     const bait = castOverGroundbait(groundbaitRef.current, spotRef.current);
-    groundbaitRef.current = bait.next;
     castBaitedRef.current = bait.baited;
-    setGroundbait(bait.next);
+    if (bait.baited) keepGroundbait(bait.next);
     const schoolFish = school.schoolId ? FISH.find((fish) => fish.id === school.schoolId) : undefined;
     setSchooled(!!schoolFish);
     if (schoolFish) waitHintRef.current = `${t("Into the school.")} ${waitHintRef.current}`;
@@ -1204,8 +1250,15 @@ export function useFishingGame(
     const bankGiant = !lost.again && !mercyNow && !released?.fish && !tagged ? openGiantsRef.current.find((one) => one.spot === spotRef.current) : undefined;
     const giant = bankGiant && !lureShy(bankGiant.name) ? bankGiant : undefined;
     const giantKind = giant ? FISH.find((fish) => fish.id === giant.speciesId) : undefined;
-    const giantUp = giant && giantKind && canLand(current, giantKind) && Math.random() < GIANT_ODDS ? { species: giantKind, weight: giant.weight, was: giant.weight, at: Date.now(), giant: giant.name } : null;
-    recaughtRef.current = (lost.again ? backAgain(lost.again, openGiantsRef.current) : undefined) ?? released?.fish ?? tagged ?? giantUp;
+    const giantUp = giant && giantKind && canLand(current, giantKind) && Math.random() < GIANT_ODDS ? { species: giantKind, weight: giant.weight, was: giant.weight, at: Date.now(), giant: giant.name, ...(giant.bonus ? { giantBonus: giant.bonus } : {}) } : null;
+    // Failing all those, the trophy that broke off here on an earlier day may be back.
+    const storedFoe = loadOldFoe(current.userId);
+    if (storedFoe && foeGone(storedFoe, Date.now())) saveOldFoe(current.userId, null);
+    const foe = !lost.again && !mercyNow && !released?.fish && !tagged && !giantUp ? castForFoe(storedFoe, spotRef.current, Date.now(), Math.random()) : null;
+    // Or a trophy another angler lost here may take.
+    const ownFoe = foe && canLand(current, foe.species) ? foe : null;
+    const lodgeFoe = !lost.again && !mercyNow && !released?.fish && !tagged && !giantUp && !ownFoe && lodgeLostRef.current.length > 0 ? castForLodgeLost(lodgeLostRef.current, spotRef.current, Math.random(), landedLostRef.current, current) : null;
+    recaughtRef.current = (lost.again ? backAgain(lost.again, openGiantsRef.current) : undefined) ?? released?.fish ?? tagged ?? giantUp ?? ownFoe ?? lodgeFoe;
     // Over the groundbait the feeders crowd in, so some bites are theirs; a beginner's first fish stays an easy one.
     const feeder = bait.baited && !mercyNow ? groundbaitFeeder(spotRef.current, lureRef?.current, short, hour) : null;
     const hunter = shiner && !lost.again && !recaughtRef.current && !mercyNow ? shinerHunter(spotRef.current, current, hour, Math.random, lively) : null;
@@ -1795,6 +1848,19 @@ export function useFishingGame(
     // On a small lure, say a big one tempts it back sooner.
     const tempt = () => (lureRef && !favorsLargeFish(lureRef.current) ? ` ${t("A big lure tempts it back sooner.")}` : "");
     const stillAbout = () => (gotAwayRef.current ? ` ${t("It's still about: cast here again.")}${tempt()}` : "");
+    // A trophy that breaks off is remembered at its bank for the days to come; a giant or a let-go fish is already its own story.
+    const foeLost = (current: { species: FishSpecies; weight: number }) => {
+      const userId = anglerIdRef.current;
+      const recaught = recaughtRef.current;
+      if (!userId || !isTrophyWeight(current.species, current.weight) || current.species.rarity === "legendary" || (recaught && !recaught.foe)) return "";
+      // The same fish lost again keeps the day it first broke off and the lure it first carried off, and is already known to the lodge.
+      const fresh = !isOldFoe(loadOldFoe(userId), current);
+      // A fresh loss goes to the lodge too, for other anglers to meet, under an id the foe keeps from the start, so landing it oneself closes it.
+      const reportId = fresh && reportsLost(current.species, current.weight) ? localId() : undefined;
+      if (reportId) setLostReport({ id: reportId, speciesId: current.species.id, weight: current.weight, spot: spotRef.current });
+      if (fresh) saveOldFoe(userId, { species: current.species.id, weight: current.weight, spot: spotRef.current, at: Date.now(), ...(lureRef?.current ? { lure: lureRef.current } : {}), ...(reportId ? { reportId } : {}) });
+      return ` ${t("It will be about this bank in the days to come.")}`;
+    };
     // A giant that breaks free learns the lure it was hooked on.
     const giantLost = () => {
       const giant = recaughtRef.current?.giant;
@@ -1974,8 +2040,20 @@ export function useFishingGame(
             setSoak(0);
             const recaught = recaughtRef.current;
             if (recaught?.tag) landedTagsRef.current.add(recaught.tag.id);
+            if (recaught?.lost) landedLostRef.current.add(recaught.lost.id);
+            // Landed, as the foe come back or as the one that got away the same day, it is no one's foe any more, and its lodge report closes.
+            const storedFoe = anglerIdRef.current ? loadOldFoe(anglerIdRef.current) : null;
+            const ownLanded = !!recaught?.foe || isOldFoe(storedFoe, current);
+            if (anglerIdRef.current && ownLanded) saveOldFoe(anglerIdRef.current, null);
+            const closesLost = ownLanded ? storedFoe?.reportId : undefined;
             const back = !recaught
               ? ""
+              : recaught.lost
+                ? t("{fish}: the trophy {name} lost here.", { fish: t(current.species.name), name: recaught.lost.by })
+              : recaught.foe
+                ? recaught.foe.lure
+                  ? t("{fish}: the trophy that broke you off here on {date}, still with your {lure} in its jaw.", { fish: t(current.species.name), date: new Date(recaught.at).toLocaleDateString(locale(), { month: "long", day: "numeric" }), lure: t(recaught.foe.lure) })
+                  : t("{fish}: the trophy that broke you off here on {date}.", { fish: t(current.species.name), date: new Date(recaught.at).toLocaleDateString(locale(), { month: "long", day: "numeric" }) })
               : recaught.giant
                 ? t("{fish}: you landed {name}, this week's giant of the bank!", { fish: t(current.species.name), name: t(recaught.giant) })
               : recaught.tag
@@ -1995,7 +2073,9 @@ export function useFishingGame(
               clean,
               ...(landedNote ? { note: landedNote } : {}),
               ...(recaught?.tag ? { tag: recaught.tag } : {}),
-              ...(recaught?.giant ? { giant: recaught.giant } : {}),
+              ...(recaught?.giant ? { giant: recaught.giant, ...(recaught.giantBonus ? { giantBonus: recaught.giantBonus } : {}) } : {}),
+              ...(recaught?.lost ? { lostFrom: { id: recaught.lost.id, by: recaught.lost.by } } : {}),
+              ...(closesLost ? { closesLost } : {}),
               ...(lureRef?.current ? { lure: lureRef.current } : {}),
               notes: {
                 perfectCast: castPerfectRef.current,
@@ -2005,7 +2085,7 @@ export function useFishingGame(
                 grabbed: grabbedRef.current,
                 gotAway: againRef.current && !followedRef.current && !droppedRef.current,
                 followedIn: againRef.current && followedRef.current,
-                recaught: !!recaught,
+                recaught: !!recaught && !recaught.foe && !recaught.giant && !recaught.lost,
                 turnedRuns: runtime.performance.turnedRuns ?? 0,
                 cleanRun: cleanRunRef.current,
                 closeCall: isCloseCall(runtime.performance),
@@ -2029,7 +2109,7 @@ export function useFishingGame(
             spookRef.current = spotRef.current;
             schoolRef.current = null;
             gotAwayRef.current = gotAwayAfterLoss(current.species, current.weight, spotRef.current, recaughtRef.current);
-            const trophy = lostTrophy(current.species, current.weight) + giantLost();
+            const trophy = lostTrophy(current.species, current.weight) + giantLost() + foeLost(current);
             // How close it came, so a break near the net reads as nearly there rather than as a wasted fight.
             const reeledIn = Math.round((1 - sim.line) * 100);
             // A break gives the angler a fresh knot to tie on, so the line is sound again.
@@ -2051,7 +2131,7 @@ export function useFishingGame(
             schoolRef.current = null;
             gotAwayRef.current = gotAwayAfterLoss(current.species, current.weight, spotRef.current, recaughtRef.current);
             const frays = runtime.performance.scuffed || runtime.performance.bitten;
-            const trophy = lostTrophy(current.species, current.weight) + giantLost() + (frays && !frayedRef.current ? ` ${scuffNote(current.water, !runtime.performance.scuffed, current.farRock)}` : "");
+            const trophy = lostTrophy(current.species, current.weight) + giantLost() + foeLost(current) + (frays && !frayedRef.current ? ` ${scuffNote(current.water, !runtime.performance.scuffed, current.farRock)}` : "");
             if (frays) markFrayed(true);
             if (sim.tornOut && sim.lightHook && !SOFT_MOUTHS.has(current.species.id)) {
               setOutcome({ kind: "broke", message: t("The light hook pulled out of the {fish}.", { fish: t(current.species.name) }) + trophy });
@@ -2160,9 +2240,7 @@ export function useFishingGame(
   /** Toss a handful of groundbait off the bank the angler stands on: the next casts there bite sooner. */
   const throwGroundbait = useCallback(() => {
     if (phaseRef.current !== "idle" || handfulsRef.current <= 0) return;
-    const next = { spot: spotRef.current, casts: GROUNDBAIT_CASTS };
-    groundbaitRef.current = next;
-    setGroundbait(next);
+    keepGroundbait({ spot: spotRef.current, casts: GROUNDBAIT_CASTS }, Date.now());
     keepHandfuls(handfulsRef.current - 1);
     fx.plop();
     setHint(t("You toss a handful of groundbait. The fish will gather to feed here for the next {casts} casts.", { casts: GROUNDBAIT_CASTS }));
@@ -2178,32 +2256,34 @@ export function useFishingGame(
       setHint(t("You hook the shop's shiner on as live bait. Cast it out to the hunters."));
       return;
     }
-    if (!profile || bucketRef.current >= BUCKET_SIZE) return;
-    keepBucket(profile.userId, bucketRef.current + 1);
-    setHint(t("The shiner goes in your bait bucket: {n} of {max}.", { n: bucketRef.current, max: BUCKET_SIZE }));
+    if (!profile || bucketNow().length >= BUCKET_SIZE) return;
+    keepBucket(profile.userId, bucketIn());
+    setHint(t("The shiner goes in your bait bucket: {n} of {max}.", { n: bucketRef.current.length, max: BUCKET_SIZE }));
   };
 
   /** Hook a spare shiner from the bait bucket. */
   const hookFromBucket = () => {
-    if (!profile || liveShinerRef.current || bucketRef.current === 0) return;
-    keepBucket(profile.userId, bucketRef.current - 1);
+    if (!profile || liveShinerRef.current || bucketNow().length === 0) return;
+    keepBucket(profile.userId, bucketOut());
     hookShiner("live");
     setHint(t("You hook a shiner from your bucket on as live bait. Cast it out to the hunters."));
   };
 
-  /** Leave the shiner on the hook out on a night line at this bank, for a later visit to check. */
+  /** Leave a shiner, or at dusk or night a worm on the hook, out on a night line at this bank, for a later visit to check. */
   const setNightLine = () => {
     const spot = stanceRef.current;
-    if (!profile || nightLine || (!liveShinerRef.current && bucketRef.current === 0) || phaseRef.current !== "idle" || !isFishingStance(spot) || spot === "open" || nightLineKinds(spot, profile).length === 0) return;
+    // With no shiner to spare, a worm on the hook goes out instead: free, but fewer night feeders come to it.
+    const shiner = liveShinerRef.current || bucketNow().length > 0;
+    if (!profile || nightLine || (!shiner && !(isLiveBait(lureRef?.current) && wormLineHour(hourRef.current))) || phaseRef.current !== "idle" || !isFishingStance(spot) || spot === "open" || nightLineKinds(spot, profile).length === 0) return;
     // A spare from the bucket goes out first, so the shiner on the hook stays for casting.
-    if (bucketRef.current > 0) keepBucket(profile.userId, bucketRef.current - 1);
-    else hookShiner(null);
+    if (bucketNow().length > 0) keepBucket(profile.userId, bucketOut());
+    else if (shiner) hookShiner(null);
     const setAt = Date.now();
-    keepNightLine(profile.userId, { spot, setAt });
+    keepNightLine(profile.userId, { spot, setAt, ...(shiner ? {} : { bait: "worm" as const }) });
     // The forecast tells the night's sky, and the sky tells how likely the line is to hold a fish.
     const sky = nightSkyFor(setAt);
     const tonight = sky === "rain" ? t("Rain tonight: the night feeders will be roaming.") : sky === "clear" ? t("A clear night: the feeders keep close to cover, so the line may come in empty.") : "";
-    setHint([t("You leave the shiner out on a night line here. Come back to check it once the night is out, and within two days."), tonight].filter(Boolean).join(" "));
+    setHint([shiner ? t("You leave the shiner out on a night line here. Come back to check it once the night is out, and within two days.") : t("You leave a worm out on a night line here. Come back to check it once the night is out, and within two days."), tonight].filter(Boolean).join(" "));
   };
 
   /** Bring in the night line set at this bank: a night feeder of the bank, or an empty hook. */
@@ -2216,7 +2296,7 @@ export function useFishingGame(
     keepNightLine(profile.userId, null);
     const caught = nightLineCatch(nightLine, now, profile, anglerLevel(profile.lifetimePoints), Math.random);
     if (!caught) {
-      setHint(state === "stale" ? t("The night line sat out too long: the bait is long gone, and nothing is on it.") : t("The night line comes in empty: something stole the shiner in the dark."));
+      setHint(state === "stale" ? t("The night line sat out too long: the bait is long gone, and nothing is on it.") : nightLine.bait === "worm" ? t("The night line comes in empty: something stole the worm in the dark.") : t("The night line comes in empty: something stole the shiner in the dark."));
       return;
     }
     const fish = downAtBank(caught, fishedDownRef.current.has(spot) && !mercyRef.current);
@@ -2224,7 +2304,7 @@ export function useFishingGame(
     // Not fought, so not clean, and it ends any run of clean fights.
     cleanRunRef.current = 0;
     // Logged at the hour it took the bait, the night, not when the line came in.
-    setOutcome({ kind: "landed", id: localId(), species: fish.species, weight: fish.weight, spot, clean: false, hour: "night", note: t("{fish} took the shiner on your night line.", { fish: t(fish.species.name) }) });
+    setOutcome({ kind: "landed", id: localId(), species: fish.species, weight: fish.weight, spot, clean: false, hour: "night", note: nightLine.bait === "worm" ? t("{fish} took the worm on your night line.", { fish: t(fish.species.name) }) : t("{fish} took the shiner on your night line.", { fish: t(fish.species.name) }) });
     setPhaseBoth("result");
     setHint(castHint("landed"));
   };
@@ -2240,13 +2320,13 @@ export function useFishingGame(
     // With a plain shiner on the hook already, a lively one landed clean takes its place and the plain one goes in the
     // bucket; otherwise the landed one goes in the bucket to keep.
     if (liveShinerRef.current && !(outcome.clean && !livelyShinerRef.current)) {
-      if (!profile || bucketRef.current >= BUCKET_SIZE) return;
-      keepBucket(profile.userId, bucketRef.current + 1);
+      if (!profile || bucketNow().length >= BUCKET_SIZE) return;
+      keepBucket(profile.userId, bucketIn());
       setOutcome(null);
-      resetToIdle(t("The shiner goes in your bait bucket: {n} of {max}.", { n: bucketRef.current, max: BUCKET_SIZE }));
+      resetToIdle(t("The shiner goes in your bait bucket: {n} of {max}.", { n: bucketRef.current.length, max: BUCKET_SIZE }));
       return;
     }
-    if (liveShinerRef.current && profile && bucketRef.current < BUCKET_SIZE) keepBucket(profile.userId, bucketRef.current + 1);
+    if (liveShinerRef.current && profile && bucketNow().length < BUCKET_SIZE) keepBucket(profile.userId, bucketIn());
     // Landed clean, it isn't worn out, so it swims hard on the hook.
     hookShiner(outcome.clean ? "lively" : "live");
     setOutcome(null);
@@ -2273,6 +2353,7 @@ export function useFishingGame(
     fishedHard,
     giantShy,
     nightLine,
+    lostReport,
     livelyShiner,
     bucket,
     hookFromBucket,
