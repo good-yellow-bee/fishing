@@ -218,9 +218,9 @@ export function TripsPage() {
   // Counted as Bests counts them: the sample week's outings go with the angler's first own outing or fish.
   // A day's fish logged without its outing count for that day's outing on that water, as a water's page and Bests count them.
   const own = countedBook(book);
-  const average = averageParts(own.trips, fishOn, fishedBy);
+  const average = averageParts(own.trips, fishOn, fishedBy, book);
   // A run of outings with a fish still going, once it is three long: worth keeping up.
-  const streak = outingStreak(own.trips, fishOn, fishedBy, looseFishDays(book));
+  const streak = outingStreak(own.trips, fishOn, fishedBy, looseFishDays(book), book);
   const runNow = streak.going && streak.best >= 3 ? streak.best : 0;
   // The sample's planned outings are made up: they stay out of a real calendar.
   // Today's outing with a fish in is under way, not a plan to put in a calendar.
@@ -483,10 +483,10 @@ function TripView() {
   const ownTrips = countedBook(book).trips.filter((other) => other.spotId === trip.spotId);
   // The outings set beside this one: the angler's own on a real water, the game's on its lake.
   const tripsHere = trip.spotId === PLAY_LAKE_ID ? tripsForSpot(book, trip.spotId) : ownTrips;
-  const best = bestOutingHere(tripsHere, fishHere, trip.id, fishedBy);
+  const best = bestOutingHere(tripsHere, fishHere, trip.id, fishedBy, book);
   // Its day come, a fish lost or a strike missed is an outing under way, as a landed fish is.
   const fished = trip.date < fishedBy || (trip.date <= today && underWay(book, trip));
-  const meanHere = fished && trip.spotId !== PLAY_LAKE_ID && ownTrips.some((other) => other.id === trip.id) ? outingMean(ownTrips, fishHere, fishedBy, trip.id) : null;
+  const meanHere = fished && trip.spotId !== PLAY_LAKE_ID && ownTrips.some((other) => other.id === trip.id) ? outingMean(ownTrips, fishHere, fishedBy, trip.id, book) : null;
   // The day's largest against the water's, from the fish counted for it: the angler's own once it has any.
   const countedHere = countedFish(catchesForSpot(book, trip.spotId));
   const countedIds = new Set(countedHere.map((entry) => entry.id));
