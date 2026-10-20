@@ -1,12 +1,12 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-game65";
+export const NEWS_ID = "2026-10-20-game66";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "Spare shiners in your bait bucket now keep three days: the oldest goes out first, and ones left longer have died by your next visit. And a trophy that broke a line before, your old foe or another angler's lost one, knows the hook now: its first run doesn't tire it.",
   "With no shiner to spare, a worm tied on can now go out on a night line at dusk or night: free, but fewer night feeders come to it. And where you stand, the bank's chip now says when your old foe or another angler's lost trophy is about.",
-  "A giant you land can now be let go back to its bank for the rest of the week: you keep it toward Giant hunter, the Board says you let it go, and the next angler to land it is paid 100 points.",
   "While your bait bucket holds spare shiners, it now stands at your feet on the dock or at the bank. And a fish hooked through the duckweed comes in under a green ball of weed until its first run strips it off.",
   "On a clear dawn or dusk the low sun now lays long shadows across the lake, yours among them: at the drop-off at dawn and the inlet at dusk you can see it fall on the water the fish are watching. And on a phone held upright the lake sits a little lower, so the far bank and the hills show clear of the panels at the top.",
   "The outings spreadsheet says when each outing's fish came, so a dawn and a dusk tell apart. Adding a book file says how many of its fish were the game's, and Home's Next goes to the outing you are fishing when a day has two.",

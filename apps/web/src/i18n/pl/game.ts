@@ -271,8 +271,8 @@ export const PL_GAME: PlBook = {
   "Not yet": "Jeszcze nie",
   "All three found: the {legend} bites far more often at the {bank} for the rest of the week.": "Wszystkie trzy znalezione: {legend} bierze dużo częściej na łowisku {bank} do końca tygodnia.",
   "The {fish} your hunt tracked down haunts this water.": "{fish}, którego wytropiono, krąży po tej wodzie.",
-  "A giant you land can now be let go back to its bank for the rest of the week: you keep it toward Giant hunter, the Board says you let it go, and the next angler to land it is paid 100 points.":
-    "Złowionego olbrzyma można teraz wypuścić z powrotem na jego łowisko do końca tygodnia: zachowujesz go do odznaki Łowca olbrzymów, tablica podaje, kto go wypuścił, a następna osoba, która go wyląduje, dostaje 100 punktów.",
+  "Spare shiners in your bait bucket now keep three days: the oldest goes out first, and ones left longer have died by your next visit. And a trophy that broke a line before, your old foe or another angler's lost one, knows the hook now: its first run doesn't tire it.":
+    "Zapasowe złotawce w wiaderku żyją teraz trzy dni: najstarszy idzie pierwszy, a te zostawione dłużej padają do następnej wizyty. A trofeum, które już raz zerwało żyłkę, twój stary rywal albo zguba innej osoby, zna teraz haczyk: pierwszy odjazd wcale go nie męczy.",
   "While your bait bucket holds spare shiners, it now stands at your feet on the dock or at the bank. And a fish hooked through the duckweed comes in under a green ball of weed until its first run strips it off.":
     "Dopóki w wiaderku na przynętę są zapasowe złotawce, stoi ono teraz u twoich stóp na pomoście albo na brzegu. A ryba zacięta w rzęsie płynie pod zieloną kulą zielska, aż pierwszy odjazd ją zerwie.",
   "On a clear dawn or dusk the low sun now lays long shadows across the lake, yours among them: at the drop-off at dawn and the inlet at dusk you can see it fall on the water the fish are watching. And on a phone held upright the lake sits a little lower, so the far bank and the hills show clear of the panels at the top.":
