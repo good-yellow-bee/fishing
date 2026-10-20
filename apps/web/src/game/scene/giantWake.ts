@@ -17,6 +17,11 @@ const WATER: Partial<Record<SpotId, { x: number; z: number }>> = {
   inlet: { x: -17, z: -6 },
 };
 
+/** Each bank's turn in the swirls, fixed, so a giant landed elsewhere never shifts the others' timing. */
+export function swirlTurn(bank: SpotId) {
+  return Object.keys(WATER).indexOf(bank);
+}
+
 /** Where `bank`'s giant shows, or null for open water. */
 export function giantWaterAt(bank: SpotId): { x: number; z: number } | null {
   return WATER[bank] ?? null;

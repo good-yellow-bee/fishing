@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import type { SpotId } from "@stillwater/shared";
-import { giantWaterAt, swirlPhase } from "./giantWake";
+import { giantWaterAt, swirlPhase, swirlTurn } from "./giantWake";
 import { useReducedMotion } from "./reducedMotion";
 import { waterHeight } from "./water";
 
@@ -58,5 +58,5 @@ function SwirlAt({ bank, index }: { bank: SpotId; index: number }) {
 export function GiantSwirl({ banks }: { banks: readonly SpotId[] }) {
   const still = useReducedMotion();
   if (still) return null;
-  return banks.map((bank, i) => <SwirlAt key={bank} bank={bank} index={i} />);
+  return banks.map((bank) => <SwirlAt key={bank} bank={bank} index={swirlTurn(bank)} />);
 }
