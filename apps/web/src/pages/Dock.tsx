@@ -365,6 +365,9 @@ export function DockPage() {
   const catchShot = useSyncExternalStore(subscribeCatchShot, latestCatchShot);
   const shotFor = useRef<{ seq: number; id: string; dataUrl: string } | null>(null);
   const shotBase = useRef<{ id: string; seq: number } | null>(null);
+  /** The landed fish as the server saved it, once the profile has been read again after the save. */
+  const landedId = game.outcome?.kind === "landed" ? game.outcome.id : null;
+  const savedLanded = landedId ? me?.catches.find((saved) => saved.requestId === landedId) : undefined;
   /** The tier the tied lure climbs to with this landed fish, read from the book before the fish goes in. */
   const lureReached = useMemo(() => (game.outcome?.kind === "landed" ? lureTierReachedBy(lureCatchCount(bookCatchesRef.current, tiedLure.current)) : null), [game.outcome]);
   const fieldBeat = useMemo(() => {
@@ -1263,7 +1266,8 @@ export function DockPage() {
             <p>{weightText(game.outcome.weight)} · {t(SPOT_LABELS[game.outcome.spot])}</p>
             <p>
               {t("+{points} pts", {
-                points: catchPoints(
+                // Once the catch is saved the card shows what the server paid; till then, what it should.
+                points: savedLanded?.points ?? catchPoints(
                   game.outcome.species,
                   game.outcome.weight,
                   game.outcome.clean,
@@ -1272,7 +1276,7 @@ export function DockPage() {
               })}
             </p>
             {landedGolden && <p className="catch-stamp golden">{t("Golden fish · 2× points")}</p>}
-            {game.outcome.tag && <p className="catch-stamp">{t("Tagged by {name} · +{points} pts, and {back} for them", { name: game.outcome.tag.by, points: TAG_FINDER_BONUS, back: TAG_RETURN_BONUS })}</p>}
+            {game.outcome.tag && (savedLanded ? savedLanded.tagged : true) && <p className="catch-stamp">{t("Tagged by {name} · +{points} pts, and {back} for them", { name: game.outcome.tag.by, points: TAG_FINDER_BONUS, back: TAG_RETURN_BONUS })}</p>}
             {weeklyBonus(game.outcome.species.id, landedDay.current) > 1 && <p className="catch-stamp">{t("Fish of the week · 1.5× points")}</p>}
             {game.outcome.clean && (
               <p className="catch-stamp">
