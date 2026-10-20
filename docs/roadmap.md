@@ -1917,7 +1917,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT441~~ | ~~A lost trophy's lodge report takes its id from the client at the moment of the loss, so the angler's own foe holds it at once (landing it the same day closes the report) and a retried report is filed only once~~ (#1666) | gameplay | S |
 | ~~GT442~~ | ~~The pre-baited swim: groundbait thrown at a bank is kept per angler for the next visit; soon after it keeps its casts, left six hours or more the feeders have gathered and it fishes as freshly baited (the load says so), past two days it is gone~~ (#1667) | gameplay | M |
 | ~~GT443~~ | ~~The angler's arm tires in a long fight: past 45 seconds of reeling, the reel wins 1% less line each further second, down to 70% of its pace; resting the reel gives the arm back half a second a second, and the status says to rest it~~ (#1668) | gameplay | M |
-| ~~GT444~~ | ~~News card 2026-10-20-game63 covers GT442-GT443: the pre-baited swim and the tiring arm~~ (#) | ui | S |
+| ~~GT444~~ | ~~News card 2026-10-20-game63 covers GT442-GT443: the pre-baited swim and the tiring arm~~ (#1670) | ui | S |
 
 ## Risks / open questions for the owner
 
