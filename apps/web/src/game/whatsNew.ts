@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-game52";
+export const NEWS_ID = "2026-10-20-scene61";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "The lake asks a little less of your phone again: shadows are redrawn at most thirty times a second, the shore's foam does less work each frame, and the anglers you only see in rain or fog and the deer, moose and hare of dawn and dusk now load only when they come out.",
   "Each kind you have landed now has three studies in the field guide on your catch log: land it at every bank it lives at, at three of the lake's four hours, and at trophy weight. Finish all three to claim 100 points once and mark the kind Studied.",
   "A water's page names kinds and lures as the rest of the book does, and each of its counts opens just the fish it counted. Its copied summary adds the next outing there and the fish lost or missed.",
   "A Line button by the bank signs now swaps the line on your reel between casts: light line brings more bites but snaps sooner, heavy line holds more strain but the fish see it. And the lodge board now names the week's stewards, the anglers who let the most fish go.",
