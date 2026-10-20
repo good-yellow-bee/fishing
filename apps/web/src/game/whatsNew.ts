@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-game44";
+export const NEWS_ID = "2026-10-20-scene54";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "Fishing from the bank, you now have company in any weather: on wet evenings a toad hops past behind you, on rainy days a blackbird comes to your feet in place of the robin, and on winter nights a wood mouse pops out of the snow and scurries across, leaving tiny tracks.",
   "In a fight, F or the fight card's Drag button turns the reel's drag: a light drag lets a run take more line but pulls softly, a heavy one holds a run short but loads the line even let go. The lodge board now ranks each angler's day's bag, their five heaviest fish of the day, and the landed card shows yours. And a fish another angler let go can come up at the same bank on a later day: landing it pays you 30 points and them 20.",
   "The rowboats and the float no longer turn black: their colours load properly again. On a phone held upright, the view now opens wider, so you see the whole dock, the boat and both shores instead of a narrow slice of the lake. And see-through things like rain rings and dragonfly wings now draw in one pass, so the lake runs a little smoother.",
   "Four fish learned a second trick: a bluegill's tight circles twist your line toward a tangle, a carp bolts the first time it sees the net, a catfish lifts its head at the net only a moment, and a burbot slithers off the hook if you leave the line slack between its runs.",
