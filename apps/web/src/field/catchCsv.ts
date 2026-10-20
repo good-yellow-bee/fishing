@@ -2,7 +2,7 @@ import { catchesNewestFirst, measuresOf, spotById, SKY_LABELS, WIND_LABELS, type
 import { getLang, getUnits, num, t } from "../i18n";
 import { CM_PER_IN, KG_PER_LB } from "../i18n/content";
 import { lureNames } from "./pieceTally";
-import { outingFished, plainName } from "./tripDates";
+import { gaveWay, outingFished, plainName } from "./tripDates";
 import { newestOutingFirst } from "./catchNeighbors";
 import { noteText, outingName, outingNameById } from "./format";
 import { countedBook } from "./milestones";
@@ -95,7 +95,8 @@ export function sheetOutings(book: Logbook, today: string): Logbook {
   // Today's outing once it is under way, as Trips' "planned" takes it: a fish (filed, or loose there on its day's one
   // outing), a fish lost or a strike missed. Before that it is still ahead.
   const fishOn = outingFish(book);
-  return { ...counted, trips: counted.trips.filter((trip) => outingFished(trip, today, fishOn(trip.id) > 0 || Boolean(trip.lost || trip.missed))) };
+  // Last evening's blank one that gave way to today's plan is a past blank day, as Recent lists it.
+  return { ...counted, trips: counted.trips.filter((trip) => outingFished(trip, today, fishOn(trip.id) > 0 || Boolean(trip.lost || trip.missed)) || gaveWay(book, trip)) };
 }
 
 /**

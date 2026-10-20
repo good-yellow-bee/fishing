@@ -101,7 +101,7 @@ function LastTimeLine({ book, trip, today }: { book: Logbook; trip: Trip; today:
     trip.date,
     outingDay(today),
     outingFish(book, true),
-    newestOutingFirst(book),
+    book,
   );
   if (!last) return null;
   // That water's fish of it, with those logged loose there that day, as the water's own page counts them.
@@ -111,6 +111,7 @@ function LastTimeLine({ book, trip, today }: { book: Logbook; trip: Trip; today:
   // The lure only when it led: after a one-all tie, naming either would be a guess.
   const [top, next] = pieceTally(fish, 2);
   const lure = top && top.count > (next?.count ?? 0) ? top : undefined;
+  const lureName = bookLureName(book.catches);
   // How long the water has rested, as the outing's own page says it: during a night session, to the outing's own day.
   const rest = daysBetween(last.date, trip.date < today ? trip.date : today);
   const day = rest >= 2 ? `${formatDay(last.date)} · ${tn(rest, "{n} day ago", "{n} days ago")}` : formatDay(last.date);
@@ -118,7 +119,7 @@ function LastTimeLine({ book, trip, today }: { book: Logbook; trip: Trip; today:
     <small className="next-last">
       <Link to={`/trips/${last.id}`} state={FROM_LIST}>
         {lure
-          ? t("Last time: {day} · {fish} · {lure}", { day, fish: fishSum(fish.length), lure: lure.count > 1 ? `${bookLureName(book.catches)(lure.lure)} ×${lure.count}` : bookLureName(book.catches)(lure.lure) })
+          ? t("Last time: {day} · {fish} · {lure}", { day, fish: fishSum(fish.length), lure: lure.count > 1 ? `${lureName(lure.lure)} ×${lure.count}` : lureName(lure.lure) })
           : t("Last time: {day} · {fish}", { day, fish: fishSum(fish.length) })}
       </Link>
     </small>

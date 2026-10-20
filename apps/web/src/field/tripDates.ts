@@ -76,6 +76,22 @@ export function lateOutings(book: Logbook, now = new Date()): Trip[] {
     .sort(newestOutingFirst(book));
 }
 
+const lateCache = new WeakMap<Logbook, { minute: number; ids: ReadonlySet<string> }>();
+
+/**
+ * Whether last evening's outing has ended in the small hours though its day is still the one counted: no longer among
+ * the late outings, as a blank evening that gave way to today's plan. Recent and Just back list it as past, so it is
+ * no plan any more, and a blank one is a blank day. The late outings are worked out once a minute per book.
+ */
+export function gaveWay(book: Logbook, trip: Trip, now = new Date()): boolean {
+  const today = localDate(now);
+  if (trip.date >= today || trip.date < outingDay(today, now)) return false;
+  const minute = Math.floor(now.getTime() / 60_000);
+  let late = lateCache.get(book);
+  if (late?.minute !== minute) lateCache.set(book, (late = { minute, ids: new Set(lateOutings(book, now).map((each) => each.id)) }));
+  return !late.ids.has(trip.id);
+}
+
 /** A fish in the last twelve hours; never one logged ahead of the clock. */
 function recentFish(caughtAt: string, now: Date): boolean {
   const since = now.getTime() - Date.parse(caughtAt);

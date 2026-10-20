@@ -2,7 +2,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { CatchEntry, Logbook, Trip } from "@stillwater/shared";
 import { isPlanned } from "./TripMonthHead";
 import { lastOutingBefore } from "./outingAverage";
-import { newestOutingFirst } from "./catchNeighbors";
 import { underWay } from "./tripDates";
 import { findTrips } from "./tripSearch";
 
@@ -21,6 +20,9 @@ describe("round 112: last evening's blank outing that gave way to today's plan",
     expect(isPlanned(book.trips[1]!, "2026-10-20", 0, book)).toBe(true);
     const alone: Logbook = { ...book, trips: [book.trips[0]!] };
     expect(isPlanned(alone.trips[0]!, "2026-10-20", 0, alone)).toBe(true);
+    // A past blank day, as Recent lists it: the last time on its water and a blank outing in a search.
+    expect(lastOutingBefore([book.trips[0]!], "2026-10-25", "2026-10-19", () => 0, book)?.id).toBe("eve");
+    expect(findTrips(book, "no fish", () => 0, "2026-10-20", (text) => text).map((found) => found.id)).toEqual(["eve"]);
   });
 });
 
@@ -44,7 +46,7 @@ describe("round 112: a day's dawn and dusk", () => {
     catches: [fish("d1", "dawn", new Date(2026, 9, 18, 6, 0)), fish("d2", "dusk", new Date(2026, 9, 18, 19, 0))],
   };
   it("name the dusk as last time here", () => {
-    expect(lastOutingBefore(book.trips, "2026-10-25", "2026-10-20", () => 1, newestOutingFirst(book))?.id).toBe("dusk");
+    expect(lastOutingBefore(book.trips, "2026-10-25", "2026-10-20", () => 1, book)?.id).toBe("dusk");
   });
   it("list the dusk first in a search", () => {
     expect(findTrips(book, "pine", () => 1, "2026-10-20", (text) => text).map((found) => found.id)).toEqual(["dusk", "dawn"]);

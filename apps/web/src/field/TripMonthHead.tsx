@@ -3,7 +3,7 @@ import { tn } from "../i18n";
 import { fishSum } from "./format";
 import { monthName } from "./tripMonths";
 import { PLAY_LAKE_ID } from "./playLake";
-import { lateOutings, outingDay } from "./tripDates";
+import { gaveWay, outingDay } from "./tripDates";
 
 /** A month's heading over its outings: the month, how many outings, and how many fish they brought. */
 /** An outing still to come, or today's before its first fish, is counted apart as planned, as a water's season line and the cards say it. */
@@ -58,5 +58,5 @@ export function TripMonthHead({
  */
 export function isPlanned(trip: Trip, today: string, fish: number, book?: Logbook): boolean {
   const ahead = trip.spotId !== PLAY_LAKE_ID && trip.date >= outingDay(today) && fish === 0 && !(trip.date <= today && (trip.lost || trip.missed));
-  return ahead && (!book || trip.date >= today || lateOutings(book).some((late) => late.id === trip.id));
+  return ahead && !(book && gaveWay(book, trip));
 }
