@@ -73,7 +73,7 @@ import { bookLureName, pieceTally } from "./pieceTally";
 import { WaterOptions } from "./WaterOptions";
 import { kindKey, speciesCounts, speciesLink } from "./speciesLink";
 import { pieceName } from "./gear/pieceKey";
-import { datePicks, gaveWay, lateOutings, outingDay, outNow, ownTitle, pastTitles, plainName, sameName, underWay } from "./tripDates";
+import { datePicks, gaveWay, lateOutings, outingDay, outNow, ownTitle, pastTitles, plainName, sameName } from "./tripDates";
 import "./search.css";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 import { bestFishDay, bookFishDay } from "./tripMonths";
@@ -192,6 +192,18 @@ export function tripLists(book: Logbook, now = new Date()): { upcoming: Trip[]; 
   return { upcoming, recent };
 }
 
+/** The outings Trips' average and streaks count: the angler's own, not the sample week's blank plans Recent leaves out. */
+export function averagedOutings(book: Logbook): Trip[] {
+  return countedBook(book).trips.filter((trip) => !isSamplePlan(book, trip));
+}
+
+/** Where an outing falls among those fished on its water, oldest first, as the water's page lists them; null for a plan. */
+export function placeOnWater(book: Logbook, trip: Trip, tripsHere: readonly Trip[], today: string, fishOn: (tripId: string) => number): { n: number; total: number } | null {
+  const held = tripsHere.filter((other) => !isPlanned(other, today, fishOn(other.id), book)).sort(newestOutingFirst(book)).reverse();
+  const n = held.findIndex((other) => other.id === trip.id) + 1;
+  return n > 0 ? { n, total: held.length } : null;
+}
+
 export function TripsPage() {
   const { book } = useLogbook();
   const { items: tackleItems } = useTackle();
@@ -217,10 +229,10 @@ export function TripsPage() {
   // How the outings already fished have gone, across every water.
   // Counted as Bests counts them: the sample week's outings go with the angler's first own outing or fish.
   // A day's fish logged without its outing count for that day's outing on that water, as a water's page and Bests count them.
-  const own = countedBook(book);
-  const average = averageParts(own.trips, fishOn, fishedBy, book);
+  const own = averagedOutings(book);
+  const average = averageParts(own, fishOn, fishedBy, book);
   // A run of outings with a fish still going, once it is three long: worth keeping up.
-  const streak = outingStreak(own.trips, fishOn, fishedBy, looseFishDays(book), book);
+  const streak = outingStreak(own, fishOn, fishedBy, looseFishDays(book), book);
   const runNow = streak.going && streak.best >= 3 ? streak.best : 0;
   // The sample's planned outings are made up: they stay out of a real calendar.
   // Today's outing with a fish in is under way, not a plan to put in a calendar.
@@ -489,7 +501,8 @@ function TripView() {
   // Its day come, a fish lost or a strike missed is an outing under way, as a landed fish is.
   // Of the day counted, a blank evening that gave way to today's plan is past too.
   const pastDay = trip.date < fishedBy || ended;
-  const fished = pastDay || (trip.date <= today && underWay(book, trip));
+  // Its fish counted as Trips counts them: of a dawn and a dusk there, a loose fish puts neither under way, as its card says.
+  const fished = pastDay || (trip.date <= today && (fishOn(trip.id) > 0 || Boolean(trip.lost || trip.missed)));
   const meanHere = fished && trip.spotId !== PLAY_LAKE_ID && ownTrips.some((other) => other.id === trip.id) ? outingMean(ownTrips, fishHere, fishedBy, trip.id, book) : null;
   // The day's largest against the water's, from the fish counted for it: the angler's own once it has any.
   const countedHere = countedFish(catchesForSpot(book, trip.spotId));
@@ -501,6 +514,7 @@ function TripView() {
   // And the one after it there, looking back from a day already fished: how the water did the next time.
   const nextHere = fished ? tripsHere.filter((other) => other.date > trip.date).sort((a, b) => a.date.localeCompare(b.date))[0] : undefined;
   const nextPlanned = nextHere && isPlanned(nextHere, today, fishOn(nextHere.id), book);
+  const placeHere = placeOnWater(book, trip, tripsHere, today, fishOn);
 
   // Fish from this water on the outing's day (or its small hours) that were logged without it.
   // Of a dawn and a dusk there, each fish goes to the one nearer its time, as its own page offers it.
@@ -572,7 +586,9 @@ function TripView() {
       {/* Every outing on this water, listed on the water's own page: how it has done, outing by outing. */}
       {spot && !play && tripsHere.length >= 3 ? (
         <p className="meta all-here">
-          <Link to={`/spots/${spot.id}#outings`}>{t("Every outing on this water")}</Link>
+          <Link to={`/spots/${spot.id}#outings`}>
+            {placeHere ? t("Outing {n} of {total} on this water", placeHere) : t("Every outing on this water")}
+          </Link>
         </p>
       ) : null}
       {/* A dawn and a dusk on one water and day: each says the other, with what it gave. */}
