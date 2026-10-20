@@ -1475,6 +1475,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | SC282 | A fight in the visual tests: a twelfth view casts at the dock, waits for the bite on the real clock with nothing drawn, strikes at the hookset (the strike measures 0 ms on the frozen clock), then draws 30 frames of the fight; Math.random starts over at the cast, so the same crappie takes the same way every run; no game code changed | scene | S |
 | SC283 | Feeders over a gathered swim: GT442's groundbait left from an earlier visit that "has the feeders gathered there" now shows them, little rings dimpling the water over its cloud in turn, while that swim lasts (not with reduced motion); a freshly thrown handful stays the plain cloud | scene | S |
 | SC284 | Hedgerows that read as hedges: on an upright phone the upper hills' hedgerows (SC263) looked like dotted chains of beads, each bush a small ball turned any way; the bushes now stand closer and lined up along the row, wider than deep, so they run together into continuous hedges (a Visual refresh run reproduced every baseline byte for byte: the test views have the hedges behind the top panels) | scene | S |
+| SC285 | News card scene68 covers SC283 and SC284: the feeders over a gathered swim and the hedgerows that read as hedges | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
