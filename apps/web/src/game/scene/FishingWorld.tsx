@@ -150,7 +150,7 @@ import { castRing, CAST_RING_COLORS } from "./castRing";
 import { LIFT_START_AGE, liftDepth, liftFlop } from "./catchLift";
 import { sweetBand } from "../logic";
 import { settings, SHAKE_SCALE, updateSettings, useSettings } from "../settings";
-import { FloatModel } from "./FloatModel";
+import { FloatModel, GLOW_TIP_Y } from "./FloatModel";
 import { createFrameWatch, noteEffectsSteppedDown, STEP_DOWN } from "../frameWatch";
 import { frameDue, frameThrottle, idleNow } from "./frameCap";
 import { GOLDEN_ACCENT, GOLDEN_COLOR } from "../../components/FishMark";
@@ -167,8 +167,6 @@ const PostOwl = lazyPart("night", "PostOwl");
 const Rainbow = lazyPart("weather", "Rainbow");
 const RodDragonfly = lazyPart("summer", "RodDragonfly");
 
-/** Top of the buoy model at its 0.32 scale, where the night tip sits. */
-const GLOW_TIP_Y = 0.46;
 
 export type SimRef = { current: FightSim | null };
 

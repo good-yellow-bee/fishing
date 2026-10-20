@@ -351,11 +351,12 @@ export function DockPage() {
   // The angler's own old foe, read again whenever a cast ends, as a loss or a landing changes it.
   const oldFoe = useMemo(() => (angler ? loadOldFoe(angler) : null), [angler, game.outcome]);
   // Each bank a lost trophy is still about, as the stance chip says, has the snapped float it trails drifting on its water.
+  const foeBank = oldFoe && foeAbout(oldFoe, oldFoe.spot, Date.now()) ? oldFoe.spot : null;
   const lostFloatBanks = useMemo(() => {
     const banks = new Set(lodgeLost.map((lost) => lost.spot));
-    if (oldFoe && foeAbout(oldFoe, oldFoe.spot, Date.now())) banks.add(oldFoe.spot);
+    if (foeBank) banks.add(foeBank);
     return [...banks];
-  }, [oldFoe, lodgeLost]);
+  }, [foeBank, lodgeLost]);
   // A trophy that broke the line is filed with the lodge once, for other anglers to meet at its bank.
   const reportedLost = useRef<string | null>(null);
   useEffect(() => {

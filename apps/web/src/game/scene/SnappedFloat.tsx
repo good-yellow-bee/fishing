@@ -4,12 +4,15 @@ import type * as THREE from "three";
 import type { SpotId } from "@stillwater/shared";
 import { driftFloatPose, driftTurn, lostFloatAt } from "./driftFloatPose";
 import { FloatModel } from "./FloatModel";
+import { useSettings } from "../settings";
 import { useReducedMotion } from "./reducedMotion";
 import { waterHeight } from "./water";
 
 /** One bank's snapped float, drifting about its water (driftFloatPose.ts): one draw. */
 function DriftingFloat({ bank }: { bank: SpotId }) {
   const still = useReducedMotion();
+  // Never the angler's own colour, so it is not taken for their float.
+  const colour = useSettings().floatColour === "red" ? "orange" : "red";
   const float = useRef<THREE.Group>(null);
   const home = lostFloatAt(bank);
   const turn = driftTurn(bank);
@@ -26,7 +29,7 @@ function DriftingFloat({ bank }: { bank: SpotId }) {
   if (!home) return null;
   return (
     <group ref={float} name="snapped-float">
-      <FloatModel colour="red" />
+      <FloatModel colour={colour} />
     </group>
   );
 }
