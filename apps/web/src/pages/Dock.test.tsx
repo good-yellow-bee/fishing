@@ -35,6 +35,12 @@ vi.mock("../game/useFishingGame", async (importOriginal) => {
     },
   };
 });
+// The frenzy keeps the real wall clock; pinned off here, so a test run that lands in a real frenzy window reads the same.
+vi.mock("../game/hotspot", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../game/hotspot")>()),
+  frenzyOn: () => false,
+  slotFrenzy: () => ({ from: Number.MAX_SAFE_INTEGER - 1, to: Number.MAX_SAFE_INTEGER }),
+}));
 vi.mock("../auth-client", () => ({ authClient: { signOut: vi.fn() } }));
 vi.mock("../game/fx", () => ({ fx: { enabled: true, land: vi.fn(), haptic: vi.fn(), drag: { set: vi.fn(), stop: vi.fn() }, ambient: { start: vi.fn(), stop: vi.fn(), setConditions: vi.fn() } } }));
 vi.mock("../game/scene/FishingWorld", () => ({
