@@ -1,12 +1,13 @@
 import { useLoader } from "@react-three/fiber";
-import { GLTFLoader, type GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 /**
- * drei's useGLTF, without the Draco and meshopt decoders it bundles: no model here is compressed that way, and the
- * decoders were 28 kB of the lake's download. Same cache, keyed by the URL or the list of URLs.
+ * The lake's models, loaded by three's own glTF loader: drei's useGLTF bundled Draco and meshopt decoders no model here
+ * needs (28 kB of the lake's download; loadGltf.test.ts keeps the models uncompressed). Its own cache, keyed by the URL
+ * or the list of URLs, so models load through this hook, not drei's.
  */
-export function useGLTF<T extends string | string[]>(url: T): T extends string[] ? GLTF[] : GLTF {
-  return useLoader(GLTFLoader, url as never) as never;
+export function useGLTF<T extends string | string[]>(url: T) {
+  return useLoader(GLTFLoader, url);
 }
 
-useGLTF.preload = (url: string | string[]) => useLoader.preload(GLTFLoader, url as never);
+useGLTF.preload = (url: string | string[]) => useLoader.preload(GLTFLoader, url);
