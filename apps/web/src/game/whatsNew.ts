@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-field63";
+export const NEWS_ID = "2026-10-20-scene55";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "The lake now opens sooner, above all on a phone: the creatures you only meet at night, in one season or in the rain load when their time comes instead of all at once, without popping in when they appear.",
   "An outing's page opens every outing on its water in one tap, and a copied outing says how many of the fish hooked were landed.",
   "A big fish worn down in a fight can now find a second wind: it gathers itself once and runs hard again, as the fight card calls. Each lure climbs tiers as you land fish on it, Proven, Trusted and Lucky, shown in the lure picker, and a Lucky lure's hook sets a little more solid. And when another angler lands a fish you let go, the lake tells you on your next visit.",
   "Fishing from the bank, you now have company in any weather: on wet evenings a toad hops past behind you, on rainy days a blackbird comes to your feet in place of the robin, and on winter nights a wood mouse pops out of the snow and scurries across, leaving tiny tracks.",

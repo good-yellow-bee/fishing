@@ -907,6 +907,8 @@ export const PL_GAME: PlBook = {
     "W szare, pochmurne dni w chmurach co jakiś czas otwiera się prześwit i przez jezioro przesuwa się plama słońca, a w dół ukośnie schodzą do niej blade promienie. W wietrzne zimowe dni wiatr zrywa śnieg ze wzgórz za drugim brzegiem i niesie go wzdłuż nich długimi białymi smugami.",
   "On winter days snow lies white on the hills behind the lake, and two children take turns sledging down a run between the far trees, rushing down in a spray of snow and trudging back up pulling their sleds.":
     "W zimowe dni na wzgórzach za jeziorem leży biały śnieg, a dwoje dzieci na zmianę zjeżdża na sankach po torze między drzewami na drugim brzegu, pędząc w obłoku śniegu i wspinając się z powrotem z sankami na sznurku.",
+  "The lake now opens sooner, above all on a phone: the creatures you only meet at night, in one season or in the rain load when their time comes instead of all at once, without popping in when they appear.":
+    "Jezioro otwiera się teraz szybciej, zwłaszcza na telefonie: zwierzęta, które spotyka się tylko nocą, w jednej porze roku albo w deszczu, wczytują się dopiero, gdy nadchodzi ich pora, a nie wszystkie naraz, i nie wyskakują znikąd, kiedy się pojawiają.",
   "An outing's page opens every outing on its water in one tap, and a copied outing says how many of the fish hooked were landed.":
     "Strona wyprawy jednym dotknięciem otwiera wszystkie wyprawy na tym łowisku, a skopiowana wyprawa podaje, ile z zaciętych ryb wyholowano.",
   "On Waters, a water's card says Out now while you are fishing it, and a water's page says when its first fish came. A kind typed two ways, such as Perch and Perches, is one kind on every page, chip and record.":
