@@ -2,7 +2,7 @@ import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Database from "better-sqlite3";
-import { BAG_SIZE, fishById, TAG_RETURN_BONUS, isLakeHour, isTrophyWeight, TROPHY_RELEASE_BONUS, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type LodgeRelease, type LodgeTrack, type SpeciesRecord, type SpotId } from "@stillwater/shared";
+import { BAG_SIZE, fishById, TAG_RETURN_BONUS, TAGGABLE_IDS, isLakeHour, isTrophyWeight, TROPHY_RELEASE_BONUS, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type LodgeRelease, type LodgeTrack, type SpeciesRecord, type SpotId } from "@stillwater/shared";
 
 const dir = dirname(fileURLToPath(import.meta.url));
 export const dataDir = join(dir, "../data");
@@ -289,16 +289,17 @@ export function listBagWeights(userId: string, from: string, to: string): number
 const LODGE_RELEASE_SELECT = `SELECT c.id as catchId, c.species_id as speciesId, c.weight as weight, c.spot as spot, c.created_at as at, p.display_name as by
   FROM catch c JOIN profile p ON p.user_id = c.user_id
   WHERE c.released = 1 AND c.user_id != ? AND c.created_at >= ? AND c.created_at < ?
+    AND c.species_id IN (${TAGGABLE_IDS.map(() => "?").join(", ")})
     AND NOT EXISTS (SELECT 1 FROM catch again WHERE again.tagged_from = c.id)`;
 
 /** Fish other anglers let go in a window and nobody has landed again, newest first. */
 export function listLodgeReleases(userId: string, from: string, before: string, limit: number): LodgeRelease[] {
-  return db.prepare(`${LODGE_RELEASE_SELECT} ORDER BY c.created_at DESC LIMIT ?`).all(userId, from, before, limit) as LodgeRelease[];
+  return db.prepare(`${LODGE_RELEASE_SELECT} ORDER BY c.created_at DESC LIMIT ?`).all(userId, from, before, ...TAGGABLE_IDS, limit) as LodgeRelease[];
 }
 
 /** One of those let-go fish, by its catch's id, if it is still in the lake for this angler. */
 export function findLodgeRelease(userId: string, catchId: string, from: string, before: string): LodgeRelease | undefined {
-  return db.prepare(`${LODGE_RELEASE_SELECT} AND c.id = ?`).get(userId, from, before, catchId) as LodgeRelease | undefined;
+  return db.prepare(`${LODGE_RELEASE_SELECT} AND c.id = ?`).get(userId, from, before, ...TAGGABLE_IDS, catchId) as LodgeRelease | undefined;
 }
 
 /** How many ended derbies this angler held the top spot of, back to their first catch. */

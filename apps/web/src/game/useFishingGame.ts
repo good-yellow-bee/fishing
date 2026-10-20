@@ -1004,7 +1004,7 @@ export function useFishingGame(
     const released = lost.again || mercyNow ? null : castForReleased(loadReleased(), spotRef.current, Date.now(), Math.random());
     if (released?.fish) saveReleased(released.next);
     // Failing that, one another angler let go here may come up, carrying their tag.
-    const tagged = released && !released.fish && lodgeReleasedRef.current.length > 0 ? castForLodgeTag(lodgeReleasedRef.current, spotRef.current, Date.now(), Math.random(), landedTagsRef.current) : null;
+    const tagged = released && !released.fish && lodgeReleasedRef.current.length > 0 ? castForLodgeTag(lodgeReleasedRef.current, spotRef.current, Date.now(), Math.random(), landedTagsRef.current, current) : null;
     recaughtRef.current = released?.fish ?? tagged;
     // Over the groundbait the feeders crowd in, so some bites are theirs; a beginner's first fish stays an easy one.
     const feeder = bait.baited && !mercyNow ? groundbaitFeeder(spotRef.current, lureRef?.current, short, hour) : null;

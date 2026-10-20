@@ -57,20 +57,22 @@ describe("fish let go from the lake", () => {
 
 describe("fish other anglers let go", () => {
   const now = Date.UTC(2026, 9, 20, 12);
+  const strong = { strength: 10, accuracy: 10 };
   const list: LodgeRelease[] = [
     { catchId: "a", speciesId: "carp", weight: 6, spot: "reeds", at: "2026-10-20T08:00:00.000Z", by: "Mara" },
     { catchId: "b", speciesId: "carp", weight: 6, spot: "reeds", at: "2026-10-13T08:00:00.000Z", by: "Mara" },
   ];
 
   it("brings up one let go at this bank before today, grown, with its tag", () => {
-    const back = castForLodgeTag(list, "reeds", now, LODGE_RECAPTURE_ODDS / 2, new Set());
+    const back = castForLodgeTag(list, "reeds", now, LODGE_RECAPTURE_ODDS / 2, new Set(), strong);
     expect(back).toMatchObject({ was: 6, weight: grownWeight(back!.species, 6, 7), tag: { id: "b", by: "Mara" } });
     expect(back!.species.id).toBe("carp");
   });
 
-  it("brings up none at another bank, on an unlucky roll, or once landed this visit", () => {
-    expect(castForLodgeTag(list, "dock", now, 0, new Set())).toBeNull();
-    expect(castForLodgeTag(list, "reeds", now, LODGE_RECAPTURE_ODDS, new Set())).toBeNull();
-    expect(castForLodgeTag(list, "reeds", now, 0, new Set(["b"]))).toBeNull();
+  it("brings up none at another bank, on an unlucky roll, once landed this visit, or too strong for the angler's line", () => {
+    expect(castForLodgeTag(list, "reeds", now, 0, new Set(), { strength: 1, accuracy: 1 })).toBeNull();
+    expect(castForLodgeTag(list, "dock", now, 0, new Set(), strong)).toBeNull();
+    expect(castForLodgeTag(list, "reeds", now, LODGE_RECAPTURE_ODDS, new Set(), strong)).toBeNull();
+    expect(castForLodgeTag(list, "reeds", now, 0, new Set(["b"]), strong)).toBeNull();
   });
 });

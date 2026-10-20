@@ -1,7 +1,6 @@
 import { Hono } from "hono";
-import { fishById, isTaggable, TRACK_LIMIT, TRACK_WINDOW_MS, type LodgeTrack } from "@stillwater/shared";
+import { tagWindow, TRACK_LIMIT, TRACK_WINDOW_MS, type LodgeTrack } from "@stillwater/shared";
 import { listLodgeReleases, listRecentLodgeCatches } from "../db.ts";
-import { tagWindow } from "./catches.ts";
 import type { SessionUser } from "../session.ts";
 
 export const lodgeRoutes = new Hono();
@@ -31,6 +30,5 @@ lodgeRoutes.get("/lodge/recent", (c) => {
 /** Fish other anglers let go on earlier days that are still in the lake, for this angler's casts to find. */
 lodgeRoutes.get("/lodge/released", (c) => {
   const user = c.get("user") as SessionUser;
-  const released = listLodgeReleases(user.id, ...tagWindow(), 100).filter((row) => isTaggable(fishById(row.speciesId)));
-  return c.json({ released: released.slice(0, 20) });
+  return c.json({ released: listLodgeReleases(user.id, ...tagWindow(), 50) });
 });

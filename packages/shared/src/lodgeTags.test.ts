@@ -3,8 +3,9 @@ import { fishById } from "./fish.ts";
 import { isTaggable, taggedWeightFits } from "./lodgeTags.ts";
 
 describe("lodge-tagged fish", () => {
-  it("remembers only fish past the small common ones", () => {
+  it("remembers only fish past the small common ones, and no legend", () => {
     expect(isTaggable(fishById("perch"))).toBe(false);
+    expect(isTaggable(fishById("ghost-pike"))).toBe(false);
     expect(isTaggable(fishById("carp"))).toBe(true);
     expect(isTaggable(undefined)).toBe(false);
   });

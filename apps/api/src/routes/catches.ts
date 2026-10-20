@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { Hono } from "hono";
-import { bagDay, daysBetween, fishById, isGolden, isTaggable, isLakeHour, isLakeSeason, isLocalDay, isSky, TAG_FINDER_BONUS, TAG_WINDOW_DAYS, taggedWeightFits, validateCatch, SPOT_IDS, type CatchSubmission } from "@stillwater/shared";
+import { daysBetween, fishById, isGolden, isTaggable, isLakeHour, isLakeSeason, isLocalDay, isSky, TAG_FINDER_BONUS, tagWindow, taggedWeightFits, validateCatch, SPOT_IDS, type CatchSubmission } from "@stillwater/shared";
 import { countCatches, findCatchByRequestId, findLodgeRelease, getProfile, heaviestCatch, listCatchDays, othersHeaviestCatch, recordCatch, releaseCatch, toProfile, type CatchRow } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
@@ -12,12 +12,6 @@ function sameCatch(row: CatchRow, body: CatchSubmission) {
   return row.species_id === body.speciesId && row.weight === body.weight && row.spot === body.spot &&
     row.clean === (body.clean ? 1 : 0) && row.hour === (body.hour ?? null) && row.sky === (body.sky ?? null) &&
     row.season === (body.season ?? null) && row.day === (body.day ?? null);
-}
-
-/** Other anglers' let-go fish come back from TAG_WINDOW_DAYS ago up to the start of today (UTC). */
-export function tagWindow(at = new Date()): [string, string] {
-  const today = bagDay(at).from;
-  return [new Date(new Date(today).getTime() - TAG_WINDOW_DAYS * 86_400_000).toISOString(), today];
 }
 
 catchRoutes.post("/catches", async (c) => {
