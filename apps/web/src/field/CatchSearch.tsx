@@ -1010,8 +1010,8 @@ function leader<T>(catches: readonly CatchEntry[], of: (entry: CatchEntry) => T 
 
 /** What the found fish have in common, where one clearly leads: "Most on Jig (5). Best time of day: Dawn (4). Most from Cedar Lake (6)." */
 /**
- * The matches split by kind and by year, once they hold more than one: "By kind: Northern pike 3 · Zander 2", "By year:
- * 2026 5 · 2025 3". Each narrows the search to that kind or year.
+ * The matches split by kind, by year and by water, once they hold more than one: "By kind: Northern pike 3 · Zander 2",
+ * "By year: 2026 5 · 2025 3", "By water: Cedar Lake 4 · Mill Pond 1". Each narrows the search to that kind, year or water.
  */
 /**
  * `matches`: the fish counted (the angler's own among those found); `all`: everything found, so each narrowed search
@@ -1042,12 +1042,14 @@ function MatchSplits({ matches, all, search, largest }: { matches: readonly Catc
     .map((forms): [string, number] => [mostWritten(forms), [...forms.values()].reduce((sum, n) => sum + n, 0)])
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
   const years = tally((entry) => bookFishDay(book, entry).slice(0, 4)).sort((a, b) => b[0].localeCompare(a[0]));
-  // The waters with most fish first, up to six: a long tail of one-fish waters says little.
-  const waterName = (spotId: string) => plainName(spotById(book, spotId)?.name ?? t("Unknown water"));
-  const waters = tally((entry) => entry.spotId)
-    .filter(([spotId]) => spotById(book, spotId))
-    .sort((a, b) => b[1] - a[1] || waterName(a[0]).localeCompare(waterName(b[0])))
-    .slice(0, 6);
+  // Waters by name, most fish first: the water search opens a name, so two waters read the same are one row.
+  const nameOf = new Map(book.spots.map((spot) => [spot.id, plainName(spot.name)]));
+  // As the search compares names: case, accents and spacing aside ("Śniardwy" is "Sniardwy").
+  const waterKey = (entry: CatchEntry) => foldText(nameOf.get(entry.spotId) ?? "");
+  const shownWater = new Map(matches.map((entry) => [waterKey(entry), nameOf.get(entry.spotId) ?? ""]));
+  const waters = tally(waterKey)
+    .filter(([key]) => key !== "")
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
   // One kind found: each year's biggest beside its count, by the measure most of them were taken in, so "are my pike
   // getting bigger" reads off any search. Across kinds a biggest says nothing.
   const byLength = matches.filter((entry) => measureOf(entry, "length")).length * 2 >= matches.length;
@@ -1087,7 +1089,7 @@ function MatchSplits({ matches, all, search, largest }: { matches: readonly Catc
       {line(t("By kind:"), kinds, (species) => exactTerm("species", pieceName(species)), (species) => pieceName(species), (entry, species) => kindKey(entry.species) === kindKey(species))}
       {line(t("By year:"), years, (year) => year, (year) => year, (entry, year) => bookFishDay(book, entry).startsWith(`${year}-`), bestIn)}
       {/* Where it came from: "pike" answers "where" in one tap, each water narrowing the search. */}
-      {line(t("By water:"), waters, (spotId) => exactTerm("water", waterName(spotId)), waterName, (entry, spotId) => entry.spotId === spotId)}
+      {line(t("By water:"), waters, (key) => exactTerm("water", shownWater.get(key)!), (key) => shownWater.get(key)!, (entry, key) => waterKey(entry) === key)}
     </>
   );
 }
