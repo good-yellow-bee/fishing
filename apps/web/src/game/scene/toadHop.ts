@@ -46,24 +46,29 @@ export type ToadPose = Spot & {
   throat: number;
   /** Eyes shut, 0 or 1. */
   blink: number;
+  /** How much of it shows, 0 to 1: out of the wet grass on a bank, always all of it on the dock. */
+  show: number;
 };
 
-const YAW = Math.atan2(TOAD_TO.x - TOAD_FROM.x, TOAD_TO.z - TOAD_FROM.z);
-const AWAY: ToadPose = { ...TOAD_FROM, here: false, y: TOAD_Y - UNDER, yaw: YAW, kick: 0, throat: 0, blink: 0 };
+/** Its way across: from and to, its ground's height, and whether it climbs over an edge at each end (the dock) or creeps out of the wet grass and back in (a bank). */
+export type ToadWay = { from: Spot; to: Spot; y: (x: number, z: number) => number; edges: boolean };
 
-function along(k: number): Spot {
-  return { x: TOAD_FROM.x + (TOAD_TO.x - TOAD_FROM.x) * k, z: TOAD_FROM.z + (TOAD_TO.z - TOAD_FROM.z) * k };
-}
+export const DOCK_WAY: ToadWay = { from: TOAD_FROM, to: TOAD_TO, y: () => TOAD_Y, edges: true };
 
-/** The toad `time` seconds after it came out (so it never appears mid-crossing). `still` sits it in the middle of the boards. */
-export function toadAt(time: number, still = false): ToadPose {
-  if (still) return { ...along(0.5), here: true, y: TOAD_Y, yaw: YAW, kick: 0, throat: 0, blink: 0 };
-  const { index, into } = visitAt(time, FIRST_SEC, VISIT_EVERY_SEC);
-  if (index < 0 || into >= VISIT_SEC) return AWAY;
+/** The toad `into` seconds into its crossing of `way` (0 to VISIT_SEC), or `still` sat in the middle of it. */
+export function crossingAt(into: number, way: ToadWay, still = false): ToadPose {
+  const yaw = Math.atan2(way.to.x - way.from.x, way.to.z - way.from.z);
+  const fx = Math.sin(yaw);
+  const fz = Math.cos(yaw);
+  const along = (k: number): Spot => ({ x: way.from.x + (way.to.x - way.from.x) * k, z: way.from.z + (way.to.z - way.from.z) * k });
+  const at = (spot: Spot, lift: number, rest: Partial<ToadPose>): ToadPose => ({ ...spot, here: true, y: way.y(spot.x, spot.z) + lift, yaw, kick: 0, throat: 0, blink: 0, show: 1, ...rest });
+  if (still) return at(along(0.5), 0, {});
   if (into < CLIMB_SEC) {
-    // Up over the edge, front feet first.
     const k = into / CLIMB_SEC;
-    return { ...along(0), x: TOAD_FROM.x - BESIDE * (1 - k), here: true, y: TOAD_Y - UNDER * (1 - k * k), yaw: YAW, kick: 0.4 * Math.sin(Math.PI * k), throat: 0, blink: 0 };
+    // Up over the edge, front feet first; or out of the grass.
+    if (!way.edges) return at(along(0), 0, { show: k * k * (3 - 2 * k), kick: 0.3 * Math.sin(Math.PI * k) });
+    const start = along(0);
+    return at({ x: start.x - fx * BESIDE * (1 - k), z: start.z - fz * BESIDE * (1 - k) }, -UNDER * (1 - k * k), { kick: 0.4 * Math.sin(Math.PI * k) });
   }
   let t = into - CLIMB_SEC;
   for (let hop = 0; hop < HOPS; hop += 1) {
@@ -71,7 +76,7 @@ export function toadAt(time: number, still = false): ToadPose {
     const to = (hop + 1) / HOPS;
     if (t < HOP_SEC) {
       const k = t / HOP_SEC;
-      return { ...along(from + (to - from) * k), here: true, y: TOAD_Y + HOP_UP * Math.sin(Math.PI * k), yaw: YAW, kick: Math.sin(Math.PI * k), throat: 0, blink: 0 };
+      return at(along(from + (to - from) * k), HOP_UP * Math.sin(Math.PI * k), { kick: Math.sin(Math.PI * k) });
     }
     t -= HOP_SEC;
     const sit = SITS[hop];
@@ -79,11 +84,23 @@ export function toadAt(time: number, still = false): ToadPose {
     if (t < sit) {
       // Sat, its throat pumping, settling in and out of it, and now and then a slow blink.
       const settle = Math.min(1, t / 0.3, (sit - t) / 0.3);
-      return { ...along(to), here: true, y: TOAD_Y, yaw: YAW, kick: 0, throat: settle * (0.5 - 0.5 * Math.cos(t * 9)), blink: t % 2.2 > 0.85 && t % 2.2 < 1.05 ? 1 : 0 };
+      return at(along(to), 0, { throat: settle * (0.5 - 0.5 * Math.cos(t * 9)), blink: t % 2.2 > 0.85 && t % 2.2 < 1.05 ? 1 : 0 });
     }
     t -= sit;
   }
-  // Over the far edge and down.
+  // Over the far edge and down; or back into the grass.
   const k = Math.min(1, t / DROP_SEC);
-  return { ...along(1), x: TOAD_TO.x + BESIDE * k, here: true, y: TOAD_Y + 0.03 * Math.sin(Math.PI * Math.min(1, k * 2)) - UNDER * k * k, yaw: YAW, kick: Math.sin(Math.PI * Math.min(1, k * 2)), throat: 0, blink: 0 };
+  if (!way.edges) return at(along(1), 0, { show: 1 - k * k * (3 - 2 * k) });
+  const end = along(1);
+  return at({ x: end.x + fx * BESIDE * k, z: end.z + fz * BESIDE * k }, 0.03 * Math.sin(Math.PI * Math.min(1, k * 2)) - UNDER * k * k, { kick: Math.sin(Math.PI * Math.min(1, k * 2)) });
+}
+
+const AWAY: ToadPose = { ...TOAD_FROM, here: false, y: TOAD_Y - UNDER, yaw: 0, kick: 0, throat: 0, blink: 0, show: 0 };
+
+/** The dock toad `time` seconds after it came out (so it never appears mid-crossing). `still` sits it in the middle of the boards. */
+export function toadAt(time: number, still = false): ToadPose {
+  if (still) return crossingAt(0, DOCK_WAY, true);
+  const { index, into } = visitAt(time, FIRST_SEC, VISIT_EVERY_SEC);
+  if (index < 0 || into >= VISIT_SEC) return AWAY;
+  return crossingAt(into, DOCK_WAY);
 }

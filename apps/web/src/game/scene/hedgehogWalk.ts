@@ -63,11 +63,11 @@ export function hedgehogStart(time: number): HedgehogState {
   return { mode: "away", nextAt: time + FIRST_SEC };
 }
 
-/** Its way past `angler`, behind them, on dry land all along: or null where the bank is wet. */
-export function hedgehogPath(angler: Angler, ground: Ground): { from: Spot; to: Spot } | null {
-  const steps = Math.ceil((2 * ACROSS) / CHECK_M);
+/** Its way past `angler`, behind them, `across` metres to each side, on dry land all along: or null where the bank is wet. */
+export function hedgehogPath(angler: Angler, ground: Ground, across = ACROSS): { from: Spot; to: Spot } | null {
+  const steps = Math.ceil((2 * across) / CHECK_M);
   for (const back of [BEHIND, BEHIND * 1.5]) {
-    const points = Array.from({ length: steps + 1 }, (_, i) => besideAngler(angler, -ACROSS + (2 * ACROSS * i) / steps, -back, ground));
+    const points = Array.from({ length: steps + 1 }, (_, i) => besideAngler(angler, -across + (2 * across * i) / steps, -back, ground));
     if (points.every((p) => p !== null)) return { from: points[0]!, to: points[steps]! };
   }
   return null;
