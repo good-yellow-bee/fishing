@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act } from "react";
+import { act, useRef } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { canLand, localDate, DOCK_STAND_X, DOCK_STAND_Z, FISH, type Giant, type LodgeLost, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind, type SpotId } from "@stillwater/shared";
@@ -175,7 +175,10 @@ const harnessGiants: { current: Giant[] } = { current: [] };
 const harnessLost: { current: LodgeLost[] } = { current: [] };
 
 function Harness({ current = profile, hour = "day", rising = false, lure, wind, sky, season }: { current?: Profile; hour?: LakeHour; rising?: boolean; lure?: string; wind?: Wind; sky?: Sky; season?: LakeSeason }) {
-  const game = useFishingGame(current, hour, lure === undefined ? undefined : { current: lure }, sky, false, season, undefined, rising, wind, undefined, harnessLegend.current, undefined, undefined, undefined, harnessGiants.current, harnessLost.current);
+  // A stable ref, as Dock's tied lure is, so a re-render with another lure reaches callbacks made earlier.
+  const lureRef = useRef(lure ?? "");
+  lureRef.current = lure ?? "";
+  const game = useFishingGame(current, hour, lure === undefined ? undefined : lureRef, sky, false, season, undefined, rising, wind, undefined, harnessLegend.current, undefined, undefined, undefined, harnessGiants.current, harnessLost.current);
   return (
     <>
       <div ref={game.surfaceRef} data-stance="dock" data-aim="0.5,3" data-angler="0.15,7.42">
@@ -790,6 +793,32 @@ describe("useFishingGame frayed line", () => {
     expect(container!.querySelector("[data-testid=worms]")?.textContent).toBe(String(left));
     cast(surface);
     expect(hint()).not.toContain("lost its scent");
+  });
+
+  it.each([
+    ["the tin is empty", 0, "Nightcrawler", "true", `You cut off the frayed line and tie the lure on again. The line holds full strain. Your worm tin is empty, so the washed-out worm stays on. More worms are dug each day.`],
+    ["a spinner is tied on instead", 2, "Inline spinner", "false", "You cut off the frayed line and tie the lure on again. The line holds full strain."],
+  ] as const)("retying a frayed line over a washed-out worm spends no worm when %s", (_, worms, lure, washed, said) => {
+    const kept = new Map<string, string>([[wormTinKey("test"), JSON.stringify({ worms, day: localDate(new Date(DOCK_BUBBLES.at)) })]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Nightcrawler");
+    fightPerformance = { peakTension: 0.5, maxLine: 1, scuffed: true };
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 1);
+    dismiss();
+    fightPerformance = { peakTension: 0.5, maxLine: 1 };
+    vi.mocked(soakAfterCast).mockReturnValueOnce(WORM_SOAK_CASTS);
+    step.mockReturnValueOnce("escaped");
+    castAndFight(surface, 2);
+    dismiss();
+    expect(container!.querySelector("[data-testid=frayed]")?.textContent).toBe("true");
+    expect(container!.querySelector("[data-testid=washed]")?.textContent).toBe("true");
+    act(() => root!.render(<Harness current={profile} lure={lure} />));
+    retie();
+    expect(container!.querySelector("[data-testid=frayed]")?.textContent).toBe("false");
+    expect(container!.querySelector("[data-testid=washed]")?.textContent).toBe(washed);
+    expect(container!.querySelector("[data-testid=worms]")?.textContent).toBe(String(worms));
+    expect(hint()).toBe(said);
   });
 
   it("keeps the washed-out worm on when the tin is empty", () => {

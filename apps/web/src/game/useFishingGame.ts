@@ -2280,28 +2280,30 @@ export function useFishingGame(
     const wasFrayed = frayedRef.current;
     const wasTwisted = isTwisted(twistRef.current);
     const wasDull = dullRef.current;
-    // A fresh worm comes from the tin; with none left the washed-out one stays on.
-    const rebait = isWashedOut(soakRef.current) && wormsRef.current > 0;
-    if (!wasFrayed && !wasTwisted && !wasDull && !rebait) {
-      setHint(t("Your worm tin is empty, so the washed-out worm stays on. More worms are dug each day."));
+    // A fresh worm for a washed-out one on the hook comes from the tin; with none left the washed-out one stays on.
+    const washedOn = isWashedOut(soakRef.current) && isLiveBait(lureRef?.current);
+    const tinEmpty = washedOn && wormsRef.current === 0;
+    const emptyTin = t("Your worm tin is empty, so the washed-out worm stays on. More worms are dug each day.");
+    if (tinEmpty && !wasFrayed && !wasTwisted && !wasDull) {
+      setHint(emptyTin);
       return;
     }
     markFrayed(false);
     setTwist(0);
     markDull(false);
-    if (rebait) {
-      setSoak(0);
-      keepWorms(wormsRef.current - 1);
-    }
-    setHint(
-      wasFrayed
-        ? t("You cut off the frayed line and tie the lure on again. The line holds full strain.")
-        : wasTwisted
-          ? t("You cut off the twisted line and tie the lure on again. It casts clean.")
-          : wasDull
-            ? t("You touch up the dull hook point and tie the lure on again. It sets solid again.")
-            : `${t("You thread a fresh worm on the hook. Its scent draws the fish again.")} ${t("Worms left in your tin: {worms}.", { worms: wormsRef.current })}`,
-    );
+    if (!tinEmpty) setSoak(0);
+    if (washedOn && !tinEmpty) keepWorms(wormsRef.current - 1);
+    const rebaited = washedOn && !tinEmpty ? `${t("You thread a fresh worm on the hook. Its scent draws the fish again.")} ${t("Worms left in your tin: {worms}.", { worms: wormsRef.current })}` : "";
+    const fixed = wasFrayed
+      ? t("You cut off the frayed line and tie the lure on again. The line holds full strain.")
+      : wasTwisted
+        ? t("You cut off the twisted line and tie the lure on again. It casts clean.")
+        : wasDull
+          ? t("You touch up the dull hook point and tie the lure on again. It sets solid again.")
+          : rebaited
+            ? ""
+            : t("You thread a fresh worm on the hook. Its scent draws the fish again.");
+    setHint([fixed, rebaited, tinEmpty ? emptyTin : ""].filter(Boolean).join(" "));
   }, []);
 
   /** Toss a handful of groundbait off the bank the angler stands on: the next casts there bite sooner. */
@@ -2379,7 +2381,7 @@ export function useFishingGame(
   /** Leave a shiner, or at dusk or night a worm on the hook, out on a night line at this bank, for a later visit to check. */
   const setNightLine = () => {
     const spot = stanceRef.current;
-    // With no shiner to spare, a worm on the hook goes out instead: free, but fewer night feeders come to it.
+    // With no shiner to spare, a worm from the tin goes out instead, when one is tied on: fewer night feeders come to it.
     const shiner = liveShinerRef.current || bucketNow().length > 0;
     if (!profile || nightLine || (!shiner && !(isLiveBait(lureRef?.current) && wormLineHour(hourRef.current) && wormsRef.current > 0)) || phaseRef.current !== "idle" || !isFishingStance(spot) || spot === "open" || nightLineKinds(spot, profile).length === 0) return;
     // A spare from the bucket goes out first, so the shiner on the hook stays for casting.

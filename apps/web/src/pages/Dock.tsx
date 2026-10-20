@@ -1258,7 +1258,7 @@ export function DockPage() {
           {game.twisted && <small className="stance-cold"> · {t("line twisted")}</small>}
           {game.dulled && <small className="stance-cold"> · {t("hook dulled")}</small>}
           {washedWorm && <small className="stance-cold"> · {t("worm washed out")}</small>}
-          {isLiveBait(lure) && game.worms === 0 && <small className="stance-cold"> · {t("worm tin empty")}</small>}
+          {isLiveBait(lure) && game.worms === 0 && (washedWorm || (wormLineHour(hour) && !game.nightLine)) && <small className="stance-cold"> · {t("worm tin empty")}</small>}
           {game.liveShiner && <small className="stance-hot"> · {t("live shiner on")}</small>}
         </aside>
         <LureChoice
