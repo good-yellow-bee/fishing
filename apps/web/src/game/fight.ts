@@ -75,6 +75,8 @@ export type FightSim = {
   bitten?: boolean;
   /** A smallmouth's or a rainbow's run straight at the angler, coming and while it lasts: the line goes slack unless it is reeled fast. */
   charge?: boolean;
+  /** A big fish that had tired found a second wind: the run it makes on it, coming and while it lasts. */
+  secondWind?: boolean;
   /** Hooked light, the fish charged and the slack line let the hook drop out: why it got away. */
   thrown?: boolean;
 };
@@ -184,6 +186,8 @@ export type FightPerformance = {
   followedDarts?: number;
   /** A trophy that made a second run at the net. */
   encore?: boolean;
+  /** A big fish found its second wind in this fight. */
+  secondWind?: boolean;
   /** Seconds of fight played so far, by game time, so a paused tab doesn't count. */
   fightSec?: number;
   /** At the reeds, the point or the dock, every run so far kept out of the weeds, off the rocks or clear of the pilings; at the inlet, every run downstream turned upstream. Unset once one wasn't. */
@@ -241,6 +245,17 @@ export const HEAVY_DRAG_CAP = 0.85;
 /** Under this the fish is tiring; under the other it is played out. */
 export const TIRING_STAMINA = 0.6;
 export const SPENT_STAMINA = 0.25;
+/** A big fish, this far up its kind's weight range, finds a second wind once in a fight: tired to this much stamina between runs, it gathers this much back and runs at once. */
+export const SECOND_WIND_SHARE = 0.6;
+export const SECOND_WIND_AT = 0.4;
+export const SECOND_WIND_GAIN = 0.3;
+/** It gathers itself this long, as the card calls it, before the run. */
+export const SECOND_WIND_GATHER_MS = 600;
+
+/** Whether a fish this heavy finds a second wind: a big one of its kind, not a panfish's quick head shakes. */
+export function findsSecondWind(species: FishSpecies, weight: number): boolean {
+  return species.challenge !== "mash" && (weight - species.minWeight) / (species.maxWeight - species.minWeight) >= SECOND_WIND_SHARE;
+}
 export type StaminaState = "fresh" | "tiring" | "spent";
 
 /** Reeling with the tension bar in the tight (amber) zone brings line in this much faster. */
@@ -641,6 +656,7 @@ export function makeFight(
   const headMs = THRASHERS.has(species.id) ? THRASH_HEAD_MS : NET_HEAD_MS;
   const slipper = SLIPPERS.has(species.id);
   let slipSec = 0;
+  let windLeft = findsSecondWind(species, weight);
   /** The drag as it stood when the run began: turning the knob mid-run takes effect on the next one. */
   let runDrag: Drag = "normal";
   const step = (nowMs: number, dtSec: number, reeling: boolean, steer: Steer = 0, drag: Drag = "normal"): FightOutcome => {
@@ -672,7 +688,15 @@ export function makeFight(
       return "fighting";
     }
     if (nextAt === null) nextAt = nowMs + range(1200, 1800);
-    if (lastRunsLeft > 0 && sim.surge === 0 && sim.line > 0 && sim.line < LAST_RUN_LINE && sim.stamina > SPENT_STAMINA) {
+    // A big fish worn down between runs gathers itself once and runs again at once.
+    if (windLeft && sim.surge === 0 && sim.stamina < SECOND_WIND_AT && sim.stamina > SPENT_STAMINA && !sim.sulk && !sim.weeded && !sim.wrapped && !sim.lastRun) {
+      windLeft = false;
+      sim.stamina = Math.min(1, sim.stamina + SECOND_WIND_GAIN);
+      sim.secondWind = true;
+      performance.secondWind = true;
+      nextAt = nowMs + SECOND_WIND_GATHER_MS;
+    }
+    if (lastRunsLeft > 0 && sim.surge === 0 && !sim.secondWind && sim.line > 0 && sim.line < LAST_RUN_LINE && sim.stamina > SPENT_STAMINA) {
       sim.encore = lastRunDone;
       if (lastRunDone) performance.encore = true;
       lastRunDone = true;
@@ -739,6 +763,7 @@ export function makeFight(
         sim.firstRun = false;
         sim.tailWalk = false;
         sim.charge = false;
+        sim.secondWind = false;
         sim.darted = false;
         dartLeft = null;
         sim.lastRun = false;
@@ -896,7 +921,7 @@ export function makeFight(
       sim.line = 0;
       sim.surge = 0;
       // Whatever it was doing ends at the net.
-      for (const flag of ["jump", "roll", "lastRun", "encore", "charge", "firstRun", "tailWalk", "tearing", "sulk", "lifting", "weeded", "wrapped", "shake", "headTurned", "diving", "rocky", "turning", "darted", "downstream", "withRun"] as const) delete sim[flag];
+      for (const flag of ["jump", "roll", "lastRun", "encore", "charge", "firstRun", "tailWalk", "tearing", "sulk", "lifting", "weeded", "wrapped", "shake", "headTurned", "diving", "rocky", "turning", "darted", "downstream", "withRun", "secondWind"] as const) delete sim[flag];
       tearSec = 0;
       sim.netting = true;
       sim.netHead = false;
