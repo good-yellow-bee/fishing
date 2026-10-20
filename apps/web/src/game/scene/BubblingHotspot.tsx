@@ -70,13 +70,12 @@ export function BubblingHotspot({ hotspot, weather }: { hotspot: Hotspot; weathe
     const bead = beads.current;
     const ring = rings.current;
     if (!bead || !ring) return;
-    // In a feeding frenzy the bubbles come twice as fast and spread wider; the boil builds and dies away.
+    // In a feeding frenzy the bubbles come twice as fast; the boil builds and dies away.
     const boil = frenzyAmount(Date.now());
-    boilClock.current += delta * (1 + boil);
+    boilClock.current += delta * (1 + (still ? 0 : boil));
     const time = clock.elapsedTime;
-    const bubbleTime = still ? time : boilClock.current;
     for (let i = 0; i < HOTSPOT_BUBBLES; i += 1) {
-      const bubble = hotspotBubble(hotspot, i, bubbleTime);
+      const bubble = hotspotBubble(hotspot, i, time, boilClock.current);
       scratch.position.set(bubble?.x ?? 0, bubble?.y ?? -40, bubble?.z ?? 0);
       scratch.rotation.set(0, 0, 0);
       scratch.scale.setScalar(bubble?.kind === "bead" ? bubble.size : 0);
@@ -84,7 +83,7 @@ export function BubblingHotspot({ hotspot, weather }: { hotspot: Hotspot; weathe
       bead.setMatrixAt(i, scratch.matrix);
 
       scratch.rotation.set(-Math.PI / 2, 0, 0);
-      const ringSize = bubble?.kind === "ring" ? bubble.size * (1 + boil * 0.6) : 0;
+      const ringSize = bubble?.kind === "ring" ? bubble.size : 0;
       scratch.scale.set(ringSize, ringSize, 1);
       scratch.updateMatrix();
       ring.setMatrixAt(i, scratch.matrix);

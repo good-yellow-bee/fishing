@@ -1403,7 +1403,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC222~~ | ~~The robin at your feet: fishing from the bank by day (Reeds, Drop-off, Point or anywhere ashore off the dock), now and then the robin flies in and lands by the angler's feet, hops about pecking and cocking its head, and flies off, at once if you walk away (every creature so far stayed in the dock's frame)~~ (#1504) | scene | S |
 | ~~SC223~~ | ~~News card scene51 covers SC222 and the render-perf cuts SC214 to SC221~~ (#1504) | scene | S |
 | ~~SC224~~ | ~~Hedgehog on the bank: on dry evenings and nights from spring to fall, while the angler fishes ashore, now and then a hedgehog snuffles past behind them from side to side, stopping to sniff; any fuss (a strike, a fish on, the angler walking past) curls it into a ball until a while after it is over, then it uncurls and trundles on~~ (#1506) | scene | S |
-| SC225 | Frenzy boil (for GT369): while the bubbling hotspot is in a feeding frenzy its bubbles come twice as fast with wider rings, and little silver baitfish skitter out of the patch and splash back; it builds and dies away over a few seconds at the frenzy's start and end | scene | S |
+| SC225 | Frenzy boil (for GT369): while the bubbling hotspot is in a feeding frenzy its bubbles come twice as fast, and little silver baitfish skitter out of the patch and splash back; it builds and dies away over a few seconds at the frenzy's start and end | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 

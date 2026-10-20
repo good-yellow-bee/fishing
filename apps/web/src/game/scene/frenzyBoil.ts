@@ -1,5 +1,6 @@
 import { spotAt, walkableAt } from "@stillwater/shared";
 import { HOTSPOT_RADIUS, slotFrenzy, type Hotspot } from "../hotspot";
+import { GOLDEN, frac } from "./hotspotBubbles";
 import { smoothstep } from "./visitClock";
 import { waterHeight } from "./water";
 
@@ -20,11 +21,6 @@ const LEAP_UP = 0.22;
 const LEAP_ACROSS = 0.35;
 const LEAP_SHARE = 0.45;
 const SPLASH_MAX = 0.28;
-const GOLDEN = 0.618034;
-
-function frac(value: number) {
-  return value - Math.floor(value);
-}
 
 /** How hard the patch boils at `nowMs`, 0 to 1: building at the frenzy's start, dying away at its end. */
 export function frenzyAmount(nowMs: number) {
@@ -50,7 +46,9 @@ export function baitfish(hotspot: Hotspot, i: number, time: number, amount: numb
   const heading = angle * 3.7 + round;
   const ex = sx + Math.sin(heading) * LEAP_ACROSS;
   const ez = sz + Math.cos(heading) * LEAP_ACROSS;
-  if (spotAt(ex, ez) !== hotspot.spot || walkableAt(ex, ez) || walkableAt(sx, sz)) return { leap: null, splash: null };
+  // Out of the patch's own water and back into it, never over a board or the bank.
+  const over = [0, 0.5, 1].map((k) => [sx + (ex - sx) * k, sz + (ez - sz) * k] as const);
+  if (over.some(([x, z]) => spotAt(x, z) !== hotspot.spot || walkableAt(x, z))) return { leap: null, splash: null };
   if (u < LEAP_SHARE) {
     const k = u / LEAP_SHARE;
     const x = sx + (ex - sx) * k;

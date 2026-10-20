@@ -1,6 +1,8 @@
+import { spotAt, walkableAt } from "@stillwater/shared";
 import { describe, expect, it } from "vitest";
 import { HOTSPOT_PERIOD_MS, hotspotAt, slotFrenzy } from "../hotspot";
 import { BAITFISH, LEAP_SEC, baitfish, frenzyAmount } from "./frenzyBoil";
+import { hotspotBubble } from "./hotspotBubbles";
 import { waterHeight } from "./water";
 
 describe("the frenzy's boil", () => {
@@ -26,7 +28,8 @@ describe("the frenzy's boil", () => {
         const { leap, splash } = baitfish(hotspot, i, t, 1);
         if (leap) {
           leaps += 1;
-          expect(leap.y).toBeGreaterThanOrEqual(waterHeight(leap.x, leap.z, t) - 1e-9);
+          expect(spotAt(leap.x, leap.z)).toBe(hotspot.spot);
+          expect(walkableAt(leap.x, leap.z)).toBe(false);
           expect(Math.hypot(leap.x - hotspot.x, leap.z - hotspot.z)).toBeLessThan(2);
         }
         if (splash) splashes += 1;
@@ -37,5 +40,13 @@ describe("the frenzy's boil", () => {
     expect(splashes).toBeGreaterThan(0);
     const few = Array.from({ length: BAITFISH }, (_, i) => baitfish(hotspot, i, 0.2, 0.3)).filter((f) => f.leap || f.splash).length;
     expect(few).toBeLessThanOrEqual(Math.round(0.3 * BAITFISH));
+  });
+
+  it("keeps the bubbles on the water's own chop however far the frenzy has paced them on", () => {
+    const hotspot = hotspotAt(Date.UTC(2026, 9, 20), 10);
+    for (let i = 0; i < 14; i += 1) {
+      const bubble = hotspotBubble(hotspot, i, 40, 127.3);
+      if (bubble) expect(bubble.y - waterHeight(bubble.x, bubble.z, 40)).toBeCloseTo(0.06);
+    }
   });
 });
