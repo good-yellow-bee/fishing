@@ -202,7 +202,7 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <button type="button" onClick={game.checkNightLine}>check night line</button>
       <i data-testid="caught-hour">{game.outcome?.kind === "landed" ? (game.outcome.hour ?? "") : ""}</i>
       <i data-testid="lost-from">{game.outcome?.kind === "landed" ? (game.outcome.lostFrom?.by ?? "") : ""}</i>
-      <i data-testid="lost-report">{game.lostReport ? `${game.lostReport.speciesId}|${game.lostReport.weight}|${game.lostReport.lure ?? ""}` : ""}</i>
+      <i data-testid="lost-report">{game.lostReport ? `${game.lostReport.speciesId}|${game.lostReport.weight}|${game.lostReport.spot}` : ""}</i>
       <i data-testid="night-line">{game.nightLine ? game.nightLine.spot : ""}</i>
       <i data-testid="live-shiner">{String(game.liveShiner)}</i>
       <i data-testid="frayed">{String(game.frayed)}</i>
@@ -1069,7 +1069,7 @@ describe("useFishingGame lost fight", () => {
     expect(message()).toMatch(/threw the hook\. It looked like a trophy\. It will be about this bank in the days to come\.$/);
     expect(JSON.parse(kept.get(oldFoeKey(profile.userId))!)).toMatchObject({ species: "pike", weight: pike.maxWeight, spot: "dock", lure: "Pheasant tails" });
     // And it goes to the lodge, for other anglers to meet.
-    expect(container!.querySelector("[data-testid=lost-report]")?.textContent).toBe(`pike|${pike.maxWeight}|Pheasant tails`);
+    expect(container!.querySelector("[data-testid=lost-report]")?.textContent).toBe(`pike|${pike.maxWeight}|dock`);
   });
 
   it("says a light hook dropped out of the slack line when a charge was left slack", () => {
@@ -2777,7 +2777,7 @@ describe("level unlock integration", () => {
   });
 
   it("brings up a trophy another angler lost here, names them, and lands it for the lodge to pay", () => {
-    harnessLost.current = [{ id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d", speciesId: "pike", weight: 14.5, spot: "dock", lure: "Mepps spinner", at: "2026-10-19T10:00:00.000Z", by: "Mara" }];
+    harnessLost.current = [{ id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d", speciesId: "pike", weight: 14.5, spot: "dock", at: "2026-10-19T10:00:00.000Z", by: "Mara" }];
     const strong = { ...profile, strength: 10, accuracy: 10 };
     try {
       const surface = mount(DOCK_BUBBLES.at, strong, "day", false, "Pheasant tails");
@@ -2785,7 +2785,7 @@ describe("level unlock integration", () => {
       castAndFight(surface, 1);
       expect(phase()).toBe("result:landed");
       expect(container!.querySelector("[data-testid=lost-from]")?.textContent).toBe("Mara");
-      expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toMatch(/^Northern pike: the trophy Mara lost here, still with their Mepps spinner in its jaw\./);
+      expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toMatch(/^Northern pike: the trophy Mara lost here\./);
     } finally {
       harnessLost.current = [];
     }

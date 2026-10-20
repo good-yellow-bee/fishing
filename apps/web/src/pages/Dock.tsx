@@ -346,8 +346,14 @@ export function DockPage() {
     if (!lost || reportedLost.current === lost.id) return;
     reportedLost.current = lost.id;
     const { id: _local, ...fish } = lost;
-    // A report that fails only means the rest of the lodge never meets this one.
-    reportLost(fish).catch(() => undefined);
+    // The angler's own foe keeps the report's id, so landing it themselves closes it for the lodge.
+    reportLost(fish)
+      .then(({ id }) => {
+        const foe = angler ? loadOldFoe(angler) : null;
+        if (angler && foe && isOldFoe(foe, { species: { id: fish.speciesId }, weight: fish.weight })) saveOldFoe(angler, { ...foe, reportId: id });
+      })
+      // A report that fails only means the rest of the lodge never meets this one.
+      .catch(() => undefined);
   }, [game.lostReport]);
   useEffect(() => {
     if (game.outcome?.kind !== "landed") return;
@@ -590,7 +596,7 @@ export function DockPage() {
   const retryServerSave = () => {
     const outcome = game.outcome;
     if (outcome?.kind === "landed" && posted.current !== outcome.id) {
-      void saveOutcome(outcome.id, { requestId: outcome.id, speciesId: outcome.species.id, weight: outcome.weight, spot: outcome.spot, clean: outcome.clean, cleanRun: outcome.notes?.cleanRun, hour: outcome.hour ?? hour, sky, season, day: landedDay.current, taggedFrom: outcome.tag?.id, giant: outcome.giant ? true : undefined, lostFrom: outcome.lostFrom?.id });
+      void saveOutcome(outcome.id, { requestId: outcome.id, speciesId: outcome.species.id, weight: outcome.weight, spot: outcome.spot, clean: outcome.clean, cleanRun: outcome.notes?.cleanRun, hour: outcome.hour ?? hour, sky, season, day: landedDay.current, taggedFrom: outcome.tag?.id, giant: outcome.giant ? true : undefined, lostFrom: outcome.lostFrom?.id ?? outcome.closesLost });
       return;
     }
     void catchSync.sync();
@@ -854,12 +860,12 @@ export function DockPage() {
       setReleaseError(false);
       return;
     }
-    const { id, species, weight, spot: catchSpot, clean, notes, tag, giant, hour: caughtAt, lostFrom } = game.outcome;
+    const { id, species, weight, spot: catchSpot, clean, notes, tag, giant, hour: caughtAt, lostFrom, closesLost } = game.outcome;
     if (posted.current === id) return;
     landedDay.current = localDate(new Date());
     saveFieldLog();
     if (!userId) return;
-    void saveOutcome(id, { requestId: id, speciesId: species.id, weight, spot: catchSpot, clean, cleanRun: notes?.cleanRun, hour: caughtAt ?? hour, sky, season, day: landedDay.current, taggedFrom: tag?.id, giant: giant ? true : undefined, lostFrom: lostFrom?.id });
+    void saveOutcome(id, { requestId: id, speciesId: species.id, weight, spot: catchSpot, clean, cleanRun: notes?.cleanRun, hour: caughtAt ?? hour, sky, season, day: landedDay.current, taggedFrom: tag?.id, giant: giant ? true : undefined, lostFrom: lostFrom?.id ?? closesLost });
   }, [game.outcome, saveFieldLog, saveOutcome, userId, hour, sky, season]);
 
   useEffect(() => {

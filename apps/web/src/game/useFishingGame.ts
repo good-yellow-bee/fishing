@@ -202,7 +202,7 @@ export function lostTrophy(species: FishSpecies, weight: number) {
 export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; lightHook?: boolean; turnedRuns: number; cleanRun?: number; closeCall?: boolean; fightSec?: number; bowedLeaps?: number; easedShakes?: number; followedDarts?: number; encore?: boolean; secondWind?: boolean; secondTake?: boolean; grabbed?: string; gotAway?: boolean; followedIn?: boolean; recaught?: boolean; clearOf?: "weeds" | "rocks" | "pilings" | "log" | "current" };
 
 export type Outcome =
-  | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes; note?: string; tag?: { id: string; by: string }; giant?: string; hour?: LakeHour; lure?: string; lostFrom?: { id: string; by: string } }
+  | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes; note?: string; tag?: { id: string; by: string }; giant?: string; hour?: LakeHour; lure?: string; lostFrom?: { id: string; by: string }; closesLost?: string }
   | { kind: "broke"; message: string }
   | { kind: "miss"; message: string; fish?: { species: FishSpecies; weight: number } }
   | { kind: "error"; message: string };
@@ -397,7 +397,7 @@ export function useFishingGame(
   /** Other anglers' lost trophies landed this visit, so one never bites twice before the list is read again. */
   const landedLostRef = useRef(new Set<string>());
   /** The trophy this angler last lost, for the Dock to file with the lodge; a fresh id each loss. */
-  const [lostReport, setLostReport] = useState<{ id: string; speciesId: string; weight: number; spot: SpotId; lure?: string } | null>(null);
+  const [lostReport, setLostReport] = useState<{ id: string; speciesId: string; weight: number; spot: SpotId } | null>(null);
   const fishedDownRef = useRef(fishedDownBanks);
   fishedDownRef.current = fishedDownBanks;
   const luckyLuresRef = useRef(luckyLures);
@@ -1220,9 +1220,10 @@ export function useFishingGame(
     const storedFoe = loadOldFoe(current.userId);
     if (storedFoe && foeGone(storedFoe, Date.now())) saveOldFoe(current.userId, null);
     const foe = !lost.again && !mercyNow && !released?.fish && !tagged && !giantUp ? castForFoe(storedFoe, spotRef.current, Date.now(), Math.random()) : null;
-    // Or a trophy another angler lost here may take, still carrying their lure.
-    const lodgeFoe = !lost.again && !mercyNow && !released?.fish && !tagged && !giantUp && !foe && lodgeLostRef.current.length > 0 ? castForLodgeLost(lodgeLostRef.current, spotRef.current, Math.random(), landedLostRef.current, current) : null;
-    recaughtRef.current = (lost.again ? backAgain(lost.again, openGiantsRef.current) : undefined) ?? released?.fish ?? tagged ?? giantUp ?? (foe && canLand(current, foe.species) ? foe : null) ?? lodgeFoe;
+    // Or a trophy another angler lost here may take.
+    const ownFoe = foe && canLand(current, foe.species) ? foe : null;
+    const lodgeFoe = !lost.again && !mercyNow && !released?.fish && !tagged && !giantUp && !ownFoe && lodgeLostRef.current.length > 0 ? castForLodgeLost(lodgeLostRef.current, spotRef.current, Math.random(), landedLostRef.current, current) : null;
+    recaughtRef.current = (lost.again ? backAgain(lost.again, openGiantsRef.current) : undefined) ?? released?.fish ?? tagged ?? giantUp ?? ownFoe ?? lodgeFoe;
     // Over the groundbait the feeders crowd in, so some bites are theirs; a beginner's first fish stays an easy one.
     const feeder = bait.baited && !mercyNow ? groundbaitFeeder(spotRef.current, lureRef?.current, short, hour) : null;
     const hunter = shiner && !lost.again && !recaughtRef.current && !mercyNow ? shinerHunter(spotRef.current, current, hour, Math.random, lively) : null;
@@ -1817,12 +1818,11 @@ export function useFishingGame(
       const userId = anglerIdRef.current;
       const recaught = recaughtRef.current;
       if (!userId || !isTrophyWeight(current.species, current.weight) || current.species.rarity === "legendary" || (recaught && !recaught.foe)) return "";
-      // A fresh loss goes to the lodge too, for other anglers to meet; the same fish lost again is already known there.
-      if (!isOldFoe(loadOldFoe(userId), current) && reportsLost(current.species, current.weight)) {
-        setLostReport({ id: localId(), speciesId: current.species.id, weight: current.weight, spot: spotRef.current, ...(lureRef?.current ? { lure: lureRef.current } : {}) });
-      }
-      // The same fish lost again keeps the day it first broke off and the lure it first carried off.
-      if (!isOldFoe(loadOldFoe(userId), current)) saveOldFoe(userId, { species: current.species.id, weight: current.weight, spot: spotRef.current, at: Date.now(), ...(lureRef?.current ? { lure: lureRef.current } : {}) });
+      // The same fish lost again keeps the day it first broke off and the lure it first carried off, and is already known to the lodge.
+      const fresh = !isOldFoe(loadOldFoe(userId), current);
+      // A fresh loss goes to the lodge too, for other anglers to meet.
+      if (fresh && reportsLost(current.species, current.weight)) setLostReport({ id: localId(), speciesId: current.species.id, weight: current.weight, spot: spotRef.current });
+      if (fresh) saveOldFoe(userId, { species: current.species.id, weight: current.weight, spot: spotRef.current, at: Date.now(), ...(lureRef?.current ? { lure: lureRef.current } : {}) });
       return ` ${t("It will be about this bank in the days to come.")}`;
     };
     // A giant that breaks free learns the lure it was hooked on.
@@ -2005,14 +2005,15 @@ export function useFishingGame(
             const recaught = recaughtRef.current;
             if (recaught?.tag) landedTagsRef.current.add(recaught.tag.id);
             if (recaught?.lost) landedLostRef.current.add(recaught.lost.id);
-            // Landed, as the foe come back or as the one that got away the same day, it is no one's foe any more.
-            if (anglerIdRef.current && (recaught?.foe || isOldFoe(loadOldFoe(anglerIdRef.current), current))) saveOldFoe(anglerIdRef.current, null);
+            // Landed, as the foe come back or as the one that got away the same day, it is no one's foe any more, and its lodge report closes.
+            const storedFoe = anglerIdRef.current ? loadOldFoe(anglerIdRef.current) : null;
+            const ownLanded = !!recaught?.foe || isOldFoe(storedFoe, current);
+            if (anglerIdRef.current && ownLanded) saveOldFoe(anglerIdRef.current, null);
+            const closesLost = ownLanded ? storedFoe?.reportId : undefined;
             const back = !recaught
               ? ""
               : recaught.lost
-                ? recaught.lost.lure
-                  ? t("{fish}: the trophy {name} lost here, still with their {lure} in its jaw.", { fish: t(current.species.name), name: recaught.lost.by, lure: t(recaught.lost.lure) })
-                  : t("{fish}: the trophy {name} lost here.", { fish: t(current.species.name), name: recaught.lost.by })
+                ? t("{fish}: the trophy {name} lost here.", { fish: t(current.species.name), name: recaught.lost.by })
               : recaught.foe
                 ? recaught.foe.lure
                   ? t("{fish}: the trophy that broke you off here on {date}, still with your {lure} in its jaw.", { fish: t(current.species.name), date: new Date(recaught.at).toLocaleDateString(locale(), { month: "long", day: "numeric" }), lure: t(recaught.foe.lure) })
@@ -2038,6 +2039,7 @@ export function useFishingGame(
               ...(recaught?.tag ? { tag: recaught.tag } : {}),
               ...(recaught?.giant ? { giant: recaught.giant } : {}),
               ...(recaught?.lost ? { lostFrom: { id: recaught.lost.id, by: recaught.lost.by } } : {}),
+              ...(closesLost ? { closesLost } : {}),
               ...(lureRef?.current ? { lure: lureRef.current } : {}),
               notes: {
                 perfectCast: castPerfectRef.current,

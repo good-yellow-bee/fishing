@@ -12,14 +12,14 @@ export const FOE_ODDS = 0.08;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-/** The trophy that last broke off: its kind's id, weight, bank, when, and the lure it carried off. */
-export type OldFoe = { species: string; weight: number; spot: SpotId; at: number; lure?: string };
+/** The trophy that last broke off: its kind's id, weight, bank, when, the lure it carried off, and its report to the lodge. */
+export type OldFoe = { species: string; weight: number; spot: SpotId; at: number; lure?: string; reportId?: string };
 
 export function loadOldFoe(userId: string): OldFoe | null {
   try {
     const foe = JSON.parse(localStorage.getItem(oldFoeKey(userId)) ?? "null") as Partial<OldFoe> | null;
     return foe && typeof foe.species === "string" && typeof foe.weight === "number" && typeof foe.spot === "string" && typeof foe.at === "number"
-      ? { species: foe.species, weight: foe.weight, spot: foe.spot, at: foe.at, ...(typeof foe.lure === "string" ? { lure: foe.lure } : {}) }
+      ? { species: foe.species, weight: foe.weight, spot: foe.spot, at: foe.at, ...(typeof foe.lure === "string" ? { lure: foe.lure } : {}), ...(typeof foe.reportId === "string" ? { reportId: foe.reportId } : {}) }
       : null;
   } catch {
     return null;

@@ -89,13 +89,13 @@ describe("fish other anglers let go", () => {
 
 describe("trophies other anglers lost", () => {
   const strong = { strength: 10, accuracy: 10 };
-  const list: LodgeLost[] = [{ id: "l1", speciesId: "pike", weight: 14.5, spot: "reeds", lure: "Mepps spinner", at: "2026-10-19T10:00:00.000Z", by: "Mara" }];
+  const list: LodgeLost[] = [{ id: "l1", speciesId: "pike", weight: 14.5, spot: "reeds", at: "2026-10-19T10:00:00.000Z", by: "Mara" }];
 
-  it("brings one up at its bank on a lucky cast, with who lost it and their lure, once a visit, and only if the line can hold it", () => {
+  it("brings one up at its bank on a lucky cast, with who lost it, once a visit, and only if the line can hold it", () => {
     expect(castForLodgeLost(list, "dock", 0, new Set(), strong)).toBeNull();
     expect(castForLodgeLost(list, "reeds", LODGE_LOST_ODDS, new Set(), strong)).toBeNull();
     expect(castForLodgeLost(list, "reeds", 0, new Set(["l1"]), strong)).toBeNull();
     expect(castForLodgeLost(list, "reeds", 0, new Set(), { strength: 1, accuracy: 1 })).toBeNull();
-    expect(castForLodgeLost(list, "reeds", 0, new Set(), strong)).toMatchObject({ species: pike, weight: 14.5, lost: { id: "l1", by: "Mara", lure: "Mepps spinner" } });
+    expect(castForLodgeLost(list, "reeds", 0, new Set(), strong)).toMatchObject({ species: pike, weight: 14.5, lost: { id: "l1", by: "Mara" } });
   });
 });

@@ -399,7 +399,7 @@ describe("POST /catches", () => {
     const at = new Date().toISOString();
     db.prepare(`INSERT INTO "user" (id, name, email, emailVerified, createdAt, updatedAt) VALUES ('mara', 'Mara', 'mara@x.test', 0, ?, ?)`).run(at, at);
     db.prepare(`INSERT INTO profile (user_id, display_name) VALUES ('mara', 'Mara')`).run();
-    const lostFrom = reportLost("mara", { speciesId: "pike", weight: 14.5, spot: "reeds", lure: null });
+    const lostFrom = reportLost("mara", { speciesId: "pike", weight: 14.5, spot: "reeds" });
     await post({ requestId, speciesId: "pike", weight: 14.5, spot: "reeds", lostFrom });
     const second = "7b6c5d4e-3f2a-4b1c-8d9e-0f1a2b3c4d5e";
     await post({ requestId: second, speciesId: "pike", weight: 14.5, spot: "reeds", lostFrom });

@@ -144,7 +144,7 @@ export function getLodgeLost() {
   return request<{ lost: LodgeLost[]; mineFound: LostFound[] }>("/api/lodge/lost");
 }
 
-export function reportLost(fish: { speciesId: string; weight: number; spot: SpotId; lure?: string }) {
+export function reportLost(fish: { speciesId: string; weight: number; spot: SpotId }) {
   return request<{ id: string }>("/api/lodge/lost", { method: "POST", body: JSON.stringify(fish) });
 }
 

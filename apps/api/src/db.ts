@@ -103,12 +103,12 @@ db.exec(`
     species_id TEXT NOT NULL,
     weight REAL NOT NULL,
     spot TEXT NOT NULL,
-    lure TEXT,
     lost_at TEXT NOT NULL,
     found_by TEXT,
     found_at TEXT
   );
   CREATE INDEX IF NOT EXISTS lost_fish_lost_at ON lost_fish (lost_at);
+  CREATE INDEX IF NOT EXISTS lost_fish_user ON lost_fish (user_id, lost_at);
 
   CREATE TABLE IF NOT EXISTS giant_landed (
     week TEXT NOT NULL,
@@ -358,9 +358,9 @@ export function payBonus(catchId: string, userId: string, bonus: number, id: Bon
 }
 
 /** Files a trophy the angler lost, for the rest of the lodge to meet at its bank. */
-export function reportLost(userId: string, fish: { speciesId: string; weight: number; spot: string; lure: string | null }): string {
+export function reportLost(userId: string, fish: { speciesId: string; weight: number; spot: string }): string {
   const id = randomUUID();
-  db.prepare(`INSERT INTO lost_fish (id, user_id, species_id, weight, spot, lure, lost_at) VALUES (?, ?, ?, ?, ?, ?, ?)`).run(id, userId, fish.speciesId, fish.weight, fish.spot, fish.lure, new Date().toISOString());
+  db.prepare(`INSERT INTO lost_fish (id, user_id, species_id, weight, spot, lost_at) VALUES (?, ?, ?, ?, ?, ?)`).run(id, userId, fish.speciesId, fish.weight, fish.spot, new Date().toISOString());
   return id;
 }
 
@@ -368,15 +368,15 @@ export function reportLost(userId: string, fish: { speciesId: string; weight: nu
 export function listLodgeLost(userId: string, since: string, limit: number): LodgeLost[] {
   return db
     .prepare(
-      `SELECT l.id, l.species_id as speciesId, l.weight, l.spot, l.lure, l.lost_at as at, p.display_name as by FROM lost_fish l JOIN profile p ON p.user_id = l.user_id
+      `SELECT l.id, l.species_id as speciesId, l.weight, l.spot, l.lost_at as at, p.display_name as by FROM lost_fish l JOIN profile p ON p.user_id = l.user_id
        WHERE l.user_id != ? AND l.found_by IS NULL AND l.lost_at >= ? ORDER BY l.lost_at DESC LIMIT ?`,
     )
     .all(userId, since, limit) as LodgeLost[];
 }
 
-/** How many of the angler's lost trophies since `since` are still out there. */
-export function countOpenLost(userId: string, since: string): number {
-  return (db.prepare(`SELECT COUNT(*) as n FROM lost_fish WHERE user_id = ? AND found_by IS NULL AND lost_at >= ?`).get(userId, since) as { n: number }).n;
+/** How many trophies the angler has reported lost since `since`, landed by anyone since or not. */
+export function countReportedLost(userId: string, since: string): number {
+  return (db.prepare(`SELECT COUNT(*) as n FROM lost_fish WHERE user_id = ? AND lost_at >= ?`).get(userId, since) as { n: number }).n;
 }
 
 /** The angler's own lost trophies since `since` that someone else has landed. */
@@ -384,13 +384,14 @@ export function listMineFound(userId: string, since: string): LostFound[] {
   return db.prepare(`SELECT species_id as speciesId, weight, spot FROM lost_fish WHERE user_id = ? AND found_by IS NOT NULL AND lost_at >= ?`).all(userId, since) as LostFound[];
 }
 
-/** Claims another angler's lost trophy for the catch that landed it, and pays its finder, together or neither; false when it was not theirs to claim. */
+/** Claims a lost trophy for the catch that landed it, and pays a finder who isn't the angler who lost it, together or neither; false when nothing was paid. The angler landing their own lost trophy only closes it. */
 export function claimAndPayLost(lostId: string, fish: { speciesId: string; weight: number; spot: string }, since: string, userId: string, catchId: string, bonus: number): boolean {
   return db.transaction(() => {
+    const row = db.prepare(`SELECT user_id FROM lost_fish WHERE id = ?`).get(lostId) as { user_id: string } | undefined;
     const claimed = db
-      .prepare(`UPDATE lost_fish SET found_by = ?, found_at = ? WHERE id = ? AND user_id != ? AND found_by IS NULL AND lost_at >= ? AND species_id = ? AND spot = ? AND ABS(weight - ?) < 0.005`)
-      .run(userId, new Date().toISOString(), lostId, userId, since, fish.speciesId, fish.spot, fish.weight);
-    if (claimed.changes !== 1) return false;
+      .prepare(`UPDATE lost_fish SET found_by = ?, found_at = ? WHERE id = ? AND found_by IS NULL AND lost_at >= ? AND species_id = ? AND spot = ? AND ABS(weight - ?) < 0.005`)
+      .run(userId, new Date().toISOString(), lostId, since, fish.speciesId, fish.spot, fish.weight);
+    if (claimed.changes !== 1 || row?.user_id === userId) return false;
     payBonus(catchId, userId, bonus, "found");
     return true;
   })();

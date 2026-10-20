@@ -16,7 +16,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 export type ReleasedFish = { species: string; weight: number; spot: SpotId; at: number; lure?: string };
 
 /** A let-go fish come back to the line, grown since; one another angler let go carries their name and its catch's id as a tag. */
-export type Recaught = { species: FishSpecies; weight: number; was: number; at: number; tag?: { id: string; by: string }; giant?: string; foe?: { lure?: string }; lost?: { id: string; by: string; lure: string | null } };
+export type Recaught = { species: FishSpecies; weight: number; was: number; at: number; tag?: { id: string; by: string }; giant?: string; foe?: { lure?: string }; lost?: { id: string; by: string } };
 
 const dayOf = (ms: number) => new Date(ms).toDateString();
 
@@ -79,7 +79,7 @@ export function castForLodgeLost(list: readonly LodgeLost[], spot: SpotId, roll:
     return one.spot === spot && !landed.has(one.id) && reportsLost(species, one.weight) && canLand(angler, species);
   });
   if (!back || roll >= LODGE_LOST_ODDS) return null;
-  return { species: fishById(back.speciesId)!, weight: back.weight, was: back.weight, at: Date.parse(back.at), lost: { id: back.id, by: back.by, lure: back.lure } };
+  return { species: fishById(back.speciesId)!, weight: back.weight, was: back.weight, at: Date.parse(back.at), lost: { id: back.id, by: back.by } };
 }
 
 /** Whether this cast brings up a fish another angler let go at this bank before today (UTC), one this angler's line can hold and not yet landed this visit. */
