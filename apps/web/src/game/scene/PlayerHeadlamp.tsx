@@ -4,7 +4,8 @@ import * as THREE from "three";
 import { footHeight, walkableAt, type LakeSeason } from "@stillwater/shared";
 import { makeSoftSpotTexture } from "./Atmosphere";
 import { BEAM_REACH, LAMP_AHEAD, LAMP_MOTHS_AHEAD, LAMP_MOTHS_AT, LAMP_UP, headlampTarget, lampMothShow } from "./headlampBeam";
-import { MOTH_COLOR, mothGeometry, mothRound } from "./mothOrbit";
+import { MOTH_COLOR, mothGeometry, poseMoth } from "./mothDraw";
+import { MOTH_COUNT, mothRound } from "./mothOrbit";
 import { useReducedMotion } from "./reducedMotion";
 import { beamFade, beamGeometry } from "./NightAngler";
 import { anglerPose } from "./pose";
@@ -18,8 +19,6 @@ function surfaceAt(x: number, z: number) {
   return walkableAt(x, z) ? footHeight(x, z) : waterHeight(x, z, surfaceTime);
 }
 
-/** The moths drawn larger than life, as round the lanterns. */
-const MOTH_SIZE = 0.08;
 /** The beam opens this wide for each metre it reaches. */
 const SPREAD = 0.2;
 
@@ -71,22 +70,21 @@ export function PlayerHeadlamp({ phase, float, season }: { phase: ScenePhase; fl
     pool.current.visible = lamp.distanceTo(aim.current) <= BEAM_REACH;
     pool.current.position.set(aim.current.x, aim.current.y + 0.08, aim.current.z);
     pool.current.scale.setScalar(Math.max(0.3, reach * SPREAD));
-    // Moths find the light one by one and loop just out along the beam.
+    // Moths find the light one by one and loop out along the beam (none in winter).
     const flock = moths.current;
     if (!flock) return;
+    flock.visible = season !== "winter";
+    if (!flock.visible) return;
     onAt.current ??= clock.elapsedTime;
     const time = still ? 0 : clock.elapsedTime;
     const centre = scratch.centre.copy(aim.current).sub(lamp).setLength(LAMP_MOTHS_AHEAD).add(lamp);
-    LAMP_MOTHS_AT.forEach((_, i) => {
-      const show = lampMothShow(i, clock.elapsedTime - onAt.current!, season);
-      const moth = mothRound(i, time, centre);
-      const next = mothRound(i, time + 0.03, centre);
-      scratch.moth.position.set(moth.x, moth.y - 0.12, moth.z);
-      scratch.moth.rotation.set(0, Math.atan2(next.x - moth.x, next.z - moth.z), 0);
-      scratch.moth.scale.set(MOTH_SIZE * show * (0.25 + 0.75 * (still ? 1 : moth.flap)), MOTH_SIZE * show, MOTH_SIZE * show);
-      scratch.moth.updateMatrix();
+    for (let i = 0; i < LAMP_MOTHS_AT.length; i += 1) {
+      const show = lampMothShow(i, clock.elapsedTime - onAt.current, season);
+      // Seeded past the lanterns' moths, so they don't fly the same loops.
+      const seed = MOTH_COUNT + i;
+      poseMoth(scratch.moth, mothRound(seed, time, centre, 0), mothRound(seed, time + 0.03, centre, 0), still, still ? Math.ceil(show) : show);
       flock.setMatrixAt(i, scratch.moth.matrix);
-    });
+    }
     flock.instanceMatrix.needsUpdate = true;
   });
   return (
@@ -94,7 +92,7 @@ export function PlayerHeadlamp({ phase, float, season }: { phase: ScenePhase; fl
       <mesh ref={beam} geometry={shapes.beam} material={materials.beam} renderOrder={6} />
       <sprite ref={glow} material={materials.glow} scale={0.18} renderOrder={6} />
       <mesh ref={pool} geometry={shapes.pool} material={materials.pool} renderOrder={5} />
-      <instancedMesh ref={moths} args={[shapes.moth, materials.moth, LAMP_MOTHS_AT.length]} frustumCulled={false} />
+      <instancedMesh ref={moths} args={[shapes.moth, materials.moth, LAMP_MOTHS_AT.length]} frustumCulled={false} renderOrder={6} />
     </group>
   );
 }

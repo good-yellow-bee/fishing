@@ -1,5 +1,4 @@
 import type { LakeHour, LakeSeason } from "@stillwater/shared";
-import * as THREE from "three";
 import { LANTERNS, lanternLevel } from "./lanternLight";
 
 /**
@@ -30,8 +29,8 @@ export function mothAt(i: number, time: number): Moth {
   return mothRound(i, time, MOTH_LAMPS[Math.floor(i / MOTHS_PER_LANTERN) % MOTH_LAMPS.length]!);
 }
 
-/** Moth `i` at `time` looping round a light at `lamp`. */
-export function mothRound(i: number, time: number, lamp: { x: number; y: number; z: number }): Moth {
+/** Moth `i` at `time` looping round a light at `lamp`, `lift` above it (the lanterns' flames sit low in their glass). */
+export function mothRound(i: number, time: number, lamp: { x: number; y: number; z: number }, lift = 0.12): Moth {
   const speed = (2.2 + unit(i, 1) * 1.6) * (unit(i, 2) < 0.5 ? 1 : -1);
   const phase = unit(i, 3) * Math.PI * 2;
   // The loop swells and shrinks, and a fast wobble on top gives the jitter.
@@ -39,18 +38,9 @@ export function mothRound(i: number, time: number, lamp: { x: number; y: number;
   const angle = time * speed + phase + 0.35 * Math.sin(time * 11 + phase);
   return {
     x: lamp.x + Math.cos(angle) * reach,
-    y: lamp.y + 0.12 + 0.14 * Math.sin(time * (1.9 + unit(i, 5)) + phase) + 0.03 * Math.sin(time * 17 + i),
+    y: lamp.y + lift + 0.14 * Math.sin(time * (1.9 + unit(i, 5)) + phase) + 0.03 * Math.sin(time * 17 + i),
     z: lamp.z + Math.sin(angle) * reach,
     flap: 0.5 + 0.5 * Math.sin(time * (28 + unit(i, 6) * 8) + phase),
   };
 }
 
-export const MOTH_COLOR = "#f3e6c8";
-
-/** Two wings as a bow tie in the xz plane, hinged along the z axis. */
-export function mothGeometry() {
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute("position", new THREE.Float32BufferAttribute([0, 0, -0.4, 1, 0, 0.2, 0, 0, 0.5, 0, 0, -0.4, -1, 0, 0.2, 0, 0, 0.5], 3));
-  geo.computeVertexNormals();
-  return geo;
-}

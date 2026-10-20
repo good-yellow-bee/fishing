@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { headlampTarget, lampMothShow } from "./headlampBeam";
+import { LAMP_MOTHS_AHEAD, headlampTarget, lampMothShow } from "./headlampBeam";
 import { mothRound } from "./mothOrbit";
 
 describe("the angler's headlamp", () => {
@@ -32,9 +32,11 @@ describe("moths at the headlamp", () => {
   it("loop close round the light they find", () => {
     const light = { x: 2, y: 1.5, z: -3 };
     for (let t = 0; t < 10; t += 0.37) {
-      const moth = mothRound(1, t, light);
+      const moth = mothRound(1, t, light, 0);
       expect(Math.hypot(moth.x - light.x, moth.z - light.z)).toBeLessThan(0.4);
-      expect(Math.abs(moth.y - light.y - 0.12)).toBeLessThan(0.2);
+      expect(Math.abs(moth.y - light.y)).toBeLessThan(0.2);
+      // Out along the beam, they never come to the lamp itself.
+      expect(Math.hypot(moth.x - light.x, moth.z - light.z)).toBeLessThan(LAMP_MOTHS_AHEAD - 0.4);
     }
   });
 });
