@@ -8,6 +8,8 @@ import {
   type BoardPeriod,
   type LodgeRelease,
   type LodgeTrack,
+  type LodgeLost,
+  type LostFound,
   type Giant,
   type StudyProgress,
   type TagReturn,
@@ -136,6 +138,14 @@ export function getGiants() {
 
 export function getBankWeek() {
   return request<{ counts: Partial<Record<SpotId, number>> }>("/api/lodge/bank-week").then((body) => body.counts);
+}
+
+export function getLodgeLost() {
+  return request<{ lost: LodgeLost[]; mineFound: LostFound[] }>("/api/lodge/lost");
+}
+
+export function reportLost(fish: { speciesId: string; weight: number; spot: SpotId; lure?: string }) {
+  return request<{ id: string }>("/api/lodge/lost", { method: "POST", body: JSON.stringify(fish) });
 }
 
 export function getLodgeReleased() {

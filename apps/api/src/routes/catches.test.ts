@@ -31,7 +31,7 @@ beforeAll(async () => {
 });
 
 beforeEach(() => {
-  db.exec(`DELETE FROM giant_landed; DELETE FROM catch; DELETE FROM profile; DELETE FROM "user";`);
+  db.exec(`DELETE FROM lost_fish; DELETE FROM giant_landed; DELETE FROM catch; DELETE FROM profile; DELETE FROM "user";`);
   db.prepare(
     `INSERT INTO "user" (id, name, email, emailVerified, createdAt, updatedAt) VALUES (?, ?, ?, 0, ?, ?)`,
   ).run(user.id, user.name, user.email, new Date().toISOString(), new Date().toISOString());
@@ -390,6 +390,24 @@ describe("POST /catches", () => {
     const off = await post({ requestId: "5e4f3a2b-7c8d-4e9f-8a1b-2c3d4e5f6a70", speciesId: giant.speciesId, weight: Math.max(0.1, giant.weight - 0.5), spot: "dock", giant: true });
     expect(off.status).toBe(200);
     expect((db.prepare(`SELECT COUNT(*) as n FROM giant_landed`).get() as { n: number }).n).toBe(0);
+  });
+
+  it("pays the finder of another angler's lost trophy once, on a catch that matches it", async () => {
+    const { reportLost } = await import("../db.ts");
+    const { LOST_FINDER_BONUS } = await import("@stillwater/shared");
+    db.prepare(`UPDATE profile SET strength = 10, accuracy = 10 WHERE user_id = ?`).run(user.id);
+    const at = new Date().toISOString();
+    db.prepare(`INSERT INTO "user" (id, name, email, emailVerified, createdAt, updatedAt) VALUES ('mara', 'Mara', 'mara@x.test', 0, ?, ?)`).run(at, at);
+    db.prepare(`INSERT INTO profile (user_id, display_name) VALUES ('mara', 'Mara')`).run();
+    const lostFrom = reportLost("mara", { speciesId: "pike", weight: 14.5, spot: "reeds", lure: null });
+    await post({ requestId, speciesId: "pike", weight: 14.5, spot: "reeds", lostFrom });
+    const second = "7b6c5d4e-3f2a-4b1c-8d9e-0f1a2b3c4d5e";
+    await post({ requestId: second, speciesId: "pike", weight: 14.5, spot: "reeds", lostFrom });
+    const bonuses = (id: string) => (db.prepare(`SELECT bonuses FROM catch WHERE request_id = ?`).get(id) as { bonuses: string }).bonuses.split(",");
+    expect(bonuses(requestId)).toContain("found");
+    expect(bonuses(second)).not.toContain("found");
+    const pts = (id: string) => (db.prepare(`SELECT points FROM catch WHERE request_id = ?`).get(id) as { points: number }).points;
+    expect(pts(requestId) - pts(second)).toBeGreaterThanOrEqual(LOST_FINDER_BONUS - 1);
   });
 
   it("limits successful catch submissions per minute", async () => {
