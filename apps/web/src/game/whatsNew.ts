@@ -6,6 +6,7 @@ export const NEWS_KEY = "stillwater.news.v1";
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
   "A bank where you kept thirty or more fish this week is fished down: its fish come smaller until it rests, and the bank chip says so. Fish you let go don't count, so releasing them keeps a bank stocked. And once a catch is saved, the landed card shows the points the server paid, with a lodge tag's stamp only when the tag was paid.",
+  "On Bests, a season names the water it was won on beside its best lure, each opening its fish, and a kind's Last fish opens that fish. A kind's page and its catch cards name it as Bests does.",
   "On a phone held upright, the view now lifts while you play a fish, so you can watch the fight above the fight card instead of behind it. And with reduced motion on, the lake bed's shimmer slows and your boat no longer rocks.",
   "Out on the boat, the cormorant no longer dries its wings right beside you: it slips off its rock and fishes out on the far side while you are at anchor. And at the bank stands the lantern post now stands beside you instead of in front of the camera.",
   "A jumper hooked rising to the hatching bugs or midges is already at the top, so its first run is a leap. At night, a fish hooked among the lantern's minnows sees the net in the light and bolts from it once. And a fish hooked chasing the kingfisher's fry is fired up: its first run doesn't tire it at all.",
