@@ -467,8 +467,15 @@ export function useFishingGame(
   const bucketNow = () => liveShiners(bucketRef.current, Date.now());
   /** The shiner trap by the shack, read when the angler signs in. */
   const [trap, setTrapState] = useState<Trap | null>(null);
+  const trapRef = useRef<Trap | null>(null);
+  const keepTrap = (userId: string, next: Trap | null) => {
+    trapRef.current = next;
+    saveTrap(userId, next);
+    setTrapState(next);
+  };
   useEffect(() => {
-    setTrapState(profile?.userId ? loadTrap(profile.userId) : null);
+    trapRef.current = profile?.userId ? loadTrap(profile.userId) : null;
+    setTrapState(trapRef.current);
   }, [profile?.userId]);
   /** The bucket with a fresh shiner in, or with its oldest one taken out. */
   const bucketIn = () => [...bucketNow(), Date.now()];
@@ -2269,24 +2276,23 @@ export function useFishingGame(
 
   /** Bait the shiner trap by the shack with a handful of groundbait, for a later visit to lift. */
   const setTrap = () => {
-    if (!profile || trap || handfulsRef.current <= 0) return;
-    const next = { setAt: Date.now() };
+    if (!profile || trapRef.current || handfulsRef.current <= 0 || phaseRef.current !== "idle") return;
     keepHandfuls(handfulsRef.current - 1);
-    saveTrap(profile.userId, next);
-    setTrapState(next);
+    keepTrap(profile.userId, { setAt: Date.now() });
     setHint(t("You bait the shiner trap with a handful of groundbait and sink it by the shack. Lift it after six hours, within three days."));
   };
 
   /** Lift the shiner trap: the shiners in it go in the bait bucket, as many as it holds room for, and the rest go back. */
   const liftTrap = () => {
-    if (!profile || !trap || trapState(trap, Date.now()) === "soaking") return;
-    const caught = trapCatch(trap, Date.now(), Math.random);
-    saveTrap(profile.userId, null);
-    setTrapState(null);
-    let kept = bucketNow();
-    for (let i = 0; i < caught && kept.length < BUCKET_SIZE; i += 1) kept = [...kept, Date.now()];
-    const added = kept.length - bucketNow().length;
-    keepBucket(profile.userId, kept);
+    const lifted = trapRef.current;
+    const now = Date.now();
+    const spares = bucketNow();
+    // A full bucket has no room, so the trap stays down till there is.
+    if (!profile || !lifted || trapState(lifted, now) === "soaking" || spares.length >= BUCKET_SIZE || phaseRef.current !== "idle") return;
+    const caught = trapCatch(lifted, now, Math.random);
+    keepTrap(profile.userId, null);
+    const added = Math.min(caught, BUCKET_SIZE - spares.length);
+    keepBucket(profile.userId, [...spares, ...Array.from({ length: added }, () => now)]);
     setHint(
       caught === 0
         ? t("The trap comes up empty: it sat too long, and the shiners found their way out.")

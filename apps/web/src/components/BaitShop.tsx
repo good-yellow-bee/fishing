@@ -87,7 +87,7 @@ export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, b
               {t("Bait the shiner trap (1 handful)")}
             </button>
           ) : trap === "soaking" ? null : (
-            <button type="button" aria-disabled={busy || undefined} aria-describedby="trap-note" onClick={() => !busy && onLiftTrap()}>
+            <button type="button" aria-disabled={busy || bucketFull || undefined} aria-describedby="trap-note" onClick={() => !busy && !bucketFull && onLiftTrap()}>
               {t("Lift the shiner trap")}
             </button>
           )}
@@ -96,7 +96,9 @@ export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, b
               ? t("A handful of groundbait in the trap by the shack draws a few shiners in for your bucket, ready after six hours.")
               : trap === "soaking"
                 ? t("The shiner trap is soaking: lift it after six hours.")
-                : trap === "ready"
+                : bucketFull
+                  ? t("Your bait bucket is full: lift the trap once it has room.")
+                  : trap === "ready"
                   ? t("Shiners have found the trap.")
                   : t("The trap has sat a long while.")}
           </p>

@@ -186,6 +186,7 @@ export const PL_GAME: PlBook = {
   "A handful of groundbait in the trap by the shack draws a few shiners in for your bucket, ready after six hours.": "Garść zanęty w pułapce przy chacie zwabia kilka złotawców do wiaderka, gotowych po sześciu godzinach.",
   "The shiner trap is soaking: lift it after six hours.": "Pułapka na złotawce czeka w wodzie: wyciągnij ją po sześciu godzinach.",
   "Shiners have found the trap.": "Złotawce znalazły pułapkę.",
+  "Your bait bucket is full: lift the trap once it has room.": "Wiaderko na przynętę jest pełne: wyciągnij pułapkę, gdy zrobi się miejsce.",
   "The trap has sat a long while.": "Pułapka stoi już długo.",
   "It has felt the hook before: its first run doesn't tire it at all": "Już raz poczuła haczyk: pierwszy odjazd wcale jej nie męczy",
   "{n} of the shiners in your bait bucket died while you were away: they keep three days.": "Część złotawców z wiaderka padła pod twoją nieobecność ({n}): żyją trzy dni.",
