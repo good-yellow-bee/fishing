@@ -582,8 +582,11 @@ export function makeFight(
   turnCut = 1,
   /** The spent fish must be netted with a fresh strike as its head comes up, rather than landing as the line comes in. */
   net = false,
+  /** Hooked from the boat tight to the far rock: an unturned run drags the line over the rock as off the point. */
+  farRock = false,
 ): FightRuntime {
   const weedy = water === "weeds";
+  const rockWater = water === "rocks" || farRock;
   const deepRuns = water === "deep" || (DIVERS.has(species.id) && (water === "open" || water === "boat"));
   const pattern = PATTERNS[species.challenge];
   const t = difficulty01(species, weight);
@@ -755,7 +758,7 @@ export function makeFight(
           wrapUntil = nowMs + WRAP_MS * coverHold;
         }
         // A clean run at the reeds or the point counts toward the landed card's note; one that went in spoils it.
-        if ((weedy || water === "rocks" || wrapsLine(water)) && turnable && !sim.jump && !sim.roll && !sim.charge) {
+        if ((weedy || rockWater || wrapsLine(water)) && turnable && !sim.jump && !sim.roll && !sim.charge) {
           if (sim.weeded || sim.wrapped || rockedThisRun) fouled = true;
           performance.clearOf = fouled ? undefined : weedy ? "weeds" : wrapsLine(water) ? water : "rocks";
         }
@@ -846,7 +849,9 @@ export function makeFight(
     sim.withRun = withRunFrom !== null && nowMs - withRunFrom >= WITH_RUN_GRACE_SEC * 1000;
     const escalation = species.challenge === "surge" ? Math.min(0.25, completedSurges * 0.05) : 0;
     const eff = (pattern.strength * surgeScale + escalation) * SURGE_PULL * (1 - worn() * (1 - SPENT_PULL)) * (deepRuns ? DEEP_PULL : 1);
-    const rocky = water === "rocks" && turnable && !sim.turning && !sim.roll && !sim.charge;
+    const rocky = rockWater && turnable && !sim.turning && !sim.roll && !sim.charge;
+    // A diving run already pulls hard; the rock only frays it, never adds a second pull.
+    const rockPull = rocky && !deepRuns ? ROCK_PULL : 1;
     sim.rocky = rocky && sim.surge === 2 && !sim.jump;
     sim.diving = deepRuns && sim.surge === 2 && !sim.jump && !sim.roll && !sim.charge;
     sim.downstream = water === "current" && turnable && sim.surge === 2 && !sim.jump && !sim.roll && !sim.charge && !sim.turning && sim.runSide === DOWNSTREAM_SIDE;
@@ -861,7 +866,7 @@ export function makeFight(
     const lightRun = plainRun && runDrag === "light";
     const heavyRun = plainRun && runDrag === "heavy";
     if (reeling) {
-      sim.tension += (tensionUpCalm + (sim.surge === 2 && !charging ? eff * (rocky ? ROCK_PULL : 1) * DRAG_RUN_PULL[runDrag] : 0) + (sim.wrapped ? WRAP_PULL : 0)) * dtSec;
+      sim.tension += (tensionUpCalm + (sim.surge === 2 && !charging ? eff * rockPull * DRAG_RUN_PULL[runDrag] : 0) + (sim.wrapped ? WRAP_PULL : 0)) * dtSec;
       // Line under real pressure comes in faster, for an angler brave enough to reel in the amber.
       const pressure = sim.tension >= TIGHT_TENSION && sim.tension < RED_TENSION ? PRESSURE_REEL : 1;
       sim.line -= reelRate * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * (sim.weeded ? WEED_REEL : 1) * (sim.wrapped ? 0 : 1) * (broadsider && sim.stamina >= TIRING_STAMINA ? BROADSIDE_REEL : 1) * (charging ? CHARGE_REEL / pattern.reelSurge : 1) * (sim.withRun ? WITH_RUN_REEL : 1) * (sim.headTurned ? TURNED_HEAD_REEL : 1) * dtSec;
@@ -869,7 +874,7 @@ export function makeFight(
     } else if (heavyRun) {
       sim.tension =
         sim.tension < HEAVY_DRAG_CAP
-          ? Math.min(HEAVY_DRAG_CAP, sim.tension + eff * (rocky ? ROCK_PULL : 1) * DRAG_RUN_PULL.heavy * HEAVY_DRAG_LOAD * dtSec)
+          ? Math.min(HEAVY_DRAG_CAP, sim.tension + eff * rockPull * DRAG_RUN_PULL.heavy * HEAVY_DRAG_LOAD * dtSec)
           : Math.max(HEAVY_DRAG_CAP, sim.tension - tensionDecay * dtSec);
       sim.line += driftSurge * DRAG_RUN_LINE.heavy * (sim.downstream ? DOWNSTREAM_RUN : 1) * (sim.withRun ? WITH_RUN_DRIFT : 1) * dtSec;
     } else {
