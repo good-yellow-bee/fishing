@@ -909,6 +909,8 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "On a small phone held upright, the cast meter now always sits low beside the walking stick, clear of the hint over the lake. And with larger text, the note naming where you stand stops after a few rows instead of pushing the hint down onto the stick and the meter; a screen reader still hears all of it.":
+    "Na małym telefonie trzymanym pionowo miernik rzutu stoi teraz zawsze nisko, obok drążka chodzenia, z dala od podpowiedzi nad jeziorem. A przy większym tekście notka z nazwą miejsca, w którym stoisz, kończy się po kilku wierszach, zamiast spychać podpowiedź na drążek i miernik; czytnik ekranu nadal odczytuje ją całą.",
   "On a phone you can now watch the whole fight: the fight card moves up to the top of the screen, over the far shore, and the header steps aside until the fish is in; held sideways it waits beside the action, above the steering buttons. Left-handed, the steering buttons now take the other corner from the Reel button instead of lying under it.":
     "Na telefonie widać teraz cały hol: karta holu przechodzi na górę ekranu, nad dalekim brzegiem, a nagłówek ustępuje jej miejsca, aż ryba będzie na brzegu; na telefonie trzymanym poziomo czeka z boku, nad przyciskami sterowania. Dla leworęcznych przyciski sterowania stoją teraz w drugim rogu niż przycisk zwijania, a nie pod nim.",
   "{lure} · good here": "{lure} · dobra tutaj",
