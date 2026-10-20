@@ -87,9 +87,13 @@ function waterFishLine(catches: readonly CatchEntry[], kindName: (species: strin
 }
 
 /** "Last fish: Sat, Oct 10" under a water, from its newest fish, on the day it counts on (a night fish on its outing's). */
-function lastFishLine(book: Logbook, catches: readonly CatchEntry[]) {
+/** `linked` opens that fish; not inside a card that is itself a link (a water's). */
+function lastFishLine(book: Logbook, catches: readonly CatchEntry[], linked = true) {
   const last = catches.reduce<CatchEntry | null>((newest, entry) => (!newest || entry.caughtAt > newest.caughtAt ? entry : newest), null);
-  return last ? <p className="meta">{t("Last fish: {day}", { day: formatDay(bookFishDay(book, last)) })}</p> : null;
+  if (!last) return null;
+  const text = t("Last fish: {day}", { day: formatDay(bookFishDay(book, last)) });
+  // Opening that fish, as every other dated line on Bests does.
+  return <p className="meta">{linked ? <Link to={`/catches/${last.id}`}>{text}</Link> : text}</p>;
 }
 
 /** A fish's size by one measure, inches or pounds, to set two fish of a kind side by side. */
@@ -389,6 +393,7 @@ export function BestsPage() {
           outings={{ count: sheetOutings(whole, fishedBy).trips.filter((trip) => trip.date.startsWith(`${year}-`)).length, to: `/trips?${new URLSearchParams({ find: tripDaySearch(all, year, new Set(whole.trips.map((trip) => trip.id)), t) }).toString()}` }}
           kindsId="by-species"
           lureLink={(lure) => linkFor(exactTerm("lure", pieceName(lure)))}
+          waterLink={(water) => linkFor(exactTerm("water", water))}
         />
       ) : null}
 
@@ -624,7 +629,7 @@ export function BestsPage() {
                   </div>
                   <p className="meta">{waterFishLine(bySpot.get(water.spotId) ?? [], kindName)}</p>
                   {/* When it last gave one: a water gone quiet is worth a visit, or a rest. */}
-                  {lastFishLine(whole, bySpot.get(water.spotId) ?? [])}
+                  {lastFishLine(whole, bySpot.get(water.spotId) ?? [], false)}
                   {waterBestLine(book, bySpot.get(water.spotId) ?? [], kindName)}
                 </Link>
               ))}

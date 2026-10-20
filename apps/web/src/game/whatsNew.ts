@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-scene58";
+export const NEWS_ID = "2026-10-20-field67";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "On Bests, a season names the water it was won on beside its best lure, each opening its fish, and a kind's Last fish opens that fish. A kind's page and its catch cards name it as Bests does.",
   "Out on the boat, the cormorant no longer dries its wings right beside you: it slips off its rock and fishes out on the far side while you are at anchor. And at the bank stands the lantern post now stands beside you instead of in front of the camera.",
   "A jumper hooked rising to the hatching bugs or midges is already at the top, so its first run is a leap. At night, a fish hooked among the lantern's minnows sees the net in the light and bolts from it once. And a fish hooked chasing the kingfisher's fry is fired up: its first run doesn't tire it at all.",
   "On the Map, a water you are out on now offers Log a catch for that outing, and a list's Works on this water tips say how many fish each lure took there.",

@@ -61,6 +61,7 @@ export function SeasonRecapBox({
   outings,
   kindsId,
   lureLink,
+  waterLink,
 }: {
   book: Logbook;
   year: string;
@@ -71,6 +72,8 @@ export function SeasonRecapBox({
   kindsId?: string;
   /** The season's fish on a lure, for its best lure line. */
   lureLink?: (lure: string) => string;
+  /** The season's fish from a water, for its best water line. */
+  waterLink?: (water: string) => string;
 }) {
   useT();
   const recap = seasonRecap(book, year, today);
@@ -99,6 +102,13 @@ export function SeasonRecapBox({
   const [lure, nextLure] = pieceTally(book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${year}-`)), 2);
   const topLure = lure && lure.count >= 2 && lure.count > (nextLure?.count ?? 0) ? lure : null;
   const lureLine = topLure ? t("Best lure: {lure} ({count})", { lure: pieceName(topLure.lure), count: topLure.count }) : null;
+  // And the water it was won on, once one clearly led: the "where" beside the "on what".
+  const byWater = new Map<string, number>();
+  for (const entry of book.catches) if (bookFishDay(book, entry).startsWith(`${year}-`)) byWater.set(entry.spotId, (byWater.get(entry.spotId) ?? 0) + 1);
+  const [water, nextWater] = [...byWater].sort((a, b) => b[1] - a[1]);
+  const waterName = water ? book.spots.find((spot) => spot.id === water[0])?.name : undefined;
+  const topWater = water && waterName && water[1] >= 2 && water[1] > (nextWater?.[1] ?? 0) ? { name: plainName(waterName), count: water[1] } : null;
+  const waterLine = topWater ? t("Best water: {water} ({count})", { water: topWater.name, count: topWater.count }) : null;
   const lines = [
     fishLine,
     daysLine,
@@ -106,6 +116,7 @@ export function SeasonRecapBox({
     ...(rateLine ? [rateLine] : []),
     kindsLine,
     ...(lureLine ? [lureLine] : []),
+    ...(waterLine ? [waterLine] : []),
     // A past season's goal, how it ended; this year's has its own box below.
     ...(goal !== null ? [recap.fish >= goal ? t("Goal reached: {count} of {goal} fish in {year}.", { count: recap.fish, goal, year }) : t("{count} of {goal} fish in {year}", { count: recap.fish, goal, year })] : []),
   ];
@@ -125,6 +136,8 @@ export function SeasonRecapBox({
               <Link to={fishLink}>{line}</Link>
             ) : topLure && lureLink && line === lureLine ? (
               <Link to={lureLink(topLure.lure)}>{line}</Link>
+            ) : topWater && waterLink && line === waterLine ? (
+              <Link to={waterLink(topWater.name)}>{line}</Link>
             ) : outings && line === outingsLine ? (
               <Link to={outings.to}>{line}</Link>
             ) : line === kindsLine && kindsId && recap.kinds > 0 ? (

@@ -655,6 +655,7 @@ export const PL_FIELD: PlBook = {
   "New best": "Nowy rekord",
   "Beat last year ({n})": "Więcej niż w zeszłym roku ({n})",
   "Best lure: {lure} ({count})": "Najlepsza przynęta: {lure} ({count})",
+  "Best water: {water} ({count})": "Najlepsze łowisko: {water} ({count})",
   "By this date last year: {n}": "Rok temu do tego dnia: {n}",
   "The sample week's fish don't count toward a goal.": "Ryby z przykładowego tygodnia nie liczą się do celu.",
   "All unpacked.": "Wszystko rozpakowane.",
