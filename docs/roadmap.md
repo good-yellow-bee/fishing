@@ -1837,7 +1837,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT395~~ | ~~Egg raiders bolt: a perch or smallmouth hooked raiding the sunfish beds by the dock is chased off by the guarding sunfish, so its first run is the long one; the fight card says so~~ (#1566) | gameplay | S |
 | ~~GT396~~ | ~~The foam lane's drift: on a breezy or strong day a fish hooked in a foam lane fights where the wind's drift is strongest, so a slack line drifts out 1.3x faster still between runs; the fight card says so~~ (#1570) | gameplay | S |
 | ~~GT397~~ | ~~News card 2026-10-20-game48 covers GT394 to GT396: the rock edge's ledge, egg raiders bolt and the foam lane's drift~~ (#1572) | ui | S |
-| GT398 | Risers leap first: a jumper hooked rising to the hatching bugs or midges is already at the top, so its first run is a leap, as off a popper; the fight card says so | gameplay | S |
+| ~~GT398~~ | ~~Risers leap first: a jumper hooked rising to the hatching bugs or midges is already at the top, so its first run is a leap, as off a popper (not in winter, when jumpers stay down); the fight card says so~~ (#1575) | gameplay | S |
 | GT399 | Lantern-lit net: at night a fish hooked by the dock's lantern sees the net in its light and bolts from it once, as a carp does; the fight card says so | gameplay | S |
 | GT400 | Fired up on fry: a fish hooked chasing the kingfisher's fry is fired up, so its first run doesn't tire it at all; the fight card says so | gameplay | S |
 | GT401 | News card game49 covers GT398 to GT400 | ui | S |
