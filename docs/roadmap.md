@@ -1853,7 +1853,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT404~~ | ~~Bank stock across the week: a bank where the angler kept 30 or more fish in the last seven days (fish let go don't count) is fished down, so a fresh fish there keeps only 0.6 of its weight above its kind's least (no trophies) till the bank rests; the stance chip says so, a new angler is spared, and the server counts the week's kept fish on its own call once a visit~~ (#1588) | gameplay | M |
 | ~~GT405~~ | ~~News card 2026-10-20-game50 covers GT403 and GT404: the landed card tells what the server paid, and bank stock across the week~~ (#1591) | ui | S |
 | ~~GT406~~ | ~~The line on the reel: the walk signs' Line button swaps light, standard or heavy line between casts (kept from visit to visit); light line bites 0.85x sooner but snaps at 0.9 of the strain (frayed too, with a mark on the tension bar), heavy line holds 1.1x the strain but bites 1.15x slower; the wait hint and the fight card say so~~ (#1593) | gameplay | M |
-| GT407 | Stewards of the week: the Board ranks the lodge's anglers by the fish they let go this week (from Monday 00:00 UTC), and the angler's own place below the top ten | gameplay | M |
+| ~~GT407~~ | ~~Stewards of the week: the Board ranks the lodge's anglers by the fish they let go this week (from Monday 00:00 UTC), and the angler's own place below the top ten~~ (#PR) | gameplay | M |
 | GT408 | News card game51 covers GT406 and GT407 | ui | S |
 
 ## Risks / open questions for the owner

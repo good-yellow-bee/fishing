@@ -287,6 +287,18 @@ export function listDayBags(from: string, to: string, limit: number) {
     .all(from, to, BAG_SIZE, limit) as { userId: string; displayName: string; total: number; count: number; madeAt: string }[];
 }
 
+/** Each angler's count of fish let go that were landed since `since`, most first; of equal counts, by name. */
+export function listStewards(since: string) {
+  return db
+    .prepare(
+      `SELECT c.user_id as userId, p.display_name as displayName, COUNT(*) as count
+       FROM catch c JOIN profile p ON p.user_id = c.user_id
+       WHERE c.released = 1 AND c.created_at >= ?
+       GROUP BY c.user_id ORDER BY count DESC, displayName ASC, userId ASC`,
+    )
+    .all(since) as { userId: string; displayName: string; count: number }[];
+}
+
 /** The weights of the angler's day's bag in a window, heaviest first. */
 export function listBagWeights(userId: string, from: string, to: string): number[] {
   const rows = db
