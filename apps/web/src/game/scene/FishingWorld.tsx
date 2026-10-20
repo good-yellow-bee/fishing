@@ -2271,7 +2271,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       {robinAbout && <GroundRobin phase={phase} />}
       {blackbirdOut(hour, sky, season, storm) && <GroundBlackbird phase={phase} />}
       {hedgehogOut(hour, sky, season) && <BankHedgehog phase={phase} />}
-      {headlamp && <PlayerHeadlamp phase={phase} float={bobberWorld} />}
+      {headlamp && <PlayerHeadlamp phase={phase} float={bobberWorld} season={season} />}
       {dogOut(hour, sky, season) && <DockDog key={season} phase={phase} robin={robinAbout ? robinStartledAt : null} paperWind={paperBoatOut(hour, sky, season) ? (wind ?? NO_WIND).x : null} winter={knitsOut(season)} nibble={nibble && spot === "dock" ? bobberWorld : null} snowfall={snowing(sky, season)} />}
       {littleOwlOut(hour, sky, season) && <PostOwl snow={dockSnowy(season)} moths={mothsOut(hour, season)} phase={phase} atDock={spot === "dock"} />}
       <SchoolShadows phase={phase} schooled={schooled} bobber={bobberWorld} />

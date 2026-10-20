@@ -24,9 +24,13 @@ function unit(i: number, salt: number) {
 
 export type Moth = { x: number; y: number; z: number; flap: number };
 
-/** Moth `i` at `time`, and its wings' beat (0 shut, 1 open). */
+/** Moth `i` at `time` round a lantern, and its wings' beat (0 shut, 1 open). */
 export function mothAt(i: number, time: number): Moth {
-  const lamp = MOTH_LAMPS[Math.floor(i / MOTHS_PER_LANTERN) % MOTH_LAMPS.length]!;
+  return mothRound(i, time, MOTH_LAMPS[Math.floor(i / MOTHS_PER_LANTERN) % MOTH_LAMPS.length]!);
+}
+
+/** Moth `i` at `time` looping round a light at `lamp`, `lift` above it (the lanterns' flames sit low in their glass). */
+export function mothRound(i: number, time: number, lamp: { x: number; y: number; z: number }, lift = 0.12): Moth {
   const speed = (2.2 + unit(i, 1) * 1.6) * (unit(i, 2) < 0.5 ? 1 : -1);
   const phase = unit(i, 3) * Math.PI * 2;
   // The loop swells and shrinks, and a fast wobble on top gives the jitter.
@@ -34,8 +38,9 @@ export function mothAt(i: number, time: number): Moth {
   const angle = time * speed + phase + 0.35 * Math.sin(time * 11 + phase);
   return {
     x: lamp.x + Math.cos(angle) * reach,
-    y: lamp.y + 0.12 + 0.14 * Math.sin(time * (1.9 + unit(i, 5)) + phase) + 0.03 * Math.sin(time * 17 + i),
+    y: lamp.y + lift + 0.14 * Math.sin(time * (1.9 + unit(i, 5)) + phase) + 0.03 * Math.sin(time * 17 + i),
     z: lamp.z + Math.sin(angle) * reach,
     flap: 0.5 + 0.5 * Math.sin(time * (28 + unit(i, 6) * 8) + phase),
   };
 }
+

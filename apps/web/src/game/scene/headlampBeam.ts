@@ -1,3 +1,4 @@
+import type { LakeSeason } from "@stillwater/shared";
 import type { ScenePhase } from "./types";
 
 /**
@@ -27,4 +28,16 @@ export function headlampTarget<T extends Point>(out: T, phase: ScenePhase, angle
   out.z = angler.z + Math.cos(angler.yaw) * GROUND_AHEAD;
   out.y = surface(out.x, out.z);
   return out;
+}
+
+/** Moths find a lit headlamp one by one, this many seconds after it goes on, and loop round a spot this far out along the beam (their loops reach 0.38 m, so clear of the head). */
+export const LAMP_MOTHS_AT = [4, 9, 15] as const;
+export const LAMP_MOTHS_AHEAD = 0.9;
+/** Each flutters into view over this long. */
+const MOTH_ARRIVE_SEC = 0.8;
+
+/** How much of headlamp moth `i` shows `sinceOn` seconds after the lamp went on, 0 to 1 (none in winter). */
+export function lampMothShow(i: number, sinceOn: number, season: LakeSeason) {
+  if (season === "winter") return 0;
+  return Math.min(1, Math.max(0, (sinceOn - LAMP_MOTHS_AT[i]!) / MOTH_ARRIVE_SEC));
 }
