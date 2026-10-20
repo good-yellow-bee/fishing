@@ -450,21 +450,27 @@ export function useFishingGame(
   /** When each spare shiner went in, oldest first: the oldest goes out first, before it dies. */
   const bucketRef = useRef<number[]>([]);
   useEffect(() => {
-    const kept = profile?.userId ? loadBucket(profile.userId) : { shiners: [], died: 0 };
+    const kept = profile?.userId ? loadBucket(profile.userId, Date.now(), season) : { shiners: [], died: 0 };
     bucketRef.current = kept.shiners;
     setBucket(kept.shiners.length);
     if (profile?.userId && kept.died > 0) {
       saveBucket(profile.userId, kept.shiners);
-      setHint(t("{n} of the shiners in your bait bucket died while you were away: they keep three days.", { n: kept.died }));
+      setHint(
+        season === "winter"
+          ? t("{n} of the shiners in your bait bucket died while you were away: in the cold winter water they keep five days.", { n: kept.died })
+          : season === "summer"
+            ? t("{n} of the shiners in your bait bucket died while you were away: in the summer heat they keep two days.", { n: kept.died })
+            : t("{n} of the shiners in your bait bucket died while you were away: they keep three days.", { n: kept.died }),
+      );
     }
   }, [profile?.userId]);
   const keepBucket = (userId: string, shiners: number[]) => {
-    bucketRef.current = liveShiners(shiners, Date.now());
+    bucketRef.current = liveShiners(shiners, Date.now(), season);
     saveBucket(userId, bucketRef.current);
     setBucket(bucketRef.current.length);
   };
-  /** The spare shiners alive right now: one whose three days ran out during the visit has died. */
-  const bucketNow = () => liveShiners(bucketRef.current, Date.now());
+  /** The spare shiners alive right now: one whose days in the bucket ran out during the visit has died. */
+  const bucketNow = () => liveShiners(bucketRef.current, Date.now(), season);
   /** The shiner trap by the shack, read when the angler signs in. */
   const [trap, setTrapState] = useState<Trap | null>(null);
   const trapRef = useRef<Trap | null>(null);

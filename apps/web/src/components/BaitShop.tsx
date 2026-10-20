@@ -1,4 +1,4 @@
-import { GROUNDBAIT_CARRY, GROUNDBAIT_PRICE, shackPrice, SHINER_PRICE } from "@stillwater/shared";
+import { GROUNDBAIT_CARRY, GROUNDBAIT_PRICE, shackPrice, SHINER_PRICE, type LakeSeason } from "@stillwater/shared";
 import { t, useT } from "../i18n";
 import { GROUNDBAIT_CASTS } from "../game/logic";
 import { BUCKET_SIZE } from "../game/baitBucket";
@@ -23,10 +23,12 @@ type Props = {
   trapCold: boolean;
   onSetTrap: () => void;
   onLiftTrap: () => void;
+  /** The lake's season now, which sets how long a spare shiner keeps in the bucket. */
+  season: LakeSeason | undefined;
 };
 
 /** The shack's bait tin: points buy a handful of groundbait, up to what the bag carries, or a live shiner for the hook. */
-export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, busy, onBuy, onBuyShiner, onHookFromBucket, trap, trapCold, onSetTrap, onLiftTrap }: Props) {
+export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, busy, onBuy, onBuyShiner, onHookFromBucket, trap, trapCold, onSetTrap, onLiftTrap, season }: Props) {
   useT();
   const full = handfuls >= GROUNDBAIT_CARRY;
   // aria-disabled, as on the skills: a disabled button would drop keyboard focus the moment a purchase starts.
@@ -75,7 +77,9 @@ export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, b
               ? t("Goes on your hook for the next cast and draws the hunters at the bank.")
               : bucketFull
                 ? t("Your hook and your bait bucket are full.")
-                : t("A shiner is on your hook, so another goes in your bait bucket, which holds {n} of {max}.", { n: bucket, max: BUCKET_SIZE })}
+                : `${t("A shiner is on your hook, so another goes in your bait bucket, which holds {n} of {max}.", { n: bucket, max: BUCKET_SIZE })} ${
+                    season === "winter" ? t("In the cold winter water it keeps five days there.") : season === "summer" ? t("In the summer heat it keeps two days there.") : t("It keeps three days there.")
+                  }`}
           </p>
           {!shinerOn && bucket > 0 && (
             <button type="button" aria-disabled={busy || undefined} onClick={() => !busy && onHookFromBucket()}>

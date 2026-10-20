@@ -808,10 +808,10 @@ describe("the shack's bait tin", () => {
     expect(note.textContent).toBe("Goes on your hook for the next cast and draws the hunters at the bank.");
     await act(async () => buy.click());
     expect(buyShiner).toHaveBeenCalledTimes(1);
-    expect(note.textContent).toBe("A shiner is on your hook, so another goes in your bait bucket, which holds 0 of 3.");
+    expect(note.textContent).toBe("A shiner is on your hook, so another goes in your bait bucket, which holds 0 of 3. It keeps three days there.");
     await act(async () => buy.click());
     expect(buyShiner).toHaveBeenCalledTimes(2);
-    expect(note.textContent).toBe("A shiner is on your hook, so another goes in your bait bucket, which holds 1 of 3.");
+    expect(note.textContent).toBe("A shiner is on your hook, so another goes in your bait bucket, which holds 1 of 3. It keeps three days there.");
     expect(localStorage.getItem(shinerKey("u1"))).toBe("live");
     expect(JSON.parse(localStorage.getItem(baitBucketKey("u1"))!)).toHaveLength(1);
     localStorage.removeItem(shinerKey("u1"));
