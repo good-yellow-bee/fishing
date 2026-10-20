@@ -194,6 +194,8 @@ export type FightPerformance = {
   secondWind?: boolean;
   /** Seconds of fight played so far, by game time, so a paused tab doesn't count. */
   fightSec?: number;
+  /** Seconds the angler reeled, less what resting gave back: what tires the arm. */
+  reelSec?: number;
   /** At the reeds, the point or the dock, every run so far kept out of the weeds, off the rocks or clear of the pilings; at the inlet, every run downstream turned upstream. Unset once one wasn't. */
   clearOf?: "weeds" | "rocks" | "pilings" | "log" | "current";
   /** The line was reeled over the rocks or wrapped round a piling, and is frayed until retied. */
@@ -353,15 +355,15 @@ export function seasonTireMul(season: string | undefined, speciesId?: string) {
   return season === "winter" && !thrivesInCold(season, speciesId) ? WINTER_TIRE : 1;
 }
 /** Seconds of reeling before the angler's arm starts to tire in a fight. */
-export const ARM_FRESH_SEC = 45;
+export const ARM_FRESH_SEC = 8;
 /** Past that, the reel wins this much less line for each further second of reeling. */
-export const ARM_TIRE_PER_SEC = 0.01;
+export const ARM_TIRE_PER_SEC = 0.02;
 /** The slowest a tired arm reels, as a share of its fresh pace. */
 export const ARM_FLOOR = 0.7;
 /** Resting the reel, the arm gets back this many seconds of reeling for each second of rest. */
 export const ARM_REST_RECOVER = 0.5;
 /** Below this pace the fight's status says the arm is tiring. */
-export const ARM_TELL = 0.9;
+export const ARM_TELL = 0.95;
 
 /** How fast a tiring arm still reels after `reelSec` seconds of reeling, from 1 while it is fresh down to ARM_FLOOR. */
 export function armMul(reelSec: number): number {
@@ -948,6 +950,7 @@ export function makeFight(
     performance.fightSec = (performance.fightSec ?? 0) + dtSec;
     // Holding a run against a heavy drag works the arm as reeling does, so it gets no rest.
     reelSec = reeling || heavyRun ? reelSec + dtSec : Math.max(0, reelSec - dtSec * ARM_REST_RECOVER);
+    performance.reelSec = reelSec;
     if (armMul(reelSec) < ARM_TELL) sim.armTired = true;
     else delete sim.armTired;
     // Fought too long, a pike chews the line it swallowed down to frayed.

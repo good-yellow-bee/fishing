@@ -1932,6 +1932,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT453~~ | ~~The shiner trap by the shack: baited with a handful of groundbait at the shop, after six hours it holds one or two shiners for the bait bucket (lifted only when the bucket has room); left past three days they have found their way out~~ (#1680) | gameplay | M |
 | ~~GT454~~ | ~~Holding a run on a heavy drag works the angler's arm as reeling does, so it gets no rest through the run; the heavy drag's note says it tires the arm~~ (#1682) | gameplay | S |
 | ~~GT455~~ | ~~News card 2026-10-20-game67 covers GT453-GT454: the shiner trap and the heavy drag's toll on the arm~~ (#1683) | ui | S |
+| ~~GT456~~ | ~~The arm's fatigue is tuned to the fights there are: measured fights reel 6-13 s, so the arm now tires past 8 s of reeling (2% a second, floor 70%), which a weak angler meets on the big bottom fish and a strong one rarely; the fight records its reeling time~~ (#PR) | gameplay | S |
 
 ## Risks / open questions for the owner
 
