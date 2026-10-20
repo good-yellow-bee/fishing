@@ -263,6 +263,10 @@ describe("FightBar for screen readers", () => {
     expect(water("rocks")).toMatch(/rocks/);
     // A perch can't be turned, so the log goes unmentioned for it, as the pilings do.
     expect(water("log")).toBeNull();
+    act(() => root!.render(<FightBar fight={{ species: trout, weight: 2, underpowered: false, rising: true }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
+    expect([...container!.querySelectorAll(".fight-water")].map((line) => line.textContent)).toContain("Risen to the hatch: it is at the top already, so its first run is a leap — bow");
+    act(() => root!.render(<FightBar fight={{ species: perch, weight: 0.8, underpowered: false, rising: true }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
+    expect([...container!.querySelectorAll(".fight-water")].map((line) => line.textContent).some((line) => line?.startsWith("Risen"))).toBe(false);
     act(() => root!.render(<FightBar fight={{ species: perch, weight: 0.8, underpowered: false, weedBall: true }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
     expect([...container!.querySelectorAll(".fight-water")].map((line) => line.textContent)).toContain("Duckweed: a ball of weed on the line slows the reel till its first run strips it off");
     act(() => root!.render(<FightBar fight={{ species: trout, weight: 2, underpowered: false, water: "boat", farRock: true }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
