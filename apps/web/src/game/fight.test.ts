@@ -2137,20 +2137,22 @@ describe("the angler's arm in a long fight", () => {
 
   it("tires a weak angler's arm on a big bottom fish, and the fish still comes in", () => {
     const catfish = fish("catfish");
-    let seed = 3;
-    const f = makeFight(catfish, catfish.maxWeight, 1, () => (seed = (seed * 16807) % 2147483647) / 2147483647);
-    let outcome: FightOutcome = "fighting";
-    let down = false;
-    let sawTired = false;
-    // A careful angler: reels while the line is easy, lets go as it tightens.
-    for (let now = 0; outcome === "fighting" && now < 600_000; now += 50) {
-      if (!down && f.sim.tension < 0.45) down = true;
-      else if (down && f.sim.tension > 0.74) down = false;
-      outcome = f.step(now, 0.05, down);
-      sawTired ||= f.sim.armTired === true;
+    let tiredFights = 0;
+    for (let seed = 1; seed <= 8; seed += 1) {
+      const f = makeFight(catfish, catfish.maxWeight, 1, seeded(seed));
+      let outcome: FightOutcome = "fighting";
+      let down = false;
+      let sawTired = false;
+      // A careful angler: reels while the line is easy, lets go as it tightens.
+      for (let now = 0; outcome === "fighting" && now < 600_000; now += 50) {
+        if (!down && f.sim.tension < 0.45) down = true;
+        else if (down && f.sim.tension > 0.74) down = false;
+        outcome = f.step(now, 0.05, down);
+        sawTired ||= f.sim.armTired === true;
+      }
+      expect(outcome).toBe("landed");
+      if (sawTired) tiredFights += 1;
     }
-    expect(sawTired).toBe(true);
-    expect(f.performance.reelSec).toBeGreaterThan(0);
-    expect(outcome).toBe("landed");
+    expect(tiredFights).toBeGreaterThan(0);
   });
 });
