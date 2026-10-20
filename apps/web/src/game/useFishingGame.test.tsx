@@ -2838,6 +2838,8 @@ describe("level unlock integration", () => {
       castAndFight(surface, 1);
       expect(phase()).toBe("result:landed");
       expect(container!.querySelector("[data-testid=lost-from]")?.textContent).toBe("Mara");
+      // It has felt the hook before, so its first run doesn't tire it.
+      expect(vi.mocked(makeFight).mock.lastCall?.at(-1)).toMatchObject({ fired: true });
       expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toMatch(/^Northern pike: the trophy Mara lost here\./);
     } finally {
       harnessLost.current = [];
