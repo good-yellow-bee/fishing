@@ -3884,6 +3884,12 @@ html[data-contrast="high"] .sound-captions li {
     display: none;
   }
 
+  /* At any text size the card, grown by a fish's habits, reached the bank chip's corner at the top left: the chip steps
+     aside for the fight too. */
+  .scene-wrap[data-phase="fight"] .stance-chip {
+    display: none;
+  }
+
   /* Centred in the room beside the Reel button, which stood over its right edge on a 640 px phone. */
   .fight-bar {
     left: calc(50% - 56px);
