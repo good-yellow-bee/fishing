@@ -52,4 +52,29 @@ describe("useTagNewsToast", () => {
     expect(show(returns, true)).toBe("");
     expect(JSON.parse(localStorage.getItem(TAG_NEWS_KEY)!)).toEqual(["b", "a"]);
   });
+
+  it("steps aside while the bank is busy and comes back for its full time", () => {
+    const returns = [back("a")];
+    expect(show(returns, true)).toBe("a");
+    act(() => vi.advanceTimersByTime(TAG_NEWS_TOAST_MS - 100));
+    expect(show(returns, false)).toBe("");
+    act(() => vi.advanceTimersByTime(TAG_NEWS_TOAST_MS));
+    expect(show(returns, true)).toBe("a");
+    expect(localStorage.getItem(TAG_NEWS_KEY)).toBeNull();
+    act(() => vi.advanceTimersByTime(TAG_NEWS_TOAST_MS));
+    expect(show(returns, true)).toBe("");
+  });
+
+  it("tells each return once a visit even when the browser can't store it", () => {
+    vi.spyOn(browser.window.localStorage, "setItem").mockImplementation(() => {
+      throw new Error("full");
+    });
+    const returns = [back("a"), back("b")];
+    expect(show(returns, true)).toBe("a");
+    act(() => vi.advanceTimersByTime(TAG_NEWS_TOAST_MS));
+    expect(show(returns, true)).toBe("b");
+    act(() => vi.advanceTimersByTime(TAG_NEWS_TOAST_MS));
+    expect(show(returns, true)).toBe("");
+    vi.restoreAllMocks();
+  });
 });

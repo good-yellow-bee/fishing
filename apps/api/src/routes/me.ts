@@ -41,6 +41,6 @@ meRoutes.get("/me", (c) => {
     longestStreak: longest,
     recentDays: days.slice(-60),
     todayBag: { day: today.from, weights: listBagWeights(user.id, today.from, today.to) },
-    tagReturns: listTagReturns(user.id, new Date(Date.now() - TAG_NEWS_DAYS * 86_400_000).toISOString(), 5),
+    tagReturns: listTagReturns(user.id, new Date(Date.now() - TAG_NEWS_DAYS * 86_400_000).toISOString(), 20),
   });
 });

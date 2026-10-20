@@ -1404,7 +1404,7 @@ export function DockPage() {
               {shownBadges.length === 1 && <p>{t(badgeById(shownBadges[0])?.blurb ?? "")}</p>}
             </div>
           )}
-          {shownTag && (
+          {shownTag && !shownLevel && !shownBadges && (
             <div className="toast level-toast badge-toast">
               <span className="eyebrow">{t("Your tag came back")}</span>
               <h2>{t("{name} landed your {fish}", { name: shownTag.by, fish: t(fishById(shownTag.speciesId)?.name ?? shownTag.speciesId).toLowerCase() })}</h2>

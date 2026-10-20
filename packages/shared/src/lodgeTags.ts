@@ -18,7 +18,7 @@ export type LodgeRelease = { catchId: string; speciesId: string; weight: number;
 /** How long the angler who let a fish go hears that another angler landed it. */
 export const TAG_NEWS_DAYS = 7;
 
-/** One of the angler's let-go fish that another angler landed again: that catch, the kind, its weight then and when let go, and who landed it. */
+/** One of the angler's let-go fish that another angler landed again: that catch, the kind, its weight now and when let go, who landed it and when. */
 export type TagReturn = { catchId: string; speciesId: string; weight: number; was: number; by: string; at: string };
 
 /** Small common fish go back unremembered, as with an angler's own let-go fish, and a legend keeps to its own rules of when it bites. */

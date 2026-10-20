@@ -302,10 +302,10 @@ export function listTagReturns(userId: string, since: string, limit: number): Ta
   return db
     .prepare(
       `SELECT again.id as catchId, again.species_id as speciesId, again.weight as weight, orig.weight as was, p.display_name as by, again.created_at as at
-       FROM catch orig JOIN catch again ON again.tagged_from = orig.id JOIN profile p ON p.user_id = again.user_id
-       WHERE orig.user_id = ? AND again.created_at >= ? ORDER BY again.created_at DESC LIMIT ?`,
+       FROM catch again JOIN catch orig ON orig.id = again.tagged_from JOIN profile p ON p.user_id = again.user_id
+       WHERE again.created_at >= ? AND again.tagged_from IS NOT NULL AND orig.user_id = ? ORDER BY again.created_at DESC LIMIT ?`,
     )
-    .all(userId, since, limit) as TagReturn[];
+    .all(since, userId, limit) as TagReturn[];
 }
 
 /** One of those let-go fish, by its catch's id, if it is still in the lake for this angler. */
