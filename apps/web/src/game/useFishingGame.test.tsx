@@ -1776,7 +1776,7 @@ describe("level unlock integration", () => {
       const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "#5 Mepps");
       vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "pike")!);
       cast(surface);
-      for (let waited = 0; !/followed it to the bank/.test(hint()) && waited < 20_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+      for (let waited = 0; !/followed it to the bank/.test(hint() ?? "") && waited < 20_000; waited += 10) act(() => vi.advanceTimersByTime(10));
       expect(phase()).toBe("waiting:none");
     };
     const tap = () => act(() => window.dispatchEvent(new KeyboardEvent("keydown", { code: "Space", bubbles: true })));
