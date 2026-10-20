@@ -6,6 +6,7 @@ export const NEWS_KEY = "stillwater.news.v1";
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
   "A search's summary splits its fish by water too, each opening that water's. A fish's page says how near it came to your longest or heaviest of its kind, and a kind typed two ways, such as Perch and Perches, keeps one name and one record on every catch page.",
+  "The lake now opens sooner, above all on a phone: the creatures you only meet at night, in one season or in the rain load when their time comes instead of all at once, without popping in when they appear.",
   "Cast tight to the sunken log and the fish there now run for it: turn every run, or the line wraps round the log and frays. Land a smallmouth and a largemouth bass on one day for the Bass slam badge, or a brook trout, a rainbow trout and a salmon for the Trout slam. And a fish you let go that breaks off stays itself when it bites again, tag and all.",
   "An outing's page opens every outing on its water in one tap, and a copied outing says how many of the fish hooked were landed.",
   "A big fish worn down in a fight can now find a second wind: it gathers itself once and runs hard again, as the fight card calls. Each lure climbs tiers as you land fish on it, Proven, Trusted and Lucky, shown in the lure picker, and a Lucky lure's hook sets a little more solid. And when another angler lands a fish you let go, the lake tells you on your next visit.",
