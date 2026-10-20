@@ -296,6 +296,12 @@ function movedHint(spot: SpotId) {
   return t("The bubbles moved to the {spot}.", { spot: t(SPOT_LABELS[spot]) });
 }
 
+/** Tags out of the lake for a cast to find: landed this visit, or on a fish that got away and may bite again as itself. */
+function takenTags(landed: ReadonlySet<string>, lost: GotAway | null): ReadonlySet<string> {
+  const pending = lost?.back?.tag?.id;
+  return pending ? new Set([...landed, pending]) : landed;
+}
+
 function frenzyHint(spot: SpotId) {
   return t("A feeding frenzy at the {bank}: baitfish boil over the bubbles. Cast into them!", { bank: t(SPOT_LABELS[spot]) });
 }
@@ -1008,7 +1014,7 @@ export function useFishingGame(
     const released = lost.again || mercyNow ? null : castForReleased(loadReleased(), spotRef.current, Date.now(), Math.random());
     if (released?.fish) saveReleased(released.next);
     // Failing that, one another angler let go here may come up, carrying their tag.
-    const tagged = released && !released.fish && lodgeReleasedRef.current.length > 0 ? castForLodgeTag(lodgeReleasedRef.current, spotRef.current, Date.now(), Math.random(), landedTagsRef.current, current) : null;
+    const tagged = released && !released.fish && lodgeReleasedRef.current.length > 0 ? castForLodgeTag(lodgeReleasedRef.current, spotRef.current, Date.now(), Math.random(), takenTags(landedTagsRef.current, gotAwayRef.current), current) : null;
     // A let-go fish that broke off or dropped the bait is still that fish when it bites again.
     recaughtRef.current = lost.again?.back ?? released?.fish ?? tagged;
     // Over the groundbait the feeders crowd in, so some bites are theirs; a beginner's first fish stays an easy one.
