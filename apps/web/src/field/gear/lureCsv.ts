@@ -12,11 +12,11 @@ const rate = (fish: number, outings: number) => (fish / outings).toLocaleString(
  * The lure record as a spreadsheet, rows in the order shown, in the reader's language and units: what took fish, how
  * often it went out, and its best, to take into a notebook or send to a fishing partner.
  */
-export function lureRecordCsv(records: readonly PieceRecord[], kindName: (species: string) => string = pieceName): string {
+export function lureRecordCsv(records: readonly PieceRecord[], kindName: (species: string) => string = pieceName, lureName: (lure: string) => string = pieceName): string {
   const separator = getLang() === "pl" ? ";" : ",";
   const header = [t("Lure or bait"), t("Fish"), t("Outings"), t("Fish an outing"), t("Last fish"), t("Largest")];
   const rows = records.map((row) => [
-    pieceName(row.name),
+    lureName(row.name),
     String(row.fish),
     String(row.outings),
     rate(row.fish, row.outings),

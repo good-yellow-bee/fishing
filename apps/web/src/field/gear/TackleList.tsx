@@ -273,10 +273,10 @@ export function TackleList({
                 type="button"
                 className="tackle-remove"
                 onClick={() => {
-                  // Back in its place on Undo, unless it has come back since.
+                  // Back in its place on Undo, unless it has come back since, however it was added again (a tip, the Lure record).
                   const at = items.findIndex((other) => other.id === item.id);
                   remove(item.id);
-                  setTaken({ text: t("{piece} taken off the list.", { piece: pieceName(item.label) }), undo: (current) => (current.some((other) => other.id === item.id) ? current : [...current.slice(0, at), item, ...current.slice(at)]) });
+                  setTaken({ text: t("{piece} taken off the list.", { piece: pieceName(item.label) }), undo: (current) => (current.some((other) => other.id === item.id || (other.tripId === item.tripId && shownPieceKey(other.label) === shownPieceKey(item.label))) ? current : [...current.slice(0, at), item, ...current.slice(at)]) });
                   focusAfter(index);
                 }}
                 aria-label={t("Take {piece} off the list", { piece: pieceName(item.label) })}

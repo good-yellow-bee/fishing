@@ -40,9 +40,9 @@ import { offPlayLake } from "../playLake";
 import { countedBook, ownFish } from "../milestones";
 import { isSampleOnly, nextRealTrips, upcomingRealTrips } from "../bookCopy";
 import { outingFish } from "../outingFish";
-import { lateOutings, outNow, plainName, sameName, underWay } from "../tripDates";
+import { lateOutings, outingDay, outNow, plainName, sameName, underWay } from "../tripDates";
 import { focusPageHeading } from "../pageFocus";
-import { onPiece } from "../pieceTally";
+import { bookLureName, onPiece } from "../pieceTally";
 import { newestOutingFirst } from "../catchNeighbors";
 import { kindNames } from "../speciesLink";
 
@@ -142,10 +142,12 @@ function LureRecord({ today }: { today: string }) {
   // The order picked holds while its control shows.
   const found = pieceRecords(atWater, items, today);
   const records = orderedRecords(found, found.length > 2 ? order : "most");
-  // A kind as the book writes it most, as Bests names it.
+  // A kind and a lure as the book writes them most, as Bests and the cards name them, whichever water is picked.
   const kindName = useMemo(() => kindNames(countedBook(book).catches), [book]);
+  const lureName = bookLureName(book.catches);
   // The book the record counts: the sample week's made-up lures go with the first outing of the angler's own.
-  const quiet = notYetThisYear(countedBook(atWater).catches, new Date(), (entry) => entry.lure, (entry) => bookFishDay(book, entry), (name) => shownPieceKey(name));
+  // This year as the book counts it: during a New Year's Eve session past midnight, still the old one.
+  const quiet = notYetThisYear(countedBook(atWater).catches, new Date(`${outingDay(today)}T12:00:00`), (entry) => entry.lure, (entry) => bookFishDay(book, entry), (name) => shownPieceKey(name));
   const [all, setAll] = useState(false);
   // A lure that took fish goes straight into the next outing's bag, unless it is already there.
   // Only for an outing on the water picked: another water's lures are no tip for it.
@@ -176,7 +178,7 @@ function LureRecord({ today }: { today: string }) {
             wrap
             label={t("Water")}
             value={water ? water.id : "all"}
-            options={[{ id: "all", label: t("All waters") }, ...waters.map((spot) => ({ id: spot.id, label: spot.name }))]}
+            options={[{ id: "all", label: t("All waters") }, ...waters.map((spot) => ({ id: spot.id, label: plainName(spot.name) }))]}
             onChange={setWaterId}
           />
         </div>
@@ -201,7 +203,7 @@ function LureRecord({ today }: { today: string }) {
           <li key={row.label}>
             {/* A lure that took fish opens them in the catch search. */}
             {/* With a water picked, its fish there. */}
-            {row.lure ? <Link to={findLink(countedSearch(book, [exactTerm("lure", pieceName(row.name)), ...(water ? [exactTerm("water", plainName(water.name))] : [])].join(" + "), atWater.catches.filter((entry) => onPiece(entry, row.lure!))))}>{pieceName(row.name)}</Link> : <span>{pieceName(row.name)}</span>}
+            {row.lure ? <Link to={findLink(countedSearch(book, [exactTerm("lure", lureName(row.name)), ...(water ? [exactTerm("water", plainName(water.name))] : [])].join(" + "), atWater.catches.filter((entry) => onPiece(entry, row.lure!))))}>{lureName(row.name)}</Link> : <span>{lureName(row.name)}</span>}
             <span className="meta">
               {fishCountLabel(row.fish)} · {tn(row.outings, "{n} outing", "{n} outings")}
               {/* How often it pays, once it has been out more than once. */}
@@ -251,7 +253,7 @@ function LureRecord({ today }: { today: string }) {
                   >
                     {t("Pack for {outing}", { outing: outingName(next, book.spots) })}
                     {/* Which lure, for a list of buttons that would otherwise all read the same. */}
-                    <span className="sr-only">: {pieceName(row.name)}</span>
+                    <span className="sr-only">: {lureName(row.name)}</span>
                   </button>
                 </span>
               ) : null}
@@ -299,7 +301,7 @@ function LureRecord({ today }: { today: string }) {
       {/* Packed again and again and never a fish: a lure that may as well stay home, said where the folded list hides it. */}
       {blanks.length > 0 ? (
         <p className="meta never-took">
-          {t("Packed for {n} or more outings without a fish: {lures}.", { n: NEVER_TOOK_OUTINGS, lures: blanks.map((row) => `${pieceName(row.name)} (${row.outings})`).join(", ") })}
+          {t("Packed for {n} or more outings without a fish: {lures}.", { n: NEVER_TOOK_OUTINGS, lures: blanks.map((row) => `${lureName(row.name)} (${row.outings})`).join(", ") })}
         </p>
       ) : null}
       {/* Lures that took fish last year and none yet this year: worth a swim before the season ends. */}
@@ -307,11 +309,11 @@ function LureRecord({ today }: { today: string }) {
         <p className="meta not-yet">
           <span>
             {t("Not yet this year:")}{" "}
-            {inReadersOrder(quiet, pieceName).map((lure, index) => (
+            {inReadersOrder(quiet, lureName).map((lure, index) => (
               <Fragment key={lure}>
                 {index > 0 ? ", " : null}
                 {/* Counted for the water picked, so each opens that water's fish on it. */}
-                <Link to={findLink(countedSearch(book, [exactTerm("lure", pieceName(lure)), ...(water ? [exactTerm("water", plainName(water.name))] : [])].join(" + "), atWater.catches.filter((entry) => onPiece(entry, lure))))}>{pieceName(lure)}</Link>
+                <Link to={findLink(countedSearch(book, [exactTerm("lure", lureName(lure)), ...(water ? [exactTerm("water", plainName(water.name))] : [])].join(" + "), atWater.catches.filter((entry) => onPiece(entry, lure))))}>{lureName(lure)}</Link>
               </Fragment>
             ))}
           </span>
@@ -324,7 +326,7 @@ function LureRecord({ today }: { today: string }) {
           <button
             type="button"
             className="text-button"
-            onClick={() => downloadFile(lureRecordCsv(records, kindName), "text/csv;charset=utf-8", datedName(water ? `${fileSlug(water.name)}-lures.csv` : "stillwater-lures.csv"))}
+            onClick={() => downloadFile(lureRecordCsv(records, kindName, lureName), "text/csv;charset=utf-8", datedName(water ? `${fileSlug(water.name)}-lures.csv` : "stillwater-lures.csv"))}
           >
             {t("Download the lure record as a spreadsheet")}
           </button>
@@ -494,7 +496,7 @@ export function GearPage() {
               {spot ? (
                 <>
                   {" · "}
-                  <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
+                  <Link to={`/spots/${spot.id}`}>{plainName(spot.name)}</Link>
                   {" · "}
                   {t(WATER_LABELS[spot.waterType])}
                 </>

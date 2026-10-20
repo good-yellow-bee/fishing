@@ -1,7 +1,9 @@
 import { foldText, type Spot } from "@stillwater/shared";
 import { plainName } from "./tripDates";
 
-const escape = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+// Control characters XML forbids (pasted or imported) are left out: one would make the whole file unreadable to a GPS.
+// eslint-disable-next-line no-control-regex
+const escape = (text: string) => text.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 /** A coordinate as GPX takes it: to six places (about 11 cm), never "-1e-7" for a place right on the equator. */
 const decimal = (value: number) => String(Number(value.toFixed(6)) || 0);
