@@ -207,7 +207,7 @@ describe("dock weather", () => {
     expect(sign("Reeds")?.querySelector(".sign-giant")).not.toBeNull();
     expect(sign("Point")?.querySelector(".sign-giant")).toBeNull();
     expect(sign("Point")?.hasAttribute("aria-label")).toBe(false);
-    expect(spring.querySelector(".stance-chip")?.textContent).toContain("Tarnish, the bank's giant, is out here");
+    expect(spring.querySelector(".stance-chip")?.textContent).toContain("· giant: Tarnish");
   });
 
   it("dims the walk signs of the banks fished hard, and says so to a screen reader", async () => {

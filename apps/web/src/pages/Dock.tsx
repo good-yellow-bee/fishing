@@ -1151,7 +1151,7 @@ export function DockPage() {
           {!rowing && game.stance === hotBank && <small className="stance-hot"> · {t("biting today")}</small>}
           {!rowing && !mercy && game.stance === crowdedBank && <small className="stance-cold"> · {t("another angler here today")}</small>}
           {!rowing && isFishingStance(game.stance) && game.stance !== "open" && favoredNow(game.stance) && <small className="stance-hot"> · {t("bites sooner now")}</small>}
-          {!rowing && giantAt(game.stance) && <small className="stance-hot"> · {t("{name}, the bank's giant, is out here", { name: t(giantAt(game.stance)!.name) })}</small>}
+          {!rowing && giantAt(game.stance) && <small className="stance-hot"> · {t("giant: {name}", { name: t(giantAt(game.stance)!.name) })}</small>}
           {rising && <small className="stance-hot"> · {t("fish rising")}</small>}
           {!rowing && clouded && isFishingStance(game.stance) && SHALLOW_BANKS.has(game.stance) && <small className="stance-hot"> · {t("cloud over the sun")}</small>}
           {!rowing && moonPass && isFishingStance(game.stance) && <small className="stance-hot"> · {t(moonPass === "overhead" ? "moon overhead" : "moon underfoot")}</small>}

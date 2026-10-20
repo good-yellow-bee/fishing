@@ -172,7 +172,7 @@ export const PL_GAME: PlBook = {
   "Too soon: it saw the rod move and sank away.": "Za wcześnie: zobaczyła ruch wędki i zeszła w dół.",
   "Wait for it to turn, then figure-eight. Cast again.": "Poczekaj, aż zawróci, wtedy zrób ósemkę. Rzuć jeszcze raz.",
   "{note} · {name}, its giant, is still out there": "{note} · {name}, olbrzym tego łowiska, wciąż czeka",
-  "{name}, the bank's giant, is out here": "{name}, olbrzym tego łowiska, jest tutaj",
+  "giant: {name}": "olbrzym: {name}",
   "It's {name}, the bank's giant!": "To {name}, olbrzym tego łowiska!",
   "{fish}: you landed {name}, this week's giant of the bank!": "{fish}: złowiony {name}, olbrzym tego łowiska w tym tygodniu!",
   "{name}, the bank's giant · +{points} pts": "{name}, olbrzym łowiska · +{points} pkt",
