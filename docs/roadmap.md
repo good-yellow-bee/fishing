@@ -1873,6 +1873,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT414~~ | ~~News card 2026-10-20-game53 covers GT412 and GT413: bonus stamps that follow what the server paid, and a crowded bank each day~~ (#1612) | ui | S |
 | ~~GT415~~ | ~~Figure-eight: a pike, tiger muskie or ghost pike on a spinner, spoon or streamer may follow the lure to the bank instead of taking (3 in 10); a tap as it turns (after 0.9 s, within about half a second) makes it hit, a tap too soon or none at all sends it away; a new angler is spared~~ (#1614) | gameplay | M |
 | ~~GT416~~ | ~~News card 2026-10-20-game54 covers GT415: the figure-eight~~ (#1617) | ui | S |
+| ~~GT417~~ | ~~The lake's giants: each week (from Monday 00:00 UTC) every bank holds one named giant, a big fish of a kind that lives there, shared by the whole lodge; a cast there rarely brings it up (about 1 in 80, if the angler's line can hold it), the first angler to land it is paid 200 points and named on the Board, and it is gone for everyone till next week~~ (#PR) | gameplay | M |
+| GT418 | News card game55 covers GT417 | ui | S |
 
 ## Risks / open questions for the owner
 

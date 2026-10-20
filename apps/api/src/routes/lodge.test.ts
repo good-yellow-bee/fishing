@@ -49,7 +49,7 @@ async function tracks() {
 
 beforeEach(() => {
   clearLodgeCache();
-  db.exec(`DELETE FROM catch; DELETE FROM profile; DELETE FROM "user";`);
+  db.exec(`DELETE FROM giant_landed; DELETE FROM catch; DELETE FROM profile; DELETE FROM "user";`);
   angler("ash", "Ash");
   angler("mara", "Mara");
 });
@@ -138,5 +138,17 @@ describe("GET /lodge/bank-week", () => {
     db.prepare(`INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, released, created_at) VALUES ('f', 'ash', 'perch', 1, 1, 'dock', 'r-f', 0, 1, ?)`).run(at(1));
     const response = await app.request("http://test/lodge/bank-week");
     expect(await response.json()).toEqual({ counts: { dock: 2, reeds: 1 } });
+  });
+});
+
+describe("GET /lodge/giants", () => {
+  it("lists the week's giants and names who landed one", async () => {
+    const { claimGiant } = await import("../db.ts");
+    const { weekStart, GIANT_BANKS } = await import("@stillwater/shared");
+    claimGiant(weekStart().toISOString().slice(0, 10), "reeds", "mara");
+    const { giants } = (await (await app.request("http://test/lodge/giants")).json()) as { giants: { spot: string; landedBy: string | null }[] };
+    expect(giants.map((giant) => giant.spot)).toEqual(GIANT_BANKS);
+    expect(giants.find((giant) => giant.spot === "reeds")?.landedBy).toBe("Mara");
+    expect(giants.find((giant) => giant.spot === "dock")?.landedBy).toBeNull();
   });
 });
