@@ -90,6 +90,7 @@ import { Walkthrough } from "../components/Walkthrough";
 import { bestPounds } from "../game/bestWeight";
 import { hookNoteMs } from "../game/hookNote";
 import { bookForPlay, markReleasedInBook, saveLandedCatch, saveLandedPhoto } from "../field/keepCatch";
+import { LURE_TIER_WORD, lureCatchCount, lureTier, lureTierReachedBy } from "../game/lureSeasoning";
 import { rememberReleased } from "../game/releasedFish";
 import { readTackle } from "../field/gear/storage";
 import { useEffectsSteppedDown } from "../game/frameWatch";
@@ -258,7 +259,13 @@ export function DockPage() {
       live = false;
     };
   }, [angler]);
-  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind, legend, lodgeReleased);
+  // Each packed lure's tier from the fish the field log took on it, read again after each catch.
+  const [bookCatches, setBookCatches] = useState(0);
+  const lureTiers = useMemo(() => {
+    const book = bookForPlay();
+    return new Map(lureChoices.map((choice) => [choice, lureTier(lureCatchCount(book.catches, choice))]));
+  }, [lureChoices, bookCatches]);
+  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind, legend, lodgeReleased, lureTiers.get(chosenLure) === "lucky");
   // The cast's left-out reasons, opened from its hint; each cast's list starts closed.
   const [reasonsOpenFor, setReasonsOpenFor] = useState<readonly string[] | null>(null);
   const reasonsOpen = reasonsOpenFor === game.moreReasons;
@@ -357,6 +364,8 @@ export function DockPage() {
   const catchShot = useSyncExternalStore(subscribeCatchShot, latestCatchShot);
   const shotFor = useRef<{ seq: number; id: string; dataUrl: string } | null>(null);
   const shotBase = useRef<{ id: string; seq: number } | null>(null);
+  /** The tier the tied lure climbs to with this landed fish, read from the book before the fish goes in. */
+  const lureReached = useMemo(() => (game.outcome?.kind === "landed" ? lureTierReachedBy(lureCatchCount(bookForPlay().catches, tiedLure.current)) : null), [game.outcome]);
   const fieldBeat = useMemo(() => {
     if (game.outcome?.kind !== "landed") return null;
     const book = bookForPlay();
@@ -714,6 +723,7 @@ export function DockPage() {
         lure: tiedLure.current,
         weather: dailyConditions(openedAt, sky),
       });
+      setBookCatches((count) => count + 1);
       setFieldSaved(true);
       setFieldLogError("");
     } catch (err) {
@@ -986,7 +996,7 @@ export function DockPage() {
             <div className="cue-bar">
               <i />
               {/* From level 2, a mark where the shrinking bar passes the last moment for a solid hook. */}
-              {showsSolidMark(me.level) && <b aria-hidden style={{ left: `${(1 - solidStrikeMs(1, fightWind(wind.wind), tiedLure.current, false, false, me.level)) * 100}%` }} />}
+              {showsSolidMark(me.level) && <b aria-hidden style={{ left: `${(1 - solidStrikeMs(1, fightWind(wind.wind), tiedLure.current, false, false, me.level, lureTiers.get(tiedLure.current) === "lucky")) * 100}%` }} />}
             </div>
           </div>
         )}
@@ -1077,6 +1087,7 @@ export function DockPage() {
           value={lure}
           spot={bank}
           now={lureNow}
+          tierOf={(choice) => lureTiers.get(choice) ?? null}
           locked={lureLocked}
           onChange={(next) => {
             if (lureLocked || !lureChoices.includes(next)) return;
@@ -1276,6 +1287,7 @@ export function DockPage() {
               <p className="catch-stamp quiet">{t("Book PB {weight}", { weight: weightText(stamp.heaviest) })}</p>
             )}
             {stamp?.trophy && <p className="catch-stamp">{t("Trophy")}</p>}
+            {lureReached && <p className="catch-stamp">{t("{lure} is now {tier}", { lure: t(tiedLure.current), tier: t(LURE_TIER_WORD[lureReached]) })}</p>}
             {dayBag && (
               <p className="catch-stamp quiet day-bag">
                 {dayBag.raisedBy > 0
