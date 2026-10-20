@@ -1931,7 +1931,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT452~~ | ~~News card 2026-10-20-game66 covers GT450-GT451: bucket shiners' three days and hook-wise trophies~~ (#1678) | ui | S |
 | ~~GT453~~ | ~~The shiner trap by the shack: baited with a handful of groundbait at the shop, after six hours it holds one or two shiners for the bait bucket (lifted only when the bucket has room); left past three days they have found their way out~~ (#1680) | gameplay | M |
 | ~~GT454~~ | ~~Holding a run on a heavy drag works the angler's arm as reeling does, so it gets no rest through the run; the heavy drag's note says it tires the arm~~ (#1682) | gameplay | S |
-| GT455 | News card game67 covers GT453-GT454 | ui | S |
+| ~~GT455~~ | ~~News card 2026-10-20-game67 covers GT453-GT454: the shiner trap and the heavy drag's toll on the arm~~ (#1683) | ui | S |
 
 ## Risks / open questions for the owner
 
