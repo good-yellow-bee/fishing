@@ -68,17 +68,18 @@ export function outingStreak(
 ): { best: number; going: boolean; dry: number; dryNow: number } {
   // Each outing is a step. Two on one day are in no known order: the run counts them all when both gave a fish, and a
   // day with a blank among them ends it (and ends a dry spell when one gave a fish).
-  const days = new Map<string, { outings: number; fished: number }>();
+  const days = new Map<string, { outings: number; fished: number; loose?: boolean }>();
   for (const trip of trips) {
     if (!outingFished(trip, today, fishOn(trip.id) > 0)) continue;
     const day = days.get(trip.date) ?? { outings: 0, fished: 0 };
     days.set(trip.date, { outings: day.outings + 1, fished: day.fished + (fishOn(trip.id) > 0 ? 1 : 0) });
   }
-  // A day with fish logged off any outing is a fished step; on a day with outings, a loose fish already counts for its
-  // water's one outing through fishOn, and gives no fish to an outing on another water.
+  // A day with fish logged off any outing is a fished step. On a day with outings it ends a dry spell, but gives no
+  // fish to a blank outing on another water: fishOn already credits its own water's one outing.
   for (const day of looseDays) {
-    if (day > today || days.has(day)) continue;
-    days.set(day, { outings: 1, fished: 1 });
+    if (day > today) continue;
+    const held = days.get(day);
+    days.set(day, held ? { ...held, loose: true } : { outings: 1, fished: 1 });
   }
   let best = 0;
   let run = 0;
@@ -86,9 +87,9 @@ export function outingStreak(
   let dry = 0;
   let dryRun = 0;
   for (const day of [...days.keys()].sort()) {
-    const { outings, fished } = days.get(day)!;
+    const { outings, fished, loose } = days.get(day)!;
     run = fished === outings ? run + outings : 0;
-    dryRun = fished === 0 ? dryRun + outings : 0;
+    dryRun = fished === 0 && !loose ? dryRun + outings : 0;
     best = Math.max(best, run);
     dry = Math.max(dry, dryRun);
   }

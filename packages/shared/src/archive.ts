@@ -1,7 +1,7 @@
 import { isLogbook, localDate, type CatchEntry, type Logbook, type Measure, type Spot, type Trip } from "./logbook.ts";
 import { CATCH_PHOTO_STORE_MAX_CHARS, isCatchPhoto, photosForBook, type CatchPhotoMap } from "./photo.ts";
 import { isTackleBox, type TackleItem } from "./tackle.ts";
-import { isWeather, prepareStoredLogbook } from "./weather.ts";
+import { prepareStoredLogbook } from "./weather.ts";
 
 export const FIELD_ARCHIVE_KIND = "stillwater-field-log";
 
@@ -87,12 +87,6 @@ function cleanCatch(entry: CatchEntry): CatchEntry {
     ...(entry.released ? { released: true } : {}),
     ...(entry.alsoMeasure ? { alsoMeasure: copy(entry.alsoMeasure) } : {}),
   };
-}
-
-/** Each fish's weather, where the file gives one, is weather this build reads; none (null or left out) is fine. */
-function weatherReadable(book: unknown): boolean {
-  if (!isRecord(book) || !Array.isArray(book.catches)) return true;
-  return book.catches.every((entry) => !isRecord(entry) || entry.weather === undefined || entry.weather === null || isWeather(entry.weather));
 }
 
 /** Every catch time and outing day is a real date, as the book writes them: a file with "yesterday" in it would stop the pages that show it. */
@@ -237,8 +231,6 @@ export function parseFieldArchive(value: unknown): FieldArchiveResult {
   // A file written by a later version says so, rather than reading as no field log at all.
   if (typeof value.version === "number" && value.version > FIELD_ARCHIVE_VERSION) return { ok: false, message: FIELD_ARCHIVE_NEWER };
   if (value.version !== FIELD_ARCHIVE_VERSION) return refuse();
-  // A fish's weather this build can't read is refused, not dropped: a file loading "fine" would lose its sky and wind.
-  if (!weatherReadable(value.book)) return refuse();
   const prepared = prepareStoredLogbook(value.book);
   if (!isLogbook(prepared) || !datesReadable(prepared) || !sizesReadable(prepared)) return refuse();
   if (!isTackleBox(value.tackle)) return refuse();

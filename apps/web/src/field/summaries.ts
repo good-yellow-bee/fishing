@@ -158,8 +158,9 @@ export function yearSummary(book: Logbook, year: string, today: string, goal: nu
     .map((row) => `${plainName(row.name!)} (${row.count})`);
   const [y, m, d] = today.split("-").map(Number) as [number, number, number];
   const pace = goal !== null && today.startsWith(`${year}-`) ? goalPace(catches.length, goal, new Date(y, m - 1, d)) : null;
+  const lureName = bookLureName(book.catches);
   const lures = pieceTally(catches, 3)
-    .map((row) => `${bookLureName(book.catches)(row.lure)} (${row.count})`)
+    .map((row) => `${lureName(row.lure)} (${row.count})`)
     .join(", ");
   return [
     t("{year} in the book", { year }),

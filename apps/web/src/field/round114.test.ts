@@ -20,10 +20,13 @@ describe("round 114: Home's What's new", () => {
     expect(fieldNewsDue(3)).toBe(true);
     markFieldNewsSeen();
     expect(fieldNewsDue(3)).toBe(false);
-    localStorage.setItem(NEWS_KEY, "2099-01-01-game99");
+    localStorage.setItem(NEWS_KEY, "2026-01-01-game1");
     expect(fieldNewsDue(3)).toBe(false);
     localStorage.setItem("stillwater.news.field.v1", "an older line");
     expect(fieldNewsDue(3)).toBe(true);
+    // Read and closed in the game's card: Home's goes too.
+    localStorage.setItem(NEWS_KEY, NEWS_ID);
+    expect(fieldNewsDue(3)).toBe(false);
     expect(newestFieldNews()).toBeTruthy();
   });
 
@@ -53,5 +56,7 @@ describe("round 114: a run of outings with a fish", () => {
     const trips: Trip[] = [{ id: "a", date: "2026-10-10", spotId: "x", title: "", note: "" }, { id: "b", date: "2026-10-12", spotId: "x", title: "", note: "" }];
     const streak = outingStreak(trips, (id) => (id === "a" ? 1 : 0), "2026-10-20", ["2026-10-12"]);
     expect(streak.going).toBe(false);
+    // It still ends a dry spell: that day had a fish.
+    expect(streak.dryNow).toBe(0);
   });
 });

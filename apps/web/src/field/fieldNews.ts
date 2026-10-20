@@ -39,19 +39,17 @@ export function newestFieldNews(): string | undefined {
 }
 
 /**
- * Whether Home's card is due: someone who has fished, with a field line newer than the one they dismissed. Before
- * this mark existed, dismissing the batch on show counts.
+ * Whether Home's card is due: someone who has fished, with a field line newer than the one they dismissed. The batch
+ * on show dismissed anywhere (the game's card too) counts.
  */
 export function fieldNewsDue(caughtTotal: number): boolean {
   const newest = newestFieldNews();
-  if (caughtTotal === 0 || !newest) return false;
-  let seen: string | null = null;
+  if (caughtTotal === 0 || !newest || readSeenNews() === NEWS_ID) return false;
   try {
-    seen = localStorage.getItem(FIELD_NEWS_KEY);
+    return localStorage.getItem(FIELD_NEWS_KEY) !== newest;
   } catch {
-    return readSeenNews() !== NEWS_ID;
+    return true;
   }
-  return seen === null ? readSeenNews() !== NEWS_ID : seen !== newest;
 }
 
 /** Dismissed on Home: this field line, and the batch too, so the game's card doesn't repeat it. */

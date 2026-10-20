@@ -1,7 +1,7 @@
 import { Fragment, useRef, useState, type ReactNode } from "react";
 import { MapAnchor } from "./MapAnchor";
 import { Link } from "react-router-dom";
-import { MOON_QUARTER_LABELS, itemsForTrip, localDate, moonQuarterOf, packedCount, recentCatches, shiftDate, spotById, type Logbook, type Spot, type Trip } from "@stillwater/shared";
+import { MOON_QUARTER_LABELS, itemsForTrip, localDate, moonQuarterOf, packedCount, recentCatches, shiftDate, spotById, type CatchEntry, type Logbook, type Spot, type Trip } from "@stillwater/shared";
 import { BookFile, SET_ASIDE_ID } from "./BookFile";
 import { readUnreadableBook } from "./storage";
 import { CatchSearch } from "./CatchSearch";
@@ -135,6 +135,11 @@ export function HomePage() {
   const heading = useRef<HTMLHeadingElement>(null);
   const [setAside, setSetAside] = useState(() => readUnreadableBook() !== null);
   // The news the game's dock shows, here too for an angler who only keeps the book: decided once per visit.
+  // A years-past fish's whole day in the catch search, without the sample week's: its day worked out once.
+  const everyFishThatDay = (entry: CatchEntry) => {
+    const day = bookFishDay(book, entry);
+    return countedSearch(book, day, book.catches.filter((other) => bookFishDay(book, other) === day), "book");
+  };
   const [news, setNews] = useState(() => fieldNewsDue(storedBook.catches.filter((entry) => offPlayLake(entry) && !isSampleCatch(entry.id)).length));
   // A first visit: the invented sample and nothing of the player's own yet.
   const sampleOnly = isSampleOnly(storedBook);
@@ -481,7 +486,7 @@ export function HomePage() {
                       {tn(yearsBack(entry, now) ?? 1, "{n} year ago", "{n} years ago")}
                       {" · "}
                       {/* The whole day it came from, in the catch search. */}
-                      <Link to={findLink(countedSearch(book, bookFishDay(book, entry), book.catches.filter((other) => bookFishDay(book, other) === bookFishDay(book, entry)), "book"))}>{t("Every fish that day")}</Link>
+                      <Link to={findLink(everyFishThatDay(entry))}>{t("Every fish that day")}</Link>
                     </p>
                     <CatchCard
                       level={4}

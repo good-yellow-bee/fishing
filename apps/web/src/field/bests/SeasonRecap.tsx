@@ -11,7 +11,6 @@ import { bestFishDay, bookFishDay } from "../tripMonths";
 import { formatDay } from "../format";
 import { kindNames } from "../speciesLink";
 import { bookLureName, pieceTally } from "../pieceTally";
-import { pieceName } from "../gear/pieceKey";
 import { countedFish } from "../milestones";
 import { plainName } from "../tripDates";
 

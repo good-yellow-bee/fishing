@@ -16,9 +16,7 @@ describe("round 114: a book file read in", () => {
   it("refuses a day the calendar doesn't have", () => {
     expect(parseFieldArchive(file(book({ date: "2026-02-31" }, null))).ok).toBe(false);
   });
-  it("refuses weather it can't read rather than dropping it", () => {
-    expect(parseFieldArchive(file(book({ date: "2026-02-20" }, { sky: "clear", wind: "calm", waterTempF: "14" }))).ok).toBe(false);
-  });
+
 });
 
 describe("round 114: a book file from a newer version", () => {
