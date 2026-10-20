@@ -29,7 +29,7 @@ async function show(board: DayBagBoard) {
 describe("DayBagCard", () => {
   it("ranks today's bags and says where the angler stands below the top ten", async () => {
     const page = await show({ day: "2026-10-20T00:00:00.000Z", entries: [{ rank: 1, userId: "a", displayName: "Ash", total: 7.5, count: 5 }], you: { rank: 12, total: 2, count: 3 } });
-    expect(page.querySelector("#bag-title")?.textContent).toBe("Day's bag: your 5 heaviest fish today");
+    expect(page.querySelector("#bag-title")?.textContent).toBe("Day's bag: each angler's 5 heaviest fish today");
     expect([...page.querySelectorAll(".derby-entries li")].map((li) => li.textContent)).toEqual(["1. Ash · 7.5 lb in 5 fish"]);
     expect(page.textContent).toContain("You: #12, 2 lb");
   });

@@ -94,6 +94,7 @@ db.exec(`
 
   CREATE INDEX IF NOT EXISTS catch_user_created ON catch (user_id, created_at DESC);
   CREATE INDEX IF NOT EXISTS catch_species_created ON catch (species_id, created_at);
+  CREATE INDEX IF NOT EXISTS catch_created ON catch (created_at);
 
   CREATE TABLE IF NOT EXISTS daily_request_claim (
     user_id TEXT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,

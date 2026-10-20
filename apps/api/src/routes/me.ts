@@ -40,6 +40,6 @@ meRoutes.get("/me", (c) => {
     badges: badgeProgress(listBadgeFacts(user.id), { longestStreak: longest, derbyWins: derbyWins(user.id) }),
     longestStreak: longest,
     recentDays: days.slice(-60),
-    todayBag: listBagWeights(user.id, today.from, today.to),
+    todayBag: { day: today.from, weights: listBagWeights(user.id, today.from, today.to) },
   });
 });

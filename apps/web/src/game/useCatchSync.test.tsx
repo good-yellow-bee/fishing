@@ -29,7 +29,7 @@ function me(userId: string): Me {
     speciesStats: [],
     badges: [],
     longestStreak: 0,
-    recentDays: [], todayBag: [],
+    recentDays: [], todayBag: { day: "", weights: [] },
   } as Me;
 }
 

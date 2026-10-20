@@ -30,8 +30,8 @@ export type Me = {
   longestStreak: number;
   /** The last 60 local days with a fish, oldest first, for the current streak on this device's calendar. */
   recentDays: string[];
-  /** The weights of today's (UTC) day's bag, heaviest first. */
-  todayBag: number[];
+  /** The UTC day's bag as it stood when read: the day's start, and its weights, heaviest first. */
+  todayBag: { day: string; weights: number[] };
 };
 
 export type DailyRequestRow = DailyRequest & { progress: number; claimed: boolean };

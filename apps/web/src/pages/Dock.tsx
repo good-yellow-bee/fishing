@@ -36,6 +36,7 @@ import {
   streakDays,
   addToBag,
   bagToBeat,
+  bagDay,
   bagTotal,
   dayRunForFirstFish,
   DAY_RUN_BONUS,
@@ -359,10 +360,14 @@ export function DockPage() {
   daysRef.current = me?.recentDays ?? [];
   /** The run of days this landed fish keeps going as the day's first, from DAY_RUN_FROM; 0 when it pays no day-run bonus. */
   const dayRun = useMemo(() => (game.outcome?.kind === "landed" ? dayRunForFirstFish(daysRef.current, localDate(new Date())) : 0), [game.outcome]);
-  const bagRef = useRef(me?.todayBag ?? []);
-  bagRef.current = me?.todayBag ?? [];
-  /** Today's bag with this landed fish in it, read before the catch is saved. */
-  const dayBag = useMemo(() => (game.outcome?.kind === "landed" ? addToBag(bagRef.current, game.outcome.weight) : null), [game.outcome]);
+  const bagRef = useRef(me?.todayBag);
+  bagRef.current = me?.todayBag;
+  /** Today's bag with this landed fish in it, read before the catch is saved; a bag read before UTC midnight is yesterday's. */
+  const dayBag = useMemo(() => {
+    if (game.outcome?.kind !== "landed" || !userId) return null;
+    const read = bagRef.current;
+    return addToBag(read && read.day === bagDay().from ? read.weights : [], game.outcome.weight);
+  }, [game.outcome, userId]);
   // Read before the catch is saved, so a new record can name the one it beat; read again after each save.
   const [records, setRecords] = useState<SpeciesRecord[] | null>(null);
   const recordsRef = useRef(records);

@@ -25,7 +25,7 @@ export function DayBagCard() {
   return (
     <section className="derby-card" aria-labelledby="bag-title">
       <p>
-        <strong id="bag-title">{t("Day's bag: your {n} heaviest fish today", { n: BAG_SIZE })}</strong>
+        <strong id="bag-title">{t("Day's bag: each angler's {n} heaviest fish today", { n: BAG_SIZE })}</strong>
         <br />
         <small>{t("Their total weight, till 00:00 UTC, one race for the whole lodge.")}</small>
       </p>
