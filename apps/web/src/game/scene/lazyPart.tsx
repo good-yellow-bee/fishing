@@ -1,4 +1,8 @@
 import { use, useEffect, useLayoutEffect, useState, type ComponentType } from "react";
+import type { LakeHour, LakeSeason, Sky } from "@stillwater/shared";
+
+/** The season a scene draws when none is given. */
+export const DEFAULT_SEASON: LakeSeason = "summer";
 
 /**
  * Scene parts seen only at night, in one season or in wet weather live in their own chunks (parts/*), so a
@@ -79,4 +83,24 @@ export function useSceneParts() {
       window.clearTimeout(timer);
     };
   }, []);
+}
+
+/**
+ * The chunks a scene at this hour, sky and season shows parts from (partsFor.test.ts checks this both ways against
+ * every part's own rule): its season's (summer's are all out on dry days only), the night's from dusk (but not
+ * a snowy winter dusk), and the wet-weather one in rain (winter's rain falls as snow, which the winter chunk draws).
+ */
+export function partsFor(hour: LakeHour, sky: Sky, season: LakeSeason): PartGroup[] {
+  const daytime = hour === "dawn" || hour === "day";
+  const groups: PartGroup[] = season !== "summer" || (daytime && sky !== "rain") ? [season] : [];
+  if (!daytime && !(hour === "dusk" && season === "winter" && sky === "rain")) groups.push("night");
+  if (sky === "rain" && season !== "winter") groups.push("weather");
+  return groups;
+}
+
+/** Asks for the chunks `partsFor` names as the lake starts, alongside its models, rather than when their parts first render. */
+export function usePartsFor(hour: LakeHour, sky: Sky, season: LakeSeason) {
+  useEffect(() => {
+    for (const group of partsFor(hour, sky, season)) void loadParts(group);
+  }, [hour, sky, season]);
 }

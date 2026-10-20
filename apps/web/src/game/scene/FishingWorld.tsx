@@ -148,7 +148,7 @@ import { createFrameWatch, noteEffectsSteppedDown } from "../frameWatch";
 import { frameDue, frameThrottle, idleNow } from "./frameCap";
 import { GOLDEN_ACCENT, GOLDEN_COLOR } from "../../components/FishMark";
 import { LIFT_RISE, LIGHT_PLUNGE, liftTilt, ROLL_SPLASH, RUN_PLUNGE, runSlide, takeStyle } from "../nibblePlan";
-import { lazyPart, useSceneParts } from "./lazyPart";
+import { DEFAULT_SEASON, lazyPart, usePartsFor, useSceneParts } from "./lazyPart";
 
 const Lightning = lazyPart("weather", "Lightning");
 const Aurora = lazyPart("night", "Aurora");
@@ -2193,7 +2193,7 @@ function Tone({ hour }: { hour: LakeHour }) {
   return null;
 }
 
-function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, topwater = false, hour, sky, season = "summer", species, weight, golden = false, released = false, moon, wind, boatSwing = 0, headlamp = false, hotspot, groundbait = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
+function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, topwater = false, hour, sky, season = DEFAULT_SEASON, species, weight, golden = false, released = false, moon, wind, boatSwing = 0, headlamp = false, hotspot, groundbait = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
   // How this fish takes the bait: a topwater lure makes every take a hit at the top.
   const take = species !== null ? takeStyle(species.id, topwater) : null;
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
@@ -2315,6 +2315,7 @@ function LakeCamera() {
 
 /** Memoized: the cast charge reaches the scene through powerRef, so holding a cast re-renders nothing here. */
 export const FishingWorld = memo(function FishingWorld(props: Props) {
+  usePartsFor(props.hour, props.sky, props.season ?? DEFAULT_SEASON);
   // Read once per visit: flipping shadows on a live renderer leaves materials compiled for the old setting.
   const [quality] = useState(() => ({ shadows: settings.shadows, dpr: settings.sharpness === "sharp" ? ([1, 1.75] as [number, number]) : 1 }));
   return (
