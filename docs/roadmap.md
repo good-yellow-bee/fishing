@@ -1876,7 +1876,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT415~~ | ~~Figure-eight: a pike, tiger muskie or ghost pike on a spinner, spoon or streamer may follow the lure to the bank instead of taking (3 in 10); a tap as it turns (after 0.9 s, within about half a second) makes it hit, a tap too soon or none at all sends it away; a new angler is spared~~ (#1614) | gameplay | M |
 | ~~GT416~~ | ~~News card 2026-10-20-game54 covers GT415: the figure-eight~~ (#1617) | ui | S |
 | ~~GT417~~ | ~~The lake's giants: each week (from Monday 00:00 UTC) every bank holds one named giant, a big fish of a kind that lives there, shared by the whole lodge; a cast there rarely brings it up (about 1 in 80, if the angler's line can hold it), the first angler to land it is paid 200 points and named on the Board, and it is gone for everyone till next week~~ (#1619) | gameplay | M |
-| GT418 | News card game55 covers GT417 | ui | S |
+| ~~GT418~~ | ~~News card 2026-10-20-game55 covers GT417: the lake's giants~~ (#PR) | ui | S |
 
 ## Risks / open questions for the owner
 
