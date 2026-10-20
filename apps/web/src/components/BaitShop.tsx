@@ -105,7 +105,9 @@ export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, b
                 : bucketFull
                   ? t("Your bait bucket is full: lift the trap once it has room.")
                   : trap === "ready"
-                  ? t("Shiners have found the trap.")
+                  ? trapCold
+                    ? t("A shiner has found the trap.")
+                    : t("Shiners have found the trap.")
                   : t("The trap has sat a long while.")}
           </p>
         </div>

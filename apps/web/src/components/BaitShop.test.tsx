@@ -71,5 +71,7 @@ describe("BaitShop's bait bucket", () => {
     expect(note()).toMatch(/draws one in for your bucket, ready after twelve hours\.$/);
     render("soaking", 1, vi.fn(), vi.fn(), true);
     expect(note()).toBe("The shiner trap is soaking in cold water: lift it after twelve hours.");
+    render("ready", 1, vi.fn(), vi.fn(), true);
+    expect(note()).toBe("A shiner has found the trap.");
   });
 });
