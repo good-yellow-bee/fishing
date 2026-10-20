@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { LAKE_HOURS, LAKE_SEASONS, SKIES, type LakeHour, type LakeSeason, type Sky } from "@stillwater/shared";
+import { LAKE_HOURS, LAKE_SEASONS, SKIES, type dailyWind, type LakeHour, type LakeSeason, type Sky } from "@stillwater/shared";
 import { describe, expect, it } from "vitest";
 import { partsFor, type PartGroup } from "./lazyPart";
 
@@ -9,11 +9,11 @@ import { partsFor, type PartGroup } from "./lazyPart";
  * every hour, sky and season: whenever a part would be out, its chunk is asked for up front.
  */
 type Gate = { part: string; group: PartGroup; rule: (hour: LakeHour, sky: Sky, season: LakeSeason, storm: boolean, wind: Wind) => boolean };
-type Wind = { x: number; z: number; wind: string };
+type Wind = ReturnType<typeof dailyWind>;
 /** A still day and a blustery one, for rules that read the wind. */
 const WINDS: Wind[] = [
-  { x: 0, z: 0, wind: "calm" },
-  { x: 0.4, z: 0, wind: "strong" },
+  { wind: "calm", x: 0, z: 0 },
+  { wind: "strong", x: 0.4, z: 0 },
 ];
 
 async function gates(): Promise<{ checked: Gate[]; unchecked: string[] }> {
