@@ -133,8 +133,21 @@ export function cormorantStartle(time: number, shift: number, splash: Splash) {
   return shift + (DRY_SEC + FOLD_SEC - t);
 }
 
-/** A boat at anchor this near the rock keeps it off: it fishes out on the far side instead, this far past the rock, in a loop this wide. */
+/** A boat out at its anchor this near the rock keeps it off: it fishes out on the far side instead, this far past the rock, in a loop this wide. */
 export const BOAT_SHY_M = 6;
+/** How far along its way out the boat has come before the bird slips off (and, rowing back, until it comes back), and how long it takes either way. */
+export const SHY_FROM_U = 0.6;
+export const SHY_SEC = 3;
+
+/** Where the bird means to be for a boat `u` of the way out to an anchor at `anchor` (0 at the pier, 1 at anchor): 1 keeping off, 0 at home. */
+export function shyTarget(u: number, anchor: { x: number; z: number }) {
+  return u >= SHY_FROM_U && Math.hypot(anchor.x - CORMORANT_ROCK.x, anchor.z - CORMORANT_ROCK.z) < BOAT_SHY_M ? 1 : 0;
+}
+
+/** Moves the keeping-off weight toward `target` at a steady pace (SHY_SEC either way), so it never hangs about halfway. */
+export function stepShy(away: number, target: number, delta: number) {
+  return away + Math.max(-delta / SHY_SEC, Math.min(delta / SHY_SEC, target - away));
+}
 const AWAY_M = 3.6;
 const AWAY_LOOP = 1.3;
 
@@ -157,18 +170,19 @@ export function cormorantAway(time: number, from: { x: number; z: number }): Cor
   };
 }
 
-/** Its pose `away` of the way (0 to 1) from where it would be (`near`) to out on the far side (`far`): off the rock in a hop, wings folding, only diving once it is out there. */
+/** Its pose `away` of the way (0 to 1) from where it would be (`near`) to out on the far side (`far`): off the rock in a quick hop, wings folding, only diving once it is out there. */
 export function shyBlend(near: CormorantPose, far: CormorantPose, away: number): CormorantPose {
   if (away <= 0) return near;
   if (away >= 1) return far;
   const k = away * away * (3 - 2 * away);
   return {
     x: near.x + (far.x - near.x) * k,
-    y: near.y * (1 - k) + Math.sin(k * Math.PI) * (near.swimming ? 0 : 0.3),
+    // Off the rock (or back up onto it) in the first quarter of the way; on the water for the rest.
+    y: near.swimming ? 0 : near.y * Math.max(0, 1 - k * 4) + Math.sin(Math.min(1, k * 4) * Math.PI) * 0.25,
     z: near.z + (far.z - near.z) * k,
     yaw: near.yaw + Math.atan2(Math.sin(far.yaw - near.yaw), Math.cos(far.yaw - near.yaw)) * k,
     spread: near.spread * (1 - k) + Math.sin(k * Math.PI) * 0.4,
     under: near.under * (1 - k) + far.under * Math.max(0, (k - 0.8) / 0.2),
-    swimming: near.swimming || k > 0.5,
+    swimming: near.swimming || k > 0.25,
   };
 }
