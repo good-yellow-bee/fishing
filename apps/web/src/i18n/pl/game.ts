@@ -135,6 +135,8 @@ export const PL_GAME: PlBook = {
   "The frenzy at the {bank} is over.": "Koniec żerowania. Łowisko: {bank}.",
   "{bank}: feeding frenzy now": "{bank}: teraz żerowanie",
   "{bank}: feeding frenzy now, but fished hard": "{bank}: teraz żerowanie, ale mocno obłowione",
+  "Bigger fish no longer just slide in: once one is played out it lies at the net, and you let go of the reel, then strike as its head comes up to net it; strike too soon and it bolts off again. And now and then the bubbles boil in a feeding frenzy for a minute and a half: the bank's sign gets a star, and casts into it bite twice as fast with the hunters crowding in.":
+    "Większe ryby nie wjeżdżają już same: zmęczona leży przy podbieraku, a ty puszczasz kołowrotek i zacinasz, gdy podniesie łeb. Zatniesz za wcześnie, a znów odpłynie. A co jakiś czas bąble na półtorej minuty zamieniają się w żerowanie: plakietka łowiska dostaje gwiazdkę, a rzuty w nie biorą dwa razy szybciej, bo zlatują się drapieżniki.",
   "Tight to the lily pads, where the bass and pike wait in ambush.": "Tuż przy liściach grzybieni, gdzie w zasadzce czekają bassy i szczupaki.",
   "Tight to the far rock, where the walleye hold in its shadow.": "Tuż przy dalekiej skale, gdzie w jej cieniu trzymają się sandacze.",
   "Along the rock edge, where the point drops off and the bass hold.": "Wzdłuż skalnej krawędzi, gdzie cypel opada w głąb i trzymają się bassy.",
@@ -806,8 +808,6 @@ export const PL_GAME: PlBook = {
   "Turning it!": "Zawracasz ją!",
   "NOW — net it!": "TERAZ — do podbieraka!",
   "At the net — let go, then strike as its head comes up!": "Przy podbieraku — puść, a potem zatnij, gdy podniesie łeb!",
-  "At night, press L or the Headlamp button to light the water: your float shows plainly, so you have longer to strike, but the light puts the fish off and the bite comes slower. And out on the boat, a cast tight to the far rock where the cormorant dries its wings finds the walleye that hold in its shadow.":
-    "W nocy wciśnij L albo przycisk Czołówka, by oświetlić wodę: spławik widać wyraźnie, więc masz więcej czasu na zacięcie, ale światło płoszy ryby i branie przychodzi wolniej. A z łódki rzut tuż przy dalekiej skale, na której kormoran suszy skrzydła, trafia na sandacze trzymające się w jej cieniu.",
   "Its head is turned — reel now to win line": "Ma łeb zwrócony do ciebie — kręć teraz, by odzyskać żyłkę",
   "Wrong way: pulling with the run gives it line — pull the other side": "Nie w tę stronę: ciągnięcie razem z odjazdem oddaje jej żyłkę — ciągnij w drugą stronę",
   "Save picture": "Zapisz obrazek",
