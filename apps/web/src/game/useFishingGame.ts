@@ -1820,9 +1820,10 @@ export function useFishingGame(
       if (!userId || !isTrophyWeight(current.species, current.weight) || current.species.rarity === "legendary" || (recaught && !recaught.foe)) return "";
       // The same fish lost again keeps the day it first broke off and the lure it first carried off, and is already known to the lodge.
       const fresh = !isOldFoe(loadOldFoe(userId), current);
-      // A fresh loss goes to the lodge too, for other anglers to meet.
-      if (fresh && reportsLost(current.species, current.weight)) setLostReport({ id: localId(), speciesId: current.species.id, weight: current.weight, spot: spotRef.current });
-      if (fresh) saveOldFoe(userId, { species: current.species.id, weight: current.weight, spot: spotRef.current, at: Date.now(), ...(lureRef?.current ? { lure: lureRef.current } : {}) });
+      // A fresh loss goes to the lodge too, for other anglers to meet, under an id the foe keeps from the start, so landing it oneself closes it.
+      const reportId = fresh && reportsLost(current.species, current.weight) ? localId() : undefined;
+      if (reportId) setLostReport({ id: reportId, speciesId: current.species.id, weight: current.weight, spot: spotRef.current });
+      if (fresh) saveOldFoe(userId, { species: current.species.id, weight: current.weight, spot: spotRef.current, at: Date.now(), ...(lureRef?.current ? { lure: lureRef.current } : {}), ...(reportId ? { reportId } : {}) });
       return ` ${t("It will be about this bank in the days to come.")}`;
     };
     // A giant that breaks free learns the lure it was hooked on.

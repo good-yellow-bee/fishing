@@ -1914,6 +1914,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT438~~ | ~~An angler is told, once, when another angler landed a trophy that broke their line: who, the kind, its weight and bank, in the same toast as a tag's return~~ (#1663) | gameplay | S |
 | ~~GT439~~ | ~~The Board lists the lodge's lost trophies still about the lake, by bank, with who lost each, so an angler can choose where to try for one~~ (#1664) | gameplay | S |
 | ~~GT440~~ | ~~News card 2026-10-20-game62 covers GT438-GT439: news of a lost trophy found, and the Board's lost trophies~~ (#1665) | ui | S |
+| ~~GT441~~ | ~~A lost trophy's lodge report takes its id from the client at the moment of the loss, so the angler's own foe holds it at once (landing it the same day closes the report) and a retried report is filed only once~~ (#1666) | gameplay | S |
 
 ## Risks / open questions for the owner
 

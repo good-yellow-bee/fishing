@@ -202,7 +202,7 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <button type="button" onClick={game.checkNightLine}>check night line</button>
       <i data-testid="caught-hour">{game.outcome?.kind === "landed" ? (game.outcome.hour ?? "") : ""}</i>
       <i data-testid="lost-from">{game.outcome?.kind === "landed" ? (game.outcome.lostFrom?.by ?? "") : ""}</i>
-      <i data-testid="lost-report">{game.lostReport ? `${game.lostReport.speciesId}|${game.lostReport.weight}|${game.lostReport.spot}` : ""}</i>
+      <i data-testid="lost-report">{game.lostReport ? `${game.lostReport.speciesId}|${game.lostReport.weight}|${game.lostReport.spot}|${game.lostReport.id}` : ""}</i>
       <i data-testid="night-line">{game.nightLine ? game.nightLine.spot : ""}</i>
       <i data-testid="live-shiner">{String(game.liveShiner)}</i>
       <i data-testid="frayed">{String(game.frayed)}</i>
@@ -1069,7 +1069,10 @@ describe("useFishingGame lost fight", () => {
     expect(message()).toMatch(/threw the hook\. It looked like a trophy\. It will be about this bank in the days to come\.$/);
     expect(JSON.parse(kept.get(oldFoeKey(profile.userId))!)).toMatchObject({ species: "pike", weight: pike.maxWeight, spot: "dock", lure: "Pheasant tails" });
     // And it goes to the lodge, for other anglers to meet.
-    expect(container!.querySelector("[data-testid=lost-report]")?.textContent).toBe(`pike|${pike.maxWeight}|dock`);
+    const report = container!.querySelector("[data-testid=lost-report]")?.textContent ?? "";
+    expect(report).toMatch(new RegExp(`^pike\\|${pike.maxWeight}\\|dock\\|`));
+    // The foe keeps the report's id from the moment it broke off, so landing it oneself closes the report.
+    expect(JSON.parse(kept.get(oldFoeKey(profile.userId))!).reportId).toBe(report.split("|")[3]);
   });
 
   it("says a light hook dropped out of the slack line when a charge was left slack", () => {

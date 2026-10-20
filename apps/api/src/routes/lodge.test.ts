@@ -161,7 +161,19 @@ describe("the lodge's lost trophies", () => {
     expect((await report({ ...pike, weight: 2 })).status).toBe(400);
     expect((await report({ ...pike, spot: "inlet" })).status).toBe(400);
     expect((await report({ ...pike, speciesId: "golden-shiner", weight: 0.5 })).status).toBe(400);
-    for (let i = 0; i < 3; i++) expect((await report(pike)).status).toBe(200);
+    expect((await report({ ...pike, id: "not-a-uuid" })).status).toBe(400);
+    // The client's id files it once, however often it is sent.
+    const id = "c1d2e3f4-a5b6-4c7d-8e9f-0a1b2c3d4e5f";
+    for (let i = 0; i < 3; i++) expect(await (await report({ ...pike, id })).json()).toEqual({ id });
+    expect((db.prepare(`SELECT COUNT(*) as n FROM lost_fish`).get() as { n: number }).n).toBe(1);
+    for (let i = 0; i < 2; i++) expect((await report(pike)).status).toBe(200);
+    db.exec(`DELETE FROM lost_fish WHERE id != '${id}'`);
+    // Another angler's report id is not this one's to file under.
+    db.prepare(`UPDATE lost_fish SET user_id = 'mara' WHERE id = ?`).run(id);
+    expect((await report({ ...pike, id: id.toUpperCase() })).status).toBe(409);
+    db.prepare(`UPDATE lost_fish SET user_id = 'ash' WHERE id = ?`).run(id);
+    db.exec(`DELETE FROM lost_fish WHERE id != '${id}'`);
+    for (let i = 0; i < 2; i++) expect((await report(pike)).status).toBe(200);
     db.exec(`UPDATE lost_fish SET found_by = 'mara'`);
     expect((await report(pike)).status).toBe(429);
   });
@@ -169,7 +181,7 @@ describe("the lodge's lost trophies", () => {
   it("lists other anglers' lost trophies, and tells the angler which of their own someone landed", async () => {
     const { reportLost, claimAndPayLost } = await import("../db.ts");
     const { lostSince } = await import("@stillwater/shared");
-    const maras = reportLost("mara", pike);
+    const maras = reportLost("mara", pike)!;
     reportLost("ash", { ...pike, weight: 14.8 });
     const read = async () => (await (await app.request("http://test/lodge/lost")).json()) as { lost: { id: string; by: string }[]; mineFound: { weight: number }[] };
     expect((await read()).lost.map((row) => [row.id, row.by])).toEqual([[maras, "Mara"]]);

@@ -357,11 +357,12 @@ export function payBonus(catchId: string, userId: string, bonus: number, id: Bon
   })();
 }
 
-/** Files a trophy the angler lost, for the rest of the lodge to meet at its bank. */
-export function reportLost(userId: string, fish: { speciesId: string; weight: number; spot: string }): string {
-  const id = randomUUID();
-  db.prepare(`INSERT INTO lost_fish (id, user_id, species_id, weight, spot, lost_at) VALUES (?, ?, ?, ?, ?, ?)`).run(id, userId, fish.speciesId, fish.weight, fish.spot, new Date().toISOString());
-  return id;
+/** Files a trophy the angler lost, for the rest of the lodge to meet at its bank, under the client's id when it sends one; null when that id is already another report's. */
+export function reportLost(userId: string, fish: { speciesId: string; weight: number; spot: string }, id: string = randomUUID()): string | null {
+  const filed = db
+    .prepare(`INSERT INTO lost_fish (id, user_id, species_id, weight, spot, lost_at) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT (id) DO NOTHING`)
+    .run(id, userId, fish.speciesId, fish.weight, fish.spot, new Date().toISOString());
+  return filed.changes === 1 ? id : null;
 }
 
 /** Other anglers' lost trophies since `since` that no one has landed yet, the newest first. */
@@ -372,6 +373,11 @@ export function listLodgeLost(userId: string, since: string, limit: number): Lod
        WHERE l.user_id != ? AND l.found_by IS NULL AND l.lost_at >= ? ORDER BY l.lost_at DESC LIMIT ?`,
     )
     .all(userId, since, limit) as LodgeLost[];
+}
+
+/** Whether a lost report is this angler's own. */
+export function ownsLost(userId: string, id: string): boolean {
+  return db.prepare(`SELECT 1 FROM lost_fish WHERE id = ? AND user_id = ?`).get(id, userId) !== undefined;
 }
 
 /** How many trophies the angler has reported lost since `since`, landed by anyone since or not. */
