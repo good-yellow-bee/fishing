@@ -1901,7 +1901,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT428~~ | ~~News card 2026-10-20-game58 covers GT426-GT427: the night line's night and sky, and released fish that shy from their lure~~ (#1645) | ui | S |
 | ~~GT429~~ | ~~Bait bucket: up to three spare live shiners kept per angler beside the one on the hook; the shack sells into it while a shiner is on, a landed shiner can go in it, a night line takes from it first, and the shack hooks one from it~~ (#1646) | gameplay | M |
 | ~~GT430~~ | ~~The groundbait bag and the shiner on the hook are kept per angler, as the bucket and night line are; the old browser-wide ones go to the first angler who loads~~ (#1648) | gameplay | S |
-| GT431 | News card game59 covers GT429 (bait bucket) | ui | S |
+| ~~GT431~~ | ~~News card 2026-10-20-game59 covers GT429: the bait bucket~~ (#PR) | ui | S |
 
 ## Risks / open questions for the owner
 
