@@ -1,5 +1,6 @@
+import * as THREE from "three";
 import type { LakeHour, LakeSeason } from "@stillwater/shared";
-import { hillFront } from "./farHills";
+import { FAR_HILLS } from "./farHills";
 
 /**
  * Hedgerows across the upper face of the hills behind the far bank, above the farm, the orchard and the hay
@@ -37,8 +38,43 @@ export function rowY(row: number, x: number) {
   return HEDGE_ROWS[row]! + WAVE * Math.sin(x * 0.35 + row * 1.7);
 }
 
+let facets: number[] | null = null;
+
+/** The drawn hills' triangles in world space: each the same icosphere as the Hills mesh, moved and stretched. */
+function hillFacets() {
+  if (facets) return facets;
+  const unit = new THREE.IcosahedronGeometry(1, 2);
+  const p = unit.getAttribute("position").array;
+  facets = [];
+  for (const { position: [cx, cy, cz], scale: [rx, ry, rz] } of FAR_HILLS) {
+    for (let i = 0; i < p.length; i += 3) facets.push(cx + p[i]! * rx, cy + p[i + 1]! * ry, cz + p[i + 2]! * rz);
+  }
+  unit.dispose();
+  return facets;
+}
+
+/**
+ * How far toward the lake the hills as drawn come at `x` and height `y`: their faceted faces, which sit a little
+ * inside the smooth hillFront, so a small bush set on them touches the slope. Null off every hill.
+ */
+export function facetFront(x: number, y: number): number | null {
+  const t = hillFacets();
+  let front: number | null = null;
+  for (let i = 0; i < t.length; i += 9) {
+    const [ax, ay, az, bx, by, bz, cx, cy, cz] = [t[i]!, t[i + 1]!, t[i + 2]!, t[i + 3]!, t[i + 4]!, t[i + 5]!, t[i + 6]!, t[i + 7]!, t[i + 8]!];
+    const d = (by - cy) * (ax - cx) + (cx - bx) * (ay - cy);
+    if (Math.abs(d) < 1e-9) continue;
+    const u = ((by - cy) * (x - cx) + (cx - bx) * (y - cy)) / d;
+    const v = ((cy - ay) * (x - cx) + (ax - cx) * (y - cy)) / d;
+    if (u < 0 || v < 0 || u + v > 1) continue;
+    const z = u * az + v * bz + (1 - u - v) * cz;
+    if (front === null || z > front) front = z;
+  }
+  return front;
+}
+
 function bushAt(x: number, y: number, size: number, seed: number): Bush | null {
-  const face = hillFront(x, y);
+  const face = facetFront(x, y);
   if (face === null) return null;
   // Above the hills' middles the face leans back, so a bush half sunk into it sits on the slope.
   return { x, y, z: face + BUSH * size * 0.35, size, shade: hash(seed + 7) };
