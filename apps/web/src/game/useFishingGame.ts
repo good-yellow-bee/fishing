@@ -700,7 +700,7 @@ export function useFishingGame(
     // One hooked in a foam lane on a windy day fights where the wind's drift is strongest.
     const foam = castFoamRef.current && windy !== undefined;
     // One that rose to the hatching bugs or midges is already at the top, so a jumper leaps on its first run, as off a popper.
-    const rising = (castBugRef.current || castMidgeRef.current) && !isTopwater(lureRef?.current);
+    const rising = (castBugRef.current || castMidgeRef.current) && !isTopwater(lureRef?.current) && season !== "winter";
     const next = { species, weight, underpowered, water, windy, lightHook, pads, farRock, weedBall, edge, bed, foam, rising, strongLift: liftsStickerInOne(species.id, current.strength) };
     fightRef.current = next;
     setFight(next);
