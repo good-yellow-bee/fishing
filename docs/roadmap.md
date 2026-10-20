@@ -1436,6 +1436,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC246~~ | ~~A bat at the headlamp: where bats are out (summer nights) and the angler's headlamp has drawn its moths, the second bat breaks off its loop every 17 s for 5 s (when its loop is within 8 m) to circle the moths just above the beam, as the first does at the dock lantern; the bats ease it to and from them, so the lamp going off, coming back or remounting never makes it jump (lampMoths, lampSwoopAt)~~ (#1569) | scene | S |
 | ~~SC247~~ | ~~News card scene57 covers SC245 and SC246: moths at the headlamp and the bat that hawks them~~ (#1573) | scene | S |
 | ~~SC248~~ | ~~The cormorant keeps off the anchored boat: its rock is 3 m from the anchor spot, so with the boat at anchor it stood drying its wings right by the camera, filling the lower right of every boat session; as the boat comes out past 60% of its way it now slips off the rock (a quick hop, 3 s each way) and fishes out on the far side (diving as usual), coming back as the boat rows home (shyTarget, stepShy, cormorantAway, shyBlend)~~ (#1576) | scene | S |
+| ~~SC249~~ | ~~Bank-stand posts out of the way: each stand's lantern post stood on the inland edge right behind the angler, on the camera's line to them, hiding the body at Reeds; posts now stand to the angler's left on the stand (Reeds clearly clear; the Inlet's was already aside, and the Drop-off's small stand leaves little room)~~ (#1581) | scene | S |
+| ~~SC250~~ | ~~News card scene58 covers SC248 and SC249: the cormorant keeping off the anchored boat and the bank-stand posts moved aside~~ (#1582) | scene | S |
+| ~~SC251~~ | ~~Calmer lake for reduced motion: creatures already held still, but the lake bed's caustic shimmer (the biggest moving area, up to a sixth of the frame) and the player's rocking rowboat kept going; with reduced motion the caustics now drift at a quarter pace and the boat rides the water's height without pitching or rolling (changed pixels a second apart, summer day: 16% to 11%)~~ (#1583) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1839,9 +1842,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT396~~ | ~~The foam lane's drift: on a breezy or strong day a fish hooked in a foam lane fights where the wind's drift is strongest, so a slack line drifts out 1.3x faster still between runs; the fight card says so~~ (#1570) | gameplay | S |
 | ~~GT397~~ | ~~News card 2026-10-20-game48 covers GT394 to GT396: the rock edge's ledge, egg raiders bolt and the foam lane's drift~~ (#1572) | ui | S |
 | ~~GT398~~ | ~~Risers leap first: a jumper hooked rising to the hatching bugs or midges is already at the top, so its first run is a leap, as off a popper (not in winter, when jumpers stay down); the fight card says so~~ (#1575) | gameplay | S |
-| GT399 | Lantern-lit net: at night a fish hooked by the dock's lantern sees the net in its light and bolts from it once, as a carp does; the fight card says so | gameplay | S |
-| GT400 | Fired up on fry: a fish hooked chasing the kingfisher's fry is fired up, so its first run doesn't tire it at all; the fight card says so | gameplay | S |
-| GT401 | News card game49 covers GT398 to GT400 | ui | S |
+| ~~GT399~~ | ~~Lantern-lit net: at night a fish hooked on a minnow lure among the dock lantern's minnows sees the net in the light and bolts from it once, as a carp does; the fight card says so~~ (#1578) | gameplay | S |
+| ~~GT400~~ | ~~Fired up on fry: a fish hooked chasing the kingfisher's fry is fired up, so its first run doesn't tire it at all; the fight card says so~~ (#1579) | gameplay | S |
+| ~~GT401~~ | ~~News card 2026-10-20-game49 covers GT398 to GT400: risers leap first, the lantern-lit net and fired up on the fry~~ (#1580) | ui | S |
 
 ## Risks / open questions for the owner
 

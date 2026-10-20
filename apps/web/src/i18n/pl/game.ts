@@ -144,6 +144,8 @@ export const PL_GAME: PlBook = {
   "Egg raider: chased off the beds by the sunfish, its first run is the long one": "Złodziej ikry: przegnany z gniazd przez bassy niebieskoskrzele, pierwszy odjazd ma najdłuższy",
   "Foam lane: the wind's drift is strongest here, so a slack line drifts out faster still": "Pas piany: tu wiatr znosi najmocniej, więc luźna żyłka odpływa jeszcze szybciej",
   "Risen to the hatch: it is at the top already, so its first run is a leap — bow": "Wyszła do rójki: jest już przy powierzchni, więc pierwszy odjazd to skok — puść",
+  "Lantern light: it will see the net in the light and bolt from it once, so be ready to bring it back": "Światło latarni: w jego blasku zobaczy podbierak i raz przed nim ucieknie, więc przygotuj się, by ją przyciągnąć",
+  "Fired up on the fry: its first run doesn't tire it at all": "Rozgrzana pogonią za narybkiem: pierwszy odjazd wcale jej nie męczy",
   "Drag: light": "Hamulec: lekki",
   "Drag: normal": "Hamulec: zwykły",
   "Drag: heavy": "Hamulec: mocny",
@@ -181,8 +183,10 @@ export const PL_GAME: PlBook = {
   "The {fish} your hunt tracked down haunts this water.": "{fish}, którego wytropiono, krąży po tej wodzie.",
   "A fish hooked along the point's rock edge now dives off the ledge instead of dragging your line over the rocks. A perch or smallmouth hooked raiding the sunfish beds bolts from the guarding sunfish, so its first run is the long one. And on a windy day a fish hooked in a foam lane lets a slack line drift out faster still.":
     "Ryba zacięta przy skalnej krawędzi cypla nurkuje teraz za półkę, zamiast ciągnąć żyłkę po kamieniach. Okoń albo bass małogębowy zacięty, gdy podkrada ikrę z gniazd, ucieka przed strzegącymi ich rybami, więc pierwszy odjazd ma najdłuższy. A w wietrzny dzień ryba zacięta w pasie piany pozwala luźnej żyłce odpływać jeszcze szybciej.",
-  "Out on the boat, a fish hooked tight to the far rock runs round it: turn every run, or the rock frays your line. A fish hooked through the duckweed comes in slower under a ball of weed until its first run strips it off. And a bank you fished hard yesterday starts today wary, its first casts biting slower, unless you bring groundbait or a lure the fish haven't seen.":
-    "Na łodzi ryba zacięta tuż przy dalekiej skale krąży wokół niej: zawracaj każdy odjazd, bo skała przetrze żyłkę. Ryba zacięta w rzęsie idzie wolniej pod kulą zielska, aż pierwszy odjazd ją zerwie. A łowisko mocno obłowione wczoraj zaczyna dziś płochliwe i pierwsze rzuty biorą wolniej, chyba że przyniesiesz zanętę albo przynętę, której ryby jeszcze nie widziały.",
+  "Out on the boat, the cormorant no longer dries its wings right beside you: it slips off its rock and fishes out on the far side while you are at anchor. And at the bank stands the lantern post now stands beside you instead of in front of the camera.":
+    "Na łódce kormoran nie suszy już skrzydeł tuż obok ciebie: gdy stoisz na kotwicy, zsuwa się ze swojego kamienia i łowi po drugiej stronie. A na stanowiskach na brzegu słupek z latarnią stoi teraz obok ciebie, a nie przed kamerą.",
+  "A jumper hooked rising to the hatching bugs or midges is already at the top, so its first run is a leap. At night, a fish hooked among the lantern's minnows sees the net in the light and bolts from it once. And a fish hooked chasing the kingfisher's fry is fired up: its first run doesn't tire it at all.":
+    "Skoczek zacięty, gdy wychodzi do rójki owadów albo muszek, jest już przy powierzchni, więc pierwszy odjazd to skok. Nocą ryba zacięta wśród rybek przy latarni widzi w świetle podbierak i raz przed nim ucieka. A ryba zacięta w pogoni za narybkiem zimorodka jest rozgrzana: pierwszy odjazd wcale jej nie męczy.",
   "Tight to the lily pads, where the bass and pike wait in ambush.": "Tuż przy liściach grzybieni, gdzie w zasadzce czekają bassy i szczupaki.",
   "Tight to the far rock, where the walleye hold in its shadow.": "Tuż przy dalekiej skale, gdzie w jej cieniu trzymają się sandacze.",
   "Along the rock edge, where the point drops off and the bass hold.": "Wzdłuż skalnej krawędzi, gdzie cypel opada w głąb i trzymają się bassy.",

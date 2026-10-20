@@ -1246,6 +1246,7 @@ function LakeSurface({
   const detailMap = useMemo(() => makeWaterDetailTexture(), []);
   const cloudMap = useMemo(() => makeCloudShadowTexture(), []);
   const causticGeometry = useMemo(() => makeCausticGeometry(bedGeometry), [bedGeometry]);
+  const still = useReducedMotion();
   const causticA = useMemo(() => makeCausticTexture(), []);
   const causticB = useMemo(() => {
     const texture = causticA.clone();
@@ -1292,11 +1293,12 @@ function LakeSurface({
     detailMap.offset.y += delta * scroll.detail.y;
     cloudMap.offset.x += delta * clouds.x;
     cloudMap.offset.y += delta * clouds.y;
-    // Two nets drifting across each other, so the light shifts instead of sliding.
-    causticA.offset.x += delta * 0.045;
-    causticA.offset.y += delta * 0.02;
-    causticB.offset.x -= delta * 0.03;
-    causticB.offset.y += delta * 0.038;
+    // Two nets drifting across each other, so the light shifts instead of sliding; reduced motion slows them to a quarter.
+    const drift = delta * (still ? 0.25 : 1);
+    causticA.offset.x += drift * 0.045;
+    causticA.offset.y += drift * 0.02;
+    causticB.offset.x -= drift * 0.03;
+    causticB.offset.y += drift * 0.038;
     if (material.current) material.current.opacity = 0.8 + Math.sin(t * 0.45) * 0.02;
     if (glintA.current) glintA.current.opacity = weather.glint * (0.14 + Math.sin(t * 0.65) * 0.05);
     if (glintB.current) glintB.current.opacity = weather.glint * (0.1 + Math.sin(t * 0.52 + 2) * 0.04);
@@ -2051,6 +2053,7 @@ function Creek({ hour, weather, wind }: { hour: LakeHour; weather: WeatherLook; 
 
 /** The angler's own rowboat. Moored by the pier until level 7 unties it; follows the row out and back, rocking on the chop. */
 function PlayerBoat({ fill }: { fill: FillKind | null }) {
+  const still = useReducedMotion();
   const ref = useRef<THREE.Group>(null);
   const ropes = useRef<THREE.InstancedMesh>(null);
   useFrame((state) => {
@@ -2063,8 +2066,9 @@ function PlayerBoat({ fill }: { fill: FillKind | null }) {
     hull.position.set(at.x, y + BOAT_DECK - 0.14, at.z);
     hull.rotation.order = "YXZ";
     hull.rotation.y = boat.yaw + boat.swing;
-    hull.rotation.x = THREE.MathUtils.clamp((waterHeight(at.x, at.z + sample, t) - y) * 1.15, -0.2, 0.2);
-    hull.rotation.z = THREE.MathUtils.clamp((y - waterHeight(at.x + sample, at.z, t)) * 1.15, -0.2, 0.2);
+    // Reduced motion keeps it riding the water's height without pitching and rolling on the chop.
+    hull.rotation.x = still ? 0 : THREE.MathUtils.clamp((waterHeight(at.x, at.z + sample, t) - y) * 1.15, -0.2, 0.2);
+    hull.rotation.z = still ? 0 : THREE.MathUtils.clamp((y - waterHeight(at.x + sample, at.z, t)) * 1.15, -0.2, 0.2);
     // Tied up, its lines run to the pier's posts, sagging and drawing tighter as it rides the chop.
     hull.updateMatrixWorld();
     poseMooringRopes(ropes.current, hull, boat.mode === "moored");
