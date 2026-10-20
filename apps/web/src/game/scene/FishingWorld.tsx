@@ -89,6 +89,7 @@ import { FollowShadow } from "./FollowShadow";
 import { GiantSwirl } from "./GiantSwirl";
 import { NightLineStake } from "./NightLineStake";
 import { ShinerTrap } from "./ShinerTrap";
+import type { trapState } from "../minnowTrap";
 import { BaitBucket } from "./BaitBucket";
 import { weedClumpShape } from "./weedClump";
 import { fishSize, landedScale } from "./fishSize";
@@ -218,7 +219,7 @@ type Props = {
   /** That groundbait was left on an earlier visit and the feeders have gathered over it. */
   groundbaitPrimed?: boolean;
   /** The shiner trap by the shack while it is set (minnowTrap.ts trapState), or null when it is not. */
-  shinerTrap?: "soaking" | "ready" | "stale" | null;
+  shinerTrap?: ReturnType<typeof trapState> | null;
   /** An evening rise is on: rings dimple the water in reach of the bank. */
   rising?: boolean;
   /** A thunderstorm: the sky flashes now and then and thunder follows. */

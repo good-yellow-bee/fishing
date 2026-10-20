@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, SHOP_X, SHOP_Z, lakeEdge, walkableAt } from "@stillwater/shared";
 import { LINE_FROM } from "./washingLine";
-import { cageAt, CAGE_LENGTH, CAGE_RADIUS, CAGE_Y, FLIP_EVERY, FLIP_SEC, TRAP_STAKE, shinerFlip } from "./trapSpot";
+import { cageAt, CAGE_LENGTH, CAGE_RADIUS, CAGE_Y, FLIP_EVERY, FLIP_SEC, SHINER_HALF, TRAP_STAKE, shinerFlip } from "./trapSpot";
 
 /** How far inside the drawn water's rim a point lies, as a share of the lake's radius there (negative on land). */
 const inside = (x: number, z: number) => {
@@ -27,7 +27,7 @@ describe("the shiner trap's spot", () => {
     expect(cage.x).toBeGreaterThan(2.3);
   });
 
-  it("breaks the surface with the cage's top", () => {
+  it("lies half out of the water", () => {
     expect(CAGE_Y + CAGE_RADIUS).toBeGreaterThan(0);
     expect(CAGE_Y).toBeLessThan(0);
   });
@@ -39,12 +39,12 @@ describe("the shiner trap's spot", () => {
       const flip = shinerFlip(t, false);
       if (!flip) continue;
       flips += 1;
-      expect(flip.lift).toBeGreaterThanOrEqual(0);
+      expect(flip.y + SHINER_HALF).toBeLessThan(CAGE_Y + CAGE_RADIUS);
       expect(Math.abs(flip.along)).toBeLessThan(CAGE_LENGTH / 2);
     }
     expect(flips).toBeGreaterThan(0);
     expect(flips).toBeLessThan((FLIP_EVERY * 6) / 0.05 / 4);
     expect(shinerFlip(1, true)).toEqual(shinerFlip(2, true));
-    expect(shinerFlip(1, true)!.lift).toBeGreaterThan(0);
+    expect(shinerFlip(1, true)!.y + SHINER_HALF).toBeLessThan(CAGE_Y + CAGE_RADIUS);
   });
 });

@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { mergePainted, type PaintedPart } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
-import { CAGE_ALONG, CAGE_LENGTH, CAGE_RADIUS, CAGE_Y, TRAP_REACH, TRAP_STAKE, shinerFlip } from "./trapSpot";
+import { CAGE_ALONG, CAGE_LENGTH, CAGE_RADIUS, CAGE_Y, SHINER_HALF, TRAP_REACH, TRAP_STAKE, shinerFlip } from "./trapSpot";
 import { toonRamp } from "./toon";
 
 const WIRE = "#5f6769";
@@ -62,13 +62,13 @@ export function ShinerTrap({ ready }: { ready: boolean }) {
     const flip = shinerFlip(clock.elapsedTime, still);
     mesh.visible = flip !== null;
     if (!flip) return;
-    mesh.position.set(CAGE_ALONG + flip.along, 0.02 + flip.lift, TRAP_REACH);
+    mesh.position.set(CAGE_ALONG + flip.along, flip.y, TRAP_REACH);
     mesh.rotation.z = flip.roll;
   });
   return (
     <group name="shiner-trap" position={[TRAP_STAKE.x, 0, TRAP_STAKE.z]} rotation={[0, TRAP_STAKE.yaw, 0]}>
       <mesh geometry={shape} material={material} />
-      {ready && <mesh ref={fish} geometry={body} material={silver} visible={false} scale={[0.05, 0.016, 0.01]} />}
+      {ready && <mesh ref={fish} geometry={body} material={silver} visible={false} scale={[0.05, SHINER_HALF, 0.01]} />}
     </group>
   );
 }

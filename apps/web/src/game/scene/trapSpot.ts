@@ -1,4 +1,5 @@
-import { LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, SHOP_X, lakeEdge } from "@stillwater/shared";
+import { LAKE_RX, SHOP_X } from "@stillwater/shared";
+import { bankStake } from "./stakeSpot";
 
 /**
  * Where the shiner trap (GT453) lies while it is set: a stake on the bank below the shack, between the
@@ -14,16 +15,13 @@ const BACK = 0.15;
 export const TRAP_REACH = 0.95;
 /** How far west along the shore the cage's middle lies from the stake, so the stake doesn't stand in front of it. */
 export const CAGE_ALONG = 0.35;
-/** The cage's length and its radius; its top breaks the surface (y 0) so it reads from the shack. */
+/** The cage's length and its radius; it lies half out of the shallow water (y 0) so it reads from the shack. */
 export const CAGE_LENGTH = 0.6;
 export const CAGE_RADIUS = 0.13;
-export const CAGE_Y = 0.05 - CAGE_RADIUS;
+export const CAGE_Y = 0.1 - CAGE_RADIUS;
 
-const edge = lakeEdge(ANGLE);
-const x = Math.cos(ANGLE) * (LAKE_RX * edge + BACK);
-const z = LAKE_CENTER_Z - Math.sin(ANGLE) * (LAKE_RZ * edge + BACK);
 /** The stake; unturned the cage lies out along +z (and along +x) from it, turned toward the lake's middle. */
-export const TRAP_STAKE = { x, z, yaw: Math.atan2(-x, LAKE_CENTER_Z - z) };
+export const TRAP_STAKE = bankStake(ANGLE, BACK);
 
 /** The middle of the cage, out from the stake. */
 export function cageAt() {
@@ -34,17 +32,20 @@ export function cageAt() {
 /** Once the trap is ready, a shiner flips at the surface inside the cage now and then: every FLIP_EVERY seconds, for FLIP_SEC. */
 export const FLIP_EVERY = 3.2;
 export const FLIP_SEC = 0.45;
-/** How high a flip throws the shiner above the water, and how far along the cage the three flips land either side of its middle. */
-const FLIP_LIFT = 0.07;
+/** The shiner's half height; it rests just under the surface and a flip throws it up toward the cage's top, never through it. */
+export const SHINER_HALF = 0.016;
+const REST_Y = -0.01;
+const FLIP_LIFT = 0.08;
+/** How far along the cage the three flips land either side of its middle, clear of the funnels. */
 const FLIP_ALONG = 0.13;
 
-export type Flip = { lift: number; along: number; roll: number };
+export type Flip = { y: number; along: number; roll: number };
 
-/** The flipping shiner at `time` (s): its height above the water, its place along the cage, and its tumble; null between flips. Still, it lies just under the cage's top. */
+/** The flipping shiner at `time` (s): its height, its place along the cage, and its tumble; null between flips. Still, it lies at the surface. */
 export function shinerFlip(time: number, still: boolean): Flip | null {
-  if (still) return { lift: 0.01, along: 0, roll: 0.25 };
+  if (still) return { y: 0.03, along: 0, roll: 0.25 };
   const into = time % FLIP_EVERY;
   if (into > FLIP_SEC) return null;
   const share = into / FLIP_SEC;
-  return { lift: Math.sin(Math.PI * share) * FLIP_LIFT, along: ((Math.floor(time / FLIP_EVERY) % 3) - 1) * FLIP_ALONG, roll: share * Math.PI * 2 };
+  return { y: REST_Y + Math.sin(Math.PI * share) * FLIP_LIFT, along: ((Math.floor(time / FLIP_EVERY) % 3) - 1) * FLIP_ALONG, roll: share * Math.PI * 2 };
 }
