@@ -1387,11 +1387,29 @@ html[data-reduce-motion="1"] .fight-bar .fight-note {
   font-weight: 700;
 }
 
-.fight-bar .fight-water {
+.fight-bar :is(.fight-water, .fight-drag) {
   margin: 6px 0 0;
   color: #3f5a42;
   font-size: 11px;
   text-align: center;
+}
+
+/* The card lets presses through to the lake; only the drag knob takes them. */
+.fight-bar .fight-drag-btn {
+  pointer-events: auto;
+  font: inherit;
+  font-weight: 700;
+  color: #2c3b2e;
+  background: rgba(255, 250, 238, 0.9);
+  border: 1px solid #665139;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+@media (pointer: coarse) {
+  .fight-bar .fight-drag-btn {
+    min-height: 32px;
+  }
 }
 
 .fight-bar .fight-clean {

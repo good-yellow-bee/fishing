@@ -1562,7 +1562,7 @@ export function useFishingGame(
           const keys = steerKeysRef.current;
           const steer: Steer = steerPointerRef.current?.side ?? (keys.left === keys.right ? 0 : keys.left ? -1 : 1);
           fightInput.steer = steer;
-          const result = runtime.step(now, dt, reeling, steer);
+          const result = runtime.step(now, dt, reeling, steer, settings.drag);
           const sim = runtime.sim;
           // Left to flutter on a slack line out past halfway, the small fish draws the hunter in. Only its calm spells count,
           // since easing off for a run is no pause, and a pump of the reel starts the pause again.

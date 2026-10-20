@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef } from "react";
 import { CLEAN_RUN_FROM } from "@stillwater/shared";
 import { canTurnRuns, ESCAPE_LINE, FRAYED_SNAP, fightLines, isCleanFight, jumpLines, RED_TENSION, SHORT_LINE, SOFT_MOUTHS, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone, NET_BOLT_LINE } from "../game/fight";
+import { nextDrag, type Drag } from "../game/drag";
 import { habitLines } from "../game/habitLines";
-import { useSettings } from "../game/settings";
+import { updateSettings, useSettings } from "../game/settings";
 import type { Fight } from "../game/useFishingGame";
 import { useLang, useT } from "../i18n";
 import { weightText } from "../i18n/content";
@@ -24,9 +25,15 @@ const ZONE_COLOR: Record<TensionZone, string> = { easy: "#6a8f5a", tight: "#d9a9
 const ZONE_WORD: Record<TensionZone, string> = { easy: "Easy", tight: "Tight", red: "Too tight" };
 /** How much fight the fish has left, beside the line bar: its runs weaken and it comes in faster as it tires. */
 const STAMINA_WORD: Record<StaminaState, string> = { fresh: "Fish fresh", tiring: "Fish tiring", spent: "Fish played out" };
+const DRAG_WORD: Record<Drag, string> = { light: "Drag: light", normal: "Drag: normal", heavy: "Drag: heavy" };
+const DRAG_LINE: Record<Drag, string> = {
+  light: "A run takes more line, even as you reel, but pulls softly",
+  normal: "Light lets a run go easy; heavy holds it short",
+  heavy: "A run takes less line, but loads it even let go: a strong one goes red",
+};
 
 export function FightBar({ fight, sim, performance, best = null, note = null, cleanRun = 0 }: Props) {
-  const { reelMode } = useSettings();
+  const { reelMode, drag } = useSettings();
   const t = useT();
   const lang = useLang();
   const card = useRef<HTMLDivElement>(null);
@@ -296,6 +303,22 @@ export function FightBar({ fight, sim, performance, best = null, note = null, cl
               {fight.windy === "strong" ? t("Strong wind: a slack line drifts out much faster") : t("Breezy: a slack line drifts out faster")}
             </p>
           )}
+          <p className="fight-drag">
+            <button
+              type="button"
+              className="fight-drag-btn"
+              title={t("Turn the reel's drag: light, normal or heavy. It takes hold from the next run.")}
+              onClick={(event) => {
+                // Leave Space free for reeling.
+                event.currentTarget.blur();
+                updateSettings({ drag: nextDrag(drag) });
+              }}
+            >
+              {t(DRAG_WORD[drag])}
+              <span className="on-pointer"> (F)</span>
+            </button>{" "}
+            {t(DRAG_LINE[drag])}
+          </p>
           <p ref={clean} className="fight-clean">{cleanLine}</p>
           {reelMode === "toggle" ? (
             <p className="fight-controls">

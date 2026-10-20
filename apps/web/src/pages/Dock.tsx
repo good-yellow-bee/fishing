@@ -109,6 +109,7 @@ import { useCatchSync } from "../game/useCatchSync";
 import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
 import { rarityLabel } from "../game/logic";
 import { locale, t, tn, useT } from "../i18n";
+import { nextDrag } from "../game/drag";
 import { boatSwingShare, canTurnRuns, fightWind } from "../game/fight";
 import { fightNotesText } from "../game/fightNotes";
 import { savePng, saveShareCard, shareCardFileName } from "../game/shareCard";
@@ -759,6 +760,12 @@ export function DockPage() {
       if (event.code === "KeyT" && !event.repeat) {
         event.preventDefault();
         retieKey.current();
+        return;
+      }
+      // The drag is turned in a fight, where its card shows it.
+      if (event.code === "KeyF" && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey && scenePhaseRef.current === "fight") {
+        event.preventDefault();
+        updateSettings({ drag: nextDrag(savedSettings.drag) });
         return;
       }
       if (event.code === "KeyL" && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey) {
