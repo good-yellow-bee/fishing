@@ -15,7 +15,7 @@ export function fovFor(aspect: number) {
 }
 
 /** While a fish is on, a phone held upright (narrower than this) can lift its view this share of its height. None now:
- * the fight card sits at the foot of the screen, below the fight (PA142), so the view stays as framed. */
+ * the phone's fight card sits at the top of the screen, above the fight (PA142), so the view stays as framed. */
 const PHONE_ASPECT = 0.65;
 export const FIGHT_LIFT = 0;
 

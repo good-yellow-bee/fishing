@@ -83,17 +83,17 @@ describe("larger text on a phone held upright", () => {
 });
 
 describe("the fight card on a phone held upright", () => {
-  const from = css.indexOf("@media (max-width: 800px) and (min-height: 501px)");
-  const upright = css.slice(from, css.indexOf("@media (max-width: 520px)", from));
-  const touch = css.slice(css.indexOf("@media (pointer: coarse) and (max-width: 800px) and (min-height: 501px) {"));
+  const phone = "@media (pointer: coarse) and (max-width: 520px) and (min-height: 501px) {";
+  const upright = css.slice(css.indexOf(phone));
+  const touch = css.slice(css.indexOf(phone + "\n  .fight-bar :is("));
 
   it("takes the top of the screen, above the fight, with the header and the bank chip stepping aside", () => {
-    const card = /\n  \.fight-bar \{([^}]*)\}/.exec(upright)?.[1];
+    const card = /\n  \.fight-bar,\n  html\[data-text-size\] \.fight-bar \{([^}]*)\}/.exec(upright)?.[1];
     expect(card).toContain("top: calc(8px + env(safe-area-inset-top));");
     expect(card).toContain("bottom: auto;");
     expect(card).toContain("right: 8px;");
     expect(upright).toMatch(/\.hud:has\(\+ \.scene-wrap\[data-phase="fight"\]\) \{\n    visibility: hidden;/);
-    expect(upright).toMatch(/\.scene-wrap\[data-phase="fight"\] \.stance-chip \{\n    display: none;/);
+    expect(upright).toMatch(/\.scene-wrap\[data-phase="fight"\] \.stance-chip,\n  html\[data-text-size\] \.scene-wrap\[data-phase="fight"\] \.walkthrough \{\n    display: none;/);
   });
 
   it("keeps to what a fight is read from on a touch screen, by height and text size", () => {
@@ -331,7 +331,7 @@ describe("high contrast", () => {
 describe("the fight card's drag line", () => {
   it("is for a screen reader only on a touch screen with larger text, and on any phone", () => {
     expect(css).toMatch(/html\[data-text-size\] \.fight-bar \.fight-drag-line \{\s*position: absolute;/);
-    const short = css.slice(css.indexOf("@media (pointer: coarse) and (max-height: 500px), (pointer: coarse) and (max-width: 800px) {"));
+    const short = css.slice(css.indexOf("@media (pointer: coarse) and (max-height: 500px), (pointer: coarse) and (max-width: 520px) {"));
     expect(/\.fight-bar \.fight-drag-line \{([^}]*)\}/.exec(short)?.[1]).toContain("clip: rect(0 0 0 0);");
     const bar = readFileSync(`${import.meta.dirname}/components/FightBar.tsx`, "utf8");
     expect(bar).toContain('<span className="fight-drag-line">{t(DRAG_LINE[drag])}</span>');

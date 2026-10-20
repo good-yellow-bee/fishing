@@ -18,7 +18,7 @@ describe("fovFor", () => {
     expect(sideways(BASE_FOV, 390 / 844)).toBeLessThan(24);
   });
 
-  it("keeps every screen's view as framed while a fish is on, the fight card being below the fight", () => {
+  it("keeps every screen's view as framed while a fish is on, the fight card being above the fight", () => {
     expect(FIGHT_LIFT).toBe(0);
     expect(fightLiftFor(390 / 844)).toBe(0);
     expect(fightLiftFor(360 / 640)).toBe(0);
