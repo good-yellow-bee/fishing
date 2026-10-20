@@ -2,6 +2,7 @@ import { join } from "node:path";
 import { serveStatic } from "@hono/node-server/serve-static";
 import type { Hono } from "hono";
 import { compress } from "hono/compress";
+import { etag } from "hono/etag";
 
 const isApi = (path: string) => path === "/api" || path.startsWith("/api/");
 
@@ -15,6 +16,14 @@ export function serveClient(app: Hono, distDir: string) {
     await next();
     if (c.res.ok) c.res.headers.set("Cache-Control", "public, max-age=31536000, immutable");
   });
+  // Models, textures, icons and the manifest keep their names across releases (the offline worker's "static" files, which
+  // it refreshes on every visit): an ETag lets each refresh cost a 304 when nothing changed, and no-cache keeps it asking.
+  for (const path of ["/models/*", "/textures/*", "/icons/*", "/env/*", "/manifest.webmanifest"]) {
+    app.use(path, etag(), async (c, next) => {
+      await next();
+      if (c.res.status === 200 || c.res.status === 304) c.res.headers.set("Cache-Control", "no-cache");
+    });
+  }
   app.get("*", (c, next) => (isApi(c.req.path) ? next() : files(c, next)));
   // Only page loads fall back: a missing script or model (an old chunk after a release) stays a 404.
   app.get("*", (c, next) =>
