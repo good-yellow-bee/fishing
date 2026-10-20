@@ -22,8 +22,8 @@ import { useTackleItems } from "./gear/TackleState";
 import { catchLink, type ListKey } from "./catchList";
 import { FROM_LIST } from "./leaveDeleted";
 import { isPlanned } from "./TripMonthHead";
-import { outingDay, outNow, sameName } from "./tripDates";
-import { bookSpelling, pieceName } from "./gear/pieceKey";
+import { outingDay, outNow, plainName, sameName } from "./tripDates";
+import { pieceName } from "./gear/pieceKey";
 import { bookFishDay } from "./tripMonths";
 import { bookKindName } from "./speciesLink";
 
@@ -180,10 +180,11 @@ export function SpotCard({
   outNow?: string | null;
 }) {
   const t = useT();
+  const { book } = useLogbook();
   return (
     <Link to={`/spots/${spot.id}`} className="spot-card" state={FROM_LIST}>
       <div className="spot-card-top">
-        <h2>{spot.name}</h2>
+        <h2>{plainName(spot.name)}</h2>
         <span className={`stamp stamp-${spot.waterType}`}>{t(WATER_LABELS[spot.waterType])}</span>
       </div>
       <p className="conditions-line">{spot.bestConditions || t("Conditions not noted")}</p>
@@ -196,7 +197,7 @@ export function SpotCard({
         {bestLure ? ` · ${t("best on {lure}", { lure: pieceName(bestLure) })}` : ""}
       </p>
       {restDays !== null ? <p className="meta">{restDays === 0 ? t("Fished here today") : restDays === 1 ? t("Last fished here yesterday") : tn(restDays, "Last fished here {n} day ago", "Last fished here {n} days ago")}</p> : null}
-      {biggest ? <p className="meta">{t("Best here: {species}, {size}", { species: t(bookSpelling(biggest.entry.species)), size: measureText(measureOf(biggest.entry, biggest.kind)!) })}</p> : null}
+      {biggest ? <p className="meta">{t("Best here: {species}, {size}", { species: bookKindName(book.catches)(biggest.entry.species), size: measureText(measureOf(biggest.entry, biggest.kind)!) })}</p> : null}
       {/* Plain words: the whole card is the link. */}
       {outNow ? <p className="meta out-now">{t("Out now: {outing}", { outing: outNow })}</p> : null}
       {nextOuting ? <p className="meta next-outing">{nextOuting}</p> : null}

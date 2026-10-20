@@ -14,7 +14,7 @@ import { bookFishDay } from "./tripMonths";
 import { tempText } from "../i18n/content";
 import { tempBandLabel, tempBandSearch } from "./WeatherBars";
 import { nearSunCount } from "./sunLight";
-import { speciesCounts } from "./speciesLink";
+import { kindNames, speciesCounts } from "./speciesLink";
 
 /**
  * "Around this date in earlier years here: 9 fish, Northern pike, Perch; most on Spinnerbait.": what a water gave within
@@ -24,7 +24,7 @@ export function sameTimeText(fish: readonly CatchEntry[]): string {
   const text = t("Around this date in earlier years here: {fish}, {species}.", {
     fish: fishCountLabel(fish.length),
     species: speciesCounts(fish)
-      .map((row) => t(row.species))
+      .map((row) => kindNames(fish)(row.species))
       .join(", "),
   });
   // A tie names no lure: "most on" would be a coin toss.

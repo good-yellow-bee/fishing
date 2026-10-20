@@ -1,5 +1,6 @@
 import { upcomingTrips, type Logbook, type Trip } from "@stillwater/shared";
 import { exactTerm } from "./findLinks";
+import { twinName } from "./spotOrder";
 
 /** The game's own lake: what is landed or fished there in play is kept apart from the angler's real days. */
 export const PLAY_LAKE_ID = "spot-stillwater";
@@ -15,7 +16,6 @@ export function upcomingOwnTrips(book: Logbook, today: string): Trip[] {
 export function withoutPlayLake(book: Logbook, term: string, rows: readonly { spotId: string }[]): string {
   const lake = book.spots.find((spot) => spot.id === PLAY_LAKE_ID);
   // Left out by name: when a real water shares it, leaving the name out would drop that water's fish as well.
-  const named = (name: string) => name.trim().toLowerCase();
-  if (lake && book.spots.some((spot) => spot.id !== PLAY_LAKE_ID && named(spot.name) === named(lake.name))) return term;
+  if (lake && book.spots.some((spot) => spot.id !== PLAY_LAKE_ID && twinName(spot.name, lake.name))) return term;
   return lake && rows.some((row) => !offPlayLake(row)) ? `${term} -${exactTerm("water", lake.name)}` : term;
 }
