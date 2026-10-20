@@ -5,6 +5,7 @@ import { downloadFile } from "./download";
 import { useLogbook } from "./LogbookState";
 import { bookKindName } from "./speciesLink";
 import { bookLureName } from "./pieceTally";
+import { bookFishDay } from "./tripMonths";
 
 /** "Cedar Bend" → "stillwater-cedar-bend.csv". */
 export function csvName(name: string): string {
@@ -19,7 +20,7 @@ export function FishCsv({ catches, name }: { catches: readonly CatchEntry[]; nam
   if (catches.length === 0) return null;
   return (
     <p className="fish-csv">
-      <button type="button" className="text-button" onClick={() => downloadFile(catchesCsv({ ...book, catches: [...catches] }, { kindName: bookKindName(book.catches), lureName: bookLureName(book.catches) }), "text/csv;charset=utf-8", csvName(name))}>
+      <button type="button" className="text-button" onClick={() => downloadFile(catchesCsv({ ...book, catches: [...catches] }, { kindName: bookKindName(book.catches), lureName: bookLureName(book.catches), dayOf: (entry) => bookFishDay(book, entry) }), "text/csv;charset=utf-8", csvName(name))}>
         {t("Download these as a spreadsheet")}
       </button>
     </p>

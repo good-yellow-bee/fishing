@@ -1,4 +1,4 @@
-import { catchesNewestFirst, measuresOf, spotById, SKY_LABELS, WIND_LABELS, type Logbook } from "@stillwater/shared";
+import { catchesNewestFirst, measuresOf, spotById, SKY_LABELS, WIND_LABELS, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { getLang, getUnits, num, t } from "../i18n";
 import { CM_PER_IN, KG_PER_LB } from "../i18n/content";
 import { lureNames } from "./pieceTally";
@@ -30,7 +30,10 @@ const waterTemp = (value: number) => num(Math.round(value * 10) / 10 || 0);
  * so a Polish reader gets those; English gets commas and points.
  */
 /** `names` names kinds and lures as a larger book does, for a sheet of some of its fish (an outing's, a water's). */
-export function catchesCsv(book: Logbook, names?: { kindName: (species: string) => string; lureName: (lure: string) => string }): string {
+export function catchesCsv(
+  book: Logbook,
+  names?: { kindName: (species: string) => string; lureName: (lure: string) => string; dayOf?: (entry: CatchEntry) => string },
+): string {
   const separator = getLang() === "pl" ? ";" : ",";
   const metric = getUnits() === "metric";
   const header = [
@@ -53,6 +56,8 @@ export function catchesCsv(book: Logbook, names?: { kindName: (species: string) 
   // One kind written two ways is one kind, under the name the book gives it most.
   const kindName = names?.kindName ?? kindNames(book.catches);
   const lureName = names?.lureName ?? lureNames(book.catches);
+  // The day a fish counts on, read on the whole book for a sheet of some of its fish: a night fish's evening.
+  const dayOf = names?.dayOf ?? ((entry: CatchEntry) => bookFishDay(book, entry));
   const rows = catchesNewestFirst(book).map((entry) => {
     const at = new Date(entry.caughtAt);
     const { weather } = entry;
@@ -62,7 +67,7 @@ export function catchesCsv(book: Logbook, names?: { kindName: (species: string) 
     return [
       `${at.getFullYear()}-${pad(at.getMonth() + 1)}-${pad(at.getDate())}`,
       `${pad(at.getHours())}:${pad(at.getMinutes())}`,
-      bookFishDay(book, entry) === `${at.getFullYear()}-${pad(at.getMonth() + 1)}-${pad(at.getDate())}` ? "" : bookFishDay(book, entry),
+      dayOf(entry) === `${at.getFullYear()}-${pad(at.getMonth() + 1)}-${pad(at.getDate())}` ? "" : dayOf(entry),
       kindName(entry.species),
       length ? num(metric ? length.inches * CM_PER_IN : length.inches) : "",
       weight ? num(metric ? weight.pounds * KG_PER_LB : weight.pounds, 2) : "",

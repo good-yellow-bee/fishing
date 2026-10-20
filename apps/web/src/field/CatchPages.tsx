@@ -43,7 +43,7 @@ import { LIST_PARAM, catchLink, catchList, largestList, type ListKey } from "./c
 import { catchBadge } from "./catchBadge";
 import { photoPlace, photoTakenAt } from "./photoTime";
 import { AT_PARAM, PHOTO_PARAM, RESUME_PARAM, anotherCatchLink } from "./anotherCatch";
-import { catchesOfSpecies, kindKey, kindNames, kindOnPage, speciesCounts, speciesLink } from "./speciesLink";
+import { bookKindName, catchesOfSpecies, kindKey, kindOnPage, speciesCounts, speciesLink } from "./speciesLink";
 import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
@@ -56,8 +56,8 @@ import { TripCounts } from "./tripCounts";
 import { speciesLures, waterSpecies, waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, gramsAsKilos, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 import { getUnits, locale, t, tn, useLang, useT, type Units } from "../i18n";
-import { pieceKey, pieceName } from "./gear/pieceKey";
-import { ownTitle, plainName } from "./tripDates";
+import { bookSpelling, pieceKey, pieceName } from "./gear/pieceKey";
+import { outNow, ownTitle, plainName } from "./tripDates";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { ChoiceRow } from "./ChoiceRow";
 import { lengthText, measureText, measuresText, tempText, weatherText, weightText } from "../i18n/content";
@@ -86,7 +86,7 @@ import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "./playLake";
 import { sameDayBefore } from "./sameDayBefore";
 import { countedSearch } from "./countedSearch";
 import { useStepKeys } from "./stepKeys";
-import { lureNames as lureNamesOf, pieceTally } from "./pieceTally";
+import { bookLureName, onPiece, pieceTally } from "./pieceTally";
 
 /** When the outing's newest fish came, so a session still going past the small hours keeps the clock's day. */
 function lastFishOn(book: Logbook, tripId: string | undefined): string | undefined {
@@ -187,7 +187,11 @@ function bookName(typed: string, names: readonly string[], keyOf?: (name: string
   const clean = typed.trim().toLowerCase();
   // The first name of the same kind or piece, however typed ("perches" is filed as the book's "Perch"), else one that
   // reads as typed in the player's language ("Okoń").
-  return (keyOf && clean ? names.find((name) => keyOf(name) === keyOf(clean)) : undefined) ?? names.find((name) => t(name).toLowerCase() === clean) ?? typed;
+  return (
+    (keyOf && clean ? names.find((name) => keyOf(name) === keyOf(clean)) : undefined) ??
+    names.find((name) => t(name).toLowerCase() === clean || t(bookSpelling(name)).toLowerCase() === clean) ??
+    typed
+  );
 }
 
 /** Whether what was typed is a pick, however written: "perches" presses the "Perch" chip, "spinners" the "Spinner". */
@@ -334,11 +338,16 @@ function CatchForm() {
   const [presetSpot] = useState(() => existing?.spotId ?? justAdded ?? presetTrip?.spotId ?? linkedSpot ?? likelyWater(book, localDate(new Date()), new Date().getHours() < LATE_NIGHT_UNTIL));
 
   const asked = params.get("kind");
-  const [species, setSpecies] = useState(existing ? t(existing.species) : t(params.get("species") ?? ""));
-  const bestSoFar = speciesBestSoFar(book, species, t, existing?.id);
+  // A kind typed as it reads ("Okoń") finds the book's fish however they were written ("perch ", "Perches").
+  const shownKind = (name: string) => t(bookSpelling(name));
+  // A stored "perch " reads as the catch page names it: "Okoń" in Polish. Left as it reads, it saves as stored.
+  const shownSpecies = existing ? bookKindName(book.catches)(existing.species) : null;
+  const shownLure = existing ? bookLureName(book.catches)(existing.lure) : null;
+  const [species, setSpecies] = useState(shownSpecies ?? t(params.get("species") ?? ""));
+  const bestSoFar = speciesBestSoFar(book, species, shownKind, existing?.id);
   // Starting values that look through the whole book are worked out once, not on every keystroke.
   const [measureKind, setMeasureKind] = useState<CatchDraft["measureKind"]>(
-    () => existing?.measure.kind ?? (asked === "weight" || asked === "length" ? asked : (kindMeasure(book, t(params.get("species") ?? ""), t) ?? lastMeasureKind(book))),
+    () => existing?.measure.kind ?? (asked === "weight" || asked === "length" ? asked : (kindMeasure(book, t(params.get("species") ?? ""), shownKind) ?? lastMeasureKind(book))),
   );
   // The form reads and writes in the units the player picked; the book keeps imperial.
   const units = getUnits();
@@ -350,7 +359,7 @@ function CatchForm() {
   const otherKind = measureKind === "length" ? "weight" : "length";
   // From this kind's fish that were both measured and weighed: about what the other measure of this one would be.
   const typedAmount = Number(toBookAmount(amount, measureKind, units));
-  const pairs = sizePairs(speciesCatches(book, species, t, existing?.id));
+  const pairs = sizePairs(speciesCatches(book, species, shownKind, existing?.id));
   // A number far past this kind's best that fits the other measure: likely typed in the wrong one, as the form keeps the last.
   // Only with the other measure left empty: with both typed, switching swaps them, which would keep the odd number.
   const otherMeasure = !alsoAmount.trim() && looksLikeOtherMeasure(bestSoFar, measureKind, typedAmount, Number(toBookAmount(amount, otherKind, units)));
@@ -386,11 +395,11 @@ function CatchForm() {
     }
     const askedHolds = (asked === "weight" || asked === "length") && kindKey(species) === kindKey(t(params.get("species") ?? ""));
     if (existing || measurePicked || askedHolds || amount.trim() || alsoAmount.trim()) return;
-    const kind = kindMeasure(book, species, t);
+    const kind = kindMeasure(book, species, shownKind);
     if (kind) setMeasureKind(kind);
     // Only a change of kind moves it, not a change of the size or the book.
   }, [species]);
-  const [lure, setLure] = useState(() => t(existing ? existing.lure : (params.get("lure") ?? tripLure(book, presetTrip?.id))));
+  const [lure, setLure] = useState(() => shownLure ?? t(params.get("lure") ?? tripLure(book, presetTrip?.id)));
   const [spotId, setSpotId] = useState(presetSpot);
   // The kind's biggest at the water picked, once it differs from the biggest anywhere.
   // Sample fish only when the best anywhere is one too (a book still all samples for this kind).
@@ -467,7 +476,7 @@ function CatchForm() {
   const twin =
     existing || !amount.trim()
       ? null
-      : likelyDuplicate(book, { species, spotId, caughtAt }, t, (entry) => {
+      : likelyDuplicate(book, { species, spotId, caughtAt }, shownKind, (entry) => {
           // By value, as the form shows it, so "1,5", "1.5" and "1.50" are one size.
           const size = measureOf(entry, measureKind);
           const typed = Number(toBookAmount(amount, measureKind, units));
@@ -482,7 +491,10 @@ function CatchForm() {
   const speciesNames = [...(existing ? [existing.species] : []), ...bookKinds, ...book.catches.map((entry) => entry.species), ...SPECIES];
   const lureNames = [...(existing ? [existing.lure] : []), ...bookPieces, ...bookLures(book), ...BAITS];
   // Kept under the book's names too, so a draft picked up after a switch of language reads, and saves, as the same fish.
-  const keptNames = () => ({ species: bookName(species, speciesNames, kindKey), lure: bookName(lure, lureNames, pieceKey) });
+  const keptNames = () => ({
+    species: existing && species === shownSpecies ? existing.species : bookName(species, speciesNames, kindKey),
+    lure: existing && lure === shownLure ? existing.lure : bookName(lure, lureNames, pieceKey),
+  });
 
   // What the form opened with (presets from a trip or Log another), so untouched presets aren't kept.
   const opened = useRef<string | null>(null);
@@ -600,7 +612,7 @@ function CatchForm() {
   // One-tap picks: the kinds this water gives, and once a kind is typed, the lures that took it here.
   const hereSpecies = useMemo(() => waterSpecies(hereCatches).map((name) => t(name)), [hereCatches, lang]);
   const kindLures = useMemo(
-    () => speciesLures(hereCatches.map((entry) => ({ ...entry, species: t(entry.species) })), species).map((name) => t(name)),
+    () => speciesLures(hereCatches.map((entry) => ({ ...entry, species: shownKind(entry.species) })), species).map((name) => t(name)),
     [hereCatches, species, lang],
   );
   const lurePicks = kindLures.length > 0 ? kindLures : hereLures;
@@ -625,7 +637,8 @@ function CatchForm() {
   // The same for a lure, so a typo doesn't split its tally in two.
   const [typingLure, setTypingLure] = useState(false);
   // Against every lure in the book, not just the dozen offered, so one used once isn't taken for a slip.
-  const allLures = useMemo(() => ownFirst(bookLures(realBook, Number.MAX_SAFE_INTEGER), BAITS, t), [realBook, lang]);
+  // Each lure as the book names it ("Spinner" for "Spinners"), so a book's own spelling is never taken for a slip.
+  const allLures = useMemo(() => ownFirst([...new Set(bookLures(realBook, Number.MAX_SAFE_INTEGER).map(pieceName))], BAITS, t), [realBook, lang]);
   const misspeltLure = typingLure ? null : closeSpecies(lure, allLures);
   // Made once per water: a water fished for years lists hundreds of outings.
   const tripOptions = useMemo(
@@ -638,7 +651,7 @@ function CatchForm() {
     [spotTrips, lang],
   );
   const onlySampleWaters = !existing && book.spots.every((spot) => spot.id === PLAY_LAKE_ID || isSampleSpot(spot.id));
-  const heading = existing ? t(existing.species) : presetTrip ? outingName(presetTrip, book.spots) : t("Log a catch");
+  const heading = existing ? shownSpecies! : presetTrip ? outingName(presetTrip, book.spots) : t("Log a catch");
 
   const onSpot = (nextSpot: string) => {
     spotTouched.current = true;
@@ -676,7 +689,7 @@ function CatchForm() {
   const lastOnTrip = pickedTrip ? lastFishOn(book, pickedTrip.id) : undefined;
   // The angler's own fish of the kind kept on this fish's day (its outing's, for a night session).
   const fishDayNow = pickedTrip?.date ?? caughtAt.slice(0, 10);
-  const keptThatDay = existing || released ? 0 : speciesCatches(book, species, t).filter((entry) => ownFish(entry) && !entry.released && bookFishDay(book, entry) === fishDayNow).length;
+  const keptThatDay = existing || released ? 0 : speciesCatches(book, species, shownKind).filter((entry) => ownFish(entry) && !entry.released && bookFishDay(book, entry) === fishDayNow).length;
   // The sun at the water picked, at the time typed.
   const formSpot = book.spots.find((spot) => spot.id === spotId);
   const formPlace = formSpot ? (formSpot.place ?? placeFor(formSpot.id)) : undefined;
@@ -1513,7 +1526,7 @@ function CatchForm() {
         {/* The same kind at the same water a few minutes apart is more likely one fish logged twice than two. */}
         {twin ? (
           <p className="form-note" role="status">
-            {t("A {species} was already logged here at {time}. Saving adds another.", { species: t(twin.species), time: formatTimeOfDay(twin.caughtAt) })}{" "}
+            {t("A {species} was already logged here at {time}. Saving adds another.", { species: bookKindName(book.catches)(twin.species), time: formatTimeOfDay(twin.caughtAt) })}{" "}
             <Link to={`/catches/${twin.id}`}>{t("Open it")}</Link>
           </p>
         ) : null}
@@ -1605,8 +1618,8 @@ export function CatchPage() {
 function CatchView() {
   const { book, deleteCatch, fileCatches, photoFor } = useLogbook();
   // A kind as the book writes it most ("Perch" for a fish typed "perch "), as its page, chips and lists name it.
-  const kindName = useMemo(() => kindNames(book.catches), [book.catches]);
-  const lureName = useMemo(() => lureNamesOf(book.catches), [book.catches]);
+  const kindName = bookKindName(book.catches);
+  const lureName = bookLureName(book.catches);
   useT();
   useStepKeys();
   const navigate = useNavigate();
@@ -1647,14 +1660,15 @@ function CatchView() {
   const listPhotos: ListPhoto[] = (list?.rows ?? []).flatMap((fish) => {
     const src = photoFor(fish.id);
     return src
-      ? [{ id: fish.id, src, alt: t("Photo of {species}", { species: t(fish.species) }), name: `${t(fish.species)} ${bookFishDay(book, fish)}`, caption: photoCaption(fish), to: catchLink(fish.id, list?.key) }]
+      ? [{ id: fish.id, src, alt: t("Photo of {species}", { species: kindName(fish.species) }), name: `${kindName(fish.species)} ${bookFishDay(book, fish)}`, caption: photoCaption(fish), to: catchLink(fish.id, list?.key) }]
       : [];
   });
   const { newer, older } = list ? neighborsIn(list.rows, entry.id) : catchNeighbors(book, entry.id);
   const listIndex = list ? list.rows.findIndex((row) => row.id === entry.id) : -1;
-  // A past outing's page lists its fish first fish first: the count goes as the page reads.
+  // A past outing's page lists its fish first fish first, a night session still going newest first: the count goes as
+  // the page reads.
   const listTrip = list?.key.startsWith("trip:") ? tripById(book, list.key.slice(5)) : undefined;
-  const listAt = list ? (listTrip && listTrip.date < localDate(new Date()) ? list.rows.length - listIndex : listIndex + 1) : 0;
+  const listAt = list ? (listTrip && listTrip.date < localDate(new Date()) && !outNow(book, listTrip) ? list.rows.length - listIndex : listIndex + 1) : 0;
   const badge = catchBadge(book, entry);
   // Newest first, so the oldest fish of the kind is number one.
   const kind = catchesOfSpecies(book, entry.species);
@@ -1690,14 +1704,14 @@ function CatchView() {
   const sizeSearch = [exactTerm("species", kindName(entry.species)), `${withoutPlayLake(book, sameSizeSearch(entry.measure, getUnits() === "metric"), kind)}${noSample}`] as const;
   const sameSize = isCounted && counted.length > 1 ? findCatches(book, `${sizeSearch[0]} + ${sizeSearch[1]}`, t, (id) => photoFor(id) !== null).filter((other) => countedIds.has(other.id)).length : 0;
   // The fish this lure has taken at this water, this one among them: whether it is the water's lure.
-  const lureHere = spot && entry.lure.trim() ? ([exactTerm("lure", pieceName(entry.lure)), exactTerm("water", spot.name)] as const) : null;
+  const lureHere = spot && entry.lure.trim() ? ([exactTerm("lure", pieceName(entry.lure)), exactTerm("water", plainName(spot.name))] as const) : null;
   const lureHereRows = lureHere ? findCatches(book, `${lureHere[0]} + ${lureHere[1]}`, t, (id) => photoFor(id) !== null) : [];
   // On the angler's own fish, counted as the book counts them and opened the same way: no sample fish in either.
   const lureHereSearch = lureHere && isCounted ? countedSearch(book, `${lureHere[0]} + ${lureHere[1]}`, lureHereRows, "book") : null;
   const lureHereCount = lureHereSearch ? findCatches(book, lureHereSearch, t, (id) => photoFor(id) !== null).length : lureHereRows.length;
   // A bigger one of its kind on the same lure: what this lure can do.
-  const lureKey = pieceKey(entry.lure);
-  const onLure = isCounted && lureKey ? counted.filter((other) => pieceKey(other.lure) === lureKey && measureOf(other, entry.measure.kind)) : [];
+  // One lure however it was written, as the lure search and "On {lure} at {water}" group it.
+  const onLure = isCounted && entry.lure.trim() ? counted.filter((other) => onPiece(other, entry.lure) && measureOf(other, entry.measure.kind)) : [];
   const lureTop = onLure.length > 1 ? personalBests({ spots: [], trips: [], catches: onLure }) : null;
   const lureBestFish = lureTop ? (entry.measure.kind === "weight" ? lureTop.heaviest : lureTop.longest) : null;
   // Only a bigger one: a tie would name another fish the same size as this one, beside its own "longest" line.
@@ -1761,7 +1775,9 @@ function CatchView() {
   // drawn from (countedBook), or a sample fish would hold the weight and the angler's own heaviest read as "longest".
   const bests = badge ? personalBests({ ...book, catches: countedBook(book).catches }, kindKey) : null;
   const kindBests = bests?.species.find((row) => kindKey(row.species) === kindKey(entry.species));
-  const heavy = (badge === "book" ? bests?.heaviest : kindBests?.heaviest)?.id === entry.id;
+  // A kind's badge by weight only when more than one of its fish was weighed, as the badge itself was drawn.
+  const weighedOfKind = countedBook(book).catches.filter((other) => kindKey(other.species) === kindKey(entry.species) && measureOf(other, "weight")).length;
+  const heavy = badge === "book" ? bests?.heaviest?.id === entry.id : kindBests?.heaviest?.id === entry.id && weighedOfKind > 1;
 
   return (
     <div className="sheet">
@@ -1782,7 +1798,7 @@ function CatchView() {
               onPage.some((other) => other.id === entry.id) || !spot
                 ? speciesLink(entry.species)
                 : entry.spotId === PLAY_LAKE_ID
-                  ? findWithLink(exactTerm("water", spot.name), exactTerm("species", kindName(entry.species)))
+                  ? findWithLink(exactTerm("water", plainName(spot.name)), exactTerm("species", kindName(entry.species)))
                   : findWithLink(exactTerm("species", kindName(entry.species)), t("sample|search word"))
             }
           >
@@ -1797,7 +1813,7 @@ function CatchView() {
           <span>{measuresText(entry)}</span>
           {" · "}
           {/* Every fish taken on this lure, through the catch search. */}
-          <Link to={findLink(exactTerm("lure", pieceName(entry.lure)))}>{pieceName(entry.lure)}</Link>
+          <Link to={findLink(exactTerm("lure", lureName(entry.lure)))}>{lureName(entry.lure)}</Link>
           {spot ? (
             <>
               {" · "}
@@ -1884,7 +1900,7 @@ function CatchView() {
         ) : null}
         {firstHere ? (
           <p className="meta first-here">
-            <Link to={findWithLink(exactTerm("water", spot!.name), `${exactTerm("species", kindName(entry.species))}${noSample}`)}>{t("First {species} here.", { species: kindName(entry.species) })}</Link>
+            <Link to={findWithLink(exactTerm("water", plainName(spot!.name)), `${exactTerm("species", kindName(entry.species))}${noSample}`)}>{t("First {species} here.", { species: kindName(entry.species) })}</Link>
           </p>
         ) : null}
         {onThisDay ? (
@@ -2016,8 +2032,8 @@ function CatchView() {
           <Link
             to={anotherCatchLink(
               isSampleCatch(entry.id) && !isSampleOnly(book)
-                ? { ...entry, spotId: "", tripId: null }
-                : { ...entry, tripId: outingGoesOn(book, entry.tripId) ? entry.tripId : null },
+                ? { ...entry, species: kindName(entry.species), lure: lureName(entry.lure), spotId: "", tripId: null }
+                : { ...entry, species: kindName(entry.species), lure: lureName(entry.lure), tripId: outingGoesOn(book, entry.tripId) ? entry.tripId : null },
             )}
             className="field-primary inline"
           >

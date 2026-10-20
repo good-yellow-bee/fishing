@@ -11,7 +11,7 @@ import { daysBetween } from "./spotOrder";
 import { useLogbook } from "./LogbookState";
 import { PagedCatches } from "./PagedCatches";
 import { bookFishDay, yearTally } from "./tripMonths";
-import { catchesOfSpecies, kindKey, kindNames, kindOnPage, speciesCounts, speciesWaters } from "./speciesLink";
+import { bookKindName, catchesOfSpecies, kindKey, kindNames, kindOnPage, speciesCounts, speciesWaters } from "./speciesLink";
 import { pieceName } from "./gear/pieceKey";
 import { FROM_LIST } from "./leaveDeleted";
 import { isSampleCatch } from "./bookCopy";
@@ -64,7 +64,7 @@ export function PhotoStrip({ catches, within, named = false, list }: { catches: 
             <Link to={catchLink(entry.id, list)} state={FROM_LIST}>
               <img src={photoFor(entry.id)!} alt="" loading="lazy" />
               <span className="photo-caption">
-                {named ? <strong>{t(entry.species)}</strong> : null}
+                {named ? <strong>{bookKindName(book.catches)(entry.species)}</strong> : null}
                 <small>
                   {measuresText(entry)} · {formatDay(bookFishDay(book, entry))}
                 </small>
