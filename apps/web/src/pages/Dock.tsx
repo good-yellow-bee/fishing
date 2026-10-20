@@ -429,19 +429,19 @@ export function DockPage() {
     const wrap = game.surfaceRef.current;
     const chip = wrap?.querySelector<HTMLElement>(":scope > .stance-chip");
     const lurePanel = wrap?.querySelector<HTMLElement>(":scope > .lure-choice");
-    const hint = wrap?.querySelector<HTMLElement>(":scope > .hint");
-    if (!wrap || !chip || !lurePanel || !hint || typeof ResizeObserver === "undefined") return;
+    if (!wrap || !chip || typeof ResizeObserver === "undefined") return;
     const sync = () => {
       wrap.style.setProperty("--stance-h", `${Math.ceil(chip.offsetHeight)}px`);
-      wrap.style.setProperty("--lure-h", `${Math.ceil(lurePanel.offsetHeight)}px`);
-      wrap.style.setProperty("--hint-h", `${Math.ceil(hint.offsetHeight)}px`);
+      if (lurePanel) wrap.style.setProperty("--lure-h", `${lurePanel.offsetHeight}px`);
     };
     const observer = new ResizeObserver(sync);
-    for (const el of [chip, lurePanel, hint]) observer.observe(el);
+    observer.observe(chip);
+    if (lurePanel) observer.observe(lurePanel);
     sync();
     return () => {
       observer.disconnect();
-      for (const name of ["--stance-h", "--lure-h", "--hint-h"]) wrap.style.removeProperty(name);
+      wrap.style.removeProperty("--stance-h");
+      wrap.style.removeProperty("--lure-h");
     };
   }, [game.surfaceRef, lakeShown]);
   // The landed fish's ID is its request ID, so this matches the roll the server makes.
