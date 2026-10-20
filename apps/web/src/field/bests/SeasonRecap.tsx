@@ -1,4 +1,4 @@
-import type { Logbook } from "@stillwater/shared";
+import { foldText, type Logbook } from "@stillwater/shared";
 import { Link } from "react-router-dom";
 import { locale, t, tn, useT } from "../../i18n";
 import { CopySummary } from "../CopySummary";
@@ -102,12 +102,18 @@ export function SeasonRecapBox({
   const [lure, nextLure] = pieceTally(book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${year}-`)), 2);
   const topLure = lure && lure.count >= 2 && lure.count > (nextLure?.count ?? 0) ? lure : null;
   const lureLine = topLure ? t("Best lure: {lure} ({count})", { lure: pieceName(topLure.lure), count: topLure.count }) : null;
-  // And the water it was won on, once one clearly led: the "where" beside the "on what".
-  const byWater = new Map<string, number>();
-  for (const entry of book.catches) if (bookFishDay(book, entry).startsWith(`${year}-`)) byWater.set(entry.spotId, (byWater.get(entry.spotId) ?? 0) + 1);
-  const [water, nextWater] = [...byWater].sort((a, b) => b[1] - a[1]);
-  const waterName = water ? book.spots.find((spot) => spot.id === water[0])?.name : undefined;
-  const topWater = water && waterName && water[1] >= 2 && water[1] > (nextWater?.[1] ?? 0) ? { name: plainName(waterName), count: water[1] } : null;
+  // And the water it was won on, once one clearly led: the "where" beside the "on what". Waters that read the same are
+  // one, as the search its link opens takes them; the game's lake and the sample week are left out, as there.
+  const byWater = new Map<string, { name: string; count: number }>();
+  for (const entry of countedFish(book.catches)) {
+    const spotName = book.spots.find((spot) => spot.id === entry.spotId)?.name;
+    if (!spotName || !bookFishDay(book, entry).startsWith(`${year}-`)) continue;
+    const name = plainName(spotName);
+    const key = foldText(name).toLowerCase();
+    byWater.set(key, { name: byWater.get(key)?.name ?? name, count: (byWater.get(key)?.count ?? 0) + 1 });
+  }
+  const [water, nextWater] = [...byWater.values()].sort((a, b) => b.count - a.count);
+  const topWater = water && water.count >= 2 && water.count > (nextWater?.count ?? 0) ? water : null;
   const waterLine = topWater ? t("Best water: {water} ({count})", { water: topWater.name, count: topWater.count }) : null;
   const lines = [
     fishLine,

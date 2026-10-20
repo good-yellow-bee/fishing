@@ -86,9 +86,11 @@ function waterFishLine(catches: readonly CatchEntry[], kindName: (species: strin
   return top.count > next.count ? t("{fish}, mostly {species}", { fish, species: kindName(top.species) }) : fish;
 }
 
-/** "Last fish: Sat, Oct 10" under a water, from its newest fish, on the day it counts on (a night fish on its outing's). */
-/** `linked` opens that fish; not inside a card that is itself a link (a water's). */
-function lastFishLine(book: Logbook, catches: readonly CatchEntry[], linked = true) {
+/**
+ * "Last fish: Sat, Oct 10" under a kind or a water, from its newest fish, on the day it counts on (a night fish on its
+ * outing's); `linked` opens that fish, for a card that is not itself a link.
+ */
+function lastFishLine(book: Logbook, catches: readonly CatchEntry[], linked = false) {
   const last = catches.reduce<CatchEntry | null>((newest, entry) => (!newest || entry.caughtAt > newest.caughtAt ? entry : newest), null);
   if (!last) return null;
   const text = t("Last fish: {day}", { day: formatDay(bookFishDay(book, last)) });
@@ -536,7 +538,7 @@ export function BestsPage() {
                       {measures ? ` · ${measures}` : ""}
                     </p>
                     <KindLeaders book={book} species={row.species} />
-                    {lastFishLine(whole, kindFish.get(kindKey(row.species)) ?? [])}
+                    {lastFishLine(whole, kindFish.get(kindKey(row.species)) ?? [], true)}
                   </article>
                 );
               })}
@@ -629,7 +631,7 @@ export function BestsPage() {
                   </div>
                   <p className="meta">{waterFishLine(bySpot.get(water.spotId) ?? [], kindName)}</p>
                   {/* When it last gave one: a water gone quiet is worth a visit, or a rest. */}
-                  {lastFishLine(whole, bySpot.get(water.spotId) ?? [], false)}
+                  {lastFishLine(whole, bySpot.get(water.spotId) ?? [])}
                   {waterBestLine(book, bySpot.get(water.spotId) ?? [], kindName)}
                 </Link>
               ))}

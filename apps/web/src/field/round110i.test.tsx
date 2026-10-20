@@ -18,4 +18,16 @@ describe("round 110 ideas: the season's best water", () => {
     expect(html).toContain("Best water: Home Lake (2)");
     expect(html).toContain('href="/w/Home Lake"');
   });
+
+  it("takes waters that read the same as one, and none on a tie", () => {
+    const spot = (id: string, name: string) => ({ id, name, waterType: "lake" as const, notes: "", bestConditions: "" });
+    const render = (catches: CatchEntry[]) =>
+      renderToStaticMarkup(
+        <MemoryRouter>
+          <SeasonRecapBox book={{ spots: [spot("a", "Home Lake"), spot("b", "home  lake"), spot("c", "Deep Lake")], trips: [], catches }} year="2026" today="2026-10-20" />
+        </MemoryRouter>,
+      );
+    expect(render([fish("1", "a"), fish("2", "b"), fish("3", "c")])).toContain("Best water: Home Lake (2)");
+    expect(render([fish("1", "a"), fish("2", "c")])).not.toContain("Best water");
+  });
 });
