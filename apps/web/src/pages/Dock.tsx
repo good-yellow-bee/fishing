@@ -351,8 +351,14 @@ export function DockPage() {
     const lost = game.lostReport;
     if (!lost || reportedLost.current === lost.id) return;
     reportedLost.current = lost.id;
-    // A report that fails only means the rest of the lodge never meets this one.
-    reportLost(lost).catch(() => undefined);
+    // A report that fails only means the rest of the lodge never meets this one; the foe then holds no id the lodge never filed.
+    reportLost(lost).catch(() => {
+      const foe = angler ? loadOldFoe(angler) : null;
+      if (angler && foe?.reportId === lost.id) {
+        const { reportId: _unfiled, ...kept } = foe;
+        saveOldFoe(angler, kept);
+      }
+    });
   }, [game.lostReport]);
   useEffect(() => {
     if (game.outcome?.kind !== "landed") return;

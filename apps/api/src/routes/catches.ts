@@ -6,7 +6,7 @@ import type { SessionUser } from "../session.ts";
 
 export const catchRoutes = new Hono();
 
-const requestIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+export const requestIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function sameCatch(row: CatchRow, body: CatchSubmission) {
   return row.species_id === body.speciesId && row.weight === body.weight && row.spot === body.spot &&
