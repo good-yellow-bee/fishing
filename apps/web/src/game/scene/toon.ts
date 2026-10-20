@@ -20,7 +20,7 @@ function toonMaterial(mat: THREE.Material | undefined, gradientMap: THREE.DataTe
   if (src && src.alphaTest > 0) alphaTest = src.alphaTest;
   return new THREE.MeshToonMaterial({
     color: src?.color instanceof THREE.Color ? src.color.clone() : new THREE.Color(0xffffff),
-    map: null,
+    map: src?.map ?? null,
     gradientMap,
     transparent,
     opacity: src?.opacity ?? 1,
