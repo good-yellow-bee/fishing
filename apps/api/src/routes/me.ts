@@ -1,6 +1,6 @@
 import { Hono } from "hono";
-import { anglerLevel, bagDay, badgeProgress, canUseSpot, pastDerbies, streakDays } from "@stillwater/shared";
-import { countDerbyWins, firstCatchAt, getProfile, listBadgeFacts, listBagWeights, listCatchDays, listCatches, listSpeciesStats, toCatch, toProfile } from "../db.ts";
+import { anglerLevel, bagDay, TAG_NEWS_DAYS, badgeProgress, canUseSpot, pastDerbies, streakDays } from "@stillwater/shared";
+import { countDerbyWins, firstCatchAt, getProfile, listBadgeFacts, listBagWeights, listTagReturns, listCatchDays, listCatches, listSpeciesStats, toCatch, toProfile } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
 export const meRoutes = new Hono();
@@ -41,5 +41,6 @@ meRoutes.get("/me", (c) => {
     longestStreak: longest,
     recentDays: days.slice(-60),
     todayBag: { day: today.from, weights: listBagWeights(user.id, today.from, today.to) },
+    tagReturns: listTagReturns(user.id, new Date(Date.now() - TAG_NEWS_DAYS * 86_400_000).toISOString(), 5),
   });
 });

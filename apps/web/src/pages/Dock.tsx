@@ -22,6 +22,7 @@ import {
   type LodgeRelease,
   TAG_FINDER_BONUS,
   TAG_RETURN_BONUS,
+  fishById,
   LAKE_HOUR_BLURB,
   lakeHour,
   lakeHourFromSearch,
@@ -97,6 +98,7 @@ import { saveLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { canBaitShiner, GROUNDBAIT_CASTS, hookWindowMs, isMercy, lampLit, longShadowWaitMul, solidStrikeMs } from "../game/logic";
 import { useBadgeToast } from "../game/useBadgeToast";
+import { useTagNewsToast } from "../game/useTagNewsToast";
 import { bookSeasonNote, bookSessionTitle, loadSession, saveSession, sessionTitle, startSession, withSessionFish, type SessionDraft } from "../game/session";
 import { TripRecap } from "../components/TripRecap";
 import { useLodgeTracks } from "../game/useLodgeTracks";
@@ -569,8 +571,9 @@ export function DockPage() {
   const shownLevel = useLevelToast(me?.level, bankClear);
   // A level-up has the floor first; the badge waits its turn behind it.
   const shownBadges = useBadgeToast(me?.badges, bankClear && !shownLevel);
+  const shownTag = useTagNewsToast(me?.tagReturns, bankClear && !shownLevel && !shownBadges);
   // The effects notice waits its turn too, behind both: in a fight it covered the tension bar and the let-go cue.
-  const effectsNotice = useEffectsNotice(steppedDownAt, !bankClear || !!shownLevel || !!shownBadges, EFFECTS_NOTICE_MS);
+  const effectsNotice = useEffectsNotice(steppedDownAt, !bankClear || !!shownLevel || !!shownBadges || !!shownTag, EFFECTS_NOTICE_MS);
 
   // Watch the clock; a new lake hour or sky waits for a calm moment so it never lands mid-strike or mid-fight.
   // One change at a time: the hour goes first and the sky follows on a later check.
@@ -1399,6 +1402,13 @@ export function DockPage() {
               <span className="eyebrow">{shownBadges.length > 1 ? t("Badges") : t("Badge")}</span>
               <h2>{shownBadges.map((id) => (badgeById(id) ? t(badgeById(id)!.label) : id)).join(" · ")}</h2>
               {shownBadges.length === 1 && <p>{t(badgeById(shownBadges[0])?.blurb ?? "")}</p>}
+            </div>
+          )}
+          {shownTag && (
+            <div className="toast level-toast badge-toast">
+              <span className="eyebrow">{t("Your tag came back")}</span>
+              <h2>{t("{name} landed your {fish}", { name: shownTag.by, fish: t(fishById(shownTag.speciesId)?.name ?? shownTag.speciesId).toLowerCase() })}</h2>
+              <p>{t("You let it go at {was}; it came back at {weight} · +{points} pts", { was: weightText(shownTag.was), weight: weightText(shownTag.weight), points: TAG_RETURN_BONUS })}</p>
             </div>
           )}
         </div>

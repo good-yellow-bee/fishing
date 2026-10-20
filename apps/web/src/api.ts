@@ -8,6 +8,7 @@ import {
   type BoardPeriod,
   type LodgeRelease,
   type LodgeTrack,
+  type TagReturn,
   type SpeciesRecord,
   type CatchRecord,
   type CatchStat,
@@ -33,6 +34,8 @@ export type Me = {
   recentDays: string[];
   /** The UTC day's bag as it stood when read: the day's start, and its weights, heaviest first. */
   todayBag: { day: string; weights: number[] };
+  /** The angler's let-go fish other anglers landed again this past week, newest first. */
+  tagReturns: TagReturn[];
 };
 
 export type DailyRequestRow = DailyRequest & { progress: number; claimed: boolean };

@@ -94,3 +94,18 @@ describe("GET /lodge/released", () => {
     expect(released[0]!.by).toBe("Mara");
   });
 });
+
+describe("listTagReturns", () => {
+  it("tells the angler who let a fish go which of them other anglers landed again lately, newest first", async () => {
+    const { listTagReturns } = await import("../db.ts");
+    const at = (daysAgo: number) => new Date(Date.now() - daysAgo * 86_400_000).toISOString();
+    const row = (id: string, userId: string, weight: number, created: string, released: 0 | 1, taggedFrom: string | null) =>
+      db.prepare(`INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, released, tagged_from, created_at) VALUES (?, ?, 'carp', ?, 1, 'dock', ?, 0, ?, ?, ?)`).run(id, userId, weight, `r-${id}`, released, taggedFrom, created);
+    row("let1", "ash", 6, at(10), 1, null);
+    row("let2", "ash", 5, at(4), 1, null);
+    row("old", "mara", 6.5, at(9), 0, "let1");
+    row("new", "mara", 5.2, at(1), 0, "let2");
+    expect(listTagReturns("ash", at(7), 5)).toEqual([{ catchId: "new", speciesId: "carp", weight: 5.2, was: 5, by: "Mara", at: expect.any(String) }]);
+    expect(listTagReturns("mara", at(30), 5)).toEqual([]);
+  });
+});
