@@ -178,6 +178,7 @@ const EFFECTS_NOTICE_MS = 5000;
 
 /** The walk signs' line button, naming the line on the reel. */
 const LINE_WORD: Record<LineWeight, string> = { light: "Line: light", standard: "Line: standard", heavy: "Line: heavy" };
+const LINE_SHORT: Record<LineWeight, string> = { light: "Thin", standard: "Line", heavy: "Thick" };
 
 export function DockPage() {
   useT();
@@ -1195,13 +1196,16 @@ export function DockPage() {
                 className="panel-btn"
                 type="button"
                 title={t("Change the line: light line brings more bites but snaps sooner, heavy line holds more but the fish see it.")}
+                aria-label={`${t(LINE_WORD[prefs.line])}. ${t("Change the line: light line brings more bites but snaps sooner, heavy line holds more but the fish see it.")}`}
                 onClick={(event) => {
                   // Leave Space free for casting.
                   event.currentTarget.blur();
                   updateSettings({ line: nextLine(prefs.line) });
                 }}
               >
-                {t(LINE_WORD[prefs.line])}
+                {/* A phone's sign row has no room for the long words, so it shows the short one; the label keeps the full name. */}
+                <span className="bait-full">{t(LINE_WORD[prefs.line])}</span>
+                <span className="bait-short" aria-hidden="true">{t(LINE_SHORT[prefs.line])}</span>
               </button>
             )}
             {hour === "night" && !rowing && (

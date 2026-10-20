@@ -737,7 +737,7 @@ export function useFishingGame(
         resetToIdle(current.strength < species.minStrength ? t("Line parted. Spend points on Strength.") : t("Line parted. Spend points on Accuracy."));
       }, 1400);
     } else {
-      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)) * seasonTireMul(season, species.id) * warmTireMul(season, species.id, sky, spotRef.current) * runTireMul(season, species.id) * nestTireMul(season, species.id, spotRef.current) * nightTireMul(hourRef.current, species.id) * spentTireMul(season, species.id) * twilightTireMul(hourRef.current, species.id) * springRunTireMul(season, species.id, spotRef.current) * currentTireMul(species.id, spotRef.current) * fallFeedTireMul(season, species.id) * rainHunterTireMul(sky, species.id) * summerStrengthTireMul(season, species.id), water, windy, isTopwater(lureRef?.current) || rising, hasTrebles(lureRef?.current) || deep, seasonTireMul(season, species.id) > 1, isTrophyWeight(species, weight), floodedInlet(spotRef.current, season, sky), frayedRef.current, deep, lineSnapForLevel(anglerLevel(current.lifetimePoints)) * LINE_SNAP[castLineRef.current], turnCutMulForLevel(anglerLevel(current.lifetimePoints)), netsFish(species, mercyRef.current), { farRock, weedBall, edge, bed, foam, lantern, fired });
+      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)) * seasonTireMul(season, species.id) * warmTireMul(season, species.id, sky, spotRef.current) * runTireMul(season, species.id) * nestTireMul(season, species.id, spotRef.current) * nightTireMul(hourRef.current, species.id) * spentTireMul(season, species.id) * twilightTireMul(hourRef.current, species.id) * springRunTireMul(season, species.id, spotRef.current) * currentTireMul(species.id, spotRef.current) * fallFeedTireMul(season, species.id) * rainHunterTireMul(sky, species.id) * summerStrengthTireMul(season, species.id), water, windy, isTopwater(lureRef?.current) || rising, hasTrebles(lureRef?.current) || deep, seasonTireMul(season, species.id) > 1, isTrophyWeight(species, weight), floodedInlet(spotRef.current, season, sky), frayedRef.current, deep, lineSnapForLevel(anglerLevel(current.lifetimePoints)), turnCutMulForLevel(anglerLevel(current.lifetimePoints)), netsFish(species, mercyRef.current), { farRock, weedBall, edge, bed, foam, lantern, fired, lineSnap: LINE_SNAP[castLineRef.current] });
       runtimeRef.current = runtime;
       simRef.current = runtime.sim;
       performanceRef.current = runtime.performance;
@@ -1054,11 +1054,12 @@ export function useFishingGame(
     castLampRef.current = lampLit(lampRef.current, hour) && !mercyRef.current;
     const lampWait = castLampRef.current ? LAMP_WAIT : 1;
     if (lampWait > 1) reasons.unshift(t("Your headlamp shows the float plainly, but its light on the water puts the fish off."));
-    // The line on the reel holds for the cast and its fight; a beginner is spared heavy line's slow bites.
+    // The line on the reel holds for the cast and its fight. Heavy line is a slow side told with the others the angler can
+    // switch off; light line's speed-up is told last, after the bank's own reasons.
     castLineRef.current = settings.line;
-    const lineWait = castLineRef.current === "heavy" && mercyRef.current ? 1 : LINE_WAIT[castLineRef.current];
+    const lineWait = LINE_WAIT[castLineRef.current];
     if (lineWait > 1) reasons.unshift(t("Heavy line: the fish can see it, so the bites come slower."));
-    else if (lineWait < 1) reasons.unshift(t("Light line: the fish can't see it, so the bites come sooner."));
+    else if (lineWait < 1) reasons.push(t("Light line: the fish can't see it, so the bites come sooner."));
     // Told last, so the two-reason cap always keeps it: waiting a few seconds is the fix.
     if (anchorWait > 1) reasons.unshift(t("The anchor's splash put the fish down, so the bites come slow: give it a few seconds before you cast."));
     waitHintRef.current = [...reasons.slice(0, WAIT_REASONS), waitHintRef.current].join(" ");

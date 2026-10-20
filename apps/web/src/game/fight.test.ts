@@ -1275,6 +1275,31 @@ describe("fired up on the fry", () => {
   });
 });
 
+describe("the line on the reel", () => {
+  const strained = (lineSnap: number, frayed: boolean, tension: number) => {
+    const f = makeFight(fish("pike"), 6, 3, () => 0, 1, "open", undefined, false, false, false, false, false, frayed, false, 1, 1, false, { lineSnap });
+    f.sim.tension = tension;
+    return f.step(0, 0.001, false);
+  };
+
+  it("snaps a light line sooner and holds more on a heavy one, frayed or sound", () => {
+    expect(strained(0.9, false, 0.92)).toBe("snapped");
+    expect(strained(1, false, 0.92)).toBe("fighting");
+    expect(strained(1.1, false, 1.05)).toBe("fighting");
+    expect(strained(1.1, true, 0.95)).toBe("fighting");
+    expect(strained(1, true, 0.95)).toBe("snapped");
+  });
+
+  it("keeps a run's opening moments short of the snap on a light line", () => {
+    const f = makeFight(fish("pike"), 6, 3, () => 0, 1, "open", undefined, false, false, false, false, false, false, false, 1, 1, false, { lineSnap: 0.9 });
+    let now = 0;
+    while (f.sim.surge !== 2) f.step((now += 50), 0.05, false);
+    let outcome = "fighting";
+    for (let at = 0; at < 250; at += 50) outcome = f.step((now += 50), 0.05, true);
+    expect(outcome).toBe("fighting");
+  });
+});
+
 describe("the dock's pilings", () => {
   /** Lets one run go unturned, then reels or rests through the calm after it. */
   function afterRun(water: "pilings" | "open", turn: boolean, reel: boolean) {
