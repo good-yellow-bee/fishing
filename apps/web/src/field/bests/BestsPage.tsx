@@ -185,9 +185,10 @@ export function BestsPage() {
     fishOn,
     fishedBy,
     real.catches.filter((entry) => !entry.tripId).map((entry) => bookFishDay(real, entry)),
+    whole,
   );
-  const weeks = weekStreak(real.trips, fishedBy, fishOn);
-  const split = weekendSplit(real.trips, fishOn, fishedBy);
+  const weeks = weekStreak(real.trips, fishedBy, fishOn, whole);
+  const split = weekendSplit(real.trips, fishOn, fishedBy, whole);
   const fishYears = yearTally(whole.catches, monthOf).map((row) => row.year);
   // A season with days out but no fish yet can be picked too: its recap says so, and Home's goal line links it.
   const years = [...new Set([...fishYears, ...whole.trips.filter((trip) => trip.date < fishedBy || gaveWay(whole, trip)).map((trip) => trip.date.slice(0, 4))])].sort((a, b) => b.localeCompare(a));
