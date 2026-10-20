@@ -1889,7 +1889,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT421~~ | ~~A giant that breaks free learns the lure: for the rest of its week it will not take that lure again at its bank, still about or fresh, so the angler must tie on another to meet it; the loss says so, and the stance chip marks the giant shy of the tied lure~~ (#1629) | gameplay | M |
 | ~~GT422~~ | ~~News card 2026-10-20-game56 covers GT420-GT421: giant signs and a giant that learns the lure~~ (#1631) | ui | S |
 | ~~GT423~~ | ~~Night line: with a live shiner on the hook, the sign of the bank underfoot leaves it out on a set line (only where the angler could land one of the bank's night feeders); six hours to two days later the same sign brings it in, mostly with a night feeder of that bank (landed, not clean), else an empty hook; past two days the bait is long gone. Kept per angler in the browser~~ (#1635) | gameplay | M |
-| ~~GT424~~ | ~~Giant hunter badge: be first to land three of the lake's weekly giants (badge facts carry a giant flag from the catch's paid bonuses, no new query)~~ (#1637) | gameplay | S |
+| ~~GT424~~ | ~~Giant hunter badge: be first to land three of the lake's weekly giants (counted from the giants table, as derby wins are)~~ (#1637) | gameplay | S |
 | GT425 | News card game57 covers GT423-GT424 | ui | S |
 
 ## Risks / open questions for the owner
