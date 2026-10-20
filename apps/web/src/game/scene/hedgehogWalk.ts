@@ -63,11 +63,11 @@ export function hedgehogStart(time: number): HedgehogState {
   return { mode: "away", nextAt: time + FIRST_SEC };
 }
 
-/** Its way past `angler`, behind them, on dry land all along: or null where the bank is wet. */
-export function hedgehogPath(angler: Angler, ground: Ground): { from: Spot; to: Spot } | null {
-  const steps = Math.ceil((2 * ACROSS) / CHECK_M);
+/** Its way past `angler`, behind them, `across` metres to each side, on dry land all along: or null where the bank is wet. */
+export function hedgehogPath(angler: Angler, ground: Ground, across = ACROSS): { from: Spot; to: Spot } | null {
+  const steps = Math.ceil((2 * across) / CHECK_M);
   for (const back of [BEHIND, BEHIND * 1.5]) {
-    const points = Array.from({ length: steps + 1 }, (_, i) => besideAngler(angler, -ACROSS + (2 * ACROSS * i) / steps, -back, ground));
+    const points = Array.from({ length: steps + 1 }, (_, i) => besideAngler(angler, -across + (2 * across * i) / steps, -back, ground));
     if (points.every((p) => p !== null)) return { from: points[0]!, to: points[steps]! };
   }
   return null;
@@ -88,7 +88,8 @@ function curlAt(state: Extract<HedgehogState, { mode: "walking" }>, time: number
  */
 export function hedgehogStep(state: HedgehogState, time: number, delta: number, angler: Angler, settled: boolean, fuss: boolean, ground: Ground = robinGround): HedgehogState {
   if (state.mode === "away") {
-    if (!settled || angler.moving) return state.nextAt >= time + FIRST_SEC ? state : { mode: "away", nextAt: time + FIRST_SEC };
+    // Kept off while they are unsettled; the wait is put back about once a second, not every frame.
+    if (!settled || angler.moving) return state.nextAt >= time + FIRST_SEC - 1 ? state : { mode: "away", nextAt: time + FIRST_SEC };
     // It waits for any fuss to be over before it sets off.
     if (time < state.nextAt || fuss) return state;
     const path = hedgehogPath(angler, ground);
