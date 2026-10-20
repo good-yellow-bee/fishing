@@ -88,6 +88,9 @@ export function TackleList({
   // One tip per piece: "Spoon" and "spoon " from two fish are one lure to pack.
   const missing = suggest.filter((lure, index) => !onList.has(readKey(lure)) && suggest.findIndex((other) => readKey(other) === readKey(lure)) === index);
   const tipKeys = new Set(suggest.map((lure) => readKey(lure)));
+  // How many fish each tip took on this water, a piece however it was written one count.
+  const tipFish = new Map<string, number>();
+  for (const [lure, count] of suggestCounts ?? []) tipFish.set(readKey(lure), (tipFish.get(readKey(lure)) ?? 0) + count);
   const took = new Map<string, number>();
   for (const entry of caught) took.set(readKey(entry.lure), (took.get(readKey(entry.lure)) ?? 0) + 1);
   const outing = trips.find((row) => row.id === tripId);
@@ -267,7 +270,7 @@ export function TackleList({
                   <span className="tackle-caught">{fishCountLabel(took.get(readKey(item.label))!)}</span>
                 ) : tipKeys.has(readKey(item.label)) ? (
                   // Already packed, and among what took fish on this water: one to keep in the bag.
-                  <span className="tackle-caught">{t("took fish here")}</span>
+                  <span className="tackle-caught">{tipFish.get(readKey(item.label)) ? tn(tipFish.get(readKey(item.label))!, "{n} fish here", "{n} fish here") : t("took fish here")}</span>
                 ) : null}
               </label>
               <button

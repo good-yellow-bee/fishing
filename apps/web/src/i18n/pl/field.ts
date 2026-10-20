@@ -737,6 +737,8 @@ export const PL_FIELD: PlBook = {
   "on {count} of {total} outings": "na {count} z {total} wypraw",
   "These are all from the sample week or the game.": "Wszystkie pochodzą z przykładowego tygodnia lub z gry.",
   "took fish here": "brały tu ryby",
+  "most at {water} ({count})": "najwięcej na łowisku {water} ({count})",
+  "{n} fish here": ["{n} ryba tutaj", "{n} ryby tutaj", "{n} ryb tutaj"],
   "Nothing on {day} itself: fish caught after midnight ({n}) count on their outing's day, {outingDay}.": "Nic z samego dnia {day}: ryby złowione po północy ({n}) liczą się do dnia wyprawy, {outingDay}.",
   "Show {day}": "Pokaż {day}",
   "{month}: {count}": "{month}: {count}",

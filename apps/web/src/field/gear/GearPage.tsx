@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import {
   WATER_LABELS,
   catchesForTrip,
+  foldText,
   localDate,
   lureTally,
   measureOf,
@@ -153,6 +154,19 @@ function LureRecord({ today }: { today: string }) {
   // A kind and a lure as the book writes them most, as Bests and the cards name them, whichever water is picked.
   const kindName = useMemo(() => kindNames(countedBook(book).catches), [book]);
   const lureName = bookLureName(book.catches);
+  // With all waters shown, where a lure took most of its fish, once one water clearly led: where to pack it for.
+  const countedFishes = countedBook(book).catches;
+  const bestWater = (lure: string) => {
+    const byWater = new Map<string, { name: string; count: number }>();
+    for (const entry of countedFishes) {
+      const name = book.spots.find((spot) => spot.id === entry.spotId)?.name;
+      if (!name || !onPiece(entry, lure)) continue;
+      const key = foldText(name);
+      byWater.set(key, { name: byWater.get(key)?.name ?? plainName(name), count: (byWater.get(key)?.count ?? 0) + 1 });
+    }
+    const [top, next] = [...byWater.values()].sort((a, b) => b.count - a.count);
+    return top && byWater.size > 1 && top.count >= 2 && top.count > (next?.count ?? 0) ? top : null;
+  };
   // The book the record counts: the sample week's made-up lures go with the first outing of the angler's own.
   // This year as the book counts it: during a New Year's Eve session past midnight, still the old one.
   const quiet = notYetThisYear(countedBook(atWater).catches, new Date(`${outingDay(today)}T12:00:00`), (entry) => entry.lure, (entry) => bookFishDay(book, entry), (name) => shownPieceKey(name));
@@ -232,6 +246,14 @@ function LureRecord({ today }: { today: string }) {
                     </span>
                   ) : null}
                 </>
+              ) : null}
+              {/* Where it took most, opening its fish there. */}
+              {!water && row.lure && bestWater(row.lure) ? (
+                <span className="lure-last">
+                  <Link to={findLink(countedSearch(book, `${exactTerm("lure", lureName(row.name))} + ${exactTerm("water", bestWater(row.lure)!.name)}`, book.catches.filter((entry) => onPiece(entry, row.lure!)), "book"))}>
+                    {t("most at {water} ({count})", { water: bestWater(row.lure)!.name, count: bestWater(row.lure)!.count })}
+                  </Link>
+                </span>
               ) : null}
               {/* A lure that never took a fish: when it last went out, so an old one can come off the list. */}
               {!row.lastAt && row.lastPacked ? <span className="lure-last">{t("last packed {day}", { day: formatDay(row.lastPacked) })}</span> : null}
