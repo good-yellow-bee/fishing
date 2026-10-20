@@ -29,11 +29,12 @@ export type BadgeFactRow = {
 
 /**
  * What the grouped facts can't carry: the longest run of consecutive local days with a fish, the weekend derbies the
- * angler held the top spot of when they ended, and the most of each slam's kinds landed on one day.
+ * angler held the top spot of when they ended, the most of each slam's kinds landed on one day, and the weekly giants
+ * they were first to land.
  */
-export type BadgeHistory = { longestStreak: number; derbyWins?: number; slams?: Partial<Record<SlamId, number>> };
+export type BadgeHistory = { longestStreak: number; derbyWins?: number; slams?: Partial<Record<SlamId, number>>; giants?: number };
 
-export type BadgeId = "four-banks" | "night-owl" | "rain-pike" | "clean-sweep" | "trophy" | "full-book" | "four-seasons" | "gold" | "steward" | "regular" | "early-bird" | "whole-lake" | "trophy-hunter" | "derby-champion" | "bass-slam" | "trout-slam";
+export type BadgeId = "four-banks" | "night-owl" | "rain-pike" | "clean-sweep" | "trophy" | "full-book" | "four-seasons" | "gold" | "steward" | "regular" | "early-bird" | "whole-lake" | "trophy-hunter" | "derby-champion" | "bass-slam" | "trout-slam" | "giant-hunter";
 
 export type Badge = {
   id: BadgeId;
@@ -199,6 +200,13 @@ export const BADGES: readonly Badge[] = [
     blurb: "Land a brook trout, a rainbow trout and a salmon on the same day.",
     need: slamSize("trout-slam"),
     have: (_facts, history) => history.slams?.["trout-slam"] ?? 0,
+  },
+  {
+    id: "giant-hunter",
+    label: "Giant hunter",
+    blurb: "Be first to land three of the lake's weekly giants.",
+    need: 3,
+    have: (_facts, history) => history.giants ?? 0,
   },
 ];
 

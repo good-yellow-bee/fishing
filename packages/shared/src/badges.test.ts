@@ -61,6 +61,13 @@ describe("lodge badges", () => {
     expect(night).toEqual({ id: "night-owl", have: 5, need: 5, earned: true });
   });
 
+  it("gives Giant hunter for three of the weekly giants landed first", () => {
+    const hunter = (giants?: number) => badgeProgress([], { longestStreak: 0, giants }).find((badge) => badge.id === "giant-hunter")!;
+    expect(hunter().have).toBe(0);
+    expect(hunter(2).earned).toBe(false);
+    expect(hunter(3).earned).toBe(true);
+  });
+
   it("names only the badges a new catch earned, and none on the first read", () => {
     const before = badgeProgress([row({ speciesId: "pike", sky: "fog" })]);
     const after = badgeProgress([row({ speciesId: "pike", sky: "rain" })]);

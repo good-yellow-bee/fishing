@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { anglerLevel, bagDay, slamBest, TAG_NEWS_DAYS, badgeProgress, canUseSpot, pastDerbies, streakDays } from "@stillwater/shared";
-import { countDerbyWins, firstCatchAt, getProfile, listBadgeFacts, listBagWeights, listSlamDays, listTagReturns, listCatchDays, listCatches, listSpeciesStats, toCatch, toProfile } from "../db.ts";
+import { countDerbyWins, countGiantsLanded, firstCatchAt, getProfile, listBadgeFacts, listBagWeights, listSlamDays, listTagReturns, listCatchDays, listCatches, listSpeciesStats, toCatch, toProfile } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
 export const meRoutes = new Hono();
@@ -38,7 +38,7 @@ meRoutes.get("/me", (c) => {
     },
     catches,
     speciesStats,
-    badges: badgeProgress(listBadgeFacts(user.id), { longestStreak: longest, derbyWins: derbyWins(user.id), slams: slamBest(slamDays) }),
+    badges: badgeProgress(listBadgeFacts(user.id), { longestStreak: longest, derbyWins: derbyWins(user.id), slams: slamBest(slamDays), giants: countGiantsLanded(user.id) }),
     longestStreak: longest,
     recentDays: days.slice(-60),
     // Two days back covers every angler's local today, for the landed card's slam stamp.
