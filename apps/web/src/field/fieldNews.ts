@@ -5,6 +5,7 @@ import { NEWS_ID, NEWS_ITEMS, markNewsSeen, readSeenNews } from "../game/whatsNe
  * Each new field-log line goes in here too, newest first, word for word as in `NEWS_ITEMS`.
  */
 export const FIELD_NEWS: ReadonlySet<string> = new Set([
+  "An outing's page says where it falls among the outings on its water, such as outing 4 of 12. Streaks, the weekend split and a water's best outing now count an outing with only a lost fish or a missed strike, as the average does, and last evening's blank outing reads as a past day once today's plan takes over.",
   "On a kind's page, a water spelled two ways says how often its outings took the kind, as other waters do, and the water lists on the catch and outing forms tell two such waters apart by their fish. A water's outings now count those with only a lost fish or a missed strike, as Trips does.",
   "On Bests, a kind that set a new best in the season picked says the record it beat, and a kind's card says how many of it went back, opening them. Twin waters spelled two ways count as one, and a month's outings match the list they open.",
   "Gear's lure record says where each lure took most of its fish, opening them, and a packed piece says how many fish it took on the outing's water. Undo on a packing list never puts a piece back twice.",

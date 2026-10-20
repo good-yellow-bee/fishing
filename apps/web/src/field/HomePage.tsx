@@ -11,8 +11,8 @@ import { useLogbook } from "./LogbookState";
 import { countedSearch } from "./countedSearch";
 import { RESUME_PARAM } from "./anotherCatch";
 import { hasSampleLeft, isSampleCatch, isSampleOnly, isSamplePlan, isSampleSpot, isSampleOuting, upcomingRealTrips, withoutSample } from "./bookCopy";
-import { outingFish } from "./outingFish";
-import { lateOutings, outNow, outingDay, plainName, sameName, underWay } from "./tripDates";
+import { outingFish, underWayOn } from "./outingFish";
+import { lateOutings, outNow, outingDay, plainName, sameName } from "./tripDates";
 import { sheetOutings } from "./catchCsv";
 import { NEWS_ITEMS } from "../game/whatsNew";
 import { FIELD_NEWS, fieldNewsDue, markFieldNewsSeen } from "./fieldNews";
@@ -216,7 +216,7 @@ export function HomePage() {
   // Fish of their own logged beside the sample week: the invented part can go on its own.
   const sampleLeft = !sampleOnly && hasSampleLeft(storedBook);
   const next = upcoming[0];
-  const nextUnderWay = next ? underWay(book, next) : false;
+  const nextUnderWay = next ? underWayOn(next, fishOn) : false;
   // The newest outing fished, for a Next with nothing planned: on a water still in the book.
   const lastOut = next ? undefined : [...sheetOutings(book, fishedBy).trips].filter((trip) => spotById(book, trip.spotId) && !isSampleOuting(trip)).sort(newestOutingFirst(book))[0];
   const lastOutRest = lastOut ? daysBetween(lastOut.date, today) : 0;
