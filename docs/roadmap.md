@@ -1411,6 +1411,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC226~~ | ~~Strong wind holds the anchored hull (for GT353): the boat at anchor swings toward a run by the share of the run it takes up, read from the fight itself (fight.ts boatSwingShare): less in a strong wind, matching the fight card's Boat line, and not at all in a pads fight~~ (#1509) | scene | S |
 | ~~SC227~~ | ~~Headlamp beam (for GT365): while the angler's headlamp is lit at night, a soft beam runs from their forehead onto the float while it is out, or a few steps ahead on the boards, bank or water otherwise, with a pool of light where it lands; it turns to a new mark over a moment~~ (#1514) | scene | S |
 | ~~SC228~~ | ~~News card scene52 covers SC224 to SC227: the hedgehog, the frenzy boil, the strong-wind boat swing and the headlamp beam~~ (#1517) | scene | S |
+| SC229 | Colour maps lost to a load race: since THREE.Cache went on (#1511), models whose shared colour map was still loading got none (three's ImageBitmapLoader resolves its cached promise to nothing), so the moored rowboat, the far rowboat and the float drew solid black and three warned every frame; bitmapCache.ts hands such a request the finished bitmap | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
