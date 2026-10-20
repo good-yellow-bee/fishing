@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { BUCKET_LIFE_MS, baitBucketKey, loadBucket, saveBucket } from "./baitBucket";
+import { BUCKET_COLD_LIFE_MS, BUCKET_HOT_LIFE_MS, BUCKET_LIFE_MS, baitBucketKey, bucketLifeMs, loadBucket, saveBucket } from "./baitBucket";
 
 let kept: Map<string, string>;
 beforeEach(() => {
@@ -13,6 +13,16 @@ describe("the bait bucket", () => {
     saveBucket("ash", [0, 10, BUCKET_LIFE_MS]);
     expect(loadBucket("ash", BUCKET_LIFE_MS + 5)).toEqual({ shiners: [10, BUCKET_LIFE_MS], died: 1 });
     expect(loadBucket("mara", 0)).toEqual({ shiners: [], died: 0 });
+  });
+
+  it("keeps them five days in winter's cold water and two in summer's heat, judged by the season now", () => {
+    expect([bucketLifeMs("spring"), bucketLifeMs("fall"), bucketLifeMs(undefined)]).toEqual([BUCKET_LIFE_MS, BUCKET_LIFE_MS, BUCKET_LIFE_MS]);
+    expect([BUCKET_HOT_LIFE_MS, BUCKET_LIFE_MS, BUCKET_COLD_LIFE_MS].map((ms) => ms / 86_400_000)).toEqual([2, 3, 5]);
+    saveBucket("ash", [0, BUCKET_LIFE_MS]);
+    expect(loadBucket("ash", BUCKET_LIFE_MS + 1, "winter")).toEqual({ shiners: [0, BUCKET_LIFE_MS], died: 0 });
+    expect(loadBucket("ash", BUCKET_COLD_LIFE_MS + 1, "winter")).toEqual({ shiners: [BUCKET_LIFE_MS], died: 1 });
+    expect(loadBucket("ash", BUCKET_HOT_LIFE_MS + 1, "summer")).toEqual({ shiners: [BUCKET_LIFE_MS], died: 1 });
+    expect(loadBucket("ash", BUCKET_HOT_LIFE_MS + 1, "fall")).toEqual({ shiners: [0, BUCKET_LIFE_MS], died: 0 });
   });
 
   it("keeps the newest live ones when more were stored than it holds", () => {

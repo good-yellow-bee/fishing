@@ -119,7 +119,7 @@ vi.mock("./fight", async (importOriginal) => {
 import { updateSettings } from "./settings";
 import { giantShyKey } from "./giantShy";
 import { nightLineKey, nightLineReadyAt } from "./nightLine";
-import { BUCKET_LIFE_MS, baitBucketKey } from "./baitBucket";
+import { BUCKET_COLD_LIFE_MS, BUCKET_HOT_LIFE_MS, BUCKET_LIFE_MS, baitBucketKey } from "./baitBucket";
 import { TRAP_COLD_SOAK_MS, TRAP_SOAK_MS, trapKey } from "./minnowTrap";
 import { bagKey, shinerKey } from "./groundbaitBag";
 import { oldFoeKey } from "./oldFoe";
@@ -501,6 +501,17 @@ describe("useFishingGame live shiner", () => {
     expect(container!.querySelector("[data-testid=bucket]")?.textContent).toBe("1");
     expect(hint()).toBe("1 of the shiners in your bait bucket died while you were away: they keep three days.");
     expect(JSON.parse(kept.get(baitBucketKey(profile.userId))!)).toHaveLength(1);
+  });
+
+  it.each([
+    ["summer", BUCKET_HOT_LIFE_MS, "1 of the shiners in your bait bucket died while you were away: in the summer heat they keep two days."],
+    ["winter", BUCKET_COLD_LIFE_MS, "1 of the shiners in your bait bucket died while you were away: in the cold winter water they keep five days."],
+  ] as const)("lets a spare shiner die sooner or later with the season: %s", (season, life, said) => {
+    const kept = new Map<string, string>([[baitBucketKey(profile.userId), JSON.stringify([DOCK_BUBBLES.at - life - 1, DOCK_BUBBLES.at - BUCKET_LIFE_MS - 1])]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, undefined, season);
+    expect(container!.querySelector("[data-testid=bucket]")?.textContent).toBe(season === "winter" ? "1" : "0");
+    expect(hint()).toBe(season === "winter" ? said : said.replace("1 of", "2 of"));
   });
 
   it("keeps spare shiners in a bait bucket: a night line takes one from it first, and one can be hooked from it later", () => {

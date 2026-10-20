@@ -194,6 +194,8 @@ export const PL_GAME: PlBook = {
   "The trap has sat a long while.": "Pułapka stoi już długo.",
   "It has felt the hook before: its first run doesn't tire it at all": "Już raz poczuła haczyk: pierwszy odjazd wcale jej nie męczy",
   "{n} of the shiners in your bait bucket died while you were away: they keep three days.": "Część złotawców z wiaderka padła pod twoją nieobecność ({n}): żyją trzy dni.",
+  "{n} of the shiners in your bait bucket died while you were away: in the cold winter water they keep five days.": "Część złotawców z wiaderka padła pod twoją nieobecność ({n}): zimą, w zimnej wodzie, żyją pięć dni.",
+  "{n} of the shiners in your bait bucket died while you were away: in the summer heat they keep two days.": "Część złotawców z wiaderka padła pod twoją nieobecność ({n}): w letnim upale żyją dwa dni.",
   "foe about": "rywal w pobliżu",
   "lost trophy": "zgubione trofeum",
   "You leave a worm out on a night line here. Come back to check it once the night is out, and within two days.": "Zostawiasz robaka na nocnej lince. Wróć ją sprawdzić, gdy minie noc, ale przed upływem dwóch dni.",
