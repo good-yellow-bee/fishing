@@ -748,7 +748,7 @@ export function useFishingGame(
         flutterRef.current = flutterer ? { predator: flutterer, profile: current } : null;
         flutterSecRef.current = 0;
         const follower = predator ? null : followerFor(species.id, spotRef.current, current, mercyRef.current, Math.random());
-        followRef.current = follower ? makeCatch(follower, current.patience, anglerLevel(current.lifetimePoints)) : null;
+        followRef.current = follower ? downAtBank(makeCatch(follower, current.patience, anglerLevel(current.lifetimePoints)), fishedDownRef.current.has(spotRef.current) && !mercyRef.current) : null;
       }
       if (solid) runtime.sim.stamina = Math.min(runtime.sim.stamina, SOLID_HOOK_STAMINA);
       // A late strike only just catches, so the hook can pull out like a soft mouth's.
@@ -1655,7 +1655,7 @@ export function useFishingGame(
             grabRef.current = null;
             followRef.current = null;
             grabbedRef.current = current.species.id;
-            const taken = makeCatch(grab.predator, grab.profile.patience, anglerLevel(grab.profile.lifetimePoints));
+            const taken = downAtBank(makeCatch(grab.predator, grab.profile.patience, anglerLevel(grab.profile.lifetimePoints)), fishedDownRef.current.has(spotRef.current) && !mercyRef.current);
             biteRef.current = taken;
             setBite(taken);
             fx.splash();
