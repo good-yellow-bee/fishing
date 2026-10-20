@@ -17,19 +17,22 @@ export const BUBBLE_NIGHT_LIGHT = 0.5;
 
 const BEAD_END = 0.45;
 const RING_END = 0.85;
-const GOLDEN = 0.618034;
+export const GOLDEN = 0.618034;
 const FOAM = "#eef8f4";
 
 export type HotspotBubble = { x: number; y: number; z: number; kind: "bead" | "ring"; size: number };
 
-function frac(value: number) {
+export function frac(value: number) {
   return value - Math.floor(value);
 }
 
-/** A bead that grows on the chop, then pops into a ring. Null while resting, or off the patch's bank water. */
-export function hotspotBubble(hotspot: Hotspot, index: number, time: number): HotspotBubble | null {
+/**
+ * A bead that grows on the chop, then pops into a ring. Null while resting, or off the patch's bank water.
+ * `cycle` paces the bubbling (faster in a frenzy); `time` is the water's own clock, for the chop under it.
+ */
+export function hotspotBubble(hotspot: Hotspot, index: number, time: number, cycle = time): HotspotBubble | null {
   const i = ((index % HOTSPOT_BUBBLES) + HOTSPOT_BUBBLES) % HOTSPOT_BUBBLES;
-  const t = time / BUBBLE_CYCLE_SEC + frac(i * GOLDEN);
+  const t = cycle / BUBBLE_CYCLE_SEC + frac(i * GOLDEN);
   const round = Math.floor(t);
   const u = t - round;
   if (u >= RING_END) return null;
