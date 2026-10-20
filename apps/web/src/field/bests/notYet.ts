@@ -50,9 +50,11 @@ export function newWatersThisYear(
   catches: readonly CatchEntry[],
   today: Date = new Date(),
   dayOf: (entry: CatchEntry) => string = (entry) => localDate(new Date(entry.caughtAt)),
+  /** Which water a fish's water is: twin waters ("Śniardwy", "Sniardwy") are one, as a search reads them. */
+  waterOf: (spotId: string) => string = (spotId) => spotId,
 ): string[] {
   const year = today.getFullYear();
-  const first = new Map<string, string>();
+  const first = new Map<string, { at: string; spotId: string }>();
   let earlier = false;
   for (const entry of countedFish(catches)) {
     if (Number.isNaN(Date.parse(entry.caughtAt))) continue;
@@ -61,12 +63,12 @@ export function newWatersThisYear(
     const fishYear = Number(at.slice(0, 4));
     if (fishYear > year) continue;
     if (fishYear < year) earlier = true;
-    const held = first.get(entry.spotId);
-    if (!held || at < held) first.set(entry.spotId, at);
+    const held = first.get(waterOf(entry.spotId));
+    if (!held || at < held.at) first.set(waterOf(entry.spotId), { at, spotId: entry.spotId });
   }
   if (!earlier) return [];
-  return [...first.entries()]
-    .filter(([, at]) => Number(at.slice(0, 4)) === year)
-    .sort((a, b) => a[1].localeCompare(b[1]))
-    .map(([spotId]) => spotId);
+  return [...first.values()]
+    .filter(({ at }) => Number(at.slice(0, 4)) === year)
+    .sort((a, b) => a.at.localeCompare(b.at))
+    .map(({ spotId }) => spotId);
 }

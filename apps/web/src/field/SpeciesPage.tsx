@@ -280,8 +280,8 @@ function SpeciesView() {
           <div className="section-head">
             <h2>{t("Lures that took it")}</h2>
           </div>
-          {/* Each lure opens just this kind's fish on it. */}
-          <TallyBars key={species} rows={pieceTally(catches).map((row) => ({ key: row.lure, label: pieceName(row.lure), count: row.count, to: findWithLink(kindTerm, exactTerm("lure", pieceName(row.lure))), note: lureBest(book, catches, row.lure) }))} />
+          {/* Each lure opens just this kind's fish on it, named as the whole book names it. */}
+          <TallyBars key={species} rows={pieceTally(catches).map((row) => ({ key: row.lure, label: bookLureName(book.catches)(row.lure), count: row.count, to: findWithLink(kindTerm, exactTerm("lure", pieceName(row.lure))), note: lureBest(book, catches, row.lure) }))} />
         </>
       ) : null}
       <div className="section-head">

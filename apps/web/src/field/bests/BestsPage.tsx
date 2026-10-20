@@ -2,7 +2,7 @@ import { Fragment, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { kindNames, speciesCounts, speciesLink, speciesWaters } from "../speciesLink";
 import { biteTimes, catchesNewestFirst, fishCountsByTrip, localDate, measureOf, moonTally, personalBests, seasonTally, skyTally, spotById, type CatchEntry, type Logbook } from "@stillwater/shared";
-import { pieceTally } from "../pieceTally";
+import { bookLureName, pieceTally } from "../pieceTally";
 import { sheetOutings } from "../catchCsv";
 import { CatchCard } from "../cards";
 import { num, t, tn, useT } from "../../i18n";
@@ -31,10 +31,10 @@ import { PLAY_LAKE_ID } from "../playLake";
 import { countedSearch } from "../countedSearch";
 import { countedBook, countedFish } from "../milestones";
 import { isSampleCatch, isSampleOnly, isSampleOuting, withoutSample } from "../bookCopy";
-import { daysBetween } from "../spotOrder";
+import { daysBetween, foldName, twinsTogether } from "../spotOrder";
 import { SameKinds } from "./SameKinds";
 import { tripDaySearch } from "../tripSearch";
-import { outingDay, plainName } from "../tripDates";
+import { gaveWay, outingDay, plainName } from "../tripDates";
 import { outingFish } from "../outingFish";
 import { pieceName } from "../gear/pieceKey";
 import { kindKey } from "../speciesLink";
@@ -116,14 +116,15 @@ function waterBestLine(book: Logbook, catches: readonly CatchEntry[], kindName: 
 const YEAR_PARAM = "year";
 
 /** A kind's best lure and best water, once one of each took two or more: where and on what to go for it. */
-function KindLeaders({ book, species }: { book: Logbook; species: string }) {
+function KindLeaders({ book, species, lureName }: { book: Logbook; species: string; lureName: (lure: string) => string }) {
   const key = kindKey(species);
   const fish = book.catches.filter((entry) => kindKey(entry.species) === key);
   const [lure, nextLure] = pieceTally(fish, 2);
-  const [water, nextWater] = speciesWaters(book, fish);
+  // Twin waters together, as the water's search the line names opens them.
+  const [water, nextWater] = twinsTogether(speciesWaters(book, fish));
   // A tie has no leader, as the catch search's own "Most on" line takes it.
   const parts = [
-    lure && lure.count >= 2 && lure.count > (nextLure?.count ?? 0) ? t("Most on {lure} ({count})", { lure: pieceName(lure.lure), count: lure.count }) : null,
+    lure && lure.count >= 2 && lure.count > (nextLure?.count ?? 0) ? t("Most on {lure} ({count})", { lure: lureName(lure.lure), count: lure.count }) : null,
     water && water.name && water.count >= 2 && water.count > (nextWater?.count ?? 0) ? t("Most from {water} ({count})", { water: plainName(water.name), count: water.count }) : null,
   ].filter(Boolean);
   return parts.length > 0 ? <p className="meta kind-leaders">{parts.join(" · ")}</p> : null;
@@ -169,13 +170,16 @@ export function BestsPage() {
   // A night session's small hours on its outing's day, as the calendar and the goal count them.
   const dayOf = (entry: CatchEntry) => bookFishDay(whole, entry);
   const monthOf = (entry: CatchEntry) => dayOf(entry).slice(0, 7);
+  const waterKeys = new Map(whole.spots.map((spot) => [spot.id, foldName(spot.name)]));
   const notYet = notYetThisYear(real.catches, new Date(), undefined, dayOf);
-  const newWaters = newWatersThisYear(real.catches, new Date(), dayOf).flatMap((id) => whole.spots.filter((spot) => spot.id === id));
+  const newWaters = newWatersThisYear(real.catches, new Date(), dayOf, (id) => waterKeys.get(id) ?? id).flatMap((id) => whole.spots.filter((spot) => spot.id === id));
   const wholeFishByTrip = fishCountsByTrip(whole);
   // An outing's fish with those logged loose on its water that day, as Trips and the outings link count them.
   const fishOn = outingFish(whole);
   // Each kind under the name the book gives it most, in the reader's language: "zander " reads "Sandacz" in Polish.
   const kindName = kindNames(countedFish(whole.catches));
+  // And each lure as the whole book writes it most, as the season box and Gear name it, not as the season picked does.
+  const lureName = bookLureName(all.catches);
   const streak = outingStreak(
     real.trips,
     fishOn,
@@ -186,7 +190,7 @@ export function BestsPage() {
   const split = weekendSplit(real.trips, fishOn, fishedBy);
   const fishYears = yearTally(whole.catches, monthOf).map((row) => row.year);
   // A season with days out but no fish yet can be picked too: its recap says so, and Home's goal line links it.
-  const years = [...new Set([...fishYears, ...whole.trips.filter((trip) => trip.date < fishedBy).map((trip) => trip.date.slice(0, 4))])].sort((a, b) => b.localeCompare(a));
+  const years = [...new Set([...fishYears, ...whole.trips.filter((trip) => trip.date < fishedBy || gaveWay(whole, trip)).map((trip) => trip.date.slice(0, 4))])].sort((a, b) => b.localeCompare(a));
   const asked = params.get(YEAR_PARAM);
   const year = asked && years.includes(asked) ? asked : null;
   // Everything else is worked out from the season picked, fish and outings alike.
@@ -215,6 +219,21 @@ export function BestsPage() {
     if (list) list.push(entry);
     else bySpot.set(entry.spotId, [entry]);
   }
+  // Twin waters ("Śniardwy", "Sniardwy") are one water to a search, so one card here, as the season box's best water
+  // takes them: its count is what its link opens. Named as the one with the most fish.
+  const twinWaters = new Map<string, typeof bests.waters>();
+  for (const water of bests.waters) {
+    // Waters no longer in the book are no twins: each keeps its own "Unknown water" card.
+    const key = spotById(book, water.spotId) ? foldName(water.name) : `\u0000${water.spotId}`;
+    twinWaters.set(key, [...(twinWaters.get(key) ?? []), water]);
+  }
+  const waterCards = [...twinWaters.values()].map((twins) => ({
+    ...twins[0]!,
+    twins: twins.length > 1,
+    fish: twins.length > 1 ? twins.flatMap((water) => bySpot.get(water.spotId) ?? []).sort((a, b) => Date.parse(b.caughtAt) - Date.parse(a.caughtAt)) : (bySpot.get(twins[0]!.spotId) ?? []),
+  }))
+    .sort((a, b) => b.fish.length - a.fish.length || plainName(a.name).localeCompare(plainName(b.name)));
+  const waterNames = new Set(book.spots.map((spot) => foldName(spot.name))).size;
   // Counted as the calendar below counts its days, so the tile and the calendar agree: in a season, its fish by the day
   // they count on, with every outing to file a night session's small hours under.
   const dayBook = year ? { ...whole, catches: whole.catches.filter((entry) => dayOf(entry).startsWith(`${year}-`)) } : book;
@@ -431,10 +450,10 @@ export function BestsPage() {
           <span className="eyebrow">{t("Waters with fish")}</span>
           <strong>
             {/* To this page's own list of them, in the season picked: the Waters page would list every water. */}
-            {bests.watersWithFish > 0 ? (
+            {waterCards.length > 0 ? (
               <a
                 href="#waters-with-fish"
-                aria-label={t("Waters with fish: {count}", { count: bests.watersWithFish })}
+                aria-label={t("Waters with fish: {count}", { count: waterCards.length })}
                 onClick={(event) => {
                   event.preventDefault();
                   const heading = document.getElementById("waters-with-fish");
@@ -442,16 +461,16 @@ export function BestsPage() {
                   heading?.focus({ preventScroll: true });
                 }}
               >
-                {bests.watersWithFish}
+                {waterCards.length}
               </a>
             ) : (
-              bests.watersWithFish
+              waterCards.length
             )}
           </strong>
           <small>
             {book.spots.length === 0
               ? t("No waters in the book")
-              : t("{count} of {total}", { count: bests.watersWithFish, total: book.spots.length })}
+              : t("{count} of {total}", { count: waterCards.length, total: waterNames })}
           </small>
         </div>
         <div>
@@ -537,7 +556,7 @@ export function BestsPage() {
                       {fishCountLabel(row.count)}
                       {measures ? ` · ${measures}` : ""}
                     </p>
-                    <KindLeaders book={book} species={row.species} />
+                    <KindLeaders book={book} species={row.species} lureName={lureName} />
                     {lastFishLine(whole, kindFish.get(kindKey(row.species)) ?? [], true)}
                   </article>
                 );
@@ -614,7 +633,7 @@ export function BestsPage() {
               <h2>{t("Lures that worked")}</h2>
             </div>
             {/* Every lure that took a fish, the top five until asked for the rest. */}
-            <TallyBars key={year ?? ""} limit={5} rows={pieceTally(book.catches, Infinity).map((row) => ({ key: row.lure, label: pieceName(row.lure), count: row.count, to: linkFor(exactTerm("lure", pieceName(row.lure))) }))} />
+            <TallyBars key={year ?? ""} limit={5} rows={pieceTally(book.catches, Infinity).map((row) => ({ key: row.lure, label: lureName(row.lure), count: row.count, to: linkFor(exactTerm("lure", pieceName(row.lure))) }))} />
           </section>
 
           <section>
@@ -624,15 +643,15 @@ export function BestsPage() {
               </h2>
             </div>
             <div className="card-grid">
-              {bests.waters.map((water) => (
-                <Link key={water.spotId} to={year ? linkFor(exactTerm("water", plainName(water.name))) : `/spots/${water.spotId}`} className="spot-card">
+              {waterCards.map((water) => (
+                <Link key={water.spotId} to={year || water.twins ? linkFor(exactTerm("water", plainName(water.name))) : `/spots/${water.spotId}`} className="spot-card">
                   <div className="spot-card-top">
                     <h3>{water.name === "Unknown water" ? t(water.name) : plainName(water.name)}</h3>
                   </div>
-                  <p className="meta">{waterFishLine(bySpot.get(water.spotId) ?? [], kindName)}</p>
+                  <p className="meta">{waterFishLine(water.fish, kindName)}</p>
                   {/* When it last gave one: a water gone quiet is worth a visit, or a rest. */}
-                  {lastFishLine(whole, bySpot.get(water.spotId) ?? [])}
-                  {waterBestLine(book, bySpot.get(water.spotId) ?? [], kindName)}
+                  {lastFishLine(whole, water.fish)}
+                  {waterBestLine(book, water.fish, kindName)}
                 </Link>
               ))}
             </div>

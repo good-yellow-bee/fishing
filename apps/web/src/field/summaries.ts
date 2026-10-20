@@ -12,6 +12,7 @@ import { kindNames, speciesCounts, speciesWaters } from "./speciesLink";
 import { goalPace } from "./YearGoal";
 import { sheetOutings } from "./catchCsv";
 import { outingDay, plainName, sameName } from "./tripDates";
+import { twinsTogether } from "./spotOrder";
 import { pieceName } from "./gear/pieceKey";
 import { countedFish } from "./milestones";
 
@@ -152,7 +153,8 @@ export function yearSummary(book: Logbook, year: string, today: string, goal: nu
     entry
       ? [t(kind === "length" ? "Longest: {species}, {size}" : "Heaviest: {species}, {size}", { species: kindName(entry.species), size: measureText(measureOf(entry, kind)!) })]
       : [];
-  const waters = speciesWaters(book, catches)
+  // Twin waters as one, as Bests' cards and the recap's best water take them.
+  const waters = twinsTogether(speciesWaters(book, catches))
     .filter((row) => row.name)
     .slice(0, 3)
     .map((row) => `${plainName(row.name!)} (${row.count})`);

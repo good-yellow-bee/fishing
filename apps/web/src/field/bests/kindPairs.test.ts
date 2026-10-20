@@ -24,4 +24,11 @@ describe("one kind under two names", () => {
   it("leaves one name in two cases alone", () => {
     expect(kindPairs([fish("a", "pike"), fish("b", "Pike ")], show)).toEqual([]);
   });
+
+  it("takes a kind however it was typed as one name, the one most of its fish carry", () => {
+    const okon = (name: string) => (/^perch/i.test(name.trim()) ? "Okoń" : name);
+    const catches = [fish("a", "Perch"), fish("b", "Perch"), fish("c", "perch "), fish("d", "Perches")];
+    expect(kindPairs(catches, okon)).toEqual([]);
+    expect(kindPairs([...catches, fish("e", "Okoń")], okon)).toEqual([{ shown: "Okoń", from: "Okoń", into: "Perch", fromCount: 1, intoCount: 4 }]);
+  });
 });

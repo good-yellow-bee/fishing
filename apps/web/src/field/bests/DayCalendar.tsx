@@ -7,6 +7,8 @@ import { findLink } from "../findLinks";
 import { FROM_LIST } from "../leaveDeleted";
 import { monthName } from "../tripMonths";
 import { dayMarks, markedMonths } from "./dayMarks";
+import { outingFish } from "../outingFish";
+import { gaveWay, outingFished } from "../tripDates";
 
 /** The weekdays' first letters in the reader's language, Monday first: "M T W T F S S", "P W Ś C P S N". */
 function weekdayLetters(): string[] {
@@ -103,11 +105,23 @@ export function DayCalendar({
   // The one tab stop starts on the latest day out so far, where a keyboard reader wants to begin, not the first.
   const active = current && linked.includes(current) ? current : (linked.filter((day) => day <= today).at(-1) ?? linked[0]);
   const monthFish = (month: string) => [...marks.entries()].reduce((sum, [day, mark]) => (day.startsWith(`${month}-`) ? sum + mark.fish : sum), 0);
+  const tripsById = new Map(book.trips.map((trip) => [trip.id, trip]));
+  const fishOn = outingFish(book);
+  // A day out already past, as "Days on the water" counts it: last evening's blank that gave way to today's plan too.
+  const pastBlank = (trips: readonly string[]) =>
+    trips.some((id) => {
+      const trip = tripsById.get(id);
+      return trip !== undefined && (trip.date < fishedBy || gaveWay(book, trip));
+    });
+  // An outing already fished, as the trip search and the season box count it: today's once a fish, one lost or a strike missed.
+  const fished = (id: string) => {
+    const trip = tripsById.get(id);
+    return trip !== undefined && (outingFished(trip, fishedBy, fishOn(id) > 0 || Boolean(trip.lost || trip.missed)) || gaveWay(book, trip));
+  };
   // The month's days out, as the shaded and outlined days show them: a fish, or an outing already past.
-  const monthDays = (month: string) => [...marks.entries()].filter(([day, mark]) => day.startsWith(`${month}-`) && (mark.fish > 0 || (mark.trips.length > 0 && day < fishedBy))).length;
+  const monthDays = (month: string) => [...marks.entries()].filter(([day, mark]) => day.startsWith(`${month}-`) && (mark.fish > 0 || pastBlank(mark.trips))).length;
   // The month's outings already fished, as its trip search counts them ("Outings: 4 · 1 planned").
-  const monthTrips = (month: string) =>
-    new Set([...marks.entries()].flatMap(([day, mark]) => (day.startsWith(`${month}-`) && (day < fishedBy || (day <= today && mark.fish > 0)) ? mark.trips : []))).size;
+  const monthTrips = (month: string) => new Set([...marks.entries()].flatMap(([day, mark]) => (day.startsWith(`${month}-`) ? mark.trips.filter(fished) : []))).size;
   // The month with the most days out, once one leads the others.
   const busiest = busiestMonth(months.map((month) => [month, monthDays(month)] as const));
   // Today's own day says so, so the season reads against the date.
@@ -183,7 +197,7 @@ export function DayCalendar({
                     </li>
                   );
                 }
-                if (mark && mark.trips.length > 0 && day < fishedBy) {
+                if (mark && pastBlank(mark.trips)) {
                   // The blank opens its outing, or the day's outings when there were several.
                   const label = `${dayName(day)}: ${tn(mark.trips.length, "an outing with no fish", "{n} outings with no fish")}`;
                   return (
