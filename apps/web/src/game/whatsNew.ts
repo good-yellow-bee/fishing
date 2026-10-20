@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-game57";
+export const NEWS_ID = "2026-10-20-scene65";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "While a bank's giant is still out there this week, now and then it rolls on that bank's water in a big swirl. And a night line you leave out now shows at its bank: a forked stick leaning over the water, the line running down into it.",
   "With a live shiner on the hook, the sign of the bank you stand at can now leave it out on a night line. Come back six hours to two days later and the same sign brings it in, often with one of the bank's night feeders on it. And a new badge, Giant hunter, waits for whoever is first to land three of the weekly giants.",
   "The angler who fishes the day's crowded bank now sits there on a camp chair a few steps from you, rod out, from dawn to dusk. And a pike that follows your lure in for the figure-eight now shows as a long shadow behind the float, swinging round as it turns.",
   "On a phone you can now watch the whole fight: the fight card moves up to the top of the screen, over the far shore, and the header steps aside until the fish is in; held sideways it waits beside the action, above the steering buttons. Left-handed, the steering buttons now take the other corner from the Reel button instead of lying under it.",
