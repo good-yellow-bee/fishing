@@ -1035,7 +1035,10 @@ export function DockPage() {
         )}
         {prefs.walkStick && !shopOpen && scenePhase === "idle" && <WalkStick />}
         <p className="hint" aria-live="polite" ref={hintRef}>
-          {game.hint}
+          {scenePhase !== "hookset" && game.hint}
+          {/* The call to strike can't wait for a screen reader to finish a long hint before it (the strike lasts a second
+              or two): it alone is said at once. Kept mounted, so the reader is listening before the bite. */}
+          <span aria-live="assertive">{scenePhase === "hookset" ? game.hint : ""}</span>
           {scenePhase === "waiting" && game.moreReasons.length > 0 && (
             <>
               {" "}
