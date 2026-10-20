@@ -1858,7 +1858,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT406~~ | ~~The line on the reel: the walk signs' Line button swaps light, standard or heavy line between casts (kept from visit to visit); light line bites 0.85x sooner but snaps at 0.9 of the strain (frayed too, with a mark on the tension bar), heavy line holds 1.1x the strain but bites 1.15x slower; the wait hint and the fight card say so~~ (#1593) | gameplay | M |
 | ~~GT407~~ | ~~Stewards of the week: the Board ranks the lodge's anglers by the fish they let go this week (from Monday 00:00 UTC), and the angler's own place below the top ten~~ (#1594) | gameplay | M |
 | ~~GT408~~ | ~~News card 2026-10-20-game51 covers GT406 and GT407: the line on the reel and the stewards of the week~~ (#1598) | ui | S |
-| ~~GT409~~ | ~~The Board's derby, day's bag and stewards cards share one read and one ranked list (no change to what they show)~~ (#PR) | ui | S |
+| ~~GT409~~ | ~~The Board's derby, day's bag and stewards cards share one read and one ranked list (no change to what they show)~~ (#1601) | ui | S |
 | GT410 | Species studies: each kind in the field guide has three studies (land one at its best hour, one at trophy weight, one on its favourite kind of lure); finishing all three marks it Studied and pays a one-off bonus, checked by the server on its own call | gameplay | M |
 | GT411 | News card game52 covers GT410 | ui | S |
 
