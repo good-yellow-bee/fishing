@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState, Suspense, type ComponentRef, type RefObject } from "react";
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, Suspense, type ComponentRef, type RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { useGLTF } from "./loadGltf";
@@ -343,7 +343,8 @@ function isAiming(phase: ScenePhase) {
 function FitFov() {
   const camera = useThree((state) => state.camera) as THREE.PerspectiveCamera;
   const aspect = useThree((state) => state.size.width / state.size.height);
-  useEffect(() => {
+  // Before the next frame draws, so a turned phone never shows a frame at the old view.
+  useLayoutEffect(() => {
     camera.fov = fovFor(aspect);
     camera.updateProjectionMatrix();
   }, [camera, aspect]);
