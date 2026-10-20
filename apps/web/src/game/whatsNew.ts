@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-game67";
+export const NEWS_ID = "2026-10-20-field73";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "On Bests, a kind that set a new best in the season picked says the record it beat, and a kind's card says how many of it went back, opening them. Twin waters spelled two ways count as one, and a month's outings match the list they open.",
   "The shack now has a shiner trap: bait it with a handful of groundbait, and after six hours it holds a shiner or two for your bait bucket. And holding a run on a heavy drag now tires your arm as reeling does.",
   "Gear's lure record says where each lure took most of its fish, opening them, and a packed piece says how many fish it took on the outing's water. Undo on a packing list never puts a piece back twice.",
   "Spare shiners in your bait bucket now keep three days: the oldest goes out first, and ones left longer have died by your next visit. And a trophy that broke a line before, your old foe or another angler's lost one, knows the hook now: its first run doesn't tire it.",

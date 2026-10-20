@@ -906,6 +906,7 @@ export const PL_FIELD: PlBook = {
   Yes: "Tak",
   "{n} released": ["{n} wypuszczona", "{n} wypuszczone", "{n} wypuszczonych"],
   "Released: {count} of {total}": "Wypuszczone: {count} z {total}",
+  "Previous best: {size} ({year})": "Poprzedni rekord: {size} ({year})",
   Moon: "Księżyc",
   "Moon: {phase}": "Księżyc: {phase}",
   "Sunrise {rise} · sunset {set}": "Wschód słońca {rise} · zachód {set}",
