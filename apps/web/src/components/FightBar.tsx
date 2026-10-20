@@ -30,7 +30,7 @@ const DRAG_WORD: Record<Drag, string> = { light: "Drag: light", normal: "Drag: n
 const DRAG_LINE: Record<Drag, string> = {
   light: "A run takes more line, even as you reel, but pulls softly",
   normal: "Light lets a run go easy; heavy holds it short",
-  heavy: "A run takes less line, but loads it even let go: a strong one goes red",
+  heavy: "A run takes less line, but loads it even let go, and tires your arm: a strong one goes red",
 };
 
 export function FightBar({ fight, sim, performance, best = null, note = null, cleanRun = 0 }: Props) {

@@ -2122,6 +2122,19 @@ describe("the angler's arm in a long fight", () => {
     expect(f.sim.armTired).toBeUndefined();
   });
 
+  it("gives the arm no rest while a run is held on a heavy drag", () => {
+    const tiredAfter = (drag: Drag) => {
+      const f = makeFight(fish("pike"), 14.5, 8, () => 0.5);
+      let now = 0;
+      for (; now < (ARM_FRESH_SEC + 15) * 1000; now += 50) f.step(now, 0.05, true, 0, drag);
+      // Then rest the reel: through the fish's runs a heavy drag still works the arm, a normal one lets it rest.
+      for (const end = now + 25_000; now < end; now += 50) f.step(now, 0.05, false, 0, drag);
+      return f.sim.armTired === true;
+    };
+    expect(tiredAfter("heavy")).toBe(true);
+    expect(tiredAfter("normal")).toBe(false);
+  });
+
   it("still lands a fish a weak angler could land, however long the fight runs", () => {
     const f = makeFight(fish("pike"), 14.5, 1, seeded(7));
     let outcome: FightOutcome = "fighting";
