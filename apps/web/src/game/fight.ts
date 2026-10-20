@@ -352,16 +352,20 @@ export function thrivesInCold(season: string | undefined, speciesId?: string) {
 export function seasonTireMul(season: string | undefined, speciesId?: string) {
   return season === "winter" && !thrivesInCold(season, speciesId) ? WINTER_TIRE : 1;
 }
-/** In a long fight the angler's arm tires: past this many seconds, and ARM_STRENGTH_SEC more for each point of Strength, */
+/** Seconds of reeling before the angler's arm starts to tire in a fight. */
 export const ARM_FRESH_SEC = 45;
-export const ARM_STRENGTH_SEC = 3;
-/** ...the reel wins this much less line for each further second, down to ARM_FLOOR of its pace. */
+/** Past that, the reel wins this much less line for each further second of reeling. */
 export const ARM_TIRE_PER_SEC = 0.01;
-export const ARM_FLOOR = 0.6;
+/** The slowest a tired arm reels, as a share of its fresh pace. */
+export const ARM_FLOOR = 0.7;
+/** Resting the reel, the arm gets back this many seconds of reeling for each second of rest. */
+export const ARM_REST_RECOVER = 0.5;
+/** Below this pace the fight's status says the arm is tiring. */
+export const ARM_TELL = 0.9;
 
-/** How fast a tiring arm still reels, from 1 while it is fresh down to ARM_FLOOR. */
-export function armMul(fightSec: number, strength: number): number {
-  const past = fightSec - (ARM_FRESH_SEC + strength * ARM_STRENGTH_SEC);
+/** How fast a tiring arm still reels after `reelSec` seconds of reeling, from 1 while it is fresh down to ARM_FLOOR. */
+export function armMul(reelSec: number): number {
+  const past = reelSec - ARM_FRESH_SEC;
   return past <= 0 ? 1 : Math.max(ARM_FLOOR, 1 - past * ARM_TIRE_PER_SEC);
 }
 
@@ -699,6 +703,8 @@ export function makeFight(
   let windCalmUntil = -Infinity;
   /** The drag as it stood when the run began: turning the knob mid-run takes effect on the next one. */
   let runDrag: Drag = "normal";
+  /** Seconds the angler has reeled, less what resting gave back: it tires the arm. */
+  let reelSec = 0;
   const step = (nowMs: number, dtSec: number, reeling: boolean, steer: Steer = 0, drag: Drag = "normal"): FightOutcome => {
     const pressed = reeling && !wasReeling;
     wasReeling = reeling;
@@ -898,11 +904,12 @@ export function makeFight(
     const plainRun = sim.surge === 2 && !sim.jump && !sim.roll && !charging;
     const lightRun = plainRun && runDrag === "light";
     const heavyRun = plainRun && runDrag === "heavy";
+    const arm = armMul(reelSec);
     if (reeling) {
       sim.tension += (tensionUpCalm + (sim.surge === 2 && !charging ? eff * rockPull * DRAG_RUN_PULL[runDrag] : 0) + (sim.wrapped ? WRAP_PULL : 0)) * dtSec;
       // Line under real pressure comes in faster, for an angler brave enough to reel in the amber.
       const pressure = sim.tension >= TIGHT_TENSION && sim.tension < RED_TENSION ? PRESSURE_REEL : 1;
-      sim.line -= reelRate * armMul(performance.fightSec ?? 0, strength) * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * (sim.weeded ? WEED_REEL : 1) * (sim.wrapped ? 0 : 1) * (broadsider && sim.stamina >= TIRING_STAMINA ? BROADSIDE_REEL : 1) * (charging ? CHARGE_REEL / pattern.reelSurge : 1) * (sim.withRun ? WITH_RUN_REEL : 1) * (sim.headTurned ? TURNED_HEAD_REEL : 1) * (sim.weedBall ? WEED_BALL_REEL : 1) * dtSec;
+      sim.line -= reelRate * arm * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * (sim.weeded ? WEED_REEL : 1) * (sim.wrapped ? 0 : 1) * (broadsider && sim.stamina >= TIRING_STAMINA ? BROADSIDE_REEL : 1) * (charging ? CHARGE_REEL / pattern.reelSurge : 1) * (sim.withRun ? WITH_RUN_REEL : 1) * (sim.headTurned ? TURNED_HEAD_REEL : 1) * (sim.weedBall ? WEED_BALL_REEL : 1) * dtSec;
       if (lightRun) sim.line += driftSurge * DRAG_RUN_LINE.light * LIGHT_DRAG_SLIP * dtSec;
     } else if (heavyRun) {
       sim.tension =
@@ -939,7 +946,9 @@ export function makeFight(
     performance.peakTension = Math.max(performance.peakTension, sim.tension);
     performance.maxLine = Math.max(performance.maxLine, sim.line);
     performance.fightSec = (performance.fightSec ?? 0) + dtSec;
-    sim.armTired = armMul(performance.fightSec, strength) < 1;
+    reelSec = reeling ? reelSec + dtSec : Math.max(0, reelSec - dtSec * ARM_REST_RECOVER);
+    if (armMul(reelSec) < ARM_TELL) sim.armTired = true;
+    else delete sim.armTired;
     // Fought too long, a pike chews the line it swallowed down to frayed.
     if (toothed && !sim.frayed && performance.fightSec >= TEETH_SEC) {
       sim.frayed = true;

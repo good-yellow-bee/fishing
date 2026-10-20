@@ -149,7 +149,7 @@ export function FightBar({ fight, sim, performance, best = null, note = null, cl
               : state.surge === 0 && tired === "spent"
               ? t("It's played out — reel it in!")
               : state.surge === 0 && state.armTired
-              ? t("Your arm is tiring — bring it in before it wears you down!")
+              ? t("Your arm is tiring — rest it a moment between pumps.")
               : (state.jump ? leapLines : lines)[state.surge]!;
         if (status.current && status.current.textContent !== call) status.current.textContent = call;
         // Screen readers get the bars as meters, refreshed four times a second rather than every frame,
