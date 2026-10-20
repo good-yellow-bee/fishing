@@ -15,7 +15,7 @@ export default defineConfig({
   ignoreSnapshots: process.platform !== "linux" && !process.env.VISUAL_COMPARE,
   outputDir: "../../test-results/visual",
   timeout: 120_000,
-  workers: process.env.CI ? 2 : 1,
+  workers: process.env.CI ? 3 : 1,
   retries: 0,
   reporter: process.env.CI ? [["list"], ["html", { open: "never", outputFolder: "../../test-results/visual-report" }]] : "list",
   expect: {

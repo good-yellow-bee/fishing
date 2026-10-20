@@ -50,11 +50,10 @@ export async function openLake(page: Page, query: string, { frames = 4, ...optio
   await prepare(page, options);
   await page.goto(`/play${query}`);
   await page.locator(".scene-wrap canvas").waitFor({ timeout: 90_000 });
-  // The scene parts ahead (night, weather, day) are fetched a few seconds in; let them come.
-  await page.waitForTimeout(6000);
+  // Scene parts out at the start hold the reveal until they are in, so once the network settles the lake is whole.
   await page.waitForLoadState("networkidle");
   await page.evaluate(() => new Promise<void>((resolve) => {
-    let left = 30;
+    let left = 12;
     const tick = () => (--left <= 0 ? resolve() : requestAnimationFrame(tick));
     requestAnimationFrame(tick);
   }));
