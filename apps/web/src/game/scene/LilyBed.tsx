@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useGLTF } from "@react-three/drei";
+import { useGLTF } from "./loadGltf";
 import * as THREE from "three";
 import type { LakeSeason } from "@stillwater/shared";
 import { LILY_HEART, LILY_PETALS, easeLily, lilyBloom, lilyCup, lilyPads } from "./lilyBloom";

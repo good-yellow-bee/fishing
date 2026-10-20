@@ -1,6 +1,6 @@
 import { createContext, memo, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useGLTF } from "@react-three/drei";
+import { useGLTF } from "./loadGltf";
 import * as THREE from "three";
 import { DROPOFF_PAD, OPEN_PAD, POINT_PAD, REEDS_PAD, SHOP_X, SHOP_Z, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, moonLight, type LakeHour, type LakeSeason, type Sky as WeatherSky, type SpotId } from "@stillwater/shared";
 import { PaintedFish } from "./ArticulatedFish";

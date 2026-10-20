@@ -1,6 +1,7 @@
 import { memo, useEffect, useMemo, useRef, useState, Suspense, type ComponentRef, type RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, useGLTF } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
+import { useGLTF } from "./loadGltf";
 import * as THREE from "three";
 import {
   CAST_RANGE,
