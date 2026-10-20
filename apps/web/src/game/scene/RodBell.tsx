@@ -3,6 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { bellShown, bellSwing } from "./bellSwing";
 import type { ScenePhase } from "./types";
+import { toonRamp } from "./toon";
 
 /** Meters the bell hangs below the rod tip. */
 const DROP = 0.09;
@@ -32,11 +33,11 @@ export function RodBell({ rodTip, phase, nibble, night }: { rodTip: THREE.Vector
       {/* Hung from its top, so it swings about the clip. */}
       <mesh position={[0, -0.035, 0]}>
         <coneGeometry args={[0.035, 0.06, 10, 1, true]} />
-        <meshStandardMaterial color="#c99a3a" metalness={0.6} roughness={0.35} side={THREE.DoubleSide} />
+        <meshToonMaterial color="#c99a3a" gradientMap={toonRamp()} side={THREE.DoubleSide} />
       </mesh>
       <mesh position={[0, -0.005, 0]}>
         <sphereGeometry args={[0.016, 8, 6]} />
-        <meshStandardMaterial color="#d8ad4d" metalness={0.6} roughness={0.35} />
+        <meshToonMaterial color="#d8ad4d" gradientMap={toonRamp()} />
       </mesh>
     </group>
   );
