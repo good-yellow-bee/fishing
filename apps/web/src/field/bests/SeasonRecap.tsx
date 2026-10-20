@@ -30,7 +30,8 @@ function seasonFirsts(book: Logbook, year: string, today: string) {
   const top = bestFishDay({ ...book, catches: book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${year}-`)) });
   const bestDay = top && top.count > 1 ? [t("Best day: {day} · {fish}", { day: formatDay(top.date), fish: tn(top.count, "{n} fish", "{n} fish") })] : [];
   // The waters that gave their first fish that season.
-  const newWaters = newWatersThisYear(book.catches, new Date(Number(year), 6, 1), (entry) => bookFishDay(book, entry), (id) => foldName(book.spots.find((spot) => spot.id === id)?.name ?? id)).flatMap((id) => book.spots.filter((spot) => spot.id === id).map((spot) => plainName(spot.name)));
+  const waterKeys = new Map(book.spots.map((spot) => [spot.id, foldName(spot.name)]));
+  const newWaters = newWatersThisYear(book.catches, new Date(Number(year), 6, 1), (entry) => bookFishDay(book, entry), (id) => waterKeys.get(id) ?? id).flatMap((id) => book.spots.filter((spot) => spot.id === id).map((spot) => plainName(spot.name)));
   const recap = seasonRecap(book, year, today);
   const firsts = [
     ...bestDay,

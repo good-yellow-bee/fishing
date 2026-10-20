@@ -61,9 +61,18 @@ describe("round 116 fixes: Bests", () => {
   });
 
   it("adds twin waters' fish together under the busier twin's name", () => {
-    expect(twinsTogether([{ name: "Home Lake", count: 3 }, { name: "Deep Lake", count: 4 }, { name: "home  lake", count: 2 }, { name: null, count: 9 }])).toEqual([
+    const rows = [
+      { spotId: "a", name: "Home Lake", count: 3 },
+      { spotId: "b", name: "Deep Lake", count: 4 },
+      { spotId: "c", name: "home  lake", count: 2 },
+      { spotId: "gone", name: null, count: 1 },
+      { spotId: "lost", name: null, count: 1 },
+    ];
+    expect(twinsTogether(rows)).toEqual([
       { name: "Home Lake", count: 5 },
       { name: "Deep Lake", count: 4 },
+      { name: null, count: 1 },
+      { name: null, count: 1 },
     ]);
   });
 

@@ -125,7 +125,7 @@ function KindLeaders({ book, species, lureName }: { book: Logbook; species: stri
   // A tie has no leader, as the catch search's own "Most on" line takes it.
   const parts = [
     lure && lure.count >= 2 && lure.count > (nextLure?.count ?? 0) ? t("Most on {lure} ({count})", { lure: lureName(lure.lure), count: lure.count }) : null,
-    water && water.count >= 2 && water.count > (nextWater?.count ?? 0) ? t("Most from {water} ({count})", { water: plainName(water.name), count: water.count }) : null,
+    water && water.name && water.count >= 2 && water.count > (nextWater?.count ?? 0) ? t("Most from {water} ({count})", { water: plainName(water.name), count: water.count }) : null,
   ].filter(Boolean);
   return parts.length > 0 ? <p className="meta kind-leaders">{parts.join(" · ")}</p> : null;
 }
@@ -170,15 +170,16 @@ export function BestsPage() {
   // A night session's small hours on its outing's day, as the calendar and the goal count them.
   const dayOf = (entry: CatchEntry) => bookFishDay(whole, entry);
   const monthOf = (entry: CatchEntry) => dayOf(entry).slice(0, 7);
+  const waterKeys = new Map(whole.spots.map((spot) => [spot.id, foldName(spot.name)]));
   const notYet = notYetThisYear(real.catches, new Date(), undefined, dayOf);
-  const newWaters = newWatersThisYear(real.catches, new Date(), dayOf, (id) => foldName(spotById(whole, id)?.name ?? id)).flatMap((id) => whole.spots.filter((spot) => spot.id === id));
+  const newWaters = newWatersThisYear(real.catches, new Date(), dayOf, (id) => waterKeys.get(id) ?? id).flatMap((id) => whole.spots.filter((spot) => spot.id === id));
   const wholeFishByTrip = fishCountsByTrip(whole);
   // An outing's fish with those logged loose on its water that day, as Trips and the outings link count them.
   const fishOn = outingFish(whole);
   // Each kind under the name the book gives it most, in the reader's language: "zander " reads "Sandacz" in Polish.
   const kindName = kindNames(countedFish(whole.catches));
   // And each lure as the whole book writes it most, as the season box and Gear name it, not as the season picked does.
-  const lureName = bookLureName(whole.catches);
+  const lureName = bookLureName(all.catches);
   const streak = outingStreak(
     real.trips,
     fishOn,
@@ -221,7 +222,11 @@ export function BestsPage() {
   // Twin waters ("Śniardwy", "Sniardwy") are one water to a search, so one card here, as the season box's best water
   // takes them: its count is what its link opens. Named as the one with the most fish.
   const twinWaters = new Map<string, typeof bests.waters>();
-  for (const water of bests.waters) twinWaters.set(foldName(water.name), [...(twinWaters.get(foldName(water.name)) ?? []), water]);
+  for (const water of bests.waters) {
+    // Waters no longer in the book are no twins: each keeps its own "Unknown water" card.
+    const key = spotById(book, water.spotId) ? foldName(water.name) : `\u0000${water.spotId}`;
+    twinWaters.set(key, [...(twinWaters.get(key) ?? []), water]);
+  }
   const waterCards = [...twinWaters.values()].map((twins) => ({
     ...twins[0]!,
     twins: twins.length > 1,

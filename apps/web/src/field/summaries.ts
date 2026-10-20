@@ -155,8 +155,9 @@ export function yearSummary(book: Logbook, year: string, today: string, goal: nu
       : [];
   // Twin waters as one, as Bests' cards and the recap's best water take them.
   const waters = twinsTogether(speciesWaters(book, catches))
+    .filter((row) => row.name)
     .slice(0, 3)
-    .map((row) => `${plainName(row.name)} (${row.count})`);
+    .map((row) => `${plainName(row.name!)} (${row.count})`);
   const [y, m, d] = today.split("-").map(Number) as [number, number, number];
   const pace = goal !== null && today.startsWith(`${year}-`) ? goalPace(catches.length, goal, new Date(y, m - 1, d)) : null;
   const lureName = bookLureName(book.catches);

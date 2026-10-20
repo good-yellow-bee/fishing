@@ -16,12 +16,13 @@ export function twinName(a: string, b: string): boolean {
 }
 
 /** Waters' fish counts with twin waters as one, as a search reads them: most first, each under its busier twin's name. */
-export function twinsTogether(rows: readonly { name: string | null; count: number }[]): { name: string; count: number }[] {
-  const twins = new Map<string, { name: string; count: number }>();
+/** A water whose spot is gone (no name) stays its own row. */
+export function twinsTogether(rows: readonly { spotId: string; name: string | null; count: number }[]): { name: string | null; count: number }[] {
+  const twins = new Map<string, { name: string | null; count: number }>();
   for (const row of [...rows].sort((a, b) => b.count - a.count)) {
-    if (!row.name) continue;
-    const was = twins.get(foldName(row.name));
-    twins.set(foldName(row.name), { name: was?.name ?? row.name, count: (was?.count ?? 0) + row.count });
+    const key = row.name ? foldName(row.name) : `\u0000${row.spotId}`;
+    const was = twins.get(key);
+    twins.set(key, { name: was?.name ?? row.name, count: (was?.count ?? 0) + row.count });
   }
   return [...twins.values()].sort((a, b) => b.count - a.count);
 }
