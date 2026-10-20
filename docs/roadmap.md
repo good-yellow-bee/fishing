@@ -1803,7 +1803,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT378~~ | ~~The reel's drag: in a fight, F or the fight card's Drag button turns it light, normal or heavy (kept from fight to fight, taking hold from the next run); a light drag lets a run take 1.35x the line, slipping some even under a turning reel, but pulls 0.7x on it; a heavy one holds a run to 0.65x the line but pulls 1.3x and loads the line even let go, so a big fresh run goes red (and tears a soft mouth), never snapping~~ (#1529) | gameplay | M |
 | ~~GT379~~ | ~~The day's bag: the Board ranks each angler's five heaviest fish landed that day (UTC, one ranking for the lodge) by their total weight, and the landed card shows the angler's bag with the new fish in it and how much it raised it, or what the next fish must beat~~ (#1530) | gameplay | M |
 | ~~GT380~~ | ~~Lodge-tagged fish: a fish (not a small common one nor a legend) that one angler lets go can come up (4% a cast) for another angler whose line can hold it, at the same bank on a later day within 30 days, grown a little; the landed card says who let it go, when and at what weight, and landing it pays the finder 30 points and the angler who let it go 20 (the server checks the release, once per fish)~~ (#1533) | gameplay | M |
-| GT381 | News card game44 covers GT378 to GT380 | ui | S |
+| ~~GT381~~ | ~~News card 2026-10-20-game44 covers GT378 to GT380: the reel's drag, the day's bag and lodge-tagged fish~~ (#PR) | ui | S |
 
 ## Risks / open questions for the owner
 
