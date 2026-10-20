@@ -2,7 +2,7 @@ import type { SpotId } from "@stillwater/shared";
 
 /**
  * A trophy that broke a line, still about its bank, trails the snapped float (SC292): cocked over on that bank's
- * water, it sits a while, dips under as the fish shifts, then slides off to the next stop round a small ring,
+ * water, it sits a while, is drawn down to its cap as the fish shifts, then slides off to the next stop round a small ring,
  * leaning as it is towed. Pure in time; held at its first stop under reduced motion.
  */
 
@@ -21,10 +21,10 @@ const STOPS = 5;
 /** Seconds between slides, and how long each slide lasts. */
 const SLIDE_EVERY = 11;
 const SLIDE_SEC = 1.6;
-/** Partway through each rest the float dips under for a moment, this deep at most. */
+/** Partway through each rest the float is drawn down for a moment until only its cap shows, this deep at most. */
 const DIP_AT = 5.5;
-const DIP_SEC = 0.9;
-export const DIP = 0.22;
+const DIP_SEC = 1.2;
+export const DIP = 0.38;
 /** A snapped float lies cocked over, and leans further while it is towed. */
 export const REST_TILT = 0.35;
 const TOW_TILT = 0.35;

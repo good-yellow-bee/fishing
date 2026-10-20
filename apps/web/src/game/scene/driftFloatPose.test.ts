@@ -43,7 +43,7 @@ describe("driftFloatPose", () => {
       const pose = driftFloatPose(time, 1, false);
       const step = Math.hypot(pose.x - last.x, pose.z - last.z);
       expect(step).toBeLessThan(0.05);
-      expect(Math.abs(pose.sink - last.sink)).toBeLessThan(0.05);
+      expect(Math.abs(pose.sink - last.sink)).toBeLessThan(0.1);
       expect(Math.hypot(pose.x, pose.z)).toBeCloseTo(LOOP_R);
       expect(pose.sink).toBeGreaterThanOrEqual(0);
       expect(pose.sink).toBeLessThanOrEqual(DIP);
