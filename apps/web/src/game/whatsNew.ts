@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-game42";
+export const NEWS_ID = "2026-10-20-pa35";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "The lake opens sooner on a phone: it now fetches its code and your profile together and each model only once, so on a slow signal it is ready about three seconds earlier, and coming back to it no longer downloads every model again. In high contrast, a switched-on Headlamp now stands out in amber.",
   "Each week the shack's weekly board carries a rumor of a legend, the tiger muskie, the sturgeon or the ghost pike, with three clues to find in your catches; find all three and that legend bites far more often at its bank for the rest of the week. And every weekend the lodge board runs a derby for the heaviest of one fish: hold the top spot when Sunday ends (UTC) to earn the Derby champion badge.",
   "On dry evenings a hedgehog now snuffles past behind you on the bank, curling into a ball at any fuss. In a feeding frenzy the bubbles boil with little silver baitfish leaping out, and at night your headlamp throws a beam onto the float. Out on the boat in a strong wind, the anchored hull now swings less toward a run, as the fight card says.",
   "Bigger fish no longer just slide in: once one is played out it lies at the net, and you let go of the reel, then strike as its head comes up to net it; strike too soon and it bolts off again. And now and then the bubbles boil in a feeding frenzy for a minute and a half: the bank's sign gets a star, and casts into it bite twice as fast with the hunters crowding in.",
@@ -13,7 +14,6 @@ export const NEWS_ITEMS: readonly string[] = [
   "On a phone, the lake's hint now sits below the bank chip when the chip has a lot to say, instead of under it. Held sideways, a long bank note ends in an ellipsis before the shore signs, and with larger text on a short screen the lure moves up beside the bank chip, clear of the walk stick.",
   "On summer evenings a bat now and then swoops in to hawk the moths by the dock's lantern. And on snowy winter nights the little owl comes to the snow-capped post too.",
   "On Waters, a water's card says Out now while you are fishing it, and a water's page says when its first fish came. A kind typed two ways, such as Perch and Perches, is one kind on every page, chip and record.",
-  "Strike a fish while the mallard is on the dock and it bursts off over the water. And on summer nights a few fireflies now drift and blink over the water right beside the dock.",
   "On Bests, the longest and heaviest tiles say how long a record has stood, and the month-by-month table names the best month the book has ever had. Not yet this year counts a kind once however it was typed, in your language's order.",
   "On Gear, each coming outing can copy its plan with what is still to pack, and the lure record says when a lure that never took a fish was last packed. On the Map, a water you have fished today says Out now.",
   "Home's Next box copies the plan for a message. The outings spreadsheet lists the lures each outing took, and from January to March the book file offers last year's catches as a sheet of their own. A lure typed two ways reads once in the spreadsheets and copied texts.",

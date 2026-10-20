@@ -740,6 +740,8 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "The lake opens sooner on a phone: it now fetches its code and your profile together and each model only once, so on a slow signal it is ready about three seconds earlier, and coming back to it no longer downloads every model again. In high contrast, a switched-on Headlamp now stands out in amber.":
+    "Jezioro otwiera się na telefonie szybciej: pobiera teraz swój kod razem z twoim profilem, a każdy model tylko raz, więc przy słabym zasięgu jest gotowe mniej więcej trzy sekundy wcześniej, a powrót nad wodę nie pobiera już wszystkich modeli od nowa. W wysokim kontraście włączona czołówka wyróżnia się teraz bursztynem.",
   "Fishing from the bank by day, the robin now comes to you too, landing by your feet to hop about and peck before it flies off. And the lake now draws about a third fewer pieces each frame, so it runs smoother on a phone.":
     "Gdy łowisz z brzegu za dnia, rudzik przylatuje teraz także do ciebie: siada przy twoich stopach, skacze i dziobie, a potem odlatuje. A jezioro rysuje teraz w każdej klatce o jedną trzecią mniej elementów, więc na telefonie działa płynniej.",
   "On a smaller phone the fight card now hangs just under the lake's header instead of rising over it, and the header's chips step aside until the fish is in. And while you wait for a bite, the hint's \"2 more reasons\" is much easier to tap.":
@@ -748,8 +750,6 @@ export const PL_GAME: PlBook = {
     "Na telefonie podpowiedź na jeziorze stoi teraz pod plakietką brzegu, gdy plakietka ma dużo do powiedzenia, zamiast chować się pod nią. Na telefonie trzymanym poziomo długa notka o brzegu kończy się wielokropkiem przed tabliczkami, a z większym tekstem na niskim ekranie przynęta przesuwa się w górę obok plakietki brzegu, z dala od drążka chodzenia.",
   "On summer evenings a bat now and then swoops in to hawk the moths by the dock's lantern. And on snowy winter nights the little owl comes to the snow-capped post too.":
     "W letnie wieczory nietoperz czasem wlatuje polować na ćmy przy latarni na pomoście. A w śnieżne zimowe noce na zaśnieżony słupek przylatuje też pójdźka.",
-  "Strike a fish while the mallard is on the dock and it bursts off over the water. And on summer nights a few fireflies now drift and blink over the water right beside the dock.":
-    "Zatnij rybę, gdy kaczor jest na pomoście, a zerwie się i odleci nad wodą. A w letnie noce tuż przy pomoście unosi się teraz i mruga kilka świetlików.",
   "{lure} · good here": "{lure} · dobra tutaj",
   "This bank suits it: the bites come sooner.": "Ten brzeg jej sprzyja: brania przychodzą szybciej.",
   "{lure} · good now": "{lure} · dobra teraz",
