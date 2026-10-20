@@ -313,6 +313,7 @@ export function DockPage() {
     };
   }, [angler, latestCatch]);
   const openGiants = useMemo(() => giants.filter((giant) => !giant.landedBy), [giants]);
+  const giantBanks = useMemo(() => openGiants.map((giant) => giant.spot), [openGiants]);
   const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind, legend, lodgeReleased, luckyLures, fishedDownBanks, openGiants);
   useEffect(() => {
     if (game.outcome?.kind !== "landed") return;
@@ -1062,6 +1063,7 @@ export function DockPage() {
           lurking={game.lurking}
           lurkerCloseInMs={game.lurkerCloseInMs}
           follow={game.follow}
+          giantBanks={giantBanks}
           topwater={isTopwater(lure)}
           hour={hour}
           sky={sky}
