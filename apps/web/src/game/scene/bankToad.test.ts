@@ -37,7 +37,7 @@ describe("toad on the bank", () => {
 
   it("comes again a while after, only to an angler settled ashore on dry ground", () => {
     const frames = run(FIRST_SEC + VISIT_SEC + GAP_SEC + 10);
-    expect(frames.filter((f, i) => f.state.mode === "crossing" && frames[i - 1]?.state.mode !== "crossing")).toHaveLength(2);
+    expect(frames.filter((f, i) => f.state.mode === "visiting" && frames[i - 1]?.state.mode !== "visiting")).toHaveLength(2);
     expect(run(60, () => false).every((f) => !f.pose.here)).toBe(true);
     expect(run(60, () => true, () => null).every((f) => !f.pose.here)).toBe(true);
   });
