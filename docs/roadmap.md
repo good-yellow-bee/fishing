@@ -1863,7 +1863,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT409~~ | ~~The Board's derby, day's bag and stewards cards share one read and one ranked list (no change to what they show)~~ (#1601) | ui | S |
 | ~~GT410~~ | ~~Species studies: each landed kind in the field guide has three studies (land it at every bank it lives at, at three of the lake's four hours, and at trophy weight); finishing all three lets the angler claim 100 points once and marks it Studied; the server reads the studies from the angler's catches on its own call~~ (#1603) | gameplay | M |
 | ~~GT411~~ | ~~News card 2026-10-20-game52 covers GT410: species studies~~ (#1606) | ui | S |
-| ~~GT412~~ | ~~The landed card's bonus stamps follow what the server paid: once the catch is saved, the golden, fish-of-the-week, clean-run, personal-best, lodge-record, day-run, mastery and tag stamps show only the bonuses the server applied (it now saves them with the catch)~~ (#PR) | gameplay | M |
+| ~~GT412~~ | ~~The landed card's bonus stamps follow what the server paid: once the catch is saved, the golden, fish-of-the-week, clean-run, personal-best, lodge-record, day-run, mastery and tag stamps show only the bonuses the server applied (it now saves them with the catch)~~ (#1607) | gameplay | M |
 | GT413 | A crowded bank: each day another angler fishes one bank, so its fish start the day wary (the hint and the bank's sign say so) until the angler has worked it a while | gameplay | S |
 | GT414 | News card game53 covers GT412 and GT413 | ui | S |
 
