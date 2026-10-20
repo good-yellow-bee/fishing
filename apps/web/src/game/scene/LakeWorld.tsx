@@ -243,6 +243,7 @@ import { CREEK_BANK, CREEK_HALF_WIDTH, CREEK_ROCKS, creekRibbon, nearCreek } fro
 import { bedColor, bedHeight, causticStrength, glitterDirection, glitterOnWater, waterDepthColor, waterHeight, surfaceScroll, waterShoreWeight, chopBasis, writeChop } from "./water";
 import { DockFrost } from "./DockFrost";
 import { WindowGlow } from "./WindowGlow";
+import { HillHedges } from "./HillHedges";
 import { lazyPart } from "./lazyPart";
 
 const Canoeist = lazyPart("day", "Canoeist");
@@ -2345,6 +2346,7 @@ export const LakeWorld = memo(function LakeWorld({
       {rapeseedOut(season) && <Rapeseed hour={hour} />}
       <Farmstead season={season} hour={hour} wind={wind} />
       <Orchard season={season} hour={hour} />
+      <HillHedges season={season} hour={hour} />
       <BarnStorks season={season} />
       <Windmill season={season} wind={wind} />
       {trainOut(sky) && <Railway hour={hour} wind={wind} />}
