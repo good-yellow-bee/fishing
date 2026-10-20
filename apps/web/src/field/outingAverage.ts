@@ -70,8 +70,8 @@ export function bestOutingHere(trips: readonly Trip[], fishOn: (tripId: string) 
 
 /**
  * The longest run of outings in a row, by date, that each gave at least one fish, and whether the latest outings are still on it.
- * Planned outings don't count, and today's only once it has a fish, a fish lost or a strike missed. `looseDays` are the days of fish logged without an
- * outing: each is a fished day too, so a blank spell ends with the fish that came after it.
+ * Planned outings don't count, and today's only once it has a fish, a fish lost or a strike missed. `looseDays` are the
+ * days of fish logged without an outing: each is a fished day too, so a blank spell ends with the fish that came after it.
  */
 export function outingStreak(
   trips: readonly Trip[],
@@ -91,7 +91,8 @@ export function outingStreak(
   // A day with fish logged off any outing is a fished step. On a day with outings it ends a dry spell, but gives no
   // fish to a blank outing on another water: fishOn already credits its own water's one outing.
   for (const day of looseDays) {
-    if (day > today) continue;
+    // In the small hours a fish logged off any outing counts on the calendar's day, as a fish on its outing does.
+    if (!outingFished({ date: day }, today, true)) continue;
     const held = days.get(day);
     days.set(day, held ? { ...held, loose: true } : { outings: 1, fished: 1 });
   }

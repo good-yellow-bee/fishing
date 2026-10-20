@@ -47,11 +47,14 @@ export function stillGoing(book: Logbook, trip: Trip, now = new Date()): boolean
 
 /**
  * An outing's own fish; with none, those logged loose on its water on its day, which say how it went: by the day a fish
- * counts on, so a small-hours fish of last evening's session doesn't put this morning's plan there under way.
+ * counts on, so a small-hours fish of last evening's session doesn't put this morning's plan there under way. Loose
+ * fish only when it was the day's one outing there: of a dawn and a dusk they are neither's until filed, as the lists
+ * count them.
  */
 function fishOf(book: Logbook, trip: Trip): CatchEntry[] {
   const own = catchesForTrip(book, trip.id);
-  return own.length > 0 ? own : book.catches.filter((entry) => entry.tripId === null && entry.spotId === trip.spotId && bookFishDay(book, entry) === trip.date);
+  if (own.length > 0 || book.trips.some((other) => other.id !== trip.id && other.spotId === trip.spotId && other.date === trip.date)) return own;
+  return book.catches.filter((entry) => entry.tripId === null && entry.spotId === trip.spotId && bookFishDay(book, entry) === trip.date);
 }
 
 /** Whether an outing is under way: a fish (its own or loose on its water that day), a lost fish or a missed strike. */

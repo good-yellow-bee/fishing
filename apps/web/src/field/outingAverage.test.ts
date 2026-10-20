@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { Trip } from "@stillwater/shared";
 import { bestOutingHere, outingAverage, outingStreak, topOuting, weekStreak } from "./outingAverage";
 
@@ -72,7 +72,10 @@ describe("outing streak with fish logged off an outing", () => {
     expect(outingStreak(trips, (id) => fish[id] ?? 0, "2026-10-15").dryNow).toBe(2);
     expect(outingStreak(trips, (id) => fish[id] ?? 0, "2026-10-15", ["2026-10-15"]).dryNow).toBe(0);
     // A loose fish dated ahead of today is left out, as planned outings are.
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-15T19:00:00"));
     expect(outingStreak(trips, (id) => fish[id] ?? 0, "2026-10-15", ["2026-10-20"]).dryNow).toBe(2);
+    vi.useRealTimers();
   });
 });
 

@@ -1,9 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Logbook, Spot, Trip } from "@stillwater/shared";
+import type { CatchEntry, Logbook, Spot, Trip } from "@stillwater/shared";
 import { outingMean, outingStreak, topOuting, weekendSplit, weekStreak } from "./outingAverage";
+import { underWay } from "./tripDates";
 
 const water = (id: string): Spot => ({ id, name: id, waterType: "lake", notes: "", bestConditions: "" }) as Spot;
 const trip = (id: string, date: string, extra: Partial<Trip> = {}): Trip => ({ id, date, spotId: "w", title: "", note: "", ...extra }) as Trip;
+const loose = (id: string, caughtAt: string): CatchEntry =>
+  ({ id, species: "Perch", measure: { kind: "length", inches: 9 }, lure: "Jig", spotId: "w", tripId: null, caughtAt: new Date(caughtAt).toISOString(), note: "", weather: null }) as CatchEntry;
 
 describe("round 118 fixes: trips", () => {
   beforeEach(() => {
@@ -37,5 +40,20 @@ describe("round 118 fixes: trips", () => {
     const fishOn = (id: string) => (id === "a" || id === "b" ? 1 : 0);
     expect(outingStreak(trips, fishOn, "2026-10-20")).toMatchObject({ best: 2, going: true });
     expect(outingStreak(trips, fishOn, "2026-10-20", [], book)).toMatchObject({ best: 2, going: false, dryNow: 1 });
+  });
+
+  it("gives a fish logged off any outing to neither of a dawn and a dusk on its water, as the lists count it", () => {
+    vi.setSystemTime(new Date("2026-10-21T10:00:00"));
+    const book: Logbook = { spots: [water("w")], trips: [trip("dawn", "2026-10-21"), trip("dusk", "2026-10-21")], catches: [loose("1", "2026-10-21T07:00:00")] };
+    // Both still plans, as Trips lists them, until the fish is filed on one.
+    expect(underWay(book, book.trips[0]!)).toBe(false);
+    expect(underWay({ ...book, trips: book.trips.slice(0, 1) }, book.trips[0]!)).toBe(true);
+  });
+
+  it("ends a blank spell with a fish logged off any outing in the small hours", () => {
+    vi.setSystemTime(new Date("2026-10-21T01:00:00"));
+    const trips = [trip("a", "2026-10-15"), trip("b", "2026-10-17")];
+    expect(outingStreak(trips, () => 0, "2026-10-20", ["2026-10-21"])).toMatchObject({ dryNow: 0, best: 1, going: true });
+    expect(outingStreak(trips, () => 0, "2026-10-20", ["2026-10-22"])).toMatchObject({ dryNow: 2 });
   });
 });
