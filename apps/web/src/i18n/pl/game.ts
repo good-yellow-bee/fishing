@@ -133,8 +133,6 @@ export const PL_GAME: PlBook = {
   "The frenzy at the {bank} is over.": "Koniec żerowania. Łowisko: {bank}.",
   "{bank}: feeding frenzy now": "{bank}: teraz żerowanie",
   "{bank}: feeding frenzy now, but fished hard": "{bank}: teraz żerowanie, ale mocno obłowione",
-  "Bigger fish no longer just slide in: once one is played out it lies at the net, and you let go of the reel, then strike as its head comes up to net it; strike too soon and it bolts off again. And now and then the bubbles boil in a feeding frenzy for a minute and a half: the bank's sign gets a star, and casts into it bite twice as fast with the hunters crowding in.":
-    "Większe ryby nie wjeżdżają już same: zmęczona leży przy podbieraku, a ty puszczasz kołowrotek i zacinasz, gdy podniesie łeb. Zatniesz za wcześnie, a znów odpłynie. A co jakiś czas bąble na półtorej minuty zamieniają się w żerowanie: plakietka łowiska dostaje gwiazdkę, a rzuty w nie biorą dwa razy szybciej, bo zlatują się drapieżniki.",
   "A {fish} at the {bank}": "Ryba: {fish}, łowisko: {bank}",
   "A fish at the {bank} at {hour}": "Dowolna ryba, łowisko: {bank}, pora: {hour}",
   "Rumor: a {legend} haunts the {bank}. Find three clues this week to draw it out.": "Wieść niesie: {legend} krąży tu — łowisko: {bank}. Znajdź w tym tygodniu trzy tropy, by go wywabić.",
@@ -144,6 +142,8 @@ export const PL_GAME: PlBook = {
   "The {fish} your hunt tracked down haunts this water.": "{fish}, którego wytropiono, krąży po tej wodzie.",
   "Each week the shack's weekly board carries a rumor of a legend, the tiger muskie, the sturgeon or the ghost pike, with three clues to find in your catches; find all three and that legend bites far more often at its bank for the rest of the week. And every weekend the lodge board runs a derby for the heaviest of one fish: hold the top spot when Sunday ends (UTC) to earn the Derby champion badge.":
     "Co tydzień tablica w szopie niesie wieść o legendzie: tygrysim szczupaku, jesiotrze jeziorowym albo szczupaku widmie, z trzema tropami do znalezienia w twoich połowach. Znajdź wszystkie trzy, a legenda do końca tygodnia bierze dużo częściej na swoim łowisku. A w każdy weekend tablica przystani prowadzi zawody na najcięższą rybę jednego gatunku: bądź na pierwszym miejscu, gdy kończy się niedziela (UTC), by zdobyć odznakę Zwycięstwo w zawodach.",
+  "Four fish learned a second trick: a bluegill's tight circles twist your line toward a tangle, a carp bolts the first time it sees the net, a catfish lifts its head at the net only a moment, and a burbot slithers off the hook if you leave the line slack between its runs.":
+    "Cztery ryby nauczyły się drugiej sztuczki: ciasne kółka bassa niebieskoskrzelego skręcają żyłkę w stronę splątania, karp ucieka, gdy pierwszy raz zobaczy podbierak, sum przy podbieraku podnosi łeb tylko na chwilę, a miętus wyślizguje się z haczyka, jeśli między jego odjazdami żyłka leży luźno.",
   "Tight to the lily pads, where the bass and pike wait in ambush.": "Tuż przy liściach grzybieni, gdzie w zasadzce czekają bassy i szczupaki.",
   "Tight to the far rock, where the walleye hold in its shadow.": "Tuż przy dalekiej skale, gdzie w jej cieniu trzymają się sandacze.",
   "Along the rock edge, where the point drops off and the bass hold.": "Wzdłuż skalnej krawędzi, gdzie cypel opada w głąb i trzymają się bassy.",
