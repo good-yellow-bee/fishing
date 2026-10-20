@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { settings } from "../settings";
-import { BAT_COUNT, batAt } from "./batFlight";
+import { BAT_COUNT, batAt, lampMoths, lampSwoopAt } from "./batFlight";
 import { useReducedMotion } from "./reducedMotion";
 
 /** Meters wingtip to wingtip, drawn larger than life so the silhouettes read at a distance. */
@@ -43,7 +43,17 @@ export function Bats() {
     },
     [wing, body, material],
   );
-  useFrame((state) => {
+  // The second bat's visits to the headlamp's moths, eased so it never jumps when the lamp goes on or off, and held on where they last were.
+  const lampVisit = useRef({ weight: 0, x: 0, y: 0, z: 0 });
+  useFrame((state, delta) => {
+    const visit = lampVisit.current;
+    if (lampMoths.on) {
+      visit.x = lampMoths.x;
+      visit.y = lampMoths.y;
+      visit.z = lampMoths.z;
+    }
+    const target = still ? 0 : lampSwoopAt(state.clock.elapsedTime, lampMoths);
+    visit.weight += (target - visit.weight) * (1 - Math.exp(-3 * Math.min(delta, 0.1)));
     const [bodyMesh, wingMesh] = [bodies.current, wings.current];
     if (!bodyMesh || !wingMesh) return;
     for (let index = 0; index < BAT_COUNT; index += 1) {
@@ -54,7 +64,7 @@ export function Bats() {
         wingMesh.setMatrixAt(index * 2 + 1, scratch.hidden);
         continue;
       }
-      const pose = batAt(index, state.clock.elapsedTime, still);
+      const pose = batAt(index, state.clock.elapsedTime, still, index === 1 ? lampVisit.current.weight : 0, lampVisit.current);
       scratch.turn.set(0, pose.yaw, 0);
       scratch.root.compose(scratch.at.set(pose.x, pose.y, pose.z), scratch.quat.setFromEuler(scratch.turn), scratch.one);
       bodyMesh.setMatrixAt(index, scratch.root);

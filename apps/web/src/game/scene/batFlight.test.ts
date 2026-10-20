@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BAT_COUNT, BAT_HIGH, BAT_LOW, SWOOP_CENTER, SWOOP_LAMP, SWOOP_RADIUS, batAt, batOverWater, batsOut, swoopAt } from "./batFlight";
+import { BAT_COUNT, BAT_HIGH, BAT_LOW, LAMP_SWOOP_EVERY_SEC, SWOOP_CENTER, SWOOP_LAMP, SWOOP_RADIUS, batAt, batOverWater, batsOut, lampSwoopAt, swoopAt, type LampMoths } from "./batFlight";
 import { DOCK_PLANKS } from "@stillwater/shared";
 
 describe("bats", () => {
@@ -60,5 +60,26 @@ describe("bats", () => {
     expect(swoops).toBeGreaterThanOrEqual(5);
     // The others keep to their loops.
     for (let i = 1; i < BAT_COUNT; i += 1) for (let t = 0; t < 300; t += 0.25) expect(Math.hypot(batAt(i, t).x - SWOOP_CENTER.x, batAt(i, t).z - SWOOP_CENTER.z)).toBeGreaterThan(0.6);
+  });
+
+  it("sends the second bat to hawk the moths at a lit headlamp now and then, when its loop is near, and never with the lamp off", () => {
+    const loopNear = batAt(1, 100);
+    const lamp: LampMoths = { on: true, since: 100, x: loopNear.x, y: 1.6, z: loopNear.z };
+    expect(lampSwoopAt(103, lamp)).toBe(0);
+    let peak = 0;
+    for (let t = 100; t < 100 + LAMP_SWOOP_EVERY_SEC * 3; t += 0.05) peak = Math.max(peak, lampSwoopAt(t, lamp));
+    expect(peak).toBe(1);
+    for (let t = 100; t < 100 + LAMP_SWOOP_EVERY_SEC * 3; t += 0.05) {
+      expect(lampSwoopAt(t, { ...lamp, on: false })).toBe(0);
+      // A lamp far across the lake is never visited.
+      expect(lampSwoopAt(t, { ...lamp, x: lamp.x + 40 })).toBe(0);
+    }
+    // Fully at the lamp, it circles the moths a little above them.
+    const at = batAt(1, 110, false, 1, lamp);
+    expect(Math.hypot(at.x - lamp.x, at.z - lamp.z)).toBeLessThanOrEqual(SWOOP_RADIUS + 1e-6);
+    expect(at.y).toBeGreaterThan(lamp.y);
+    // Off its loop only as far as the bats' eased weight says; the others keep to theirs.
+    expect(batAt(1, 110, false, 0, lamp)).toEqual(batAt(1, 110));
+    expect(batAt(2, 110, false, 1, lamp)).toEqual(batAt(2, 110));
   });
 });
