@@ -118,7 +118,7 @@ vi.mock("./fight", async (importOriginal) => {
 
 import { updateSettings } from "./settings";
 import { giantShyKey } from "./giantShy";
-import { nightLineKey, nightLineReadyAt } from "./nightLine";
+import { NIGHT_LINE_STALE_MS, nightLineKey, nightLineReadyAt, nightLineState } from "./nightLine";
 import { BUCKET_COLD_LIFE_MS, BUCKET_HOT_LIFE_MS, BUCKET_LIFE_MS, baitBucketKey } from "./baitBucket";
 import { TRAP_COLD_SOAK_MS, TRAP_SOAK_MS, TRAP_STALE_MS, trapKey, trapState } from "./minnowTrap";
 import { bagKey, shinerKey } from "./groundbaitBag";
@@ -209,6 +209,7 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <i data-testid="lost-from">{game.outcome?.kind === "landed" ? (game.outcome.lostFrom?.by ?? "") : ""}</i>
       <i data-testid="lost-report">{game.lostReport ? `${game.lostReport.speciesId}|${game.lostReport.weight}|${game.lostReport.spot}|${game.lostReport.id}` : ""}</i>
       <i data-testid="night-line">{game.nightLine ? game.nightLine.spot : ""}</i>
+      <i data-testid="line-state">{game.nightLine ? nightLineState(game.nightLine, Date.now()) : "none"}</i>
       <i data-testid="live-shiner">{String(game.liveShiner)}</i>
       <i data-testid="frayed">{String(game.frayed)}</i>
       <i data-testid="twisted">{String(game.twisted)}</i>
@@ -439,6 +440,24 @@ describe("useFishingGame live shiner", () => {
         // No store in this run, so nothing was kept.
       }
     }
+  });
+
+  it("shows the night line turn ready, then stale, while the angler waits on the bank", () => {
+    // Set in the small hours, off the lake's three-minute marks, so nothing else re-renders at its turns.
+    const setAt = new Date(2026, 9, 21, 1, 0, 7).getTime();
+    const kept = new Map([[nightLineKey(profile.userId), JSON.stringify({ spot: "dock", setAt })]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    mount(setAt);
+    const state = () => container!.querySelector("[data-testid=line-state]")?.textContent;
+    expect(state()).toBe("soaking");
+    act(() => vi.advanceTimersByTime(nightLineReadyAt(setAt) - setAt - 1));
+    expect(state()).toBe("soaking");
+    act(() => vi.advanceTimersByTime(1));
+    expect(state()).toBe("ready");
+    act(() => vi.advanceTimersByTime(setAt + NIGHT_LINE_STALE_MS - nightLineReadyAt(setAt)));
+    expect(state()).toBe("ready");
+    act(() => vi.advanceTimersByTime(1));
+    expect(state()).toBe("stale");
   });
 
   it("leaves a worm out on a night line when there is no shiner to spare", () => {

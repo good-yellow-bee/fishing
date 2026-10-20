@@ -68,7 +68,7 @@ import { BUCKET_SIZE, liveShiners, loadBucket, saveBucket } from "./baitBucket";
 import { loadSwim, saveSwim, swimNow } from "./swim";
 import { loadTrap, saveTrap, trapCatch, trapIsCold, trapNextChange, trapState, type Trap } from "./minnowTrap";
 import { castForFoe, foeGone, isOldFoe, loadOldFoe, saveOldFoe } from "./oldFoe";
-import { loadNightLine, nightLineCatch, nightLineKinds, nightLineState, nightSkyFor, saveNightLine, wormLineHour, type NightLine } from "./nightLine";
+import { loadNightLine, nightLineCatch, nightLineKinds, nightLineNextChange, nightLineState, nightSkyFor, saveNightLine, wormLineHour, type NightLine } from "./nightLine";
 import { markShy, loadGiantShy, rollGiantShy, saveGiantShy, shyOf, type GiantShy } from "./giantShy";
 import { AGAIN_CASTS, backAgain, castForGotAway, gotAwayAfterDrop, PATIENT_DROP_RANK, gotAwayAfterLoss, type GotAway } from "./gotAway";
 import { LINE_SNAP, LINE_WAIT, type LineWeight } from "./lineWeight";
@@ -365,6 +365,24 @@ function frenzyHint(spot: SpotId) {
   return t("A feeding frenzy at the {bank}: baitfish boil over the bubbles. Cast into them!", { bank: t(SPOT_LABELS[spot]) });
 }
 
+/** Re-renders as a set trap or line turns ready and then stale, so an idle screen keeps up with it. Checked at
+ * least once a minute, since a sleeping computer holds its timers back. */
+function useTurnsOver<T, S>(set: T | null, stateOf: (set: T, now: number) => S, nextChange: (set: T, now: number) => number | null) {
+  const [, setSeen] = useState<S | null>(null);
+  useEffect(() => {
+    if (!set) return;
+    let timer: number | undefined;
+    const check = () => {
+      const now = Date.now();
+      setSeen(stateOf(set, now));
+      const next = nextChange(set, now);
+      if (next !== null) timer = window.setTimeout(check, Math.min(next - now, 60_000));
+    };
+    check();
+    return () => window.clearTimeout(timer);
+  }, [set, stateOf, nextChange]);
+}
+
 export function useFishingGame(
   profile: Profile | null,
   hour: LakeHour = lakeHour(),
@@ -445,6 +463,7 @@ export function useFishingGame(
     saveNightLine(userId, line);
     setNightLineOut(line);
   };
+  useTurnsOver(nightLine, nightLineState, nightLineNextChange);
   /** Spare live shiners in the angler's bait bucket, read from the browser once per angler; the ref is what actions count from. */
   const [bucket, setBucket] = useState(0);
   /** When each spare shiner went in, oldest first: the oldest goes out first, before it dies. */
@@ -483,21 +502,7 @@ export function useFishingGame(
     trapRef.current = profile?.userId ? loadTrap(profile.userId) : null;
     setTrapState(trapRef.current);
   }, [profile?.userId]);
-  // Re-render as the trap turns ready and then stale, so an idle shack view keeps up with it. Checked at
-  // least once a minute, since a sleeping computer holds its timers back.
-  const [, setTrapSeen] = useState<ReturnType<typeof trapState> | null>(null);
-  useEffect(() => {
-    if (!trap) return;
-    let timer: number | undefined;
-    const check = () => {
-      const now = Date.now();
-      setTrapSeen(trapState(trap, now));
-      const next = trapNextChange(trap, now);
-      if (next !== null) timer = window.setTimeout(check, Math.min(next - now, 60_000));
-    };
-    check();
-    return () => window.clearTimeout(timer);
-  }, [trap]);
+  useTurnsOver(trap, trapState, trapNextChange);
   /** The bucket with a fresh shiner in, or with its oldest one taken out. */
   const bucketIn = () => [...bucketNow(), Date.now()];
   const bucketOut = () => bucketNow().slice(1);
