@@ -38,18 +38,28 @@ export function rowY(row: number, x: number) {
   return HEDGE_ROWS[row]! + WAVE * Math.sin(x * 0.35 + row * 1.7);
 }
 
-let facets: number[] | null = null;
+/** The drawn hills' lake-facing triangles in world space (each the same icosphere as the Hills mesh, moved and
+ * stretched), nine coordinates apiece, with each one's x and y bounds for a quick miss. */
+let facets: { t: Float64Array; box: Float64Array } | null = null;
 
-/** The drawn hills' triangles in world space: each the same icosphere as the Hills mesh, moved and stretched. */
 function hillFacets() {
   if (facets) return facets;
   const unit = new THREE.IcosahedronGeometry(1, 2);
   const p = unit.getAttribute("position").array;
-  facets = [];
+  const t: number[] = [];
+  const box: number[] = [];
   for (const { position: [cx, cy, cz], scale: [rx, ry, rz] } of FAR_HILLS) {
-    for (let i = 0; i < p.length; i += 3) facets.push(cx + p[i]! * rx, cy + p[i + 1]! * ry, cz + p[i + 2]! * rz);
+    for (let i = 0; i < p.length; i += 9) {
+      const tri = [0, 3, 6].flatMap((o) => [cx + p[i + o]! * rx, cy + p[i + o + 1]! * ry, cz + p[i + o + 2]! * rz]);
+      const [ax, ay, , bx, by, , qx, qy] = tri as [number, number, number, number, number, number, number, number, number];
+      // Only triangles facing the lake (+z) can be the front-most face.
+      if ((bx - ax) * (qy - ay) - (by - ay) * (qx - ax) <= 0) continue;
+      t.push(...tri);
+      box.push(Math.min(ax, bx, qx), Math.max(ax, bx, qx), Math.min(ay, by, qy), Math.max(ay, by, qy));
+    }
   }
   unit.dispose();
+  facets = { t: Float64Array.from(t), box: Float64Array.from(box) };
   return facets;
 }
 
@@ -58,9 +68,10 @@ function hillFacets() {
  * inside the smooth hillFront, so a small bush set on them touches the slope. Null off every hill.
  */
 export function facetFront(x: number, y: number): number | null {
-  const t = hillFacets();
+  const { t, box } = hillFacets();
   let front: number | null = null;
-  for (let i = 0; i < t.length; i += 9) {
+  for (let j = 0, i = 0; i < t.length; i += 9, j += 4) {
+    if (x < box[j]! || x > box[j + 1]! || y < box[j + 2]! || y > box[j + 3]!) continue;
     const [ax, ay, az, bx, by, bz, cx, cy, cz] = [t[i]!, t[i + 1]!, t[i + 2]!, t[i + 3]!, t[i + 4]!, t[i + 5]!, t[i + 6]!, t[i + 7]!, t[i + 8]!];
     const d = (by - cy) * (ax - cx) + (cx - bx) * (ay - cy);
     if (Math.abs(d) < 1e-9) continue;
