@@ -283,8 +283,9 @@ export const SECOND_TAKE_NIBBLE_MS = 300;
 export const FOLLOW_MS = 1200;
 
 /** Said once, when a fight first frays the line: what did it, and what to do. */
-function scuffNote(water: FightWater | undefined, teeth = false) {
+function scuffNote(water: FightWater | undefined, teeth = false, farRock = false) {
   if (teeth) return t("Its teeth frayed your line: it snaps sooner until you retie it.");
+  if (farRock) return t("The far rock frayed your line: it snaps sooner until you retie it.");
   if (water === "log") return t("Rubbing round the sunken log frayed your line: it snaps sooner until you retie it.");
   return water === "pilings"
     ? t("Rubbing round the piling frayed your line: it snaps sooner until you retie it.")
@@ -1612,6 +1613,9 @@ export function useFishingGame(
             fx.splash();
             fx.haptic("strike");
             prevSurge = 0;
+            // The hunter takes it by the boat or bank, away from any rock or log the lure landed by.
+            castFarRockRef.current = false;
+            castLogRef.current = false;
             beginFight(taken.species, taken.weight, grab.profile);
             // The pike is where the shiner was, not back at the far end of the line.
             if (runtimeRef.current) runtimeRef.current.sim.line = sim.line;
@@ -1705,7 +1709,7 @@ export function useFishingGame(
             // The landed card covers the hint, so what the bank holds now rides on the card too.
             const fed = fedRef.current ? t("{fish}: it came in to feed on the groundbait.", { fish: t(current.species.name) }) : "";
             const frays = runtime.performance.scuffed || runtime.performance.bitten;
-            const scuffed = frays && !frayedRef.current ? scuffNote(current.water, !runtime.performance.scuffed) : "";
+            const scuffed = frays && !frayedRef.current ? scuffNote(current.water, !runtime.performance.scuffed, current.farRock) : "";
             if (frays) markFrayed(true);
             // The fish took the worm, so a fresh one goes on.
             setSoak(0);
@@ -1782,7 +1786,7 @@ export function useFishingGame(
             schoolRef.current = null;
             gotAwayRef.current = gotAwayAfterLoss(current.species, current.weight, spotRef.current, recaughtRef.current);
             const frays = runtime.performance.scuffed || runtime.performance.bitten;
-            const trophy = lostTrophy(current.species, current.weight) + (frays && !frayedRef.current ? ` ${scuffNote(current.water, !runtime.performance.scuffed)}` : "");
+            const trophy = lostTrophy(current.species, current.weight) + (frays && !frayedRef.current ? ` ${scuffNote(current.water, !runtime.performance.scuffed, current.farRock)}` : "");
             if (frays) markFrayed(true);
             if (sim.tornOut && sim.lightHook && !SOFT_MOUTHS.has(current.species.id)) {
               setOutcome({ kind: "broke", message: t("The light hook pulled out of the {fish}.", { fish: t(current.species.name) }) + trophy });

@@ -1156,10 +1156,23 @@ describe("the far rock from the boat", () => {
       return { scuffed: runtime.performance.scuffed, clearOf: runtime.performance.clearOf, rocky };
     };
     expect(twoRuns(true, false)).toMatchObject({ scuffed: true, rocky: true });
-    expect(twoRuns(true, true)).toMatchObject({ clearOf: "rocks" });
-    expect(twoRuns(true, true).scuffed).toBeFalsy();
+    const turned = twoRuns(true, true);
+    expect(turned.clearOf).toBe("rocks");
+    expect(turned.scuffed).toBeFalsy();
     expect(twoRuns(false, false)).toMatchObject({ rocky: false });
     expect(twoRuns(false, false).scuffed).toBeFalsy();
+  });
+
+  it("still takes a run's line at the boat's share", () => {
+    const runLine = (farRock: boolean) => {
+      const f = makeFight(fish("pike"), 6, 3, () => 0, 1, "boat", undefined, false, false, false, false, false, false, false, 1, 1, false, farRock);
+      let now = 0;
+      while (f.sim.surge !== 2) f.step((now += 50), 0.05, false);
+      const before = f.sim.line;
+      f.step((now += 50), 0.2, false);
+      return f.sim.line - before;
+    };
+    expect(runLine(true)).toBeCloseTo(runLine(false));
   });
 });
 

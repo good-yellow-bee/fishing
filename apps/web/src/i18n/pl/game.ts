@@ -137,6 +137,7 @@ export const PL_GAME: PlBook = {
   "Sunken log: turn every run, or it wraps the line round the log and frays it": "Zatopiony pień: zawracaj każdy odjazd, bo owinie żyłkę wokół pnia i ją przetrze",
   "{slam} · every kind in one day": "{slam} · wszystkie gatunki jednego dnia",
   "Far rock: turn every run; reeling while it drags round the rock frays the line": "Daleka skała: zawracaj każdy odjazd; zwijanie, gdy ryba ciągnie żyłkę wokół skały, przeciera ją",
+  "The far rock frayed your line: it snaps sooner until you retie it.": "Daleka skała przetarła żyłkę: pęknie szybciej, dopóki jej nie przewiążesz.",
   "Drag: light": "Hamulec: lekki",
   "Drag: normal": "Hamulec: zwykły",
   "Drag: heavy": "Hamulec: mocny",
