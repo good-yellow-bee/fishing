@@ -2454,7 +2454,7 @@ export const LakeWorld = memo(function LakeWorld({
       {damselfliesOut(hour, sky, season, wind) && <Damselflies />}
       {snailOut(hour, sky, season) && <DockSnail />}
       {mouseOut(hour, sky, season) && <DockMouse />}
-      {snowMouseOut(hour, season) && <BankMouse />}
+      {snowMouseOut(hour, sky, season) && <BankMouse />}
       {toadOut(hour, sky, season) && <DockToad />}
       {toadOut(hour, sky, season) && <BankToad />}
       {ropeSwallowsOut(hour, sky, season) && <RopeSwallows />}

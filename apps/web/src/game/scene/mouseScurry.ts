@@ -32,7 +32,9 @@ const STOP_SEC = 0.9;
 const NIBBLE_SEC = 4;
 /** One long dart from the crumb to the far edge. */
 const DART_SEC = 0.7;
-export const VISIT_SEC = CLIMB_SEC + DASHES_IN * (DASH_SEC + STOP_SEC) + NIBBLE_SEC + DART_SEC + CLIMB_SEC;
+/** When it darts off from the crumb: up to here its way runs toward the crumb, after it away from it. */
+const DART_AT = CLIMB_SEC + DASHES_IN * (DASH_SEC + STOP_SEC) + NIBBLE_SEC;
+export const VISIT_SEC = DART_AT + DART_SEC + CLIMB_SEC;
 /** How far below the boards' top it is while out of sight under the edge. */
 const UNDER = 0.12;
 
@@ -114,8 +116,7 @@ export function mouseCrossingAt(t: number, way: MouseWay, still = false): MouseP
 export function mouseTrailAt(t: number, way: MouseWay) {
   const pose = mouseCrossingAt(Math.min(t, VISIT_SEC - 1e-6), way);
   const first = Math.hypot(way.crumb.x - way.from.x, way.crumb.z - way.from.z);
-  const k = t - CLIMB_SEC - DASHES_IN * (DASH_SEC + STOP_SEC) - NIBBLE_SEC;
-  return k <= 0 ? Math.hypot(pose.x - way.from.x, pose.z - way.from.z) : first + Math.hypot(pose.x - way.crumb.x, pose.z - way.crumb.z);
+  return t <= DART_AT ? Math.hypot(pose.x - way.from.x, pose.z - way.from.z) : first + Math.hypot(pose.x - way.crumb.x, pose.z - way.crumb.z);
 }
 
 const AWAY: MousePose = { here: false, x: MOUSE_FROM.x, y: MOUSE_Y - UNDER, z: MOUSE_FROM.z, yaw: 0, running: 0, sitting: 0, nibble: 0, show: 0 };
@@ -129,7 +130,7 @@ export function mouseAt(time: number, still = false): MousePose {
   return t >= VISIT_SEC ? AWAY : mouseCrossingAt(t, DOCK_MOUSE_WAY);
 }
 
-/** Out on a winter bank instead, at dusk and through the night, over the snow (bankMouse.ts). */
-export function snowMouseOut(hour: LakeHour, season: LakeSeason) {
-  return (hour === "dusk" || hour === "night") && season === "winter";
+/** Out on a winter bank instead, at dusk and through the night, over the snow, but not while it is snowing (bankMouse.ts). */
+export function snowMouseOut(hour: LakeHour, sky: Sky | undefined, season: LakeSeason) {
+  return (hour === "dusk" || hour === "night") && season === "winter" && sky !== "rain";
 }

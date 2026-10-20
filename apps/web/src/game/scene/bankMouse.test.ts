@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FIRST_SEC, GAP_SEC, TRACKS_FADE_SEC, bankMouseAt, bankMouseStart, bankMouseStep, nextTracks, tracksShow, type BankMouseState, type MouseTracks } from "./bankMouse";
+import { FIRST_SEC, GAP_SEC, TRACKS_FADE_SEC, trackPrints, bankMouseAt, bankMouseStart, bankMouseStep, nextTracks, tracksShow, type BankMouseState, type MouseTracks } from "./bankMouse";
 import { VISIT_SEC, snowMouseOut } from "./mouseScurry";
 import type { Angler } from "./robinHop";
 
@@ -21,10 +21,12 @@ function run(until: number, settled = () => true, ground: (x: number, z: number)
 
 describe("mouse on a winter bank", () => {
   it("is out on winter evenings and nights only", () => {
-    expect(snowMouseOut("night", "winter")).toBe(true);
-    expect(snowMouseOut("dusk", "winter")).toBe(true);
-    expect(snowMouseOut("day", "winter")).toBe(false);
-    expect(snowMouseOut("night", "fall")).toBe(false);
+    expect(snowMouseOut("night", "clear", "winter")).toBe(true);
+    expect(snowMouseOut("dusk", "fog", "winter")).toBe(true);
+    expect(snowMouseOut("day", "clear", "winter")).toBe(false);
+    expect(snowMouseOut("night", "clear", "fall")).toBe(false);
+    // Not out while it snows.
+    expect(snowMouseOut("night", "rain", "winter")).toBe(false);
   });
 
   it("pops out of the snow behind the angler, runs across at the snow's height, sits up to nibble, and dives back in", () => {
@@ -46,6 +48,13 @@ describe("mouse on a winter bank", () => {
     const end = frames.find((f) => f.t > FIRST_SEC + VISIT_SEC - 0.1)!;
     expect(mid.tracks!.reach).toBeGreaterThan(0.1);
     expect(end.tracks!.reach).toBeGreaterThan(mid.tracks!.reach);
+    // Its prints follow its way, alternating side to side, and run no further than it has.
+    const prints = trackPrints(mid.tracks!, 100);
+    expect(prints.length).toBeGreaterThan(1);
+    const { from } = mid.tracks!.way;
+    for (const p of prints) expect(Math.hypot(p.x - from.x, p.z - from.z)).toBeLessThan(mid.tracks!.reach + 0.03);
+    expect(prints[0]!.y).toBeCloseTo(0.08);
+    expect(trackPrints(end.tracks!, 5)).toHaveLength(5);
     const after = frames.find((f) => f.t > FIRST_SEC + VISIT_SEC + 5)!;
     expect(after.pose.here).toBe(false);
     expect(tracksShow(after.tracks!, after.t)).toBeGreaterThan(0.5);

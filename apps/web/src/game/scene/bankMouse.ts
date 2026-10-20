@@ -59,3 +59,24 @@ export function nextTracks(state: BankMouseState, last: MouseTracks | null, time
 export function tracksShow(tracks: MouseTracks, time: number) {
   return tracks.goneAt === null ? 1 : Math.max(0, 1 - (time - tracks.goneAt) / TRACKS_FADE_SEC);
 }
+
+/** Footprints this far apart along its way, and this far to each side of it. */
+const TRACK_STEP = 0.045;
+const TRACK_SIDE = 0.016;
+
+/** Where its footprints lie (on the ground, alternating side to side), as far as its tracks reach. */
+export function trackPrints(tracks: MouseTracks, max: number) {
+  const { from, crumb, to } = tracks.way;
+  const first = Math.hypot(crumb.x - from.x, crumb.z - from.z);
+  const second = Math.hypot(to.x - crumb.x, to.z - crumb.z);
+  const prints: { x: number; y: number; z: number }[] = [];
+  for (let d = TRACK_STEP / 2; d < tracks.reach && prints.length < max; d += TRACK_STEP) {
+    const [a, b, k] = d < first ? [from, crumb, d / first] : [crumb, to, Math.min(1, (d - first) / Math.max(1e-6, second))];
+    const length = Math.hypot(b.x - a.x, b.z - a.z) || 1;
+    const side = (prints.length % 2 ? 1 : -1) * TRACK_SIDE;
+    const x = a.x + (b.x - a.x) * k - ((b.z - a.z) / length) * side;
+    const z = a.z + (b.z - a.z) * k + ((b.x - a.x) / length) * side;
+    prints.push({ x, y: tracks.way.y(x, z), z });
+  }
+  return prints;
+}
