@@ -487,7 +487,9 @@ function TripView() {
   const tripsHere = trip.spotId === PLAY_LAKE_ID ? tripsForSpot(book, trip.spotId) : ownTrips;
   const best = bestOutingHere(tripsHere, fishHere, trip.id, fishedBy, book);
   // Its day come, a fish lost or a strike missed is an outing under way, as a landed fish is.
-  const fished = trip.date < fishedBy || ended || (trip.date <= today && underWay(book, trip));
+  // Of the day counted, a blank evening that gave way to today's plan is past too.
+  const pastDay = trip.date < fishedBy || ended;
+  const fished = pastDay || (trip.date <= today && underWay(book, trip));
   const meanHere = fished && trip.spotId !== PLAY_LAKE_ID && ownTrips.some((other) => other.id === trip.id) ? outingMean(ownTrips, fishHere, fishedBy, trip.id, book) : null;
   // The day's largest against the water's, from the fish counted for it: the angler's own once it has any.
   const countedHere = countedFish(catchesForSpot(book, trip.spotId));
@@ -634,7 +636,7 @@ function TripView() {
             : trip.date === today
               ? t("No fish logged yet today.")
               : // Last evening's, still going in the small hours.
-                trip.date >= fishedBy && !ended
+                !pastDay
                 ? t("No fish logged yet tonight.")
                 : t("Nothing logged for this trip yet.")}
           {lastFishHere && loose.length === 0 ? (
@@ -647,7 +649,7 @@ function TripView() {
               </Link>
             </>
           ) : null}
-          {trip.date >= fishedBy && !ended && trip.date <= today && !play && !samplePlan ? (
+          {!pastDay && trip.date <= today && !play && !samplePlan ? (
             <>
               {" "}
               <Link to={`/catches/new?trip=${trip.id}&spot=${trip.spotId}`}>{t("Log the first one")}</Link>
@@ -784,7 +786,7 @@ function TripView() {
         ) : null
       )}
       {/* A hard day is worth telling too: a past blank outing with a note, or fish lost or missed. Today's plan with only a note isn't a day yet. */}
-      {catches.length > 0 || (!samplePlan && (trip.date < fishedBy || ended || trip.lost || trip.missed) && (trip.note.trim() || trip.lost || trip.missed)) ? <CopySummary text={() => tripSummary(trip, spot ? plainName(spot.name) : null, catches, (id) => { const name = spotById(book, id)?.name; return name === undefined ? null : plainName(name); }, countedFish(book.catches))} file="stillwater-outing.txt" /> : null}
+      {catches.length > 0 || (!samplePlan && (pastDay || trip.lost || trip.missed) && (trip.note.trim() || trip.lost || trip.missed)) ? <CopySummary text={() => tripSummary(trip, spot ? plainName(spot.name) : null, catches, (id) => { const name = spotById(book, id)?.name; return name === undefined ? null : plainName(name); }, countedFish(book.catches))} file="stillwater-outing.txt" /> : null}
       {/* Planning ahead: what has worked on this water before. */}
       {!fished && spot && !play ? <WaterTipsBox catches={countedFish(catchesForSpot(book, spot.id))} on={trip.date} within={countedSearch(book, exactTerm("water", plainName(spot.name)), catchesForSpot(book, spot.id))} /> : null}
       <TripWeather catches={catches} />
