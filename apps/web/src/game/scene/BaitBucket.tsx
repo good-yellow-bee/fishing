@@ -48,10 +48,9 @@ export function BaitBucket({ count }: { count: number }) {
   useFrame(() => {
     const g = group.current;
     if (!g) return;
-    g.visible = count > 0 && !anglerPose.moving && !aboard();
-    if (!g.visible) return;
-    const spot = bucketSpot(anglerPose.x, anglerPose.z, anglerPose.yaw);
-    g.position.set(spot.x, spot.y, spot.z);
+    const spot = count > 0 && !anglerPose.moving && !aboard() ? bucketSpot(anglerPose.x, anglerPose.z, anglerPose.yaw) : null;
+    g.visible = spot !== null;
+    if (spot) g.position.set(spot.x, spot.y, spot.z);
   });
   return (
     <group ref={group} name="bait-bucket" visible={false}>
