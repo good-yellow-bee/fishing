@@ -5,6 +5,7 @@ import { footHeight, walkableAt, type LakeSeason } from "@stillwater/shared";
 import { makeSoftSpotTexture } from "./Atmosphere";
 import { BEAM_REACH, LAMP_AHEAD, LAMP_MOTHS_AHEAD, LAMP_MOTHS_AT, LAMP_UP, headlampTarget, lampMothShow } from "./headlampBeam";
 import { MOTH_COLOR, mothGeometry, poseMoth } from "./mothDraw";
+import { lampMoths } from "./batFlight";
 import { MOTH_COUNT, mothRound } from "./mothOrbit";
 import { useReducedMotion } from "./reducedMotion";
 import { beamFade, beamGeometry } from "./NightAngler";
@@ -50,6 +51,14 @@ export function PlayerHeadlamp({ phase, float, season }: { phase: ScenePhase; fl
   const aim = useRef<THREE.Vector3 | null>(null);
   const scratch = useMemo(() => ({ lamp: new THREE.Vector3(), target: new THREE.Vector3(), centre: new THREE.Vector3(), moth: new THREE.Object3D() }), []);
   const onAt = useRef<number | null>(null);
+  const lastTime = useRef(0);
+  // Switched off, the moths are gone and a bat among them eases away.
+  useEffect(
+    () => () => {
+      if (lampMoths.on) Object.assign(lampMoths, { on: false, offAt: lastTime.current });
+    },
+    [],
+  );
   useFrame(({ clock }, delta) => {
     const ray = beam.current;
     if (!ray || !glow.current || !pool.current) return;
@@ -74,7 +83,11 @@ export function PlayerHeadlamp({ phase, float, season }: { phase: ScenePhase; fl
     const flock = moths.current;
     if (!flock) return;
     flock.visible = season !== "winter";
-    if (!flock.visible) return;
+    lastTime.current = clock.elapsedTime;
+    if (!flock.visible) {
+      lampMoths.on = false;
+      return;
+    }
     onAt.current ??= clock.elapsedTime;
     const time = still ? 0 : clock.elapsedTime;
     const centre = scratch.centre.copy(aim.current).sub(lamp).setLength(LAMP_MOTHS_AHEAD).add(lamp);
@@ -85,6 +98,8 @@ export function PlayerHeadlamp({ phase, float, season }: { phase: ScenePhase; fl
       poseMoth(scratch.moth, mothRound(seed, time, centre, 0), mothRound(seed, time + 0.03, centre, 0), still, still ? Math.ceil(show) : show);
       flock.setMatrixAt(i, scratch.moth.matrix);
     }
+    // Where they gather, for the bats that come to hawk them (batFlight.ts).
+    Object.assign(lampMoths, { on: true, since: onAt.current + LAMP_MOTHS_AT[0], offAt: Infinity, x: centre.x, y: centre.y, z: centre.z });
     flock.instanceMatrix.needsUpdate = true;
   });
   return (

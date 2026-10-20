@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BAT_COUNT, BAT_HIGH, BAT_LOW, SWOOP_CENTER, SWOOP_LAMP, SWOOP_RADIUS, batAt, batOverWater, batsOut, swoopAt } from "./batFlight";
+import { BAT_COUNT, BAT_HIGH, BAT_LOW, LAMP_SWOOP_EVERY_SEC, SWOOP_CENTER, SWOOP_LAMP, SWOOP_RADIUS, batAt, batOverWater, batsOut, lampSwoopAt, swoopAt, type LampMoths } from "./batFlight";
 import { DOCK_PLANKS } from "@stillwater/shared";
 
 describe("bats", () => {
@@ -60,5 +60,26 @@ describe("bats", () => {
     expect(swoops).toBeGreaterThanOrEqual(5);
     // The others keep to their loops.
     for (let i = 1; i < BAT_COUNT; i += 1) for (let t = 0; t < 300; t += 0.25) expect(Math.hypot(batAt(i, t).x - SWOOP_CENTER.x, batAt(i, t).z - SWOOP_CENTER.z)).toBeGreaterThan(0.6);
+  });
+
+  it("sends the second bat to hawk the moths at a lit headlamp now and then, easing in and out, and away when it goes off", () => {
+    const lamp: LampMoths = { on: true, since: 100, offAt: Infinity, x: 1, y: 1.6, z: 4 };
+    expect(lampSwoopAt(103, lamp)).toBe(0);
+    let peak = 0;
+    for (let t = 100; t < 100 + LAMP_SWOOP_EVERY_SEC * 2; t += 0.05) peak = Math.max(peak, lampSwoopAt(t, lamp));
+    expect(peak).toBe(1);
+    const at = (t: number) => batAt(1, t, false, lamp);
+    let near = 0;
+    for (let t = 100; t < 100 + LAMP_SWOOP_EVERY_SEC; t += 0.05) if (lampSwoopAt(t, lamp) === 1) near = Math.max(near, Math.hypot(at(t).x - 1, at(t).z - 4));
+    expect(near).toBeLessThanOrEqual(SWOOP_RADIUS + 1e-6);
+    // Off mid-swoop: it eases away rather than vanishing from the beam.
+    let mid = 100;
+    while (lampSwoopAt(mid, lamp) < 1) mid += 0.05;
+    const off: LampMoths = { ...lamp, on: false, offAt: mid };
+    expect(lampSwoopAt(mid + 0.4, off)).toBeGreaterThan(0.3);
+    expect(lampSwoopAt(mid + 2, off)).toBe(0);
+    // No lamp, no visit; the other bats keep to their loops.
+    expect(lampSwoopAt(110, { ...lamp, on: false, offAt: -Infinity })).toBe(0);
+    expect(batAt(2, 110, false, lamp)).toEqual(batAt(2, 110, false, { ...lamp, on: false, offAt: -Infinity }));
   });
 });
