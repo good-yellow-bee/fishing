@@ -1,0 +1,20 @@
+// The scene parts only seen at dusk and night: one chunk, loaded when they come out (lazyPart.tsx).
+export { BankHedgehog } from "../BankHedgehog";
+export { BarnOwl } from "../BarnOwl";
+export { Bats } from "../Bats";
+export { Beaver } from "../Beaver";
+export { BankMouse, DockMouse } from "../DockMouse";
+export { Fox } from "../Fox";
+export { HillBonfire } from "../HillBonfire";
+export { LanternMinnows } from "../LanternMinnows";
+export { Loon } from "../Loon";
+export { MidgeCloud } from "../MidgeCloud";
+export { Moths } from "../Moths";
+export { NightEyes } from "../NightEyes";
+export { NightRower } from "../NightRower";
+export { Owl } from "../Owl";
+export { PorchRocker } from "../PorchRocker";
+export { PostOwl } from "../PostOwl";
+export { Starlings } from "../Starlings";
+export { Campers } from "../Tent";
+export { WindowGlow } from "../WindowGlow";

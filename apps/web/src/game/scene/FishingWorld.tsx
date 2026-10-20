@@ -1,3 +1,4 @@
+import type { ComponentProps } from "react";
 import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, Suspense, type ComponentRef, type RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
@@ -34,29 +35,28 @@ import { Angler } from "./Angler";
 import { RiseRings } from "./RiseRings";
 import { Mayflies } from "./Mayflies";
 import { RodBell } from "./RodBell";
-import { RodDragonfly } from "./RodDragonfly";
+
 import { DockDog } from "./DockDog";
 import { dogOut } from "./dogMood";
 import { paperBoatOut } from "./paperDrift";
-import { DockMallard } from "./DockMallard";
-import { BankHedgehog } from "./BankHedgehog";
+
 import { BASE_FOV, fovFor } from "./cameraFov";
 import { PlayerHeadlamp } from "./PlayerHeadlamp";
-import { DockRobin, GroundBlackbird, GroundRobin } from "./DockRobin";
+import { DockRobin, GroundRobin } from "./DockRobin";
 import { hedgehogOut } from "./hedgehogWalk";
 import { mallardOut } from "./mallardWaddle";
 import { blackbirdOut, robinOut, robinVisitIndex } from "./robinVisit";
 import { useStrikeStartle } from "./useStrikeStartle";
 import { knitsOut } from "./scarfKnit";
 import { leavesOut, petalsOut } from "./leafFall";
-import { PostOwl } from "./PostOwl";
+
 import { littleOwlOut } from "./littleOwl";
 import { mothsOut } from "./mothOrbit";
 import { dockSnowy } from "./snowyDock";
 import { rodDragonflyOut } from "./dragonflyPerch";
 import { Windsock } from "./Windsock";
 import { Lightning } from "./Lightning";
-import { Rainbow } from "./Rainbow";
+
 import { Aurora } from "./Aurora";
 import { auroraOut } from "./auroraCurtain";
 import { rainbowOut } from "./rainbowArc";
@@ -155,6 +155,14 @@ import { createFrameWatch, noteEffectsSteppedDown } from "../frameWatch";
 import { frameDue, frameThrottle, idleNow } from "./frameCap";
 import { GOLDEN_ACCENT, GOLDEN_COLOR } from "../../components/FishMark";
 import { LIFT_RISE, LIGHT_PLUNGE, liftTilt, ROLL_SPLASH, RUN_PLUNGE, runSlide, takeStyle } from "../nibblePlan";
+import { lazyPart, markSceneShown, preloadParts } from "./lazyPart";
+
+const BankHedgehog = lazyPart<ComponentProps<typeof import("./parts/night").BankHedgehog>>("night", "BankHedgehog");
+const DockMallard = lazyPart<ComponentProps<typeof import("./parts/weather").DockMallard>>("weather", "DockMallard");
+const GroundBlackbird = lazyPart<ComponentProps<typeof import("./parts/weather").GroundBlackbird>>("weather", "GroundBlackbird");
+const PostOwl = lazyPart<ComponentProps<typeof import("./parts/night").PostOwl>>("night", "PostOwl");
+const Rainbow = lazyPart<ComponentProps<typeof import("./parts/weather").Rainbow>>("weather", "Rainbow");
+const RodDragonfly = lazyPart<ComponentProps<typeof import("./parts/summer").RodDragonfly>>("summer", "RodDragonfly");
 
 const BUOY_URL = "/models/buoy.glb";
 /** Top of the buoy model at its 0.32 scale, where the night tip sits. */
@@ -337,6 +345,25 @@ function placeBobber(
 
 function isAiming(phase: ScenePhase) {
   return phase === "idle" || phase === "casting";
+}
+
+/** Once the scene has drawn, lets later scene parts load on their own and fetches the chunks likely needed next (lazyPart.tsx). */
+function PartsAhead({ hour }: { hour: LakeHour }) {
+  const drawn = useRef(false);
+  const [up, setUp] = useState(false);
+  useFrame(() => {
+    if (drawn.current) return;
+    drawn.current = true;
+    markSceneShown();
+    setUp(true);
+  });
+  useEffect(() => {
+    if (!up) return;
+    // After the first moments' downloads, at an idle moment.
+    const timer = window.setTimeout(() => preloadParts(hour), 4000);
+    return () => window.clearTimeout(timer);
+  }, [up, hour]);
+  return null;
 }
 
 /** Opens the view up on a tall phone screen (cameraFov.ts). */
@@ -2211,6 +2238,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       <PlayerMove phase={phase} />
       <FightMotion phase={phase} sim={sim} ambush={take === "ambush"} light={take === "light"} lift={take === "lift"} run={take === "run"} boatSwing={boatSwing} />
       <CameraRig phase={phase} sim={sim} />
+      <PartsAhead hour={hour} />
       <FitFov />
       <Tone hour={hour} />
       <FrameWatch />

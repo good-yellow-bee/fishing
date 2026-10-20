@@ -1,3 +1,4 @@
+import type { ComponentProps } from "react";
 import { createContext, memo, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "./loadGltf";
@@ -36,31 +37,29 @@ import { DockRain } from "./DockRain";
 import { dewGlintsOut } from "./dewGlints";
 import { dockLeavesOut } from "./plankLeaves";
 import { DewGrass } from "./DewGrass";
-import { DockLeaves } from "./DockLeaves";
+
 import { boatHeading } from "./boatSwing";
 import { releaseSwayingMaterial, swayUniforms, swayingMaterial } from "./treeSway";
-import { Tadpoles } from "./Tadpoles";
+
 import { GrassSnake } from "./GrassSnake";
 import { SunfishNests } from "./SunfishNests";
-import { IceFloes } from "./IceFloes";
+
 import { Crayfish } from "./Crayfish";
 import { Waterweed } from "./Waterweed";
 import { SunkenLeaves } from "./SunkenLeaves";
 import { sunkenLeavesOut } from "./leafLitter";
-import { Frogspawn } from "./Frogspawn";
+
 import { spawnOut } from "./spawnClumps";
 import { crayfishOut } from "./crayfishCrawl";
 import { floesOut } from "./iceFloes";
 import { nestsOut } from "./sunfishNests";
 import { snakeOut } from "./snakeSwim";
 import { tadpolesOut } from "./tadpoleSchools";
-import { DockFrost } from "./DockFrost";
-import { DockSnow } from "./DockSnow";
+
 import { FROST_COLOR, dockFrost, walkwayPale } from "./dockFrost";
-import { Icicles } from "./Icicles";
+
 import { Thermos } from "./Thermos";
-import { Moths } from "./Moths";
-import { CapDrips } from "./CapDrips";
+
 import { dripsOut } from "./brimDrips";
 import { mothsOut } from "./mothOrbit";
 import { iciclesOut } from "./icicleRow";
@@ -93,8 +92,7 @@ import { firefliesOut } from "./fireflies";
 import { Heron } from "./Heron";
 import { Lanterns } from "./Lanterns";
 import { Campfire } from "./Campfire";
-import { Snowman } from "./Snowman";
-import { BirdFeeder } from "./BirdFeeder";
+
 import { Puddles } from "./Puddles";
 import { puddlesOut } from "./rainPuddles";
 import { Cat } from "./Cat";
@@ -105,9 +103,9 @@ import { hareCoat, hareOut } from "./hareRounds";
 import { Wildflowers } from "./Wildflowers";
 import { beesOut } from "./meadowFlowers";
 import { Woodpile } from "./Woodpile";
-import { WindowGlow } from "./WindowGlow";
+
 import { Dinghy } from "./Dinghy";
-import { Pedalo } from "./Pedalo";
+
 import { pedaloOut } from "./pedalBoat";
 import { sailingOut } from "./sailingTrip";
 import { TireSwing } from "./TireSwing";
@@ -116,22 +114,22 @@ import { foamOpacity } from "./lappingWaves";
 import { catPlace } from "./catNap";
 import { chickadeesOut, feederUp } from "./feederVisits";
 import { snowmanUp } from "./snowmanLook";
-import { Toadstools } from "./Toadstools";
+
 import { Squirrels } from "./Squirrels";
 import { squirrelRuns, squirrelsOut } from "./squirrelRun";
 import { toadstoolsOut } from "./toadstoolPatches";
 import { campfireLit } from "./campfireSmoke";
-import { LanternMinnows } from "./LanternMinnows";
+
 import { minnowsOut } from "./minnowSwirl";
-import { Loon } from "./Loon";
+
 import { loonOut } from "./loonMotion";
-import { Bats } from "./Bats";
+
 import { batsOut } from "./batFlight";
-import { Geese } from "./Geese";
+
 import { geeseOut } from "./geeseSkein";
 import { Swans } from "./Swans";
 import { Cormorant } from "./Cormorant";
-import { Grebes } from "./Grebes";
+
 import { Feathers } from "./Feathers";
 import { feathersOut } from "./featherDrift";
 import { Terns } from "./Terns";
@@ -139,7 +137,7 @@ import { ternsOut } from "./ternHover";
 import { grebesOut } from "./grebeRush";
 import { CORMORANT_ROCK, cormorantOut } from "./cormorantPerch";
 import { swansOut } from "./swanGlide";
-import { Cygnets } from "./Cygnets";
+
 import { cygnetsOut } from "./cygnetBrood";
 import { Kingfisher } from "./Kingfisher";
 import { kingfisherOut } from "./kingfisherFlight";
@@ -148,80 +146,80 @@ import { duckShape, ducklingShape } from "./duckShapes";
 import { fastVertexNormals } from "./waterNormals";
 import { fishBuild } from "./fishBuild";
 import { swallowsOut } from "./swallowFlight";
-import { BaskingLog, Turtle } from "./Turtle";
+import { BaskingLog } from "./Turtle";
 import { turtleOut } from "./turtleMotion";
-import { Owl, OwlTree } from "./Owl";
+import { OwlTree } from "./Owl";
 import { Woodpecker } from "./Woodpecker";
 import { woodpeckerOut } from "./woodpeckerDrum";
 import { Canoeist } from "./Canoeist";
 import { canoeOut } from "./canoeTrip";
-import { Skier } from "./Skier";
+
 import { skiingOut } from "./skiTour";
 import { Kite } from "./Kite";
-import { NightRower } from "./NightRower";
+
 import { nightRowOut } from "./nightRow";
 import { Hammock } from "./Hammock";
 import { hammockOut, hammockTrees } from "./hammockSway";
-import { ShedSnow } from "./ShedSnow";
+
 import { snowShedOut } from "./snowShed";
 import { HotAirBalloon } from "./HotAirBalloon";
 import { balloonOut } from "./balloonDrift";
 import { kiteOut } from "./kiteFlight";
-import { Campers, Tent } from "./Tent";
+import { Tent } from "./Tent";
 import { CAMP_FIRE_AT, CAMP_LIGHTS, campersOut, tentPitched } from "./campTent";
-import { Pumpkins } from "./Pumpkins";
+
 import { pumpkinsOut } from "./pumpkinPatch";
-import { Hummingbird } from "./Hummingbird";
+
 import { hummingbirdOut } from "./hummingbirdVisits";
 import { FogAngler } from "./FogAngler";
 import { fogAnglerOut } from "./fogFishing";
 import { DogWalker } from "./DogWalker";
 import { FAR_HILLS, hillColor } from "./farHills";
 import { dogWalkOut } from "./dogWalk";
-import { Swimmer } from "./Swimmer";
+
 import { swimmingOut } from "./swimLane";
 import { Woodcutter } from "./Woodcutter";
 import { choppingOut } from "./woodChopping";
 import { BoatFill } from "./BoatFill";
 import { fillKind, type FillKind } from "./boatBilge";
-import { GooseFamily } from "./GooseFamily";
+
 import { gooseFamilyOut } from "./gooseGraze";
 import { LeafPile } from "./LeafPile";
-import { LeafRaker } from "./LeafRaker";
+
 import { leafJumpOut } from "./leafJump";
 import { Painter } from "./Painter";
 import { painterOut } from "./pleinAir";
-import { DiscTossers } from "./DiscTossers";
+
 import { discOut } from "./discToss";
 import { BrollyFisher } from "./BrollyFisher";
 import { brollyOut } from "./brollyFishing";
-import { SnowballKids } from "./SnowballKids";
+
 import { snowballOut } from "./snowballFight";
 import { NightAngler } from "./NightAngler";
 import { headlampOut } from "./headlampFishing";
 import { enableModelCache } from "./bitmapCache";
 import { StoneSkimmer } from "./StoneSkimmer";
 import { skimOut } from "./skimStones";
-import { Jogger } from "./Jogger";
+
 import { joggerOut } from "./jogRun";
-import { Crows } from "./Crows";
+
 import { crowsOut } from "./crowFlush";
 import { sleddersOut } from "./sledRun";
 import { HayBales } from "./HayBales";
 import { Farmstead } from "./Farmstead";
 import { Cows } from "./Cows";
-import { Tractor } from "./Tractor";
+
 import { tractorOut } from "./tractorRun";
 import { HillShadows } from "./HillShadows";
-import { BarnOwl } from "./BarnOwl";
+
 import { barnOwlOut } from "./owlQuarter";
 import { Windmill } from "./Windmill";
 import { Paraglider } from "./Paraglider";
-import { HillBonfire } from "./HillBonfire";
+
 import { bonfireOut } from "./bonfireSite";
 import { paragliderOut } from "./paraglideRidge";
 import { Sheep } from "./Sheep";
-import { Rapeseed } from "./Rapeseed";
+
 import { Railway } from "./Railway";
 import { Orchard } from "./Orchard";
 import { BarnStorks } from "./BarnStorks";
@@ -234,31 +232,29 @@ import { HillCloud } from "./HillCloud";
 import { capCloudAmount, capCloudOut } from "./capCloud";
 import { cowsOut } from "./cowGraze";
 import { balesOut } from "./hayField";
-import { Sledders } from "./Sledders";
+
 import { spindriftOut } from "./blowingSnow";
-import { Spindrift } from "./Spindrift";
-import { NightEyes } from "./NightEyes";
+
 import { eyesOut } from "./eyeShine";
-import { Birdwatcher } from "./Birdwatcher";
+
 import { birderOut } from "./birdWatch";
-import { PorchRocker } from "./PorchRocker";
+
 import { porchOut } from "./porchRocking";
 import { Sandpipers } from "./Sandpipers";
 import { sandpipersOut } from "./sandpiperRun";
-import { EaveLights } from "./EaveLights";
+
 import { eaveLightsOn } from "./festiveBulbs";
 import { Coots } from "./Coots";
 import { cootsOut } from "./cootSquabble";
 import { murmurationOut } from "./murmuration";
-import { Starlings } from "./Starlings";
-import { Damselflies } from "./Damselflies";
+
 import { damselfliesOut } from "./damselPerch";
 import { DockSnail } from "./DockSnail";
 import { MooringLines } from "./MooringLines";
 import { poseMooringRopes } from "./mooringRope";
-import { BankMouse, DockMouse } from "./DockMouse";
+
 import { mouseOut, snowMouseOut } from "./mouseScurry";
-import { BankToad, DockToad } from "./DockToad";
+
 import { toadOut } from "./toadHop";
 import { RopeSwallows } from "./RopeSwallows";
 import { ropeSwallowsOut } from "./swallowPerch";
@@ -266,16 +262,16 @@ import { PaperBoat } from "./PaperBoat";
 import { paperBoatOut } from "./paperDrift";
 import { snailOut } from "./snailCrawl";
 import { gullsOut } from "./gullFloes";
-import { WinterGulls } from "./WinterGulls";
+
 import { LakeSmoke } from "./LakeSmoke";
 import { lakeSmokeOut } from "./lakeSteam";
 import { Sculler } from "./Sculler";
 import { scullOut } from "./scullRow";
-import { Paddleboarder } from "./Paddleboarder";
+
 import { paddleOut } from "./paddleRoute";
-import { MidgeCloud } from "./MidgeCloud";
+
 import { midgesOut } from "./midgeDance";
-import { Gossamer } from "./Gossamer";
+
 import { gossamerOut } from "./silkDrift";
 import { Cabin } from "./Cabin";
 import { cabinWindowsLit, chimneySmoking } from "./cabinLook";
@@ -283,24 +279,23 @@ import { owlOut } from "./owlMotion";
 import { JumpingFish } from "./JumpingFish";
 import { FryBurst } from "./FryBurst";
 import { fryOut } from "./fryScatter";
-import { DiamondDust } from "./DiamondDust";
+
 import { diamondDustOut } from "./iceGlitter";
 import { jumpsOn } from "./fishJump";
 import { Otter } from "./Otter";
 import { Osprey } from "./Osprey";
-import { Fox } from "./Fox";
+
 import { foxOut } from "./foxTrot";
 import { ospreyOut } from "./ospreyFlight";
-import { Beaver } from "./Beaver";
-import { Butterflies } from "./Butterflies";
+
 import { butterfliesOut } from "./butterflyFlit";
 import { beaverOut } from "./beaverSwim";
 import { lilyOpen, lilyPads } from "./lilyBloom";
 import { LILY_PADS_AT } from "../lilyCover";
 import { FallingLeaves } from "./FallingLeaves";
-import { LeafRaft } from "./LeafRaft";
+
 import { leavesOut, petalsOut } from "./leafFall";
-import { LeafWhirl } from "./LeafWhirl";
+
 import { leafWhirlOut } from "./leafEddy";
 import { otterOut } from "./otterMotion";
 import { lanternLevel, lanternMurk } from "./lanternLight";
@@ -317,7 +312,7 @@ import { PollenFilm } from "./PollenFilm";
 import { FoamLanes } from "./FoamLanes";
 import { foamLanesAmount } from "./foamLanesPlan";
 import { DuckweedFilm } from "./DuckweedFilm";
-import { ShoreIceFilm } from "./ShoreIceFilm";
+
 import { SNOW_BAND } from "./shoreIce";
 import { duckweedAmount } from "./duckweedBeds";
 import { pollenAmount } from "./pollenDrift";
@@ -337,6 +332,70 @@ import { useSettings } from "../settings";
 import { BOAT_DECK, boat, boatPathPoint } from "./boat";
 import { CREEK_BANK, CREEK_HALF_WIDTH, CREEK_ROCKS, creekRibbon, nearCreek } from "./creek";
 import { bedColor, bedHeight, causticStrength, glitterDirection, glitterOnWater, waterDepthColor, waterHeight, waterHeightWithShoreWeight, surfaceScroll, waterShoreWeight } from "./water";
+import { lazyPart } from "./lazyPart";
+
+const BankMouse = lazyPart<ComponentProps<typeof import("./parts/night").BankMouse>>("night", "BankMouse");
+const BankToad = lazyPart<ComponentProps<typeof import("./parts/weather").BankToad>>("weather", "BankToad");
+const BarnOwl = lazyPart<ComponentProps<typeof import("./parts/night").BarnOwl>>("night", "BarnOwl");
+const Bats = lazyPart<ComponentProps<typeof import("./parts/night").Bats>>("night", "Bats");
+const Beaver = lazyPart<ComponentProps<typeof import("./parts/night").Beaver>>("night", "Beaver");
+const BirdFeeder = lazyPart<ComponentProps<typeof import("./parts/winter").BirdFeeder>>("winter", "BirdFeeder");
+const Birdwatcher = lazyPart<ComponentProps<typeof import("./parts/spring").Birdwatcher>>("spring", "Birdwatcher");
+const Butterflies = lazyPart<ComponentProps<typeof import("./parts/summer").Butterflies>>("summer", "Butterflies");
+const Campers = lazyPart<ComponentProps<typeof import("./parts/night").Campers>>("night", "Campers");
+const CapDrips = lazyPart<ComponentProps<typeof import("./parts/weather").CapDrips>>("weather", "CapDrips");
+const Crows = lazyPart<ComponentProps<typeof import("./parts/winter").Crows>>("winter", "Crows");
+const Cygnets = lazyPart<ComponentProps<typeof import("./parts/summer").Cygnets>>("summer", "Cygnets");
+const Damselflies = lazyPart<ComponentProps<typeof import("./parts/summer").Damselflies>>("summer", "Damselflies");
+const DiamondDust = lazyPart<ComponentProps<typeof import("./parts/winter").DiamondDust>>("winter", "DiamondDust");
+const DiscTossers = lazyPart<ComponentProps<typeof import("./parts/summer").DiscTossers>>("summer", "DiscTossers");
+const DockFrost = lazyPart<ComponentProps<typeof import("./parts/winter").DockFrost>>("winter", "DockFrost");
+const DockLeaves = lazyPart<ComponentProps<typeof import("./parts/fall").DockLeaves>>("fall", "DockLeaves");
+const DockMouse = lazyPart<ComponentProps<typeof import("./parts/night").DockMouse>>("night", "DockMouse");
+const DockSnow = lazyPart<ComponentProps<typeof import("./parts/winter").DockSnow>>("winter", "DockSnow");
+const DockToad = lazyPart<ComponentProps<typeof import("./parts/weather").DockToad>>("weather", "DockToad");
+const EaveLights = lazyPart<ComponentProps<typeof import("./parts/winter").EaveLights>>("winter", "EaveLights");
+const Fox = lazyPart<ComponentProps<typeof import("./parts/night").Fox>>("night", "Fox");
+const Frogspawn = lazyPart<ComponentProps<typeof import("./parts/spring").Frogspawn>>("spring", "Frogspawn");
+const Geese = lazyPart<ComponentProps<typeof import("./parts/fall").Geese>>("fall", "Geese");
+const GooseFamily = lazyPart<ComponentProps<typeof import("./parts/spring").GooseFamily>>("spring", "GooseFamily");
+const Gossamer = lazyPart<ComponentProps<typeof import("./parts/fall").Gossamer>>("fall", "Gossamer");
+const Grebes = lazyPart<ComponentProps<typeof import("./parts/spring").Grebes>>("spring", "Grebes");
+const HillBonfire = lazyPart<ComponentProps<typeof import("./parts/night").HillBonfire>>("night", "HillBonfire");
+const Hummingbird = lazyPart<ComponentProps<typeof import("./parts/summer").Hummingbird>>("summer", "Hummingbird");
+const IceFloes = lazyPart<ComponentProps<typeof import("./parts/winter").IceFloes>>("winter", "IceFloes");
+const Icicles = lazyPart<ComponentProps<typeof import("./parts/winter").Icicles>>("winter", "Icicles");
+const Jogger = lazyPart<ComponentProps<typeof import("./parts/winter").Jogger>>("winter", "Jogger");
+const LanternMinnows = lazyPart<ComponentProps<typeof import("./parts/night").LanternMinnows>>("night", "LanternMinnows");
+const LeafRaft = lazyPart<ComponentProps<typeof import("./parts/fall").LeafRaft>>("fall", "LeafRaft");
+const LeafRaker = lazyPart<ComponentProps<typeof import("./parts/fall").LeafRaker>>("fall", "LeafRaker");
+const LeafWhirl = lazyPart<ComponentProps<typeof import("./parts/fall").LeafWhirl>>("fall", "LeafWhirl");
+const Loon = lazyPart<ComponentProps<typeof import("./parts/night").Loon>>("night", "Loon");
+const MidgeCloud = lazyPart<ComponentProps<typeof import("./parts/night").MidgeCloud>>("night", "MidgeCloud");
+const Moths = lazyPart<ComponentProps<typeof import("./parts/night").Moths>>("night", "Moths");
+const NightEyes = lazyPart<ComponentProps<typeof import("./parts/night").NightEyes>>("night", "NightEyes");
+const NightRower = lazyPart<ComponentProps<typeof import("./parts/night").NightRower>>("night", "NightRower");
+const Owl = lazyPart<ComponentProps<typeof import("./parts/night").Owl>>("night", "Owl");
+const Paddleboarder = lazyPart<ComponentProps<typeof import("./parts/summer").Paddleboarder>>("summer", "Paddleboarder");
+const Pedalo = lazyPart<ComponentProps<typeof import("./parts/summer").Pedalo>>("summer", "Pedalo");
+const PorchRocker = lazyPart<ComponentProps<typeof import("./parts/night").PorchRocker>>("night", "PorchRocker");
+const Pumpkins = lazyPart<ComponentProps<typeof import("./parts/fall").Pumpkins>>("fall", "Pumpkins");
+const Rapeseed = lazyPart<ComponentProps<typeof import("./parts/spring").Rapeseed>>("spring", "Rapeseed");
+const ShedSnow = lazyPart<ComponentProps<typeof import("./parts/winter").ShedSnow>>("winter", "ShedSnow");
+const ShoreIceFilm = lazyPart<ComponentProps<typeof import("./parts/winter").ShoreIceFilm>>("winter", "ShoreIceFilm");
+const Skier = lazyPart<ComponentProps<typeof import("./parts/winter").Skier>>("winter", "Skier");
+const Sledders = lazyPart<ComponentProps<typeof import("./parts/winter").Sledders>>("winter", "Sledders");
+const SnowballKids = lazyPart<ComponentProps<typeof import("./parts/winter").SnowballKids>>("winter", "SnowballKids");
+const Snowman = lazyPart<ComponentProps<typeof import("./parts/winter").Snowman>>("winter", "Snowman");
+const Spindrift = lazyPart<ComponentProps<typeof import("./parts/winter").Spindrift>>("winter", "Spindrift");
+const Starlings = lazyPart<ComponentProps<typeof import("./parts/night").Starlings>>("night", "Starlings");
+const Swimmer = lazyPart<ComponentProps<typeof import("./parts/summer").Swimmer>>("summer", "Swimmer");
+const Tadpoles = lazyPart<ComponentProps<typeof import("./parts/spring").Tadpoles>>("spring", "Tadpoles");
+const Toadstools = lazyPart<ComponentProps<typeof import("./parts/fall").Toadstools>>("fall", "Toadstools");
+const Tractor = lazyPart<ComponentProps<typeof import("./parts/summer").Tractor>>("summer", "Tractor");
+const Turtle = lazyPart<ComponentProps<typeof import("./parts/summer").Turtle>>("summer", "Turtle");
+const WindowGlow = lazyPart<ComponentProps<typeof import("./parts/night").WindowGlow>>("night", "WindowGlow");
+const WinterGulls = lazyPart<ComponentProps<typeof import("./parts/winter").WinterGulls>>("winter", "WinterGulls");
 
 type Vec3 = [number, number, number];
 
@@ -782,8 +841,6 @@ const DUCKS: DuckProps[] = [
     brood: true,
   },
 ];
-
-
 
 // The scatter lists load their models as a list (one cache entry per list), so each file was fetched again after its
 // preload, and the shared colour map once per model: three's file cache hands a repeat request the bytes it already has.
