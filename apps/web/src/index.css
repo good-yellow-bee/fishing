@@ -918,7 +918,8 @@ a:focus-visible {
   display: none;
 }
 
-.walk-signs .sign-frenzy {
+.walk-signs .sign-frenzy,
+.walk-signs .sign-giant {
   color: var(--amber);
 }
 
