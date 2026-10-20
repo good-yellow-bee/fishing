@@ -2,7 +2,7 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind, type SpotId } from "@stillwater/shared";
+import { canLand, DOCK_STAND_X, DOCK_STAND_Z, FISH, type Giant, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind, type SpotId } from "@stillwater/shared";
 import { floodedInlet, makeFight, springRunTireMul, SPRING_RUN_TIRE, currentTireMul, CURRENT_FIGHTER_TIRE, type FightOutcome, type FightPerformance, type FightSim } from "./fight";
 import { FRENZY_SLOT_MS, HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt, slotFrenzy } from "./hotspot";
 import { bedRaider, COLD_WORK_GAP_MS, LONG_CAST_SOLID, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, castIntoSpooked, isSkipCast, castOnFreshWater, TWIST_CASTS, twistAfterCast, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, PRESSURE_CASTS, GROUNDBAIT_CASTS, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WARMING_WAIT, COOLING_WAIT, waterSwingWaitMul, anchorSplashWaitMul, ANCHOR_SPLASH_WAIT, LAMP_WINDOW } from "./logic";
@@ -163,9 +163,10 @@ function pointer(type: string, pointerId = 1) {
 
 /** The solved legend hunt the harness hands the hook, if a test sets one. */
 const harnessLegend: { current: { legendId: string; spot: SpotId } | null } = { current: null };
+const harnessGiants: { current: Giant[] } = { current: [] };
 
 function Harness({ current = profile, hour = "day", rising = false, lure, wind, sky, season }: { current?: Profile; hour?: LakeHour; rising?: boolean; lure?: string; wind?: Wind; sky?: Sky; season?: LakeSeason }) {
-  const game = useFishingGame(current, hour, lure === undefined ? undefined : { current: lure }, sky, false, season, undefined, rising, wind, undefined, harnessLegend.current);
+  const game = useFishingGame(current, hour, lure === undefined ? undefined : { current: lure }, sky, false, season, undefined, rising, wind, undefined, harnessLegend.current, undefined, undefined, undefined, harnessGiants.current);
   return (
     <>
       <div ref={game.surfaceRef} data-stance="dock" data-aim="0.5,3" data-angler="0.15,7.42">
@@ -2645,6 +2646,27 @@ describe("level unlock integration", () => {
     cast(surface);
     expect(phase()).toBe("waiting:none");
     expect(hint()).toMatch(/^The anchor's splash put the fish down, so the bites come slow: give it a few seconds before you cast\. /);
+  });
+
+  it("has a giant that broke free learn the lure, and not take it again this week", () => {
+    const kind = FISH.find((fish) => fish.spots.includes("dock") && fish.rarity !== "common" && fish.rarity !== "legendary" && canLand(profile, fish))!;
+    harnessGiants.current = [{ spot: "dock", name: "Tarnish", speciesId: kind.id, weight: kind.maxWeight }];
+    const message = () => container!.querySelector("[data-testid=broke]")?.textContent;
+    try {
+      const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Mepps spinner");
+      vi.spyOn(Math, "random").mockReturnValue(0);
+      step.mockReturnValueOnce("snapped");
+      castAndFight(surface, 1);
+      expect(message()).toContain("Tarnish knows the Mepps spinner now, and won't take one again this week.");
+      act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
+      // Still about, and the cast's every roll a sure one, yet the giant will not take the same lure, fresh or again.
+      step.mockReturnValueOnce("snapped");
+      castAndFight(surface, 2);
+      expect(message()).not.toContain("Tarnish");
+    } finally {
+      harnessGiants.current = [];
+      vi.mocked(Math.random).mockRestore();
+    }
   });
 
   it("draws a hunted legend at its bank, and says so only when the angler could land it", () => {

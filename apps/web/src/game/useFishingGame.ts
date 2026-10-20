@@ -62,6 +62,7 @@ import { DUCKWEED_FOUL_WAIT, DUCKWEED_TOPWATER_WAIT, duckweedCast, inDuckweed } 
 import { FAR_ROCK_WAIT, tightToFarRock } from "./farRock";
 import { castSnags, onRockEdge, onShoreIce, ROCK_EDGE_WAIT, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { FLUTTER_SEC, flutterGrabberFor, flutterTip, followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
+import { markShy, loadGiantShy, rollGiantShy, saveGiantShy, shyOf, type GiantShy } from "./giantShy";
 import { AGAIN_CASTS, backAgain, castForGotAway, gotAwayAfterDrop, PATIENT_DROP_RANK, gotAwayAfterLoss, type GotAway } from "./gotAway";
 import { LINE_SNAP, LINE_WAIT, type LineWeight } from "./lineWeight";
 import { countAtBank, loadBankMemory, rollBankMemory, saveBankMemory, waryFromYesterday, YESTERDAY_WAIT, type BankMemory } from "./bankMemory";
@@ -401,6 +402,21 @@ export function useFishingGame(
   /** Read live in the frame loop, which outlives a render's profile. */
   const anglerIdRef = useRef(profile?.userId);
   anglerIdRef.current = profile?.userId;
+  /** The lures this week's giants broke free of: read from the browser once per angler, then kept here too. */
+  const [giantShy, setGiantShy] = useState<GiantShy | null>(null);
+  const giantShyRef = useRef<{ userId: string; shy: GiantShy } | null>(null);
+  const giantShyNow = (userId: string) => {
+    const kept = giantShyRef.current;
+    return kept && kept.userId === userId ? rollGiantShy(kept.shy, new Date()) : loadGiantShy(userId);
+  };
+  const keepGiantShy = (userId: string, shy: GiantShy) => {
+    giantShyRef.current = { userId, shy };
+    saveGiantShy(userId, shy);
+    setGiantShy(shy);
+  };
+  useEffect(() => {
+    setGiantShy(profile?.userId ? loadGiantShy(profile.userId) : null);
+  }, [profile?.userId]);
   const legendRef = useRef(legend);
   legendRef.current = legend;
   const lodgeReleasedRef = useRef(lodgeReleased);
@@ -1121,7 +1137,9 @@ export function useFishingGame(
     const drawn = pickBite(spotRef.current, current, short, Math.random, hour, lureRef?.current, sky, castHotspotRef.current, mercyNow, season, moon, hunted);
     // The fish that broke off here may come back, at the same weight; while it's about this bank its shadow circles the float.
     setLurking(gotAwayRef.current?.spot === spotRef.current);
-    const lost = castForGotAway(gotAwayRef.current, spotRef.current, Math.random(), favorsLargeFish(lureRef?.current ?? ""), current.patience);
+    // A giant that broke free of the tied lure this week will not take it again, whether still about or fresh.
+    const lureShy = shyOf(giantShyNow(current.userId), spotRef.current, lureRef?.current);
+    const lost = castForGotAway(gotAwayRef.current, spotRef.current, lureShy && gotAwayRef.current?.back?.giant ? 1 : Math.random(), favorsLargeFish(lureRef?.current ?? ""), current.patience);
     gotAwayRef.current = lost.next;
     againRef.current = lost.again !== null;
     followedRef.current = !!lost.again?.follow;
@@ -1133,7 +1151,7 @@ export function useFishingGame(
     const tagged = released && !released.fish && lodgeReleasedRef.current.length > 0 ? castForLodgeTag(lodgeReleasedRef.current, spotRef.current, Date.now(), Math.random(), takenTags(landedTagsRef.current, gotAwayRef.current), current) : null;
     // A let-go fish that broke off or dropped the bait is still that fish when it bites again.
     // Rarely, the bank's giant comes up, if no one has landed it this week and the angler's line could hold it.
-    const giant = !lost.again && !mercyNow && !released?.fish && !tagged ? openGiantsRef.current.find((one) => one.spot === spotRef.current) : undefined;
+    const giant = !lost.again && !mercyNow && !lureShy && !released?.fish && !tagged ? openGiantsRef.current.find((one) => one.spot === spotRef.current) : undefined;
     const giantKind = giant ? FISH.find((fish) => fish.id === giant.speciesId) : undefined;
     const giantUp = giant && giantKind && canLand(current, giantKind) && Math.random() < GIANT_ODDS ? { species: giantKind, weight: giant.weight, was: giant.weight, at: Date.now(), giant: giant.name } : null;
     recaughtRef.current = (lost.again ? backAgain(lost.again, openGiantsRef.current) : undefined) ?? released?.fish ?? tagged ?? giantUp;
@@ -1721,6 +1739,15 @@ export function useFishingGame(
     // On a small lure, say a big one tempts it back sooner.
     const tempt = () => (lureRef && !favorsLargeFish(lureRef.current) ? ` ${t("A big lure tempts it back sooner.")}` : "");
     const stillAbout = () => (gotAwayRef.current ? ` ${t("It's still about: cast here again.")}${tempt()}` : "");
+    // A giant that breaks free learns the lure it was hooked on.
+    const giantLost = () => {
+      const giant = recaughtRef.current?.giant;
+      const lure = lureRef?.current;
+      const userId = anglerIdRef.current;
+      if (!giant || !lure || !userId) return "";
+      keepGiantShy(userId, markShy(giantShyNow(userId), spotRef.current, lure));
+      return ` ${t("{name} knows the {lure} now, and won't take one again this week.", { name: t(giant), lure: t(lure) })}`;
+    };
     const loop = (now: number) => {
       frame = requestAnimationFrame(loop);
       try {
@@ -1945,7 +1972,7 @@ export function useFishingGame(
             spookRef.current = spotRef.current;
             schoolRef.current = null;
             gotAwayRef.current = gotAwayAfterLoss(current.species, current.weight, spotRef.current, recaughtRef.current);
-            const trophy = lostTrophy(current.species, current.weight);
+            const trophy = lostTrophy(current.species, current.weight) + giantLost();
             // How close it came, so a break near the net reads as nearly there rather than as a wasted fight.
             const reeledIn = Math.round((1 - sim.line) * 100);
             // A break gives the angler a fresh knot to tie on, so the line is sound again.
@@ -1967,7 +1994,7 @@ export function useFishingGame(
             schoolRef.current = null;
             gotAwayRef.current = gotAwayAfterLoss(current.species, current.weight, spotRef.current, recaughtRef.current);
             const frays = runtime.performance.scuffed || runtime.performance.bitten;
-            const trophy = lostTrophy(current.species, current.weight) + (frays && !frayedRef.current ? ` ${scuffNote(current.water, !runtime.performance.scuffed, current.farRock)}` : "");
+            const trophy = lostTrophy(current.species, current.weight) + giantLost() + (frays && !frayedRef.current ? ` ${scuffNote(current.water, !runtime.performance.scuffed, current.farRock)}` : "");
             if (frays) markFrayed(true);
             if (sim.tornOut && sim.lightHook && !SOFT_MOUTHS.has(current.species.id)) {
               setOutcome({ kind: "broke", message: t("The light hook pulled out of the {fish}.", { fish: t(current.species.name) }) + trophy });
@@ -2126,6 +2153,7 @@ export function useFishingGame(
     handfuls,
     groundbait,
     fishedHard,
+    giantShy,
     throwGroundbait,
     addHandful,
     addShiner,

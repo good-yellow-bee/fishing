@@ -120,6 +120,7 @@ import { WALK_TARGETS, type WalkTarget } from "../game/scene/walkPath";
 import { bankSuitsNow } from "../game/bankNow";
 import { PowerMeter } from "../game/scene/PowerMeter";
 import { prefersReducedMotion } from "../game/scene/reducedMotion";
+import { shyOf } from "../game/giantShy";
 import { isLiveBait, isTopwater, touchScreen, useFishingGame } from "../game/useFishingGame";
 import { useCatchSync } from "../game/useCatchSync";
 import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
@@ -1151,7 +1152,11 @@ export function DockPage() {
           {!rowing && game.stance === hotBank && <small className="stance-hot"> · {t("biting today")}</small>}
           {!rowing && !mercy && game.stance === crowdedBank && <small className="stance-cold"> · {t("another angler here today")}</small>}
           {!rowing && isFishingStance(game.stance) && game.stance !== "open" && favoredNow(game.stance) && <small className="stance-hot"> · {t("bites sooner now")}</small>}
-          {!rowing && giantAt(game.stance) && <small className="stance-hot"> · {t("giant: {name}", { name: t(giantAt(game.stance)!.name) })}</small>}
+          {!rowing && giantAt(game.stance) && (
+            game.giantShy && isFishingStance(game.stance) && shyOf(game.giantShy, game.stance, chosenLure)
+              ? <small className="stance-cold"> · {t("giant: {name}, shy of this lure", { name: t(giantAt(game.stance)!.name) })}</small>
+              : <small className="stance-hot"> · {t("giant: {name}", { name: t(giantAt(game.stance)!.name) })}</small>
+          )}
           {rising && <small className="stance-hot"> · {t("fish rising")}</small>}
           {!rowing && clouded && isFishingStance(game.stance) && SHALLOW_BANKS.has(game.stance) && <small className="stance-hot"> · {t("cloud over the sun")}</small>}
           {!rowing && moonPass && isFishingStance(game.stance) && <small className="stance-hot"> · {t(moonPass === "overhead" ? "moon overhead" : "moon underfoot")}</small>}
