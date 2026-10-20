@@ -9,4 +9,3 @@ export { Pedalo } from "../Pedalo";
 export { RodDragonfly } from "../RodDragonfly";
 export { Swimmer } from "../Swimmer";
 export { Tractor } from "../Tractor";
-export { Turtle } from "../Turtle";

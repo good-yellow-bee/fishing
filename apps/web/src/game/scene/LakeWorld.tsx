@@ -27,13 +27,9 @@ import { BRIDGE_SCALE, BRIDGE_SPANS, PIER_BOARDS, PIER_PLANK, PIER_THICK, PIER_T
 import type { Hotspot } from "../hotspot";
 import { BubblingHotspot } from "./BubblingHotspot";
 import { LakeRain } from "./LakeRain";
-import { HailShower } from "./HailShower";
 import { hailOut } from "./hailBurst";
-import { RainCurtain } from "./RainCurtain";
 import { squallOut } from "./rainSquall";
 import { LakeSnow } from "./LakeSnow";
-import { MoonRoad } from "./MoonRoad";
-import { DockRain } from "./DockRain";
 import { dewGlintsOut } from "./dewGlints";
 import { dockLeavesOut } from "./plankLeaves";
 import { DewGrass } from "./DewGrass";
@@ -93,7 +89,6 @@ import { Heron } from "./Heron";
 import { Lanterns } from "./Lanterns";
 import { Campfire } from "./Campfire";
 
-import { Puddles } from "./Puddles";
 import { puddlesOut } from "./rainPuddles";
 import { Cat } from "./Cat";
 import { Clothesline } from "./Clothesline";
@@ -146,9 +141,9 @@ import { duckShape, ducklingShape } from "./duckShapes";
 import { fastVertexNormals } from "./waterNormals";
 import { fishBuild } from "./fishBuild";
 import { swallowsOut } from "./swallowFlight";
-import { BaskingLog } from "./Turtle";
+import { BaskingLog, Turtle } from "./Turtle";
 import { turtleOut } from "./turtleMotion";
-import { OwlTree } from "./Owl";
+import { Owl, OwlTree } from "./Owl";
 import { Woodpecker } from "./Woodpecker";
 import { woodpeckerOut } from "./woodpeckerDrum";
 import { Canoeist } from "./Canoeist";
@@ -165,7 +160,7 @@ import { snowShedOut } from "./snowShed";
 import { HotAirBalloon } from "./HotAirBalloon";
 import { balloonOut } from "./balloonDrift";
 import { kiteOut } from "./kiteFlight";
-import { Tent } from "./Tent";
+import { Campers, Tent } from "./Tent";
 import { CAMP_FIRE_AT, CAMP_LIGHTS, campersOut, tentPitched } from "./campTent";
 
 import { pumpkinsOut } from "./pumpkinPatch";
@@ -324,7 +319,6 @@ import { DABBLE_TIP, dabble } from "./duckDabble";
 import { mistAmount } from "./mist";
 import { cloudBlobs, cloudScroll, cloudShadowStrength } from "./cloudShadow";
 import { starOpacity } from "./starField";
-import { Stars } from "./Stars";
 import { seasonGroundColor, seasonWaterColor, shoreIce, tintPlant, type PlantKind } from "./seasonLook";
 import { treeShape, type HillShape, type TreeShape } from "./cameraClear";
 import { fx } from "../fx";
@@ -334,6 +328,12 @@ import { CREEK_BANK, CREEK_HALF_WIDTH, CREEK_ROCKS, creekRibbon, nearCreek } fro
 import { bedColor, bedHeight, causticStrength, glitterDirection, glitterOnWater, waterDepthColor, waterHeight, waterHeightWithShoreWeight, surfaceScroll, waterShoreWeight } from "./water";
 import { lazyPart } from "./lazyPart";
 
+const Puddles = lazyPart<ComponentProps<typeof import("./parts/weather").Puddles>>("weather", "Puddles");
+const DockRain = lazyPart<ComponentProps<typeof import("./parts/weather").DockRain>>("weather", "DockRain");
+const RainCurtain = lazyPart<ComponentProps<typeof import("./parts/weather").RainCurtain>>("weather", "RainCurtain");
+const HailShower = lazyPart<ComponentProps<typeof import("./parts/weather").HailShower>>("weather", "HailShower");
+const MoonRoad = lazyPart<ComponentProps<typeof import("./parts/night").MoonRoad>>("night", "MoonRoad");
+const Stars = lazyPart<ComponentProps<typeof import("./parts/night").Stars>>("night", "Stars");
 const BankMouse = lazyPart<ComponentProps<typeof import("./parts/night").BankMouse>>("night", "BankMouse");
 const BankToad = lazyPart<ComponentProps<typeof import("./parts/weather").BankToad>>("weather", "BankToad");
 const BarnOwl = lazyPart<ComponentProps<typeof import("./parts/night").BarnOwl>>("night", "BarnOwl");
@@ -342,7 +342,6 @@ const Beaver = lazyPart<ComponentProps<typeof import("./parts/night").Beaver>>("
 const BirdFeeder = lazyPart<ComponentProps<typeof import("./parts/winter").BirdFeeder>>("winter", "BirdFeeder");
 const Birdwatcher = lazyPart<ComponentProps<typeof import("./parts/spring").Birdwatcher>>("spring", "Birdwatcher");
 const Butterflies = lazyPart<ComponentProps<typeof import("./parts/summer").Butterflies>>("summer", "Butterflies");
-const Campers = lazyPart<ComponentProps<typeof import("./parts/night").Campers>>("night", "Campers");
 const CapDrips = lazyPart<ComponentProps<typeof import("./parts/weather").CapDrips>>("weather", "CapDrips");
 const Crows = lazyPart<ComponentProps<typeof import("./parts/winter").Crows>>("winter", "Crows");
 const Cygnets = lazyPart<ComponentProps<typeof import("./parts/summer").Cygnets>>("summer", "Cygnets");
@@ -375,7 +374,6 @@ const MidgeCloud = lazyPart<ComponentProps<typeof import("./parts/night").MidgeC
 const Moths = lazyPart<ComponentProps<typeof import("./parts/night").Moths>>("night", "Moths");
 const NightEyes = lazyPart<ComponentProps<typeof import("./parts/night").NightEyes>>("night", "NightEyes");
 const NightRower = lazyPart<ComponentProps<typeof import("./parts/night").NightRower>>("night", "NightRower");
-const Owl = lazyPart<ComponentProps<typeof import("./parts/night").Owl>>("night", "Owl");
 const Paddleboarder = lazyPart<ComponentProps<typeof import("./parts/summer").Paddleboarder>>("summer", "Paddleboarder");
 const Pedalo = lazyPart<ComponentProps<typeof import("./parts/summer").Pedalo>>("summer", "Pedalo");
 const PorchRocker = lazyPart<ComponentProps<typeof import("./parts/night").PorchRocker>>("night", "PorchRocker");
@@ -393,7 +391,6 @@ const Swimmer = lazyPart<ComponentProps<typeof import("./parts/summer").Swimmer>
 const Tadpoles = lazyPart<ComponentProps<typeof import("./parts/spring").Tadpoles>>("spring", "Tadpoles");
 const Toadstools = lazyPart<ComponentProps<typeof import("./parts/fall").Toadstools>>("fall", "Toadstools");
 const Tractor = lazyPart<ComponentProps<typeof import("./parts/summer").Tractor>>("summer", "Tractor");
-const Turtle = lazyPart<ComponentProps<typeof import("./parts/summer").Turtle>>("summer", "Turtle");
 const WindowGlow = lazyPart<ComponentProps<typeof import("./parts/night").WindowGlow>>("night", "WindowGlow");
 const WinterGulls = lazyPart<ComponentProps<typeof import("./parts/winter").WinterGulls>>("winter", "WinterGulls");
 

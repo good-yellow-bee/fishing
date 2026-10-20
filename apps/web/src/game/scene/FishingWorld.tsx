@@ -42,7 +42,7 @@ import { paperBoatOut } from "./paperDrift";
 
 import { BASE_FOV, fovFor } from "./cameraFov";
 import { PlayerHeadlamp } from "./PlayerHeadlamp";
-import { DockRobin, GroundRobin } from "./DockRobin";
+import { DockRobin, GroundBlackbird, GroundRobin } from "./DockRobin";
 import { hedgehogOut } from "./hedgehogWalk";
 import { mallardOut } from "./mallardWaddle";
 import { blackbirdOut, robinOut, robinVisitIndex } from "./robinVisit";
@@ -55,9 +55,7 @@ import { mothsOut } from "./mothOrbit";
 import { dockSnowy } from "./snowyDock";
 import { rodDragonflyOut } from "./dragonflyPerch";
 import { Windsock } from "./Windsock";
-import { Lightning } from "./Lightning";
 
-import { Aurora } from "./Aurora";
 import { auroraOut } from "./auroraCurtain";
 import { rainbowOut } from "./rainbowArc";
 import {
@@ -157,9 +155,10 @@ import { GOLDEN_ACCENT, GOLDEN_COLOR } from "../../components/FishMark";
 import { LIFT_RISE, LIGHT_PLUNGE, liftTilt, ROLL_SPLASH, RUN_PLUNGE, runSlide, takeStyle } from "../nibblePlan";
 import { lazyPart, markSceneShown, preloadParts } from "./lazyPart";
 
+const Lightning = lazyPart<ComponentProps<typeof import("./parts/weather").Lightning>>("weather", "Lightning");
+const Aurora = lazyPart<ComponentProps<typeof import("./parts/night").Aurora>>("night", "Aurora");
 const BankHedgehog = lazyPart<ComponentProps<typeof import("./parts/night").BankHedgehog>>("night", "BankHedgehog");
 const DockMallard = lazyPart<ComponentProps<typeof import("./parts/weather").DockMallard>>("weather", "DockMallard");
-const GroundBlackbird = lazyPart<ComponentProps<typeof import("./parts/weather").GroundBlackbird>>("weather", "GroundBlackbird");
 const PostOwl = lazyPart<ComponentProps<typeof import("./parts/night").PostOwl>>("night", "PostOwl");
 const Rainbow = lazyPart<ComponentProps<typeof import("./parts/weather").Rainbow>>("weather", "Rainbow");
 const RodDragonfly = lazyPart<ComponentProps<typeof import("./parts/summer").RodDragonfly>>("summer", "RodDragonfly");
