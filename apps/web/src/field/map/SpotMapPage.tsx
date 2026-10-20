@@ -46,8 +46,8 @@ import { datedName, downloadFile } from "../download";
 import { gpxFor } from "../gpx";
 import { countedBook } from "../milestones";
 import { focusPageHeading } from "../pageFocus";
-import { pieceName } from "../gear/pieceKey";
 import "./spot-map.css";
+import { bookLureName } from "../pieceTally";
 
 const POND = oval(POND_CENTER, 0.0052, 0.014);
 
@@ -384,11 +384,12 @@ export function SpotMapPage() {
   const bestLure = (spotId: string) => bestLureAt(ownHere(spotId) ? counted.catches : book.catches, spotId);
   const fishLine = (spotId: string) => {
     const row = rowOf(spotId);
-    const fish = fishCountLabel(row?.fishCount ?? 0);
+    // A water been out on without a fish says "0 fish", as its card does, not "Nothing logged".
+    const fish = !row?.fishCount && lastOut.has(spotId) ? tn(0, "{n} fish", "{n} fish") : fishCountLabel(row?.fishCount ?? 0);
     const dated = row?.lastFishDay ? t("{fish}, last {day}", { fish, day: formatDay(row.lastFishDay) }) : fish;
     // What to pack for there: the lure that took the most of its fish, when two or more did and none ties it.
     const best = bestLure(spotId);
-    const line = best ? `${dated} · ${t("best on {lure}", { lure: pieceName(best) })}` : dated;
+    const line = best ? `${dated} · ${t("best on {lure}", { lure: bookLureName(book.catches)(best) })}` : dated;
     // The outing the angler is out on now there; of a dawn and a dusk, the later.
     const going = outNowAt(book, spotId);
     if (going)
