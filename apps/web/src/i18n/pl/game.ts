@@ -138,6 +138,8 @@ export const PL_GAME: PlBook = {
   "{slam} · every kind in one day": "{slam} · wszystkie gatunki jednego dnia",
   "Far rock: turn every run; reeling while it drags round the rock frays the line": "Daleka skała: zawracaj każdy odjazd; zwijanie, gdy ryba ciągnie żyłkę wokół skały, przeciera ją",
   "The far rock frayed your line: it snaps sooner until you retie it.": "Daleka skała przetarła żyłkę: pęknie szybciej, dopóki jej nie przewiążesz.",
+  "Duckweed: a ball of weed on the line slows the reel till its first run strips it off": "Rzęsa: kula zielska na żyłce spowalnia zwijanie, aż pierwszy odjazd ją zerwie",
+  "This bank was fished hard yesterday, so its fish are still wary for your first casts.": "Wczoraj tu dużo łowiono, więc ryby są jeszcze płochliwe przy pierwszych rzutach.",
   "Drag: light": "Hamulec: lekki",
   "Drag: normal": "Hamulec: zwykły",
   "Drag: heavy": "Hamulec: mocny",
@@ -177,8 +179,8 @@ export const PL_GAME: PlBook = {
     "Gdy łowisz z brzegu, masz teraz towarzystwo przy każdej pogodzie: w mokre wieczory za tobą przeskakuje ropucha, w deszczowe dni zamiast rudzika do twoich stóp przylatuje kos, a w zimowe noce spod śniegu wyskakuje mysz leśna i przebiega obok, zostawiając drobne ślady.",
   "Cast tight to the sunken log and the fish there now run for it: turn every run, or the line wraps round the log and frays. Land a smallmouth and a largemouth bass on one day for the Bass slam badge, or a brook trout, a rainbow trout and a salmon for the Trout slam. And a fish you let go that breaks off stays itself when it bites again, tag and all.":
     "Rzuć tuż przy zatopionym pniu, a ryby stamtąd uciekają teraz do niego: zawracaj każdy odjazd, bo żyłka owinie się wokół pnia i przetrze. Złów bassa małogębowego i wielkogębowego jednego dnia, by zdobyć odznakę Bassowy szlem, albo pstrąga źródlanego, tęczowego i łososia, by zdobyć Pstrągowy szlem. A wypuszczona ryba, która się zerwie, pozostaje sobą, gdy znów weźmie, razem z oznaczeniem.",
-  "A big fish worn down in a fight can now find a second wind: it gathers itself once and runs hard again, as the fight card calls. Each lure climbs tiers as you land fish on it, Proven, Trusted and Lucky, shown in the lure picker, and a Lucky lure's hook sets a little more solid. And when another angler lands a fish you let go, the lake tells you on your next visit.":
-    "Duża ryba zmęczona w holu może teraz złapać drugi oddech: raz zbiera siły i znów mocno odjeżdża, co zapowiada karta holu. Każda przynęta zdobywa stopnie, gdy łowisz na nią ryby: Pewniak, Ulubieniec i Talizman, widoczne przy wyborze przynęty, a hak Talizmanu zacina trochę pewniej. A gdy inna osoba złowi rybę wypuszczoną przez ciebie, jezioro powie ci o tym przy następnej wizycie.",
+  "Out on the boat, a fish hooked tight to the far rock runs round it: turn every run, or the rock frays your line. A fish hooked through the duckweed comes in slower under a ball of weed until its first run strips it off. And a bank you fished hard yesterday starts today wary, its first casts biting slower, unless you bring groundbait or a lure the fish haven't seen.":
+    "Na łodzi ryba zacięta tuż przy dalekiej skale krąży wokół niej: zawracaj każdy odjazd, bo skała przetrze żyłkę. Ryba zacięta w rzęsie idzie wolniej pod kulą zielska, aż pierwszy odjazd ją zerwie. A łowisko mocno obłowione wczoraj zaczyna dziś płochliwe i pierwsze rzuty biorą wolniej, chyba że przyniesiesz zanętę albo przynętę, której ryby jeszcze nie widziały.",
   "Tight to the lily pads, where the bass and pike wait in ambush.": "Tuż przy liściach grzybieni, gdzie w zasadzce czekają bassy i szczupaki.",
   "Tight to the far rock, where the walleye hold in its shadow.": "Tuż przy dalekiej skale, gdzie w jej cieniu trzymają się sandacze.",
   "Along the rock edge, where the point drops off and the bass hold.": "Wzdłuż skalnej krawędzi, gdzie cypel opada w głąb i trzymają się bassy.",

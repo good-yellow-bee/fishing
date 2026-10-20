@@ -4,7 +4,7 @@ import * as THREE from "three";
 import { barnOwlAt } from "./owlQuarter";
 import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
-import { toonRamp } from "./toon";
+import { toonRamp, useInstancedTwin } from "./toon";
 
 const BUFF = "#ead6ac";
 const FACE = "#f6f1e6";
@@ -42,6 +42,7 @@ export function BarnOwl() {
   const wings = useRef<THREE.InstancedMesh>(null);
   const shapes = useMemo(() => ({ body: owlBodyShape(), wing: owlWingShape() }), []);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp(), side: THREE.DoubleSide }), []);
+  const instanced = useInstancedTwin(material);
   useEffect(
     () => () => {
       [shapes.body, shapes.wing, material].forEach((item) => item.dispose());
@@ -76,7 +77,7 @@ export function BarnOwl() {
   return (
     <group name="barn-owl">
       <mesh ref={body} geometry={shapes.body} material={material} matrixAutoUpdate={false} />
-      <instancedMesh ref={wings} args={[shapes.wing, material, 2]} frustumCulled={false} />
+      <instancedMesh ref={wings} args={[shapes.wing, instanced, 2]} frustumCulled={false} />
     </group>
   );
 }

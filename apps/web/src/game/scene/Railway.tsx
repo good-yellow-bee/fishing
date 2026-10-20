@@ -4,7 +4,7 @@ import * as THREE from "three";
 import type { LakeHour } from "@stillwater/shared";
 import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
-import { toonRamp } from "./toon";
+import { toonRamp, useInstancedTwin } from "./toon";
 import { CARS, CAR_LENGTH, PORTAL_EAST, PORTAL_OUT, PORTAL_WEST, PUFFS, TRACK_Y, carAt, hillFaceAt, puffAt, trackZ, windowsLit } from "./trainLine";
 
 const ENGINE = "#2f6b45";
@@ -106,6 +106,7 @@ export function Railway({ hour, wind }: { hour: LakeHour; wind: { x: number; z: 
     }),
     [],
   );
+  const paintedTwin = useInstancedTwin(looks.painted);
   useEffect(() => {
     looks.glass.color.set(windowsLit(hour) ? LAMPLIT : GLASS);
     looks.steam.color.set(STEAM[hour]);
@@ -165,7 +166,7 @@ export function Railway({ hour, wind }: { hour: LakeHour; wind: { x: number; z: 
       <mesh geometry={shapes.line} material={looks.painted} />
       <mesh ref={engine} geometry={shapes.engine} material={looks.painted} visible={false} />
       {/* The cars and steam move along the line, so they are never culled by a stale bound. */}
-      <instancedMesh ref={carriages} args={[shapes.carriage, looks.painted, CARS - 1]} frustumCulled={false} />
+      <instancedMesh ref={carriages} args={[shapes.carriage, paintedTwin, CARS - 1]} frustumCulled={false} />
       <instancedMesh ref={panes} args={[shapes.windows, looks.glass, CARS - 1]} frustumCulled={false} />
       <instancedMesh ref={puffs} args={[shapes.puff, looks.steam, PUFFS]} frustumCulled={false} />
     </group>

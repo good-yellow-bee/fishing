@@ -75,6 +75,8 @@ export type FightSim = {
   bitten?: boolean;
   /** A smallmouth's or a rainbow's run straight at the angler, coming and while it lasts: the line goes slack unless it is reeled fast. */
   charge?: boolean;
+  /** Hooked through the duckweed, it comes in under a ball of weed until its first run strips it off. */
+  weedBall?: boolean;
   /** A big fish that had tired found a second wind: the run it makes on it, coming and while it lasts. */
   secondWind?: boolean;
   /** Hooked light, the fish charged and the slack line let the hook drop out: why it got away. */
@@ -233,6 +235,8 @@ export const WITH_RUN_GRACE_SEC = 0.25;
 /** After a run the angler turned, the fish faces the rod this long, and line reeled meanwhile comes in this much faster. */
 export const TURNED_HEAD_MS = 1000;
 export const TURNED_HEAD_REEL = 1.3;
+/** A ball of duckweed on the line drags in the water: line reels in this much slower until the fish's first run strips it. */
+export const WEED_BALL_REEL = 0.75;
 /** How much line a run takes off a slack reel at each drag setting, and how hard it pulls on a reel that is turning. */
 export const DRAG_RUN_LINE: Record<Drag, number> = { light: 1.35, normal: 1, heavy: 0.65 };
 export const DRAG_RUN_PULL: Record<Drag, number> = { light: 0.7, normal: 1, heavy: 1.3 };
@@ -584,6 +588,8 @@ export function makeFight(
   net = false,
   /** Hooked from the boat tight to the far rock: an unturned run drags the line over the rock as off the point. */
   farRock = false,
+  /** Hooked through a duckweed mat: a ball of weed rides the line until the first run strips it. */
+  weedBall = false,
 ): FightRuntime {
   const weedy = water === "weeds";
   const rockWater = water === "rocks" || farRock;
@@ -605,7 +611,7 @@ export function makeFight(
 
   // Runs swing from side to side; the first way is the fish's own, not a dice roll, so seeded fights replay unchanged.
   const firstSide = Math.floor(weight * 10) % 2 === 0 ? 1 : -1;
-  const sim: FightSim = { line: 1, tension: 0.2, surge: 0, stamina: 1, runSide: firstSide, ...(frayed ? { frayed: true } : {}) };
+  const sim: FightSim = { line: 1, tension: 0.2, surge: 0, stamina: 1, runSide: firstSide, ...(frayed ? { frayed: true } : {}), ...(weedBall ? { weedBall: true } : {}) };
   /** 0 fresh, 1 spent: how far the fish has tired. */
   const worn = () => 1 - sim.stamina;
   const performance: FightPerformance = { peakTension: sim.tension, maxLine: sim.line, turnedRuns: 0, bowedLeaps: 0, fightSec: 0 };
@@ -781,6 +787,8 @@ export function makeFight(
         sim.lastRun = false;
         sim.encore = false;
         completedSurges += 1;
+        // The run tore the duckweed off the line.
+        sim.weedBall = false;
         if (turnedThisRun) {
           performance.turnedRuns = (performance.turnedRuns ?? 0) + 1;
           headTurnedUntil = nowMs + TURNED_HEAD_MS;
@@ -869,7 +877,7 @@ export function makeFight(
       sim.tension += (tensionUpCalm + (sim.surge === 2 && !charging ? eff * rockPull * DRAG_RUN_PULL[runDrag] : 0) + (sim.wrapped ? WRAP_PULL : 0)) * dtSec;
       // Line under real pressure comes in faster, for an angler brave enough to reel in the amber.
       const pressure = sim.tension >= TIGHT_TENSION && sim.tension < RED_TENSION ? PRESSURE_REEL : 1;
-      sim.line -= reelRate * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * (sim.weeded ? WEED_REEL : 1) * (sim.wrapped ? 0 : 1) * (broadsider && sim.stamina >= TIRING_STAMINA ? BROADSIDE_REEL : 1) * (charging ? CHARGE_REEL / pattern.reelSurge : 1) * (sim.withRun ? WITH_RUN_REEL : 1) * (sim.headTurned ? TURNED_HEAD_REEL : 1) * dtSec;
+      sim.line -= reelRate * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * (sim.weeded ? WEED_REEL : 1) * (sim.wrapped ? 0 : 1) * (broadsider && sim.stamina >= TIRING_STAMINA ? BROADSIDE_REEL : 1) * (charging ? CHARGE_REEL / pattern.reelSurge : 1) * (sim.withRun ? WITH_RUN_REEL : 1) * (sim.headTurned ? TURNED_HEAD_REEL : 1) * (sim.weedBall ? WEED_BALL_REEL : 1) * dtSec;
       if (lightRun) sim.line += driftSurge * DRAG_RUN_LINE.light * LIGHT_DRAG_SLIP * dtSec;
     } else if (heavyRun) {
       sim.tension =
@@ -936,7 +944,7 @@ export function makeFight(
       sim.line = 0;
       sim.surge = 0;
       // Whatever it was doing ends at the net.
-      for (const flag of ["jump", "roll", "lastRun", "encore", "charge", "firstRun", "tailWalk", "tearing", "sulk", "lifting", "weeded", "wrapped", "shake", "headTurned", "diving", "rocky", "turning", "darted", "downstream", "withRun", "secondWind"] as const) delete sim[flag];
+      for (const flag of ["jump", "roll", "lastRun", "encore", "charge", "firstRun", "tailWalk", "tearing", "sulk", "lifting", "weeded", "wrapped", "shake", "headTurned", "diving", "rocky", "turning", "darted", "downstream", "withRun", "secondWind", "weedBall"] as const) delete sim[flag];
       tearSec = 0;
       sim.netting = true;
       sim.netHead = false;

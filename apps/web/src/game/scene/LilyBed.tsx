@@ -49,9 +49,22 @@ export function LilyBed({ lilies, season, open }: { lilies: readonly LilyAt[]; s
         root.updateMatrixWorld(true);
         const members = lilies.flatMap((lily, i) => (lily.url === url ? [i] : []));
         const parts: { mesh: THREE.InstancedMesh; local: THREE.Matrix4 }[] = [];
+        // Its own copy of each material: the shared toon materials are also drawn on plain scenery meshes, and one
+        // material drawn both instanced and plain makes three re-pick its shader every frame (toon.ts useInstancedTwin).
+        const copies = new Map<THREE.Material, THREE.Material>();
+        const instancedCopy = (material: THREE.Material | THREE.Material[]) => {
+          if (Array.isArray(material)) return material;
+          let copy = copies.get(material);
+          if (!copy) {
+            copy = material.clone();
+            delete copy.userData.shareKey;
+            copies.set(material, copy);
+          }
+          return copy;
+        };
         root.traverse((obj) => {
           if (!(obj instanceof THREE.Mesh) || !obj.visible) return;
-          const mesh = new THREE.InstancedMesh(obj.geometry, obj.material, members.length);
+          const mesh = new THREE.InstancedMesh(obj.geometry, instancedCopy(obj.material), members.length);
           mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
           mesh.frustumCulled = false;
           parts.push({ mesh, local: obj.matrixWorld.clone() });
@@ -63,6 +76,7 @@ export function LilyBed({ lilies, season, open }: { lilies: readonly LilyAt[]; s
   useEffect(
     () => () =>
       kinds.forEach(({ root, parts }) => {
+        new Set(parts.flatMap(({ mesh }) => (Array.isArray(mesh.material) ? [] : [mesh.material]))).forEach((material) => material.dispose());
         parts.forEach(({ mesh }) => mesh.dispose());
         releaseToonCopy(root);
       }),
