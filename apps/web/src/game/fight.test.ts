@@ -1142,7 +1142,7 @@ describe("keeping a fish clear of the reeds' weeds and the point's rocks", () =>
 describe("the far rock from the boat", () => {
   it("frays the line on an unturned run dragged round the rock, keeping the boat's own fight, and notes runs turned clear", () => {
     const twoRuns = (farRock: boolean, turn: boolean) => {
-      const runtime = makeFight(fish("lake-whitefish"), 2, 3, () => 0, 1, "boat", undefined, false, false, false, false, false, false, false, 1, 1, false, farRock);
+      const runtime = makeFight(fish("lake-whitefish"), 2, 3, () => 0, 1, "boat", undefined, false, false, false, false, false, false, false, 1, 1, false, { farRock });
       let runs = 0;
       let was = runtime.sim.surge;
       let rocky = false;
@@ -1165,7 +1165,7 @@ describe("the far rock from the boat", () => {
 
   it("still takes a run's line at the boat's share", () => {
     const runLine = (farRock: boolean) => {
-      const f = makeFight(fish("pike"), 6, 3, () => 0, 1, "boat", undefined, false, false, false, false, false, false, false, 1, 1, false, farRock);
+      const f = makeFight(fish("pike"), 6, 3, () => 0, 1, "boat", undefined, false, false, false, false, false, false, false, 1, 1, false, { farRock });
       let now = 0;
       while (f.sim.surge !== 2) f.step((now += 50), 0.05, false);
       const before = f.sim.line;
@@ -1178,7 +1178,7 @@ describe("the far rock from the boat", () => {
 
 describe("duckweed on the line", () => {
   it("reels in slower under a ball of weed until the first run strips it off", () => {
-    const fight = (weedBall: boolean) => makeFight(fish("largemouth-bass"), 3, 3, () => 0, 1, "open", undefined, false, false, false, false, false, false, false, 1, 1, false, false, weedBall);
+    const fight = (weedBall: boolean) => makeFight(fish("largemouth-bass"), 3, 3, () => 0, 1, "open", undefined, false, false, false, false, false, false, false, 1, 1, false, { weedBall });
     const plain = fight(false);
     const weedy = fight(true);
     expect(weedy.sim.weedBall).toBe(true);
@@ -1192,6 +1192,20 @@ describe("duckweed on the line", () => {
       weedy.step((now += 50), 0.05, false);
     }
     expect(weedy.sim.weedBall).toBe(false);
+  });
+});
+
+describe("the point's rock edge", () => {
+  it("sends a fish hooked along the edge diving off the ledge, as at the drop-off", () => {
+    const firstRun = (edge: boolean) => {
+      const f = makeFight(fish("smallmouth-bass"), 2, 3, () => 0, 1, "rocks", undefined, false, false, false, false, false, false, false, 1, 1, false, { edge });
+      let now = 0;
+      while (f.sim.surge !== 2) f.step((now += 50), 0.05, false);
+      f.step((now += 50), 0.05, false);
+      return f.sim.diving === true;
+    };
+    expect(firstRun(true)).toBe(true);
+    expect(firstRun(false)).toBe(false);
   });
 });
 
