@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   WATER_LABELS,
@@ -27,7 +27,7 @@ import { datedName, downloadFile } from "../download";
 import { fileSlug } from "../gpx";
 import { ChoiceRow } from "../ChoiceRow";
 import { pieceName, shownPieceKey } from "./pieceKey";
-import { notYetThisYear } from "../bests/notYet";
+import { inReadersOrder, notYetThisYear } from "../bests/notYet";
 import { exactTerm, findLink } from "../findLinks";
 import { packingTips } from "../waterTips";
 import { nearTwinLures } from "../suggestions";
@@ -38,20 +38,21 @@ import { locale, t, tn, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
 import { offPlayLake } from "../playLake";
 import { countedBook, ownFish } from "../milestones";
-import { isSampleOnly, isSampleOuting, nextRealTrips, upcomingRealTrips } from "../bookCopy";
+import { isSampleOnly, nextRealTrips, upcomingRealTrips } from "../bookCopy";
 import { outingFish } from "../outingFish";
-import { plainName, sameName, stillGoing } from "../tripDates";
+import { lateOutings, outNow, plainName, sameName, underWay } from "../tripDates";
 import { focusPageHeading } from "../pageFocus";
 import { onPiece } from "../pieceTally";
 import { newestOutingFirst } from "../catchNeighbors";
+import { kindNames } from "../speciesLink";
 
 function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
   const { book } = useLogbook();
   const { items } = useTackle();
   useT();
   const spot = spotById(book, trip.spotId);
-  // Under way once anything bit, as the outing's own page takes it: a fish, a lost one or a missed strike.
-  const fished = catchesForTrip(book, trip.id).length > 0 || Boolean(trip.lost || trip.missed);
+  // Under way once anything bit, as the outing's own page takes it: a fish (loose on its water too), a lost one or a miss.
+  const fished = underWay(book, trip);
 
   return (
     <section className="tackle-trip">
@@ -61,7 +62,7 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
           <Link to={`/trips/${trip.id}`}>{outingName(trip, book.spots)}</Link>
         </h3>
         <span className="meta">
-          {tripWhen(trip.date, today, tomorrow, stillGoing(book, trip))}
+          {tripWhen(trip.date, today, tomorrow, outNow(book, trip))}
           {spot && !sameName(spot.name, outingName(trip, book.spots)) ? ` · ${plainName(spot.name)}` : ""}
         </span>
       </div>
@@ -69,7 +70,7 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
         tripId={trip.id}
         name={t("Tackle for {trip}", { trip: outingName(trip, book.spots) })}
         suggest={packingTips(book, trip, today)}
-        trips={book.trips}
+        trips={book.trips} catches={book.catches}
         spots={book.spots}
         // Today's outing may already have fish, counted against the pieces as on the outing's page.
         caught={trip.date <= today ? catchesForTrip(book, trip.id) : undefined}
@@ -141,6 +142,8 @@ function LureRecord({ today }: { today: string }) {
   // The order picked holds while its control shows.
   const found = pieceRecords(atWater, items, today);
   const records = orderedRecords(found, found.length > 2 ? order : "most");
+  // A kind as the book writes it most, as Bests names it.
+  const kindName = useMemo(() => kindNames(countedBook(book).catches), [book]);
   // The book the record counts: the sample week's made-up lures go with the first outing of the angler's own.
   const quiet = notYetThisYear(countedBook(atWater).catches, new Date(), (entry) => entry.lure, (entry) => bookFishDay(book, entry), (name) => shownPieceKey(name));
   const [all, setAll] = useState(false);
@@ -198,7 +201,7 @@ function LureRecord({ today }: { today: string }) {
           <li key={row.label}>
             {/* A lure that took fish opens them in the catch search. */}
             {/* With a water picked, its fish there. */}
-            {row.lure ? <Link to={findLink(countedSearch(book, [exactTerm("lure", t(row.lure)), ...(water ? [exactTerm("water", water.name)] : [])].join(" + "), atWater.catches.filter((entry) => onPiece(entry, row.lure!))))}>{pieceName(row.name)}</Link> : <span>{pieceName(row.name)}</span>}
+            {row.lure ? <Link to={findLink(countedSearch(book, [exactTerm("lure", pieceName(row.name)), ...(water ? [exactTerm("water", plainName(water.name))] : [])].join(" + "), atWater.catches.filter((entry) => onPiece(entry, row.lure!))))}>{pieceName(row.name)}</Link> : <span>{pieceName(row.name)}</span>}
             <span className="meta">
               {fishCountLabel(row.fish)} · {tn(row.outings, "{n} outing", "{n} outings")}
               {/* How often it pays, once it has been out more than once. */}
@@ -213,7 +216,7 @@ function LureRecord({ today }: { today: string }) {
                   {row.largest ? (
                     <span className="lure-last">
                       <Link to={`/catches/${row.largest.entry.id}`}>
-                        {t("Largest: {species}, {size}", { species: pieceName(row.largest.entry.species), size: measureText(measureOf(row.largest.entry, row.largest.by)!) })}
+                        {t("Largest: {species}, {size}", { species: kindName(row.largest.entry.species), size: measureText(measureOf(row.largest.entry, row.largest.by)!) })}
                       </Link>
                     </span>
                   ) : null}
@@ -240,7 +243,8 @@ function LureRecord({ today }: { today: string }) {
                     type="button"
                     className="text-button"
                     onClick={() => {
-                      if (add(next.id, row.label) !== null) return;
+                      // The book's own spelling, as its fish were logged: the button shows it in the reader's language.
+                      if (add(next.id, row.name) !== null) return;
                       focusPacked.current = true;
                       setJustPacked(row.label);
                     }}
@@ -275,7 +279,7 @@ function LureRecord({ today }: { today: string }) {
             type="button"
             className="text-button"
             onClick={() => {
-              const packed = best.filter((row) => add(next.id, row.label) === null).map((row) => row.label);
+              const packed = best.filter((row) => add(next.id, row.name) === null).map((row) => row.name);
               if (packed.length === 0) return;
               focusPackedBest.current = true;
               setPackedBest(packed);
@@ -303,11 +307,11 @@ function LureRecord({ today }: { today: string }) {
         <p className="meta not-yet">
           <span>
             {t("Not yet this year:")}{" "}
-            {quiet.map((lure, index) => (
+            {inReadersOrder(quiet, pieceName).map((lure, index) => (
               <Fragment key={lure}>
                 {index > 0 ? ", " : null}
                 {/* Counted for the water picked, so each opens that water's fish on it. */}
-                <Link to={findLink(countedSearch(book, [exactTerm("lure", pieceName(lure)), ...(water ? [exactTerm("water", water.name)] : [])].join(" + "), atWater.catches.filter((entry) => shownPieceKey(entry.lure) === shownPieceKey(lure))))}>{pieceName(lure)}</Link>
+                <Link to={findLink(countedSearch(book, [exactTerm("lure", pieceName(lure)), ...(water ? [exactTerm("water", plainName(water.name))] : [])].join(" + "), atWater.catches.filter((entry) => onPiece(entry, lure))))}>{pieceName(lure)}</Link>
               </Fragment>
             ))}
           </span>
@@ -320,7 +324,7 @@ function LureRecord({ today }: { today: string }) {
           <button
             type="button"
             className="text-button"
-            onClick={() => downloadFile(lureRecordCsv(records), "text/csv;charset=utf-8", datedName(water ? `${fileSlug(water.name)}-lures.csv` : "stillwater-lures.csv"))}
+            onClick={() => downloadFile(lureRecordCsv(records, kindName), "text/csv;charset=utf-8", datedName(water ? `${fileSlug(water.name)}-lures.csv` : "stillwater-lures.csv"))}
           >
             {t("Download the lure record as a spreadsheet")}
           </button>
@@ -431,7 +435,7 @@ function PastTripTackle({ trip, today, tomorrow, fishCount, open, onToggle }: { 
       <summary>
         <span className="tackle-past-title">{outingName(trip, book.spots)}</span>
         <span className="meta">
-          {tripWhen(trip.date, today, tomorrow, stillGoing(book, trip))}
+          {tripWhen(trip.date, today, tomorrow, outNow(book, trip))}
           {spot && !sameName(spot.name, outingName(trip, book.spots)) ? ` · ${plainName(spot.name)}` : ""}
           {` · ${fishCountLabel(fishCount)}`}
         </span>
@@ -439,7 +443,7 @@ function PastTripTackle({ trip, today, tomorrow, fishCount, open, onToggle }: { 
       <p className="tackle-past-link">
         <Link to={`/trips/${trip.id}`}>{t("Open the outing")}</Link>
       </p>
-      {open ? <TackleList tripId={trip.id} name={t("Tackle for {trip}", { trip: outingName(trip, book.spots) })} caught={fish} trips={book.trips} spots={book.spots} /> : null}
+      {open ? <TackleList tripId={trip.id} name={t("Tackle for {trip}", { trip: outingName(trip, book.spots) })} caught={fish} trips={book.trips} catches={book.catches} spots={book.spots} /> : null}
     </details>
   );
 }
@@ -482,7 +486,7 @@ export function GearPage() {
             <p className="eyebrow">
               <Link to="/gear">{t("Tackle")}</Link>
               {" · "}
-              {tripWhen(trip.date, today, tomorrow, stillGoing(book, trip))}
+              {tripWhen(trip.date, today, tomorrow, outNow(book, trip))}
             </p>
             <h1>{outingName(trip, book.spots)}</h1>
             <p className="meta stand">
@@ -503,7 +507,7 @@ export function GearPage() {
           tripId={trip.id}
           heading={t("In the bag")}
           suggest={packingTips(book, trip, today)}
-          trips={book.trips}
+          trips={book.trips} catches={book.catches}
           spots={book.spots}
           caught={trip.date <= today ? catchesForTrip(book, trip.id) : undefined}
         />
@@ -511,8 +515,8 @@ export function GearPage() {
     );
   }
 
-  // In the small hours, last evening's outing still going stays first under Coming up, its bag open, as Home's Next.
-  const going = book.trips.filter((trip) => offPlayLake(trip) && !isSampleOuting(trip) && stillGoing(book, trip));
+  // In the small hours, last evening's outings still going stay first under Coming up, their bags open, as Home and Trips.
+  const going = lateOutings(book);
   const upcoming = [...going, ...upcomingRealTrips(book, today)];
   // Real days out: a game day has nothing in the bag.
   // And not the sample week's once the angler has outings of their own, as Coming up and the record leave them out.

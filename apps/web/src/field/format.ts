@@ -39,7 +39,7 @@ export function outingName(trip: { title: string; spotId: string }, spots: reado
   const water = spots.find((spot) => spot.id === trip.spotId)?.name;
   // An untitled outing reads as its water is named now ("home lake " was saved for "Home Lake").
   if (water && trip.title.trim() && sameName(trip.title, water)) return plainName(water);
-  return trip.title.trim() || water?.trim() || t("Outing");
+  return trip.title.trim() || (water ? plainName(water) : "") || t("Outing");
 }
 
 /** The shown name of the outing with this id, or null when the book has none such. */

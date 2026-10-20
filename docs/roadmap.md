@@ -1838,6 +1838,10 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT395~~ | ~~Egg raiders bolt: a perch or smallmouth hooked raiding the sunfish beds by the dock is chased off by the guarding sunfish, so its first run is the long one; the fight card says so~~ (#1566) | gameplay | S |
 | ~~GT396~~ | ~~The foam lane's drift: on a breezy or strong day a fish hooked in a foam lane fights where the wind's drift is strongest, so a slack line drifts out 1.3x faster still between runs; the fight card says so~~ (#1570) | gameplay | S |
 | ~~GT397~~ | ~~News card 2026-10-20-game48 covers GT394 to GT396: the rock edge's ledge, egg raiders bolt and the foam lane's drift~~ (#1572) | ui | S |
+| ~~GT398~~ | ~~Risers leap first: a jumper hooked rising to the hatching bugs or midges is already at the top, so its first run is a leap, as off a popper (not in winter, when jumpers stay down); the fight card says so~~ (#1575) | gameplay | S |
+| GT399 | Lantern-lit net: at night a fish hooked by the dock's lantern sees the net in its light and bolts from it once, as a carp does; the fight card says so | gameplay | S |
+| GT400 | Fired up on fry: a fish hooked chasing the kingfisher's fry is fired up, so its first run doesn't tire it at all; the fight card says so | gameplay | S |
+| GT401 | News card game49 covers GT398 to GT400 | ui | S |
 
 ## Risks / open questions for the owner
 
@@ -2431,3 +2435,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR582~~ | ~~Round 107 catch-page ideas: a By water split in a search's summary, how near a fish came to its kind's best~~ (#1553) | field | S |
 | ~~BR583~~ | ~~Round 108 Home and export fixes: English kind names steady before and after the Polish book loads, copies name kinds across the book, a day's outings in one order everywhere, every outing still going on Home, untitled outings and water names read cleanly~~ (#1561) | field | S |
 | ~~BR584~~ | ~~Round 108 Home and export ideas: Out now on Home's Next, today's plan to the calendar, released fish in the outings sheet~~ (#1564) | field | S |
+| ~~BR585~~ | ~~Round 109 gear and map fixes: Out now and Last night by Home's rule everywhere, loose fish make an outing under way, Gear's record and Pack name lures as shown, names trimmed on Gear, the Map and GPX~~ (#1574) | field | S |
