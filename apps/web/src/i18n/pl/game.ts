@@ -173,6 +173,8 @@ export const PL_GAME: PlBook = {
   "Wait for it to turn, then figure-eight. Cast again.": "Poczekaj, aż zawróci, wtedy zrób ósemkę. Rzuć jeszcze raz.",
   "{note} · {name}, its giant, is still out there": "{note} · {name}, olbrzym tego łowiska, wciąż czeka",
   "giant: {name}": "olbrzym: {name}",
+  "giant: {name}, shy of this lure": "olbrzym: {name}, boi się tej przynęty",
+  "{name} knows the {lure} now, and won't take one again this week.": "{name} zna już tę przynętę ({lure}) i w tym tygodniu jej nie weźmie.",
   "It's {name}, the bank's giant!": "To {name}, olbrzym tego łowiska!",
   "{fish}: you landed {name}, this week's giant of the bank!": "{fish}: złowiony {name}, olbrzym tego łowiska w tym tygodniu!",
   "{name}, the bank's giant · +{points} pts": "{name}, olbrzym łowiska · +{points} pkt",
