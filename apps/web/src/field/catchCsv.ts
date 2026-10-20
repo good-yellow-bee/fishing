@@ -111,8 +111,10 @@ export function sheetOutings(book: Logbook, today: string): Logbook {
 export function tripsCsv(whole: Logbook, today: string): string {
   const book = sheetOutings(whole, today);
   const separator = getLang() === "pl" ? ";" : ",";
-  const header = [t("Date"), t("Trip"), t("Water"), t("Fish"), t("Kinds"), t("Lures"), t("Lost fish"), t("Missed strikes"), t("Released fish"), t("Note")];
+  const header = [t("Date"), t("Trip"), t("Water"), t("Fish"), t("Kinds"), t("Lures"), t("Lost fish"), t("Missed strikes"), t("Released fish"), t("Fish times"), t("Note")];
   const fish = new Map<string, number>();
+  // When its fish came, first to last on the 24-hour clock, so a day's dawn and dusk rows tell apart: "18:00–18:40".
+  const times = new Map<string, { first: string; last: string }>();
   // How many of them went back, for a club's catch-and-release return: a new column before the note, so the older ones keep their places.
   const released = new Map<string, number>();
   // What each outing took, most first, in the sheet's language: "Zander ×2, Northern pike".
@@ -132,6 +134,8 @@ export function tripsCsv(whole: Logbook, today: string): string {
       if (!tripIds.has(id)) continue;
       fish.set(id, (fish.get(id) ?? 0) + 1);
       if (entry.released) released.set(id, (released.get(id) ?? 0) + 1);
+      const was = times.get(id);
+      times.set(id, !was ? { first: entry.caughtAt, last: entry.caughtAt } : { first: entry.caughtAt < was.first ? entry.caughtAt : was.first, last: entry.caughtAt > was.last ? entry.caughtAt : was.last });
       const tally = kinds.get(id) ?? new Map<string, number>();
       const name = kindName(entry.species);
       tally.set(name, (tally.get(name) ?? 0) + 1);
@@ -149,10 +153,19 @@ export function tripsCsv(whole: Logbook, today: string): string {
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
       .map(([name, count]) => (count > 1 ? `${name} ×${count}` : name))
       .join(", ");
+  const clock = (iso: string) => {
+    const at = new Date(iso);
+    return `${pad(at.getHours())}:${pad(at.getMinutes())}`;
+  };
+  const timesOf = (tripId: string) => {
+    const span = times.get(tripId);
+    if (!span) return "";
+    return clock(span.first) === clock(span.last) ? clock(span.first) : `${clock(span.first)}–${clock(span.last)}`;
+  };
   const rows = [...book.trips]
     // Newest first, a day's dusk before its dawn, as Trips lists them.
     .sort(newestOutingFirst(whole))
     // An untitled outing goes by its water's name, as the list names it.
-    .map((trip) => [trip.date, plainName(outingName(trip, book.spots)), plainName(spotById(book, trip.spotId)?.name ?? ""), String(fish.get(trip.id) ?? 0), tallyOf(kinds, trip.id), tallyOf(lures, trip.id), String(trip.lost ?? 0), String(trip.missed ?? 0), String(released.get(trip.id) ?? 0), noteText(trip.note)]);
+    .map((trip) => [trip.date, plainName(outingName(trip, book.spots)), plainName(spotById(book, trip.spotId)?.name ?? ""), String(fish.get(trip.id) ?? 0), tallyOf(kinds, trip.id), tallyOf(lures, trip.id), String(trip.lost ?? 0), String(trip.missed ?? 0), String(released.get(trip.id) ?? 0), timesOf(trip.id), noteText(trip.note)]);
   return sheet([header, ...rows], separator);
 }
