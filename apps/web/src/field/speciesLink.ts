@@ -4,6 +4,7 @@ import { isSampleCatch } from "./bookCopy";
 import { getLang, t } from "../i18n";
 import { bookSpelling, pieceKey } from "./gear/pieceKey";
 import { countedFish } from "./milestones";
+import { foldName } from "./spotOrder";
 
 /** The page for one kind of fish, by the name the book keeps it under. */
 export function speciesLink(species: string) {
@@ -48,13 +49,23 @@ export function pageCounts(catches: readonly CatchEntry[]) {
   return rows.sort((a, b) => b.count - a.count || a.species.localeCompare(b.species));
 }
 
-/** The waters this kind came from, most fish first, then by name. */
+/**
+ * The waters this kind came from, most fish first, then by name. Twin waters ("Śniardwy", "Sniardwy") are one, as a
+ * search reads them: under the busier one's name and page, `spotIds` holding both. A water no longer in the book
+ * (no name) stays its own row.
+ */
 export function speciesWaters(book: Logbook, catches: readonly CatchEntry[]) {
   const counts = new Map<string, number>();
   for (const entry of catches) counts.set(entry.spotId, (counts.get(entry.spotId) ?? 0) + 1);
-  return [...counts]
-    .map(([spotId, count]) => ({ spotId, name: book.spots.find((spot) => spot.id === spotId)?.name ?? null, count }))
-    .sort((a, b) => b.count - a.count || (a.name ?? "").localeCompare(b.name ?? ""));
+  const byName = (a: { name: string | null; count: number }, b: { name: string | null; count: number }) => b.count - a.count || (a.name ?? "").localeCompare(b.name ?? "");
+  const rows = [...counts].map(([spotId, count]) => ({ spotId, name: book.spots.find((spot) => spot.id === spotId)?.name ?? null, count })).sort(byName);
+  const twins = new Map<string, { spotId: string; spotIds: string[]; name: string | null; count: number }>();
+  for (const row of rows) {
+    const key = row.name ? foldName(row.name) : `\u0000${row.spotId}`;
+    const was = twins.get(key);
+    twins.set(key, was ? { ...was, spotIds: [...was.spotIds, row.spotId], count: was.count + row.count } : { ...row, spotIds: [row.spotId] });
+  }
+  return [...twins.values()].sort(byName);
 }
 
 /** The kinds among some fish, most first, then by name, keeping the book's name for each. */

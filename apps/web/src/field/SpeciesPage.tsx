@@ -7,7 +7,7 @@ import { CatchCard } from "./cards";
 import { FishSum } from "./FishSum";
 import { FishCsv } from "./FishCsv";
 import { fishCountLabel, formatDay, outingNameById } from "./format";
-import { daysBetween } from "./spotOrder";
+import { daysBetween, waterKeys } from "./spotOrder";
 import { useLogbook } from "./LogbookState";
 import { PagedCatches } from "./PagedCatches";
 import { bookFishDay, yearTally } from "./tripMonths";
@@ -213,17 +213,17 @@ function SpeciesView() {
       <ul className="species-waters">
         {waters.map((water) => (
           <li key={water.spotId}>
-            {water.name ? <Link to={`/spots/${water.spotId}`}>{water.name}</Link> : t("Unknown water")}
+            {water.name ? <Link to={`/spots/${water.spotId}`}>{plainName(water.name)}</Link> : t("Unknown water")}
             <span className="meta sizes">
               {/* The count opens just those fish, through the catch search. */}
-              {water.name ? <Link to={findWithLink(kindTerm, exactTerm("water", water.name))}>{fishCountLabel(water.count)}</Link> : fishCountLabel(water.count)}
+              {water.name ? <Link to={findWithLink(kindTerm, exactTerm("water", plainName(water.name)))}>{fishCountLabel(water.count)}</Link> : fishCountLabel(water.count)}
               {/* How often an outing there took one: where the kind is reliable, not just where it came once. */}
-              {rates.has(water.spotId) ? `\u00a0· ${t("on {count} of {total} outings", rates.get(water.spotId)!)}` : ""}
+              {water.spotIds.length === 1 && rates.has(water.spotId) ? `\u00a0· ${t("on {count} of {total} outings", rates.get(water.spotId)!)}` : ""}
               {/* Beside each water, its biggest of the kind, once there is more than one water to set side by side. */}
               {waters.length > 1 ? (
                 <>
                   {"\u00a0· "}
-                  <BiggestLinks catches={catches.filter((entry) => entry.spotId === water.spotId)} list={`species:${species}`} about={`${t(name)}, ${water.name ?? t("Unknown water")}`} />
+                  <BiggestLinks catches={catches.filter((entry) => water.spotIds.includes(entry.spotId))} list={`species:${species}`} about={`${t(name)}, ${water.name ? plainName(water.name) : t("Unknown water")}`} />
                 </>
               ) : null}
             </span>
@@ -355,12 +355,12 @@ function SizeSpread({ catches, within }: { catches: readonly CatchEntry[]; withi
 }
 
 /** "Typical size by water: Cedar Lake: 29 in · Mill Pond: 24 in", biggest first, once two waters have enough fish measured. */
-function TypicalByWater({ catches, waters }: { catches: readonly CatchEntry[]; waters: readonly { spotId: string; name?: string | null }[] }) {
+function TypicalByWater({ catches, waters }: { catches: readonly CatchEntry[]; waters: readonly { spotIds: string[]; name?: string | null }[] }) {
   const lengths = catches.filter((entry) => measureOf(entry, "length")).length;
   const kind = lengths * 2 >= catches.length ? "length" : "weight";
   const rows = waters.flatMap((water) => {
-    const size = water.name ? typicalSize(catches.filter((entry) => entry.spotId === water.spotId), kind) : null;
-    return size && water.name ? [{ name: water.name, size }] : [];
+    const size = water.name ? typicalSize(catches.filter((entry) => water.spotIds.includes(entry.spotId)), kind) : null;
+    return size && water.name ? [{ name: plainName(water.name), size }] : [];
   });
   if (rows.length < 2) return null;
   const amount = (measure: Measure) => (measure.kind === "length" ? measure.inches : measure.pounds);
@@ -369,9 +369,11 @@ function TypicalByWater({ catches, waters }: { catches: readonly CatchEntry[]; w
 }
 
 /** "New waters this year: Cedar Lake": where the kind turned up somewhere it hadn't before, each opening those fish. */
-function NewWaters({ catches, name, waters }: { catches: readonly CatchEntry[]; name: string; waters: readonly { spotId: string; name?: string | null }[] }) {
+function NewWaters({ catches, name, waters }: { catches: readonly CatchEntry[]; name: string; waters: readonly { spotId: string; spotIds: string[]; name?: string | null }[] }) {
   const { book } = useLogbook();
-  const found = newWatersThisYear(catches, new Date(), (entry) => bookFishDay(book, entry)).flatMap((id) => waters.filter((water) => water.spotId === id && water.name));
+  // Twin waters as one, as the list above and the search each name opens take them.
+  const waterOf = waterKeys(book);
+  const found = newWatersThisYear(catches, new Date(), (entry) => bookFishDay(book, entry), (id) => waterOf.get(id) ?? id).flatMap((id) => waters.filter((water) => water.spotIds.includes(id) && water.name));
   if (found.length === 0) return null;
   return (
     <p className="meta new-waters">

@@ -124,6 +124,14 @@ export function outingFished(trip: { date: string }, today: string, hasFish: boo
   return hasFish && (trip.date === today || (today < calendarDay && trip.date === calendarDay));
 }
 
+/**
+ * Whether an outing counts as one fished, as Trips, the outings sheet and Bests count it: `outingFished`, with a fish
+ * lost or a strike missed as good as a fish, and last evening's blank that gave way to today's plan.
+ */
+export function outingCounted(book: Logbook, trip: Trip, today: string, fish: number, now = new Date()): boolean {
+  return outingFished(trip, today, fish > 0 || Boolean(trip.lost || trip.missed), now) || gaveWay(book, trip, now);
+}
+
 /** Whether an outing's title is only the name of a water: what an untitled outing is saved under. */
 function waterNamed(title: string, spots: Logbook["spots"]): boolean {
   return spots.some((spot) => sameName(spot.name, title));
