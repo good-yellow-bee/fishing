@@ -1477,6 +1477,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | SC284 | Hedgerows that read as hedges: on an upright phone the upper hills' hedgerows (SC263) looked like dotted chains of beads, each bush a small ball turned any way; the bushes now stand closer and lined up along the row, wider than deep, so they run together into continuous hedges (a Visual refresh run reproduced every baseline byte for byte: the test views have the hedges behind the top panels) | scene | S |
 | SC285 | News card scene68 covers SC283 and SC284: the feeders over a gathered swim and the hedgerows that read as hedges | scene | S |
 | SC286 | The shiner trap seen: while one is set (GT453), a wire cage lies in the shallows below the shack, its cord tied to a stake on the bank; once it is ready to lift, a shiner flips at the surface inside it now and then (not with reduced motion: it lies still). Seen from the shack; the dock view faces away | scene | S |
+| SC287 | The trap fills on time: waiting at the shack, the cage shows its shiner and the bait shop offers the lift the moment the soak ends, and the trap goes empty once it has sat too long, without anything else on screen changing first | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
