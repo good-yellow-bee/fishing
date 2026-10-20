@@ -687,8 +687,8 @@ export function useFishingGame(
     const farRock = castFarRockRef.current && water === "boat";
     // One hooked through a duckweed mat comes in under a ball of weed until it runs.
     const weedBall = castWeedRef.current !== null;
-    // One hooked along the point's rock edge dives off the ledge.
-    const edge = castEdgeRef.current;
+    // One hooked along the point's rock edge dives off the ledge, clear of the shallow rocks.
+    const edge = castEdgeRef.current && water === "rocks";
     const next = { species, weight, underpowered, water, windy, lightHook, pads, farRock, weedBall, edge, strongLift: liftsStickerInOne(species.id, current.strength) };
     fightRef.current = next;
     setFight(next);

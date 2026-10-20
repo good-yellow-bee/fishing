@@ -472,7 +472,7 @@ export function fightWind(wind: string | undefined): FightWind | undefined {
 /**
  * Cover a fish was hooked tight to, on top of the spot's water: `farRock` from the boat by the far rock (unturned runs
  * drag the line over it), `weedBall` through a duckweed mat (a ball of weed slows the reel till the first run), `edge`
- * along the point's rock edge (runs dive off the ledge as at the drop-off).
+ * along the point's rock edge (runs dive off the ledge as at the drop-off, clear of the shallow rocks).
  */
 export type FightCover = { farRock?: boolean; weedBall?: boolean; edge?: boolean };
 export type FightWater = "open" | "weeds" | "current" | "deep" | "rocks" | "boat" | "pilings" | "log";
@@ -597,7 +597,8 @@ export function makeFight(
 ): FightRuntime {
   const { farRock = false, weedBall = false, edge = false } = cover;
   const weedy = water === "weeds";
-  const rockWater = water === "rocks" || farRock;
+  // Hooked along the rock edge, past the shallow rocks, the fish dives off the ledge rather than dragging the line over them.
+  const rockWater = (water === "rocks" && !edge) || farRock;
   const deepRuns = water === "deep" || edge || (DIVERS.has(species.id) && (water === "open" || water === "boat"));
   const pattern = PATTERNS[species.challenge];
   const t = difficulty01(species, weight);

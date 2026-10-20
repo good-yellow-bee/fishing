@@ -1196,16 +1196,17 @@ describe("duckweed on the line", () => {
 });
 
 describe("the point's rock edge", () => {
-  it("sends a fish hooked along the edge diving off the ledge, as at the drop-off", () => {
+  it("sends a fish hooked along the edge diving off the ledge, as at the drop-off, clear of the rocks", () => {
     const firstRun = (edge: boolean) => {
       const f = makeFight(fish("smallmouth-bass"), 2, 3, () => 0, 1, "rocks", undefined, false, false, false, false, false, false, false, 1, 1, false, { edge });
       let now = 0;
       while (f.sim.surge !== 2) f.step((now += 50), 0.05, false);
       f.step((now += 50), 0.05, false);
-      return f.sim.diving === true;
+      return { diving: f.sim.diving === true, rocky: f.sim.rocky === true };
     };
-    expect(firstRun(true)).toBe(true);
-    expect(firstRun(false)).toBe(false);
+    // Past the shallow rocks it dives instead of dragging the line over them.
+    expect(firstRun(true)).toEqual({ diving: true, rocky: false });
+    expect(firstRun(false)).toEqual({ diving: false, rocky: true });
   });
 });
 
