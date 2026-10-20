@@ -2939,7 +2939,7 @@ describe("useFishingGame groundbait", () => {
     const at = new Date(2026, 9, 4, 12).getTime();
     vi.mocked(castForReleased).mockReturnValueOnce({ fish: { species: pike, weight: 6.5, was: 6, at }, next: [] });
     cast(surface);
-    expect(castForReleased).toHaveBeenCalledWith([], "dock", expect.any(Number), expect.any(Number));
+    expect(castForReleased).toHaveBeenCalledWith([], "dock", expect.any(Number), expect.any(Number), undefined);
     expect(container!.querySelector("[data-testid=bite]")?.textContent).toMatch(/^pike\|6\.5/);
     step.mockReturnValueOnce("landed");
     act(() => vi.advanceTimersByTime(2_201));

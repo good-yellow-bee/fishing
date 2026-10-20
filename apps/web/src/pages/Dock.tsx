@@ -743,7 +743,7 @@ export function DockPage() {
       setReleaseBonus(bonus);
       setReleasedId(outcome.id);
       // The lake remembers the fish, so it may bite again at this bank another day, a little heavier.
-      rememberReleased(outcome.species, outcome.weight, outcome.spot);
+      rememberReleased(outcome.species, outcome.weight, outcome.spot, Date.now(), outcome.lure);
       // Let go, it went back to its bank, so the bank's week no longer counts it.
       setKeptHere((counts) => ({ ...counts, [outcome.spot]: Math.max(0, (counts[outcome.spot] ?? 0) - 1) }));
       try {
@@ -1463,6 +1463,8 @@ export function DockPage() {
                   {releaseBonus > 0
                     ? t("Released back into the lake · +{bonus} pts for letting a trophy go", { bonus: releaseBonus })
                     : t("Released back into the lake")}
+                  {/* The lake remembers all but its small common fish, and a remembered one shies from the lure it was caught on. */}
+                  {game.outcome.lure && game.outcome.species.rarity !== "common" && ` · ${t("it will shy from the {lure} now", { lure: t(game.outcome.lure) })}`}
                 </p>
               ) : (
                 <button className="panel-btn" type="button" onClick={() => void releaseFish()} aria-disabled={releasing || undefined}>

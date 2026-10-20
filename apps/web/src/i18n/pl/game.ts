@@ -177,6 +177,7 @@ export const PL_GAME: PlBook = {
   "{bank}: bring in your night line": "{bank}: wyciągnij swoją nocną linkę",
   "{note} · your night line is out here": "{note} · tu stoi twoja nocna linka",
   "Night line": "Nocna linka",
+  "it will shy from the {lure} now": "teraz będzie unikać tej przynęty ({lure})",
   "Rain tonight: the night feeders will be roaming.": "W nocy pada: nocne ryby będą krążyć.",
   "A clear night: the feeders keep close to cover, so the line may come in empty.": "Pogodna noc: ryby trzymają się kryjówek, więc linka może wrócić pusta.",
   "Check line": "Sprawdź linkę",
