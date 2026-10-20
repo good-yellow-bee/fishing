@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { lakeMasks, openLake } from "./shoot";
+import { fightFish, lakeMasks, openLake } from "./shoot";
 
 test.describe("the lake", () => {
   test("summer day at the dock", async ({ page }) => {
@@ -42,5 +42,11 @@ test.describe("the lake", () => {
     await page.setViewportSize({ width: 844, height: 390 });
     await openLake(page, "?hour=day&sky=clear&season=summer&moon=0.5");
     await expect(page).toHaveScreenshot("phone-sideways.png", { mask: lakeMasks(page) });
+  });
+
+  test("a fight in progress", async ({ page }) => {
+    await openLake(page, "?hour=day&sky=clear&season=summer&moon=0.5");
+    await fightFish(page, { x: 600, y: 380 });
+    await expect(page).toHaveScreenshot("fight.png", { mask: lakeMasks(page) });
   });
 });

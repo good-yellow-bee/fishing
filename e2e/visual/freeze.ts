@@ -1,11 +1,11 @@
 /**
  * Runs in the page before the app (page.addInitScript), so every screenshot sees the same moment:
  * - Date is fixed at `fixedAt` and does not move.
- * - Math.random is a seeded generator, seeded again when the test starts stepping frames.
+ * - Math.random is a seeded generator, which the test seeds again before the moment it shoots.
  * - performance.now and requestAnimationFrame's time stand still while the lake loads, so every per-frame step
  *   (clock deltas, texture scrolls, easing) stays at zero however long the software renderer takes. Then
- *   window.__shot.hold() stops drawing (so a wait costs no rendering), and window.__shot.step(n) reseeds Math.random
- *   and draws exactly n frames 1/60 s apart.
+ *   window.__shot.hold() stops drawing (so a wait costs no rendering), window.__shot.reseed() starts Math.random's
+ *   sequence over, and window.__shot.step(n, ms) draws exactly n frames `ms` apart (1/60 s unless given).
  */
 export function freezeTime(fixedAt: number) {
   const NativeDate = Date;
@@ -56,10 +56,10 @@ export function freezeTime(fixedAt: number) {
     hold() {
       manual = true;
     },
-    async step(frames: number) {
-      reseed();
+    reseed,
+    async step(frames: number, ms = 1000 / 60) {
       for (let i = 0; i < frames; i++) {
-        now += 1000 / 60;
+        now += ms;
         const due = [...queue.values()];
         queue.clear();
         for (const callback of due) callback(now);
