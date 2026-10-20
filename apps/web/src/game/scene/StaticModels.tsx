@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { useGLTF } from "@react-three/drei";
+import { useGLTF } from "./loadGltf";
 import * as THREE from "three";
 import { batchPlaced, disposeBatch } from "./scatterBatch";
 import { prepareToon, releaseToonCopy, type ToonLook } from "./ToonModel";
