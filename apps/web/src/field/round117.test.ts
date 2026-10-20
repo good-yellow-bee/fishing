@@ -42,3 +42,16 @@ describe("round 117 fixes: waters", () => {
     expect(notes.map((each) => each.text)).toEqual(["Zander on the drop-off"]);
   });
 });
+
+describe("round 117 fixes: an outing with only a lost fish", () => {
+  afterEach(() => vi.useRealTimers());
+
+  it("counts in a water's average as a blank", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-18T19:00:00"));
+    const { averageParts } = await import("./outingAverage");
+    const trips = [trip("a", "2026-10-10", "w"), trip("b", "2026-10-12", "w"), trip("c", "2026-10-18", "w", { lost: 1 })];
+    const fishOn = (id: string) => (id === "c" ? 0 : 6);
+    expect(averageParts(trips, fishOn, "2026-10-18")).toEqual({ average: "4 fish an outing on average", blank: "1 without a fish" });
+  });
+});

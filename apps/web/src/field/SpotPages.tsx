@@ -39,7 +39,7 @@ import { CopySummary } from "./CopySummary";
 import { spotSummary } from "./summaries";
 import { EditDelete } from "./EditDelete";
 import { fishCountLabel, formatDay, formatTimeOfDay, messageText, outingName, outingNameById, tripWhen } from "./format";
-import { outingCounted, outingDay, outNow, outNowAt, plainName } from "./tripDates";
+import { outingCounted, outingDay, outingFished, outNow, outNowAt, plainName } from "./tripDates";
 import { newestOutingFirst } from "./catchNeighbors";
 import { useLogbook } from "./LogbookState";
 import { locale, num, t, tn, useT } from "../i18n";
@@ -502,7 +502,7 @@ function SpotView() {
   // counts once it has a fish, as the average counts outings.
   const ownHere = summed;
   const seasonSoFar = (year: string) => ({
-    outings: countedTrips.filter((trip) => trip.date.startsWith(`${year}-`) && trip.date.slice(5) <= today.slice(5) && (trip.date < fishedBy || fishOn(trip.id) > 0)).length,
+    outings: countedTrips.filter((trip) => trip.date.startsWith(`${year}-`) && trip.date.slice(5) <= today.slice(5) && outingFished(trip, fishedBy, fishOn(trip.id) > 0 || Boolean(trip.lost || trip.missed))).length,
     fish: ownHere.filter((entry) => {
       // A night's small-hours fish counts on its outing's day, as Bests and the day search put it.
       const day = bookFishDay(book, entry);

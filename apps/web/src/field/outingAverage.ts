@@ -15,8 +15,9 @@ export function outingAverage(trips: readonly Trip[], fishOn: (tripId: string) =
 
 /** The average and its blank outings apart ("1 without a fish", or null), for a page that links the blank ones. */
 export function averageParts(trips: readonly Trip[], fishOn: (tripId: string) => number, today: string): { average: string; blank: string | null } | null {
-  // Today's outing counts once it has a fish; until then it is still the day's plan.
-  const fished = trips.filter((trip) => outingFished(trip, today, fishOn(trip.id) > 0));
+  // Today's outing counts once it has a fish, a fish lost or a strike missed, as Trips counts it; until then it is
+  // still the day's plan.
+  const fished = trips.filter((trip) => outingFished(trip, today, fishOn(trip.id) > 0 || Boolean(trip.lost || trip.missed)));
   if (fished.length < 2) return null;
   const counts = fished.map((trip) => fishOn(trip.id));
   // A few fish over many outings still reads as a few, not "0".

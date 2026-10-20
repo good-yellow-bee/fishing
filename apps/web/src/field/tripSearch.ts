@@ -3,7 +3,7 @@ import { dateWords, monthWord } from "./dateWords";
 import { singularStems } from "./pluralWord";
 import { readSizePlus } from "./sizePlus";
 import { isPlanned } from "./TripMonthHead";
-import { gaveWay, outingDay, ownTitle } from "./tripDates";
+import { outingCounted, outingDay, ownTitle } from "./tripDates";
 import { bookSpelling } from "./gear/pieceKey";
 import { isSampleOnly, isSampleOuting } from "./bookCopy";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
@@ -142,7 +142,8 @@ export function findTrips(
     // "game" and "sample" on their own ask for those outings, as "-game" and "-sample" leave them out.
     if (GAME.includes(part)) return !offPlayLake(trip);
     if (SAMPLE.includes(part)) return isSampleOuting(trip);
-    if (NO_FISH.includes(part)) return (trip.date < outingDay(today, now) || gaveWay(book, trip, now)) && fishOn(trip.id) === 0;
+    // As the average's "without a fish" counts them: today's with a fish lost or a strike missed too.
+    if (NO_FISH.includes(part)) return outingCounted(book, trip, outingDay(today, now), fishOn(trip.id), now) && fishOn(trip.id) === 0;
     if (LOST.includes(part)) return (trip.lost ?? 0) > 0;
     if (MISSED.includes(part)) return (trip.missed ?? 0) > 0;
     if (PLANNED.includes(part)) return isPlanned(trip, today, fishOn(trip.id), book);
