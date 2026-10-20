@@ -1441,6 +1441,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC250~~ | ~~News card scene58 covers SC248 and SC249: the cormorant keeping off the anchored boat and the bank-stand posts moved aside~~ (#1582) | scene | S |
 | ~~SC251~~ | ~~Calmer lake for reduced motion: creatures already held still, but the lake bed's caustic shimmer (the biggest moving area, up to a sixth of the frame) and the player's rocking rowboat kept going; with reduced motion the caustics now drift at a quarter pace and the boat rides the water's height without pitching or rolling (changed pixels a second apart, summer day: 16% to 11%)~~ (#1583) | scene | S |
 | ~~SC252~~ | ~~The fight above the card on a tall phone: the fight card sits at the foot of the lake, which on a portrait phone is its middle, right over the angler, the line and the fish; while a fish is on (hookset and fight) a phone held upright (narrower than 0.65) eases its view up 18% of its height, so the fight shows above the card, dropping back at once when it ends (so aiming and the catch photo never see it); tablets and wider screens unchanged~~ (#1587) | scene | S |
+| ~~SC253~~ | ~~News card scene59 covers SC251 and SC252: the fight above the card on an upright phone and a calmer lake for reduced motion~~ (#1590) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
