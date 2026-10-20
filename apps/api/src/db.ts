@@ -2,7 +2,7 @@ import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Database from "better-sqlite3";
-import { BAG_SIZE, SLAMS, fishById, TAG_RETURN_BONUS, TAGGABLE_IDS, isLakeHour, isTrophyWeight, releaseBonus, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type BonusId, type LodgeRelease, type LodgeTrack, type StudyFact, type TagReturn, type SpeciesRecord, type SpotId } from "@stillwater/shared";
+import { BAG_SIZE, SLAMS, fishById, TAG_RETURN_BONUS, TAGGABLE_IDS, isLakeHour, lakeSeason, releaseBonus, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type BonusId, type LodgeRelease, type LodgeTrack, type StudyFact, type TagReturn, type SpeciesRecord, type SpotId } from "@stillwater/shared";
 
 const dir = dirname(fileURLToPath(import.meta.url));
 export const dataDir = join(dir, "../data");
@@ -573,7 +573,8 @@ export function releaseCatch(userId: string, requestId: string): { row: CatchRow
     const row = findCatchByRequestId(userId, requestId);
     if (!row) return undefined;
     const species = fishById(row.species_id);
-    const bonus = change.changes === 1 && species ? releaseBonus(species, row.weight, row.spot, row.season) : 0;
+    // The season is the server's own, from when the catch was saved, not the one the client sent.
+    const bonus = change.changes === 1 && species ? releaseBonus(species, row.weight, row.spot, lakeSeason(new Date(row.created_at))) : 0;
     if (bonus) {
       db.prepare(`UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`).run(bonus, bonus, userId);
     }

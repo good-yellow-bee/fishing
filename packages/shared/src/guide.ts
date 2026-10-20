@@ -77,9 +77,14 @@ export function offItsNest(speciesId: string, spot: string, season: string | nul
   return season === "spring" && NEST_GUARDERS.has(speciesId) && NEST_SPOTS.has(spot);
 }
 
+/** Whether letting it go sends a guarder back to its nest: one off its nest and grown enough to hold one, past the middle of its kind's weights. */
+export function backToItsNest(species: FishSpecies, weight: number, spot: string, season: string | null | undefined): boolean {
+  return offItsNest(species.id, spot, season) && weight >= (species.minWeight + species.maxWeight) / 2;
+}
+
 /** What letting a fish go pays on top of its points: for a trophy, and for a guarder sent back to its nest. */
 export function releaseBonus(species: FishSpecies, weight: number, spot: string, season: string | null | undefined): number {
-  return (isTrophyWeight(species, weight) ? TROPHY_RELEASE_BONUS : 0) + (offItsNest(species.id, spot, season) ? NEST_RELEASE_BONUS : 0);
+  return (isTrophyWeight(species, weight) ? TROPHY_RELEASE_BONUS : 0) + (backToItsNest(species, weight, spot, season) ? NEST_RELEASE_BONUS : 0);
 }
 
 export type ShadowSize = "small" | "medium" | "large" | "huge";

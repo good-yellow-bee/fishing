@@ -64,9 +64,12 @@ describe("field guide clues", () => {
 describe("the release bonus", () => {
   const bass = fishById("smallmouth-bass")!;
   it("pays for a trophy, for a guarder sent back to its spring nest, and for both", () => {
-    expect(releaseBonus(bass, 2, "dock", "summer")).toBe(0);
-    expect(releaseBonus(bass, 2, "dock", "spring")).toBe(NEST_RELEASE_BONUS);
-    expect(releaseBonus(bass, 2, "point", "spring")).toBe(0);
+    const guarder = (bass.minWeight + bass.maxWeight) / 2;
+    expect(releaseBonus(bass, guarder, "dock", "summer")).toBe(0);
+    expect(releaseBonus(bass, guarder, "dock", "spring")).toBe(NEST_RELEASE_BONUS);
+    expect(releaseBonus(bass, guarder, "point", "spring")).toBe(0);
+    // Too small to hold a nest, it pays nothing extra.
+    expect(releaseBonus(bass, bass.minWeight, "dock", "spring")).toBe(0);
     expect(releaseBonus(bass, bass.maxWeight, "dock", "spring")).toBe(TROPHY_RELEASE_BONUS + NEST_RELEASE_BONUS);
     expect(releaseBonus(bass, bass.maxWeight, "dock", null)).toBe(TROPHY_RELEASE_BONUS);
   });

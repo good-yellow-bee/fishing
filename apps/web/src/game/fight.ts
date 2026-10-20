@@ -1,4 +1,4 @@
-import { isTrophyWeight, NEST_GUARDERS, NEST_SPOTS, offItsNest, type ChallengeId, type FishSpecies } from "@stillwater/shared";
+import { isTrophyWeight, offItsNest, type ChallengeId, type FishSpecies } from "@stillwater/shared";
 import { t } from "../i18n";
 import { BED_RAIDERS, difficulty01 } from "./logic";
 import type { Drag } from "./drag";
@@ -423,7 +423,6 @@ export const SUMMER_STRENGTH_TIRE = 0.85;
 export function summerStrengthTireMul(season: string | undefined, speciesId: string) {
   return season === "summer" && WARM_LOVERS.has(speciesId) ? SUMMER_STRENGTH_TIRE : 1;
 }
-export { NEST_GUARDERS, NEST_SPOTS };
 /** In spring a nest guarder hooked by its nest tires only this fast on a run or against the reel. */
 export const NEST_TIRE = 0.85;
 
