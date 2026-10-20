@@ -534,9 +534,12 @@ export function useFishingGame(
   };
   /** A pike-family fish following the lure to the bank: when it turns, when it leaves, and its take if the angler times the figure-eight. */
   const figureRef = useRef<{ turnAt: number; endAt: number; take: () => void; fish: { species: FishSpecies; weight: number } } | null>(null);
+  /** What the scene shows of a follow: the pike trailing the lure, then turning. */
+  const [follow, setFollow] = useState<"follow" | "turn" | null>(null);
   /** A follower that turned away without taking: like a dropped fish, it stays about for a cast straight back. */
   const turnAway = (figure: { fish: { species: FishSpecies; weight: number } }, message = t("It turned away and sank back into the deep."), hint = t("A follower turns away unless you figure-eight the lure as it turns. Cast again.")) => {
     figureRef.current = null;
+    setFollow(null);
     setOutcome({ kind: "miss", message, fish: figure.fish });
     if (!gotAwayRef.current) gotAwayRef.current = gotAwayAfterDrop(figure.fish.species, figure.fish.weight, spotRef.current, recaughtRef.current);
     resetToIdle(hint, "result");
@@ -691,6 +694,7 @@ export function useFishingGame(
     timers.current.nibbles?.forEach((id) => window.clearTimeout(id));
     timers.current.figure?.forEach((id) => window.clearTimeout(id));
     figureRef.current = null;
+    setFollow(null);
     window.clearTimeout(timers.current.snag);
     timers.current.shown?.();
     timers.current = {};
@@ -1237,6 +1241,7 @@ export function useFishingGame(
             if (phaseRef.current !== "waiting") return;
             // Not turning yet: a tap now is too soon.
             figureRef.current = { turnAt: Infinity, endAt: Infinity, take: takeBait, fish: bitten };
+            setFollow("follow");
             setHint(t("{fish} followed it to the bank! Figure-eight: tap as it turns…", { fish: t(species.name) }));
             fx.nibble();
             fx.haptic("nibble");
@@ -1247,12 +1252,14 @@ export function useFishingGame(
                 // Out of sight, it waits: the follow starts over when the angler is back.
                 if (document.visibilityState === "hidden") {
                   figureRef.current = null;
+                  setFollow(null);
                   timers.current.shown = whenShown(startFollow, document, 0);
                   return;
                 }
                 // The window runs from the call the angler sees, whatever the frame rate.
                 figure.turnAt = performance.now();
                 figure.endAt = figure.turnAt + FIGURE_WINDOW_MS;
+                setFollow("turn");
                 setHint(t("NOW — it's turning!"));
                 fx.plop();
                 fx.haptic("bite");
@@ -1270,6 +1277,7 @@ export function useFishingGame(
         }
         // A fish taking for real ends any follow.
         figureRef.current = null;
+        setFollow(null);
         fx.bite();
         if (hour === "night") fx.rodBell("ring");
         fx.haptic("bite");
@@ -1495,6 +1503,7 @@ export function useFishingGame(
         const figure = figureRef.current;
         if (figure) {
           figureRef.current = null;
+          setFollow(null);
           timers.current.figure?.forEach((id) => window.clearTimeout(id));
           const now = performance.now();
           if (now >= figure.turnAt && now <= figure.endAt) {
@@ -2171,6 +2180,7 @@ export function useFishingGame(
     toggleLamp,
     lurking,
     lurkerCloseInMs,
+    follow,
     strikeWindowMs,
     hotspot,
     frenzy,

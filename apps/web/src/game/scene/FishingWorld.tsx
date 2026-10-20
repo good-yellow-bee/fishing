@@ -85,6 +85,7 @@ import { ArticulatedFish, type FishDrive } from "./ArticulatedFish";
 import { FishShadow } from "./FishShadow";
 import { SchoolShadows } from "./SchoolShadows";
 import { LurkerShadow } from "./LurkerShadow";
+import { FollowShadow } from "./FollowShadow";
 import { fishSize, landedScale } from "./fishSize";
 import {
   LAND_DRIPS,
@@ -178,6 +179,8 @@ type Props = {
   lurking?: boolean;
   /** That fish is the one coming to bite: its shadow closes in on the float over this many ms. */
   lurkerCloseInMs?: number;
+  /** A pike following the lure in to the bank, then turning, while the angler figure-eights it. */
+  follow?: "follow" | "turn" | null;
   /** A topwater lure is tied on: every fish hits it at the top, like an ambush, in a big splash. */
   topwater?: boolean;
   hour: LakeHour;
@@ -2278,7 +2281,7 @@ function Tone({ hour }: { hour: LakeHour }) {
   return null;
 }
 
-function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, topwater = false, hour, sky, season = DEFAULT_SEASON, species, weight, golden = false, released = false, moon, wind, boatSwing = 0, headlamp = false, hotspot, groundbait = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
+function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, follow = null, topwater = false, hour, sky, season = DEFAULT_SEASON, species, weight, golden = false, released = false, moon, wind, boatSwing = 0, headlamp = false, hotspot, groundbait = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
   // How this fish takes the bait: a topwater lure makes every take a hit at the top.
   const take = species !== null ? takeStyle(species.id, topwater) : null;
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
@@ -2351,6 +2354,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       {littleOwlOut(hour, sky, season) && <PostOwl snow={dockSnowy(season)} moths={mothsOut(hour, season)} phase={phase} atDock={spot === "dock"} />}
       <SchoolShadows phase={phase} schooled={schooled} bobber={bobberWorld} />
       <LurkerShadow phase={phase} lurking={lurking} closeInMs={lurkerCloseInMs} bobber={bobberWorld} />
+      <FollowShadow phase={phase} follow={follow} bobber={bobberWorld} rodTip={rodTip} />
       {species && <FishShadow level={level} phase={phase} weight={weight} bobber={bobberWorld} speciesId={species.id} />}
       <StrikeSplash phase={phase} roll={take === "roll" || (species !== null && topwater)} />
       <CaughtFish
