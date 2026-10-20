@@ -59,7 +59,7 @@ export type FightSim = {
   lifting?: boolean;
   /** A run left unturned at a weedy spot ends with the fish in the weeds: line comes in slowly and it rests there a while. */
   weeded?: boolean;
-  /** At the dock, a run nobody turned has wrapped the line round a piling: reeling only rubs it until the fish swings free. */
+  /** At the dock or the sunken log, a run nobody turned has wrapped the line round the wood: reeling only rubs it until the fish swings free. */
   wrapped?: boolean;
   /** At the inlet, a run heading downstream that the angler isn't turning: the current helps it take more line. */
   downstream?: boolean;
@@ -467,7 +467,7 @@ export function fightWind(wind: string | undefined): FightWind | undefined {
 }
 export type FightWater = "open" | "weeds" | "current" | "deep" | "rocks" | "boat" | "pilings" | "log";
 /** Water where an unturned run wraps the line round wood: the dock's pilings, or the half-sunk log a fish was hooked tight to. */
-export function wrapsLine(water: FightWater | undefined): boolean {
+export function wrapsLine(water: FightWater | undefined): water is "pilings" | "log" {
   return water === "pilings" || water === "log";
 }
 /** The water a spot gives the fight. */
@@ -757,7 +757,7 @@ export function makeFight(
         // A clean run at the reeds or the point counts toward the landed card's note; one that went in spoils it.
         if ((weedy || water === "rocks" || wrapsLine(water)) && turnable && !sim.jump && !sim.roll && !sim.charge) {
           if (sim.weeded || sim.wrapped || rockedThisRun) fouled = true;
-          performance.clearOf = fouled ? undefined : weedy ? "weeds" : water === "pilings" || water === "log" ? water : "rocks";
+          performance.clearOf = fouled ? undefined : weedy ? "weeds" : wrapsLine(water) ? water : "rocks";
         }
         // At the inlet only a run downstream counts: turned upstream it keeps the note, left to run with the current it spoils it.
         if (water === "current" && turnable && !sim.jump && !sim.roll && !sim.charge && sim.runSide === DOWNSTREAM_SIDE) {

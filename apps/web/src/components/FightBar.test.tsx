@@ -426,7 +426,7 @@ describe("FightBar for screen readers", () => {
     ]);
     expect(habit("largemouth-bass")).toEqual([
       "Jumper: every second run is a leap, so let go when it comes up",
-      "Cover-diver: at the reeds or the dock it buries itself in cover and stays put, so turn every run there",
+      "Cover-diver: at the reeds, the dock or the sunken log it buries itself in cover and stays put, so turn every run there",
     ]);
     expect(habit("brook-trout")).toEqual([
       "Jumper: every second run is a leap, so let go when it comes up",
