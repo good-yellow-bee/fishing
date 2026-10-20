@@ -2478,6 +2478,28 @@ html[data-input="pad"] .fight-bar .on-pad {
   }
 }
 
+/* With large or larger text on a touch phone up to 375 px wide and 667 px tall, a bank chip with three notes wrapped eight rows deep
+   in its column beside the lure panel and hung the hint over the walk stick and the cast meter: the chip stops at
+   six rows with an ellipsis, three up to 360 px wide. A screen reader still reads every note. Its bottom padding
+   becomes a border the background fills, as the clip at the padding's edge let the next row's tops show. */
+@media (pointer: coarse) and (max-width: 375px) and (min-height: 501px) and (max-height: 667px) {
+  html[data-text-size] .stance-chip {
+    display: -webkit-box;
+    overflow: hidden;
+    padding-bottom: 0;
+    border-bottom: 6px solid transparent;
+    box-shadow: 0 1px rgba(220, 196, 150, 0.38);
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 6;
+  }
+}
+
+@media (pointer: coarse) and (max-width: 360px) and (min-height: 501px) and (max-height: 667px) {
+  html[data-text-size] .stance-chip {
+    -webkit-line-clamp: 3;
+  }
+}
+
 /* Under 360 px with larger text the header's links took three rows, which pushed the hint down under the walk stick
    (71 px of it on a 320 x 568 phone): its rows sit flush, each link keeping its 32 px, and the links drop their
    letter spacing, so they take two. */
