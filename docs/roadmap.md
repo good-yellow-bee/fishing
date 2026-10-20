@@ -1883,7 +1883,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT419~~ | ~~A giant that got away comes back as the bank's giant only while no one has landed it and its week still runs; otherwise it is just the big fish that got away~~ (#1625) | gameplay | S |
 | ~~GT420~~ | ~~The walk signs mark each bank whose giant is still out there (♦, named for a screen reader), and the stance chip names the giant of the bank the angler stands at~~ (#1627) | gameplay | S |
 | ~~GT421~~ | ~~A giant that breaks free learns the lure: for the rest of its week it will not take that lure again at its bank, still about or fresh, so the angler must tie on another to meet it; the loss says so, and the stance chip marks the giant shy of the tied lure~~ (#1629) | gameplay | M |
-| GT422 | News card game56 covers GT419-GT421 | ui | S |
+| ~~GT422~~ | ~~News card 2026-10-20-game56 covers GT420-GT421: giant signs and a giant that learns the lure~~ (#PR) | ui | S |
 
 ## Risks / open questions for the owner
 
