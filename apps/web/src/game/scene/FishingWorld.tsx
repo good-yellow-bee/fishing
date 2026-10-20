@@ -34,7 +34,6 @@ import { Angler } from "./Angler";
 import { RiseRings } from "./RiseRings";
 import { Mayflies } from "./Mayflies";
 import { RodBell } from "./RodBell";
-import { DockDog } from "./DockDog";
 import { dogOut } from "./dogMood";
 import { paperBoatOut } from "./paperDrift";
 import { BASE_FOV, fovFor } from "./cameraFov";
@@ -150,6 +149,7 @@ import { GOLDEN_ACCENT, GOLDEN_COLOR } from "../../components/FishMark";
 import { LIFT_RISE, LIGHT_PLUNGE, liftTilt, ROLL_SPLASH, RUN_PLUNGE, runSlide, takeStyle } from "../nibblePlan";
 import { DEFAULT_SEASON, lazyPart, usePartsFor, useSceneParts } from "./lazyPart";
 
+const DockDog = lazyPart("day", "DockDog");
 const Lightning = lazyPart("weather", "Lightning");
 const Aurora = lazyPart("night", "Aurora");
 const BankHedgehog = lazyPart("night", "BankHedgehog");

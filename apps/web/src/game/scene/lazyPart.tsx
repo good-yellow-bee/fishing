@@ -11,6 +11,7 @@ export const DEFAULT_SEASON: LakeSeason = "summer";
  * draws once its chunk arrives, and the chunks a visit may turn to (the weather, the night) are fetched ahead.
  */
 const GROUPS = {
+  day: () => import("./parts/day"),
   night: () => import("./parts/night"),
   winter: () => import("./parts/winter"),
   spring: () => import("./parts/spring"),
@@ -87,12 +88,13 @@ export function useSceneParts() {
 
 /**
  * The chunks a scene at this hour, sky and season shows parts from (partsFor.test.ts checks this both ways against
- * every part's own rule): its season's (summer's are all out on dry days only), the night's from dusk (but not
+ * every part's own rule): its season's (summer's are all out on dry days only), the day's at dawn and by day, the night's from dusk (but not
  * a snowy winter dusk), and the wet-weather one in rain (winter's rain falls as snow, which the winter chunk draws).
  */
 export function partsFor(hour: LakeHour, sky: Sky, season: LakeSeason): PartGroup[] {
   const daytime = hour === "dawn" || hour === "day";
   const groups: PartGroup[] = season !== "summer" || (daytime && sky !== "rain") ? [season] : [];
+  if (daytime) groups.push("day");
   if (!daytime && !(hour === "dusk" && season === "winter" && sky === "rain")) groups.push("night");
   if (sky === "rain" && season !== "winter") groups.push("weather");
   return groups;

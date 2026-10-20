@@ -8,7 +8,13 @@ import { partsFor, type PartGroup } from "./lazyPart";
  * Checks partsFor against each lazy part's own rule in LakeWorld and FishingWorld (`{rule(args) && <Part`), over
  * every hour, sky and season: whenever a part would be out, its chunk is asked for up front.
  */
-type Gate = { part: string; group: PartGroup; rule: (hour: LakeHour, sky: Sky, season: LakeSeason, storm: boolean) => boolean };
+type Gate = { part: string; group: PartGroup; rule: (hour: LakeHour, sky: Sky, season: LakeSeason, storm: boolean, wind: Wind) => boolean };
+type Wind = { x: number; z: number; wind: string };
+/** A still day and a blustery one, for rules that read the wind. */
+const WINDS: Wind[] = [
+  { x: 0, z: 0, wind: "calm" },
+  { x: 0.4, z: 0, wind: "strong" },
+];
 
 async function gates(): Promise<{ checked: Gate[]; unchecked: string[] }> {
   const checked: Gate[] = [];
@@ -24,7 +30,7 @@ async function gates(): Promise<{ checked: Gate[]; unchecked: string[] }> {
       if (!group) continue;
       const from = modules.get(fn!);
       const names = args!.split(",").map((a) => a.trim()).filter(Boolean);
-      if (!from || names.some((a) => !["hour", "sky", "season", "storm", "weather.rain"].includes(a))) {
+      if (!from || names.some((a) => !["hour", "sky", "season", "storm", "wind", "weather.rain"].includes(a))) {
         unchecked.push(part!);
         continue;
       }
@@ -32,7 +38,7 @@ async function gates(): Promise<{ checked: Gate[]; unchecked: string[] }> {
       checked.push({
         part: part!,
         group,
-        rule: (hour, sky, season, storm) => rule(...names.map((a) => ({ hour, sky, season, storm, "weather.rain": sky === "rain" })[a])),
+        rule: (hour, sky, season, storm, wind) => rule(...names.map((a) => ({ hour, sky, season, storm, wind, "weather.rain": sky === "rain" })[a])),
       });
     }
   }
@@ -44,11 +50,11 @@ describe("partsFor", () => {
     const { checked, unchecked } = await gates();
     expect(checked.length).toBeGreaterThan(40);
     // Parts on rules this can't run (stars, the moon road, lightning, the aurora) are night- or rain-only by their own code.
-    expect(unchecked.length).toBeLessThan(10);
+    expect(unchecked.length, unchecked.join(", ")).toBeLessThan(10);
     const missed = new Set<string>();
-    for (const hour of LAKE_HOURS) for (const sky of SKIES) for (const season of LAKE_SEASONS) for (const storm of [false, true]) {
+    for (const hour of LAKE_HOURS) for (const sky of SKIES) for (const season of LAKE_SEASONS) for (const storm of [false, true]) for (const wind of WINDS) {
       const asked = partsFor(hour, sky, season);
-      for (const gate of checked) if (gate.rule(hour, sky, season, storm) && !asked.includes(gate.group)) missed.add(`${gate.part} (${gate.group}) at ${hour}, ${sky}, ${season}`);
+      for (const gate of checked) if (gate.rule(hour, sky, season, storm, wind) && !asked.includes(gate.group)) missed.add(`${gate.part} (${gate.group}) at ${hour}, ${sky}, ${season}`);
     }
     expect([...missed]).toEqual([]);
   });
@@ -58,7 +64,7 @@ describe("partsFor", () => {
     const idle = new Set<string>();
     for (const hour of LAKE_HOURS) for (const sky of SKIES) for (const season of LAKE_SEASONS)
       for (const group of partsFor(hour, sky, season))
-        if (!checked.some((gate) => gate.group === group && [false, true].some((storm) => gate.rule(hour, sky, season, storm)))) idle.add(`${group} at ${hour}, ${sky}, ${season}`);
+        if (!checked.some((gate) => gate.group === group && [false, true].some((storm) => WINDS.some((wind) => gate.rule(hour, sky, season, storm, wind))))) idle.add(`${group} at ${hour}, ${sky}, ${season}`);
     expect([...idle]).toEqual([]);
   });
 });
