@@ -353,15 +353,15 @@ export function seasonTireMul(season: string | undefined, speciesId?: string) {
   return season === "winter" && !thrivesInCold(season, speciesId) ? WINTER_TIRE : 1;
 }
 /** Seconds of reeling before the angler's arm starts to tire in a fight. */
-export const ARM_FRESH_SEC = 45;
+export const ARM_FRESH_SEC = 9;
 /** Past that, the reel wins this much less line for each further second of reeling. */
-export const ARM_TIRE_PER_SEC = 0.01;
+export const ARM_TIRE_PER_SEC = 0.02;
 /** The slowest a tired arm reels, as a share of its fresh pace. */
 export const ARM_FLOOR = 0.7;
 /** Resting the reel, the arm gets back this many seconds of reeling for each second of rest. */
 export const ARM_REST_RECOVER = 0.5;
 /** Below this pace the fight's status says the arm is tiring. */
-export const ARM_TELL = 0.9;
+export const ARM_TELL = 0.95;
 
 /** How fast a tiring arm still reels after `reelSec` seconds of reeling, from 1 while it is fresh down to ARM_FLOOR. */
 export function armMul(reelSec: number): number {
@@ -709,6 +709,8 @@ export function makeFight(
     const pressed = reeling && !wasReeling;
     wasReeling = reeling;
     if (sim.netting) {
+      // Waiting at the net, the arm rests.
+      reelSec = Math.max(0, reelSec - dtSec * ARM_REST_RECOVER);
       // Its head comes up now and then; a strike then nets it, a strike with its head down sends it off on one short bolt.
       sim.netHead = (nowMs - netFrom) % NET_HEAD_EVERY_MS >= NET_HEAD_EVERY_MS - headMs;
       if (pressed && sim.netHead) return "landed";
