@@ -12,7 +12,7 @@ import { countedSearch } from "./countedSearch";
 import { RESUME_PARAM } from "./anotherCatch";
 import { hasSampleLeft, isSampleCatch, isSampleOnly, isSamplePlan, isSampleSpot, isSampleOuting, upcomingRealTrips, withoutSample } from "./bookCopy";
 import { outingFish } from "./outingFish";
-import { lateOutings, outNow, outingDay, plainName, sameName } from "./tripDates";
+import { lateOutings, outNow, outingDay, plainName, sameName, underWay } from "./tripDates";
 import { sheetOutings } from "./catchCsv";
 import { NEWS_ITEMS, markNewsSeen, newsDue, readSeenNews } from "../game/whatsNew";
 import { FIELD_NEWS } from "./fieldNews";
@@ -204,6 +204,7 @@ export function HomePage() {
   // Fish of their own logged beside the sample week: the invented part can go on its own.
   const sampleLeft = !sampleOnly && hasSampleLeft(storedBook);
   const next = upcoming[0];
+  const nextUnderWay = next ? underWay(book, next) : false;
   // The newest outing fished, for a Next with nothing planned: on a water still in the book.
   const lastOut = next ? undefined : [...sheetOutings(book, fishedBy).trips].filter((trip) => spotById(book, trip.spotId) && !isSampleOuting(trip)).sort(newestOutingFirst(book))[0];
   const lastOutRest = lastOut ? daysBetween(lastOut.date, today) : 0;
@@ -414,7 +415,7 @@ export function HomePage() {
           {next ? <LastTimeLine book={book} trip={next} today={today} /> : null}
           {/* A plan still ahead goes on the phone's calendar from here, as from its own page. */}
           {/* Today's too, until it is under way: a plan made this morning for the evening is worth a reminder. */}
-          {next && next !== lateOuting && !isSampleOuting(next) && (next.date > today || (next.date === today && catchesForTrip(book, next.id).length === 0 && !next.lost && !next.missed)) ? (
+          {next && next !== lateOuting && !isSampleOuting(next) && (next.date > today || (next.date === today && !nextUnderWay)) ? (
             <small className="next-log">
               <button type="button" className="text-button" onClick={() => saveOutingIcs(book, next, tackleItems ?? [], today)}>
                 {t("Add to calendar")}
@@ -422,8 +423,8 @@ export function HomePage() {
             </small>
           ) : null}
           {/* The plan for a message, as its own page copies it: who is coming along needs the day, the water and the bag. */}
-          {/* Until its first fish: an outing under way has nothing left to plan, as its page says. */}
-          {next && !isSampleOuting(next) && catchesForTrip(book, next.id).length === 0 ? (
+          {/* Until it is under way: an outing with a bite has nothing left to plan, as its page says. */}
+          {next && !isSampleOuting(next) && !nextUnderWay ? (
             <CopySummary text={() => planText(book, next, tackleItems ?? [])} file="stillwater-plan.txt" label={t("Copy the plan")} copied={t("Plan copied.")} saved={t("Plan saved as a file.")} />
           ) : null}
           {/* On the day, a fish goes straight onto this outing. */}

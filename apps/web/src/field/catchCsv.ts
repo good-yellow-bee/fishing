@@ -102,9 +102,9 @@ export function sheetOutings(book: Logbook, today: string): Logbook {
 export function tripsCsv(whole: Logbook, today: string): string {
   const book = sheetOutings(whole, today);
   const separator = getLang() === "pl" ? ";" : ",";
-  const header = [t("Date"), t("Trip"), t("Water"), t("Fish"), t("Released fish"), t("Kinds"), t("Lures"), t("Lost fish"), t("Missed strikes"), t("Note")];
+  const header = [t("Date"), t("Trip"), t("Water"), t("Fish"), t("Kinds"), t("Lures"), t("Lost fish"), t("Missed strikes"), t("Released fish"), t("Note")];
   const fish = new Map<string, number>();
-  // How many of them went back, for a club's catch-and-release return.
+  // How many of them went back, for a club's catch-and-release return: a new column before the note, so the older ones keep their places.
   const released = new Map<string, number>();
   // What each outing took, most first, in the sheet's language: "Zander ×2, Northern pike".
   const kinds = new Map<string, Map<string, number>>();
@@ -144,6 +144,6 @@ export function tripsCsv(whole: Logbook, today: string): string {
     // Newest first, a day's dusk before its dawn, as Trips lists them.
     .sort(newestOutingFirst(whole))
     // An untitled outing goes by its water's name, as the list names it.
-    .map((trip) => [trip.date, plainName(outingName(trip, book.spots)), plainName(spotById(book, trip.spotId)?.name ?? ""), String(fish.get(trip.id) ?? 0), String(released.get(trip.id) ?? 0), tallyOf(kinds, trip.id), tallyOf(lures, trip.id), String(trip.lost ?? 0), String(trip.missed ?? 0), noteText(trip.note)]);
+    .map((trip) => [trip.date, plainName(outingName(trip, book.spots)), plainName(spotById(book, trip.spotId)?.name ?? ""), String(fish.get(trip.id) ?? 0), tallyOf(kinds, trip.id), tallyOf(lures, trip.id), String(trip.lost ?? 0), String(trip.missed ?? 0), String(released.get(trip.id) ?? 0), noteText(trip.note)]);
   return sheet([header, ...rows], separator);
 }
