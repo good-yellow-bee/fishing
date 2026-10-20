@@ -25,6 +25,7 @@ export function ShoreTracks({ tracks }: { tracks: readonly LodgeTrack[] }) {
         toneMapped: false,
         blending: THREE.AdditiveBlending,
         side: THREE.DoubleSide,
+        forceSinglePass: true,
       }),
     [],
   );

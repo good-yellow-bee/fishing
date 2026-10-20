@@ -61,8 +61,8 @@ export function RainCurtain({ light }: { light: number }) {
   const shapes = useMemo(() => ({ sheet: new THREE.PlaneGeometry(WIDTH, TALL).translate(0, TALL / 2, 0), ring: new THREE.RingGeometry(0.82, 1, 16) }), []);
   const materials = useMemo(
     () => ({
-      sheet: new THREE.MeshBasicMaterial({ color: VEIL, map: textures.streaks, alphaMap: textures.mask, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide }),
-      ring: new THREE.MeshBasicMaterial({ color: RING, transparent: true, opacity: 0.4, depthWrite: false, toneMapped: false, side: THREE.DoubleSide }),
+      sheet: new THREE.MeshBasicMaterial({ color: VEIL, map: textures.streaks, alphaMap: textures.mask, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide, forceSinglePass: true }),
+      ring: new THREE.MeshBasicMaterial({ color: RING, transparent: true, opacity: 0.4, depthWrite: false, toneMapped: false, side: THREE.DoubleSide, forceSinglePass: true }),
     }),
     [textures],
   );

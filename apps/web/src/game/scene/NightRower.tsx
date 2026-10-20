@@ -79,7 +79,7 @@ export function NightRower() {
       map,
       lamp: new THREE.MeshBasicMaterial({ color: FLAME }),
       glow: new THREE.SpriteMaterial({ map, color: FLAME, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }),
-      streak: new THREE.MeshBasicMaterial({ map, color: FLAME, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide }),
+      streak: new THREE.MeshBasicMaterial({ map, color: FLAME, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, forceSinglePass: true }),
     };
   }, []);
   useEffect(

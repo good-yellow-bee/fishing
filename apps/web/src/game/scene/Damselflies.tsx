@@ -43,7 +43,7 @@ export function Damselflies() {
   const wings = useRef<THREE.InstancedMesh>(null);
   const shapes = useMemo(() => ({ body: damselBodyShape(), wing: damselWingShape() }), []);
   const body = useMemo(() => new THREE.MeshStandardMaterial({ color: "#ffffff", vertexColors: true, roughness: 0.35, metalness: 0.2 }), []);
-  const glass = useMemo(() => new THREE.MeshBasicMaterial({ color: "#e8f2f8", transparent: true, opacity: 0.45, side: THREE.DoubleSide, depthWrite: false }), []);
+  const glass = useMemo(() => new THREE.MeshBasicMaterial({ color: "#e8f2f8", transparent: true, opacity: 0.45, side: THREE.DoubleSide, forceSinglePass: true, depthWrite: false }), []);
   useEffect(
     () => () => {
       [shapes.body, shapes.wing, body, glass].forEach((item) => item.dispose());

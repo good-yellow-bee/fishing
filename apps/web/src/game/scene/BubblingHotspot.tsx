@@ -32,6 +32,7 @@ export function BubblingHotspot({ hotspot, weather }: { hotspot: Hotspot; weathe
         depthWrite: false,
         toneMapped: false,
         side: THREE.DoubleSide,
+        forceSinglePass: true,
       }),
     [],
   );

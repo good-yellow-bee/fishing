@@ -40,7 +40,7 @@ export function Spindrift({ wind }: { wind: { x: number; z: number } }) {
   const mesh = useRef<THREE.InstancedMesh>(null);
   const geometry = useMemo(() => new THREE.PlaneGeometry(1, 1), []);
   const texture = useMemo(wispTexture, []);
-  const material = useMemo(() => new THREE.MeshBasicMaterial({ map: texture, color: SNOW, transparent: true, depthWrite: false, side: THREE.DoubleSide }), [texture]);
+  const material = useMemo(() => new THREE.MeshBasicMaterial({ map: texture, color: SNOW, transparent: true, depthWrite: false, side: THREE.DoubleSide, forceSinglePass: true }), [texture]);
   useEffect(() => {
     material.opacity = OPACITY * spindriftStrength(wind);
   }, [material, wind]);

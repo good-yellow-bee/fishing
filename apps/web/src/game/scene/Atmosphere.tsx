@@ -96,6 +96,7 @@ export function LakeMist({ amount, color }: { amount: number; color: string }) {
         transparent: true,
         depthWrite: false,
         side: THREE.DoubleSide,
+        forceSinglePass: true,
       }),
     [texture],
   );

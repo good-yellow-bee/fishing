@@ -139,7 +139,7 @@ export function Sledders() {
   );
   const figure = useRef<THREE.Group>(null);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
-  const trackMaterial = useMemo(() => new THREE.MeshToonMaterial({ color: TRACK, gradientMap: toonRamp(), side: THREE.DoubleSide, transparent: true, opacity: 0.4, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }), []);
+  const trackMaterial = useMemo(() => new THREE.MeshToonMaterial({ color: TRACK, gradientMap: toonRamp(), side: THREE.DoubleSide, forceSinglePass: true, transparent: true, opacity: 0.4, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }), []);
   const spot = useMemo(() => makeSoftSpotTexture(0.2), []);
   const puffMaterial = useMemo(() => new THREE.MeshBasicMaterial({ map: spot, color: "#ffffff", transparent: true, opacity: 0.85, depthWrite: false, toneMapped: false }), [spot]);
   useEffect(

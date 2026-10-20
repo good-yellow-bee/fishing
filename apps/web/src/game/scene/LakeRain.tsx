@@ -28,6 +28,7 @@ export function LakeRain({ light, wind = NO_WIND }: { light: number; wind?: { x:
         depthWrite: false,
         toneMapped: false,
         side: THREE.DoubleSide,
+        forceSinglePass: true,
       }),
     [],
   );
@@ -40,6 +41,7 @@ export function LakeRain({ light, wind = NO_WIND }: { light: number; wind?: { x:
         depthWrite: false,
         toneMapped: false,
         side: THREE.DoubleSide,
+        forceSinglePass: true,
       }),
     [],
   );

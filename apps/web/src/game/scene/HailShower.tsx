@@ -28,8 +28,8 @@ export function HailShower({ light }: { light: number }) {
   const materials = useMemo(
     () => ({
       pellet: new THREE.MeshBasicMaterial({ color: ICE, toneMapped: false }),
-      spout: new THREE.MeshBasicMaterial({ color: SPRAY, transparent: true, opacity: 0.6, depthWrite: false, toneMapped: false, side: THREE.DoubleSide }),
-      ring: new THREE.MeshBasicMaterial({ color: SPRAY, transparent: true, opacity: 0.45, depthWrite: false, toneMapped: false, side: THREE.DoubleSide }),
+      spout: new THREE.MeshBasicMaterial({ color: SPRAY, transparent: true, opacity: 0.6, depthWrite: false, toneMapped: false, side: THREE.DoubleSide, forceSinglePass: true }),
+      ring: new THREE.MeshBasicMaterial({ color: SPRAY, transparent: true, opacity: 0.45, depthWrite: false, toneMapped: false, side: THREE.DoubleSide, forceSinglePass: true }),
     }),
     [],
   );

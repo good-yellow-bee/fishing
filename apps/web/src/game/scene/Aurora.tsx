@@ -45,6 +45,7 @@ export function Aurora() {
       fog: false,
       toneMapped: false,
       side: THREE.DoubleSide,
+      forceSinglePass: true,
       blending: THREE.AdditiveBlending,
     };
     return { sky: makeCurtain(), lake: makeCurtain(), skyMaterial: new THREE.MeshBasicMaterial(options), lakeMaterial: new THREE.MeshBasicMaterial(options) };

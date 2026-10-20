@@ -29,7 +29,7 @@ export function PlayerHeadlamp({ phase, float }: { phase: ScenePhase; float: THR
   const fade = useMemo(() => beamFade(0.8), []);
   const materials = useMemo(
     () => ({
-      beam: new THREE.MeshBasicMaterial({ map: fade, color: "#fff1c4", transparent: true, opacity: 0.32, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }),
+      beam: new THREE.MeshBasicMaterial({ map: fade, color: "#fff1c4", transparent: true, opacity: 0.32, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, forceSinglePass: true, toneMapped: false }),
       glow: new THREE.SpriteMaterial({ map: spot, color: LAMP, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }),
       pool: new THREE.MeshBasicMaterial({ map: spot, color: "#fff1c4", transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }),
     }),
