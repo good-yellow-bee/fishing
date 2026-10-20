@@ -142,6 +142,7 @@ export const PL_GAME: PlBook = {
   "This bank was fished hard yesterday, so its fish are still wary for your first casts.": "Wczoraj tu dużo łowiono, więc ryby są jeszcze płochliwe przy pierwszych rzutach.",
   "Rock edge: runs dive off the ledge, pulling harder but tiring the fish faster": "Skalna krawędź: odjazdy nurkują za półkę, ciągną mocniej, ale szybciej męczą rybę",
   "Egg raider: chased off the beds by the sunfish, its first run is the long one": "Złodziej ikry: przegnany z gniazd przez bassy niebieskoskrzele, pierwszy odjazd ma najdłuższy",
+  "Foam lane: the wind's drift is strongest here, so a slack line drifts out faster still": "Pas piany: tu wiatr znosi najmocniej, więc luźna żyłka odpływa jeszcze szybciej",
   "Drag: light": "Hamulec: lekki",
   "Drag: normal": "Hamulec: zwykły",
   "Drag: heavy": "Hamulec: mocny",
