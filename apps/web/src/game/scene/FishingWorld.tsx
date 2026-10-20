@@ -1,4 +1,4 @@
-import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, Suspense, type ComponentRef, type RefObject } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, Suspense, type ComponentRef, type RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { useGLTF } from "./loadGltf";
@@ -2218,6 +2218,45 @@ function FrameCap() {
   return null;
 }
 
+/** The longest the lake's first frame waits on its shaders; past it, any still compiling finish on first use. */
+const PRECOMPILE_MAX_MS = 4000;
+
+/**
+ * Compiles every material's shaders before the lake's first frame, in parallel where the browser can
+ * (KHR_parallel_shader_compile), so the first frames don't stall the page compiling them one by one. Frames run
+ * but draw nothing meanwhile (HoldFrames); a material swapped or dropped meanwhile (three's compileAsync trips on
+ * those) just stops counting.
+ */
+function Precompile() {
+  const [done, setDone] = useState(false);
+  const ready = useCallback(() => setDone(true), []);
+  return done ? null : <HoldFrames onReady={ready} />;
+}
+
+function HoldFrames({ onReady }: { onReady: () => void }) {
+  const gl = useThree((state) => state.gl);
+  const scene = useThree((state) => state.scene);
+  const camera = useThree((state) => state.camera);
+  // A frame callback with a priority takes over drawing from R3F; this one draws nothing until it unmounts.
+  useFrame(() => {}, 1);
+  useLayoutEffect(() => {
+    let timer = 0;
+    const materials = gl.compile(scene, camera);
+    const started = performance.now();
+    const check = () => {
+      const compiling = [...materials].some((material) => {
+        const program = (gl.properties.get(material) as { currentProgram?: { isReady(): boolean } } | undefined)?.currentProgram;
+        return program ? !program.isReady() : false;
+      });
+      if (compiling && performance.now() - started < PRECOMPILE_MAX_MS) timer = window.setTimeout(check, 10);
+      else onReady();
+    };
+    check();
+    return () => window.clearTimeout(timer);
+  }, [gl, scene, camera, onReady]);
+  return null;
+}
+
 /** Steps the effects, shadows and picture down once if the frame rate sags, unless the player picked them themselves. */
 function FrameWatch() {
   const watch = useMemo(() => createFrameWatch(), []);
@@ -2272,6 +2311,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       <Tone hour={hour} />
       <FrameWatch />
       <FrameCap />
+      <Precompile />
       <LakeWorld spot={spot} hour={hour} sky={sky} season={season} hotspot={hotspot} moon={moon} wind={wind} />
       {tracks && tracks.length > 0 && <ShoreTracks tracks={tracks} />}
       {groundbait && <GroundbaitCloud bait={groundbait} />}
