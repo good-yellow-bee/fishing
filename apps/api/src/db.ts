@@ -343,6 +343,11 @@ export function payGiant(catchId: string, userId: string, bonus: number) {
   })();
 }
 
+/** How many of the weekly giants the angler was first to land. */
+export function countGiantsLanded(userId: string): number {
+  return (db.prepare(`SELECT COUNT(*) as n FROM giant_landed WHERE user_id = ?`).get(userId) as { n: number }).n;
+}
+
 /** Who landed each of a week's giants, and when. */
 export function listGiantsLanded(week: string): { spot: string; displayName: string; landedAt: string }[] {
   return db

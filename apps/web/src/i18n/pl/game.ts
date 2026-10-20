@@ -173,6 +173,21 @@ export const PL_GAME: PlBook = {
   "Wait for it to turn, then figure-eight. Cast again.": "Poczekaj, aż zawróci, wtedy zrób ósemkę. Rzuć jeszcze raz.",
   "{note} · {name}, its giant, is still out there": "{note} · {name}, olbrzym tego łowiska, wciąż czeka",
   "giant: {name}": "olbrzym: {name}",
+  "{bank}: leave the shiner out on a night line here": "{bank}: zostaw tu złotawca na nocnej lince",
+  "{bank}: bring in your night line": "{bank}: wyciągnij swoją nocną linkę",
+  "{note} · your night line is out here": "{note} · tu stoi twoja nocna linka",
+  "Night line": "Nocna linka",
+  "Check line": "Sprawdź linkę",
+  "night line soaking": "nocna linka czeka",
+  "night line ready": "nocna linka gotowa",
+  "night line left too long": "nocna linka stała za długo",
+  "night line out at the {bank}": "nocna linka czeka na łowisku: {bank}",
+  "You leave the shiner out on a night line here. Come back to check it after six hours, and within two days.": "Zostawiasz złotawca na nocnej lince. Wróć ją sprawdzić po sześciu godzinach, ale przed upływem dwóch dni.",
+  "The night line sat out too long: the bait is long gone, and nothing is on it.": "Nocna linka stała za długo: przynęty dawno nie ma i nic na niej nie siedzi.",
+  "The night line comes in empty: something stole the shiner in the dark.": "Nocna linka wraca pusta: coś ukradło złotawca w ciemności.",
+  "{fish} took the shiner on your night line.": "{fish} wziął złotawca na twojej nocnej lince.",
+  "giant: {name}, shy of this lure": "olbrzym: {name}, boi się tej przynęty",
+  "{name} knows the {lure} now, and won't take one again this week.": "{name} zna już tę przynętę ({lure}) i w tym tygodniu jej nie weźmie.",
   "It's {name}, the bank's giant!": "To {name}, olbrzym tego łowiska!",
   "{fish}: you landed {name}, this week's giant of the bank!": "{fish}: złowiony {name}, olbrzym tego łowiska w tym tygodniu!",
   "{name}, the bank's giant · +{points} pts": "{name}, olbrzym łowiska · +{points} pkt",
@@ -221,22 +236,18 @@ export const PL_GAME: PlBook = {
   "Not yet": "Jeszcze nie",
   "All three found: the {legend} bites far more often at the {bank} for the rest of the week.": "Wszystkie trzy znalezione: {legend} bierze dużo częściej na łowisku {bank} do końca tygodnia.",
   "The {fish} your hunt tracked down haunts this water.": "{fish}, którego wytropiono, krąży po tej wodzie.",
-  "A pike, tiger muskie or ghost pike chasing a spinner, spoon or streamer may now follow it right to the bank without taking. Wait for the call that it is turning, then tap to figure-eight the lure, and it hits; tap too soon, or not at all, and it sinks away.":
-    "Szczupak, tygrysi szczupak albo szczupak widmo goniący błystkę obrotową, wahadłówkę lub streamer może teraz odprowadzić ją aż do brzegu bez brania. Poczekaj na sygnał, że zawraca, i stuknij, by zrobić ósemkę przynętą, a uderzy; stuknij za wcześnie albo wcale, a zejdzie w głębinę.",
+  "The walk signs now mark with a diamond each bank whose giant is still out there, and where you stand the chip names it. A giant that breaks free learns the lure it was hooked on and won't take one again that week: tie on another to meet it again.":
+    "Drogowskazy oznaczają teraz rombem każde łowisko, którego olbrzym wciąż czeka, a tam, gdzie stoisz, plakietka podaje jego imię. Olbrzym, który się zerwie, zapamiętuje przynętę, na którą go zacięto, i w tym tygodniu już jej nie weźmie: załóż inną, by znów go spotkać.",
+  "The angler who fishes the day's crowded bank now sits there on a camp chair a few steps from you, rod out, from dawn to dusk. And a pike that follows your lure in for the figure-eight now shows as a long shadow behind the float, swinging round as it turns.":
+    "Wędkarz, który łowi dziś na zatłoczonym brzegu, siedzi teraz tam na składanym krzesełku kilka kroków od ciebie, z wędką nad wodą, od świtu do zmierzchu. A szczupaka, który odprowadza przynętę do brzegu, widać teraz jako długi cień za spławikiem, zawracający razem z rybą.",
   "The lake opens more smoothly on a phone: it prepares its shading before the first frame instead of stalling as it draws each thing for the first time, the hedgerows no longer hitch as the evening falls, and the windsock, the rod bell and the damselflies are drawn in the same simple style as the rest.":
     "Jezioro otwiera się płynniej na telefonie: przygotowuje cieniowanie przed pierwszą klatką, zamiast przycinać się przy pierwszym rysowaniu każdej rzeczy, żywopłoty nie przycinają już, gdy zapada wieczór, a rękaw wiatrowy, dzwonek na wędce i świtezianki rysowane są w tym samym prostym stylu co reszta.",
   "Hedgerows now part the upper hills into fields, as a phone held upright sees them above the farm, green through spring and summer, turning in the fall and bare over the winter snow. And at night the moon road and the lights mirrored on the lake shimmer softly instead of lying in hard bars.":
     "Żywopłoty dzielą teraz górne zbocza wzgórz na pola, widoczne nad farmą na telefonie trzymanym pionowo: zielone wiosną i latem, przebarwione jesienią i nagie na zimowym śniegu. A nocą księżycowa ścieżka i światła odbite w jeziorze migoczą łagodnie zamiast leżeć twardymi pasami.",
   "The lake asks a little less of your phone again: shadows are redrawn at most thirty times a second, the shore's foam does less work each frame, and the anglers you only see in rain or fog and the deer, moose and hare of dawn and dusk now load only when they come out.":
     "Jezioro znów trochę mniej obciąża twój telefon: cienie odświeżają się najwyżej trzydzieści razy na sekundę, piana przy brzegu wymaga mniej pracy w każdej klatce, a wędkarze widoczni tylko w deszczu lub mgle oraz jelenie, łosie i zające o świcie i zmierzchu wczytują się dopiero, gdy się pojawiają.",
-  "If the lake runs slowly on your phone, it now also turns shadows off and draws a lighter picture from your next visit, besides lighter effects, and says so; Settings can turn each back. And the moving water costs less of every frame, so the lake runs a little smoother everywhere.":
-    "Jeśli jezioro działa wolno na twoim telefonie, od następnej wizyty wyłącza też cienie i rysuje lżejszy obraz, oprócz lżejszych efektów, i mówi o tym; każde z nich możesz przywrócić w Ustawieniach. A ruchoma woda zabiera mniej z każdej klatki, więc jezioro działa nieco płynniej wszędzie.",
-  "On a phone held upright, the view now lifts while you play a fish, so you can watch the fight above the fight card instead of behind it. And with reduced motion on, the lake bed's shimmer slows and your boat no longer rocks.":
-    "Na telefonie trzymanym pionowo widok unosi się teraz podczas holu, więc walkę z rybą widać nad kartą holu, a nie za nią. A przy ograniczonym ruchu migotanie dna jeziora zwalnia, a twoja łódka już się nie kołysze.",
-  "Out on the boat, the cormorant no longer dries its wings right beside you: it slips off its rock and fishes out on the far side while you are at anchor. And at the bank stands the lantern post now stands beside you instead of in front of the camera.":
-    "Na łódce kormoran nie suszy już skrzydeł tuż obok ciebie: gdy stoisz na kotwicy, zsuwa się ze swojego kamienia i łowi po drugiej stronie. A na stanowiskach na brzegu słupek z latarnią stoi teraz obok ciebie, a nie przed kamerą.",
-  "Every week each bank now holds a named giant, shared by the whole lodge: a big fish of a kind that lives there, which comes up only rarely. The first angler to land one is paid 200 points and named on the Board, and that giant is gone for everyone until Monday.":
-    "Co tydzień każde łowisko kryje teraz nazwanego olbrzyma, wspólnego dla całej przystani: dużą rybę gatunku, który tam żyje, pokazującą się tylko z rzadka. Pierwsza osoba, która go złowi, dostaje 200 punktów i trafia na tablicę, a olbrzym znika dla wszystkich aż do poniedziałku.",
+  "With a live shiner on the hook, the sign of the bank you stand at can now leave it out on a night line. Come back six hours to two days later and the same sign brings it in, often with one of the bank's night feeders on it. And a new badge, Giant hunter, waits for whoever is first to land three of the weekly giants.":
+    "Z żywym złotawcem na haczyku drogowskaz łowiska, na którym stoisz, pozwala teraz zostawić go na nocnej lince. Wróć po sześciu godzinach, ale przed upływem dwóch dni, a ten sam drogowskaz ją wyciągnie, często z jedną z nocnych ryb tego łowiska. Czeka też nowa odznaka, Łowca olbrzymów, dla osoby, która jako pierwsza złowi trzy cotygodniowe olbrzymy.",
   "Tight to the lily pads, where the bass and pike wait in ambush.": "Tuż przy liściach grzybieni, gdzie w zasadzce czekają bassy i szczupaki.",
   "Tight to the far rock, where the walleye hold in its shadow.": "Tuż przy dalekiej skale, gdzie w jej cieniu trzymają się sandacze.",
   "Along the rock edge, where the point drops off and the bass hold.": "Wzdłuż skalnej krawędzi, gdzie cypel opada w głąb i trzymają się bassy.",
@@ -833,8 +844,8 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
-  "With a screen reader, the call to strike is now said the moment a fish takes, not after the hint before it; in your first fight the coach no longer repeats each run over the fight card; and following Field log from the lake lands on the page's heading. On a small or sideways phone the fight card keeps clear of the Reel button.":
-    "Z czytnikiem ekranu wezwanie do zacięcia pada teraz w chwili brania, a nie po wcześniejszej podpowiedzi; w pierwszym holu podpowiedzi nie powtarzają każdego odjazdu obok karty holu; a przejście z jeziora do dziennika trafia na nagłówek strony. Na małym lub poziomo trzymanym telefonie karta holu nie wchodzi już pod przycisk zwijania.",
+  "On a phone you can now watch the whole fight: the fight card moves up to the top of the screen, over the far shore, and the header steps aside until the fish is in; held sideways it waits beside the action, above the steering buttons. Left-handed, the steering buttons now take the other corner from the Reel button instead of lying under it.":
+    "Na telefonie widać teraz cały hol: karta holu przechodzi na górę ekranu, nad dalekim brzegiem, a nagłówek ustępuje jej miejsca, aż ryba będzie na brzegu; na telefonie trzymanym poziomo czeka z boku, nad przyciskami sterowania. Dla leworęcznych przyciski sterowania stoją teraz w drugim rogu niż przycisk zwijania, a nie pod nim.",
   "{lure} · good here": "{lure} · dobra tutaj",
   "This bank suits it: the bites come sooner.": "Ten brzeg jej sprzyja: brania przychodzą szybciej.",
   "{lure} · good now": "{lure} · dobra teraz",
@@ -959,10 +970,6 @@ export const PL_GAME: PlBook = {
     "W szare, pochmurne dni w chmurach co jakiś czas otwiera się prześwit i przez jezioro przesuwa się plama słońca, a w dół ukośnie schodzą do niej blade promienie. W wietrzne zimowe dni wiatr zrywa śnieg ze wzgórz za drugim brzegiem i niesie go wzdłuż nich długimi białymi smugami.",
   "On winter days snow lies white on the hills behind the lake, and two children take turns sledging down a run between the far trees, rushing down in a spray of snow and trudging back up pulling their sleds.":
     "W zimowe dni na wzgórzach za jeziorem leży biały śnieg, a dwoje dzieci na zmianę zjeżdża na sankach po torze między drzewami na drugim brzegu, pędząc w obłoku śniegu i wspinając się z powrotem z sankami na sznurku.",
-  "The lake now runs a little smoother on a phone: it spends less of each frame sorting out how to draw its creatures and their shadows. And on spring nights the pollen on the water no longer glows yellow in the dark.":
-    "Jezioro działa teraz nieco płynniej na telefonie: w każdej klatce traci mniej czasu na ustalanie, jak narysować zwierzęta i ich cienie. A wiosenną nocą pyłek na wodzie nie świeci już na żółto w ciemności.",
-  "At night your headlamp now draws moths: from spring to fall a few find the beam one by one and flutter round it, and on summer nights a bat comes now and then to hawk them.":
-    "Nocą twoja czołówka przyciąga teraz ćmy: od wiosny do jesieni kilka po kolei odnajduje snop światła i krąży wokół niego, a w letnie noce co jakiś czas przylatuje nietoperz, żeby na nie zapolować.",
   "A search's summary now splits its fish by lure too, each opening that lure's fish, and a fish caught after midnight says whose night it counts on. The catch form finds a kind typed in Polish however the book wrote it.":
     "Podsumowanie wyszukiwania dzieli też ryby według przynęty, a każda otwiera swoje ryby; ryba złowiona po północy mówi, do której nocy się liczy. Formularz połowu znajduje gatunek wpisany po polsku, jakkolwiek zapisano go w dzienniku.",
   "Two outings on one water and day now show when each one's fish came, so a dawn and a dusk tell apart on Trips. The outing search finds those “with a note” and those left “untitled”, and an outing's page names kinds and lures as the rest of the book does.":
@@ -977,8 +984,6 @@ export const PL_GAME: PlBook = {
     "Pole „Następna” na stronie głównej mówi „Teraz na wodzie”, gdy trwa dzisiejsza wyprawa, i pozwala dodać dzisiejszy plan do kalendarza, dopóki wyprawa się nie zaczęła. Arkusz wypraw liczy ryby wypuszczone na każdej wyprawie.",
   "A search's summary splits its fish by water too, each opening that water's. A fish's page says how near it came to your longest or heaviest of its kind, and a kind typed two ways, such as Perch and Perches, keeps one name and one record on every catch page.":
     "Podsumowanie wyszukiwania dzieli ryby także według łowiska, a każde otwiera ryby z tego łowiska. Strona ryby mówi, ile zabrakło do najdłuższego lub najcięższego okazu tego gatunku, a gatunek wpisany na dwa sposoby, np. Perch i Perches, ma jedną nazwę i jeden rekord na każdej stronie połowów.",
-  "The lake now opens sooner, above all on a phone: the creatures you only meet at night, in one season or in the rain load when their time comes instead of all at once, without popping in when they appear.":
-    "Jezioro otwiera się teraz szybciej, zwłaszcza na telefonie: zwierzęta, które spotyka się tylko nocą, w jednej porze roku albo w deszczu, wczytują się dopiero, gdy nadchodzi ich pora, a nie wszystkie naraz, i nie wyskakują znikąd, kiedy się pojawiają.",
   "An outing's page opens every outing on its water in one tap, and a copied outing says how many of the fish hooked were landed.":
     "Strona wyprawy jednym dotknięciem otwiera wszystkie wyprawy na tym łowisku, a skopiowana wyprawa podaje, ile z zaciętych ryb wyholowano.",
   "On Waters, a water's card says Out now while you are fishing it, and a water's page says when its first fish came. A kind typed two ways, such as Perch and Perches, is one kind on every page, chip and record.":

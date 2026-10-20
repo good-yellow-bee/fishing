@@ -244,6 +244,8 @@ import { bedColor, bedHeight, causticStrength, glitterDirection, glitterOnWater,
 import { DockFrost } from "./DockFrost";
 import { WindowGlow } from "./WindowGlow";
 import { HillHedges } from "./HillHedges";
+import { RivalAngler } from "./RivalAngler";
+import { rivalOut } from "./rivalSeat";
 import { lazyPart } from "./lazyPart";
 
 const Canoeist = lazyPart("day", "Canoeist");
@@ -2376,6 +2378,7 @@ export const LakeWorld = memo(function LakeWorld({
       {stridersOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Striders />}
       {whirligigsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Whirligigs />}
       <Shack />
+      {rivalOut(hour) && <RivalAngler />}
       <Campfire lit={campfireLit(hour, sky)} hour={hour} wind={wind} />
       <Woodpile season={season} />
       {pumpkinsOut(season) && <Pumpkins hour={hour} />}
