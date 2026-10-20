@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, NEST_GUARDERS, type FishSpecies } from "@stillwater/shared";
-import { DIVERS, FRAYED_SNAP, LINE_SPINNERS, NET_SHY_MS, SLIPPERS, THRASH_HEAD_MS, NET_BOLT_LINE, NET_WAIT_MS, NET_HEAD_EVERY_MS, NET_HEAD_MS, netsFish, liftsStickerInOne, STRONG_LIFT_STRENGTH, TEETH_SEC, TOOTHY, CHARGERS, CHARGE_SLACK_SEC, BREACHERS, BROADSIDE_REEL, BROADSIDERS, QUIT_TIRE, QUITTERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, FLOOD_DRIFT, floodedInlet, BOAT_RUN, STRONG_WIND_BOAT_RUN, boatSwingShare, WIND_SLACK, WINTER_TIRE, seasonTireMul, thrivesInCold, COLD_LOVERS, SUMMER_TIRE, COLDWATER, warmTireMul, rainCooled, deepCooled, FALL_RUN_TIRE, FALL_RUNNERS, runTireMul, SPRING_RUN_TIRE, SPRING_RUNNERS, springRunTireMul, CURRENT_FIGHTER_TIRE, CURRENT_FIGHTERS, currentTireMul, FALL_FEED_TIRE, FALL_FEEDERS, fallFeedTireMul, RAIN_HUNTER_TIRE, SCENT_HUNTERS, rainHunterTireMul, SUMMER_STRENGTH_TIRE, WARM_LOVERS, summerStrengthTireMul, NEST_TIRE, nestTireMul, NIGHT_HUNTER_TIRE, NIGHT_HUNTERS, nightTireMul, SPAWN_SPENT_TIRE, EARLY_SPAWNERS, spentTireMul, TWILIGHT_HUNTER_TIRE, TWILIGHT_HUNTERS, twilightTireMul, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, TREBLE_HOLD, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD, SHAKE_MS, SHAKE_GRACE_SEC, WITH_RUN_DRIFT, WITH_RUN_GRACE_SEC, WITH_RUN_REEL, TURNED_HEAD_MS, TURNED_HEAD_REEL, DRAG_RUN_LINE, DRAG_RUN_PULL, HEAVY_DRAG_CAP, WEED_BALL_REEL, FOAM_DRIFT, findsSecondWind, SECOND_WIND_AT, SECOND_WIND_GAIN, SECOND_WIND_GATHER_MS } from "./fight";
+import { DIVERS, FRAYED_SNAP, LINE_SPINNERS, NET_SHY_MS, SLIPPERS, THRASH_HEAD_MS, NET_BOLT_LINE, NET_WAIT_MS, NET_HEAD_EVERY_MS, NET_HEAD_MS, netsFish, liftsStickerInOne, STRONG_LIFT_STRENGTH, TEETH_SEC, TOOTHY, CHARGERS, CHARGE_SLACK_SEC, BREACHERS, BROADSIDE_REEL, BROADSIDERS, QUIT_TIRE, QUITTERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, FLOOD_DRIFT, floodedInlet, BOAT_RUN, STRONG_WIND_BOAT_RUN, boatSwingShare, WIND_SLACK, WINTER_TIRE, seasonTireMul, thrivesInCold, COLD_LOVERS, SUMMER_TIRE, COLDWATER, warmTireMul, rainCooled, deepCooled, FALL_RUN_TIRE, FALL_RUNNERS, runTireMul, SPRING_RUN_TIRE, SPRING_RUNNERS, springRunTireMul, CURRENT_FIGHTER_TIRE, CURRENT_FIGHTERS, currentTireMul, FALL_FEED_TIRE, FALL_FEEDERS, fallFeedTireMul, RAIN_HUNTER_TIRE, SCENT_HUNTERS, rainHunterTireMul, SUMMER_STRENGTH_TIRE, WARM_LOVERS, summerStrengthTireMul, NEST_TIRE, nestTireMul, NIGHT_HUNTER_TIRE, NIGHT_HUNTERS, nightTireMul, SPAWN_SPENT_TIRE, EARLY_SPAWNERS, spentTireMul, TWILIGHT_HUNTER_TIRE, TWILIGHT_HUNTERS, twilightTireMul, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, TREBLE_HOLD, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD, SHAKE_MS, SHAKE_GRACE_SEC, WITH_RUN_DRIFT, WITH_RUN_GRACE_SEC, WITH_RUN_REEL, TURNED_HEAD_MS, TURNED_HEAD_REEL, DRAG_RUN_LINE, DRAG_RUN_PULL, HEAVY_DRAG_CAP, WEED_BALL_REEL, FOAM_DRIFT, findsSecondWind, SECOND_WIND_AT, SECOND_WIND_GAIN, SECOND_WIND_GATHER_MS, ARM_FLOOR, ARM_FRESH_SEC, armMul } from "./fight";
 import { nextDrag, type Drag } from "./drag";
 
 function fish(id: string) {
@@ -2097,5 +2097,35 @@ describe("second fight habits", () => {
 
   it("marks the bluegill as the line-spinner", () => {
     expect(LINE_SPINNERS.has("bluegill")).toBe(true);
+  });
+});
+
+describe("the angler's arm in a long fight", () => {
+  it("reels at full pace while fresh, then less each second of reeling past it, down to a floor", () => {
+    expect(armMul(ARM_FRESH_SEC)).toBe(1);
+    expect(armMul(ARM_FRESH_SEC + 10)).toBeCloseTo(0.9);
+    expect(armMul(10_000)).toBe(ARM_FLOOR);
+  });
+
+  it("tires only while reeling, and rests back while the reel is still", () => {
+    const f = makeFight(fish("pike"), 14.5, 8, () => 0.5);
+    let now = 0;
+    // A long sulk or wrap with the reel still never tires the arm.
+    for (; now < (ARM_FRESH_SEC + 30) * 1000; now += 50) f.step(now, 0.05, false);
+    expect(f.sim.armTired).toBeUndefined();
+    const reelFor = (sec: number) => {
+      for (const end = now + sec * 1000; now < end; now += 50) f.step(now, 0.05, true);
+    };
+    reelFor(ARM_FRESH_SEC + 15);
+    expect(f.sim.armTired).toBe(true);
+    for (const end = now + 40_000; now < end; now += 50) f.step(now, 0.05, false);
+    expect(f.sim.armTired).toBeUndefined();
+  });
+
+  it("still lands a fish a weak angler could land, however long the fight runs", () => {
+    const f = makeFight(fish("pike"), 14.5, 1, seeded(7));
+    let outcome: FightOutcome = "fighting";
+    for (let now = 0; outcome === "fighting" && now < 600_000; now += 50) outcome = f.step(now, 0.05, f.sim.surge !== 2 && f.sim.tension < 0.6);
+    expect(outcome).toBe("landed");
   });
 });
