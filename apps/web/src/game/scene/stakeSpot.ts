@@ -8,7 +8,7 @@ import { DROPOFF_STAND, INLET_STAND, REEDS_STAND } from "./bankWalk";
  */
 
 const STANDS: Partial<Record<SpotId, { x: number; z: number }>> = { point: POINT_PAD, reeds: REEDS_STAND, dropoff: DROPOFF_STAND, inlet: INLET_STAND };
-/** A step along the shore from the stand, the other way round from the crowded bank's chair (rivalSeat.ts). */
+/** A step along the shore from the stand, clear of the walk boards; mostly the other way round from the crowded bank's chair (rivalSeat.ts), though at the inlet the boards leave only its side, where the chair sits further back. */
 const ALONG: Partial<Record<SpotId, number>> = { point: 1.0, reeds: 1.0, dropoff: -1.0, inlet: -1.0 };
 /** Just inland of the waterline, so the stick stands on the bank. */
 const BACK = 0.12;
