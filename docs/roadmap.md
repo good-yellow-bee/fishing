@@ -1816,7 +1816,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT386~~ | ~~A let-go fish that breaks off or drops the bait stays itself: when it bites again it still carries its release note, and another angler's tag still pays both~~ (#1543) | gameplay | S |
 | ~~GT387~~ | ~~The sunken log fights back: a fish hooked from the bank tight to the half-sunk log off the west bank runs for it, and a run the angler doesn't turn wraps the line round the log as round a dock piling (fraying it); the fight card says "Sunken log: turn every run"~~ (#1544) | gameplay | M |
 | ~~GT388~~ | ~~Slams: land both bass (smallmouth and largemouth) on one local day for the Bass slam badge, and a brook trout, a rainbow trout and a salmon on one day for the Trout slam (the server reads the catches' days); the landed card stamps the slam a fish completes with the day's earlier fish~~ (#1547) | gameplay | M |
-| GT389 | News card game46 covers GT386 to GT388 | ui | S |
+| ~~GT389~~ | ~~News card 2026-10-20-game46 covers GT386 to GT388: a let-go fish stays itself, the sunken log fights back, and the bass and trout slams~~ (#PR) | ui | S |
 
 ## Risks / open questions for the owner
 
