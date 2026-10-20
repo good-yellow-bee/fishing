@@ -111,9 +111,7 @@ export function FightBar({ fight, sim, performance, best = null, note = null, cl
             ? t("It's turning toward you — get ready to reel!")
             : state.charge && state.surge === 2
             ? t("REEL — it's charging straight at you!")
-            : state.secondWind && state.surge === 0
-            ? t("Second wind — it's gathering itself!")
-            : state.secondWind && state.surge === 1
+            : state.secondWind && state.surge === 1 && !state.jump
             ? t("Let go now — it found a second wind!")
             : state.secondWind && state.surge === 2 && !state.jump
             ? t("Let it run — a second wind, it'll tire again!")
@@ -127,6 +125,8 @@ export function FightBar({ fight, sim, performance, best = null, note = null, cl
             ? t("Let go now — it sees the net!")
             : state.surge === 0 && state.shake
               ? t("It's shaking its head — ease off a moment!")
+            : state.surge === 0 && state.secondWind
+              ? t("Second wind — it's gathering itself!")
             : state.surge === 0 && state.sulk && state.lifting
               ? t("It's lifting — ease off and pump once more!")
             : state.surge === 0 && state.sulk

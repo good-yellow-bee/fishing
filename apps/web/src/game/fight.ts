@@ -254,7 +254,7 @@ export const SECOND_WIND_GATHER_MS = 600;
 
 /** Whether a fish this heavy finds a second wind: a big one of its kind, not a panfish's quick head shakes. */
 export function findsSecondWind(species: FishSpecies, weight: number): boolean {
-  return species.challenge !== "mash" && (weight - species.minWeight) / (species.maxWeight - species.minWeight) >= SECOND_WIND_SHARE;
+  return species.challenge !== "mash" && difficulty01(species, weight) >= SECOND_WIND_SHARE;
 }
 export type StaminaState = "fresh" | "tiring" | "spent";
 
@@ -657,6 +657,8 @@ export function makeFight(
   const slipper = SLIPPERS.has(species.id);
   let slipSec = 0;
   let windLeft = findsSecondWind(species, weight);
+  /** After the second wind's run, the last run near the net waits out a calm like any other run. */
+  let windCalmUntil = -Infinity;
   /** The drag as it stood when the run began: turning the knob mid-run takes effect on the next one. */
   let runDrag: Drag = "normal";
   const step = (nowMs: number, dtSec: number, reeling: boolean, steer: Steer = 0, drag: Drag = "normal"): FightOutcome => {
@@ -689,14 +691,15 @@ export function makeFight(
     }
     if (nextAt === null) nextAt = nowMs + range(1200, 1800);
     // A big fish worn down between runs gathers itself once and runs again at once.
-    if (windLeft && sim.surge === 0 && sim.stamina < SECOND_WIND_AT && sim.stamina > SPENT_STAMINA && !sim.sulk && !sim.weeded && !sim.wrapped && !sim.lastRun) {
+    if (windLeft && sim.surge === 0 && sim.stamina < SECOND_WIND_AT && !sim.sulk && !sim.weeded && !sim.wrapped && !sim.shake) {
       windLeft = false;
       sim.stamina = Math.min(1, sim.stamina + SECOND_WIND_GAIN);
       sim.secondWind = true;
-      performance.secondWind = true;
+      // No head shake in the gather: the card is calling the second wind.
+      shakeAt = Infinity;
       nextAt = nowMs + SECOND_WIND_GATHER_MS;
     }
-    if (lastRunsLeft > 0 && sim.surge === 0 && !sim.secondWind && sim.line > 0 && sim.line < LAST_RUN_LINE && sim.stamina > SPENT_STAMINA) {
+    if (lastRunsLeft > 0 && sim.surge === 0 && !sim.secondWind && nowMs >= windCalmUntil && sim.line > 0 && sim.line < LAST_RUN_LINE && sim.stamina > SPENT_STAMINA) {
       sim.encore = lastRunDone;
       if (lastRunDone) performance.encore = true;
       lastRunDone = true;
@@ -727,6 +730,7 @@ export function makeFight(
       } else if (sim.surge === 1) {
         sim.surge = 2;
         runDrag = drag;
+        if (sim.secondWind) performance.secondWind = true;
         nextAt = nowMs + (sim.jump ? JUMP_MS * (sim.tailWalk ? TAIL_WALK : 1) : sim.roll ? ROLL_MS : range(pattern.surgeMin, pattern.surgeMax) * (sim.firstRun ? FIRST_RUN_LONGER : 1));
         // Starter head shakes skip this: their 220 ms warning is about one reaction time.
         if (reeling && species.challenge !== "mash" && !sim.charge) sim.tension = Math.max(sim.tension, RED_TENSION);
@@ -763,6 +767,7 @@ export function makeFight(
         sim.firstRun = false;
         sim.tailWalk = false;
         sim.charge = false;
+        const windRunEnded = sim.secondWind === true;
         sim.secondWind = false;
         sim.darted = false;
         dartLeft = null;
@@ -789,6 +794,7 @@ export function makeFight(
         if (coverDiver && sim.wrapped) nextAt = Math.max(nextAt, wrapUntil);
         // A catfish stuck on the bottom doesn't run again till it is lifted or comes up on its own.
         calmEnd = nextAt;
+        if (windRunEnded) windCalmUntil = nextAt;
         if (sticker && sim.sulk) nextAt = Math.max(nextAt, sulkUntil);
       }
     }

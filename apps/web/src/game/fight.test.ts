@@ -936,15 +936,17 @@ describe("a second wind", () => {
     let now = 0;
     let winds = 0;
     let gathered: number | null = null;
-    for (let i = 0; i < 2400 && f.sim.line > 0.05; i++) {
+    let outcome: FightOutcome = "fighting";
+    for (let i = 0; i < 2400 && outcome === "fighting"; i++) {
       const was = f.sim.secondWind;
       const before = f.sim.stamina;
-      f.step((now += 50), 0.05, f.sim.surge !== 2 && f.sim.tension < 0.6);
+      outcome = f.step((now += 50), 0.05, f.sim.surge !== 2 && f.sim.tension < 0.6);
       if (f.sim.secondWind && !was) {
         winds += 1;
         expect(before).toBeLessThan(SECOND_WIND_AT);
         expect(f.sim.stamina).toBeCloseTo(before + SECOND_WIND_GAIN, 1);
         expect(f.sim.surge).toBe(0);
+        expect(f.performance.secondWind).toBeUndefined();
         gathered = now;
       }
       if (gathered !== null && f.sim.surge === 1) {
@@ -954,6 +956,7 @@ describe("a second wind", () => {
       }
     }
     expect(winds).toBe(1);
+    expect(outcome).toBe("landed");
     expect(f.performance.secondWind).toBe(true);
   });
 
