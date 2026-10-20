@@ -143,6 +143,7 @@ export const PL_GAME: PlBook = {
   "Rock edge: runs dive off the ledge, pulling harder but tiring the fish faster": "Skalna krawędź: odjazdy nurkują za półkę, ciągną mocniej, ale szybciej męczą rybę",
   "Egg raider: chased off the beds by the sunfish, its first run is the long one": "Złodziej ikry: przegnany z gniazd przez bassy niebieskoskrzele, pierwszy odjazd ma najdłuższy",
   "Foam lane: the wind's drift is strongest here, so a slack line drifts out faster still": "Pas piany: tu wiatr znosi najmocniej, więc luźna żyłka odpływa jeszcze szybciej",
+  "Risen to the hatch: it is at the top already, so its first run is a leap — bow": "Wyszła do rójki: jest już przy powierzchni, więc pierwszy odjazd to skok — puść",
   "Drag: light": "Hamulec: lekki",
   "Drag: normal": "Hamulec: zwykły",
   "Drag: heavy": "Hamulec: mocny",
