@@ -51,20 +51,13 @@ export async function openLake(page: Page, query: string, { frames = 4, ...optio
   await page.goto(`/play${query}`);
   // Set once the scene's models are in and its shaders compiled (FishingWorld Precompile).
   await page.locator(".scene-wrap canvas[data-ready]").waitFor({ timeout: 90_000 });
+  // From here frames are drawn only when the test steps them, so the waits below spend no time rendering.
+  await page.evaluate(() => (window as unknown as { __shot: { hold(): void } }).__shot.hold());
   // The game's start-up timers (the angler taking up the rod, the first hints) run on the real clock: let them fire.
   await page.waitForTimeout(6000);
   await page.waitForLoadState("networkidle");
-  await page.evaluate(() => new Promise<void>((resolve) => {
-    let left = 4;
-    const tick = () => (--left <= 0 ? resolve() : requestAnimationFrame(tick));
-    requestAnimationFrame(tick);
-  }));
   for (const key of options.keys ?? []) await page.keyboard.press(key);
-  await page.evaluate(async (frames) => {
-    const shot = (window as unknown as { __shot: { start(): void; step(n: number): Promise<void> } }).__shot;
-    shot.start();
-    await shot.step(frames);
-  }, frames);
+  await page.evaluate((frames) => (window as unknown as { __shot: { step(n: number): Promise<void> } }).__shot.step(frames), frames);
 }
 
 /** The lake's passing words (hints and toasts) come and go on their own timers; the shots leave them out. */

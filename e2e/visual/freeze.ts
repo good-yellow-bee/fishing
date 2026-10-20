@@ -1,10 +1,11 @@
 /**
  * Runs in the page before the app (page.addInitScript), so every screenshot sees the same moment:
  * - Date is fixed at `fixedAt` and does not move.
- * - Math.random is a seeded generator, seeded again when the shot starts.
+ * - Math.random is a seeded generator, seeded again when the test starts stepping frames.
  * - performance.now and requestAnimationFrame's time stand still while the lake loads, so every per-frame step
  *   (clock deltas, texture scrolls, easing) stays at zero however long the software renderer takes. Then
- *   window.__shot.start() hands frames to the test, and window.__shot.step(n) draws exactly n frames 1/60 s apart.
+ *   window.__shot.hold() stops drawing (so a wait costs no rendering), and window.__shot.step(n) reseeds Math.random
+ *   and draws exactly n frames 1/60 s apart.
  */
 export function freezeTime(fixedAt: number) {
   const NativeDate = Date;
@@ -52,11 +53,11 @@ export function freezeTime(fixedAt: number) {
   // The software renderer presents a frame after it is drawn; a real frame between steps lets it show.
   const nativeFrame = () => new Promise<void>((resolve) => nativeRaf(() => resolve()));
   (window as unknown as { __shot: unknown }).__shot = {
-    start() {
+    hold() {
       manual = true;
-      reseed();
     },
     async step(frames: number) {
+      reseed();
       for (let i = 0; i < frames; i++) {
         now += 1000 / 60;
         const due = [...queue.values()];

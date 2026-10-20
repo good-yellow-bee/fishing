@@ -19,8 +19,8 @@ export default defineConfig({
   retries: 0,
   reporter: process.env.CI ? [["list"], ["html", { open: "never", outputFolder: "../../test-results/visual-report" }]] : "list",
   expect: {
-    // The software renderer takes a few seconds per capture, and a new baseline needs two that match.
-    timeout: 30_000,
+    // The software renderer takes several seconds per capture under parallel workers, and a new baseline needs two that match.
+    timeout: 60_000,
     toHaveScreenshot: { maxDiffPixelRatio: 0.002, animations: "disabled", caret: "hide", scale: "css" },
   },
   use: {
