@@ -1,0 +1,11 @@
+/** The line on the reel: light line the fish can't see but that snaps sooner, heavy line that holds more but that they see. */
+export type LineWeight = "light" | "standard" | "heavy";
+export const LINE_WEIGHTS: readonly LineWeight[] = ["light", "standard", "heavy"];
+/** How long a bite takes on each line, and the strain it snaps at as a share of a standard line's. */
+export const LINE_WAIT: Record<LineWeight, number> = { light: 0.85, standard: 1, heavy: 1.15 };
+export const LINE_SNAP: Record<LineWeight, number> = { light: 0.9, standard: 1, heavy: 1.1 };
+
+/** The next line, round from light to heavy and back. */
+export function nextLine(line: LineWeight): LineWeight {
+  return LINE_WEIGHTS[(LINE_WEIGHTS.indexOf(line) + 1) % LINE_WEIGHTS.length];
+}

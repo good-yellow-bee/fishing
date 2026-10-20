@@ -292,6 +292,8 @@ export function FightBar({ fight, sim, performance, best = null, note = null, cl
           {fight.water === "current" && <p className="fight-water">{t("Inlet: the current takes line while you rest, and helps a run downstream")}</p>}
           {fight.water === "deep" && <p className="fight-water">{t("Drop-off: runs dive and pull harder, but tire the fish faster")}</p>}
           {fight.water === "rocks" && !fight.edge && <p className="fight-water">{t("Point: turn every run; reeling while it drags over the rocks frays the line")}</p>}
+          {fight.line === "light" && <p className="fight-water">{t("Light line: it snaps sooner, so keep out of the red")}</p>}
+          {fight.line === "heavy" && <p className="fight-water">{t("Heavy line: it holds more strain before it snaps")}</p>}
           {fight.rising && LEAPERS.has(fight.species.id) && <p className="fight-water">{t("Risen to the hatch: it is at the top already, so its first run is a leap — bow")}</p>}
           {fight.lantern && !NET_SHY.has(fight.species.id) && <p className="fight-water">{t("Lantern light: it will see the net in the light and bolt from it once, so be ready to bring it back")}</p>}
           {fight.fired && <p className="fight-water">{t("Fired up on the fry: its first run doesn't tire it at all")}</p>}
