@@ -296,6 +296,12 @@ function movedHint(spot: SpotId) {
   return t("The bubbles moved to the {spot}.", { spot: t(SPOT_LABELS[spot]) });
 }
 
+/** Tags out of the lake for a cast to find: landed this visit, or on a fish that got away and may bite again as itself. */
+function takenTags(landed: ReadonlySet<string>, lost: GotAway | null): ReadonlySet<string> {
+  const pending = lost?.back?.tag?.id;
+  return pending ? new Set([...landed, pending]) : landed;
+}
+
 function frenzyHint(spot: SpotId) {
   return t("A feeding frenzy at the {bank}: baitfish boil over the bubbles. Cast into them!", { bank: t(SPOT_LABELS[spot]) });
 }
@@ -1008,8 +1014,9 @@ export function useFishingGame(
     const released = lost.again || mercyNow ? null : castForReleased(loadReleased(), spotRef.current, Date.now(), Math.random());
     if (released?.fish) saveReleased(released.next);
     // Failing that, one another angler let go here may come up, carrying their tag.
-    const tagged = released && !released.fish && lodgeReleasedRef.current.length > 0 ? castForLodgeTag(lodgeReleasedRef.current, spotRef.current, Date.now(), Math.random(), landedTagsRef.current, current) : null;
-    recaughtRef.current = released?.fish ?? tagged;
+    const tagged = released && !released.fish && lodgeReleasedRef.current.length > 0 ? castForLodgeTag(lodgeReleasedRef.current, spotRef.current, Date.now(), Math.random(), takenTags(landedTagsRef.current, gotAwayRef.current), current) : null;
+    // A let-go fish that broke off or dropped the bait is still that fish when it bites again.
+    recaughtRef.current = lost.again?.back ?? released?.fish ?? tagged;
     // Over the groundbait the feeders crowd in, so some bites are theirs; a beginner's first fish stays an easy one.
     const feeder = bait.baited && !mercyNow ? groundbaitFeeder(spotRef.current, lureRef?.current, short, hour) : null;
     const hunter = shiner && !lost.again && !recaughtRef.current && !mercyNow ? shinerHunter(spotRef.current, current, hour, Math.random, lively) : null;
@@ -1140,7 +1147,7 @@ export function useFishingGame(
             setOutcome({ kind: "miss", message: t("Too slow. The fish dropped the bait after {time} s.", { time: seconds(windowMs) }), fish: bitten });
             // It was never pricked, so it may take again on a cast straight back, unless a bigger lost fish is already about.
             const dropped = !gotAwayRef.current;
-            if (dropped) gotAwayRef.current = gotAwayAfterDrop(bitten.species, bitten.weight, spotRef.current);
+            if (dropped) gotAwayRef.current = gotAwayAfterDrop(bitten.species, bitten.weight, spotRef.current, recaughtRef.current);
             // Hold result so the miss spring and the turn play out.
             resetToIdle((style === "lift" ? t("Strike the moment the float lifts.") : t("Strike the moment the bobber goes under.")) + (dropped ? ` ${current.patience >= PATIENT_DROP_RANK ? t("It wasn't hooked, and your Patience keeps it about: cast straight back here, it will likely take again.") : t("It wasn't hooked, so it may take again: cast straight back here.")}` : ""), "result");
           }, windowMs);
@@ -1746,7 +1753,7 @@ export function useFishingGame(
             // A lost fish spooks the bank and scatters any school there.
             spookRef.current = spotRef.current;
             schoolRef.current = null;
-            gotAwayRef.current = gotAwayAfterLoss(current.species, current.weight, spotRef.current);
+            gotAwayRef.current = gotAwayAfterLoss(current.species, current.weight, spotRef.current, recaughtRef.current);
             const trophy = lostTrophy(current.species, current.weight);
             // How close it came, so a break near the net reads as nearly there rather than as a wasted fight.
             const reeledIn = Math.round((1 - sim.line) * 100);
@@ -1767,7 +1774,7 @@ export function useFishingGame(
             // A lost fish spooks the bank and scatters any school there.
             spookRef.current = spotRef.current;
             schoolRef.current = null;
-            gotAwayRef.current = gotAwayAfterLoss(current.species, current.weight, spotRef.current);
+            gotAwayRef.current = gotAwayAfterLoss(current.species, current.weight, spotRef.current, recaughtRef.current);
             const frays = runtime.performance.scuffed || runtime.performance.bitten;
             const trophy = lostTrophy(current.species, current.weight) + (frays && !frayedRef.current ? ` ${scuffNote(spotRef.current, !runtime.performance.scuffed)}` : "");
             if (frays) markFrayed(true);
