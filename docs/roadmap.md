@@ -1434,7 +1434,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC244~~ | ~~News card scene56 covers SC241 to SC243: a smoother lake on phones (instanced material copies, shadow depth per kind) and the pollen no longer glowing at night~~ (#1560) | scene | S |
 | ~~SC245~~ | ~~Moths at the headlamp: with the angler's headlamp lit at night (spring to fall), three pale moths find it one by one (4, 9 and 15 s after it goes on), flutter into view and loop 0.9 m out along the beam, clear of the head, as they do round the lanterns (mothRound, poses shared in mothDraw.ts)~~ (#1567) | scene | S |
 | ~~SC246~~ | ~~A bat at the headlamp: where bats are out (summer nights) and the angler's headlamp has drawn its moths, the second bat breaks off its loop every 17 s for 5 s (when its loop is within 8 m) to circle the moths just above the beam, as the first does at the dock lantern; the bats ease it to and from them, so the lamp going off, coming back or remounting never makes it jump (lampMoths, lampSwoopAt)~~ (#1569) | scene | S |
-| ~~SC247~~ | ~~News card scene57 covers SC245 and SC246: moths at the headlamp and the bat that hawks them~~ (#NEWS) | scene | S |
+| ~~SC247~~ | ~~News card scene57 covers SC245 and SC246: moths at the headlamp and the bat that hawks them~~ (#1573) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
