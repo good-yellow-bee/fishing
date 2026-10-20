@@ -103,3 +103,31 @@ export function biggestOnOuting(outing: readonly CatchEntry[], entry: CatchEntry
   const bests = personalBests({ spots: [], trips: [], catches: [...outing] });
   return (bests.heaviest ?? bests.longest)?.id === entry.id;
 }
+
+/** A size as the page prints it (measureText): lengths to the tenth, weights to the hundredth under one, else the tenth. */
+function printedSize(measure: Measure): number {
+  const metric = getUnits() === "metric";
+  const value = measure.kind === "length" ? (metric ? measure.inches * CM_PER_IN : measure.inches) : metric ? measure.pounds * KG_PER_LB : measure.pounds;
+  const places = measure.kind === "weight" && value < 1 ? 2 : 1;
+  return Math.round(value * 10 ** places) / 10 ** places;
+}
+
+/**
+ * How far a fish fell short of its kind's best (the record personalBests picks, the earliest of a tie), when it came
+ * within a tenth of it: "1.5 in short of your longest perch". Null for the best itself, a tie as the sizes print, or one
+ * further off. The gap is between the printed sizes, so it never reads "0 in".
+ */
+export function shortOfBest(kind: readonly CatchEntry[], entry: CatchEntry): { best: CatchEntry; short: Measure } | null {
+  const own = entry.measure;
+  const bests = personalBests({ spots: [], trips: [], catches: [...kind] });
+  const best = own.kind === "length" ? bests.longest : bests.heaviest;
+  const size = best ? measureOf(best, own.kind) : null;
+  if (!best || !size || best.id === entry.id) return null;
+  const mine = printedSize(own);
+  const top = printedSize(size);
+  if (!(mine < top) || mine < top * 0.9) return null;
+  const gap = top - mine;
+  const metric = getUnits() === "metric";
+  const short: Measure = own.kind === "length" ? { kind: "length", inches: metric ? gap / CM_PER_IN : gap } : { kind: "weight", pounds: metric ? gap / KG_PER_LB : gap };
+  return { best, short };
+}
