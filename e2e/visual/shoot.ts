@@ -57,7 +57,39 @@ export async function openLake(page: Page, query: string, { frames = 4, ...optio
   await page.waitForTimeout(6000);
   await page.waitForLoadState("networkidle");
   for (const key of options.keys ?? []) await page.keyboard.press(key);
-  await page.evaluate((frames) => (window as unknown as { __shot: { step(n: number): Promise<void> } }).__shot.step(frames), frames);
+  await shot(page, "reseed");
+  await shot(page, "step", frames);
+}
+
+type Shot = { reseed(): void; step(n: number, ms?: number): Promise<void> };
+
+/** Calls the frozen clock's controls in the page (freeze.ts). */
+export function shot<K extends keyof Shot>(page: Page, call: K, ...args: Parameters<Shot[K]>) {
+  return page.evaluate(([call, args]) => ((window as unknown as { __shot: Record<string, (...a: unknown[]) => unknown> }).__shot[call]!(...args)), [call, args] as const);
+}
+
+/**
+ * From a loaded lake (openLake), casts at the water under (`x`, `y`), waits for a bite on the real clock (no frames
+ * drawn meanwhile), strikes as the float goes under, then draws `frames` frames of the fight. The cast's charge and the
+ * strike's timing run on the frozen clock, and Math.random starts over at the cast, so the same fish takes the same
+ * way every run.
+ */
+export async function fightFish(page: Page, { x, y, frames = 30 }: { x: number; y: number; frames?: number }) {
+  await shot(page, "reseed");
+  await page.mouse.move(x, y);
+  await shot(page, "step", 2);
+  const aim = await page.locator(".scene-wrap").getAttribute("data-aim");
+  if (!aim || aim === "none") throw new Error(`No aim on the water at ${x},${y}`);
+  await page.keyboard.down("Space");
+  // A 560 ms hold, in eight frames.
+  await shot(page, "step", 8, 70);
+  await page.keyboard.up("Space");
+  // The cast's flight and the float settling, in few frames: the bite's timer runs on the real clock meanwhile.
+  await shot(page, "step", 6, 250);
+  await page.locator(".scene-wrap[data-phase='hookset']").waitFor({ timeout: 60_000 });
+  await page.keyboard.press("Space");
+  await page.locator(".scene-wrap[data-phase='fight']").waitFor({ timeout: 10_000 });
+  await shot(page, "step", frames);
 }
 
 /** The lake's passing words (hints and toasts) come and go on their own timers; the shots leave them out. */
