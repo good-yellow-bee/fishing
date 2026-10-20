@@ -64,7 +64,7 @@ import { DUCKWEED_FOUL_WAIT, DUCKWEED_TOPWATER_WAIT, duckweedCast, inDuckweed } 
 import { FAR_ROCK_WAIT, tightToFarRock } from "./farRock";
 import { castSnags, onRockEdge, onShoreIce, ROCK_EDGE_WAIT, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { FLUTTER_SEC, flutterGrabberFor, flutterTip, followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
-import { BUCKET_SIZE, loadBucket, saveBucket } from "./baitBucket";
+import { BUCKET_SIZE, liveShiners, loadBucket, saveBucket } from "./baitBucket";
 import { loadSwim, saveSwim, swimNow } from "./swim";
 import { castForFoe, foeGone, isOldFoe, loadOldFoe, saveOldFoe } from "./oldFoe";
 import { loadNightLine, nightLineCatch, nightLineKinds, nightLineState, nightSkyFor, saveNightLine, wormLineHour, type NightLine } from "./nightLine";
@@ -456,13 +456,15 @@ export function useFishingGame(
     }
   }, [profile?.userId]);
   const keepBucket = (userId: string, shiners: number[]) => {
-    bucketRef.current = shiners;
-    saveBucket(userId, shiners);
-    setBucket(shiners.length);
+    bucketRef.current = liveShiners(shiners, Date.now());
+    saveBucket(userId, bucketRef.current);
+    setBucket(bucketRef.current.length);
   };
+  /** The spare shiners alive right now: one whose three days ran out during the visit has died. */
+  const bucketNow = () => liveShiners(bucketRef.current, Date.now());
   /** The bucket with a fresh shiner in, or with its oldest one taken out. */
-  const bucketIn = () => [...bucketRef.current, Date.now()];
-  const bucketOut = () => bucketRef.current.slice(1);
+  const bucketIn = () => [...bucketNow(), Date.now()];
+  const bucketOut = () => bucketNow().slice(1);
   const legendRef = useRef(legend);
   legendRef.current = legend;
   const lodgeReleasedRef = useRef(lodgeReleased);
@@ -2251,14 +2253,14 @@ export function useFishingGame(
       setHint(t("You hook the shop's shiner on as live bait. Cast it out to the hunters."));
       return;
     }
-    if (!profile || bucketRef.current.length >= BUCKET_SIZE) return;
+    if (!profile || bucketNow().length >= BUCKET_SIZE) return;
     keepBucket(profile.userId, bucketIn());
     setHint(t("The shiner goes in your bait bucket: {n} of {max}.", { n: bucketRef.current.length, max: BUCKET_SIZE }));
   };
 
   /** Hook a spare shiner from the bait bucket. */
   const hookFromBucket = () => {
-    if (!profile || liveShinerRef.current || bucketRef.current.length === 0) return;
+    if (!profile || liveShinerRef.current || bucketNow().length === 0) return;
     keepBucket(profile.userId, bucketOut());
     hookShiner("live");
     setHint(t("You hook a shiner from your bucket on as live bait. Cast it out to the hunters."));
@@ -2268,10 +2270,10 @@ export function useFishingGame(
   const setNightLine = () => {
     const spot = stanceRef.current;
     // With no shiner to spare, a worm on the hook goes out instead: free, but fewer night feeders come to it.
-    const shiner = liveShinerRef.current || bucketRef.current.length > 0;
+    const shiner = liveShinerRef.current || bucketNow().length > 0;
     if (!profile || nightLine || (!shiner && !(isLiveBait(lureRef?.current) && wormLineHour(hourRef.current))) || phaseRef.current !== "idle" || !isFishingStance(spot) || spot === "open" || nightLineKinds(spot, profile).length === 0) return;
     // A spare from the bucket goes out first, so the shiner on the hook stays for casting.
-    if (bucketRef.current.length > 0) keepBucket(profile.userId, bucketOut());
+    if (bucketNow().length > 0) keepBucket(profile.userId, bucketOut());
     else if (shiner) hookShiner(null);
     const setAt = Date.now();
     keepNightLine(profile.userId, { spot, setAt, ...(shiner ? {} : { bait: "worm" as const }) });
@@ -2315,13 +2317,13 @@ export function useFishingGame(
     // With a plain shiner on the hook already, a lively one landed clean takes its place and the plain one goes in the
     // bucket; otherwise the landed one goes in the bucket to keep.
     if (liveShinerRef.current && !(outcome.clean && !livelyShinerRef.current)) {
-      if (!profile || bucketRef.current.length >= BUCKET_SIZE) return;
+      if (!profile || bucketNow().length >= BUCKET_SIZE) return;
       keepBucket(profile.userId, bucketIn());
       setOutcome(null);
       resetToIdle(t("The shiner goes in your bait bucket: {n} of {max}.", { n: bucketRef.current.length, max: BUCKET_SIZE }));
       return;
     }
-    if (liveShinerRef.current && profile && bucketRef.current.length < BUCKET_SIZE) keepBucket(profile.userId, bucketIn());
+    if (liveShinerRef.current && profile && bucketNow().length < BUCKET_SIZE) keepBucket(profile.userId, bucketIn());
     // Landed clean, it isn't worn out, so it swims hard on the hook.
     hookShiner(outcome.clean ? "lively" : "live");
     setOutcome(null);

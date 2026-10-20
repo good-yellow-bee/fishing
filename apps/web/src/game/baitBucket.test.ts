@@ -15,10 +15,17 @@ describe("the bait bucket", () => {
     expect(loadBucket("mara", 0)).toEqual({ shiners: [], died: 0 });
   });
 
+  it("keeps the newest live ones when more were stored than it holds", () => {
+    saveBucket("ash", [0, 1, 2, BUCKET_LIFE_MS * 2]);
+    expect(loadBucket("ash", BUCKET_LIFE_MS * 2 + 1).shiners).toEqual([BUCKET_LIFE_MS * 2]);
+  });
+
   it("reads the count-only bucket from before as shiners put in now", () => {
     kept.set("stillwater.bucket.ash.v1", "2");
     expect(loadBucket("ash", 500)).toEqual({ shiners: [500, 500], died: 0 });
     expect(kept.has("stillwater.bucket.ash.v1")).toBe(false);
+    // Moved over, they are still there on the next visit.
+    expect(loadBucket("ash", 600).shiners).toEqual([500, 500]);
     saveBucket("ash", []);
     expect(kept.has(baitBucketKey("ash"))).toBe(false);
   });
