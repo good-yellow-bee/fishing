@@ -9,7 +9,7 @@ import { undoneTackle } from "./gear/undoneTackle";
 import { localId } from "../game/localId";
 import { PLAY_LAKE_ID } from "./playLake";
 import { isSampleSpot } from "./bookCopy";
-import { foldName } from "./spotOrder";
+import { foldName, twinNamesAmong } from "./spotOrder";
 import { plainName } from "./tripDates";
 
 /** In a water's link, the water to merge it into: the merge box opens with it picked. */
@@ -41,8 +41,7 @@ export function MergeWater({ spotId }: { spotId: string }) {
   }, [asked]);
   if (others.length === 0 || spotId === PLAY_LAKE_ID || isSampleSpot(spotId)) return null;
   // Two waters of one name read alike in the list: each says how many fish it holds, to tell them apart.
-  const names = [spotId, ...others.map((spot) => spot.id)].map((id) => foldName(book.spots.find((spot) => spot.id === id)?.name ?? ""));
-  const twinNames = new Set(names.filter((name, index) => name && names.indexOf(name) !== index));
+  const twinNames = twinNamesAmong([...book.spots.filter((spot) => spot.id === spotId), ...others]);
   const fishAt = (id: string) => storedBook.catches.filter((entry) => entry.spotId === id).length;
   const moves = into ? mergeMoves(storedBook, spotId, into) : null;
   const keptSpot = into ? storedBook.spots.find((spot) => spot.id === into) : undefined;

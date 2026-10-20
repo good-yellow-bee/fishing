@@ -2548,3 +2548,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR599~~ | ~~Round 116 Bests fixes: twin waters as one card, book-wide lure names, month outings as the trip search counts them, join prompt only for different kinds~~ (#1685) | field | S |
 | ~~BR600~~ | ~~Round 116 Bests ideas: a kind's previous best beside a season's new best, how many of a kind were released~~ (#1687) | field | S |
 | ~~BR601~~ | ~~Round 117 Waters fixes: outings counted as Trips counts them, twin waters as one on a kind's page and the season line, hooked tally on a water's own fish~~ (#1689) | field | S |
+| ~~BR602~~ | ~~Round 117 Waters ideas (browser audit of Waters, a water's page and the Map clean): a kind's twin water rows say how often their outings took it, water pickers tell twin waters apart by their fish~~ (#1694) | field | S |
