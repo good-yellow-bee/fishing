@@ -3,6 +3,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { LureConditions } from "../game/lureChoice";
+import type { LureTier } from "../game/lureSeasoning";
 import { LureChoice } from "./LureChoice";
 
 let root: Root | null = null;
@@ -16,12 +17,12 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-function mount(value: string, onChange: (value: string) => void, spot: "dock" | "reeds" = "dock", now?: LureConditions) {
+function mount(value: string, onChange: (value: string) => void, spot: "dock" | "reeds" = "dock", now?: LureConditions, tierOf?: (lure: string) => LureTier | null) {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
-  act(() => root!.render(<LureChoice choices={["Spinnerbait", "Popper", "#5 Mepps"]} value={value} spot={spot} now={now} locked={false} onChange={onChange} />));
+  act(() => root!.render(<LureChoice choices={["Spinnerbait", "Popper", "#5 Mepps"]} value={value} spot={spot} now={now} tierOf={tierOf} locked={false} onChange={onChange} />));
   return container.querySelector("select")!;
 }
 
@@ -30,6 +31,13 @@ describe("LureChoice", () => {
     const select = mount("Spinnerbait", () => undefined);
     expect([...select.options].map((option) => option.value)).toEqual(["Popper", "Spinnerbait", "#5 Mepps"]);
     expect(container!.querySelector("small")?.textContent).toBe("Big lure — heavier fish (Strength 3+ to land most)");
+  });
+
+  it("names each seasoned lure's tier, and says what a lucky one does under it", () => {
+    const tiers: Record<string, LureTier> = { Popper: "proven", Spinnerbait: "lucky" };
+    const select = mount("Spinnerbait", () => undefined, "dock", undefined, (lure) => tiers[lure] ?? null);
+    expect([...select.options].map((option) => option.textContent)).toEqual(["Popper · Proven", "Spinnerbait · Lucky", "#5 Mepps"]);
+    expect(container!.querySelector(".lure-lucky")?.textContent).toBe("Lucky lure: its hook sets a little more solid");
   });
 
   it("marks the lures this bank suits, and says so under a tied one", () => {

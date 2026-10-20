@@ -1,8 +1,9 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { mergePainted, mergeParts } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
+import { useSkinnedFigure } from "./skinFigure";
 import { toonRamp } from "./toon";
 import { LINE_FROM, LINE_TO, LINE_Y, WASHING, garmentSwing, linePoint, type Garment } from "./washingLine";
 
@@ -68,7 +69,9 @@ export function Clothesline({ washing, wind }: { washing: boolean; wind: { x: nu
   const still = useReducedMotion();
   // The posts and the rope never move, so they bake into one shape: one draw.
   const shapes = useMemo(() => ({ frame: mergeParts([{ geometry: postsShape() }, { geometry: ropeShape() }]), garments: WASHING.map(garmentShape) }), []);
-  const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
+  // A fresh material when the washing goes out or comes in, so the line is baked again with it (skinFigure.ts).
+  const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), [washing]);
+  const root = useRef<THREE.Group>(null);
   const hangers = useMemo<(THREE.Group | null)[]>(() => WASHING.map(() => null), []);
   useEffect(
     () => () => {
@@ -82,8 +85,9 @@ export function Clothesline({ washing, wind }: { washing: boolean; wind: { x: nu
       if (hanger) hanger.rotation.x = garmentSwing(i, clock.elapsedTime, wind, still);
     });
   });
+  useSkinnedFigure(root, material);
   return (
-    <group name="clothesline">
+    <group name="clothesline" ref={root}>
       <mesh geometry={shapes.frame} material={material} castShadow />
       {washing &&
         WASHING.map((garment, i) => {

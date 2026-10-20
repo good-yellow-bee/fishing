@@ -38,7 +38,7 @@ function makeWashGeometry() {
 export function ShoreWash({ wind, opacity }: { wind: { x: number; z: number }; opacity: number }) {
   const still = useReducedMotion();
   const geometry = useMemo(makeWashGeometry, []);
-  const material = useMemo(() => new THREE.MeshBasicMaterial({ color: "#e9f3ef", vertexColors: true, transparent: true, depthWrite: false, side: THREE.DoubleSide }), []);
+  const material = useMemo(() => new THREE.MeshBasicMaterial({ color: "#e9f3ef", vertexColors: true, transparent: true, depthWrite: false, side: THREE.DoubleSide, forceSinglePass: true }), []);
   const rim = useMemo(
     () =>
       Array.from({ length: STEPS }, (_, i) => {

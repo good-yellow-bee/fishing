@@ -45,6 +45,12 @@ describe("settings", () => {
     expect(parseSettings(JSON.stringify({ floatColour: "plaid" })).floatColour).toBe(DEFAULT_SETTINGS.floatColour);
   });
 
+  it("keeps the reel's drag where it was turned, and starts it at normal", () => {
+    expect(parseSettings(null).drag).toBe("normal");
+    expect(parseSettings(JSON.stringify({ drag: "heavy" })).drag).toBe("heavy");
+    expect(parseSettings(JSON.stringify({ drag: "tight" })).drag).toBe("normal");
+  });
+
   it("keeps vibration on unless it was switched off", () => {
     expect(parseSettings(null).vibration).toBe(true);
     expect(parseSettings(JSON.stringify({ vibration: false })).vibration).toBe(false);

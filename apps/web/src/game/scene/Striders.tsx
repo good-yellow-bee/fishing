@@ -21,7 +21,7 @@ export function Striders() {
   const bodyGeo = useMemo(() => striderBodyGeometry(), []);
   const dimpleGeo = useMemo(() => striderDimpleGeometry(), []);
   const bodyMat = useMemo(() => new THREE.MeshBasicMaterial({ color: BODY }), []);
-  const dimpleMat = useMemo(() => new THREE.MeshBasicMaterial({ color: DIMPLE, transparent: true, opacity: 0.55, depthWrite: false, side: THREE.DoubleSide }), []);
+  const dimpleMat = useMemo(() => new THREE.MeshBasicMaterial({ color: DIMPLE, transparent: true, opacity: 0.55, depthWrite: false, side: THREE.DoubleSide, forceSinglePass: true }), []);
   const bodies = useRef<THREE.InstancedMesh>(null);
   const dimples = useRef<THREE.InstancedMesh>(null);
   const place = useMemo(() => ({ matrix: new THREE.Matrix4(), at: new THREE.Vector3(), turn: new THREE.Quaternion(), up: new THREE.Vector3(0, 1, 0), size: new THREE.Vector3().setScalar(STRIDER_SCALE) }), []);

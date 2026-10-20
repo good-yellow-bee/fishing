@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { DIVERS, FRAYED_SNAP, liftsStickerInOne, STRONG_LIFT_STRENGTH, TEETH_SEC, TOOTHY, CHARGERS, CHARGE_SLACK_SEC, BREACHERS, BROADSIDE_REEL, BROADSIDERS, QUIT_TIRE, QUITTERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, FLOOD_DRIFT, floodedInlet, BOAT_RUN, STRONG_WIND_BOAT_RUN, WIND_SLACK, WINTER_TIRE, seasonTireMul, thrivesInCold, COLD_LOVERS, SUMMER_TIRE, COLDWATER, warmTireMul, rainCooled, deepCooled, FALL_RUN_TIRE, FALL_RUNNERS, runTireMul, SPRING_RUN_TIRE, SPRING_RUNNERS, springRunTireMul, CURRENT_FIGHTER_TIRE, CURRENT_FIGHTERS, currentTireMul, FALL_FEED_TIRE, FALL_FEEDERS, fallFeedTireMul, RAIN_HUNTER_TIRE, SCENT_HUNTERS, rainHunterTireMul, SUMMER_STRENGTH_TIRE, WARM_LOVERS, summerStrengthTireMul, NEST_TIRE, NEST_GUARDERS, nestTireMul, NIGHT_HUNTER_TIRE, NIGHT_HUNTERS, nightTireMul, SPAWN_SPENT_TIRE, EARLY_SPAWNERS, spentTireMul, TWILIGHT_HUNTER_TIRE, TWILIGHT_HUNTERS, twilightTireMul, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, TREBLE_HOLD, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD, SHAKE_MS, SHAKE_GRACE_SEC, WITH_RUN_DRIFT, WITH_RUN_GRACE_SEC, WITH_RUN_REEL, TURNED_HEAD_MS, TURNED_HEAD_REEL } from "./fight";
+import { DIVERS, FRAYED_SNAP, LINE_SPINNERS, NET_SHY_MS, SLIPPERS, THRASH_HEAD_MS, NET_BOLT_LINE, NET_WAIT_MS, NET_HEAD_EVERY_MS, NET_HEAD_MS, netsFish, liftsStickerInOne, STRONG_LIFT_STRENGTH, TEETH_SEC, TOOTHY, CHARGERS, CHARGE_SLACK_SEC, BREACHERS, BROADSIDE_REEL, BROADSIDERS, QUIT_TIRE, QUITTERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, FLOOD_DRIFT, floodedInlet, BOAT_RUN, STRONG_WIND_BOAT_RUN, boatSwingShare, WIND_SLACK, WINTER_TIRE, seasonTireMul, thrivesInCold, COLD_LOVERS, SUMMER_TIRE, COLDWATER, warmTireMul, rainCooled, deepCooled, FALL_RUN_TIRE, FALL_RUNNERS, runTireMul, SPRING_RUN_TIRE, SPRING_RUNNERS, springRunTireMul, CURRENT_FIGHTER_TIRE, CURRENT_FIGHTERS, currentTireMul, FALL_FEED_TIRE, FALL_FEEDERS, fallFeedTireMul, RAIN_HUNTER_TIRE, SCENT_HUNTERS, rainHunterTireMul, SUMMER_STRENGTH_TIRE, WARM_LOVERS, summerStrengthTireMul, NEST_TIRE, NEST_GUARDERS, nestTireMul, NIGHT_HUNTER_TIRE, NIGHT_HUNTERS, nightTireMul, SPAWN_SPENT_TIRE, EARLY_SPAWNERS, spentTireMul, TWILIGHT_HUNTER_TIRE, TWILIGHT_HUNTERS, twilightTireMul, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, TREBLE_HOLD, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD, SHAKE_MS, SHAKE_GRACE_SEC, WITH_RUN_DRIFT, WITH_RUN_GRACE_SEC, WITH_RUN_REEL, TURNED_HEAD_MS, TURNED_HEAD_REEL, DRAG_RUN_LINE, DRAG_RUN_PULL, HEAVY_DRAG_CAP, findsSecondWind, SECOND_WIND_AT, SECOND_WIND_GAIN, SECOND_WIND_GATHER_MS } from "./fight";
+import { nextDrag, type Drag } from "./drag";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -45,14 +46,14 @@ const REACTION_FRAMES = 12;
 const SLOW_REACTION_FRAMES = 15;
 
 /** Plays a fight at 60 Hz (by default) where the angler's hand acts on what they saw 0.2 s (by default) earlier. */
-function play(species: FishSpecies, weight: number, seed: number, policy: Policy, reactionFrames = REACTION_FRAMES, frameSec = FRAME_SEC) {
+function play(species: FishSpecies, weight: number, seed: number, policy: Policy, reactionFrames = REACTION_FRAMES, frameSec = FRAME_SEC, drag: Drag = "normal") {
   const runtime = makeFight(species, weight, species.minStrength, seeded(seed));
   const hand: boolean[] = Array(reactionFrames).fill(false);
   let intent = false;
   for (let frame = 0; frame < 120 / frameSec; frame++) {
     intent = policy(runtime.sim, intent);
     hand.push(intent);
-    const outcome = runtime.step(frame * frameSec * 1000, frameSec, hand.shift()!);
+    const outcome = runtime.step(frame * frameSec * 1000, frameSec, hand.shift()!, 0, drag);
     if (outcome !== "fighting") {
       return { outcome, seconds: frame * frameSec, clean: outcome === "landed" && isCleanFight(runtime.performance) };
     }
@@ -855,6 +856,116 @@ describe("a run from the boat", () => {
     open.step(0, 0.5, false);
     boat.step(0, 0.5, false);
     expect(boat.sim.line).toBeCloseTo(open.sim.line);
+  });
+});
+
+describe("the reel's drag", () => {
+  /** Steps to the first run on the given drag, then a while into it, and returns how much line and tension it moved. */
+  const run = (drag: Drag, reeling: boolean, ms = 200, id = "pike", weight = 6) => {
+    const f = makeFight(fish(id), weight, 3, () => 0);
+    let now = 0;
+    while (f.sim.surge !== 2) f.step((now += 50), 0.05, false, 0, drag);
+    const line = f.sim.line;
+    const tension = f.sim.tension;
+    for (let at = 0; at < ms && f.sim.surge === 2; at += 50) f.step((now += 50), 0.05, reeling, 0, drag);
+    return { line: f.sim.line - line, tension: f.sim.tension - tension, end: f.sim.tension, runtime: f, now };
+  };
+
+  it("lets a run take more line off a light drag and less off a heavy one", () => {
+    const normal = run("normal", false).line;
+    expect(normal).toBeGreaterThan(0);
+    expect(run("light", false).line).toBeCloseTo(normal * DRAG_RUN_LINE.light);
+    expect(run("heavy", false).line).toBeCloseTo(normal * DRAG_RUN_LINE.heavy);
+  });
+
+  it("loads a turning reel harder on a heavy drag and softer on a light one, which slips line even so", () => {
+    const normal = run("normal", true, 50);
+    expect(run("heavy", true, 50).tension).toBeGreaterThan(normal.tension);
+    const light = run("light", true, 50);
+    expect(light.tension).toBeLessThan(normal.tension);
+    expect(light.line).toBeGreaterThan(normal.line);
+    expect(DRAG_RUN_PULL.heavy).toBeGreaterThan(1);
+  });
+
+  it("loads the line through a run against a heavy drag even with the reel let go, never past the cap", () => {
+    const heavy = run("heavy", false, 3000, "carp", 20);
+    expect(heavy.end).toBeGreaterThan(0.3);
+    expect(heavy.end).toBeLessThanOrEqual(HEAVY_DRAG_CAP);
+    expect(HEAVY_DRAG_CAP).toBeLessThan(FRAYED_SNAP);
+    expect(run("normal", false, 3000, "carp", 20).end).toBe(0);
+  });
+
+  it("takes the drag as it stood when the run began, so turning it mid-run waits for the next run", () => {
+    const f = makeFight(fish("pike"), 6, 3, () => 0);
+    let now = 0;
+    while (f.sim.surge !== 2) f.step((now += 50), 0.05, false, 0, "normal");
+    const before = f.sim.line;
+    f.step((now += 50), 0.05, false, 0, "heavy");
+    const normal = run("normal", false, 50).line;
+    expect(f.sim.line - before).toBeCloseTo(normal);
+  });
+
+  it("goes round from light to heavy and back", () => {
+    expect(nextDrag("light")).toBe("normal");
+    expect(nextDrag("normal")).toBe("heavy");
+    expect(nextDrag("heavy")).toBe("light");
+  });
+
+  it("still lands every fish at either end for an angler who follows the card", () => {
+    for (const drag of ["light", "heavy"] as const) {
+      for (const species of FISH) {
+        for (const weight of weights(species)) {
+          const results = SEEDS.slice(0, 4).map((seed) => play(species, weight, seed, releaseOnTelegraph, REACTION_FRAMES, FRAME_SEC, drag).outcome);
+          expect(results.filter((outcome) => outcome === "landed").length, `${drag} ${species.id} ${weight}`).toBeGreaterThanOrEqual(3);
+        }
+      }
+    }
+  });
+});
+
+describe("a second wind", () => {
+  it("comes to a big fish of its kind, not a small one nor a panfish", () => {
+    expect(findsSecondWind(fish("pike"), fish("pike").maxWeight)).toBe(true);
+    expect(findsSecondWind(fish("pike"), fish("pike").minWeight)).toBe(false);
+    expect(findsSecondWind(fish("perch"), fish("perch").maxWeight)).toBe(false);
+  });
+
+  it("lifts a big fish tired between runs once, and sends it off on a run after a moment", () => {
+    const pike = fish("pike");
+    const f = makeFight(pike, pike.maxWeight, 10, () => 0);
+    let now = 0;
+    let winds = 0;
+    let gathered: number | null = null;
+    let outcome: FightOutcome = "fighting";
+    for (let i = 0; i < 2400 && outcome === "fighting"; i++) {
+      const was = f.sim.secondWind;
+      const before = f.sim.stamina;
+      outcome = f.step((now += 50), 0.05, f.sim.surge !== 2 && f.sim.tension < 0.6);
+      if (f.sim.secondWind && !was) {
+        winds += 1;
+        expect(before).toBeLessThan(SECOND_WIND_AT);
+        expect(f.sim.stamina).toBeCloseTo(before + SECOND_WIND_GAIN, 1);
+        expect(f.sim.surge).toBe(0);
+        expect(f.performance.secondWind).toBeUndefined();
+        gathered = now;
+      }
+      if (gathered !== null && f.sim.surge === 1) {
+        expect(now - gathered).toBeGreaterThanOrEqual(SECOND_WIND_GATHER_MS);
+        expect(f.sim.secondWind).toBe(true);
+        gathered = null;
+      }
+    }
+    expect(winds).toBe(1);
+    expect(outcome).toBe("landed");
+    expect(f.performance.secondWind).toBe(true);
+  });
+
+  it("never comes to a small fish", () => {
+    const pike = fish("pike");
+    const f = makeFight(pike, pike.minWeight, 10, () => 0);
+    let now = 0;
+    for (let i = 0; i < 2400 && f.sim.line > 0.05; i++) f.step((now += 50), 0.05, f.sim.surge !== 2 && f.sim.tension < 0.6);
+    expect(f.performance.secondWind).toBeUndefined();
   });
 });
 
@@ -1704,5 +1815,122 @@ describe("charges", () => {
     expect(outcome).toBe("escaped");
     expect(runtime.sim.thrown).toBe(true);
     expect(CHARGE_SLACK_SEC).toBeGreaterThan(0);
+  });
+});
+
+describe("netting the fish", () => {
+  const toNet = () => {
+    const runtime = makeFight(fish("pike"), 4, 8, () => 0, 1, "open", undefined, false, false, false, false, false, false, false, 1, 1, true);
+    runtime.sim.line = 0.01;
+    runtime.sim.stamina = 0;
+    let now = 0;
+    for (; !runtime.sim.netting && now < 10_000; now += 50) runtime.step(now, 0.05, true);
+    return { runtime, now };
+  };
+
+  it("holds a spent fish at the net instead of landing it as the line comes in", () => {
+    const { runtime } = toNet();
+    expect(runtime.sim.netting).toBe(true);
+    expect(runtime.sim.line).toBe(0);
+  });
+
+  it("nets it on a fresh strike as its head comes up, and sends it off on a short bolt on a strike with its head down", () => {
+    const { runtime, now } = toNet();
+    runtime.step(now + 10, 0.01, false);
+    expect(runtime.sim.netHead).toBe(false);
+    expect(runtime.step(now + 20, 0.01, true)).toBe("fighting");
+    expect(runtime.sim.netting).toBe(false);
+    expect(runtime.sim.line).toBe(NET_BOLT_LINE);
+    expect(runtime.performance.netMisses).toBe(1);
+    expect(isCleanFight(runtime.performance)).toBe(false);
+
+    const again = toNet();
+    const up = again.now + NET_HEAD_EVERY_MS - NET_HEAD_MS + 50;
+    // Still holding the reel from bringing it in: only a fresh strike counts.
+    expect(again.runtime.step(up, 0.01, true)).toBe("fighting");
+    again.runtime.step(up + 10, 0.01, false);
+    expect(again.runtime.sim.netHead).toBe(true);
+    expect(again.runtime.step(up + 20, 0.01, true)).toBe("landed");
+  });
+
+  it("lets a fish left at the net too long bolt off again, without counting a miss", () => {
+    const { runtime, now } = toNet();
+    runtime.step(now + 10, 0.01, false);
+    expect(runtime.step(now + NET_WAIT_MS + 10, 0.01, false)).toBe("fighting");
+    expect(runtime.sim.netting).toBe(false);
+    expect(runtime.sim.line).toBe(NET_BOLT_LINE);
+    expect(runtime.performance.netMisses).toBeUndefined();
+  });
+
+  it("nets everything but a panfish masher, and never a beginner's easy fish", () => {
+    expect(netsFish(fish("pike"), false)).toBe(true);
+    expect(fish("perch").challenge).toBe("mash");
+    expect(netsFish(fish("perch"), false)).toBe(false);
+    expect(netsFish(fish("pike"), true)).toBe(false);
+  });
+});
+
+describe("boatSwingShare", () => {
+  it("swings the hull by the share of a run it takes up: in full from the boat, less in a strong wind, not at all in a pads fight", () => {
+    expect(boatSwingShare({ water: "boat" })).toBe(1);
+    expect(boatSwingShare({ water: "boat", windy: "breezy" })).toBe(1);
+    expect(boatSwingShare({ water: "boat", windy: "strong" })).toBeCloseTo((1 - STRONG_WIND_BOAT_RUN) / (1 - BOAT_RUN));
+    expect(boatSwingShare({ water: "boat", windy: "strong" })).toBeLessThan(1);
+    expect(boatSwingShare({ water: "weeds", windy: "strong" })).toBe(0);
+    expect(boatSwingShare(null)).toBe(0);
+  });
+});
+
+describe("second fight habits", () => {
+  const atNet = (id: string, weight: number) => {
+    const runtime = makeFight(fish(id), weight, 8, () => 0, 1, "open", undefined, false, false, false, false, false, false, false, 1, 1, true);
+    runtime.sim.line = 0.01;
+    runtime.sim.stamina = 0;
+    let now = 0;
+    for (; !runtime.sim.netting && now < 10_000; now += 50) runtime.step(now, 0.05, true);
+    return { runtime, now };
+  };
+
+  it("lets a carp see the net and bolt the first time, without a miss", () => {
+    const { runtime, now } = atNet("carp", 8);
+    runtime.step(now + 10, 0.01, false);
+    expect(runtime.step(now + NET_SHY_MS + 20, 0.01, false)).toBe("fighting");
+    expect(runtime.sim.netting).toBe(false);
+    expect(runtime.sim.shyBolt).toBe(true);
+    expect(runtime.sim.line).toBe(NET_BOLT_LINE);
+    expect(runtime.performance.netMisses).toBeUndefined();
+  });
+
+  it("gives a catfish only a short moment with its head up at the net", () => {
+    const { runtime, now } = atNet("catfish", 6);
+    runtime.step(now + 10, 0.01, false);
+    const lateInHead = now + NET_HEAD_EVERY_MS - NET_HEAD_MS + 50;
+    runtime.step(lateInHead, 0.01, false);
+    expect(runtime.sim.netHead).toBe(false);
+    runtime.step(now + NET_HEAD_EVERY_MS - THRASH_HEAD_MS + 50, 0.01, false);
+    expect(runtime.sim.netHead).toBe(true);
+  });
+
+  it("lets a burbot slither off a slack line after its first run, but not a tight one, nor before it has run", () => {
+    // A long calm (sequence calms run 0.8-1.3 s), as most are in play.
+    const slack = makeFight(fish("burbot"), 3, 8, () => 0.9);
+    let now = 0;
+    // Slack before its first run is no loss.
+    for (; slack.sim.surge === 0 && now < 5000; now += 50) expect(slack.step(now, 0.05, false)).toBe("fighting");
+    for (; slack.sim.surge !== 0 && now < 30_000; now += 50) slack.step(now, 0.05, false);
+    slack.sim.tension = 0;
+    slack.sim.sulk = false;
+    let result = "fighting";
+    for (const until = now + 20_000; result === "fighting" && now < until; now += 50) result = slack.step(now, 0.05, false);
+    expect(result).toBe("escaped");
+    expect(slack.sim.slipped).toBe(true);
+    const tight = makeFight(fish("burbot"), 3, 8, () => 0.9);
+    for (let now = 0; now < 2000; now += 50) expect(tight.step(now, 0.05, true)).not.toBe("escaped");
+    expect(tight.sim.slipped).toBeUndefined();
+    expect(SLIPPERS.has("perch")).toBe(false);
+  });
+
+  it("marks the bluegill as the line-spinner", () => {
+    expect(LINE_SPINNERS.has("bluegill")).toBe(true);
   });
 });

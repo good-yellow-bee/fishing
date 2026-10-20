@@ -32,7 +32,7 @@ export function FryBurst({ light }: { light: number }) {
   const materials = useMemo(
     () => ({
       fry: new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }),
-      ring: new THREE.MeshBasicMaterial({ color: RING, transparent: true, opacity: 0.5, depthWrite: false, toneMapped: false, side: THREE.DoubleSide }),
+      ring: new THREE.MeshBasicMaterial({ color: RING, transparent: true, opacity: 0.5, depthWrite: false, toneMapped: false, side: THREE.DoubleSide, forceSinglePass: true }),
     }),
     [],
   );

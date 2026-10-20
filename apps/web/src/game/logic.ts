@@ -32,8 +32,7 @@ import {
   BOAT_CAST_RANGE,
   castRangeMultiplier,
   solidShareForLevel,
-  foldText,
-} from "@stillwater/shared";
+  foldText, LEGEND_HUNT_BITE } from "@stillwater/shared";
 import { locale, t } from "../i18n";
 
 /** A weight with one decimal in the player's number style: 3.0 / 3,0. */
@@ -219,10 +218,13 @@ export const WIND_STRIKE = { breezy: 0.85, strong: 0.7 } as const;
 export const JIG_SOLID = 1.25;
 
 /** How quick a strike must be, in ms, to set the hook solid in a window this long, in this wind, on this lure, with a dull point, this far out, at this level. */
-export function solidStrikeMs(windowMs: number, windy?: keyof typeof WIND_STRIKE, lure?: string, dull = false, long = false, level = 1) {
+export function solidStrikeMs(windowMs: number, windy?: keyof typeof WIND_STRIKE, lure?: string, dull = false, long = false, level = 1, lucky = false) {
   const jig = !!lure?.trim() && lureClass(lure).id === "jig";
-  return windowMs * solidShareForLevel(level) * (windy ? WIND_STRIKE[windy] : 1) * (jig ? JIG_SOLID : 1) * (dull ? DULL_SOLID : 1) * (long ? LONG_CAST_SOLID : 1);
+  return windowMs * solidShareForLevel(level) * (windy ? WIND_STRIKE[windy] : 1) * (jig ? JIG_SOLID : 1) * (dull ? DULL_SOLID : 1) * (long ? LONG_CAST_SOLID : 1) * (lucky ? LUCKY_SOLID : 1);
 }
+
+/** A lucky lure (75 fish in the field log) sets its hook a little more solid: the solid share of the strike window grows this much. */
+export const LUCKY_SOLID = 1.1;
 
 /** A lure landing past this share of the angler's reach is a long cast. */
 export const LONG_CAST_SHARE = 0.75;
@@ -625,6 +627,16 @@ export function longShadowWaitMul(spot: string, hour: LakeHour, sky: string | un
 /** On a night with the moon this thin (its lit share) or less, it is too dark for the fish to see to feed. */
 export const NEW_MOON = 0.1;
 
+/** At night a headlamp shows the float plainly, so the strike window holds this much longer... */
+export const LAMP_WINDOW = 1.2;
+/** ...but its light on the water puts the fish off, so the bite comes this much slower. */
+export const LAMP_WAIT = 1.15;
+
+/** Whether the headlamp is lit on the water: switched on, and only at night. */
+export function lampLit(on: boolean, hour: LakeHour) {
+  return on && hour === "night";
+}
+
 /** On a moonless night the fish can barely see to feed, so the bite comes slower. */
 export const DARK_NIGHT_WAIT = 1.1;
 
@@ -802,6 +814,17 @@ export function shinerHunter(spot: SpotId, profile: Pick<Profile, "strength" | "
     if (roll <= 0) return fish;
   }
   return hunters.at(-1) ?? null;
+}
+
+/** In a feeding frenzy the bite on the bubbles comes this much sooner again... */
+export const FRENZY_WAIT = 0.5;
+/** ...and this share of those bites are the hunters crowding in on the baitfish. */
+export const FRENZY_HUNTER_SHARE = 0.5;
+export const FRENZY_HUNTERS: ReadonlySet<string> = new Set(["pike", "smallmouth-bass", "largemouth-bass", "walleye", "perch", "tiger-muskie", "rainbow-trout"]);
+
+/** A hunter drawn into the frenzy for this bite, or none. */
+export function frenzyHunter(spot: SpotId, lure: string | undefined, profile: Pick<Profile, "strength" | "accuracy">, hour: LakeHour, random = Math.random): FishSpecies | null {
+  return drawnFrom(FRENZY_HUNTERS, FRENZY_HUNTER_SHARE, spot, lure, profile, hour, random);
 }
 
 /** The fish that raid the sunfish beds by the dock for their eggs. */
@@ -991,6 +1014,8 @@ export function pickBite(
   season?: LakeSeason,
   /** The moon's lit share; a bright night brings rare fish up a little. */
   moon?: number,
+  /** The legend a solved hunt has drawn to this bank, which bites LEGEND_HUNT_BITE times as often. */
+  legend?: string,
 ): FishSpecies {
   let home = FISH.filter((fish) => fish.spots.includes(spot));
   if (mercy) {
@@ -1050,8 +1075,9 @@ export function pickBite(
     (hotspot ? HOTSPOT_BITE[fish.rarity] : 1) *
     (legendaryBonus && fish.rarity === "legendary" ? 2 : 1) *
     (fish.rarity === "rare" || fish.rarity === "legendary" ? rareLift : 1) *
-    (moon !== undefined ? biteMoonMul(fish, hour, moon) : 1);
-  const drawWeights = sky || season || hotspot || legendaryBonus || rareLift > 1 || moon !== undefined ? reshuffle(pool, weights, profile, lift) : weights;
+    (moon !== undefined ? biteMoonMul(fish, hour, moon) : 1) *
+    (legend === fish.id ? LEGEND_HUNT_BITE : 1);
+  const drawWeights = sky || season || hotspot || legendaryBonus || rareLift > 1 || moon !== undefined || legend !== undefined ? reshuffle(pool, weights, profile, lift) : weights;
   let roll = random() * drawWeights.reduce((sum, weight) => sum + weight, 0);
   for (let i = 0; i < pool.length; i++) {
     roll -= drawWeights[i]!;

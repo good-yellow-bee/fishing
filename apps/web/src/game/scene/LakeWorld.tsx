@@ -1,13 +1,15 @@
-import { createContext, memo, useContext, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { createContext, memo, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useGLTF } from "@react-three/drei";
+import { useGLTF } from "./loadGltf";
 import * as THREE from "three";
 import { DROPOFF_PAD, OPEN_PAD, POINT_PAD, REEDS_PAD, SHOP_X, SHOP_Z, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, moonLight, type LakeHour, type LakeSeason, type Sky as WeatherSky, type SpotId } from "@stillwater/shared";
-import { ArticulatedFish } from "./ArticulatedFish";
+import { PaintedFish } from "./ArticulatedFish";
 import { ToonModel } from "./ToonModel";
+import { StaticModels, type StaticModel } from "./StaticModels";
+import { LilyBed, type LilyAt } from "./LilyBed";
 import { applyToon, disposeMaterials, releaseSharedMaterials, shareMaterials, toonRamp } from "./toon";
 import { bakeToon, lookOf, releaseBaked } from "./toonBake";
-import { batchPlaced, placement } from "./scatterBatch";
+import { SWAY_FOOT, batchPlaced, disposeBatch, placement } from "./scatterBatch";
 import { mergeParts } from "./mergeParts";
 import {
   BANK_BOARDS,
@@ -24,41 +26,28 @@ import { BRIDGE_SCALE, BRIDGE_SPANS, PIER_BOARDS, PIER_PLANK, PIER_THICK, PIER_T
 import type { Hotspot } from "../hotspot";
 import { BubblingHotspot } from "./BubblingHotspot";
 import { LakeRain } from "./LakeRain";
-import { HailShower } from "./HailShower";
 import { hailOut } from "./hailBurst";
-import { RainCurtain } from "./RainCurtain";
 import { squallOut } from "./rainSquall";
 import { LakeSnow } from "./LakeSnow";
-import { MoonRoad } from "./MoonRoad";
-import { DockRain } from "./DockRain";
 import { dewGlintsOut } from "./dewGlints";
 import { dockLeavesOut } from "./plankLeaves";
 import { DewGrass } from "./DewGrass";
-import { DockLeaves } from "./DockLeaves";
 import { boatHeading } from "./boatSwing";
 import { releaseSwayingMaterial, swayUniforms, swayingMaterial } from "./treeSway";
-import { Tadpoles } from "./Tadpoles";
 import { GrassSnake } from "./GrassSnake";
 import { SunfishNests } from "./SunfishNests";
-import { IceFloes } from "./IceFloes";
 import { Crayfish } from "./Crayfish";
 import { Waterweed } from "./Waterweed";
 import { SunkenLeaves } from "./SunkenLeaves";
 import { sunkenLeavesOut } from "./leafLitter";
-import { Frogspawn } from "./Frogspawn";
 import { spawnOut } from "./spawnClumps";
 import { crayfishOut } from "./crayfishCrawl";
 import { floesOut } from "./iceFloes";
 import { nestsOut } from "./sunfishNests";
 import { snakeOut } from "./snakeSwim";
 import { tadpolesOut } from "./tadpoleSchools";
-import { DockFrost } from "./DockFrost";
-import { DockSnow } from "./DockSnow";
 import { FROST_COLOR, dockFrost, walkwayPale } from "./dockFrost";
-import { Icicles } from "./Icicles";
 import { Thermos } from "./Thermos";
-import { Moths } from "./Moths";
-import { CapDrips } from "./CapDrips";
 import { dripsOut } from "./brimDrips";
 import { mothsOut } from "./mothOrbit";
 import { iciclesOut } from "./icicleRow";
@@ -91,9 +80,6 @@ import { firefliesOut } from "./fireflies";
 import { Heron } from "./Heron";
 import { Lanterns } from "./Lanterns";
 import { Campfire } from "./Campfire";
-import { Snowman } from "./Snowman";
-import { BirdFeeder } from "./BirdFeeder";
-import { Puddles } from "./Puddles";
 import { puddlesOut } from "./rainPuddles";
 import { Cat } from "./Cat";
 import { Clothesline } from "./Clothesline";
@@ -103,9 +89,7 @@ import { hareCoat, hareOut } from "./hareRounds";
 import { Wildflowers } from "./Wildflowers";
 import { beesOut } from "./meadowFlowers";
 import { Woodpile } from "./Woodpile";
-import { WindowGlow } from "./WindowGlow";
 import { Dinghy } from "./Dinghy";
-import { Pedalo } from "./Pedalo";
 import { pedaloOut } from "./pedalBoat";
 import { sailingOut } from "./sailingTrip";
 import { TireSwing } from "./TireSwing";
@@ -114,22 +98,16 @@ import { foamOpacity } from "./lappingWaves";
 import { catPlace } from "./catNap";
 import { chickadeesOut, feederUp } from "./feederVisits";
 import { snowmanUp } from "./snowmanLook";
-import { Toadstools } from "./Toadstools";
 import { Squirrels } from "./Squirrels";
 import { squirrelRuns, squirrelsOut } from "./squirrelRun";
 import { toadstoolsOut } from "./toadstoolPatches";
 import { campfireLit } from "./campfireSmoke";
-import { LanternMinnows } from "./LanternMinnows";
 import { minnowsOut } from "./minnowSwirl";
-import { Loon } from "./Loon";
 import { loonOut } from "./loonMotion";
-import { Bats } from "./Bats";
 import { batsOut } from "./batFlight";
-import { Geese } from "./Geese";
 import { geeseOut } from "./geeseSkein";
 import { Swans } from "./Swans";
 import { Cormorant } from "./Cormorant";
-import { Grebes } from "./Grebes";
 import { Feathers } from "./Feathers";
 import { feathersOut } from "./featherDrift";
 import { Terns } from "./Terns";
@@ -137,7 +115,6 @@ import { ternsOut } from "./ternHover";
 import { grebesOut } from "./grebeRush";
 import { CORMORANT_ROCK, cormorantOut } from "./cormorantPerch";
 import { swansOut } from "./swanGlide";
-import { Cygnets } from "./Cygnets";
 import { cygnetsOut } from "./cygnetBrood";
 import { Kingfisher } from "./Kingfisher";
 import { kingfisherOut } from "./kingfisherFlight";
@@ -153,72 +130,57 @@ import { Woodpecker } from "./Woodpecker";
 import { woodpeckerOut } from "./woodpeckerDrum";
 import { Canoeist } from "./Canoeist";
 import { canoeOut } from "./canoeTrip";
-import { Skier } from "./Skier";
 import { skiingOut } from "./skiTour";
 import { Kite } from "./Kite";
-import { NightRower } from "./NightRower";
 import { nightRowOut } from "./nightRow";
 import { Hammock } from "./Hammock";
 import { hammockOut, hammockTrees } from "./hammockSway";
-import { ShedSnow } from "./ShedSnow";
 import { snowShedOut } from "./snowShed";
 import { HotAirBalloon } from "./HotAirBalloon";
 import { balloonOut } from "./balloonDrift";
 import { kiteOut } from "./kiteFlight";
 import { Campers, Tent } from "./Tent";
 import { CAMP_FIRE_AT, CAMP_LIGHTS, campersOut, tentPitched } from "./campTent";
-import { Pumpkins } from "./Pumpkins";
 import { pumpkinsOut } from "./pumpkinPatch";
-import { Hummingbird } from "./Hummingbird";
 import { hummingbirdOut } from "./hummingbirdVisits";
 import { FogAngler } from "./FogAngler";
 import { fogAnglerOut } from "./fogFishing";
 import { DogWalker } from "./DogWalker";
 import { FAR_HILLS, hillColor } from "./farHills";
 import { dogWalkOut } from "./dogWalk";
-import { Swimmer } from "./Swimmer";
 import { swimmingOut } from "./swimLane";
 import { Woodcutter } from "./Woodcutter";
 import { choppingOut } from "./woodChopping";
 import { BoatFill } from "./BoatFill";
 import { fillKind, type FillKind } from "./boatBilge";
-import { GooseFamily } from "./GooseFamily";
 import { gooseFamilyOut } from "./gooseGraze";
 import { LeafPile } from "./LeafPile";
-import { LeafRaker } from "./LeafRaker";
 import { leafJumpOut } from "./leafJump";
 import { Painter } from "./Painter";
 import { painterOut } from "./pleinAir";
-import { DiscTossers } from "./DiscTossers";
 import { discOut } from "./discToss";
 import { BrollyFisher } from "./BrollyFisher";
 import { brollyOut } from "./brollyFishing";
-import { SnowballKids } from "./SnowballKids";
 import { snowballOut } from "./snowballFight";
 import { NightAngler } from "./NightAngler";
 import { headlampOut } from "./headlampFishing";
+import { enableModelCache } from "./bitmapCache";
 import { StoneSkimmer } from "./StoneSkimmer";
 import { skimOut } from "./skimStones";
-import { Jogger } from "./Jogger";
 import { joggerOut } from "./jogRun";
-import { Crows } from "./Crows";
 import { crowsOut } from "./crowFlush";
 import { sleddersOut } from "./sledRun";
 import { HayBales } from "./HayBales";
 import { Farmstead } from "./Farmstead";
 import { Cows } from "./Cows";
-import { Tractor } from "./Tractor";
 import { tractorOut } from "./tractorRun";
 import { HillShadows } from "./HillShadows";
-import { BarnOwl } from "./BarnOwl";
 import { barnOwlOut } from "./owlQuarter";
 import { Windmill } from "./Windmill";
 import { Paraglider } from "./Paraglider";
-import { HillBonfire } from "./HillBonfire";
 import { bonfireOut } from "./bonfireSite";
 import { paragliderOut } from "./paraglideRidge";
 import { Sheep } from "./Sheep";
-import { Rapeseed } from "./Rapeseed";
 import { Railway } from "./Railway";
 import { Orchard } from "./Orchard";
 import { BarnStorks } from "./BarnStorks";
@@ -231,31 +193,21 @@ import { HillCloud } from "./HillCloud";
 import { capCloudAmount, capCloudOut } from "./capCloud";
 import { cowsOut } from "./cowGraze";
 import { balesOut } from "./hayField";
-import { Sledders } from "./Sledders";
 import { spindriftOut } from "./blowingSnow";
-import { Spindrift } from "./Spindrift";
-import { NightEyes } from "./NightEyes";
 import { eyesOut } from "./eyeShine";
-import { Birdwatcher } from "./Birdwatcher";
 import { birderOut } from "./birdWatch";
-import { PorchRocker } from "./PorchRocker";
 import { porchOut } from "./porchRocking";
 import { Sandpipers } from "./Sandpipers";
 import { sandpipersOut } from "./sandpiperRun";
-import { EaveLights } from "./EaveLights";
 import { eaveLightsOn } from "./festiveBulbs";
 import { Coots } from "./Coots";
 import { cootsOut } from "./cootSquabble";
 import { murmurationOut } from "./murmuration";
-import { Starlings } from "./Starlings";
-import { Damselflies } from "./Damselflies";
 import { damselfliesOut } from "./damselPerch";
 import { DockSnail } from "./DockSnail";
 import { MooringLines } from "./MooringLines";
 import { poseMooringRopes } from "./mooringRope";
-import { DockMouse } from "./DockMouse";
-import { mouseOut } from "./mouseScurry";
-import { DockToad } from "./DockToad";
+import { mouseOut, snowMouseOut } from "./mouseScurry";
 import { toadOut } from "./toadHop";
 import { RopeSwallows } from "./RopeSwallows";
 import { ropeSwallowsOut } from "./swallowPerch";
@@ -263,16 +215,12 @@ import { PaperBoat } from "./PaperBoat";
 import { paperBoatOut } from "./paperDrift";
 import { snailOut } from "./snailCrawl";
 import { gullsOut } from "./gullFloes";
-import { WinterGulls } from "./WinterGulls";
 import { LakeSmoke } from "./LakeSmoke";
 import { lakeSmokeOut } from "./lakeSteam";
 import { Sculler } from "./Sculler";
 import { scullOut } from "./scullRow";
-import { Paddleboarder } from "./Paddleboarder";
 import { paddleOut } from "./paddleRoute";
-import { MidgeCloud } from "./MidgeCloud";
 import { midgesOut } from "./midgeDance";
-import { Gossamer } from "./Gossamer";
 import { gossamerOut } from "./silkDrift";
 import { Cabin } from "./Cabin";
 import { cabinWindowsLit, chimneySmoking } from "./cabinLook";
@@ -280,25 +228,18 @@ import { owlOut } from "./owlMotion";
 import { JumpingFish } from "./JumpingFish";
 import { FryBurst } from "./FryBurst";
 import { fryOut } from "./fryScatter";
-import { DiamondDust } from "./DiamondDust";
 import { diamondDustOut } from "./iceGlitter";
 import { jumpsOn } from "./fishJump";
 import { Otter } from "./Otter";
 import { Osprey } from "./Osprey";
-import { Fox } from "./Fox";
 import { foxOut } from "./foxTrot";
 import { ospreyOut } from "./ospreyFlight";
-import { Beaver } from "./Beaver";
-import { Butterflies } from "./Butterflies";
 import { butterfliesOut } from "./butterflyFlit";
 import { beaverOut } from "./beaverSwim";
-import { LILY_HEART, LILY_PETALS, easeLily, lilyBloom, lilyCup, lilyOpen, lilyPads, type Bloom } from "./lilyBloom";
-import { sharedLilyPetals } from "./lilyPetals";
+import { lilyOpen, lilyPads } from "./lilyBloom";
 import { LILY_PADS_AT } from "../lilyCover";
 import { FallingLeaves } from "./FallingLeaves";
-import { LeafRaft } from "./LeafRaft";
 import { leavesOut, petalsOut } from "./leafFall";
-import { LeafWhirl } from "./LeafWhirl";
 import { leafWhirlOut } from "./leafEddy";
 import { otterOut } from "./otterMotion";
 import { lanternLevel, lanternMurk } from "./lanternLight";
@@ -315,7 +256,6 @@ import { PollenFilm } from "./PollenFilm";
 import { FoamLanes } from "./FoamLanes";
 import { foamLanesAmount } from "./foamLanesPlan";
 import { DuckweedFilm } from "./DuckweedFilm";
-import { ShoreIceFilm } from "./ShoreIceFilm";
 import { SNOW_BAND } from "./shoreIce";
 import { duckweedAmount } from "./duckweedBeds";
 import { pollenAmount } from "./pollenDrift";
@@ -327,7 +267,6 @@ import { DABBLE_TIP, dabble } from "./duckDabble";
 import { mistAmount } from "./mist";
 import { cloudBlobs, cloudScroll, cloudShadowStrength } from "./cloudShadow";
 import { starOpacity } from "./starField";
-import { Stars } from "./Stars";
 import { seasonGroundColor, seasonWaterColor, shoreIce, tintPlant, type PlantKind } from "./seasonLook";
 import { treeShape, type HillShape, type TreeShape } from "./cameraClear";
 import { fx } from "../fx";
@@ -335,6 +274,73 @@ import { useSettings } from "../settings";
 import { BOAT_DECK, boat, boatPathPoint } from "./boat";
 import { CREEK_BANK, CREEK_HALF_WIDTH, CREEK_ROCKS, creekRibbon, nearCreek } from "./creek";
 import { bedColor, bedHeight, causticStrength, glitterDirection, glitterOnWater, waterDepthColor, waterHeight, waterHeightWithShoreWeight, surfaceScroll, waterShoreWeight } from "./water";
+import { DockFrost } from "./DockFrost";
+import { WindowGlow } from "./WindowGlow";
+import { lazyPart } from "./lazyPart";
+
+const Puddles = lazyPart("weather", "Puddles");
+const DockRain = lazyPart("weather", "DockRain");
+const RainCurtain = lazyPart("weather", "RainCurtain");
+const HailShower = lazyPart("weather", "HailShower");
+const MoonRoad = lazyPart("night", "MoonRoad");
+const Stars = lazyPart("night", "Stars");
+const BankMouse = lazyPart("night", "BankMouse");
+const BankToad = lazyPart("weather", "BankToad");
+const BarnOwl = lazyPart("night", "BarnOwl");
+const Bats = lazyPart("night", "Bats");
+const Beaver = lazyPart("night", "Beaver");
+const BirdFeeder = lazyPart("winter", "BirdFeeder");
+const Birdwatcher = lazyPart("spring", "Birdwatcher");
+const Butterflies = lazyPart("summer", "Butterflies");
+const CapDrips = lazyPart("weather", "CapDrips");
+const Crows = lazyPart("winter", "Crows");
+const Cygnets = lazyPart("summer", "Cygnets");
+const Damselflies = lazyPart("summer", "Damselflies");
+const DiamondDust = lazyPart("winter", "DiamondDust");
+const DiscTossers = lazyPart("summer", "DiscTossers");
+const DockLeaves = lazyPart("fall", "DockLeaves");
+const DockMouse = lazyPart("night", "DockMouse");
+const DockSnow = lazyPart("winter", "DockSnow");
+const DockToad = lazyPart("weather", "DockToad");
+const EaveLights = lazyPart("winter", "EaveLights");
+const Fox = lazyPart("night", "Fox");
+const Frogspawn = lazyPart("spring", "Frogspawn");
+const Geese = lazyPart("fall", "Geese");
+const GooseFamily = lazyPart("spring", "GooseFamily");
+const Gossamer = lazyPart("fall", "Gossamer");
+const Grebes = lazyPart("spring", "Grebes");
+const HillBonfire = lazyPart("night", "HillBonfire");
+const Hummingbird = lazyPart("summer", "Hummingbird");
+const IceFloes = lazyPart("winter", "IceFloes");
+const Icicles = lazyPart("winter", "Icicles");
+const Jogger = lazyPart("winter", "Jogger");
+const LanternMinnows = lazyPart("night", "LanternMinnows");
+const LeafRaft = lazyPart("fall", "LeafRaft");
+const LeafRaker = lazyPart("fall", "LeafRaker");
+const LeafWhirl = lazyPart("fall", "LeafWhirl");
+const Loon = lazyPart("night", "Loon");
+const MidgeCloud = lazyPart("night", "MidgeCloud");
+const Moths = lazyPart("night", "Moths");
+const NightEyes = lazyPart("night", "NightEyes");
+const NightRower = lazyPart("night", "NightRower");
+const Paddleboarder = lazyPart("summer", "Paddleboarder");
+const Pedalo = lazyPart("summer", "Pedalo");
+const PorchRocker = lazyPart("night", "PorchRocker");
+const Pumpkins = lazyPart("fall", "Pumpkins");
+const Rapeseed = lazyPart("spring", "Rapeseed");
+const ShedSnow = lazyPart("winter", "ShedSnow");
+const ShoreIceFilm = lazyPart("winter", "ShoreIceFilm");
+const Skier = lazyPart("winter", "Skier");
+const Sledders = lazyPart("winter", "Sledders");
+const SnowballKids = lazyPart("winter", "SnowballKids");
+const Snowman = lazyPart("winter", "Snowman");
+const Spindrift = lazyPart("winter", "Spindrift");
+const Starlings = lazyPart("night", "Starlings");
+const Swimmer = lazyPart("summer", "Swimmer");
+const Tadpoles = lazyPart("spring", "Tadpoles");
+const Toadstools = lazyPart("fall", "Toadstools");
+const Tractor = lazyPart("summer", "Tractor");
+const WinterGulls = lazyPart("winter", "WinterGulls");
 
 type Vec3 = [number, number, number];
 
@@ -564,7 +570,6 @@ function plantVariant(position: Vec3) {
   const s = Math.sin(position[0] * 12.9898 + position[2] * 78.233) * 43758.5453;
   return s - Math.floor(s);
 }
-type Lily = { url: string; position: Vec3; scale: number };
 type BoatProps = { url: string; position: Vec3; heading: number; delay: number; scale: number };
 type FishProps = {
   points: Vec3[];
@@ -671,8 +676,12 @@ const NEAR_GRASS: Scatter[] = [
   { url: MODELS.bushLarge, position: [2.1, -0.02, 16.6], scale: 1.35, rot: 3.2 },
 ];
 
+/** The swaying trees of the near and far shores and the creek, and the ground cover round the lake and the creek, each drawn as one list so like materials bake together. */
+const SHORE_TREES: Scatter[] = [...BACK_TREES, ...TREES, ...CREEK_TREES];
+const GROUND_COVER: Scatter[] = [...BUSHES, ...GRASS, ...NEAR_GRASS, ...CREEK_GRASS];
+
 // The pads' places are shared with the casts that land tight to them (lilyCover.ts).
-const LILIES: Lily[] = LILY_PADS_AT.map((pad) => ({ url: pad.large ? MODELS.lilyLarge : MODELS.lilySmall, position: [pad.x, 0.04, pad.z], scale: pad.scale }));
+const LILIES: LilyAt[] = LILY_PADS_AT.map((pad) => ({ url: pad.large ? MODELS.lilyLarge : MODELS.lilySmall, position: [pad.x, 0.04, pad.z], scale: pad.scale }));
 
 const BOATS: BoatProps[] = [
   { url: MODELS.canoe, position: [-8.5, 0.08, -5], heading: 0.72, delay: 0.2, scale: 2.6 },
@@ -778,8 +787,9 @@ const DUCKS: DuckProps[] = [
   },
 ];
 
-
-
+// The scatter lists load their models as a list (one cache entry per list), so each file was fetched again after its
+// preload, and the shared colour map once per model: three's file cache hands a repeat request the bytes it already has.
+enableModelCache();
 for (const url of Object.values(MODELS)) useGLTF.preload(url);
 
 function pushDiscIndices(rings: number, segments: number, indices: number[]) {
@@ -1360,12 +1370,30 @@ function LakeSurface({
   );
 }
 
-function Hill({ position, scale, color }: { position: Vec3; scale: Vec3; color: string }) {
+/** Places the far hills in one instanced mesh, each in its colour for the hour, season and sky. */
+export function placeHills(mesh: THREE.InstancedMesh, hour: LakeHour, season: LakeSeason, sky: WeatherSky) {
+  const at = new THREE.Matrix4();
+  const tint = new THREE.Color();
+  HILLS.forEach((hill, i) => {
+    mesh.setMatrixAt(i, at.compose(new THREE.Vector3(...hill.position), new THREE.Quaternion(), new THREE.Vector3(...hill.scale)));
+    mesh.setColorAt(i, tint.set(hillColor(hill, hour, season, sky)));
+  });
+  mesh.instanceMatrix.needsUpdate = true;
+  mesh.instanceColor!.needsUpdate = true;
+  mesh.computeBoundingSphere();
+}
+
+/** The far hills: one shape, so all of them are one draw, each coloured for the hour, the season and the sky. */
+function Hills({ hour, season, sky }: { hour: LakeHour; season: LakeSeason; sky: WeatherSky }) {
+  const mesh = useRef<THREE.InstancedMesh>(null);
+  useLayoutEffect(() => {
+    if (mesh.current) placeHills(mesh.current, hour, season, sky);
+  }, [hour, season, sky]);
   return (
-    <mesh position={position} scale={scale} castShadow={false}>
+    <instancedMesh ref={mesh} args={[undefined, undefined, HILLS.length]} castShadow={false}>
       <icosahedronGeometry args={[1, 2]} />
-      <meshToonMaterial color={color} gradientMap={toonRamp()} />
-    </mesh>
+      <meshToonMaterial color="#ffffff" gradientMap={toonRamp()} />
+    </instancedMesh>
   );
 }
 
@@ -1418,71 +1446,8 @@ const LAKE_ROCKS: RockSpec[] = [
 ];
 
 const CREEK_ROCK_SPECS: RockSpec[] = CREEK_ROCKS.map((rock) => ({ position: [rock.x, rock.scale[1] * 0.45, rock.z], scale: rock.scale, rotation: rock.rot }));
-
-/** A lily flower (or, in spring, a bud) sitting on its pad, about the size of a fist. */
-function LilyFlower({ bloom, color, open }: { bloom: Exclude<Bloom, null>; color: string; open: number }) {
-  const cup = useRef<THREE.Group>(null);
-  const still = useReducedMotion();
-  const shown = useRef(open);
-  useFrame((_, delta) => {
-    const flower = cup.current;
-    if (!flower) return;
-    // The flower eases open and shut as the hour and the weather turn.
-    shown.current = still ? open : easeLily(shown.current, open, delta);
-    const shape = lilyCup(shown.current);
-    flower.scale.set(shape.spread, shape.rise, shape.spread);
-  });
-  if (bloom === "bud") {
-    return (
-      <mesh position={[0, 0.07, 0]} scale={[0.045, 0.08, 0.045]}>
-        <sphereGeometry args={[1, 8, 6]} />
-        <meshToonMaterial color="#9fb86a" gradientMap={toonRamp()} />
-      </mesh>
-    );
-  }
-  return (
-    <group position={[0, 0.03, 0]}>
-      <group ref={cup}>
-        <mesh geometry={sharedLilyPetals()}>
-          <meshToonMaterial color={color} gradientMap={toonRamp()} />
-        </mesh>
-      </group>
-      <mesh position={[0, 0.04, 0]} scale={[0.03, 0.022, 0.03]}>
-        <sphereGeometry args={[1, 8, 6]} />
-        <meshToonMaterial color={LILY_HEART} gradientMap={toonRamp()} />
-      </mesh>
-    </group>
-  );
-}
-
-function FloatingLily({ url, position, scale, index, open }: Lily & { index: number; open: number }) {
-  const ref = useRef<THREE.Group>(null);
-  const season = useContext(SeasonContext);
-  const bloom = lilyBloom(season);
-  const pads = lilyPads(season);
-  useFrame((state) => {
-    const lily = ref.current;
-    if (!lily) return;
-    const t = state.clock.elapsedTime;
-    const y = waterHeight(position[0], position[2], t);
-    const sample = 0.5;
-    lily.position.set(position[0], position[1] + y, position[2]);
-    lily.rotation.x = THREE.MathUtils.clamp((waterHeight(position[0], position[2] + sample, t) - y) * 1.3, -0.28, 0.28);
-    lily.rotation.z = THREE.MathUtils.clamp((y - waterHeight(position[0] + sample, position[2], t)) * 1.3, -0.28, 0.28);
-  });
-  if (!pads) return null;
-  return (
-    <group ref={ref} position={position}>
-      <ToonModel url={url} scale={scale * pads.grow} shadows={false} plant={{ season, kind: "grass", variant: 0.5 }} />
-      {bloom && (
-        // Drawn a little large so the flowers read from the bank.
-        <group position={[0.12 * scale, 0, 0.08 * scale]} scale={scale * 1.8}>
-          <LilyFlower bloom={bloom} color={LILY_PETALS[index % LILY_PETALS.length]!} open={open} />
-        </group>
-      )}
-    </group>
-  );
-}
+/** Every rock round the lake, the drop-off's and the creek's: one shape, so all of them are one draw. */
+const ALL_ROCKS: RockSpec[] = [...LAKE_ROCKS, ...DROPOFF_ROCKS, ...CREEK_ROCK_SPECS];
 
 function Boat({ url, position, heading, delay, scale, wind, fill }: BoatProps & { wind: { x: number; z: number }; fill: FillKind | null }) {
   const ref = useRef<THREE.Group>(null);
@@ -1553,7 +1518,7 @@ function SwimmingFish({ points, speed, phase, size, color, accent, species }: Fi
   return (
     <group ref={ref} scale={size}>
       <group ref={bank}>
-        <ArticulatedFish color={color} accent={accent} phase={phase * 10} speed={0.85 + speed * 8} build={build} />
+        <PaintedFish color={color} accent={accent} phase={phase * 10} speed={0.85 + speed * 8} build={build} />
       </group>
       <group ref={ripple}>
         <mesh rotation={[-Math.PI / 2, 0, 0]}>
@@ -1812,7 +1777,7 @@ function Dragonflies() {
   const shapes = useMemo(() => ({ body: new THREE.CapsuleGeometry(0.02, 0.3, 3, 6).rotateX(Math.PI / 2), wing: dragonflyWingShape() }), []);
   const bodyMaterial = useMemo(() => new THREE.MeshToonMaterial({ color: "#3d6f78", gradientMap: toonRamp() }), []);
   const wingMaterial = useMemo(
-    () => new THREE.MeshBasicMaterial({ color: "#e6f1f2", transparent: true, opacity: 0.25, depthWrite: false, side: THREE.DoubleSide }),
+    () => new THREE.MeshBasicMaterial({ color: "#e6f1f2", transparent: true, opacity: 0.25, depthWrite: false, side: THREE.DoubleSide, forceSinglePass: true }),
     [],
   );
   useEffect(
@@ -1852,24 +1817,12 @@ function Dragonflies() {
   );
 }
 
-type BankPlank = { board: BankBoard; index: number };
-
-function bankPlankBatches() {
-  const batches = new Map<string, BankPlank[]>();
-  BANK_BOARDS.forEach((board, index) => {
-    const colors = board.kind === "stand" ? BANK_STAND_PLANK : BANK_WALK_PLANK;
-    const color = colors[index % 2];
-    const batch = batches.get(color);
-    const plank = { board, index };
-    if (batch) batch.push(plank);
-    else batches.set(color, [plank]);
-  });
-  return [...batches].map(([color, planks]) => ({ color, planks }));
+/** Each bank board's colour: a stand's or a walk's, alternating board by board as they always have. */
+export function bankPlankColor(board: BankBoard, index: number) {
+  return (board.kind === "stand" ? BANK_STAND_PLANK : BANK_WALK_PLANK)[index % 2]!;
 }
 
-export const BANK_PLANK_BATCHES = bankPlankBatches();
-
-/** Matrix for one board; unit geometry keeps all planks in four draw calls. */
+/** Matrix for one board; unit geometry keeps every plank in one draw call. */
 export function bankPlankMatrix(board: BankBoard, index: number) {
   const stand = board.kind === "stand";
   const y = BANK_TOP - BANK_THICK / 2 + (stand ? BANK_STAND_LIFT : 0) + (index % 2) * 0.001;
@@ -1880,26 +1833,41 @@ export function bankPlankMatrix(board: BankBoard, index: number) {
   );
 }
 
-export function placeBankPlanks(mesh: THREE.InstancedMesh, planks: readonly BankPlank[]) {
-  planks.forEach(({ board, index }, instance) => mesh.setMatrixAt(instance, bankPlankMatrix(board, index)));
+/** Places and colours `count` planks in one instanced mesh, then refits its bounds around them. */
+export function placePlanks(mesh: THREE.InstancedMesh, count: number, matrixFor: (index: number) => THREE.Matrix4, colorFor: (index: number, into: THREE.Color) => THREE.Color) {
+  const tint = new THREE.Color();
+  for (let index = 0; index < count; index += 1) {
+    mesh.setMatrixAt(index, matrixFor(index));
+    mesh.setColorAt(index, colorFor(index, tint));
+  }
   mesh.instanceMatrix.needsUpdate = true;
+  mesh.instanceColor!.needsUpdate = true;
   // Culling and shadow passes cache the first bounds three computes, which may predate these matrices.
   mesh.computeBoundingBox();
   mesh.computeBoundingSphere();
 }
 
-function BankPlanks({ color, planks }: { color: string; planks: readonly BankPlank[] }) {
+const bankMatrix = (index: number) => bankPlankMatrix(BANK_BOARDS[index]!, index);
+const bankColor = (index: number, into: THREE.Color) => into.set(bankPlankColor(BANK_BOARDS[index]!, index));
+
+/** Places and colours every bank board in one instanced mesh. */
+export function placeBankPlanks(mesh: THREE.InstancedMesh) {
+  placePlanks(mesh, BANK_BOARDS.length, bankMatrix, bankColor);
+}
+
+/** Unit boxes for `count` planks, each placed and coloured by `place`, which runs again when it changes. */
+function PlankMesh({ count, place }: { count: number; place: (mesh: THREE.InstancedMesh) => void }) {
   const mesh = useRef<THREE.InstancedMesh>(null);
 
   useLayoutEffect(() => {
-    if (mesh.current) placeBankPlanks(mesh.current, planks);
-  }, [planks]);
+    if (mesh.current) place(mesh.current);
+  }, [place]);
 
   // R3F disposes child geometry and material on unmount; an effect cleanup would also fire on StrictMode's dev replay.
   return (
-    <instancedMesh ref={mesh} args={[undefined, undefined, planks.length]} castShadow receiveShadow>
+    <instancedMesh ref={mesh} args={[undefined, undefined, count]} castShadow receiveShadow>
       <boxGeometry />
-      <meshToonMaterial color={color} gradientMap={toonRamp()} />
+      <meshToonMaterial color="#ffffff" gradientMap={toonRamp()} />
     </instancedMesh>
   );
 }
@@ -1922,15 +1890,13 @@ function BankPosts() {
 function BankWalks() {
   return (
     <group>
-      {BANK_PLANK_BATCHES.map(({ color, planks }) => (
-        <BankPlanks key={color} color={color} planks={planks} />
-      ))}
+      <PlankMesh count={BANK_BOARDS.length} place={placeBankPlanks} />
       <BankPosts />
     </group>
   );
 }
 
-/** Matrix for one pier board; unit geometry keeps the deck in two draw calls, one per plank colour. */
+/** Matrix for one pier board; unit geometry keeps the deck in one draw call. */
 export function pierPlankMatrix(index: number) {
   const board = PIER_BOARDS[index]!;
   return new THREE.Matrix4().compose(
@@ -1940,79 +1906,80 @@ export function pierPlankMatrix(index: number) {
   );
 }
 
-/** Board indices for each of the two plank colours, alternating as they always have. */
-export const PIER_PLANK_BATCHES = [0, 1].map((parity) => PIER_BOARDS.map((_, i) => i).filter((i) => i % 2 === parity));
+const FROST = new THREE.Color(FROST_COLOR);
 
-function PierPlanks({ color, boards }: { color: THREE.Color; boards: readonly number[] }) {
-  const mesh = useRef<THREE.InstancedMesh>(null);
-
-  useLayoutEffect(() => {
-    const deck = mesh.current;
-    if (!deck) return;
-    boards.forEach((index, instance) => deck.setMatrixAt(instance, pierPlankMatrix(index)));
-    deck.instanceMatrix.needsUpdate = true;
-    deck.computeBoundingBox();
-    deck.computeBoundingSphere();
-  }, [boards]);
-
-  return (
-    <instancedMesh ref={mesh} args={[undefined, undefined, boards.length]} castShadow receiveShadow>
-      <boxGeometry />
-      <meshToonMaterial color={color} gradientMap={toonRamp()} />
-    </instancedMesh>
-  );
+/** Each pier board's colour: the two plank colours alternating, soaked darker by `shade` and paled by frost or snow (`pale`). */
+export function pierPlankColor(index: number, shade: number, pale: number, into = new THREE.Color()) {
+  return into.set(PIER_PLANK[index % 2]!).multiplyScalar(shade).lerp(FROST, pale);
 }
 
+/** Places every pier board in one instanced mesh, each coloured for `shade` and `pale`. */
+export function placePierPlanks(mesh: THREE.InstancedMesh, shade: number, pale: number) {
+  placePlanks(mesh, PIER_BOARDS.length, pierPlankMatrix, (index, into) => pierPlankColor(index, shade, pale, into));
+}
+
+/** Every pier board in one instanced mesh, each in its own colour. */
 function PierDeck({ shade, pale }: { shade: number; pale: number }) {
-  return PIER_PLANK_BATCHES.map((boards, parity) => (
-    <PierPlanks
-      key={parity}
-      boards={boards}
-      color={new THREE.Color(PIER_PLANK[parity]).multiplyScalar(shade).lerp(new THREE.Color(FROST_COLOR), pale)}
-    />
-  ));
+  const place = useCallback((mesh: THREE.InstancedMesh) => placePierPlanks(mesh, shade, pale), [shade, pale]);
+  return <PlankMesh count={PIER_BOARDS.length} place={place} />;
 }
+
+/** The pier's still timbers: its bridge spans, the landing platform, a log and a paddle, soaked darker by `shade`. */
+function dockModels(shade: number): StaticModel[] {
+  return [
+    ...BRIDGE_SPANS.map((z): StaticModel => ({ url: MODELS.bridge, position: [0, 0, z], rotation: [0, Math.PI / 2, 0], scale: BRIDGE_SCALE, shade })),
+    { url: MODELS.platform, position: [0, 0, 7.9], scale: 1.55, shade },
+    { url: MODELS.log, position: [1.35, 0.12, 7.2], rotation: [0, 0.5, 0], scale: 1.1, shade },
+    { url: MODELS.paddle, position: [-1, 0.18, 7.05], rotation: [0.15, 0.6, 1.15], scale: 1.25, shade },
+  ];
+}
+const DRY_DOCK = dockModels(1);
+const WET_DOCK = dockModels(WET_SHADE);
 
 /** The pier and its planks; rain soaks the wood darker (`wet`), and frost or snow pales the walkway (`pale`). */
 function Dock({ wet, pale }: { wet: boolean; pale: number }) {
   const shade = wet ? WET_SHADE : 1;
   return (
     <group>
-      {BRIDGE_SPANS.map((z) => (
-        <ToonModel key={z} url={MODELS.bridge} position={[0, 0, z]} rotation={[0, Math.PI / 2, 0]} scale={BRIDGE_SCALE} shade={shade} />
-      ))}
+      <StaticModels items={wet ? WET_DOCK : DRY_DOCK} />
       <PierDeck shade={shade} pale={pale} />
-      <ToonModel url={MODELS.platform} position={[0, 0, 7.9]} scale={1.55} shade={shade} />
-      <ToonModel url={MODELS.log} position={[1.35, 0.12, 7.2]} rotation={[0, 0.5, 0]} scale={1.1} shade={shade} />
-      <ToonModel url={MODELS.paddle} position={[-1, 0.18, 7.05]} rotation={[0.15, 0.6, 1.15]} scale={1.25} shade={shade} />
     </group>
   );
 }
+
+/** The shack's ground: its grass platform, deck, logs, a paddle and a bush, about the shack's spot. */
+const SHACK_MODELS: StaticModel[] = [
+  { url: MODELS.grassPlat, position: [0, 0, 0], scale: 2.2 },
+  { url: MODELS.platform, position: [0, 0.02, -0.2], scale: 1.7 },
+  { url: MODELS.log, position: [-0.85, 0.22, 0.55], rotation: [0, 1.2, 0], scale: 1.15 },
+  { url: MODELS.log, position: [0.9, 0.22, 0.45], rotation: [0, -0.4, 0], scale: 1.05 },
+  { url: MODELS.log, position: [0.1, 0.38, -0.7], rotation: [0, 0.2, 0], scale: 1.3 },
+  { url: MODELS.paddle, position: [-1.15, 0.7, 0.1], rotation: [0.2, 0.4, 1.2], scale: 1.4 },
+  { url: MODELS.bushDetailed, position: [1.8, 0, -1.1], scale: 1.4, shadows: false, sitOnGround: true },
+];
 
 function Shack() {
   return (
     <group position={[SHOP_X, 0, SHOP_Z]}>
-      <ToonModel url={MODELS.grassPlat} position={[0, 0, 0]} scale={2.2} />
-      <ToonModel url={MODELS.platform} position={[0, 0.02, -0.2]} scale={1.7} />
-      <ToonModel url={MODELS.log} position={[-0.85, 0.22, 0.55]} rotation={[0, 1.2, 0]} scale={1.15} />
-      <ToonModel url={MODELS.log} position={[0.9, 0.22, 0.45]} rotation={[0, -0.4, 0]} scale={1.05} />
-      <ToonModel url={MODELS.log} position={[0.1, 0.38, -0.7]} rotation={[0, 0.2, 0]} scale={1.3} />
-      <ToonModel url={MODELS.paddle} position={[-1.15, 0.7, 0.1]} rotation={[0.2, 0.4, 1.2]} scale={1.4} />
-      <ToonModel url={MODELS.bushDetailed} position={[1.8, 0, -1.1]} scale={1.4} shadows={false} sitOnGround />
+      <StaticModels items={SHACK_MODELS} />
     </group>
   );
 }
 
+/** The boardwalk pieces along the near shore and the logs by the reeds and the point. */
+const SHORE_PATH_MODELS: StaticModel[] = [
+  { url: MODELS.path, position: [-6.2, 0.02, 11.2], rotation: [0, 1.2, 0], scale: 1.55 },
+  { url: MODELS.path, position: [-9.8, 0.02, 10.4], rotation: [0, 0.9, 0], scale: 1.5 },
+  { url: MODELS.path, position: [8.4, 0.02, 11], rotation: [0, -1.05, 0], scale: 1.5 },
+  { url: MODELS.path, position: [12.2, 0.02, 9.6], rotation: [0, -0.85, 0], scale: 1.45 },
+  { url: MODELS.log, position: [REEDS_PAD.x + 1.1, 0.12, REEDS_PAD.z + 0.4], rotation: [0, 0.8, 0], scale: 1.05 },
+  { url: MODELS.log, position: [POINT_PAD.x + 1.15, 0.12, POINT_PAD.z + 0.35], rotation: [0, -0.4, 0], scale: 1.05 },
+];
+
 function ShorePath() {
   return (
     <group>
-      <ToonModel url={MODELS.path} position={[-6.2, 0.02, 11.2]} rotation={[0, 1.2, 0]} scale={1.55} />
-      <ToonModel url={MODELS.path} position={[-9.8, 0.02, 10.4]} rotation={[0, 0.9, 0]} scale={1.5} />
-      <ToonModel url={MODELS.path} position={[8.4, 0.02, 11]} rotation={[0, -1.05, 0]} scale={1.5} />
-      <ToonModel url={MODELS.path} position={[12.2, 0.02, 9.6]} rotation={[0, -0.85, 0]} scale={1.45} />
-      <ToonModel url={MODELS.log} position={[REEDS_PAD.x + 1.1, 0.12, REEDS_PAD.z + 0.4]} rotation={[0, 0.8, 0]} scale={1.05} />
-      <ToonModel url={MODELS.log} position={[POINT_PAD.x + 1.15, 0.12, POINT_PAD.z + 0.35]} rotation={[0, -0.4, 0]} scale={1.05} />
-      <Rocks items={DROPOFF_ROCKS} />
+      <StaticModels items={SHORE_PATH_MODELS} />
     </group>
   );
 }
@@ -2077,10 +2044,7 @@ function Creek({ hour, weather, wind }: { hour: LakeHour; weather: WeatherLook; 
       <mesh geometry={water} position={[0, -0.012, 0]} receiveShadow>
         <meshToonMaterial color={seasonWaterColor(weather.water, season)} map={flow} gradientMap={toonRamp()} transparent opacity={0.9} depthWrite={false} />
       </mesh>
-      <Rocks items={CREEK_ROCK_SPECS} />
       <Reeds count={6} origin={[-23.2, 0.03, -11.0]} wind={wind} />
-      <ScatterModels items={CREEK_TREES} sway />
-      <ScatterModels items={CREEK_GRASS} />
     </group>
   );
 }
@@ -2197,7 +2161,7 @@ function Reeds({ count, origin, wind = NO_WIND }: { count: number; origin: Vec3;
 }
 
 /**
- * A scatter list drawn as instanced meshes: one draw per model part, however many copies stand around the lake.
+ * A scatter list baked into merged meshes: one draw per material, however many copies of however many models stand around the lake.
  * With `sway`, each copy bends in the wind (treeSway.ts).
  */
 function ScatterModels({ items, shadows = false, sway = false }: { items: Scatter[]; shadows?: boolean; sway?: boolean }) {
@@ -2206,7 +2170,7 @@ function ScatterModels({ items, shadows = false, sway = false }: { items: Scatte
   const models = useGLTF(urls);
   const batches = useMemo(() => {
     const byUrl = new Map(urls.map((url, i) => [url, models[i]!.scene]));
-    // Copies that look alike share one baked shape, so they still batch into one instanced mesh.
+    // Copies that look alike share one baked shape, prepared once.
     const baked = new Map<string, THREE.Group | null>();
     const placed = items.map((item) => {
       // Prepared exactly as ToonModel prepares a single copy.
@@ -2226,9 +2190,9 @@ function ScatterModels({ items, shadows = false, sway = false }: { items: Scatte
       if (!shape) shareMaterials(root);
       return { root, matrix: placement(item.position, item.rot, item.scale) };
     });
-    const meshes = batchPlaced(placed);
-    // Swapped on the batch only: the copies keep the still originals, which they release below.
-    const swayed = sway ? meshes.filter((mesh) => !Array.isArray(mesh.material)) : [];
+    const meshes = batchPlaced(placed, sway);
+    // Swapped on the batch only: the copies keep the still originals, which they release below. Only batches that carry their trees' feet sway.
+    const swayed = meshes.filter((mesh) => mesh.geometry.getAttribute(SWAY_FOOT));
     const stillMaterials = swayed.map((mesh) => mesh.material as THREE.Material);
     swayed.forEach((mesh, i) => (mesh.material = swayingMaterial(stillMaterials[i]!)));
     return { placed, meshes, stillMaterials, baked: [...baked.values()] };
@@ -2238,7 +2202,7 @@ function ScatterModels({ items, shadows = false, sway = false }: { items: Scatte
       batches.stillMaterials.forEach(releaseSwayingMaterial);
       batches.placed.forEach(({ root }) => !root.userData.baked && releaseSharedMaterials(root));
       batches.baked.forEach((shape) => shape && releaseBaked(shape));
-      batches.meshes.forEach((mesh) => mesh.dispose());
+      disposeBatch(batches.meshes);
     },
     [batches],
   );
@@ -2339,9 +2303,7 @@ export const LakeWorld = memo(function LakeWorld({
       </mesh>
       <LakeSurface spot={spot} hour={hour} sky={sky} season={season} weather={weather} wind={wind} />
 
-      {HILLS.map((hill) => (
-        <Hill key={hill.position.join()} position={hill.position} scale={hill.scale} color={hillColor(hill, hour, season, sky)} />
-      ))}
+      <Hills hour={hour} season={season} sky={sky} />
       {balesOut(season) && <HayBales season={season} hour={hour} />}
       {rapeseedOut(season) && <Rapeseed hour={hour} />}
       <Farmstead season={season} hour={hour} wind={wind} />
@@ -2356,13 +2318,10 @@ export const LakeWorld = memo(function LakeWorld({
       {tractorOut(hour, sky, season) && <Tractor />}
       {barnOwlOut(hour, sky, season) && <BarnOwl />}
       <TreeSwayClock wind={wind} />
-      <ScatterModels items={BACK_TREES} sway />
-      <ScatterModels items={TREES} sway />
+      <ScatterModels items={SHORE_TREES} sway />
       <ScatterModels items={SHACK_TREES} shadows sway />
-      <ScatterModels items={BUSHES} />
-      <ScatterModels items={GRASS} />
-      <ScatterModels items={NEAR_GRASS} />
-      <Rocks items={LAKE_ROCKS} />
+      <ScatterModels items={GROUND_COVER} />
+      <Rocks items={ALL_ROCKS} />
       <Dock wet={dockWet(weather.rain, season)} pale={walkwayPale(season, frost)} />
       {frost > 0 && <DockFrost amount={frost} />}
       {dockWet(weather.rain, season) && <DockRain light={weather.rainLight} />}
@@ -2398,9 +2357,7 @@ export const LakeWorld = memo(function LakeWorld({
       <AnchorBuoy />
       <Reeds count={14} origin={[-13.2, 0.03, 1.8]} wind={wind} />
       <Reeds count={6} origin={[11.4, 0.03, -9.7]} wind={wind} />
-      {LILIES.map((lily, i) => (
-        <FloatingLily key={`${lily.url}-${i}`} {...lily} index={i} open={lilyOpen(hour, sky)} />
-      ))}
+      {lilyPads(season) && <LilyBed lilies={LILIES} season={season} open={lilyOpen(hour, sky)} />}
       {frogsOnPads(hour, season) && FROG_PADS.map((_, i) => <PadFrog key={i} index={i} />)}
       {nestsOut(season) && <SunfishNests />}
       {floesOut(season) && <IceFloes wind={wind} />}
@@ -2499,7 +2456,9 @@ export const LakeWorld = memo(function LakeWorld({
       {damselfliesOut(hour, sky, season, wind) && <Damselflies />}
       {snailOut(hour, sky, season) && <DockSnail />}
       {mouseOut(hour, sky, season) && <DockMouse />}
+      {snowMouseOut(hour, sky, season) && <BankMouse />}
       {toadOut(hour, sky, season) && <DockToad />}
+      {toadOut(hour, sky, season) && <BankToad />}
       {ropeSwallowsOut(hour, sky, season) && <RopeSwallows />}
       {paperBoatOut(hour, sky, season) && <PaperBoat wind={wind} />}
       {gullsOut(hour, sky, season) && <WinterGulls wind={wind} />}

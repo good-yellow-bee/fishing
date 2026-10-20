@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { Hono } from "hono";
-import { daysBetween, isGolden, isLakeHour, isLakeSeason, isLocalDay, isSky, validateCatch, SPOT_IDS, type CatchSubmission } from "@stillwater/shared";
-import { findCatchByRequestId, getProfile, heaviestCatch, listCatchDays, othersHeaviestCatch, recordCatch, releaseCatch, toProfile, type CatchRow } from "../db.ts";
+import { daysBetween, fishById, isGolden, isTaggable, isLakeHour, isLakeSeason, isLocalDay, isSky, TAG_FINDER_BONUS, tagWindow, taggedWeightFits, validateCatch, SPOT_IDS, type CatchSubmission } from "@stillwater/shared";
+import { countCatches, findCatchByRequestId, findLodgeRelease, getProfile, heaviestCatch, listCatchDays, othersHeaviestCatch, recordCatch, releaseCatch, toProfile, type CatchRow } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
 export const catchRoutes = new Hono();
@@ -30,6 +30,7 @@ catchRoutes.post("/catches", async (c) => {
     !requestIdPattern.test(body.requestId) ||
     (body.clean !== undefined && typeof body.clean !== "boolean") ||
     (body.cleanRun !== undefined && (!Number.isInteger(body.cleanRun) || body.cleanRun < 0)) ||
+    (body.taggedFrom !== undefined && (typeof body.taggedFrom !== "string" || !requestIdPattern.test(body.taggedFrom))) ||
     (body.hour !== undefined && (typeof body.hour !== "string" || !isLakeHour(body.hour))) ||
     (body.sky !== undefined && !isSky(body.sky)) ||
     (body.season !== undefined && !isLakeSeason(body.season)) ||
@@ -47,14 +48,19 @@ catchRoutes.post("/catches", async (c) => {
   }
   const row = getProfile(user.id);
   if (!row) return c.json({ error: "profile missing" }, 404);
-  const result = validateCatch(toProfile(row), body, new Date(), heaviestCatch(user.id, body.speciesId), othersHeaviestCatch(user.id, body.speciesId), listCatchDays(user.id));
+  const result = validateCatch(toProfile(row), body, new Date(), heaviestCatch(user.id, body.speciesId), othersHeaviestCatch(user.id, body.speciesId), listCatchDays(user.id), countCatches(user.id, body.speciesId));
   if (!result.ok) return c.json({ error: result.error }, result.status);
+  // Another angler's let-go fish must still be in the lake: theirs, the same kind at the same bank, let go before today, grown no more than it could.
+  // One that isn't (another angler landed it first) is saved as a plain catch, so the fish is never lost.
+  const found = body.taggedFrom ? findLodgeRelease(user.id, body.taggedFrom, ...tagWindow()) : undefined;
+  const kind = fishById(found?.speciesId ?? "");
+  const tag = found && isTaggable(kind) && found.speciesId === body.speciesId && found.spot === body.spot && taggedWeightFits(kind, found.weight, body.weight) ? found : undefined;
   const record: CatchRow = {
     id: randomUUID(),
     user_id: user.id,
     species_id: body.speciesId,
     weight: body.weight,
-    points: result.points,
+    points: result.points + (tag ? TAG_FINDER_BONUS : 0),
     spot: body.spot,
     request_id: body.requestId,
     clean: body.clean ? 1 : 0,
@@ -63,6 +69,7 @@ catchRoutes.post("/catches", async (c) => {
     season: body.season ?? null,
     golden: isGolden(body.requestId) ? 1 : 0,
     day: body.day ?? null,
+    tagged_from: tag?.catchId ?? null,
     created_at: new Date().toISOString(),
   };
   const saved = recordCatch(record);
@@ -80,7 +87,7 @@ catchRoutes.post("/catches", async (c) => {
   if (saved.kind === "rate_limited") return c.json({ error: "catch rate limit exceeded" }, 429);
   return c.json({
     id: record.id,
-    points: result.points,
+    points: record.points,
     speciesId: body.speciesId,
     weight: body.weight,
   });

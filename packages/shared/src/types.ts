@@ -66,6 +66,8 @@ export type CatchRequest = {
   season?: LakeSeason;
   /** The angler's local calendar day (YYYY-MM-DD), for days-on-the-water streaks. */
   day?: string;
+  /** The catch of another angler's let-go fish that this one is, landed again. */
+  taggedFrom?: string;
 };
 
 export type CatchSubmission = CatchRequest & {

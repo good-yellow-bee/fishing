@@ -2,7 +2,7 @@ import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Database from "better-sqlite3";
-import { fishById, isLakeHour, isTrophyWeight, TROPHY_RELEASE_BONUS, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type LodgeTrack, type SpeciesRecord, type SpotId } from "@stillwater/shared";
+import { BAG_SIZE, fishById, TAG_RETURN_BONUS, TAGGABLE_IDS, isLakeHour, isTrophyWeight, TROPHY_RELEASE_BONUS, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type LodgeRelease, type LodgeTrack, type TagReturn, type SpeciesRecord, type SpotId } from "@stillwater/shared";
 
 const dir = dirname(fileURLToPath(import.meta.url));
 export const dataDir = join(dir, "../data");
@@ -93,6 +93,8 @@ db.exec(`
   );
 
   CREATE INDEX IF NOT EXISTS catch_user_created ON catch (user_id, created_at DESC);
+  CREATE INDEX IF NOT EXISTS catch_species_created ON catch (species_id, created_at);
+  CREATE INDEX IF NOT EXISTS catch_created ON catch (created_at);
 
   CREATE TABLE IF NOT EXISTS daily_request_claim (
     user_id TEXT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
@@ -102,6 +104,14 @@ db.exec(`
     window_to TEXT NOT NULL,
     claimed_at TEXT NOT NULL,
     PRIMARY KEY (user_id, day, daily_request_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS weekly_challenge_claim (
+    user_id TEXT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
+    week TEXT NOT NULL,
+    challenge_id TEXT NOT NULL,
+    claimed_at TEXT NOT NULL,
+    PRIMARY KEY (user_id, week, challenge_id)
   );
 `);
 
@@ -134,7 +144,12 @@ if (!catchColumns.some((column) => column.name === "released")) {
 if (!catchColumns.some((column) => column.name === "day")) {
   db.exec(`ALTER TABLE catch ADD COLUMN day TEXT`);
 }
+// A fish another angler let go and this catch landed again: that catch's id.
+if (!catchColumns.some((column) => column.name === "tagged_from")) {
+  db.exec(`ALTER TABLE catch ADD COLUMN tagged_from TEXT`);
+}
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS catch_user_request ON catch (user_id, request_id)`);
+db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS catch_tagged_from ON catch (tagged_from) WHERE tagged_from IS NOT NULL`);
 
 export type ProfileRow = {
   user_id: string;
@@ -162,6 +177,8 @@ export type CatchRow = {
   /** Read back from the table; a new catch is never released yet. */
   released?: 0 | 1;
   day: string | null;
+  /** Another angler's let-go fish this catch landed again. */
+  tagged_from?: string | null;
   created_at: string;
 };
 
@@ -187,6 +204,11 @@ export function findCatchByRequestId(userId: string, requestId: string): CatchRo
   return db
     .prepare(`SELECT * FROM catch WHERE user_id = ? AND request_id = ?`)
     .get(userId, requestId) as CatchRow | undefined;
+}
+
+/** How many fish of a kind the angler has landed, for the mastery tiers. */
+export function countCatches(userId: string, speciesId: string): number {
+  return (db.prepare(`SELECT COUNT(*) as n FROM catch WHERE user_id = ? AND species_id = ?`).get(userId, speciesId) as { n: number }).n;
 }
 
 /** The heaviest of a species this angler has landed, or null before the first. */
@@ -226,6 +248,78 @@ export function listCatchDays(userId: string): string[] {
     .prepare(`SELECT DISTINCT day FROM catch WHERE user_id = ? AND day IS NOT NULL ORDER BY day`)
     .all(userId) as { day: string }[];
   return rows.map((row) => row.day);
+}
+
+/** The heaviest of a derby's fish each angler landed in its window, heaviest first; of equal fish, the one landed first wins. */
+export function listDerbyEntries(fishId: string, from: string, to: string, limit: number) {
+  return db
+    .prepare(
+      `SELECT userId, displayName, weight, landedAt FROM (
+         SELECT c.user_id as userId, p.display_name as displayName, c.weight as weight, c.created_at as landedAt,
+                ROW_NUMBER() OVER (PARTITION BY c.user_id ORDER BY c.weight DESC, c.created_at ASC) as nth
+         FROM catch c JOIN profile p ON p.user_id = c.user_id
+         WHERE c.species_id = ? AND c.created_at >= ? AND c.created_at < ?
+       ) WHERE nth = 1 ORDER BY weight DESC, landedAt ASC LIMIT ?`,
+    )
+    .all(fishId, from, to, limit) as { userId: string; displayName: string; weight: number; landedAt: string }[];
+}
+
+/** Each angler's day's bag in a window: the total of their BAG_SIZE heaviest fish, heaviest bag first; of equal bags, the one made first wins. */
+export function listDayBags(from: string, to: string, limit: number) {
+  return db
+    .prepare(
+      `SELECT userId, displayName, ROUND(SUM(weight), 2) as total, COUNT(*) as count, MAX(landedAt) as madeAt FROM (
+         SELECT c.user_id as userId, p.display_name as displayName, c.weight as weight, c.created_at as landedAt,
+                ROW_NUMBER() OVER (PARTITION BY c.user_id ORDER BY c.weight DESC, c.created_at ASC) as nth
+         FROM catch c JOIN profile p ON p.user_id = c.user_id
+         WHERE c.created_at >= ? AND c.created_at < ?
+       ) WHERE nth <= ? GROUP BY userId ORDER BY total DESC, madeAt ASC, userId ASC LIMIT ?`,
+    )
+    .all(from, to, BAG_SIZE, limit) as { userId: string; displayName: string; total: number; count: number; madeAt: string }[];
+}
+
+/** The weights of the angler's day's bag in a window, heaviest first. */
+export function listBagWeights(userId: string, from: string, to: string): number[] {
+  const rows = db
+    .prepare(`SELECT weight FROM catch WHERE user_id = ? AND created_at >= ? AND created_at < ? ORDER BY weight DESC LIMIT ?`)
+    .all(userId, from, to, BAG_SIZE) as { weight: number }[];
+  return rows.map((row) => row.weight);
+}
+
+const LODGE_RELEASE_SELECT = `SELECT c.id as catchId, c.species_id as speciesId, c.weight as weight, c.spot as spot, c.created_at as at, p.display_name as by
+  FROM catch c JOIN profile p ON p.user_id = c.user_id
+  WHERE c.released = 1 AND c.user_id != ? AND c.created_at >= ? AND c.created_at < ?
+    AND c.species_id IN (${TAGGABLE_IDS.map(() => "?").join(", ")})
+    AND NOT EXISTS (SELECT 1 FROM catch again WHERE again.tagged_from = c.id)`;
+
+/** Fish other anglers let go in a window and nobody has landed again, newest first. */
+export function listLodgeReleases(userId: string, from: string, before: string, limit: number): LodgeRelease[] {
+  return db.prepare(`${LODGE_RELEASE_SELECT} ORDER BY c.created_at DESC LIMIT ?`).all(userId, from, before, ...TAGGABLE_IDS, limit) as LodgeRelease[];
+}
+
+/** The angler's let-go fish other anglers landed again since `since`, newest first. */
+export function listTagReturns(userId: string, since: string, limit: number): TagReturn[] {
+  return db
+    .prepare(
+      `SELECT again.id as catchId, again.species_id as speciesId, again.weight as weight, orig.weight as was, p.display_name as by, again.created_at as at
+       FROM catch again JOIN catch orig ON orig.id = again.tagged_from JOIN profile p ON p.user_id = again.user_id
+       WHERE again.created_at >= ? AND again.tagged_from IS NOT NULL AND orig.user_id = ? ORDER BY again.created_at DESC LIMIT ?`,
+    )
+    .all(since, userId, limit) as TagReturn[];
+}
+
+/** One of those let-go fish, by its catch's id, if it is still in the lake for this angler. */
+export function findLodgeRelease(userId: string, catchId: string, from: string, before: string): LodgeRelease | undefined {
+  return db.prepare(`${LODGE_RELEASE_SELECT} AND c.id = ?`).get(userId, from, before, ...TAGGABLE_IDS, catchId) as LodgeRelease | undefined;
+}
+
+/** How many ended derbies this angler held the top spot of, back to their first catch. */
+export function countDerbyWins(userId: string, derbies: readonly { fishId: string; from: string; to: string }[]): number {
+  return derbies.filter((derby) => listDerbyEntries(derby.fishId, derby.from, derby.to, 1)[0]?.userId === userId).length;
+}
+
+export function firstCatchAt(userId: string): string | null {
+  return (db.prepare(`SELECT MIN(created_at) as at FROM catch WHERE user_id = ?`).get(userId) as { at: string | null }).at;
 }
 
 /** The whole history grouped into badge facts; `listCatches` stops at 20, so badges can't be read from it. */
@@ -349,9 +443,12 @@ export function recordCatch(row: CatchRow): RecordCatchResult {
       .get(row.user_id, cutoff) as { count: number };
     if (count.count >= 12) return { kind: "rate_limited" } as const;
     db.prepare(
-      `INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, hour, sky, season, golden, day, created_at)
-       VALUES (@id, @user_id, @species_id, @weight, @points, @spot, @request_id, @clean, @hour, @sky, @season, @golden, @day, @created_at)`,
-    ).run(row);
+      `INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, hour, sky, season, golden, day, tagged_from, created_at)
+       VALUES (@id, @user_id, @species_id, @weight, @points, @spot, @request_id, @clean, @hour, @sky, @season, @golden, @day, @tagged_from, @created_at)`,
+    ).run({ ...row, tagged_from: row.tagged_from ?? null });
+    // The angler who let the fish go is paid for it once, when it is landed again.
+    const tagged = row.tagged_from ? (db.prepare(`SELECT user_id FROM catch WHERE id = ?`).get(row.tagged_from) as { user_id: string } | undefined) : undefined;
+    if (tagged) db.prepare(`UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`).run(TAG_RETURN_BONUS, TAG_RETURN_BONUS, tagged.user_id);
     db.prepare(
       `UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`,
     ).run(row.points, row.points, row.user_id);
@@ -372,6 +469,30 @@ export function releaseCatch(userId: string, requestId: string): { row: CatchRow
       db.prepare(`UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`).run(bonus, bonus, userId);
     }
     return { row, bonus };
+  })();
+}
+
+/** The angler's catches filed under any of these local days and saved no earlier than `savedFrom`, so a fish posted
+ * late can't be filed back into an earlier week. */
+export function listCatchesOnDays(userId: string, days: readonly string[], savedFrom: string): CatchRow[] {
+  return db
+    .prepare(`SELECT * FROM catch WHERE user_id = ? AND created_at >= ? AND day IN (${days.map(() => "?").join(", ")})`)
+    .all(userId, savedFrom, ...days) as CatchRow[];
+}
+
+export function listWeeklyClaims(userId: string, week: string): string[] {
+  return (db.prepare(`SELECT challenge_id FROM weekly_challenge_claim WHERE user_id = ? AND week = ?`).all(userId, week) as { challenge_id: string }[]).map((row) => row.challenge_id);
+}
+
+/** Pays a week's goal once; false when it was already claimed. */
+export function claimWeeklyChallenge(userId: string, week: string, challengeId: string, reward: number): boolean {
+  return db.transaction(() => {
+    const claim = db
+      .prepare(`INSERT OR IGNORE INTO weekly_challenge_claim (user_id, week, challenge_id, claimed_at) VALUES (?, ?, ?, ?)`)
+      .run(userId, week, challengeId, new Date().toISOString());
+    if (claim.changes !== 1) return false;
+    db.prepare(`UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`).run(reward, reward, userId);
+    return true;
   })();
 }
 

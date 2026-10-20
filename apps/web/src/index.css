@@ -577,6 +577,20 @@ a:focus-visible {
   cursor: pointer;
 }
 
+/* On a touch screen "2 more reasons" was a 15 px line of text to tap: it reaches 9 px up and down, into the hint's
+   padding and the plain words above it, for a 33 px band. */
+@media (pointer: coarse) {
+  .hint-more {
+    position: relative;
+  }
+
+  .hint-more::after {
+    content: "";
+    position: absolute;
+    inset: -9px -4px;
+  }
+}
+
 /* In a fight the hint would overlap the fight card, which shows the hookset's message itself for a while. */
 .scene-wrap[data-phase="fight"] .hint {
   display: none;
@@ -895,8 +909,17 @@ a:focus-visible {
   color: var(--amber);
 }
 
+.walk-signs .panel-btn[aria-pressed="true"] {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
 .walk-signs .bait-short {
   display: none;
+}
+
+.walk-signs .sign-frenzy {
+  color: var(--amber);
 }
 
 /* A bank the season, hour and weather favor right now; the stance chip spells it out once you stand there. */
@@ -1364,11 +1387,53 @@ html[data-reduce-motion="1"] .fight-bar .fight-note {
   font-weight: 700;
 }
 
-.fight-bar .fight-water {
+.fight-bar :is(.fight-water, .fight-drag) {
   margin: 6px 0 0;
   color: #3f5a42;
   font-size: 11px;
   text-align: center;
+}
+
+/* The card lets presses through to the lake; only the drag knob takes them. */
+.fight-bar .fight-drag-btn {
+  pointer-events: auto;
+  font: inherit;
+  font-weight: 700;
+  color: #2c3b2e;
+  background: rgba(255, 250, 238, 0.9);
+  border: 1px solid #665139;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+@media (pointer: coarse) {
+  .fight-bar .fight-drag-btn {
+    min-height: 32px;
+  }
+
+  /* With larger text on a touch screen the drag's explanation took the card two lines further down, under the Reel
+     button on a 360 x 640 phone and over the header held sideways: the knob says the drag, and a screen reader still
+     reads the line. */
+  html[data-text-size] .fight-bar .fight-drag-line {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
+/* And at any text size on a phone held sideways or narrower than 360 px, where the card had no line to spare either. */
+@media (pointer: coarse) and (max-height: 500px), (pointer: coarse) and (max-width: 359px) {
+  .fight-bar .fight-drag-line {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
 }
 
 .fight-bar .fight-clean {
@@ -2422,6 +2487,21 @@ html[data-input="pad"] .fight-bar .on-pad {
   }
 }
 
+/* On a short upright phone (320 x 568 to 375 x 667) the fight card, now taller with its fish's habit and the clean-fight
+   line, ran up over the header and the bank chip from its low place: as with larger text, it hangs from the header,
+   whose time, weather, level and points chips step aside until the fight ends, and the coach and bank chip go too. */
+@media (max-width: 800px) and (min-height: 501px) and (max-height: 700px) {
+  .fight-bar {
+    top: calc(var(--hud-bottom, 140px) + 8px);
+    bottom: auto;
+  }
+
+  .hud:has(+ .scene-wrap[data-phase="fight"]) :is(.hour-chip, .sky-chip, .level-chip, .points-chip),
+  .scene-wrap[data-phase="fight"] :is(.walkthrough, .stance-chip) {
+    display: none;
+  }
+}
+
 /* On a touch screen the thumb button already says Reel and the status line says when to let go, so the card's
    hold-and-release line goes with larger text too. */
 @media (pointer: coarse) and (max-width: 800px) and (min-height: 501px) {
@@ -3355,8 +3435,8 @@ html[data-contrast="high"] :is(
   backdrop-filter: none;
 }
 
-/* The states the panels above would flatten keep their amber. */
-html[data-contrast="high"] :is(.walk-signs .panel-btn:disabled, .walk-signs .walk-shop, .walk-signs .walk-retie) {
+/* The states the panels above would flatten keep their amber, a switched-on Headlamp among them. */
+html[data-contrast="high"] :is(.walk-signs .panel-btn:disabled, .walk-signs .walk-shop, .walk-signs .walk-retie, .walk-signs .panel-btn[aria-pressed="true"]) {
   border-color: #ffc95c;
   color: #ffc95c;
 }
@@ -3581,6 +3661,32 @@ html[data-contrast="high"] .sound-captions li {
     display: none;
   }
 
+  /* With large or larger text a short sideways screen has no room for the bank chip, the lure and the walk stick down the
+     left edge: at 300 px tall the stick covered the lure's lower 26-55 px. The lure goes up into the chip's row without
+     its heading (the list keeps its name for a screen reader), and the chip sits to its right, short of the shore signs;
+     the first-cast coach takes that spot while it shows. */
+  html[data-text-size] .lure-choice {
+    top: calc(var(--hud-bottom, 52px) + 6px);
+  }
+
+  html[data-text-size] .lure-choice > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  html[data-text-size] .stance-chip {
+    left: calc(16px + min(220px, calc(30vw / var(--text-zoom, 1))));
+    max-width: calc((100vw - var(--signs-room, 0px)) / var(--text-zoom, 1) - 24px - min(220px, calc(30vw / var(--text-zoom, 1))));
+  }
+
+  html[data-text-size] .scene-wrap[data-walkthrough="1"] .stance-chip {
+    display: none;
+  }
+
   /* Down the right edge, stopping above the power meter; more signs than fit (larger text, the inlet, the boat) start a second column. */
   .walk-signs {
     top: calc(var(--hud-bottom, 52px) + 6px);
@@ -3798,4 +3904,15 @@ html[data-contrast="high"] .sound-captions li {
   html[data-hand="left"] .hint {
     right: 10px;
   }
+}
+
+/* Each row says its own rank, so the list draws no numbers of its own. */
+.derby-entries {
+  list-style: none;
+  padding-left: 0;
+}
+
+.derby-entries li[data-you="1"] {
+  color: var(--amber);
+  font-weight: 700;
 }

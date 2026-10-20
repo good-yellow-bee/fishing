@@ -11,12 +11,18 @@ import {
   PB_BONUS,
   CLEAN_RUN_FROM,
   catchStamp,
+  masteryBonus,
+  tierReachedBy,
   dailyConditions,
   fieldLogBestBeat,
   isFishingStance,
   badgeById,
   lodgeStamp,
   type SpeciesRecord,
+  type LodgeRelease,
+  TAG_FINDER_BONUS,
+  TAG_RETURN_BONUS,
+  fishById,
   LAKE_HOUR_BLURB,
   lakeHour,
   lakeHourFromSearch,
@@ -30,7 +36,12 @@ import {
   luresPacked,
   keepPlayTrip,
   localDate,
+  weekOf,
   streakDays,
+  addToBag,
+  bagToBeat,
+  bagDay,
+  bagTotal,
   dayRunForFirstFish,
   DAY_RUN_BONUS,
   STANCE_LABELS,
@@ -55,8 +66,9 @@ import {
   type SkillId,
   type StanceId,
 } from "@stillwater/shared";
-import { buyGroundbait, buyShiner, buyUpgrade, errorText, getMe, getSpeciesRecords, releaseCatch, type Me } from "../api";
+import { buyGroundbait, buyShiner, buyUpgrade, errorText, getLodgeReleased, getMe, getSpeciesRecords, getWeeklyChallenges, releaseCatch, type Me, type WeeklyBoard } from "../api";
 import { DailyRequestsPanel } from "../components/DailyRequestsPanel";
+import { WeeklyChallengesPanel } from "../components/WeeklyChallengesPanel";
 import { FightBar } from "../components/FightBar";
 import { FishMark } from "../components/FishMark";
 import { useGamepad } from "../game/useGamepad";
@@ -78,14 +90,16 @@ import { Walkthrough } from "../components/Walkthrough";
 import { bestPounds } from "../game/bestWeight";
 import { hookNoteMs } from "../game/hookNote";
 import { bookForPlay, markReleasedInBook, saveLandedCatch, saveLandedPhoto } from "../field/keepCatch";
+import { LURE_TIER_WORD, lureCatchCount, lureTier, lureTierReachedBy } from "../game/lureSeasoning";
 import { rememberReleased } from "../game/releasedFish";
 import { readTackle } from "../field/gear/storage";
 import { useEffectsSteppedDown } from "../game/frameWatch";
 import { useEffectsNotice } from "../game/effectsNotice";
 import { saveLogbook } from "../field/storage";
 import { fx } from "../game/fx";
-import { canBaitShiner, GROUNDBAIT_CASTS, hookWindowMs, isMercy, longShadowWaitMul, solidStrikeMs } from "../game/logic";
+import { canBaitShiner, GROUNDBAIT_CASTS, hookWindowMs, isMercy, lampLit, longShadowWaitMul, solidStrikeMs } from "../game/logic";
 import { useBadgeToast } from "../game/useBadgeToast";
+import { useTagNewsToast } from "../game/useTagNewsToast";
 import { bookSeasonNote, bookSessionTitle, loadSession, saveSession, sessionTitle, startSession, withSessionFish, type SessionDraft } from "../game/session";
 import { TripRecap } from "../components/TripRecap";
 import { useLodgeTracks } from "../game/useLodgeTracks";
@@ -105,7 +119,8 @@ import { useCatchSync } from "../game/useCatchSync";
 import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
 import { rarityLabel } from "../game/logic";
 import { locale, t, tn, useT } from "../i18n";
-import { canTurnRuns, fightWind } from "../game/fight";
+import { nextDrag } from "../game/drag";
+import { boatSwingShare, canTurnRuns, fightWind } from "../game/fight";
 import { fightNotesText } from "../game/fightNotes";
 import { savePng, saveShareCard, shareCardFileName } from "../game/shareCard";
 import { lakePictureFileName, requestLakeShot } from "../game/scene/lakeShot";
@@ -214,7 +229,43 @@ export function DockPage() {
   const tiedLure = useRef(chosenLure);
   const caughtTotal = me?.speciesStats.reduce((sum, stat) => sum + stat.caught, 0) ?? 0;
   const mercy = isMercy(caughtTotal);
-  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind);
+  // The week's legend hunt, read with the weekly challenges; a solved one draws its legend to its bank.
+  const [hunt, setHunt] = useState<{ week: string; rumor: WeeklyBoard["rumor"] } | null>(null);
+  const latestCatch = me?.catches[0]?.id;
+  const angler = me?.profile.userId;
+  useEffect(() => {
+    if (!angler) return;
+    let live = true;
+    getWeeklyChallenges()
+      .then((board) => live && setHunt({ week: board.week, rumor: board.rumor }))
+      // The shack's own panel reports the board's errors; the hunt keeps what it last read until a catch reads it again.
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [angler, latestCatch]);
+  // A hunt only holds for its own week, even in a tab left open past Sunday midnight.
+  const legend = hunt && hunt.week === weekOf(localDate(new Date())) && hunt.rumor.clues.every(Boolean) ? { legendId: hunt.rumor.legendId, spot: hunt.rumor.spot } : null;
+  // Other anglers' let-go fish, read once a visit, for a cast to find.
+  const [lodgeReleased, setLodgeReleased] = useState<LodgeRelease[]>([]);
+  useEffect(() => {
+    if (!angler) return;
+    let live = true;
+    getLodgeReleased()
+      .then((rows) => live && setLodgeReleased(rows))
+      // Without the list the lake simply holds no tagged fish this visit.
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [angler]);
+  // Each packed lure's tier from the fish the game landed on it, as the field log keeps them; read again after each save.
+  const [bookCatches, setBookCatches] = useState(() => bookForPlay().catches);
+  const lureTiers = useMemo(() => new Map(lureChoices.map((choice) => [choice, lureTier(lureCatchCount(bookCatches, choice))])), [lureChoices, bookCatches]);
+  const bookCatchesRef = useRef(bookCatches);
+  bookCatchesRef.current = bookCatches;
+  const luckyLures = useMemo(() => new Set(lureChoices.filter((choice) => lureTiers.get(choice) === "lucky")), [lureChoices, lureTiers]);
+  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind, legend, lodgeReleased, luckyLures);
   // The cast's left-out reasons, opened from its hint; each cast's list starts closed.
   const [reasonsOpenFor, setReasonsOpenFor] = useState<readonly string[] | null>(null);
   const reasonsOpen = reasonsOpenFor === game.moreReasons;
@@ -300,6 +351,7 @@ export function DockPage() {
   const groundbaitKey = useRef(() => {});
   // Read by the T key: reties a frayed or twisted line, or touches up a dull hook, whenever its button by the walk signs shows.
   const retieKey = useRef(() => {});
+  const lampKey = useRef(() => {});
   const posted = useRef<string | null>(null);
   // The local day the fish landed on, kept so a later retry files it under the same day.
   const landedDay = useRef(localDate(new Date()));
@@ -312,6 +364,8 @@ export function DockPage() {
   const catchShot = useSyncExternalStore(subscribeCatchShot, latestCatchShot);
   const shotFor = useRef<{ seq: number; id: string; dataUrl: string } | null>(null);
   const shotBase = useRef<{ id: string; seq: number } | null>(null);
+  /** The tier the tied lure climbs to with this landed fish, read from the book before the fish goes in. */
+  const lureReached = useMemo(() => (game.outcome?.kind === "landed" ? lureTierReachedBy(lureCatchCount(bookCatchesRef.current, tiedLure.current)) : null), [game.outcome]);
   const fieldBeat = useMemo(() => {
     if (game.outcome?.kind !== "landed") return null;
     const book = bookForPlay();
@@ -323,10 +377,24 @@ export function DockPage() {
     if (game.outcome?.kind !== "landed") return null;
     return catchStamp(statsRef.current, game.outcome.species.id, game.outcome.weight);
   }, [game.outcome]);
+  /** How many of the landed kind the angler had before this one, for the mastery tiers. */
+  const priorCaught = useMemo(() => {
+    const outcome = game.outcome;
+    return outcome?.kind === "landed" ? (statsRef.current.find((row) => row.speciesId === outcome.species.id)?.caught ?? 0) : 0;
+  }, [game.outcome]);
+  const tierReached = tierReachedBy(priorCaught);
   const daysRef = useRef(me?.recentDays ?? []);
   daysRef.current = me?.recentDays ?? [];
   /** The run of days this landed fish keeps going as the day's first, from DAY_RUN_FROM; 0 when it pays no day-run bonus. */
   const dayRun = useMemo(() => (game.outcome?.kind === "landed" ? dayRunForFirstFish(daysRef.current, localDate(new Date())) : 0), [game.outcome]);
+  const bagRef = useRef(me?.todayBag);
+  bagRef.current = me?.todayBag;
+  /** Today's bag with this landed fish in it, read before the catch is saved; a bag read before UTC midnight is yesterday's. */
+  const dayBag = useMemo(() => {
+    if (game.outcome?.kind !== "landed" || !userId) return null;
+    const read = bagRef.current;
+    return addToBag(read && read.day === bagDay().from ? read.weights : [], game.outcome.weight);
+  }, [game.outcome, userId]);
   // Read before the catch is saved, so a new record can name the one it beat; read again after each save.
   const [records, setRecords] = useState<SpeciesRecord[] | null>(null);
   const recordsRef = useRef(records);
@@ -417,7 +485,7 @@ export function DockPage() {
   const retryServerSave = () => {
     const outcome = game.outcome;
     if (outcome?.kind === "landed" && posted.current !== outcome.id) {
-      void saveOutcome(outcome.id, { requestId: outcome.id, speciesId: outcome.species.id, weight: outcome.weight, spot: outcome.spot, clean: outcome.clean, cleanRun: outcome.notes?.cleanRun, hour, sky, season, day: landedDay.current });
+      void saveOutcome(outcome.id, { requestId: outcome.id, speciesId: outcome.species.id, weight: outcome.weight, spot: outcome.spot, clean: outcome.clean, cleanRun: outcome.notes?.cleanRun, hour, sky, season, day: landedDay.current, taggedFrom: outcome.tag?.id });
       return;
     }
     void catchSync.sync();
@@ -512,8 +580,9 @@ export function DockPage() {
   const shownLevel = useLevelToast(me?.level, bankClear);
   // A level-up has the floor first; the badge waits its turn behind it.
   const shownBadges = useBadgeToast(me?.badges, bankClear && !shownLevel);
+  const shownTag = useTagNewsToast(me?.tagReturns, bankClear && !shownLevel && !shownBadges);
   // The effects notice waits its turn too, behind both: in a fight it covered the tension bar and the let-go cue.
-  const effectsNotice = useEffectsNotice(steppedDownAt, !bankClear || !!shownLevel || !!shownBadges, EFFECTS_NOTICE_MS);
+  const effectsNotice = useEffectsNotice(steppedDownAt, !bankClear || !!shownLevel || !!shownBadges || !!shownTag, EFFECTS_NOTICE_MS);
 
   // Watch the clock; a new lake hour or sky waits for a calm moment so it never lands mid-strike or mid-fight.
   // One change at a time: the hour goes first and the sky follows on a later check.
@@ -654,6 +723,7 @@ export function DockPage() {
         lure: tiedLure.current,
         weather: dailyConditions(openedAt, sky),
       });
+      setBookCatches(bookForPlay().catches);
       setFieldSaved(true);
       setFieldLogError("");
     } catch (err) {
@@ -672,12 +742,12 @@ export function DockPage() {
       setReleaseError(false);
       return;
     }
-    const { id, species, weight, spot: catchSpot, clean, notes } = game.outcome;
+    const { id, species, weight, spot: catchSpot, clean, notes, tag } = game.outcome;
     if (posted.current === id) return;
     landedDay.current = localDate(new Date());
     saveFieldLog();
     if (!userId) return;
-    void saveOutcome(id, { requestId: id, speciesId: species.id, weight, spot: catchSpot, clean, cleanRun: notes?.cleanRun, hour, sky, season, day: landedDay.current });
+    void saveOutcome(id, { requestId: id, speciesId: species.id, weight, spot: catchSpot, clean, cleanRun: notes?.cleanRun, hour, sky, season, day: landedDay.current, taggedFrom: tag?.id });
   }, [game.outcome, saveFieldLog, saveOutcome, userId, hour, sky, season]);
 
   useEffect(() => {
@@ -731,6 +801,17 @@ export function DockPage() {
       if (event.code === "KeyT" && !event.repeat) {
         event.preventDefault();
         retieKey.current();
+        return;
+      }
+      // The drag is turned in a fight, where its card shows it.
+      if (event.code === "KeyF" && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey && scenePhaseRef.current === "fight") {
+        event.preventDefault();
+        updateSettings({ drag: nextDrag(savedSettings.drag) });
+        return;
+      }
+      if (event.code === "KeyL" && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        event.preventDefault();
+        lampKey.current();
         return;
       }
       if (event.code !== "KeyE" || event.repeat) return;
@@ -796,6 +877,9 @@ export function DockPage() {
   groundbaitKey.current = () => {
     if (fishing && !rowing && game.handfuls > 0 && !shopOpen) game.throwGroundbait();
   };
+  lampKey.current = () => {
+    if (hour === "night" && !rowing && !shopOpen) game.toggleLamp();
+  };
   retieKey.current = () => {
     if (!rowing && (game.frayed || game.twisted || game.dulled || washedWorm) && !shopOpen) game.retie();
   };
@@ -804,9 +888,15 @@ export function DockPage() {
     target !== "shop" && (target !== "dropoff" || dropoffOpen) && (target !== "inlet" || inletOpen) && bankSuitsNow(target, lureNow);
   /** A bank whose next cast meets wary fish, unless groundbait there keeps them feeding: its sign is dimmed and the stance chip says so. */
   const fishedHardAt = (target: StanceId) => game.fishedHard.some((bank) => bank === target) && game.groundbait?.spot !== target;
+  /** A bank whose bubbles boil in a feeding frenzy right now: its sign carries a star. */
+  const frenzyAt = (target: WalkTarget) => game.frenzy && game.hotspot?.spot === target;
   /** What a walk sign tells a screen reader and the tooltip beyond its bank's name. */
   const signNote = (target: WalkTarget, label: string) =>
-    fishedHardAt(target)
+    frenzyAt(target)
+      ? fishedHardAt(target)
+        ? t("{bank}: feeding frenzy now, but fished hard", { bank: t(label) })
+        : t("{bank}: feeding frenzy now", { bank: t(label) })
+      : fishedHardAt(target)
       ? favoredNow(target)
         ? t("{bank}: bites sooner now, but fished hard", { bank: t(label) })
         : t("{bank}: fished hard", { bank: t(label) })
@@ -887,6 +977,8 @@ export function DockPage() {
           released={landedReleased}
           moon={moon}
           wind={wind}
+          boatSwing={boatSwingShare(game.fight)}
+          headlamp={lampLit(game.lamp, hour)}
           hotspot={game.hotspot}
           groundbait={game.groundbait}
           rising={rising}
@@ -904,7 +996,7 @@ export function DockPage() {
             <div className="cue-bar">
               <i />
               {/* From level 2, a mark where the shrinking bar passes the last moment for a solid hook. */}
-              {showsSolidMark(me.level) && <b aria-hidden style={{ left: `${(1 - solidStrikeMs(1, fightWind(wind.wind), tiedLure.current, false, false, me.level)) * 100}%` }} />}
+              {showsSolidMark(me.level) && <b aria-hidden style={{ left: `${(1 - solidStrikeMs(1, fightWind(wind.wind), tiedLure.current, false, false, me.level, lureTiers.get(tiedLure.current) === "lucky")) * 100}%` }} />}
             </div>
           </div>
         )}
@@ -995,6 +1087,7 @@ export function DockPage() {
           value={lure}
           spot={bank}
           now={lureNow}
+          tierOf={(choice) => lureTiers.get(choice) ?? null}
           locked={lureLocked}
           onChange={(next) => {
             if (lureLocked || !lureChoices.includes(next)) return;
@@ -1044,6 +1137,21 @@ export function DockPage() {
                 <span className="bait-short" aria-hidden="true">{t("Bait")}</span>
               </button>
             )}
+            {hour === "night" && !rowing && (
+              <button
+                className="panel-btn"
+                type="button"
+                aria-pressed={game.lamp}
+                title={t("A headlamp shows the float plainly, so the strike holds longer, but its light on the water puts the fish off.")}
+                onClick={(event) => {
+                  // Leave Space free for casting.
+                  event.currentTarget.blur();
+                  game.toggleLamp();
+                }}
+              >
+                {t("Headlamp")}
+              </button>
+            )}
             {!rowing && (game.frayed || game.twisted || game.dulled || washedWorm) && (
               <button
                 className="panel-btn walk-retie"
@@ -1085,6 +1193,7 @@ export function DockPage() {
               >
                 {t(label)}
                 {favoredNow(target) && <span className="sign-now" aria-hidden="true"> •</span>}
+                {frenzyAt(target) && <span className="sign-frenzy" aria-hidden="true"> ✦</span>}
               </button>
             ))}
           </nav>
@@ -1142,12 +1251,13 @@ export function DockPage() {
                   game.outcome.species,
                   game.outcome.weight,
                   game.outcome.clean,
-                  weeklyBonus(game.outcome.species.id) * (landedGolden ? GOLDEN_BONUS : 1) * cleanRunBonus(game.outcome.clean, game.outcome.notes?.cleanRun) * (lodgeTaken ? LODGE_RECORD_BONUS : stamp?.kind === "pb" ? PB_BONUS : 1) * (dayRun > 0 ? DAY_RUN_BONUS : 1),
-                ),
+                  weeklyBonus(game.outcome.species.id, landedDay.current) * (landedGolden ? GOLDEN_BONUS : 1) * cleanRunBonus(game.outcome.clean, game.outcome.notes?.cleanRun) * (lodgeTaken ? LODGE_RECORD_BONUS : stamp?.kind === "pb" ? PB_BONUS : 1) * (dayRun > 0 ? DAY_RUN_BONUS : 1) * masteryBonus(priorCaught),
+                ) + (game.outcome.tag ? TAG_FINDER_BONUS : 0),
               })}
             </p>
             {landedGolden && <p className="catch-stamp golden">{t("Golden fish · 2× points")}</p>}
-            {weeklyBonus(game.outcome.species.id) > 1 && <p className="catch-stamp">{t("Fish of the week · 1.5× points")}</p>}
+            {game.outcome.tag && <p className="catch-stamp">{t("Tagged by {name} · +{points} pts, and {back} for them", { name: game.outcome.tag.by, points: TAG_FINDER_BONUS, back: TAG_RETURN_BONUS })}</p>}
+            {weeklyBonus(game.outcome.species.id, landedDay.current) > 1 && <p className="catch-stamp">{t("Fish of the week · 1.5× points")}</p>}
             {game.outcome.clean && (
               <p className="catch-stamp">
                 {(game.outcome.notes?.cleanRun ?? 0) >= CLEAN_RUN_FROM
@@ -1158,6 +1268,16 @@ export function DockPage() {
             {fightNotesText(game.outcome.notes) && <p className="catch-stamp quiet fight-notes">{fightNotesText(game.outcome.notes)}</p>}
             {dayRun > 0 && <p className="catch-stamp">{t("First fish of day {n} in a row · 1.5× points", { n: dayRun })}</p>}
             {stamp?.kind === "first" && <p className="catch-stamp">{t("New in the field guide")}</p>}
+            {tierReached && (
+              <p className="catch-stamp">
+                {tierReached.id === "known"
+                  ? t("Known fish: {fish} · {n} landed", { fish: t(game.outcome.species.name), n: priorCaught + 1 })
+                  : tierReached.id === "skilled"
+                    ? t("Skilled: {fish} · {n} landed", { fish: t(game.outcome.species.name), n: priorCaught + 1 })
+                    : t("Mastered: {fish} · 1.1× points from the next one", { fish: t(game.outcome.species.name) })}
+              </p>
+            )}
+            {masteryBonus(priorCaught) > 1 && <p className="catch-stamp">{t("Mastered kind · 1.1× points")}</p>}
             {stamp?.kind === "pb" && (
               <p className="catch-stamp">
                 {lodgeTaken ? t("Personal best · was {weight}", { weight: weightText(stamp.previous) }) : t("Personal best · was {weight} · 1.25× points", { weight: weightText(stamp.previous) })}
@@ -1167,6 +1287,14 @@ export function DockPage() {
               <p className="catch-stamp quiet">{t("Book PB {weight}", { weight: weightText(stamp.heaviest) })}</p>
             )}
             {stamp?.trophy && <p className="catch-stamp">{t("Trophy")}</p>}
+            {lureReached && <p className="catch-stamp">{t("{lure} is now {tier}", { lure: t(tiedLure.current), tier: t(LURE_TIER_WORD[lureReached]) })}</p>}
+            {dayBag && (
+              <p className="catch-stamp quiet day-bag">
+                {dayBag.raisedBy > 0
+                  ? t("Day's bag {weight} in {n} fish · up {more}", { weight: weightText(bagTotal(dayBag.bag)), n: dayBag.bag.length, more: weightText(dayBag.raisedBy) })
+                  : t("Day's bag {weight} · beat {least} to raise it", { weight: weightText(bagTotal(dayBag.bag)), least: weightText(bagToBeat(dayBag.bag) ?? 0) })}
+              </p>
+            )}
             {lodge?.kind === "first" && <p className="catch-stamp">{t("First on the lodge wall")}</p>}
             {lodge?.kind === "record" && (
               <p className="catch-stamp">
@@ -1288,6 +1416,13 @@ export function DockPage() {
               {shownBadges.length === 1 && <p>{t(badgeById(shownBadges[0])?.blurb ?? "")}</p>}
             </div>
           )}
+          {shownTag && !shownLevel && !shownBadges && (
+            <div className="toast level-toast badge-toast">
+              <span className="eyebrow">{t("Your tag came back")}</span>
+              <h2>{t("{name} landed your {fish}", { name: shownTag.by, fish: t(fishById(shownTag.speciesId)?.name ?? shownTag.speciesId).toLowerCase() })}</h2>
+              <p>{t("You let it go at {was}; it came back at {weight} · +{points} pts", { was: weightText(shownTag.was), weight: weightText(shownTag.weight), points: TAG_RETURN_BONUS })}</p>
+            </div>
+          )}
         </div>
         {shopOpen && (
           <div className="shop-overlay" role="dialog" aria-modal="true" aria-labelledby="shop-title" ref={shopPanel} tabIndex={-1}>
@@ -1298,6 +1433,7 @@ export function DockPage() {
             <UpgradePanel profile={me.profile} busy={busy || scenePhase !== "idle"} onBuy={onBuy} />
             <BaitShop points={me.profile.points} lifetimePoints={me.profile.lifetimePoints} handfuls={game.handfuls} shinerOn={game.liveShiner} busy={busy || scenePhase !== "idle"} onBuy={onBuyBait} onBuyShiner={onBuyShiner} />
             <DailyRequestsPanel key={userId} catchKey={me.catches[0]?.id} onClaimed={refresh} />
+            <WeeklyChallengesPanel key={`week-${userId}`} catchKey={me.catches[0]?.id} onClaimed={refresh} />
             <ForecastBoard />
             <div className="shop-foot">
               {error && (

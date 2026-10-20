@@ -1,6 +1,7 @@
-import { memo, useEffect, useMemo, useRef, useState, Suspense, type ComponentRef, type RefObject } from "react";
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, Suspense, type ComponentRef, type RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, useGLTF } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
+import { useGLTF } from "./loadGltf";
 import * as THREE from "three";
 import {
   CAST_RANGE,
@@ -33,26 +34,23 @@ import { Angler } from "./Angler";
 import { RiseRings } from "./RiseRings";
 import { Mayflies } from "./Mayflies";
 import { RodBell } from "./RodBell";
-import { RodDragonfly } from "./RodDragonfly";
 import { DockDog } from "./DockDog";
 import { dogOut } from "./dogMood";
 import { paperBoatOut } from "./paperDrift";
-import { DockMallard } from "./DockMallard";
-import { DockRobin } from "./DockRobin";
+import { BASE_FOV, fovFor } from "./cameraFov";
+import { PlayerHeadlamp } from "./PlayerHeadlamp";
+import { DockRobin, GroundBlackbird, GroundRobin } from "./DockRobin";
+import { hedgehogOut } from "./hedgehogWalk";
 import { mallardOut } from "./mallardWaddle";
-import { robinOut, robinVisitIndex } from "./robinVisit";
+import { blackbirdOut, robinOut, robinVisitIndex } from "./robinVisit";
 import { useStrikeStartle } from "./useStrikeStartle";
 import { knitsOut } from "./scarfKnit";
 import { leavesOut, petalsOut } from "./leafFall";
-import { PostOwl } from "./PostOwl";
 import { littleOwlOut } from "./littleOwl";
 import { mothsOut } from "./mothOrbit";
 import { dockSnowy } from "./snowyDock";
 import { rodDragonflyOut } from "./dragonflyPerch";
 import { Windsock } from "./Windsock";
-import { Lightning } from "./Lightning";
-import { Rainbow } from "./Rainbow";
-import { Aurora } from "./Aurora";
 import { auroraOut } from "./auroraCurtain";
 import { rainbowOut } from "./rainbowArc";
 import {
@@ -150,6 +148,15 @@ import { createFrameWatch, noteEffectsSteppedDown } from "../frameWatch";
 import { frameDue, frameThrottle, idleNow } from "./frameCap";
 import { GOLDEN_ACCENT, GOLDEN_COLOR } from "../../components/FishMark";
 import { LIFT_RISE, LIGHT_PLUNGE, liftTilt, ROLL_SPLASH, RUN_PLUNGE, runSlide, takeStyle } from "../nibblePlan";
+import { lazyPart, useSceneParts } from "./lazyPart";
+
+const Lightning = lazyPart("weather", "Lightning");
+const Aurora = lazyPart("night", "Aurora");
+const BankHedgehog = lazyPart("night", "BankHedgehog");
+const DockMallard = lazyPart("weather", "DockMallard");
+const PostOwl = lazyPart("night", "PostOwl");
+const Rainbow = lazyPart("weather", "Rainbow");
+const RodDragonfly = lazyPart("summer", "RodDragonfly");
 
 const BUOY_URL = "/models/buoy.glb";
 /** Top of the buoy model at its 0.32 scale, where the night tip sits. */
@@ -186,6 +193,10 @@ type Props = {
   moon?: number;
   /** The day's wind as a downwind drift on a sitting float, meters a second. */
   wind?: { x: number; z: number };
+  /** How far the anchored hull swings toward a run, as a share of its full swing (fight.ts boatSwingShare). */
+  boatSwing?: number;
+  /** The angler's headlamp lit on the water (logic.ts lampLit). */
+  headlamp?: boolean;
   hotspot: Hotspot | null;
   /** The groundbait tossed off a bank, while it still feeds the fish there. */
   groundbait?: Groundbait | null;
@@ -328,6 +339,24 @@ function placeBobber(
 
 function isAiming(phase: ScenePhase) {
   return phase === "idle" || phase === "casting";
+}
+
+/** Lets later scene parts load on their own once the scene is in, and fetches the likely ones ahead (lazyPart.tsx). */
+function PartsAhead() {
+  useSceneParts();
+  return null;
+}
+
+/** Opens the view up on a tall phone screen (cameraFov.ts). */
+function FitFov() {
+  const camera = useThree((state) => state.camera) as THREE.PerspectiveCamera;
+  const aspect = useThree((state) => state.size.width / state.size.height);
+  // Before the next frame draws, so a turned phone never shows a frame at the old view.
+  useLayoutEffect(() => {
+    camera.fov = fovFor(aspect);
+    camera.updateProjectionMatrix();
+  }, [camera, aspect]);
+  return null;
 }
 
 function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
@@ -694,7 +723,7 @@ function WaterAim({ phase, aim, level, powerRef, accuracy }: WaterAimProps) {
   );
 }
 
-function FightMotion({ phase, sim, ambush, light, lift, run }: { phase: ScenePhase; sim: SimRef; ambush: boolean; light: boolean; lift: boolean; run: boolean }) {
+function FightMotion({ phase, sim, ambush, light, lift, run, boatSwing }: { phase: ScenePhase; sim: SimRef; ambush: boolean; light: boolean; lift: boolean; run: boolean; boatSwing: number }) {
   const prevPhase = useRef(phase);
   const prevSurge = useRef(0);
   const biteAt = useRef(-1);
@@ -783,8 +812,8 @@ function FightMotion({ phase, sim, ambush, light, lift, run }: { phase: ScenePha
       fightView.plunge = phase === "hookset" ? bobberPlunge(fightView.biteAge, -1, 0) * (light ? LIGHT_PLUNGE : lift ? -LIFT_RISE : run ? RUN_PLUNGE : 1) : 0;
     }
 
-    // At anchor the boat swings to follow a run (that is why a run takes less line out here), then settles back.
-    const swingTarget = live && boat.mode === "anchored" ? boatSwingTarget(surge, runSide.current, sim.current?.jump === true || sim.current?.roll === true) : 0;
+    // At anchor the boat swings to follow a run (that is why a run takes less line out here), less in a strong wind, then settles back.
+    const swingTarget = live && boat.mode === "anchored" ? boatSwingTarget(surge, runSide.current, sim.current?.jump === true || sim.current?.roll === true, boatSwing) : 0;
     boat.swing += (swingTarget - boat.swing) * (1 - Math.exp(-(swingTarget === 0 ? 0.9 : 2.5) * dt));
 
     if (phase === "fight" && fightView.leapAge >= 0) {
@@ -2057,6 +2086,7 @@ function StrikeSplash({ phase, roll }: { phase: ScenePhase; roll: boolean }) {
           toneMapped={false}
           fog={false}
           side={THREE.DoubleSide}
+          forceSinglePass
         />
       </mesh>
       <mesh ref={rim} visible={false} rotation={[-Math.PI / 2, 0, 0]} renderOrder={5} frustumCulled={false}>
@@ -2069,6 +2099,7 @@ function StrikeSplash({ phase, roll }: { phase: ScenePhase; roll: boolean }) {
           toneMapped={false}
           fog={false}
           side={THREE.DoubleSide}
+          forceSinglePass
         />
       </mesh>
       <mesh ref={flash} visible={false} rotation={[-Math.PI / 2, 0, 0]} renderOrder={6} frustumCulled={false}>
@@ -2081,6 +2112,7 @@ function StrikeSplash({ phase, roll }: { phase: ScenePhase; roll: boolean }) {
           toneMapped={false}
           fog={false}
           side={THREE.DoubleSide}
+          forceSinglePass
         />
       </mesh>
       <primitive object={sprayPool} />
@@ -2161,7 +2193,7 @@ function Tone({ hour }: { hour: LakeHour }) {
   return null;
 }
 
-function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, topwater = false, hour, sky, season = "summer", species, weight, golden = false, released = false, moon, wind, hotspot, groundbait = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
+function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, topwater = false, hour, sky, season = "summer", species, weight, golden = false, released = false, moon, wind, boatSwing = 0, headlamp = false, hotspot, groundbait = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
   // How this fish takes the bait: a topwater lure makes every take a hit at the top.
   const take = species !== null ? takeStyle(species.id, topwater) : null;
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
@@ -2185,8 +2217,10 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
   return (
     <>
       <PlayerMove phase={phase} />
-      <FightMotion phase={phase} sim={sim} ambush={take === "ambush"} light={take === "light"} lift={take === "lift"} run={take === "run"} />
+      <FightMotion phase={phase} sim={sim} ambush={take === "ambush"} light={take === "light"} lift={take === "lift"} run={take === "run"} boatSwing={boatSwing} />
       <CameraRig phase={phase} sim={sim} />
+      <PartsAhead />
+      <FitFov />
       <Tone hour={hour} />
       <FrameWatch />
       <FrameCap />
@@ -2221,6 +2255,10 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       {rodDragonflyOut(hour, sky, season) && <RodDragonfly rodTip={rodTip} phase={phase} nibble={nibble} />}
       {mallardOut(hour, sky, season) && <DockMallard phase={phase} atDock={spot === "dock"} />}
       {robinAbout && <DockRobin snow={dockSnowy(season)} startledAt={robinStartledAt} />}
+      {robinAbout && <GroundRobin phase={phase} />}
+      {blackbirdOut(hour, sky, season, storm) && <GroundBlackbird phase={phase} />}
+      {hedgehogOut(hour, sky, season) && <BankHedgehog phase={phase} />}
+      {headlamp && <PlayerHeadlamp phase={phase} float={bobberWorld} />}
       {dogOut(hour, sky, season) && <DockDog key={season} phase={phase} robin={robinAbout ? robinStartledAt : null} paperWind={paperBoatOut(hour, sky, season) ? (wind ?? NO_WIND).x : null} winter={knitsOut(season)} nibble={nibble && spot === "dock" ? bobberWorld : null} snowfall={snowing(sky, season)} />}
       {littleOwlOut(hour, sky, season) && <PostOwl snow={dockSnowy(season)} moths={mothsOut(hour, season)} phase={phase} atDock={spot === "dock"} />}
       <SchoolShadows phase={phase} schooled={schooled} bobber={bobberWorld} />
@@ -2284,7 +2322,7 @@ export const FishingWorld = memo(function FishingWorld(props: Props) {
       // "percentage" is PCF: three already draws its deprecated soft default that way, and saying so keeps the console quiet.
       shadows={quality.shadows ? "percentage" : false}
       dpr={quality.dpr}
-      camera={{ position: CAM_START, fov: 48, near: 0.1, far: 160 }}
+      camera={{ position: CAM_START, fov: BASE_FOV, near: 0.1, far: 160 }}
       gl={{ antialias: true }}
       style={{ cursor: "crosshair" }}
       onCreated={({ gl }) => {

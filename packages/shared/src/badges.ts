@@ -27,9 +27,10 @@ export type BadgeFactRow = {
 };
 
 /** What the grouped facts can't carry: the longest run of consecutive local days with a fish. */
-export type BadgeHistory = { longestStreak: number };
+/** `derbyWins`: weekend derbies the angler held the top spot of when they ended. */
+export type BadgeHistory = { longestStreak: number; derbyWins?: number };
 
-export type BadgeId = "four-banks" | "night-owl" | "rain-pike" | "clean-sweep" | "trophy" | "full-book" | "four-seasons" | "gold" | "steward" | "regular" | "early-bird" | "whole-lake" | "trophy-hunter";
+export type BadgeId = "four-banks" | "night-owl" | "rain-pike" | "clean-sweep" | "trophy" | "full-book" | "four-seasons" | "gold" | "steward" | "regular" | "early-bird" | "whole-lake" | "trophy-hunter" | "derby-champion";
 
 export type Badge = {
   id: BadgeId;
@@ -170,6 +171,13 @@ export const BADGES: readonly Badge[] = [
         }),
         (row) => row.speciesId,
       ),
+  },
+  {
+    id: "derby-champion",
+    label: "Derby champion",
+    blurb: "Hold the top spot when a weekend derby ends.",
+    need: 1,
+    have: (_facts, history) => history.derbyWins ?? 0,
   },
 ];
 

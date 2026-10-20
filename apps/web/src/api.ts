@@ -1,9 +1,14 @@
 import {
   localDate,
+  type Derby,
+  type Rumor,
+  type WeeklyChallenge,
   type BoardView,
   type BadgeProgress,
   type BoardPeriod,
+  type LodgeRelease,
   type LodgeTrack,
+  type TagReturn,
   type SpeciesRecord,
   type CatchRecord,
   type CatchStat,
@@ -27,11 +32,17 @@ export type Me = {
   longestStreak: number;
   /** The last 60 local days with a fish, oldest first, for the current streak on this device's calendar. */
   recentDays: string[];
+  /** The UTC day's bag as it stood when read: the day's start, and its weights, heaviest first. */
+  todayBag: { day: string; weights: number[] };
+  /** The angler's let-go fish other anglers landed again this past week, newest first. */
+  tagReturns: TagReturn[];
 };
 
 export type DailyRequestRow = DailyRequest & { progress: number; claimed: boolean };
 
 export type DailyBoard = { day: string; requests: DailyRequestRow[] };
+export type WeeklyChallengeRow = WeeklyChallenge & { progress: number; claimed: boolean };
+export type WeeklyBoard = { week: string; weekFish: string; challenges: WeeklyChallengeRow[]; rumor: Rumor & { clues: [boolean, boolean, boolean] } };
 
 export class ApiError extends Error {
   readonly status: number;
@@ -67,8 +78,24 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return data;
 }
 
+let earlyMe: { at: number; me: Promise<Me> } | null = null;
+
+/** A page load of the lake asks for the profile while the lake's code downloads; a getMe within 30 s takes that answer. */
+export function prefetchMe() {
+  const me = request<Me>("/api/me");
+  me.catch(() => undefined);
+  earlyMe = { at: Date.now(), me };
+}
+
 export function getMe() {
-  return request<Me>("/api/me");
+  const early = earlyMe;
+  earlyMe = null;
+  if (!early || Date.now() - early.at > 30_000) return request<Me>("/api/me");
+  // Asked before the sign-in check, a signed-out answer is asked again; any other failure stands.
+  return early.me.catch((err: unknown) => {
+    if (err instanceof ApiError && err.status === 401) return request<Me>("/api/me");
+    throw err;
+  });
 }
 
 export function recordCatch(body: CatchSubmission) {
@@ -87,8 +114,34 @@ export function getBoard(period: BoardPeriod = "all") {
   return request<BoardView>(period === "all" ? "/api/board" : `/api/board?period=${period}`);
 }
 
+export function getLodgeReleased() {
+  return request<{ released: LodgeRelease[] }>("/api/lodge/released").then((body) => body.released);
+}
+
 export function getLodgeTracks() {
   return request<{ tracks: LodgeTrack[] }>("/api/lodge/recent").then((body) => body.tracks);
+}
+
+export type DerbyBoard = {
+  derby: Derby;
+  running: boolean;
+  entries: { rank: number; userId: string; displayName: string; weight: number }[];
+  you: { rank: number; weight: number } | null;
+  lastChampion: { fishId: string; displayName: string; weight: number } | null;
+};
+
+export type DayBagBoard = {
+  day: string;
+  entries: { rank: number; userId: string; displayName: string; total: number; count: number }[];
+  you: { rank: number; total: number; count: number } | null;
+};
+
+export function getDayBag() {
+  return request<DayBagBoard>("/api/board/bag");
+}
+
+export function getDerby() {
+  return request<DerbyBoard>("/api/board/derby");
 }
 
 export function getSpeciesRecords() {
@@ -120,6 +173,15 @@ export function dayQuery(day: string) {
 
 export function getDailyRequests(day = localDate(new Date())) {
   return request<DailyBoard>(`/api/daily-requests?${dayQuery(day)}`);
+}
+
+export function getWeeklyChallenges(day = localDate(new Date())) {
+  return request<WeeklyBoard>(`/api/weekly-challenges?day=${day}`);
+}
+
+/** Takes a day of the week the board was read for, so a claim just after Sunday midnight still finds its week. */
+export function claimWeeklyChallenge(id: string, day: string) {
+  return request<{ reward: number }>(`/api/weekly-challenges/${encodeURIComponent(id)}/claim?day=${day}`, { method: "POST" });
 }
 
 /** Takes the day the board was read for, so a claim just after midnight still finds its request. */

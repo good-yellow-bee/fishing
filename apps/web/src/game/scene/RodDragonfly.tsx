@@ -39,7 +39,7 @@ export function RodDragonfly({ rodTip, phase, nibble }: Props) {
   const shapes = useMemo(() => ({ body: rodDragonflyBodyShape(), wing: rodDragonflyWingShape() }), []);
   const bodyMaterial = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
   const wingMaterial = useMemo(
-    () => new THREE.MeshBasicMaterial({ color: "#eef6f7", transparent: true, opacity: 0.4, depthWrite: false, side: THREE.DoubleSide }),
+    () => new THREE.MeshBasicMaterial({ color: "#eef6f7", transparent: true, opacity: 0.4, depthWrite: false, side: THREE.DoubleSide, forceSinglePass: true }),
     [],
   );
   const wings = useRef<THREE.Mesh>(null);

@@ -62,7 +62,7 @@ export function Stars({ opacity }: { opacity: number }) {
     geo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(12), 3));
     geo.setAttribute("color", new THREE.BufferAttribute(new Float32Array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]), 3));
     geo.setIndex([0, 2, 1, 1, 2, 3]);
-    const mat = new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, toneMapped: false });
+    const mat = new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, forceSinglePass: true, toneMapped: false });
     const mesh = new THREE.Mesh(geo, mat);
     mesh.frustumCulled = false;
     mesh.visible = false;

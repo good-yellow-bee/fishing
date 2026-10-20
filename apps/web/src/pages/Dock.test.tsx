@@ -4,7 +4,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { badgeProgress, catchPoints, CLEAN_RUN_BONUS, DAY_RUN_BONUS, GOLDEN_BONUS, LODGE_RECORD_BONUS, PB_BONUS, isGolden, weeklyBonus, dailyConditions, skyTurnForDay, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky, type SpotId } from "@stillwater/shared";
+import { badgeProgress, catchPoints, CLEAN_RUN_BONUS, DAY_RUN_BONUS, GOLDEN_BONUS, LODGE_RECORD_BONUS, PB_BONUS, isGolden, weeklyBonus, dailyConditions, skyTurnForDay, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky, type SpotId, MASTER_BONUS, localDate } from "@stillwater/shared";
 import { buyGroundbait, buyShiner, getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
@@ -12,13 +12,14 @@ import { sessionKey, startSession } from "../game/session";
 import type { Outcome } from "../game/useFishingGame";
 
 const scene = vi.fn<(props: { hour: LakeHour; sky: Sky; species?: FishSpecies | null; weight?: number; tracks?: readonly LodgeTrack[]; released?: boolean }) => void>();
-const landed = vi.hoisted(() => ({ outcome: null as Outcome | null, fishedHard: null as SpotId[] | null }));
+const landed = vi.hoisted(() => ({ outcome: null as Outcome | null, fishedHard: null as SpotId[] | null, waiting: null as { hint: string; more: string[] } | null }));
 
 vi.mock("../api", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../api")>()),
   getMe: vi.fn(),
   getSpeciesRecords: vi.fn(async () => []),
   getLodgeTracks: vi.fn(async () => []),
+  getLodgeReleased: vi.fn(async () => []),
   recordCatch: vi.fn(),
   releaseCatch: vi.fn(),
   buyGroundbait: vi.fn(),
@@ -31,10 +32,16 @@ vi.mock("../game/useFishingGame", async (importOriginal) => {
     ...real,
     useFishingGame: (...args: Parameters<typeof real.useFishingGame>) => {
       const game = real.useFishingGame(...args);
-      return { ...game, ...(landed.outcome ? { outcome: landed.outcome } : {}), ...(landed.fishedHard ? { fishedHard: landed.fishedHard } : {}) };
+      return { ...game, ...(landed.outcome ? { outcome: landed.outcome } : {}), ...(landed.fishedHard ? { fishedHard: landed.fishedHard } : {}), ...(landed.waiting ? { phase: "waiting" as const, hint: landed.waiting.hint, moreReasons: landed.waiting.more } : {}) };
     },
   };
 });
+// The frenzy keeps the real wall clock; pinned off here, so a test run that lands in a real frenzy window reads the same.
+vi.mock("../game/hotspot", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../game/hotspot")>()),
+  frenzyOn: () => false,
+  slotFrenzy: () => ({ from: Number.MAX_SAFE_INTEGER - 1, to: Number.MAX_SAFE_INTEGER }),
+}));
 vi.mock("../auth-client", () => ({ authClient: { signOut: vi.fn() } }));
 vi.mock("../game/fx", () => ({ fx: { enabled: true, land: vi.fn(), haptic: vi.fn(), drag: { set: vi.fn(), stop: vi.fn() }, ambient: { start: vi.fn(), stop: vi.fn(), setConditions: vi.fn() } } }));
 vi.mock("../game/scene/FishingWorld", () => ({
@@ -56,7 +63,7 @@ const me: Me = {
   speciesStats: [],
   badges: [],
   longestStreak: 0,
-  recentDays: [],
+  recentDays: [], todayBag: { day: "", weights: [] }, tagReturns: [],
 };
 
 // Node ships its own empty `localStorage` global, so borrow a real one.
@@ -81,6 +88,7 @@ afterEach(() => {
   container = null;
   landed.outcome = null;
   landed.fishedHard = null;
+  landed.waiting = null;
   browser.window.localStorage.clear();
   scene.mockClear();
   vi.mocked(fx.ambient.setConditions).mockClear();
@@ -157,6 +165,18 @@ describe("dock weather", () => {
     const summer = await openDock("/?hour=day&sky=clear&season=summer");
     const summerSigns = [...summer.querySelectorAll(".walk-signs button")].filter((button) => button.querySelector(".sign-now")).map((button) => button.textContent);
     expect(summerSigns).toEqual(["Dock •"]);
+  });
+
+  it("opens a cast's left-out reasons from its hint, and steps the focus off the button", async () => {
+    landed.waiting = { hint: "Fresh water.", more: ["Glassy water, made for a topwater.", "The chop hides the topwater."] };
+    const page = await openDock("/?hour=day&sky=clear");
+    const more = page.querySelector<HTMLButtonElement>(".hint .hint-more")!;
+    expect(more.textContent).toBe("2 more reasons");
+    more.focus();
+    await act(async () => more.click());
+    expect(page.querySelector(".hint")?.textContent).toBe("Fresh water. Glassy water, made for a topwater. The chop hides the topwater.");
+    expect(page.querySelector(".hint .hint-more")).toBeNull();
+    expect(document.activeElement).not.toBe(more);
   });
 
   it("dims the walk signs of the banks fished hard, and says so to a screen reader", async () => {
@@ -309,7 +329,7 @@ describe("lodge records", () => {
     const stamps = [...page.querySelectorAll(".landed-card .catch-stamp")].map((p) => p.textContent);
     expect(stamps).toContain("Lodge record · was 12.3 lb (Mara) · 1.5× points");
     const pike = fishById("pike")!;
-    const points = catchPoints(pike, 13.1, false, LODGE_RECORD_BONUS * weeklyBonus(pike.id) * (isGolden("catch-big-pike") ? GOLDEN_BONUS : 1));
+    const points = catchPoints(pike, 13.1, false, LODGE_RECORD_BONUS * weeklyBonus(pike.id, localDate(new Date())) * (isGolden("catch-big-pike") ? GOLDEN_BONUS : 1));
     expect(page.querySelector(".landed-card")!.textContent).toContain(`+${points} pts`);
     expect(page.querySelector(".landed-card .guide-fish path")?.getAttribute("d")).toBe(pike.silhouette);
     expect(page.querySelector(".landed-card .guide-fish path")?.getAttribute("fill")).toBe(pike.color);
@@ -360,6 +380,36 @@ describe("a personal best", () => {
   });
 });
 
+describe("species mastery", () => {
+  it("stamps the fish that makes a kind Skilled, and pays a mastered kind its bonus", async () => {
+    const at = new Date(2026, 6, 15, 14, 0);
+    vi.useFakeTimers({ toFake: ["Date"], now: at });
+    const perch = fishById("perch")!;
+    const land = async (caught: number, id: string) => {
+      vi.mocked(getMe).mockResolvedValue({ ...me, speciesStats: [{ speciesId: "perch", caught, heaviest: 1.1, lastAt: "2026-07-10T12:00:00.000Z" }] });
+      vi.mocked(recordCatch).mockResolvedValue({ id, points: 1, speciesId: perch.id, weight: 0.5 });
+      const page = await openDock("/");
+      landed.outcome = { kind: "landed", id, species: perch, weight: 0.5, spot: "dock", clean: false };
+      await act(async () => {
+        root!.render(
+          <MemoryRouter initialEntries={["/"]}>
+            <DockPage />
+          </MemoryRouter>,
+        );
+      });
+      return page;
+    };
+    const skilled = await land(14, "catch-skilled");
+    expect([...skilled.querySelectorAll(".landed-card .catch-stamp")].map((p) => p.textContent)).toContain("Skilled: Yellow perch · 15 landed");
+    act(() => root?.unmount());
+    container?.remove();
+    const mastered = await land(40, "catch-mastered");
+    expect([...mastered.querySelectorAll(".landed-card .catch-stamp")].map((p) => p.textContent)).toContain("Mastered kind · 1.1× points");
+    const points = catchPoints(perch, 0.5, false, MASTER_BONUS * (isGolden("catch-mastered") ? GOLDEN_BONUS : 1));
+    expect(mastered.querySelector(".landed-card")!.textContent).toContain(`+${points} pts`);
+  });
+});
+
 describe("days on the water", () => {
   it("shows the run of days on the HUD and files the catch under today's local day", async () => {
     const today = new Date();
@@ -398,7 +448,7 @@ describe("days on the water", () => {
     });
     const stamps = [...page.querySelectorAll(".landed-card .catch-stamp")].map((p) => p.textContent);
     expect(stamps).toContain("First fish of day 3 in a row · 1.5× points");
-    const points = catchPoints(perch, 0.6, false, DAY_RUN_BONUS * weeklyBonus(perch.id) * (isGolden("catch-run") ? GOLDEN_BONUS : 1));
+    const points = catchPoints(perch, 0.6, false, DAY_RUN_BONUS * weeklyBonus(perch.id, localDate(new Date())) * (isGolden("catch-run") ? GOLDEN_BONUS : 1));
     expect(page.querySelector(".landed-card")!.textContent).toContain(`+${points} pts`);
   });
 });

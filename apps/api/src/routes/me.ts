@@ -1,9 +1,15 @@
 import { Hono } from "hono";
-import { anglerLevel, badgeProgress, canUseSpot, streakDays } from "@stillwater/shared";
-import { getProfile, listBadgeFacts, listCatchDays, listCatches, listSpeciesStats, toCatch, toProfile } from "../db.ts";
+import { anglerLevel, bagDay, TAG_NEWS_DAYS, badgeProgress, canUseSpot, pastDerbies, streakDays } from "@stillwater/shared";
+import { countDerbyWins, firstCatchAt, getProfile, listBadgeFacts, listBagWeights, listTagReturns, listCatchDays, listCatches, listSpeciesStats, toCatch, toProfile } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
 export const meRoutes = new Hono();
+
+/** Weekend derbies the angler held the top spot of when they ended, from their first catch on. */
+function derbyWins(userId: string): number {
+  const first = firstCatchAt(userId);
+  return first ? countDerbyWins(userId, pastDerbies(new Date(first))) : 0;
+}
 
 meRoutes.get("/me", (c) => {
   const user = c.get("user") as SessionUser;
@@ -16,6 +22,7 @@ meRoutes.get("/me", (c) => {
   const days = listCatchDays(user.id);
   // The longest run doesn't depend on today; the page reads the current one from `recentDays` on its own calendar.
   const { longest } = streakDays(days, "0000-01-01");
+  const today = bagDay();
   return c.json({
     user: { id: user.id, email: user.email, name: user.name },
     profile,
@@ -30,8 +37,10 @@ meRoutes.get("/me", (c) => {
     },
     catches,
     speciesStats,
-    badges: badgeProgress(listBadgeFacts(user.id), { longestStreak: longest }),
+    badges: badgeProgress(listBadgeFacts(user.id), { longestStreak: longest, derbyWins: derbyWins(user.id) }),
     longestStreak: longest,
     recentDays: days.slice(-60),
+    todayBag: { day: today.from, weights: listBagWeights(user.id, today.from, today.to) },
+    tagReturns: listTagReturns(user.id, new Date(Date.now() - TAG_NEWS_DAYS * 86_400_000).toISOString(), 20),
   });
 });

@@ -220,6 +220,24 @@ describe("FightBar for screen readers", () => {
     expect(status()).not.toBe("It's played out — reel it in!");
   });
 
+  it("calls a second wind as the fish gathers itself and runs, but a leap's own warning first", () => {
+    mount({ peakTension: 0.3, maxLine: 1 });
+    const status = () => container!.querySelector(".fight-status")!.textContent;
+    sim.current.secondWind = true;
+    frame();
+    expect(status()).toBe("Second wind — it's gathering itself!");
+    sim.current.surge = 1;
+    frame();
+    expect(status()).toBe("Let go now — it found a second wind!");
+    sim.current.surge = 2;
+    frame();
+    expect(status()).toBe("Let it run — a second wind, it'll tire again!");
+    sim.current.surge = 1;
+    sim.current.jump = true;
+    frame();
+    expect(status()).not.toMatch(/second wind/i);
+  });
+
   it("tells the angler to pump a sulking fish off the bottom", () => {
     mount({ peakTension: 0.3, maxLine: 1 });
     const status = () => container!.querySelector(".fight-status")!.textContent;
@@ -386,14 +404,14 @@ describe("FightBar for screen readers", () => {
   it("names each fish's habit on the card, and only its own", () => {
     const habit = (id: string) => {
       mount({ peakTension: 0.3, maxLine: 1 }, false, FISH.find((fish) => fish.id === id)!);
-      return [...container!.querySelectorAll(".fight-water")].map((line) => line.textContent).filter((line) => /^(Jumper|Tail-walker|Breacher|Roller|Scrapper|Circler|Quitter|Bottom-sticker|Head-shaker|Diver|Darter|Cover-diver|Long runner|Soft mouth|Sharp teeth):/.test(line ?? ""));
+      return [...container!.querySelectorAll(".fight-water")].map((line) => line.textContent).filter((line) => /^(Jumper|Tail-walker|Breacher|Roller|Scrapper|Circler|Quitter|Bottom-sticker|Head-shaker|Diver|Line-spinner|Net-shy|Thrasher|Slippery|Darter|Cover-diver|Long runner|Soft mouth|Sharp teeth):/.test(line ?? ""));
     };
     expect(habit("rainbow-trout")).toEqual(["Jumper: every second run is a leap, so let go when it comes up", "Tail-walker: its first leap dances across the top, so keep bowing till it's down"]);
     expect(habit("sturgeon")).toEqual(["Breacher: its first run is a leap, so let go when it comes up", "Bottom-sticker: when it sulks it takes two pumps to lift, not one"]);
     expect(habit("pike")).toEqual(["Roller: at the net it rolls on the line instead of running", "Sharp teeth: when it swallows the bait, they fray the line if the fight runs long"]);
-    expect(habit("carp")).toEqual(["Long runner: the first run is the long one, so let it go"]);
+    expect(habit("carp")).toEqual(["Net-shy: the first time it sees the net it bolts, so be ready to bring it back", "Long runner: the first run is the long one, so let it go"]);
     expect(habit("crappie")).toEqual(["Soft mouth: reel in the red and the hook tears out"]);
-    expect(habit("bluegill")).toEqual(["Circler: it turns its flat side and circles, so it comes in slowly till it tires"]);
+    expect(habit("bluegill")).toEqual(["Circler: it turns its flat side and circles, so it comes in slowly till it tires", "Line-spinner: its tight circles twist the line, so retie after a few"]);
     expect(habit("salmon")).toEqual([
       "Jumper: every second run is a leap, so let go when it comes up",
       "Long runner: the first run is the long one, so let it go",
@@ -411,7 +429,8 @@ describe("FightBar for screen readers", () => {
       "Darter: halfway through a run it cuts back the other way, so switch sides to keep turning it",
     ]);
     expect(habit("walleye")).toEqual(["Head-shaker: between runs it shakes its head, so ease off a moment when it does", "Diver: in open water its runs bore down deep, pulling harder but tiring it faster"]);
-    expect(habit("catfish")).toEqual(["Bottom-sticker: when it sulks it takes two pumps to lift, not one"]);
+    expect(habit("catfish")).toEqual(["Bottom-sticker: when it sulks it takes two pumps to lift, not one", "Thrasher: at the net it lifts its head only a moment, so strike quick"]);
+    expect(habit("burbot")).toContain("Slippery: on a slack line it slithers off the hook, so keep it tight");
     expect(habit("perch")).toEqual(["Quitter: it fights hard for a moment, then gives up fast"]);
     expect(habit("golden-shiner")).toEqual([]);
   });
@@ -426,6 +445,18 @@ describe("FightBar for screen readers", () => {
     sim.current.lifting = true;
     frame();
     expect(status()).toBe("It's lifting — ease off and pump once more!");
+  });
+
+  it("calls the net: wait for the head, then strike", () => {
+    mount({ peakTension: 0.3, maxLine: 1 }, false, FISH.find((fish) => fish.id === "pike")!);
+    const status = () => container!.querySelector(".fight-status")!.textContent;
+    sim.current.surge = 0;
+    sim.current.netting = true;
+    frame();
+    expect(status()).toBe("At the net — let go, then strike as its head comes up!");
+    sim.current.netHead = true;
+    frame();
+    expect(status()).toBe("NOW — net it!");
   });
 
   it("calls a walleye's head shake between runs", () => {

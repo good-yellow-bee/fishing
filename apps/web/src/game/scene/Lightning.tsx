@@ -31,6 +31,7 @@ function makeStrip(order: number) {
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.DoubleSide,
+    forceSinglePass: true,
     toneMapped: false,
     fog: false,
   });

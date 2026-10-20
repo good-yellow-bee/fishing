@@ -1,6 +1,7 @@
 import { isTrophyWeight, type ChallengeId, type FishSpecies } from "@stillwater/shared";
 import { t } from "../i18n";
 import { difficulty01 } from "./logic";
+import type { Drag } from "./drag";
 import { biteStyle } from "./nibblePlan";
 
 export type SurgeState = 0 | 1 | 2; // 0 calm, 1 warning (telegraph), 2 surging
@@ -11,6 +12,16 @@ export type SurgeState = 0 | 1 | 2; // 0 calm, 1 warning (telegraph), 2 surging
  * `turning`: the angler is pulling the rod against the run, so it is cut short.
  */
 export type FightSim = {
+  /** A slippery fish on a slack line, slithering toward slipping the hook. */
+  slipping?: boolean;
+  /** It slipped the hook on a slack line. */
+  slipped?: boolean;
+  /** A net-shy fish that saw the net and bolted. */
+  shyBolt?: boolean;
+  /** The spent fish lies at the net; a fresh strike as its head comes up nets it. */
+  netting?: boolean;
+  /** Its head is up at the net, the moment to net it. */
+  netHead?: boolean;
   line: number;
   tension: number;
   surge: SurgeState;
@@ -64,6 +75,8 @@ export type FightSim = {
   bitten?: boolean;
   /** A smallmouth's or a rainbow's run straight at the angler, coming and while it lasts: the line goes slack unless it is reeled fast. */
   charge?: boolean;
+  /** A big fish that had tired found a second wind: the run it makes on it, coming and while it lasts. */
+  secondWind?: boolean;
   /** Hooked light, the fish charged and the slack line let the hook drop out: why it got away. */
   thrown?: boolean;
 };
@@ -155,10 +168,12 @@ export const JUMP_GRACE_SEC = 0.15;
 export type FightRuntime = {
   sim: FightSim;
   performance: FightPerformance;
-  step(nowMs: number, dtSec: number, reeling: boolean, steer?: Steer): FightOutcome;
+  step(nowMs: number, dtSec: number, reeling: boolean, steer?: Steer, drag?: Drag): FightOutcome;
 };
 
 export type FightPerformance = {
+  /** Strikes at the net with the fish's head down, each sending it off on a short bolt. */
+  netMisses?: number;
   peakTension: number;
   maxLine: number;
   /** Runs the angler cut short by pulling the rod the other way. */
@@ -171,6 +186,8 @@ export type FightPerformance = {
   followedDarts?: number;
   /** A trophy that made a second run at the net. */
   encore?: boolean;
+  /** A big fish found its second wind in this fight. */
+  secondWind?: boolean;
   /** Seconds of fight played so far, by game time, so a paused tab doesn't count. */
   fightSec?: number;
   /** At the reeds, the point or the dock, every run so far kept out of the weeds, off the rocks or clear of the pilings; at the inlet, every run downstream turned upstream. Unset once one wasn't. */
@@ -216,10 +233,29 @@ export const WITH_RUN_GRACE_SEC = 0.25;
 /** After a run the angler turned, the fish faces the rod this long, and line reeled meanwhile comes in this much faster. */
 export const TURNED_HEAD_MS = 1000;
 export const TURNED_HEAD_REEL = 1.3;
+/** How much line a run takes off a slack reel at each drag setting, and how hard it pulls on a reel that is turning. */
+export const DRAG_RUN_LINE: Record<Drag, number> = { light: 1.35, normal: 1, heavy: 0.65 };
+export const DRAG_RUN_PULL: Record<Drag, number> = { light: 0.7, normal: 1, heavy: 1.3 };
+/** A light drag slips under a turning reel: a run still takes this share of the line it takes off a slack one. */
+export const LIGHT_DRAG_SLIP = 0.5;
+/** A run against a heavy drag loads the line even with the reel let go, at this share of its pull on a turning reel, up to the cap: a strong fresh run reaches the red (and tears a soft mouth) but never snaps it. */
+export const HEAVY_DRAG_LOAD = 1.2;
+export const HEAVY_DRAG_CAP = 0.85;
 
 /** Under this the fish is tiring; under the other it is played out. */
 export const TIRING_STAMINA = 0.6;
 export const SPENT_STAMINA = 0.25;
+/** A big fish, this far up its kind's weight range, finds a second wind once in a fight: tired to this much stamina between runs, it gathers this much back and runs at once. */
+export const SECOND_WIND_SHARE = 0.6;
+export const SECOND_WIND_AT = 0.4;
+export const SECOND_WIND_GAIN = 0.3;
+/** It gathers itself this long, as the card calls it, before the run. */
+export const SECOND_WIND_GATHER_MS = 600;
+
+/** Whether a fish this heavy finds a second wind: a big one of its kind, not a panfish's quick head shakes. */
+export function findsSecondWind(species: FishSpecies, weight: number): boolean {
+  return species.challenge !== "mash" && difficulty01(species, weight) >= SECOND_WIND_SHARE;
+}
 export type StaminaState = "fresh" | "tiring" | "spent";
 
 /** Reeling with the tension bar in the tight (amber) zone brings line in this much faster. */
@@ -257,6 +293,31 @@ export const DEEP_PULL = 1.25;
 export const DEEP_TIRE = 1.3;
 /** Off the point a run left unturned drags the line over the rocks: reeling against it loads the line this much harder. */
 export const ROCK_PULL = 1.2;
+/** At the net a spent fish lifts its head for NET_HEAD_MS in every NET_HEAD_EVERY_MS: the moment to net it. */
+export const NET_HEAD_EVERY_MS = 1400;
+export const NET_HEAD_MS = 600;
+/** Carp see the net and bolt the first time they're brought to it, this long after they reach it. */
+export const NET_SHY: ReadonlySet<string> = new Set(["carp"]);
+export const NET_SHY_MS = 1500;
+/** A catfish thrashes at the net, lifting its head only this long at a time. */
+export const THRASHERS: ReadonlySet<string> = new Set(["catfish"]);
+export const THRASH_HEAD_MS = 400;
+/** A burbot slithers off the hook once the line has lain slack this long, added up over its calms between runs. */
+export const SLIPPERS: ReadonlySet<string> = new Set(["burbot"]);
+export const SLIP_SEC = 0.6;
+/** A bluegill's tight circles twist the line this many casts' worth toward a tangle. */
+export const LINE_SPINNERS: ReadonlySet<string> = new Set(["bluegill"]);
+export const SPIN_TWIST = 4;
+
+/** A strike with its head down, or leaving it at the net this long, sends it off this far again. */
+export const NET_BOLT_LINE = 0.12;
+export const NET_WAIT_MS = 6000;
+
+/** Whether this fish is netted, not just reeled in: anything but a panfish masher, once past a beginner's easy fish. */
+export function netsFish(species: { challenge: string }, mercy: boolean): boolean {
+  return !mercy && species.challenge !== "mash";
+}
+
 /** At the dock a run left unturned wraps the line round a piling for this long: reeling wins no line meanwhile and loads it this much harder each second. */
 export const WRAP_MS = 1200;
 export const WRAP_PULL = 0.5;
@@ -264,6 +325,12 @@ export const WRAP_PULL = 0.5;
 export const BOAT_RUN = 0.65;
 /** In a strong wind the hull lies pushed back on its anchor line and can't follow a run as well, so a run takes this share. */
 export const STRONG_WIND_BOAT_RUN = 0.85;
+/** How far the anchored hull swings round toward a run, as a share of its full swing: by the share of the run it takes up, so less in a strong wind, and not at all off the boat's water (a pads fight). */
+export function boatSwingShare(fight: { water?: FightWater; windy?: FightWind } | null) {
+  if (fight?.water !== "boat") return 0;
+  return (1 - (fight.windy === "strong" ? STRONG_WIND_BOAT_RUN : BOAT_RUN)) / (1 - BOAT_RUN);
+}
+
 /** In winter's cold water a hooked fish is sluggish: it tires this much faster on a run or against the reel. */
 export const WINTER_TIRE = 1.25;
 
@@ -431,7 +498,7 @@ export function isCloseCall(performance: FightPerformance) {
 
 /** Clean = tension never went red and the fish never nearly ran out the line. */
 export function isCleanFight(performance: FightPerformance) {
-  return performance.peakTension < RED_TENSION && performance.maxLine < RUN_OUT_LINE && !performance.slackCharge;
+  return performance.peakTension < RED_TENSION && performance.maxLine < RUN_OUT_LINE && !performance.slackCharge && !performance.netMisses;
 }
 
 type Pattern = {
@@ -509,6 +576,8 @@ export function makeFight(
   snapAt = 1,
   /** How much faster a turn cuts a run short: 1, or a quarter faster from level 16. */
   turnCut = 1,
+  /** The spent fish must be netted with a fresh strike as its head comes up, rather than landing as the line comes in. */
+  net = false,
 ): FightRuntime {
   const weedy = water === "weeds";
   const deepRuns = water === "deep" || (DIVERS.has(species.id) && (water === "open" || water === "boat"));
@@ -580,9 +649,57 @@ export function makeFight(
   let rockedThisRun = false;
   let fouled = false;
 
-  const step = (nowMs: number, dtSec: number, reeling: boolean, steer: Steer = 0): FightOutcome => {
+  let netFrom = 0;
+  let wasReeling = false;
+  const netShy = NET_SHY.has(species.id);
+  let shyDone = false;
+  const headMs = THRASHERS.has(species.id) ? THRASH_HEAD_MS : NET_HEAD_MS;
+  const slipper = SLIPPERS.has(species.id);
+  let slipSec = 0;
+  let windLeft = findsSecondWind(species, weight);
+  /** After the second wind's run, the last run near the net waits out a calm like any other run. */
+  let windCalmUntil = -Infinity;
+  /** The drag as it stood when the run began: turning the knob mid-run takes effect on the next one. */
+  let runDrag: Drag = "normal";
+  const step = (nowMs: number, dtSec: number, reeling: boolean, steer: Steer = 0, drag: Drag = "normal"): FightOutcome => {
+    const pressed = reeling && !wasReeling;
+    wasReeling = reeling;
+    if (sim.netting) {
+      // Its head comes up now and then; a strike then nets it, a strike with its head down sends it off on one short bolt.
+      sim.netHead = (nowMs - netFrom) % NET_HEAD_EVERY_MS >= NET_HEAD_EVERY_MS - headMs;
+      if (pressed && sim.netHead) return "landed";
+      if (netShy && !shyDone && nowMs - netFrom >= NET_SHY_MS) {
+        // It sees the net and bolts once; no miss, but it has to be brought back.
+        shyDone = true;
+        sim.shyBolt = true;
+        sim.netting = false;
+        sim.netHead = false;
+        sim.line = NET_BOLT_LINE;
+        nextAt = nowMs + range(1200, 1800);
+        return "fighting";
+      }
+      if (!pressed && nowMs - netFrom < NET_WAIT_MS) return "fighting";
+      sim.netting = false;
+      sim.netHead = false;
+      sim.line = NET_BOLT_LINE;
+      // Its first sight of the net is spent, however it ended.
+      shyDone = true;
+      if (pressed) performance.netMisses = (performance.netMisses ?? 0) + 1;
+      // The bolt is all it has left; the next run waits its calm like any other.
+      nextAt = nowMs + range(1200, 1800);
+      return "fighting";
+    }
     if (nextAt === null) nextAt = nowMs + range(1200, 1800);
-    if (lastRunsLeft > 0 && sim.surge === 0 && sim.line > 0 && sim.line < LAST_RUN_LINE && sim.stamina > SPENT_STAMINA) {
+    // A big fish worn down between runs gathers itself once and runs again at once.
+    if (windLeft && sim.surge === 0 && sim.stamina < SECOND_WIND_AT && !sim.sulk && !sim.weeded && !sim.wrapped && !sim.shake) {
+      windLeft = false;
+      sim.stamina = Math.min(1, sim.stamina + SECOND_WIND_GAIN);
+      sim.secondWind = true;
+      // No head shake in the gather: the card is calling the second wind.
+      shakeAt = Infinity;
+      nextAt = nowMs + SECOND_WIND_GATHER_MS;
+    }
+    if (lastRunsLeft > 0 && sim.surge === 0 && !sim.secondWind && nowMs >= windCalmUntil && sim.line > 0 && sim.line < LAST_RUN_LINE && sim.stamina > SPENT_STAMINA) {
       sim.encore = lastRunDone;
       if (lastRunDone) performance.encore = true;
       lastRunDone = true;
@@ -612,6 +729,8 @@ export function makeFight(
         nextAt = nowMs + (sim.jump || sim.roll ? Math.max(pattern.warnMs, 420) : pattern.warnMs);
       } else if (sim.surge === 1) {
         sim.surge = 2;
+        runDrag = drag;
+        if (sim.secondWind) performance.secondWind = true;
         nextAt = nowMs + (sim.jump ? JUMP_MS * (sim.tailWalk ? TAIL_WALK : 1) : sim.roll ? ROLL_MS : range(pattern.surgeMin, pattern.surgeMax) * (sim.firstRun ? FIRST_RUN_LONGER : 1));
         // Starter head shakes skip this: their 220 ms warning is about one reaction time.
         if (reeling && species.challenge !== "mash" && !sim.charge) sim.tension = Math.max(sim.tension, RED_TENSION);
@@ -648,6 +767,8 @@ export function makeFight(
         sim.firstRun = false;
         sim.tailWalk = false;
         sim.charge = false;
+        const windRunEnded = sim.secondWind === true;
+        sim.secondWind = false;
         sim.darted = false;
         dartLeft = null;
         sim.lastRun = false;
@@ -673,6 +794,7 @@ export function makeFight(
         if (coverDiver && sim.wrapped) nextAt = Math.max(nextAt, wrapUntil);
         // A catfish stuck on the bottom doesn't run again till it is lifted or comes up on its own.
         calmEnd = nextAt;
+        if (windRunEnded) windCalmUntil = nextAt;
         if (sticker && sim.sulk) nextAt = Math.max(nextAt, sulkUntil);
       }
     }
@@ -730,15 +852,26 @@ export function makeFight(
     if (sim.rocky && reeling) rockedThisRun = true;
     // Line reeled over the rocks or rubbing round a piling comes out of the fight frayed.
     if ((sim.rocky && reeling) || sim.wrapped) performance.scuffed = true;
+    // A run off a light drag slips line under a turning reel; one against a heavy drag loads the line even let go. A leap or a roll only slackens it.
+    const plainRun = sim.surge === 2 && !sim.jump && !sim.roll && !charging;
+    const lightRun = plainRun && runDrag === "light";
+    const heavyRun = plainRun && runDrag === "heavy";
     if (reeling) {
-      sim.tension += (tensionUpCalm + (sim.surge === 2 && !charging ? eff * (rocky ? ROCK_PULL : 1) : 0) + (sim.wrapped ? WRAP_PULL : 0)) * dtSec;
+      sim.tension += (tensionUpCalm + (sim.surge === 2 && !charging ? eff * (rocky ? ROCK_PULL : 1) * DRAG_RUN_PULL[runDrag] : 0) + (sim.wrapped ? WRAP_PULL : 0)) * dtSec;
       // Line under real pressure comes in faster, for an angler brave enough to reel in the amber.
       const pressure = sim.tension >= TIGHT_TENSION && sim.tension < RED_TENSION ? PRESSURE_REEL : 1;
       sim.line -= reelRate * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * (sim.weeded ? WEED_REEL : 1) * (sim.wrapped ? 0 : 1) * (broadsider && sim.stamina >= TIRING_STAMINA ? BROADSIDE_REEL : 1) * (charging ? CHARGE_REEL / pattern.reelSurge : 1) * (sim.withRun ? WITH_RUN_REEL : 1) * (sim.headTurned ? TURNED_HEAD_REEL : 1) * dtSec;
+      if (lightRun) sim.line += driftSurge * DRAG_RUN_LINE.light * LIGHT_DRAG_SLIP * dtSec;
+    } else if (heavyRun) {
+      sim.tension =
+        sim.tension < HEAVY_DRAG_CAP
+          ? Math.min(HEAVY_DRAG_CAP, sim.tension + eff * (rocky ? ROCK_PULL : 1) * DRAG_RUN_PULL.heavy * HEAVY_DRAG_LOAD * dtSec)
+          : Math.max(HEAVY_DRAG_CAP, sim.tension - tensionDecay * dtSec);
+      sim.line += driftSurge * DRAG_RUN_LINE.heavy * (sim.downstream ? DOWNSTREAM_RUN : 1) * (sim.withRun ? WITH_RUN_DRIFT : 1) * dtSec;
     } else {
       sim.tension = Math.max(0, sim.tension - tensionDecay * dtSec);
       // A sulking fish sits where it is: no line goes out.
-      if (!sim.sulk && !sim.weeded && !sim.wrapped && !charging) sim.line += (sim.surge === 2 ? driftSurge * (sim.downstream ? DOWNSTREAM_RUN : 1) * (sim.withRun ? WITH_RUN_DRIFT : 1) : driftCalm) * dtSec;
+      if (!sim.sulk && !sim.weeded && !sim.wrapped && !charging) sim.line += (sim.surge === 2 ? driftSurge * DRAG_RUN_LINE[runDrag] * (sim.downstream ? DOWNSTREAM_RUN : 1) * (sim.withRun ? WITH_RUN_DRIFT : 1) : driftCalm) * dtSec;
     }
     // Like a leap, a shake reeled through costs the clean bonus, never the fish.
     if (reeling && sim.shake && nowMs >= shakeAt + SHAKE_GRACE_SEC * 1000) {
@@ -769,13 +902,39 @@ export function makeFight(
     }
 
     // Reeling a soft mouth, or a fish hooked light, in the red tears the hook hole wider until it pulls free.
-    if ((softMouth || sim.lightHook) && reeling && sim.tension >= RED_TENSION) tearSec += dtSec;
+    if ((softMouth || sim.lightHook) && (reeling || heavyRun) && sim.tension >= RED_TENSION) tearSec += dtSec;
     else tearSec = 0;
     sim.tearing = tearSec > 0;
 
     // Slack through a charge costs the clean bonus, and lets a light hook drop out of its mouth.
     if (charging && !reeling) chargeSlack += dtSec;
-    if (sim.line <= 0) return "landed";
+    // A slippery fish slithers off a slack line in a plain calm between runs: not before its first run, nor while it
+    // sulks, shakes, sits in the weeds or round a piling, when the card tells the angler to ease off.
+    if (slipper) {
+      const slackCalm = completedSurges > 0 && sim.surge === 0 && !reeling && sim.tension < 0.1 && !sim.sulk && !sim.shake && !sim.weeded && !sim.wrapped;
+      // Slack adds up over its short calms; reeling winds it back twice as fast.
+      slipSec = slackCalm ? slipSec + dtSec : reeling ? Math.max(0, slipSec - 2 * dtSec) : slipSec;
+      sim.slipping = slipSec >= SLIP_SEC / 3;
+      if (slipSec >= SLIP_SEC) {
+        sim.slipped = true;
+        return "escaped";
+      }
+    }
+    // Once a net-shy fish is reeled most of the way back, its bolt is done with.
+    if (sim.shyBolt && sim.line < NET_BOLT_LINE / 2) sim.shyBolt = false;
+    if (sim.line <= 0) {
+      if (!net) return "landed";
+      sim.line = 0;
+      sim.surge = 0;
+      // Whatever it was doing ends at the net.
+      for (const flag of ["jump", "roll", "lastRun", "encore", "charge", "firstRun", "tailWalk", "tearing", "sulk", "lifting", "weeded", "wrapped", "shake", "headTurned", "diving", "rocky", "turning", "darted", "downstream", "withRun", "secondWind"] as const) delete sim[flag];
+      tearSec = 0;
+      sim.netting = true;
+      sim.netHead = false;
+      sim.tension = 0;
+      netFrom = nowMs;
+      return "fighting";
+    }
     if (chargeSlack >= CHARGE_SLACK_SEC) {
       performance.slackCharge = true;
       if (sim.lightHook) {

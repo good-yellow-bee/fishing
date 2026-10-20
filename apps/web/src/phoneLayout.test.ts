@@ -17,6 +17,14 @@ describe("a phone held sideways", () => {
     expect(block).toContain("max-height: calc((100dvh - var(--hud-bottom, 52px)) / var(--text-zoom, 1) - 72px);");
   });
 
+  it("moves the lure up beside the bank chip with larger text, clear of the walk stick", () => {
+    const sideways = css.slice(css.indexOf(SIDEWAYS));
+    expect(/html\[data-text-size\] \.lure-choice \{([^}]*)\}/.exec(sideways)?.[1]).toContain("top: calc(var(--hud-bottom, 52px) + 6px);");
+    expect(/html\[data-text-size\] \.lure-choice > span \{([^}]*)\}/.exec(sideways)?.[1]).toContain("clip: rect(0 0 0 0);");
+    expect(/html\[data-text-size\] \.stance-chip \{([^}]*)\}/.exec(sideways)?.[1]).toContain("left: calc(16px + min(220px, calc(30vw / var(--text-zoom, 1))));");
+    expect(/html\[data-text-size\] \.scene-wrap\[data-walkthrough="1"\] \.stance-chip \{([^}]*)\}/.exec(sideways)?.[1]).toContain("display: none;");
+  });
+
   it("keeps the coach and the news card off the signs, which take a second column with larger text", () => {
     const sideways = css.slice(css.indexOf(SIDEWAYS));
     const coach = [...sideways.matchAll(/\n  \.walkthrough \{([^}]*)\}/g)].map((m) => m[1]).find((b) => b.includes("--signs-room"));
@@ -39,6 +47,12 @@ describe("a phone held sideways", () => {
     expect(/\n  \.power-meter \{([^}]*)\}/.exec(upright)?.[1]).toContain("z-index: 3;");
     const dock = readFileSync(`${import.meta.dirname}/pages/Dock.tsx`, "utf8");
     expect(dock).toContain('wrap.style.setProperty("--stance-h"');
+  });
+
+  it("hangs the fight card from the header on a short upright phone, with the chips stepping aside", () => {
+    const short = css.slice(css.indexOf("@media (max-width: 800px) and (min-height: 501px) and (max-height: 700px) {"));
+    expect(/\n  \.fight-bar \{([^}]*)\}/.exec(short)?.[1]).toContain("top: calc(var(--hud-bottom, 140px) + 8px);");
+    expect(short).toMatch(/\.scene-wrap\[data-phase="fight"\] :is\(\.walkthrough, \.stance-chip\) \{\s*display: none;/);
   });
 
   it("fits a narrow phone's header links into two rows with larger text, each link keeping its 32 px", () => {
@@ -286,5 +300,23 @@ describe("the lodge's catch log at any width", () => {
     const block = /\n\.log-page table \{\n  display: block;\n  overflow-x: auto;\n\}/.exec(css);
     expect(block).not.toBeNull();
     expect(css).not.toContain("@media (max-width: 640px) {\n  .log-page table {");
+  });
+});
+
+describe("high contrast", () => {
+  it("keeps a switched-on sign such as the Headlamp amber, as the shop and retie signs are", () => {
+    const keep = /html\[data-contrast="high"\] :is\(([^)]*\)[^)]*)\) \{\s*border-color: #ffc95c;/.exec(css)?.[1];
+    expect(keep).toContain('.walk-signs .panel-btn[aria-pressed="true"]');
+    expect(keep).toContain(".walk-signs .walk-retie");
+  });
+});
+
+describe("the fight card's drag line", () => {
+  it("is for a screen reader only on a touch screen with larger text, held sideways or narrower than 360 px", () => {
+    expect(css).toMatch(/html\[data-text-size\] \.fight-bar \.fight-drag-line \{\s*position: absolute;/);
+    const short = css.slice(css.indexOf("@media (pointer: coarse) and (max-height: 500px), (pointer: coarse) and (max-width: 359px) {"));
+    expect(/\.fight-bar \.fight-drag-line \{([^}]*)\}/.exec(short)?.[1]).toContain("clip: rect(0 0 0 0);");
+    const bar = readFileSync(`${import.meta.dirname}/components/FightBar.tsx`, "utf8");
+    expect(bar).toContain('<span className="fight-drag-line">{t(DRAG_LINE[drag])}</span>');
   });
 });

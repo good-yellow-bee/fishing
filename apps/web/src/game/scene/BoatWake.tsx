@@ -48,7 +48,7 @@ export function wakeGeometry() {
 export function BoatWake({ at, stern, still, size = 1 }: { at: (time: number) => { x: number; z: number; yaw: number }; stern: number; still: boolean; size?: number }) {
   const group = useRef<THREE.Group>(null);
   const geometry = useMemo(wakeGeometry, []);
-  const material = useMemo(() => new THREE.MeshBasicMaterial({ color: WAKE, vertexColors: true, transparent: true, depthWrite: false, side: THREE.DoubleSide }), []);
+  const material = useMemo(() => new THREE.MeshBasicMaterial({ color: WAKE, vertexColors: true, transparent: true, depthWrite: false, side: THREE.DoubleSide, forceSinglePass: true }), []);
   useEffect(
     () => () => {
       geometry.dispose();

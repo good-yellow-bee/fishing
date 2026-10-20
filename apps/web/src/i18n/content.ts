@@ -15,6 +15,7 @@ import {
   type Measure,
   type Profile,
   type SkillId,
+  type WeeklyChallenge,
 } from "@stillwater/shared";
 import { getUnits, num, t } from ".";
 
@@ -68,6 +69,22 @@ export function dailyRequestText(request: DailyRequest): string {
   const size = request.minWeight === undefined ? "" : t(" over {weight}", { weight: weightText(request.minWeight) });
   const bank = request.spot ? t(" at the {spot}", { spot: t(SPOT_LABELS[request.spot]) }) : "";
   return `${fish}${size}${bank}`;
+}
+
+/** A week's goal in words, naming the week's fish for that goal. */
+export function weeklyChallengeText(challenge: WeeklyChallenge, weekFish: string): string {
+  switch (challenge.kind) {
+    case "weeklyFish":
+      return t("{n} × {fish}, the week's fish", { n: challenge.goal, fish: t(fishById(weekFish)!.name).toLowerCase() });
+    case "banks":
+      return t("Fish from {n} different banks", { n: challenge.goal });
+    case "kinds":
+      return t("{n} different kinds of fish", { n: challenge.goal });
+    case "trophy":
+      return t("A trophy of any kind");
+    case "clean":
+      return t("{n} fish in clean fights", { n: challenge.goal });
+  }
 }
 
 /** The nearest skill rank that opens new species, e.g. "Strength 3: Common carp, Channel catfish". */

@@ -47,7 +47,7 @@ export function Hummingbird({ season }: { season: LakeSeason }) {
   const wing = useMemo(wingGeometry, []);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
   // The wings beat too fast to see, so they are drawn as a pale blur.
-  const blur = useMemo(() => new THREE.MeshBasicMaterial({ color: WING, transparent: true, opacity: 0.45, depthWrite: false, side: THREE.DoubleSide }), []);
+  const blur = useMemo(() => new THREE.MeshBasicMaterial({ color: WING, transparent: true, opacity: 0.45, depthWrite: false, side: THREE.DoubleSide, forceSinglePass: true }), []);
   useEffect(
     () => () => {
       [body, wing, material, blur].forEach((item) => item.dispose());
