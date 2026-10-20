@@ -1913,7 +1913,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT437~~ | ~~News card 2026-10-20-game61 covers GT435-GT436: the lodge's lost trophies and the chalk board's night-line nights~~ (#1662) | ui | S |
 | ~~GT438~~ | ~~An angler is told, once, when another angler landed a trophy that broke their line: who, the kind, its weight and bank, in the same toast as a tag's return~~ (#1663) | gameplay | S |
 | ~~GT439~~ | ~~The Board lists the lodge's lost trophies still about the lake, by bank, with who lost each, so an angler can choose where to try for one~~ (#1664) | gameplay | S |
-| GT440 | News card game62 covers GT438-GT439 | ui | S |
+| ~~GT440~~ | ~~News card 2026-10-20-game62 covers GT438-GT439: news of a lost trophy found, and the Board's lost trophies~~ (#PR) | ui | S |
 
 ## Risks / open questions for the owner
 
