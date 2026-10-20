@@ -17,10 +17,14 @@ type Props = {
   onBuy: () => void;
   onBuyShiner: () => void;
   onHookFromBucket: () => void;
+  /** The shiner trap by the shack: not set, soaking, ready to lift, or sat too long. */
+  trap: "none" | "soaking" | "ready" | "stale";
+  onSetTrap: () => void;
+  onLiftTrap: () => void;
 };
 
 /** The shack's bait tin: points buy a handful of groundbait, up to what the bag carries, or a live shiner for the hook. */
-export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, busy, onBuy, onBuyShiner, onHookFromBucket }: Props) {
+export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, busy, onBuy, onBuyShiner, onHookFromBucket, trap, onSetTrap, onLiftTrap }: Props) {
   useT();
   const full = handfuls >= GROUNDBAIT_CARRY;
   // aria-disabled, as on the skills: a disabled button would drop keyboard focus the moment a purchase starts.
@@ -76,6 +80,28 @@ export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, b
               {t("Hook one from your bucket ({n} left)", { n: bucket })}
             </button>
           )}
+        </div>
+        <div className="upgrade-skill">
+          {trap === "none" ? (
+            <button type="button" aria-disabled={busy || handfuls === 0 || undefined} aria-describedby="trap-note" onClick={() => !busy && handfuls > 0 && onSetTrap()}>
+              {t("Bait the shiner trap (1 handful)")}
+            </button>
+          ) : trap === "soaking" ? null : (
+            <button type="button" aria-disabled={busy || bucketFull || undefined} aria-describedby="trap-note" onClick={() => !busy && !bucketFull && onLiftTrap()}>
+              {t("Lift the shiner trap")}
+            </button>
+          )}
+          <p id="trap-note">
+            {trap === "none"
+              ? t("A handful of groundbait in the trap by the shack draws a few shiners in for your bucket, ready after six hours.")
+              : trap === "soaking"
+                ? t("The shiner trap is soaking: lift it after six hours.")
+                : bucketFull
+                  ? t("Your bait bucket is full: lift the trap once it has room.")
+                  : trap === "ready"
+                  ? t("Shiners have found the trap.")
+                  : t("The trap has sat a long while.")}
+          </p>
         </div>
       </div>
     </section>

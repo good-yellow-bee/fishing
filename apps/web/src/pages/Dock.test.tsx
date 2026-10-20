@@ -793,7 +793,7 @@ describe("the shack's bait tin", () => {
     vi.mocked(getMe).mockResolvedValue({ ...me, level: 17, profile: { ...me.profile, points: 500, lifetimePoints: 57_000 } });
     const page = await openDock("/?hour=day&sky=clear");
     act(() => page.querySelector<HTMLButtonElement>(".walk-shop")!.click());
-    expect([...page.querySelectorAll(".bait-shop button")].map((button) => button.textContent)).toEqual(["A handful (48 pts)", "A live shiner (40 pts)"]);
+    expect([...page.querySelectorAll(".bait-shop button")].map((button) => button.textContent)).toEqual(["A handful (48 pts)", "A live shiner (40 pts)", "Bait the shiner trap (1 handful)"]);
   });
 
   it("sells a live shiner onto the hook, then into the bait bucket, and keeps it for a reload", async () => {
