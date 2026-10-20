@@ -2,6 +2,7 @@ import { join } from "node:path";
 import { serveStatic } from "@hono/node-server/serve-static";
 import type { Hono } from "hono";
 import { compress } from "hono/compress";
+import { etag } from "hono/etag";
 
 const isApi = (path: string) => path === "/api" || path.startsWith("/api/");
 
@@ -15,6 +16,14 @@ export function serveClient(app: Hono, distDir: string) {
     await next();
     if (c.res.ok) c.res.headers.set("Cache-Control", "public, max-age=31536000, immutable");
   });
+  // Models and textures keep their names across releases, so a day's cache, then a check that costs a 304 when they
+  // have not changed: a returning angler no longer downloads every model again each visit.
+  for (const path of ["/models/*", "/textures/*"]) {
+    app.use(path, etag(), async (c, next) => {
+      await next();
+      if (c.res.ok) c.res.headers.set("Cache-Control", "public, max-age=86400");
+    });
+  }
   app.get("*", (c, next) => (isApi(c.req.path) ? next() : files(c, next)));
   // Only page loads fall back: a missing script or model (an old chunk after a release) stays a 404.
   app.get("*", (c, next) =>

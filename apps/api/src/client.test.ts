@@ -10,6 +10,8 @@ mkdirSync(join(dist, "assets"));
 writeFileSync(join(dist, "index.html"), "<!doctype html><title>Stillwater</title>");
 writeFileSync(join(dist, "assets", "app-abc.js"), `console.log("${"x".repeat(2000)}")`);
 writeFileSync(join(dist, "manifest.webmanifest"), "{}");
+mkdirSync(join(dist, "models"));
+writeFileSync(join(dist, "models", "tree.glb"), Buffer.alloc(4000, 7));
 
 const app = new Hono();
 app.get("/api/health", (c) => c.json({ ok: true }));
@@ -36,6 +38,15 @@ describe("serveClient", () => {
     expect(res.headers.get("content-encoding")).toBe("gzip");
     expect(res.headers.get("cache-control")).toContain("immutable");
     expect((await app.request("/manifest.webmanifest")).headers.get("cache-control")).toBeNull();
+  });
+
+  it("caches the lake's models for a day, and answers a repeat check with a 304", async () => {
+    const res = await app.request("/models/tree.glb");
+    expect(res.status).toBe(200);
+    expect(res.headers.get("cache-control")).toBe("public, max-age=86400");
+    const tag = res.headers.get("etag");
+    expect(tag).toBeTruthy();
+    expect((await app.request("/models/tree.glb", { headers: { "If-None-Match": tag! } })).status).toBe(304);
   });
 
   it("leaves a missing script and unknown API paths as 404", async () => {
