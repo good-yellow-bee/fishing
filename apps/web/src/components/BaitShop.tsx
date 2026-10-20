@@ -1,7 +1,8 @@
-import { GROUNDBAIT_CARRY, GROUNDBAIT_PRICE, shackPrice, SHINER_PRICE, type LakeSeason } from "@stillwater/shared";
+import { GROUNDBAIT_CARRY, GROUNDBAIT_PRICE, shackPrice, SHINER_PRICE, WORM_PRICE, type LakeSeason } from "@stillwater/shared";
 import { t, useT } from "../i18n";
 import { GROUNDBAIT_CASTS } from "../game/logic";
 import { BUCKET_SIZE } from "../game/baitBucket";
+import { WORM_TIN_WET } from "../game/wormTin";
 
 type Props = {
   points: number;
@@ -17,6 +18,9 @@ type Props = {
   onBuy: () => void;
   onBuyShiner: () => void;
   onHookFromBucket: () => void;
+  /** Worms in the worm tin now. */
+  worms: number;
+  onBuyWorm: () => void;
   /** The shiner trap by the shack: not set, soaking, ready to lift, or sat too long. */
   trap: "none" | "soaking" | "ready" | "stale";
   /** The trap soaks in winter's cold water: the one down already, or one baited today. */
@@ -27,8 +31,8 @@ type Props = {
   season: LakeSeason | undefined;
 };
 
-/** The shack's bait tin: points buy a handful of groundbait, up to what the bag carries, or a live shiner for the hook. */
-export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, busy, onBuy, onBuyShiner, onHookFromBucket, trap, trapCold, onSetTrap, onLiftTrap, season }: Props) {
+/** The shack's bait tin: points buy a handful of groundbait, up to what the bag carries, a live shiner for the hook, or a worm for the tin. */
+export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, busy, onBuy, onBuyShiner, onHookFromBucket, worms, onBuyWorm, trap, trapCold, onSetTrap, onLiftTrap, season }: Props) {
   useT();
   const full = handfuls >= GROUNDBAIT_CARRY;
   // aria-disabled, as on the skills: a disabled button would drop keyboard focus the moment a purchase starts.
@@ -37,6 +41,9 @@ export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, b
   const off = busy || full || points < groundbaitCost;
   const bucketFull = bucket >= BUCKET_SIZE;
   const shinerOff = busy || (shinerOn && bucketFull) || points < shinerCost;
+  const wormCost = shackPrice(WORM_PRICE, lifetimePoints);
+  const tinFull = worms >= WORM_TIN_WET;
+  const wormOff = busy || tinFull || points < wormCost;
   return (
     <section className="bait-shop">
       <div className="panel-heading">
@@ -86,6 +93,23 @@ export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, b
               {t("Hook one from your bucket ({n} left)", { n: bucket })}
             </button>
           )}
+        </div>
+        <div className="upgrade-skill">
+          <button
+            type="button"
+            aria-disabled={wormOff || undefined}
+            aria-describedby="worm-shop-note"
+            onClick={() => {
+              if (!wormOff) onBuyWorm();
+            }}
+          >
+            {t("A worm ({cost} pts)", { cost: wormCost })}
+          </button>
+          <p id="worm-shop-note">
+            {tinFull
+              ? t("Your worm tin is full: {max} worms.", { max: WORM_TIN_WET })
+              : t("A fresh worm for a washed-out hook or a night line. In your tin: {n} of {max}.", { n: worms, max: WORM_TIN_WET })}
+          </p>
         </div>
         <div className="upgrade-skill">
           {trap === "none" ? (
