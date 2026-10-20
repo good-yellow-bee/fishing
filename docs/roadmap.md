@@ -1821,7 +1821,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT388~~ | ~~Slams: land both bass (smallmouth and largemouth) on one local day for the Bass slam badge, and a brook trout, a rainbow trout and a salmon on one day for the Trout slam (the server reads the catches' days); the landed card stamps the slam a fish completes with the day's earlier fish~~ (#1547) | gameplay | M |
 | ~~GT389~~ | ~~News card 2026-10-20-game46 covers GT386 to GT388: a let-go fish stays itself, the sunken log fights back, and the bass and trout slams~~ (#1549) | ui | S |
 | ~~GT390~~ | ~~The far rock fights back: a fish hooked from the boat tight to the far rock runs round it, and reeling while an unturned run drags the line over the rock frays it, as off the point (the boat's own fight stays); the fight card says "Far rock: turn every run"~~ (#1552) | gameplay | S |
-| GT391 | Duckweed on the line: a fish hooked through the duckweed comes in under a ball of weed, so the line reels in slower until its first run strips the weed off; the fight card says so | gameplay | S |
+| ~~GT391~~ | ~~Duckweed on the line: a fish hooked through the duckweed comes in under a ball of weed, so the line reels in 0.75x as fast until its first run strips the weed off; the fight card says so~~ (#1556) | gameplay | S |
 | GT392 | Yesterday's pressure: a bank fished hard yesterday (eight or more fish landed there) starts today wary, its first casts biting slower, and the wait hint says why | gameplay | M |
 | GT393 | News card game47 covers GT390 to GT392 | ui | S |
 
