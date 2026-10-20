@@ -64,7 +64,7 @@ export function catchesCsv(book: Logbook): string {
       length ? num(metric ? length.inches * CM_PER_IN : length.inches) : "",
       weight ? num(metric ? weight.pounds * KG_PER_LB : weight.pounds, 2) : "",
       lureName(entry.lure),
-      spotById(book, entry.spotId)?.name ?? "",
+      plainName(spotById(book, entry.spotId)?.name ?? ""),
       // An untitled outing by its water, as the outings sheet names it, so the two sheets join on it.
       entry.tripId ? (outingNameById(book, entry.tripId) ?? "") : "",
       weather ? t(SKY_LABELS[weather.sky]) : "",

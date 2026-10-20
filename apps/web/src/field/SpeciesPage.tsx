@@ -11,7 +11,8 @@ import { daysBetween } from "./spotOrder";
 import { useLogbook } from "./LogbookState";
 import { PagedCatches } from "./PagedCatches";
 import { bookFishDay, yearTally } from "./tripMonths";
-import { catchesOfSpecies, kindOnPage, speciesWaters } from "./speciesLink";
+import { catchesOfSpecies, kindKey, kindOnPage, speciesWaters } from "./speciesLink";
+import { pieceName } from "./gear/pieceKey";
 import { FROM_LIST } from "./leaveDeleted";
 import { isSampleCatch } from "./bookCopy";
 import { withoutPlayLake } from "./playLake";
@@ -34,7 +35,7 @@ import { catchLink, type ListKey } from "./catchList";
 import { largestFirst } from "./largestFirst";
 import { MatchOrder, useLargestOrder } from "./MatchOrder";
 import { spreadRows } from "./spreadRows";
-import { outingDay } from "./tripDates";
+import { outingDay, plainName } from "./tripDates";
 
 /** One kind of fish across the whole book: how many, how big, on what, and where. */
 /** How many of the kind's newest photos show here; the rest are a search away. */
@@ -176,7 +177,7 @@ function SpeciesView() {
         </div>
         <div className="sheet-actions">
           {/* Lake fish also have a card in the game's field guide, on its Log page. */}
-          {FISH.some((fish) => fish.name.toLowerCase() === name.trim().toLowerCase()) ? <Link to="/log">{t("Field guide")}</Link> : null}
+          {FISH.some((fish) => kindKey(fish.name) === kindKey(name)) ? <Link to="/log">{t("Field guide")}</Link> : null}
           <Link to={`/catches/new?species=${encodeURIComponent(name)}`} className="field-primary inline">
             {t("Log another")}
           </Link>
@@ -276,7 +277,7 @@ function SpeciesView() {
             <h2>{t("Lures that took it")}</h2>
           </div>
           {/* Each lure opens just this kind's fish on it. */}
-          <TallyBars key={species} rows={pieceTally(catches).map((row) => ({ key: row.lure, label: t(row.lure), count: row.count, to: findWithLink(kindTerm, exactTerm("lure", t(row.lure))), note: lureBest(book, catches, row.lure) }))} />
+          <TallyBars key={species} rows={pieceTally(catches).map((row) => ({ key: row.lure, label: pieceName(row.lure), count: row.count, to: findWithLink(kindTerm, exactTerm("lure", pieceName(row.lure))), note: lureBest(book, catches, row.lure) }))} />
         </>
       ) : null}
       <div className="section-head">
@@ -375,7 +376,7 @@ function NewWaters({ catches, name, waters }: { catches: readonly CatchEntry[]; 
         {found.map((water, index) => (
           <Fragment key={water.spotId}>
             {index > 0 ? ", " : null}
-            <Link to={findWithLink(exactTerm("species", t(name)), exactTerm("water", water.name!))}>{water.name}</Link>
+            <Link to={findWithLink(exactTerm("species", t(name)), exactTerm("water", water.name!))}>{plainName(water.name!)}</Link>
           </Fragment>
         ))}
       </span>

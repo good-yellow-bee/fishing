@@ -1818,7 +1818,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT386~~ | ~~A let-go fish that breaks off or drops the bait stays itself: when it bites again it still carries its release note, and another angler's tag still pays both~~ (#1543) | gameplay | S |
 | ~~GT387~~ | ~~The sunken log fights back: a fish hooked from the bank tight to the half-sunk log off the west bank runs for it, and a run the angler doesn't turn wraps the line round the log as round a dock piling (fraying it); the fight card says "Sunken log: turn every run"~~ (#1544) | gameplay | M |
 | ~~GT388~~ | ~~Slams: land both bass (smallmouth and largemouth) on one local day for the Bass slam badge, and a brook trout, a rainbow trout and a salmon on one day for the Trout slam (the server reads the catches' days); the landed card stamps the slam a fish completes with the day's earlier fish~~ (#1547) | gameplay | M |
-| GT389 | News card game46 covers GT386 to GT388 | ui | S |
+| ~~GT389~~ | ~~News card 2026-10-20-game46 covers GT386 to GT388: a let-go fish stays itself, the sunken log fights back, and the bass and trout slams~~ (#1549) | ui | S |
 
 ## Risks / open questions for the owner
 
@@ -2408,3 +2408,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR578~~ | ~~Round 106 trips fixes: a loose fish offered only to the nearer of a day's outings, an outing's fish line counts a kind once, an untitled outing on a water with stray spaces names it once~~ (#1476) | field | S |
 | ~~BR579~~ | ~~Round 106 trips ideas: every outing on the water from an outing's page, landed of hooked in a copied outing~~ (#1479) | field | S |
 | ~~BR580~~ | ~~Yesterday's ended outing moves from Coming up to Recent right after midnight; only a session still going stays (owner, 2026-10-20)~~ (#1545) | field | S |
+| ~~BR581~~ | ~~Round 107 catch-page fixes: a kind however it was typed is one kind for badges, milestones, the form and its saved spelling, sizing, search summaries, Photos and the species page; water names read trimmed~~ (#1550) | field | S |
