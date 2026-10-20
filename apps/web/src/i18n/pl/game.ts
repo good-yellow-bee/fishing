@@ -145,6 +145,7 @@ export const PL_GAME: PlBook = {
   "Foam lane: the wind's drift is strongest here, so a slack line drifts out faster still": "Pas piany: tu wiatr znosi najmocniej, więc luźna żyłka odpływa jeszcze szybciej",
   "Risen to the hatch: it is at the top already, so its first run is a leap — bow": "Wyszła do rójki: jest już przy powierzchni, więc pierwszy odjazd to skok — puść",
   "Lantern light: it will see the net in the light and bolt from it once, so be ready to bring it back": "Światło latarni: w jego blasku zobaczy podbierak i raz przed nim ucieknie, więc przygotuj się, by ją przyciągnąć",
+  "Fired up on the fry: its first run doesn't tire it at all": "Rozgrzana pogonią za narybkiem: pierwszy odjazd wcale jej nie męczy",
   "Drag: light": "Hamulec: lekki",
   "Drag: normal": "Hamulec: zwykły",
   "Drag: heavy": "Hamulec: mocny",

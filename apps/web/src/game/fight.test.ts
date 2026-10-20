@@ -1255,6 +1255,26 @@ describe("the lantern's light at the net", () => {
   });
 });
 
+describe("fired up on the fry", () => {
+  it("doesn't tire on its first run, and tires as usual after", () => {
+    const afterRuns = (fired: boolean, runs: number) => {
+      const f = makeFight(fish("pike"), 6, 3, () => 0, 1, "open", undefined, false, false, false, false, false, false, false, 1, 1, false, { fired });
+      let now = 0;
+      let done = 0;
+      let was = f.sim.surge;
+      while (done < runs) {
+        f.step((now += 50), 0.05, false);
+        if (was === 2 && f.sim.surge === 0) done += 1;
+        was = f.sim.surge;
+      }
+      return f.sim.stamina;
+    };
+    expect(afterRuns(true, 1)).toBeGreaterThan(afterRuns(false, 1));
+    expect(afterRuns(true, 1)).toBe(1);
+    expect(afterRuns(true, 2)).toBeLessThan(1);
+  });
+});
+
 describe("the dock's pilings", () => {
   /** Lets one run go unturned, then reels or rests through the calm after it. */
   function afterRun(water: "pilings" | "open", turn: boolean, reel: boolean) {
