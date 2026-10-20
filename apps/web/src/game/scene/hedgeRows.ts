@@ -1,0 +1,90 @@
+import type { LakeHour, LakeSeason } from "@stillwater/shared";
+import { hillFront } from "./farHills";
+
+/**
+ * Hedgerows across the upper face of the hills behind the far bank, above the farm, the orchard and the hay
+ * fields: rows of bushes running along the slope with gaps for gates, a few short hedges between the fields,
+ * and here and there a hedgerow tree. An upright phone sees this part of the hills; a wide screen only its foot.
+ * Still, so laid out once.
+ */
+
+/** The rows' heights on the hills' face, lowest first, and how far they run east and west. */
+export const HEDGE_ROWS = [5.6, 7.0, 8.5, 10.0] as const;
+export const HEDGE_WEST = -14;
+export const HEDGE_EAST = 12;
+/** Bush spacing along a row, and a bush's radius, drawn large enough to read at the hills' distance. */
+const STEP = 0.26;
+export const BUSH = 0.16;
+/** How far a row rises and falls as it follows the slope. */
+const WAVE = 0.25;
+/** Gates to a row, each a gap this wide. */
+const GATES = 2;
+const GATE_WIDTH = 1.1;
+/** Short hedges between neighbouring rows, splitting the band into fields. */
+const DIVIDERS = 4;
+/** One bush in this many along a row grows into a hedgerow tree. */
+const TREE_EVERY = 29;
+
+export type Bush = { x: number; y: number; z: number; size: number; shade: number };
+
+function hash(i: number) {
+  const s = Math.sin(i * 73.1 + 19.7) * 43758.5453;
+  return s - Math.floor(s);
+}
+
+/** Where row `row` runs at `x`, rising and falling a little along the slope. */
+export function rowY(row: number, x: number) {
+  return HEDGE_ROWS[row]! + WAVE * Math.sin(x * 0.35 + row * 1.7);
+}
+
+function bushAt(x: number, y: number, size: number, seed: number): Bush | null {
+  const face = hillFront(x, y);
+  if (face === null) return null;
+  // Above the hills' middles the face leans back, so a bush half sunk into it sits on the slope.
+  return { x, y, z: face + BUSH * size * 0.35, size, shade: hash(seed + 7) };
+}
+
+/** Every bush in the hedgerows: the rows with their gates and trees, then the field hedges between them. */
+export function hedgeBushes(): Bush[] {
+  const bushes: Bush[] = [];
+  HEDGE_ROWS.forEach((_, row) => {
+    const gates = Array.from({ length: GATES }, (_, g) => HEDGE_WEST + (HEDGE_EAST - HEDGE_WEST) * ((g + 0.3 + hash(row * 10 + g) * 0.4) / GATES));
+    let n = 0;
+    for (let x = HEDGE_WEST; x <= HEDGE_EAST; x += STEP, n += 1) {
+      if (gates.some((gate) => Math.abs(x - gate) < GATE_WIDTH / 2)) continue;
+      const seed = row * 1000 + n;
+      const tree = (n + row * 5) % TREE_EVERY === 0;
+      const bush = bushAt(x, rowY(row, x) + (tree ? BUSH : 0), tree ? 1.7 : 0.85 + hash(seed) * 0.35, seed);
+      if (bush) bushes.push(bush);
+    }
+  });
+  for (let row = 0; row < HEDGE_ROWS.length - 1; row += 1) {
+    for (let d = 0; d < DIVIDERS; d += 1) {
+      const x = HEDGE_WEST + (HEDGE_EAST - HEDGE_WEST) * ((d + 0.25 + hash(row * 50 + d) * 0.5) / DIVIDERS);
+      const from = rowY(row, x);
+      const to = rowY(row + 1, x);
+      for (let y = from + STEP; y < to - STEP / 2; y += STEP) {
+        const seed = 5000 + row * 100 + d * 10 + Math.round(y * 3);
+        const bush = bushAt(x + (hash(seed) - 0.5) * 0.12, y, 0.8 + hash(seed + 1) * 0.3, seed);
+        if (bush) bushes.push(bush);
+      }
+    }
+  }
+  return bushes;
+}
+
+/** The hedges' greens by season: fresh in spring, deep in summer, turning in the fall, bare twigs over the snow in winter. */
+const HEDGE_LOOK: Record<LakeSeason, readonly [string, string]> = {
+  spring: ["#5d8a4a", "#6f9a52"],
+  summer: ["#3f623c", "#4a7044"],
+  fall: ["#8a6234", "#9a4f2c"],
+  winter: ["#857565", "#94846f"],
+};
+/** Under the night sky the hedges darken as the hills do. */
+export const NIGHT_DIM = 0.55;
+
+/** A bush's colour for the season, its own `shade` (0..1) picking between the season's two, dimmed at night. */
+export function hedgeColor(season: LakeSeason, hour: LakeHour, shade: number): { hex: string; dim: number } {
+  const [a, b] = HEDGE_LOOK[season];
+  return { hex: shade < 0.6 ? a : b, dim: hour === "night" ? NIGHT_DIM : 1 };
+}
