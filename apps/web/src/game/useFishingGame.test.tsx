@@ -118,6 +118,7 @@ vi.mock("./fight", async (importOriginal) => {
 
 import { updateSettings } from "./settings";
 import { giantShyKey } from "./giantShy";
+import { NIGHT_LINE_SOAK_MS, nightLineKey } from "./nightLine";
 import { carriesBait, FALSE_STRIKE_MS, FIGURE_EIGHT_ODDS, FIGURE_TURN_MS, FIGURE_WINDOW_MS, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TIRE_REASONS, TOPWATER_POPS, useFishingGame, WAIT_REASONS } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
@@ -191,6 +192,10 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <button type="button" onClick={game.toggleLamp}>lamp</button>
       <button type="button" onClick={game.baitShiner}>bait shiner</button>
       <button type="button" onClick={game.addShiner}>buy shiner</button>
+      <button type="button" onClick={game.setNightLine}>set night line</button>
+      <button type="button" onClick={game.checkNightLine}>check night line</button>
+      <i data-testid="caught-hour">{game.outcome?.kind === "landed" ? (game.outcome.hour ?? "") : ""}</i>
+      <i data-testid="night-line">{game.nightLine ? game.nightLine.spot : ""}</i>
       <i data-testid="live-shiner">{String(game.liveShiner)}</i>
       <i data-testid="frayed">{String(game.frayed)}</i>
       <i data-testid="twisted">{String(game.twisted)}</i>
@@ -388,6 +393,39 @@ describe("useFishingGame live shiner", () => {
     act(() => vi.advanceTimersByTime(2_201));
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
     expect(hint()).toMatch(/^It took the live shiner! /);
+  });
+
+  it("leaves a bought shiner out on a night line, and a later visit brings in a night feeder of the bank, landed but not clean", () => {
+    const strong = { ...profile, strength: 10, accuracy: 10 };
+    mount(DOCK_BUBBLES.at, strong);
+    const press = (name: string) => act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === name) as HTMLButtonElement).click());
+    const line = () => container!.querySelector("[data-testid=night-line]")?.textContent;
+    try {
+      // A frame reads where the angler stands.
+      act(() => frames.at(-1)!(now));
+      press("buy shiner");
+      press("set night line");
+      expect(line()).toBe("dock");
+      expect(liveShiner()).toBe("false");
+      expect(hint()).toBe("You leave the shiner out on a night line here. Come back to check it after six hours, and within two days.");
+      // Too soon, the line stays out.
+      vi.setSystemTime(DOCK_BUBBLES.at + NIGHT_LINE_SOAK_MS - 60_000);
+      press("check night line");
+      expect(line()).toBe("dock");
+      vi.setSystemTime(DOCK_BUBBLES.at + NIGHT_LINE_SOAK_MS + 60_000);
+      press("check night line");
+      expect(line()).toBe("");
+      expect(phase()).toBe("result:landed");
+      expect(container!.querySelector("[data-testid=clean]")?.textContent).toBe("false");
+      expect(container!.querySelector("[data-testid=caught-hour]")?.textContent).toBe("night");
+      expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toMatch(/^(Common carp|Channel catfish) took the shiner on your night line\.$/);
+    } finally {
+      try {
+        localStorage.removeItem(nightLineKey(strong.userId));
+      } catch {
+        // No store in this run, so nothing was kept.
+      }
+    }
   });
 
   it("sends a shiner landed clean out lively, drawing more of the hunters", () => {

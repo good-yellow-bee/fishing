@@ -121,6 +121,7 @@ import { bankSuitsNow } from "../game/bankNow";
 import { PowerMeter } from "../game/scene/PowerMeter";
 import { prefersReducedMotion } from "../game/scene/reducedMotion";
 import { shyOf } from "../game/giantShy";
+import { nightLineKinds, nightLineState } from "../game/nightLine";
 import { isLiveBait, isTopwater, touchScreen, useFishingGame } from "../game/useFishingGame";
 import { useCatchSync } from "../game/useCatchSync";
 import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
@@ -508,7 +509,7 @@ export function DockPage() {
     setSession((current) => {
       const now = new Date();
       const base = current && current.date === localDate(now) ? current : startSession(now, sky);
-      return withSessionFish(base, { id, speciesId: species.id, speciesName: species.name, weight, spot: landedAt, hour, first, clean });
+      return withSessionFish(base, { id, speciesId: species.id, speciesName: species.name, weight, spot: landedAt, hour: game.outcome?.kind === "landed" ? (game.outcome.hour ?? hour) : hour, first, clean });
     });
     // Only a new landing adds a fish; hour and sky changes must not replay it.
   }, [game.outcome]);
@@ -554,7 +555,7 @@ export function DockPage() {
   const retryServerSave = () => {
     const outcome = game.outcome;
     if (outcome?.kind === "landed" && posted.current !== outcome.id) {
-      void saveOutcome(outcome.id, { requestId: outcome.id, speciesId: outcome.species.id, weight: outcome.weight, spot: outcome.spot, clean: outcome.clean, cleanRun: outcome.notes?.cleanRun, hour, sky, season, day: landedDay.current, taggedFrom: outcome.tag?.id, giant: outcome.giant ? true : undefined });
+      void saveOutcome(outcome.id, { requestId: outcome.id, speciesId: outcome.species.id, weight: outcome.weight, spot: outcome.spot, clean: outcome.clean, cleanRun: outcome.notes?.cleanRun, hour: outcome.hour ?? hour, sky, season, day: landedDay.current, taggedFrom: outcome.tag?.id, giant: outcome.giant ? true : undefined });
       return;
     }
     void catchSync.sync();
@@ -813,12 +814,12 @@ export function DockPage() {
       setReleaseError(false);
       return;
     }
-    const { id, species, weight, spot: catchSpot, clean, notes, tag, giant } = game.outcome;
+    const { id, species, weight, spot: catchSpot, clean, notes, tag, giant, hour: caughtAt } = game.outcome;
     if (posted.current === id) return;
     landedDay.current = localDate(new Date());
     saveFieldLog();
     if (!userId) return;
-    void saveOutcome(id, { requestId: id, speciesId: species.id, weight, spot: catchSpot, clean, cleanRun: notes?.cleanRun, hour, sky, season, day: landedDay.current, taggedFrom: tag?.id, giant: giant ? true : undefined });
+    void saveOutcome(id, { requestId: id, speciesId: species.id, weight, spot: catchSpot, clean, cleanRun: notes?.cleanRun, hour: caughtAt ?? hour, sky, season, day: landedDay.current, taggedFrom: tag?.id, giant: giant ? true : undefined });
   }, [game.outcome, saveFieldLog, saveOutcome, userId, hour, sky, season]);
 
   useEffect(() => {
@@ -963,11 +964,26 @@ export function DockPage() {
   const frenzyAt = (target: WalkTarget) => game.frenzy && game.hotspot?.spot === target;
   /** What a walk sign tells a screen reader and the tooltip beyond its bank's name. */
   const giantAt = (bank: string) => openGiants.find((giant) => giant.spot === bank);
-  // A bank whose giant is still out there says so after its other news.
+  const lineState = game.nightLine ? nightLineState(game.nightLine, Date.now()) : null;
+  const lineAt = (bank: string) => (game.nightLine?.spot === bank ? lineState : null);
+  // The bank underfoot's own sign sets a night line with the shiner on the hook, or brings in the one out there.
+  const stanceLine =
+    !me || rowing
+      ? null
+      : lineAt(game.stance) && lineAt(game.stance) !== "soaking"
+        ? "check"
+        : !game.nightLine && game.liveShiner && isFishingStance(game.stance) && game.stance !== "open" && nightLineKinds(game.stance, me.profile).length > 0
+          ? "set"
+          : null;
+  const lineAction = (target: WalkTarget) => (target === game.stance ? stanceLine : null);
+  // A bank whose giant is still out there, or where the night line is out, says so after its other news.
   const signNote = (target: WalkTarget, label: string) => {
+    const action = lineAction(target);
+    if (action) return action === "set" ? t("{bank}: leave the shiner out on a night line here", { bank: t(label) }) : t("{bank}: bring in your night line", { bank: t(label) });
     const giant = giantAt(target);
     const note = bankNote(target, label);
-    return giant ? t("{note} · {name}, its giant, is still out there", { note: note ?? t(label), name: t(giant.name) }) : note;
+    const withGiant = giant ? t("{note} · {name}, its giant, is still out there", { note: note ?? t(label), name: t(giant.name) }) : note;
+    return lineAt(target) ? t("{note} · your night line is out here", { note: withGiant ?? t(label) }) : withGiant;
   };
   const bankNote = (target: WalkTarget, label: string) =>
     frenzyAt(target)
@@ -1153,6 +1169,8 @@ export function DockPage() {
           {!rowing && game.stance === hotBank && <small className="stance-hot"> · {t("biting today")}</small>}
           {!rowing && !mercy && game.stance === crowdedBank && <small className="stance-cold"> · {t("another angler here today")}</small>}
           {!rowing && isFishingStance(game.stance) && game.stance !== "open" && favoredNow(game.stance) && <small className="stance-hot"> · {t("bites sooner now")}</small>}
+          {!rowing && lineAt(game.stance) && (lineAt(game.stance) === "ready" ? <small className="stance-hot"> · {t("night line ready")}</small> : <small className="stance-cold"> · {t(lineAt(game.stance) === "soaking" ? "night line soaking" : "night line left too long")}</small>)}
+          {!rowing && game.nightLine && game.nightLine.spot !== game.stance && game.liveShiner && <small className="stance-cold"> · {t("night line out at the {bank}", { bank: t(SPOT_LABELS[game.nightLine.spot]) })}</small>}
           {!rowing && giantAt(game.stance) && (
             game.giantShy && isFishingStance(game.stance) && shyOf(game.giantShy, game.stance, giantAt(game.stance)!.name, lure)
               ? <small className="stance-cold"> · {t("giant: {name}, shy of this lure", { name: t(giantAt(game.stance)!.name) })}</small>
@@ -1290,14 +1308,18 @@ export function DockPage() {
                 title={signNote(target, label)}
                 data-now={favoredNow(target) ? "1" : undefined}
                 data-cold={fishedHardAt(target) ? "1" : undefined}
-                disabled={game.stance === target}
+                disabled={game.stance === target && !lineAction(target)}
                 onClick={(event) => {
                   // Leave Space free for casting.
                   event.currentTarget.blur();
-                  walkAnglerTo(WALK_TARGETS[target].x, WALK_TARGETS[target].z);
+                  const action = lineAction(target);
+                  if (action === "set") game.setNightLine();
+                  else if (action === "check") game.checkNightLine();
+                  else walkAnglerTo(WALK_TARGETS[target].x, WALK_TARGETS[target].z);
                 }}
               >
-                {t(label)}
+                {lineAction(target) === "set" ? t("Night line") : lineAction(target) === "check" ? t("Check line") : t(label)}
+                {lineAt(target) && !lineAction(target) && <span className="sign-line" aria-hidden="true"> ≈</span>}
                 {favoredNow(target) && <span className="sign-now" aria-hidden="true"> •</span>}
                 {frenzyAt(target) && <span className="sign-frenzy" aria-hidden="true"> ✦</span>}
                 {giantAt(target) && <span className="sign-giant" aria-hidden="true"> ♦</span>}

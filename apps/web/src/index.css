@@ -919,7 +919,8 @@ a:focus-visible {
 }
 
 .walk-signs .sign-frenzy,
-.walk-signs .sign-giant {
+.walk-signs .sign-giant,
+.walk-signs .sign-line {
   color: var(--amber);
 }
 
