@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { makeStreakTexture } from "./glintStreak";
 import { CABIN_WINDOW_LIGHTS, GLINTS_PER_WINDOW, lightGlints, type Vec3 } from "./cabinShine";
 import { useReducedMotion } from "./reducedMotion";
 import { waterHeight } from "./water";
@@ -15,9 +16,10 @@ const GAIN = 1.2;
 export function WindowGlow({ strength, lights = CABIN_WINDOW_LIGHTS, color = GLOW, name = "cabin-window-glow" }: { strength: number; lights?: readonly Vec3[]; color?: string; name?: string }) {
   const still = useReducedMotion();
   const geometry = useMemo(() => new THREE.PlaneGeometry(1.0, 0.35), []);
+  const fade = useMemo(makeStreakTexture, []);
   const material = useMemo(
-    () => new THREE.MeshBasicMaterial({ color: "#ffffff", transparent: true, opacity: 0.85, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }),
-    [],
+    () => new THREE.MeshBasicMaterial({ color: "#ffffff", map: fade, transparent: true, opacity: 0.85, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }),
+    [fade],
   );
   const mesh = useRef<THREE.InstancedMesh>(null);
   const helper = useMemo(() => new THREE.Object3D(), []);
@@ -26,9 +28,10 @@ export function WindowGlow({ strength, lights = CABIN_WINDOW_LIGHTS, color = GLO
   useEffect(
     () => () => {
       geometry.dispose();
+      fade.dispose();
       material.dispose();
     },
-    [geometry, material],
+    [geometry, fade, material],
   );
   useFrame((state) => {
     const glow = mesh.current;
