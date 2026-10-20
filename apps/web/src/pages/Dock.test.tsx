@@ -5,11 +5,12 @@ import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { badgeProgress, catchPoints, CLEAN_RUN_BONUS, DAY_RUN_BONUS, GOLDEN_BONUS, LODGE_RECORD_BONUS, PB_BONUS, isGolden, weeklyBonus, dailyConditions, skyTurnForDay, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky, type SpotId, MASTER_BONUS, localDate } from "@stillwater/shared";
-import { buyGroundbait, buyShiner, getGiants, getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
+import { buyGroundbait, buyShiner, getGiants, getLodgeLost, getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { bagKey, shinerKey } from "../game/groundbaitBag";
 import { nightLineKey } from "../game/nightLine";
+import { oldFoeKey } from "../game/oldFoe";
 import { baitBucketKey } from "../game/baitBucket";
 import { sessionKey, startSession } from "../game/session";
 import type { Outcome } from "../game/useFishingGame";
@@ -233,6 +234,18 @@ describe("dock weather", () => {
     expect(reeds?.getAttribute("aria-label")).toMatch(/your night line is out here$/);
     // With a line out, the shiner stays on the hook rather than setting a second one.
     expect([...later.querySelectorAll(".walk-signs button")].some((button) => button.textContent === "Night line")).toBe(false);
+  });
+
+  it("names on the stance chip an old foe about the bank and another angler's lost trophy there", async () => {
+    landed.stance = "dock";
+    localStorage.setItem(oldFoeKey("u1"), JSON.stringify({ species: "smallmouth-bass", weight: 3.8, spot: "dock", at: Date.now() - 26 * 3_600_000 }));
+    vi.mocked(getLodgeLost).mockResolvedValue({ lost: [{ id: "l1", speciesId: "smallmouth-bass", weight: 3.7, spot: "dock", at: "2026-10-19T10:00:00.000Z", by: "Mara" }], mineFound: [] });
+    const page = await openDock("/?hour=day&sky=clear");
+    const chip = page.querySelector(".stance-chip")?.textContent;
+    expect(chip).toContain("· foe about");
+    expect(chip).toContain("· lost trophy");
+    localStorage.removeItem(oldFoeKey("u1"));
+    vi.mocked(getLodgeLost).mockResolvedValue({ lost: [], mineFound: [] });
   });
 
   it("dims the walk signs of the banks fished hard, and says so to a screen reader", async () => {

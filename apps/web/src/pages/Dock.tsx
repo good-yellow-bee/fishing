@@ -127,7 +127,7 @@ import { PowerMeter } from "../game/scene/PowerMeter";
 import { prefersReducedMotion } from "../game/scene/reducedMotion";
 import { shyOf } from "../game/giantShy";
 import { nightLineKinds, nightLineState, wormLineHour } from "../game/nightLine";
-import { isOldFoe, loadOldFoe, saveOldFoe } from "../game/oldFoe";
+import { foeAbout, isOldFoe, loadOldFoe, saveOldFoe } from "../game/oldFoe";
 import { BUCKET_SIZE } from "../game/baitBucket";
 import { isLiveBait, isTopwater, touchScreen, useFishingGame, type Outcome } from "../game/useFishingGame";
 import { useCatchSync } from "../game/useCatchSync";
@@ -347,6 +347,8 @@ export function DockPage() {
   }, [angler, latestCatch]);
   const giantBanks = useMemo(() => openGiants.map((giant) => giant.spot), [openGiants]);
   const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind, legend, lodgeReleased, luckyLures, fishedDownBanks, openGiants, lodgeLost);
+  // The angler's own old foe, read again whenever a cast ends, as a loss or a landing changes it.
+  const oldFoe = useMemo(() => (angler ? loadOldFoe(angler) : null), [angler, game.outcome]);
   // A trophy that broke the line is filed with the lodge once, for other anglers to meet at its bank.
   const reportedLost = useRef<string | null>(null);
   useEffect(() => {
@@ -1234,6 +1236,8 @@ export function DockPage() {
           {!rowing && isFishingStance(game.stance) && game.stance !== "open" && favoredNow(game.stance) && <small className="stance-hot"> · {t("bites sooner now")}</small>}
           {!rowing && lineAt(game.stance) && (lineAt(game.stance) === "ready" ? <small className="stance-hot"> · {t("night line ready")}</small> : <small className="stance-cold"> · {t(lineAt(game.stance) === "soaking" ? "night line soaking" : "night line left too long")}</small>)}
           {!rowing && game.nightLine && game.nightLine.spot !== game.stance && lineBait && <small className="stance-cold"> · {t("night line out at the {bank}", { bank: t(SPOT_LABELS[game.nightLine.spot]) })}</small>}
+          {!rowing && foeAbout(oldFoe, game.stance, Date.now()) && <small className="stance-hot"> · {t("foe about")}</small>}
+          {!rowing && lodgeLost.some((lost) => lost.spot === game.stance) && <small className="stance-hot"> · {t("lost trophy")}</small>}
           {!rowing && giantAt(game.stance) && (
             game.giantShy && isFishingStance(game.stance) && shyOf(game.giantShy, game.stance, giantAt(game.stance)!.name, lure)
               ? <small className="stance-cold"> · {t("giant: {name}, shy of this lure", { name: t(giantAt(game.stance)!.name) })}</small>
