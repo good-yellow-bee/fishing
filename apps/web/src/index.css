@@ -2478,14 +2478,20 @@ html[data-input="pad"] .fight-bar .on-pad {
   }
 }
 
-/* With larger text on a phone up to 360 px wide and 667 px tall, a bank chip with three notes wrapped eight rows deep
+/* With larger text on a phone up to 375 px wide and 667 px tall, a bank chip with three notes wrapped eight rows deep
    in its column beside the lure panel and hung the hint over the walk stick and the cast meter: the chip stops at
-   three rows with an ellipsis. A screen reader still reads every note. */
-@media (max-width: 360px) and (min-height: 501px) and (max-height: 667px) {
+   six rows with an ellipsis, three up to 360 px wide. A screen reader still reads every note. */
+@media (max-width: 375px) and (min-height: 501px) and (max-height: 667px) {
   html[data-text-size] .stance-chip {
     display: -webkit-box;
     overflow: hidden;
     -webkit-box-orient: vertical;
+    -webkit-line-clamp: 6;
+  }
+}
+
+@media (max-width: 360px) and (min-height: 501px) and (max-height: 667px) {
+  html[data-text-size] .stance-chip {
     -webkit-line-clamp: 3;
   }
 }
