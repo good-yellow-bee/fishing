@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { FLOAT_AT, ROD_BASE, ROD_LENGTH, ROD_LIFT, SEAT_AT, SEAT_YAW, brollyAt, brollyTilt, rodTip } from "./brollyFishing";
-import { floatShape } from "./FogAngler";
+import { brollySitterShape, floatShape, rodRestShape } from "./anglerShapes";
 import { mergePainted, mergeParts } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
@@ -10,10 +10,7 @@ import { waterHeight } from "./water";
 import { useSkinnedFigure } from "./skinFigure";
 
 const JACKET = "#76854a";
-const TROUSERS = "#3b4033";
-const BOOTS = "#2b3a2a";
 const SKIN = "#d9a882";
-const CHAIR = "#4a4a44";
 const ROD = "#2a2622";
 const CANOPY = "#3f6a45";
 const RIB = "#2f4f34";
@@ -31,21 +28,6 @@ const BUTT_AHEAD = Math.hypot(ROD_BASE.x - SEAT_AT.x, ROD_BASE.z - SEAT_AT.z);
 const FRONT_REST = 0.75;
 /** The angler drawn a little larger than life, as the others on the far bank are. */
 const SCALE = 1.2;
-
-/** The angler sitting on a low chair, facing +z, hood up: thighs out level, shins down to the wellies. */
-export function brollySitterShape() {
-  return mergePainted([
-    { geometry: new THREE.BoxGeometry(0.4, 0.04, 0.36), position: [0, SEAT_Y - 0.02, 0.02], color: CHAIR },
-    ...[-0.18, 0.18].flatMap((x) => [
-      { geometry: new THREE.CylinderGeometry(0.015, 0.015, SEAT_Y, 4), position: [x, SEAT_Y / 2, -0.12] as const, color: CHAIR },
-      { geometry: new THREE.CylinderGeometry(0.015, 0.015, SEAT_Y, 4), position: [x, SEAT_Y / 2, 0.16] as const, color: CHAIR },
-    ]),
-    ...[-0.08, 0.08].flatMap((x) => [
-      { geometry: new THREE.BoxGeometry(0.12, 0.12, 0.38), position: [x, SEAT_Y + 0.06, 0.15] as const, color: TROUSERS },
-      { geometry: new THREE.BoxGeometry(0.11, SEAT_Y, 0.12), position: [x, SEAT_Y / 2, 0.32] as const, color: BOOTS },
-    ]),
-  ]);
-}
 
 /** The body above the seat, in a hooded waterproof, facing +z. */
 export function brollyTorsoShape() {
@@ -71,13 +53,6 @@ export function cupArmShape() {
 /** The rod, butt at the origin, along +z, and its two rests, the back one at the butt. */
 export function brollyRodShape() {
   return mergePainted([{ geometry: new THREE.CylinderGeometry(0.01, 0.022, ROD_LENGTH, 5), position: [0, 0, ROD_LENGTH / 2], rotation: [Math.PI / 2, 0, 0], color: ROD }]);
-}
-
-export function rodRestShape(height: number) {
-  return mergePainted([
-    { geometry: new THREE.CylinderGeometry(0.012, 0.012, height, 4), position: [0, height / 2, 0], color: "#6a5a44" },
-    { geometry: new THREE.BoxGeometry(0.1, 0.02, 0.02), position: [0, height, 0], color: "#2a2a2a" },
-  ]);
 }
 
 /** The big green umbrella: its pole, and its canopy with ribs showing at the rim. */

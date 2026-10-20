@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { makeSoftSpotTexture } from "./Atmosphere";
-import { brollySitterShape, rodRestShape } from "./BrollyFisher";
+import { beamGeometry, beamFade, brollySitterShape, rodRestShape } from "./anglerShapes";
 import { BOX_AHEAD, BOX_SIDE, BUTT_AHEAD, FLOAT_AT, ROD_BUTT_Y, ROD_LENGTH, ROD_LIFT, ROD_TIP, SEAT_AT, SEAT_YAW, floatGlow, headlampLook } from "./headlampFishing";
 import { mergePainted, mergeParts } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
@@ -22,9 +22,6 @@ const STICK = "#9dff7a";
 const SEAT_Y = 0.36;
 const NECK_Y = 0.52;
 const LAMP_AT: THREE.Vector3Tuple = [0, 0.15, 0.1];
-/** The beam: how far it reaches and how wide it opens. */
-const BEAM_LENGTH = 6;
-const BEAM_RADIUS = 0.7;
 const FRONT_REST = 0.75;
 const LINE_POINTS = 8;
 /** The angler drawn a little larger than life, as the others on the far bank are. */
@@ -55,28 +52,6 @@ export function nightHeadShape() {
 
 export function nightRodShape() {
   return mergePainted([{ geometry: new THREE.CylinderGeometry(0.01, 0.022, ROD_LENGTH, 5), position: [0, 0, ROD_LENGTH / 2], rotation: [Math.PI / 2, 0, 0], color: ROD }]);
-}
-
-/** The beam's fall-off: bright at the lamp (the cone's point, the top of its map) fading to nothing at its open end; `mid` is where it is half gone. */
-export function beamFade(mid = 0.45) {
-  const canvas = document.createElement("canvas");
-  canvas.width = 4;
-  canvas.height = 64;
-  const ctx = canvas.getContext("2d");
-  if (ctx) {
-    const gradient = ctx.createLinearGradient(0, 0, 0, 64);
-    gradient.addColorStop(0, "#ffffff");
-    gradient.addColorStop(mid, "#5a5a5a");
-    gradient.addColorStop(1, "#000000");
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 4, 64);
-  }
-  return new THREE.CanvasTexture(canvas);
-}
-
-/** The headlamp's beam: an open cone with its point at the lamp, widening out along +z. */
-export function beamGeometry(radius = BEAM_RADIUS, length = BEAM_LENGTH) {
-  return new THREE.ConeGeometry(radius, length, 16, 1, true).rotateX(-Math.PI / 2).translate(0, 0, length / 2);
 }
 
 /** A night angler on the far bank, a headlamp's beam following their looks and a glowing float out on the water (headlampFishing.ts). */

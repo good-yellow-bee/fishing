@@ -8,7 +8,7 @@ import { MOTH_COLOR, mothGeometry, poseMoth } from "./mothDraw";
 import { lampMoths } from "./batFlight";
 import { MOTH_COUNT, mothRound } from "./mothOrbit";
 import { useReducedMotion } from "./reducedMotion";
-import { beamFade, beamGeometry } from "./NightAngler";
+import { beamFade, beamGeometry } from "./anglerShapes";
 import { anglerPose } from "./pose";
 import type { ScenePhase } from "./types";
 import { waterHeight } from "./water";
