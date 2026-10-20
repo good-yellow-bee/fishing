@@ -1,9 +1,15 @@
 import { Hono } from "hono";
-import { anglerLevel, badgeProgress, canUseSpot, streakDays } from "@stillwater/shared";
-import { getProfile, listBadgeFacts, listCatchDays, listCatches, listSpeciesStats, toCatch, toProfile } from "../db.ts";
+import { anglerLevel, badgeProgress, canUseSpot, pastDerbies, streakDays } from "@stillwater/shared";
+import { countDerbyWins, firstCatchAt, getProfile, listBadgeFacts, listCatchDays, listCatches, listSpeciesStats, toCatch, toProfile } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
 export const meRoutes = new Hono();
+
+/** Weekend derbies the angler held the top spot of when they ended, from their first catch on. */
+function derbyWins(userId: string): number {
+  const first = firstCatchAt(userId);
+  return first ? countDerbyWins(userId, pastDerbies(new Date(first))) : 0;
+}
 
 meRoutes.get("/me", (c) => {
   const user = c.get("user") as SessionUser;
@@ -30,7 +36,7 @@ meRoutes.get("/me", (c) => {
     },
     catches,
     speciesStats,
-    badges: badgeProgress(listBadgeFacts(user.id), { longestStreak: longest }),
+    badges: badgeProgress(listBadgeFacts(user.id), { longestStreak: longest, derbyWins: derbyWins(user.id) }),
     longestStreak: longest,
     recentDays: days.slice(-60),
   });

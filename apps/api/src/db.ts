@@ -242,6 +242,27 @@ export function listCatchDays(userId: string): string[] {
 }
 
 /** The whole history grouped into badge facts; `listCatches` stops at 20, so badges can't be read from it. */
+/** The heaviest of a derby's fish each angler landed in its window, heaviest first; an earlier catch wins a tie. */
+export function listDerbyEntries(fishId: string, from: string, to: string, limit: number) {
+  return db
+    .prepare(
+      `SELECT c.user_id as userId, p.display_name as displayName, MAX(c.weight) as weight, MIN(c.created_at) as firstAt
+       FROM catch c JOIN profile p ON p.user_id = c.user_id
+       WHERE c.species_id = ? AND c.created_at >= ? AND c.created_at < ?
+       GROUP BY c.user_id ORDER BY weight DESC, firstAt ASC LIMIT ?`,
+    )
+    .all(fishId, from, to, limit) as { userId: string; displayName: string; weight: number; firstAt: string }[];
+}
+
+/** How many ended derbies this angler held the top spot of, back to their first catch. */
+export function countDerbyWins(userId: string, derbies: readonly { fishId: string; from: string; to: string }[]): number {
+  return derbies.filter((derby) => listDerbyEntries(derby.fishId, derby.from, derby.to, 1)[0]?.userId === userId).length;
+}
+
+export function firstCatchAt(userId: string): string | null {
+  return (db.prepare(`SELECT MIN(created_at) as at FROM catch WHERE user_id = ?`).get(userId) as { at: string | null }).at;
+}
+
 export function listBadgeFacts(userId: string): BadgeFactRow[] {
   const rows = db
     .prepare(
