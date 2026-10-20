@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { skyAt, type Sky } from "@stillwater/shared";
-import { loadNightLine, saveNightLine, wormLineHour, NIGHT_LINE_ODDS, NIGHT_LINE_SOAK_MS, WORM_LINE_ODDS, NIGHT_LINE_STALE_MS, nightLineCatch, nightLineKinds, nightLineNextChange, nightLineReadyAt, nightLineState, nightSkyFor } from "./nightLine";
+import { loadNightLine, saveNightLine, wormLineHour, NIGHT_LINE_ODDS, NIGHT_LINE_SOAK_MS, WORM_LINE_ODDS, NIGHT_LINE_STALE_MS, NIGHT_LINE_HOT_STALE_MS, NIGHT_LINE_COLD_SOAK_MS, NIGHT_LINE_COLD_STALE_MS, NIGHT_LINE_DAY_MS, nightLineCatch, nightLineKinds, nightLineNextChange, nightLineReadyAt, nightLineSeason, nightLineState, nightSkyFor } from "./nightLine";
 
 const strong = { strength: 10, accuracy: 10, patience: 5 };
 const at = (day: number, hour: number) => new Date(2026, 9, day, hour).getTime();
@@ -19,9 +19,34 @@ describe("a night line", () => {
     expect(nightLineState(line, line.setAt + NIGHT_LINE_STALE_MS + 1)).toBe("stale");
   });
 
+  it("keeps the season it was set in: summer's line is ready by dawn but stripped within a day, winter's soaks twelve hours past dawn but keeps four days", () => {
+    expect(nightLineSeason("summer")).toBe("summer");
+    expect(nightLineSeason("winter")).toBe("winter");
+    expect(nightLineSeason("fall")).toBeUndefined();
+    expect(nightLineSeason(undefined)).toBeUndefined();
+    const summer = { ...line, season: "summer" as const };
+    expect(nightLineState(summer, at(21, 5))).toBe("ready");
+    // Set in the small hours, only three hours have to pass.
+    expect(nightLineState({ ...summer, setAt: at(21, 2) }, at(21, 5))).toBe("ready");
+    expect(nightLineState({ ...line, setAt: at(21, 2) }, at(21, 5))).toBe("soaking");
+    expect(nightLineState(summer, line.setAt + NIGHT_LINE_HOT_STALE_MS)).toBe("ready");
+    expect(nightLineState(summer, line.setAt + NIGHT_LINE_HOT_STALE_MS + 1)).toBe("stale");
+    // Set just after dawn, it still holds its bait till the evening after its night.
+    const morning = { ...summer, setAt: at(20, 6) };
+    expect(nightLineState(morning, at(21, 5) + NIGHT_LINE_DAY_MS)).toBe("ready");
+    expect(nightLineState(morning, at(21, 5) + NIGHT_LINE_DAY_MS + 1)).toBe("stale");
+    const winter = { ...line, season: "winter" as const };
+    // Set at eight in the evening, it is not ready at dawn but at eight in the morning.
+    expect(nightLineState(winter, at(21, 5))).toBe("soaking");
+    expect(nightLineState(winter, line.setAt + NIGHT_LINE_COLD_SOAK_MS - 1)).toBe("soaking");
+    expect(nightLineState(winter, at(21, 8))).toBe("ready");
+    expect(nightLineState(winter, line.setAt + NIGHT_LINE_STALE_MS + 1)).toBe("ready");
+    expect(nightLineState(winter, line.setAt + NIGHT_LINE_COLD_STALE_MS + 1)).toBe("stale");
+  });
+
   it("knows when its state next changes: as it turns ready, then stale, then never", () => {
-    for (const setAt of [at(20, 20), at(21, 2)]) {
-      const set = { spot: "dropoff" as const, setAt };
+    for (const set of [at(20, 20), at(21, 2), at(20, 6)].flatMap((setAt) => [undefined, "summer" as const, "winter" as const].map((season) => ({ spot: "dropoff" as const, setAt, season })))) {
+      const setAt = set.setAt;
       const turnsReady = nightLineNextChange(set, setAt)!;
       expect(nightLineState(set, turnsReady - 1)).toBe("soaking");
       expect(nightLineState(set, turnsReady)).toBe("ready");
@@ -68,6 +93,10 @@ describe("a night line", () => {
     try {
       saveNightLine("ash", { ...line, bait: "worm" });
       expect(loadNightLine("ash")).toEqual({ ...line, bait: "worm" });
+      saveNightLine("ash", { ...line, season: "winter" });
+      expect(loadNightLine("ash")).toEqual({ ...line, season: "winter" });
+      kept.set("stillwater.nightline.ash.v1", JSON.stringify({ ...line, season: "fall" }));
+      expect(loadNightLine("ash")).toEqual(line);
     } finally {
       vi.unstubAllGlobals();
     }
