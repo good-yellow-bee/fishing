@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { BANK_STOCK_DAYS, giantsForWeek, tagWindow, weekStart, TRACK_LIMIT, TRACK_WINDOW_MS, type LodgeTrack } from "@stillwater/shared";
+import { BANK_STOCK_DAYS, giantsForWeek, giantWeek, tagWindow, TRACK_LIMIT, TRACK_WINDOW_MS, type LodgeTrack } from "@stillwater/shared";
 import { listBankCounts, listGiantsLanded, listLodgeReleases, listRecentLodgeCatches } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
@@ -42,7 +42,7 @@ lodgeRoutes.get("/lodge/bank-week", (c) => {
 
 /** The week's giants, one per bank, and who landed each, if anyone has. */
 lodgeRoutes.get("/lodge/giants", (c) => {
-  const landed = new Map(listGiantsLanded(weekStart().toISOString().slice(0, 10)).map((row) => [row.spot, row]));
+  const landed = new Map(listGiantsLanded(giantWeek()).map((row) => [row.spot, row]));
   return c.json({
     giants: giantsForWeek().map((giant) => {
       const by = landed.get(giant.spot);

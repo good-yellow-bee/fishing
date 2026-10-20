@@ -361,8 +361,9 @@ describe("POST /catches", () => {
     const again = await post({ requestId: "4d3e2f1a-6b7c-4d8e-9f0a-1b2c3d4e5f60", speciesId: giant.speciesId, weight: giant.weight, spot: "dock", giant: true });
     const againBody = (await again.json()) as { points: number };
     expect(firstBody.points - againBody.points).toBeGreaterThanOrEqual(GIANT_BONUS - 1);
-    const saved = db.prepare(`SELECT bonuses FROM catch WHERE request_id = ?`).get(requestId) as { bonuses: string };
-    expect(saved.bonuses.split(",")).toContain("giant");
+    const bonuses = (id: string) => (db.prepare(`SELECT bonuses FROM catch WHERE request_id = ?`).get(id) as { bonuses: string }).bonuses.split(",");
+    expect(bonuses(requestId)).toContain("giant");
+    expect(bonuses("4d3e2f1a-6b7c-4d8e-9f0a-1b2c3d4e5f60")).not.toContain("giant");
     // A wrong weight claims nothing.
     db.exec(`DELETE FROM giant_landed`);
     const off = await post({ requestId: "5e4f3a2b-7c8d-4e9f-8a1b-2c3d4e5f6a70", speciesId: giant.speciesId, weight: Math.max(0.1, giant.weight - 0.5), spot: "dock", giant: true });

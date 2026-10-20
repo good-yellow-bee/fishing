@@ -326,6 +326,15 @@ export function claimGiant(week: string, spot: string, userId: string): boolean 
   return db.prepare(`INSERT OR IGNORE INTO giant_landed (week, spot, user_id, landed_at) VALUES (?, ?, ?, ?)`).run(week, spot, userId, new Date().toISOString()).changes === 1;
 }
 
+/** Claims the giant and pays its bonus together, or neither; false when someone landed it first. */
+export function claimAndPayGiant(week: string, spot: string, userId: string, catchId: string, bonus: number): boolean {
+  return db.transaction(() => {
+    if (!claimGiant(week, spot, userId)) return false;
+    payGiant(catchId, userId, bonus);
+    return true;
+  })();
+}
+
 /** Pays a catch the giant's bonus, on the catch and the angler's points. */
 export function payGiant(catchId: string, userId: string, bonus: number) {
   db.transaction(() => {

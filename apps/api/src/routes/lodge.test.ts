@@ -144,8 +144,8 @@ describe("GET /lodge/bank-week", () => {
 describe("GET /lodge/giants", () => {
   it("lists the week's giants and names who landed one", async () => {
     const { claimGiant } = await import("../db.ts");
-    const { weekStart, GIANT_BANKS } = await import("@stillwater/shared");
-    claimGiant(weekStart().toISOString().slice(0, 10), "reeds", "mara");
+    const { giantWeek, GIANT_BANKS } = await import("@stillwater/shared");
+    claimGiant(giantWeek(), "reeds", "mara");
     const { giants } = (await (await app.request("http://test/lodge/giants")).json()) as { giants: { spot: string; landedBy: string | null }[] };
     expect(giants.map((giant) => giant.spot)).toEqual(GIANT_BANKS);
     expect(giants.find((giant) => giant.spot === "reeds")?.landedBy).toBe("Mara");

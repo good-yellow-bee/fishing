@@ -297,7 +297,7 @@ export function DockPage() {
     () => new Set((Object.keys({ ...bankWeek, ...keptHere }) as SpotId[]).filter((bank) => fishedDown((bankWeek[bank] ?? 0) + (keptHere[bank] ?? 0)))),
     [bankWeek, keptHere],
   );
-  // The week's giants, read once a visit; one landed here leaves the lake at once.
+  // The week's giants, read when the visit opens and again after each saved catch, so one landed by anyone leaves the lake.
   const [giants, setGiants] = useState<GiantStatus[]>([]);
   useEffect(() => {
     if (!angler) return;
@@ -309,14 +309,13 @@ export function DockPage() {
     return () => {
       live = false;
     };
-  }, [angler]);
+  }, [angler, latestCatch]);
   const openGiants = useMemo(() => giants.filter((giant) => !giant.landedBy), [giants]);
   const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind, legend, lodgeReleased, luckyLures, fishedDownBanks, openGiants);
   useEffect(() => {
     if (game.outcome?.kind !== "landed") return;
     const bank = game.outcome.spot;
     setKeptHere((counts) => ({ ...counts, [bank]: (counts[bank] ?? 0) + 1 }));
-    if (game.outcome.giant) setGiants((rows) => rows.map((giant) => (giant.spot === bank ? { ...giant, landedBy: me?.profile.displayName ?? "you", landedAt: new Date().toISOString() } : giant)));
   }, [game.outcome]);
   // The cast's left-out reasons, opened from its hint; each cast's list starts closed.
   const [reasonsOpenFor, setReasonsOpenFor] = useState<readonly string[] | null>(null);
