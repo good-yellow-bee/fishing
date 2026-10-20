@@ -120,7 +120,7 @@ import { updateSettings } from "./settings";
 import { giantShyKey } from "./giantShy";
 import { nightLineKey, nightLineReadyAt } from "./nightLine";
 import { BUCKET_COLD_LIFE_MS, BUCKET_HOT_LIFE_MS, BUCKET_LIFE_MS, baitBucketKey } from "./baitBucket";
-import { TRAP_COLD_SOAK_MS, TRAP_SOAK_MS, trapKey } from "./minnowTrap";
+import { TRAP_COLD_SOAK_MS, TRAP_SOAK_MS, TRAP_STALE_MS, trapKey, trapState } from "./minnowTrap";
 import { bagKey, shinerKey } from "./groundbaitBag";
 import { oldFoeKey } from "./oldFoe";
 import { SWIM_PRIMED_MS, swimKey } from "./swim";
@@ -203,6 +203,7 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <button type="button" onClick={game.setTrap}>set trap</button>
       <button type="button" onClick={game.liftTrap}>lift trap</button>
       <i data-testid="bucket">{game.bucket}</i>
+      <i data-testid="trap">{game.trap ? trapState(game.trap, Date.now()) : "none"}</i>
       <button type="button" onClick={game.checkNightLine}>check night line</button>
       <i data-testid="caught-hour">{game.outcome?.kind === "landed" ? (game.outcome.hour ?? "") : ""}</i>
       <i data-testid="lost-from">{game.outcome?.kind === "landed" ? (game.outcome.lostFrom?.by ?? "") : ""}</i>
@@ -476,6 +477,21 @@ describe("useFishingGame live shiner", () => {
     // Math.random is pinned to 0 here, so the trap holds one.
     expect(container!.querySelector("[data-testid=bucket]")?.textContent).toBe("1");
     expect(hint()).toBe("Shiners in the trap: 1, all into your bait bucket.");
+  });
+
+  it("shows the trap turn ready, then stale, while the angler waits at the shack", () => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    mount();
+    const trap = () => container!.querySelector("[data-testid=trap]")?.textContent;
+    act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === "set trap") as HTMLButtonElement).click());
+    expect(trap()).toBe("soaking");
+    act(() => vi.advanceTimersByTime(TRAP_SOAK_MS - 1));
+    expect(trap()).toBe("soaking");
+    act(() => vi.advanceTimersByTime(1));
+    expect(trap()).toBe("ready");
+    act(() => vi.advanceTimersByTime(TRAP_STALE_MS - TRAP_SOAK_MS + 1));
+    expect(trap()).toBe("stale");
   });
 
   it("baits the shiner trap in winter's cold water: it soaks twelve hours, and the hint says so", () => {
