@@ -70,8 +70,24 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return data;
 }
 
+let earlyMe: { at: number; me: Promise<Me> } | null = null;
+
+/** A page load of the lake asks for the profile while the lake's code downloads; a getMe within 30 s takes that answer. */
+export function prefetchMe() {
+  const me = request<Me>("/api/me");
+  me.catch(() => undefined);
+  earlyMe = { at: Date.now(), me };
+}
+
 export function getMe() {
-  return request<Me>("/api/me");
+  const early = earlyMe;
+  earlyMe = null;
+  if (!early || Date.now() - early.at > 30_000) return request<Me>("/api/me");
+  // Asked before the sign-in check, a signed-out answer is asked again; any other failure stands.
+  return early.me.catch((err: unknown) => {
+    if (err instanceof ApiError && err.status === 401) return request<Me>("/api/me");
+    throw err;
+  });
 }
 
 export function recordCatch(body: CatchSubmission) {
