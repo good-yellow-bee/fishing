@@ -354,8 +354,11 @@ describe("the cast meter on a short upright phone", () => {
 
 describe("the bank chip on a small upright phone with larger text", () => {
   it("stops at six rows, three up to 360 px wide, so the hint under it stays clear of the walk stick", () => {
-    const chipIn = (media: string) => /\n  html\[data-text-size\] \.stance-chip \{([^}]*)\}/.exec(css.slice(css.indexOf(media)))?.[1];
-    expect(chipIn("@media (max-width: 375px) and (min-height: 501px) and (max-height: 667px) {")).toContain("-webkit-line-clamp: 6;");
-    expect(chipIn("@media (max-width: 360px) and (min-height: 501px) and (max-height: 667px) {")).toContain("-webkit-line-clamp: 3;");
+    const chipIn = (media: string) => {
+      const block = css.slice(css.indexOf(media), css.indexOf("\n}\n", css.indexOf(media)));
+      return /\n  html\[data-text-size\] \.stance-chip \{([^}]*)\}/.exec(block)?.[1];
+    };
+    expect(chipIn("@media (pointer: coarse) and (max-width: 375px) and (min-height: 501px) and (max-height: 667px) {")).toContain("-webkit-line-clamp: 6;");
+    expect(chipIn("@media (pointer: coarse) and (max-width: 360px) and (min-height: 501px) and (max-height: 667px) {")).toContain("-webkit-line-clamp: 3;");
   });
 });
