@@ -177,7 +177,7 @@ export const PL_GAME: PlBook = {
   "You touch up the dull hook point and tie the lure on again. It sets solid again.": "Podostrzasz tępy grot haczyka i wiążesz przynętę na nowo. Znów pewnie zacina.",
   "Retie the twisted line, so it casts clean again.": "Przewiąż skręconą żyłkę, żeby znów rzucała czysto.",
   "A wind knot: the twisted line kinked on the cast.": "Supeł: skręcona żyłka zaplątała się przy rzucie.",
-  "A spinner twists the line as it turns. Retie to take the twist out.": "Obrotówka skręca żyłkę, gdy się obraca. Przewiąż ją, by usunąć skręt.",
+  "A spinner's turns and a bluegill's circles twist the line. Retie to take the twist out.": "Obroty obrotówki i kółka bassa niebieskoskrzelego skręcają żyłkę. Przewiąż ją, by usunąć skręt.",
   "You cut off the twisted line and tie the lure on again. It casts clean.": "Odcinasz skręconą żyłkę i wiążesz przynętę na nowo. Znów rzuca czysto.",
   "Retie the frayed line, so it holds full strain again.": "Przewiąż przetartą żyłkę, by znów wytrzymała pełne napięcie.",
   "Frayed line: it snaps here": "Przetarta żyłka: tu pęka",

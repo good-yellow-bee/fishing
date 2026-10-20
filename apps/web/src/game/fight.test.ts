@@ -1800,14 +1800,20 @@ describe("second fight habits", () => {
     expect(runtime.sim.netHead).toBe(true);
   });
 
-  it("lets a burbot slither off a slack line, but not a tight one", () => {
-    const slack = makeFight(fish("burbot"), 3, 8, () => 0);
+  it("lets a burbot slither off a slack line after its first run, but not a tight one, nor before it has run", () => {
+    // A long calm (sequence calms run 0.8-1.3 s), as most are in play.
+    const slack = makeFight(fish("burbot"), 3, 8, () => 0.9);
+    let now = 0;
+    // Slack before its first run is no loss.
+    for (; slack.sim.surge === 0 && now < 5000; now += 50) expect(slack.step(now, 0.05, false)).toBe("fighting");
+    for (; slack.sim.surge !== 0 && now < 30_000; now += 50) slack.step(now, 0.05, false);
     slack.sim.tension = 0;
+    slack.sim.sulk = false;
     let result = "fighting";
-    for (let now = 0; result === "fighting" && now < 2000; now += 50) result = slack.step(now, 0.05, false);
+    for (const until = now + 20_000; result === "fighting" && now < until; now += 50) result = slack.step(now, 0.05, false);
     expect(result).toBe("escaped");
     expect(slack.sim.slipped).toBe(true);
-    const tight = makeFight(fish("burbot"), 3, 8, () => 0);
+    const tight = makeFight(fish("burbot"), 3, 8, () => 0.9);
     for (let now = 0; now < 2000; now += 50) expect(tight.step(now, 0.05, true)).not.toBe("escaped");
     expect(tight.sim.slipped).toBeUndefined();
     expect(SLIPPERS.has("perch")).toBe(false);

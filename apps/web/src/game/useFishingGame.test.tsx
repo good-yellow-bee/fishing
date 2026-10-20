@@ -474,7 +474,7 @@ describe("useFishingGame frayed line", () => {
     // The test's rolls are all 0, so a cast on the twisted line kinks.
     cast(surface);
     expect(phase()).toBe("idle:miss");
-    expect(hint()).toBe("A spinner twists the line as it turns. Retie to take the twist out.");
+    expect(hint()).toBe("A spinner's turns and a bluegill's circles twist the line. Retie to take the twist out.");
     retie();
     expect(twisted()).toBe("false");
     expect(hint()).toBe("You cut off the twisted line and tie the lure on again. It casts clean.");

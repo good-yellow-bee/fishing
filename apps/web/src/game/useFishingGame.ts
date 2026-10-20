@@ -1213,7 +1213,7 @@ export function useFishingGame(
     // A line twisted by a spinner's blade kinks on the cast now and then, until it is retied.
     if (castTangles(twistRef.current, Math.random(), mercyRef.current)) {
       setOutcome({ kind: "miss", message: t("A wind knot: the twisted line kinked on the cast.") });
-      resetToIdle(t("A spinner twists the line as it turns. Retie to take the twist out."));
+      resetToIdle(t("A spinner's turns and a bluegill's circles twist the line. Retie to take the twist out."));
       return;
     }
     setTwist(twistAfterCast(twistRef.current, lureRef?.current));
