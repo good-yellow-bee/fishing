@@ -13,11 +13,14 @@ const HAZEL = "#6b5236";
 /** A forked hazel stick leaning out along +z from its foot, bowed once a fish is on, a white tag at its tip, and the line down into the water. */
 function stakeShape(footY: number, state: LineState) {
   const { joint, topLean, tip, line } = stakePose(state, footY);
-  const top = tip.distanceTo(joint);
+  const up = new THREE.Vector3(0, Math.cos(topLean), Math.sin(topLean));
+  // The top starts a little below the bend, so a bowed stick shows no notch at the joint.
+  const topFoot = joint.clone().addScaledVector(up, -0.02);
+  const twig = tip.clone().addScaledVector(up, -0.058);
   return mergePainted([
     rod(new THREE.Vector3(), joint, 0.017, HAZEL, 5),
-    { geometry: new THREE.CylinderGeometry(0.012, 0.016, top, 5), position: joint.clone().lerp(tip, 0.5).toArray(), rotation: [topLean, 0, 0], color: HAZEL },
-    { geometry: new THREE.CylinderGeometry(0.008, 0.01, 0.14, 4), position: [0.03, tip.y - 0.05, tip.z - 0.03], rotation: [topLean, 0, -0.5], color: HAZEL },
+    { geometry: new THREE.CylinderGeometry(0.012, 0.016, tip.distanceTo(topFoot), 5), position: topFoot.clone().lerp(tip, 0.5).toArray(), rotation: [topLean, 0, 0], color: HAZEL },
+    { geometry: new THREE.CylinderGeometry(0.008, 0.01, 0.14, 4), position: [0.03, twig.y, twig.z], rotation: [topLean, 0, -0.5], color: HAZEL },
     { geometry: new THREE.BoxGeometry(0.08, 0.045, 0.006), position: [0, tip.y - 0.03, tip.z], color: "#f2efe6" },
     ...line.slice(1).map((to, i) => rod(line[i], to, 0.004, "#d8d4c8")),
   ]);
