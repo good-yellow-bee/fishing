@@ -140,6 +140,7 @@ export const PL_GAME: PlBook = {
   "The far rock frayed your line: it snaps sooner until you retie it.": "Daleka skała przetarła żyłkę: pęknie szybciej, dopóki jej nie przewiążesz.",
   "Duckweed: a ball of weed on the line slows the reel till its first run strips it off": "Rzęsa: kula zielska na żyłce spowalnia zwijanie, aż pierwszy odjazd ją zerwie",
   "This bank was fished hard yesterday, so its fish are still wary for your first casts.": "Wczoraj tu dużo łowiono, więc ryby są jeszcze płochliwe przy pierwszych rzutach.",
+  "Rock edge: runs dive off the ledge, pulling harder but tiring the fish faster": "Skalna krawędź: odjazdy nurkują za półkę, ciągną mocniej, ale szybciej męczą rybę",
   "Drag: light": "Hamulec: lekki",
   "Drag: normal": "Hamulec: zwykły",
   "Drag: heavy": "Hamulec: mocny",
