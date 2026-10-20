@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { makeSoftSpotTexture } from "./Atmosphere";
 import { balloonAt } from "./balloonDrift";
-import { mergePainted } from "./mergeParts";
+import { mergePainted, rod } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 
@@ -41,9 +41,7 @@ export function balloonShape() {
     const a = (k + 0.5) * (Math.PI / 2);
     const from = new THREE.Vector3(Math.cos(a) * 0.2, 0.3, Math.sin(a) * 0.2);
     const to = new THREE.Vector3(Math.cos(a) * 0.24, 0.78, Math.sin(a) * 0.24);
-    const mid = from.clone().add(to).multiplyScalar(0.5);
-    const tilt = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), to.clone().sub(from).normalize());
-    return { geometry: new THREE.CylinderGeometry(0.012, 0.012, from.distanceTo(to), 4), position: mid.toArray(), rotation: new THREE.Euler().setFromQuaternion(tilt).toArray().slice(0, 3) as THREE.Vector3Tuple, color: ROPE };
+    return rod(from, to, 0.012, ROPE, 4);
   });
   return mergePainted([
     ...GORES.flatMap((color, k) =>

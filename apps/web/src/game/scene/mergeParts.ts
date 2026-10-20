@@ -48,6 +48,14 @@ export function mergePainted(parts: readonly PaintedPart[]): THREE.BufferGeometr
   );
 }
 
+/** A thin rod between two points. */
+export function rod(from: THREE.Vector3, to: THREE.Vector3, radius: number, color: string, sides = 3): PaintedPart {
+  const span = to.clone().sub(from);
+  const turn = new THREE.Euler().setFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), span.clone().normalize()));
+  const mid = from.clone().add(to).multiplyScalar(0.5);
+  return { geometry: new THREE.CylinderGeometry(radius, radius, span.length(), sides), position: [mid.x, mid.y, mid.z], rotation: [turn.x, turn.y, turn.z], color };
+}
+
 /** Copies each pose group's local transform into one instance of `mesh`, so a set of limbs costs one draw. */
 export function poseLimbs(mesh: THREE.InstancedMesh | null, groups: readonly RefObject<THREE.Group | null>[]) {
   if (!mesh) return;
