@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { LAKE_CENTER_Z } from "@stillwater/shared";
 import { footPush, hammockSwing, hammockTies, pageTurn } from "./hammockSway";
-import { mergePainted, type PaintedPart } from "./mergeParts";
+import { mergePainted, rod, type PaintedPart } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 
@@ -30,17 +30,6 @@ function sagAt(x: number, half: number) {
   return -BAR_DROP - SAG * (1 - k * k);
 }
 
-function rod(from: THREE.Vector3, to: THREE.Vector3, radius: number, color: string): PaintedPart {
-  const tilt = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), to.clone().sub(from).normalize());
-  const euler = new THREE.Euler().setFromQuaternion(tilt);
-  return {
-    geometry: new THREE.CylinderGeometry(radius, radius, from.distanceTo(to), 5),
-    position: from.clone().add(to).multiplyScalar(0.5).toArray(),
-    rotation: [euler.x, euler.y, euler.z],
-    color,
-  };
-}
-
 /** The hammock and its reader in its own frame: the ties at x = ±length/2, y = 0, the reader's head toward +x, the open book toward +z. */
 export function hammockShape(length: number) {
   const tie = length / 2;
@@ -61,7 +50,7 @@ export function hammockShape(length: number) {
   for (const end of [-1, 1]) {
     const bar = new THREE.Vector3(end * half, -BAR_DROP, 0);
     parts.push({ geometry: new THREE.BoxGeometry(0.04, 0.04, WIDTH + 0.08), position: bar.toArray(), color: ROPE });
-    for (const side of [-1, 1]) parts.push(rod(new THREE.Vector3(end * tie, 0, 0), bar.clone().add(new THREE.Vector3(0, 0, side * WIDTH * 0.45)), 0.012, ROPE));
+    for (const side of [-1, 1]) parts.push(rod(new THREE.Vector3(end * tie, 0, 0), bar.clone().add(new THREE.Vector3(0, 0, side * WIDTH * 0.45)), 0.012, ROPE, 5));
   }
   // The reader, lying along the fabric with their head raised toward +x.
   const on = (x: number, up: number) => sagAt(x, half) + up;
@@ -72,8 +61,8 @@ export function hammockShape(length: number) {
     { geometry: new THREE.SphereGeometry(0.12, 10, 8), position: [0.62, on(0.62, 0.3), 0], color: SKIN },
     { geometry: new THREE.SphereGeometry(0.125, 10, 6, 0, Math.PI * 2, 0, Math.PI / 2), position: [0.65, on(0.62, 0.31), 0], rotation: [0, 0, -1.1], color: HAIR },
     // Forearms up holding the book open over the chest, and its left half.
-    rod(new THREE.Vector3(0.28, on(0.28, 0.22), 0.13), new THREE.Vector3(0.38, on(0.38, 0.52), 0.13), 0.04, SKIN),
-    rod(new THREE.Vector3(0.28, on(0.28, 0.22), -0.13), new THREE.Vector3(0.38, on(0.38, 0.52), -0.13), 0.04, SKIN),
+    rod(new THREE.Vector3(0.28, on(0.28, 0.22), 0.13), new THREE.Vector3(0.38, on(0.38, 0.52), 0.13), 0.04, SKIN, 5),
+    rod(new THREE.Vector3(0.28, on(0.28, 0.22), -0.13), new THREE.Vector3(0.38, on(0.38, 0.52), -0.13), 0.04, SKIN, 5),
     { geometry: new THREE.BoxGeometry(0.03, 0.26, 0.17), position: [0.4, on(0.4, 0.56), 0.09], rotation: [0.25, 0, 0.35], color: COVER },
     { geometry: new THREE.BoxGeometry(0.03, 0.26, 0.17), position: [0.4, on(0.4, 0.56), -0.09], rotation: [-0.25, 0, 0.35], color: COVER },
   );

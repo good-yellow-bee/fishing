@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { mergePainted, type PaintedPart } from "./mergeParts";
+import { mergePainted, rod, type PaintedPart } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { CAGE_ALONG, CAGE_LENGTH, CAGE_RADIUS, CAGE_Y, SHINER_HALF, TRAP_REACH, TRAP_STAKE, shinerFlip } from "./trapSpot";
 import { toonRamp } from "./toon";
@@ -13,14 +13,6 @@ const STAKE_TOP = 0.34;
 /** The funnel mouths at each end, where the shiners nose in. */
 const MOUTH = 0.035;
 const FUNNEL = 0.1;
-
-/** A thin rod between two points. */
-function rod(from: THREE.Vector3, to: THREE.Vector3, radius: number, color: string): PaintedPart {
-  const span = to.clone().sub(from);
-  const turn = new THREE.Euler().setFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), span.clone().normalize()));
-  const mid = from.clone().add(to).multiplyScalar(0.5);
-  return { geometry: new THREE.CylinderGeometry(radius, radius, span.length(), 3), position: [mid.x, mid.y, mid.z], rotation: [turn.x, turn.y, turn.z], color };
-}
 
 /** The stake, the cord out to the cage, and the wire cage lying along the shore (x) with a funnel at each end. */
 function trapShape() {
