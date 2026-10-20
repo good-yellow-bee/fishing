@@ -32,6 +32,7 @@ import {
   luresPacked,
   keepPlayTrip,
   localDate,
+  weekOf,
   streakDays,
   dayRunForFirstFish,
   DAY_RUN_BONUS,
@@ -57,7 +58,7 @@ import {
   type SkillId,
   type StanceId,
 } from "@stillwater/shared";
-import { buyGroundbait, buyShiner, buyUpgrade, errorText, getMe, getSpeciesRecords, releaseCatch, type Me } from "../api";
+import { buyGroundbait, buyShiner, buyUpgrade, errorText, getMe, getSpeciesRecords, getWeeklyChallenges, releaseCatch, type Me, type WeeklyBoard } from "../api";
 import { DailyRequestsPanel } from "../components/DailyRequestsPanel";
 import { WeeklyChallengesPanel } from "../components/WeeklyChallengesPanel";
 import { FightBar } from "../components/FightBar";
@@ -217,7 +218,24 @@ export function DockPage() {
   const tiedLure = useRef(chosenLure);
   const caughtTotal = me?.speciesStats.reduce((sum, stat) => sum + stat.caught, 0) ?? 0;
   const mercy = isMercy(caughtTotal);
-  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind);
+  // The week's legend hunt, read with the weekly challenges; a solved one draws its legend to its bank.
+  const [hunt, setHunt] = useState<{ week: string; rumor: WeeklyBoard["rumor"] } | null>(null);
+  const latestCatch = me?.catches[0]?.id;
+  const angler = me?.profile.userId;
+  useEffect(() => {
+    if (!angler) return;
+    let live = true;
+    getWeeklyChallenges()
+      .then((board) => live && setHunt({ week: board.week, rumor: board.rumor }))
+      // The shack's own panel reports the board's errors; the hunt keeps what it last read until a catch reads it again.
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [angler, latestCatch]);
+  // A hunt only holds for its own week, even in a tab left open past Sunday midnight.
+  const legend = hunt && hunt.week === weekOf(localDate(new Date())) && hunt.rumor.clues.every(Boolean) ? { legendId: hunt.rumor.legendId, spot: hunt.rumor.spot } : null;
+  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind, legend);
   // The cast's left-out reasons, opened from its hint; each cast's list starts closed.
   const [reasonsOpenFor, setReasonsOpenFor] = useState<readonly string[] | null>(null);
   const reasonsOpen = reasonsOpenFor === game.moreReasons;

@@ -32,8 +32,7 @@ import {
   BOAT_CAST_RANGE,
   castRangeMultiplier,
   solidShareForLevel,
-  foldText,
-} from "@stillwater/shared";
+  foldText, LEGEND_HUNT_BITE } from "@stillwater/shared";
 import { locale, t } from "../i18n";
 
 /** A weight with one decimal in the player's number style: 3.0 / 3,0. */
@@ -1012,6 +1011,8 @@ export function pickBite(
   season?: LakeSeason,
   /** The moon's lit share; a bright night brings rare fish up a little. */
   moon?: number,
+  /** The legend a solved hunt has drawn to this bank, which bites LEGEND_HUNT_BITE times as often. */
+  legend?: string,
 ): FishSpecies {
   let home = FISH.filter((fish) => fish.spots.includes(spot));
   if (mercy) {
@@ -1071,8 +1072,9 @@ export function pickBite(
     (hotspot ? HOTSPOT_BITE[fish.rarity] : 1) *
     (legendaryBonus && fish.rarity === "legendary" ? 2 : 1) *
     (fish.rarity === "rare" || fish.rarity === "legendary" ? rareLift : 1) *
-    (moon !== undefined ? biteMoonMul(fish, hour, moon) : 1);
-  const drawWeights = sky || season || hotspot || legendaryBonus || rareLift > 1 || moon !== undefined ? reshuffle(pool, weights, profile, lift) : weights;
+    (moon !== undefined ? biteMoonMul(fish, hour, moon) : 1) *
+    (legend === fish.id ? LEGEND_HUNT_BITE : 1);
+  const drawWeights = sky || season || hotspot || legendaryBonus || rareLift > 1 || moon !== undefined || legend !== undefined ? reshuffle(pool, weights, profile, lift) : weights;
   let roll = random() * drawWeights.reduce((sum, weight) => sum + weight, 0);
   for (let i = 0; i < pool.length; i++) {
     roll -= drawWeights[i]!;

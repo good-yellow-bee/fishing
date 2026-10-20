@@ -137,6 +137,13 @@ export const PL_GAME: PlBook = {
   "{bank}: feeding frenzy now, but fished hard": "{bank}: teraz żerowanie, ale mocno obłowione",
   "Bigger fish no longer just slide in: once one is played out it lies at the net, and you let go of the reel, then strike as its head comes up to net it; strike too soon and it bolts off again. And now and then the bubbles boil in a feeding frenzy for a minute and a half: the bank's sign gets a star, and casts into it bite twice as fast with the hunters crowding in.":
     "Większe ryby nie wjeżdżają już same: zmęczona leży przy podbieraku, a ty puszczasz kołowrotek i zacinasz, gdy podniesie łeb. Zatniesz za wcześnie, a znów odpłynie. A co jakiś czas bąble na półtorej minuty zamieniają się w żerowanie: plakietka łowiska dostaje gwiazdkę, a rzuty w nie biorą dwa razy szybciej, bo zlatują się drapieżniki.",
+  "A {fish} at the {bank}": "Ryba: {fish}, łowisko: {bank}",
+  "A fish at the {bank} at {hour}": "Dowolna ryba, łowisko: {bank}, pora: {hour}",
+  "Rumor: a {legend} haunts the {bank}. Find three clues this week to draw it out.": "Wieść niesie: {legend} krąży tu — łowisko: {bank}. Znajdź w tym tygodniu trzy tropy, by go wywabić.",
+  Found: "Jest",
+  "Not yet": "Jeszcze nie",
+  "All three found: the {legend} bites far more often at the {bank} for the rest of the week.": "Wszystkie trzy znalezione: {legend} bierze dużo częściej na łowisku {bank} do końca tygodnia.",
+  "The {fish} your hunt tracked down haunts this water.": "{fish}, którego wytropiono, krąży po tej wodzie.",
   "Tight to the lily pads, where the bass and pike wait in ambush.": "Tuż przy liściach grzybieni, gdzie w zasadzce czekają bassy i szczupaki.",
   "Tight to the far rock, where the walleye hold in its shadow.": "Tuż przy dalekiej skale, gdzie w jej cieniu trzymają się sandacze.",
   "Along the rock edge, where the point drops off and the bass hold.": "Wzdłuż skalnej krawędzi, gdzie cypel opada w głąb i trzymają się bassy.",

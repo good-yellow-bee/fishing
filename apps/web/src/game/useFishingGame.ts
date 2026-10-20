@@ -27,6 +27,8 @@ import {
   type SpotId,
   type StanceId,
   type Wind,
+  fishById,
+  legendaryCanBite,
 } from "@stillwater/shared";
 import { locale, t } from "../i18n";
 import { fightLines, liftsStickerInOne, netsFish, TOOTHY, fightWater, fightWind, isCleanFight, isCloseCall, LEAPERS, makeFight, seasonTireMul, thrivesInCold, floodedInlet, warmTireMul, rainCooled, deepCooled, runTireMul, nestTireMul, nightTireMul, spentTireMul, twilightTireMul, springRunTireMul, currentTireMul, fallFeedTireMul, rainHunterTireMul, summerStrengthTireMul, SOFT_MOUTHS, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type FightWater, type FightWind, type Steer, type SurgeState } from "./fight";
@@ -313,7 +315,11 @@ export function useFishingGame(
   wind?: Wind,
   /** The day's wind as the scene's drift, which combs foam lanes across the open water on a breezy or strong day. */
   windDrift?: { x: number; z: number },
+  /** The legend a solved hunt has drawn to its bank this week, or null. */
+  legend: { legendId: string; spot: SpotId } | null = null,
 ) {
+  const legendRef = useRef(legend);
+  legendRef.current = legend;
   const risingRef = useRef(rising);
   risingRef.current = rising;
   const windRef = useRef(wind);
@@ -804,6 +810,9 @@ export function useFishingGame(
     const schoolFish = school.schoolId ? FISH.find((fish) => fish.id === school.schoolId) : undefined;
     setSchooled(!!schoolFish);
     if (schoolFish) waitHintRef.current = `${t("Into the school.")} ${waitHintRef.current}`;
+    // Only told when the legend can take this cast: the angler can land it and the cast went out full.
+    const huntedFish = legendRef.current?.spot === spotRef.current ? fishById(legendRef.current.legendId) : undefined;
+    if (huntedFish && !short && legendaryCanBite(current, huntedFish, spotRef.current)) waitHintRef.current = `${t("The {fish} your hunt tracked down haunts this water.", { fish: t(huntedFish.name) })} ${waitHintRef.current}`;
     if (castFrenzyRef.current) waitHintRef.current = `${t("Into the frenzy! The baitfish boil and the hunters are slashing through them.")} ${waitHintRef.current}`;
     if (bait.baited) waitHintRef.current = `${t("Over the groundbait.")} ${waitHintRef.current}`;
     if (spooked) waitHintRef.current = `${t("The lost fish spooked this water, so the next bite is slower.")} ${waitHintRef.current}`;
@@ -975,7 +984,8 @@ export function useFishingGame(
     setMoreReasons({ hint: waitHintRef.current, more: reasons.slice(WAIT_REASONS) });
     // Roll the fish as the lure sits, so the one rising under the bobber is the one that bites.
     const mercyNow = mercyRef.current;
-    const drawn = pickBite(spotRef.current, current, short, Math.random, hour, lureRef?.current, sky, castHotspotRef.current, mercyNow, season, moon);
+    const hunted = legendRef.current?.spot === spotRef.current ? legendRef.current.legendId : undefined;
+    const drawn = pickBite(spotRef.current, current, short, Math.random, hour, lureRef?.current, sky, castHotspotRef.current, mercyNow, season, moon, hunted);
     // The fish that broke off here may come back, at the same weight; while it's about this bank its shadow circles the float.
     setLurking(gotAwayRef.current?.spot === spotRef.current);
     const lost = castForGotAway(gotAwayRef.current, spotRef.current, Math.random(), favorsLargeFish(lureRef?.current ?? ""), current.patience);

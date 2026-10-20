@@ -18,6 +18,7 @@ const board: WeeklyBoard = {
     { id: "week-trophy", kind: "trophy", goal: 1, reward: 120, progress: 1, claimed: false },
     { id: "week-clean", kind: "clean", goal: 10, reward: 60, progress: 10, claimed: true },
   ],
+  rumor: { legendId: "ghost-pike", spot: "inlet", hour: "dusk", preyId: "golden-shiner", clues: [true, false, true] },
 };
 
 let root: Root | null = null;
@@ -45,13 +46,16 @@ describe("WeeklyChallengesPanel", () => {
     document.body.append(container);
     root = createRoot(container);
     await act(async () => root!.render(<WeeklyChallengesPanel catchKey="c1" onClaimed={onClaimed} />));
-    const rows = [...container.querySelectorAll("li")];
+    const rows = [...container.querySelectorAll(".weekly-challenges > ul > li")];
     expect(rows.map((row) => row.querySelector(".daily-request-label")?.textContent)).toEqual(["5 × northern pike, the week's fish", "A trophy of any kind", "10 fish in clean fights"]);
     expect(rows[0]!.querySelector("button")!.disabled).toBe(true);
     expect(rows[2]!.textContent).toContain("Claimed");
     await act(async () => rows[1]!.querySelector("button")!.click());
     expect(claimWeeklyChallenge).toHaveBeenCalledWith("week-trophy", expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/));
     expect(onClaimed).toHaveBeenCalled();
-    expect(container.querySelectorAll("li")[1]!.textContent).toContain("Claimed");
+    expect(container.querySelectorAll(".weekly-challenges > ul > li")[1]!.textContent).toContain("Claimed");
+    const clues = [...container.querySelectorAll(".legend-rumor li")].map((row) => row.textContent);
+    expect(clues).toEqual(["A golden shiner at the InletFound", "A fish at the Inlet at duskNot yet", "A trophy of any kindFound"]);
+    expect(container.querySelector(".legend-rumor")!.textContent).not.toContain("All three found");
   });
 });

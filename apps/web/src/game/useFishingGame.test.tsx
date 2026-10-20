@@ -2,7 +2,7 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind } from "@stillwater/shared";
+import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind, type SpotId } from "@stillwater/shared";
 import { floodedInlet, makeFight, springRunTireMul, SPRING_RUN_TIRE, currentTireMul, CURRENT_FIGHTER_TIRE, type FightOutcome, type FightPerformance, type FightSim } from "./fight";
 import { FRENZY_SLOT_MS, HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt, slotFrenzy } from "./hotspot";
 import { bedRaider, COLD_WORK_GAP_MS, LONG_CAST_SOLID, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, castIntoSpooked, isSkipCast, castOnFreshWater, TWIST_CASTS, twistAfterCast, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, PRESSURE_CASTS, GROUNDBAIT_CASTS, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WARMING_WAIT, COOLING_WAIT, waterSwingWaitMul, anchorSplashWaitMul, ANCHOR_SPLASH_WAIT, LAMP_WINDOW } from "./logic";
@@ -161,8 +161,11 @@ function pointer(type: string, pointerId = 1) {
   return event;
 }
 
+/** The solved legend hunt the harness hands the hook, if a test sets one. */
+const harnessLegend: { current: { legendId: string; spot: SpotId } | null } = { current: null };
+
 function Harness({ current = profile, hour = "day", rising = false, lure, wind, sky, season }: { current?: Profile; hour?: LakeHour; rising?: boolean; lure?: string; wind?: Wind; sky?: Sky; season?: LakeSeason }) {
-  const game = useFishingGame(current, hour, lure === undefined ? undefined : { current: lure }, sky, false, season, undefined, rising, wind);
+  const game = useFishingGame(current, hour, lure === undefined ? undefined : { current: lure }, sky, false, season, undefined, rising, wind, undefined, harnessLegend.current);
   return (
     <>
       <div ref={game.surfaceRef} data-stance="dock" data-aim="0.5,3" data-angler="0.15,7.42">
@@ -2608,6 +2611,29 @@ describe("level unlock integration", () => {
     cast(surface);
     expect(phase()).toBe("waiting:none");
     expect(hint()).toMatch(/^The anchor's splash put the fish down, so the bites come slow: give it a few seconds before you cast\. /);
+  });
+
+  it("draws a hunted legend at its bank, and says so only when the angler could land it", () => {
+    harnessLegend.current = { legendId: "sturgeon", spot: "dropoff" };
+    const castAtDropoff = (current: Profile) => {
+      const surface = mount(DOCK_BUBBLES.at, current);
+      surface.dataset.stance = "dropoff";
+      surface.dataset.angler = "15.4,7.8";
+      surface.dataset.aim = "15.4,-5.4";
+      cast(surface);
+      const told = hint();
+      act(() => root!.unmount());
+      root = null;
+      container!.remove();
+      return told;
+    };
+    try {
+      expect(castAtDropoff({ ...profile, lifetimePoints: 700, strength: 8, accuracy: 8 })).toContain("The Lake sturgeon your hunt tracked down haunts this water.");
+      expect(vi.mocked(pickBite).mock.lastCall?.[11]).toBe("sturgeon");
+      expect(castAtDropoff({ ...profile, lifetimePoints: 700, strength: 1, accuracy: 1 })).not.toContain("your hunt tracked down");
+    } finally {
+      harnessLegend.current = null;
+    }
   });
 
   it("says the midday glare drives the fish from the open water when the cast's wait comes slower for it", () => {
