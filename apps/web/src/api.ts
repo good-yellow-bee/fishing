@@ -146,6 +146,15 @@ export function getDayBag() {
   return request<DayBagBoard>("/api/board/bag");
 }
 
+export type StewardsBoard = {
+  entries: { rank: number; userId: string; displayName: string; count: number }[];
+  you: { rank: number; count: number } | null;
+};
+
+export function getStewards() {
+  return request<StewardsBoard>("/api/board/stewards");
+}
+
 export function getDerby() {
   return request<DerbyBoard>("/api/board/derby");
 }
