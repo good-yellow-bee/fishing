@@ -6,6 +6,7 @@ export const NEWS_KEY = "stillwater.news.v1";
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
   "A pike, tiger muskie or ghost pike chasing a spinner, spoon or streamer may now follow it right to the bank without taking. Wait for the call that it is turning, then tap to figure-eight the lure, and it hits; tap too soon, or not at all, and it sinks away.",
+  "Two outings on one water and day now show when each one's fish came, so a dawn and a dusk tell apart on Trips. The outing search finds those “with a note” and those left “untitled”, and an outing's page names kinds and lures as the rest of the book does.",
   "Each day another angler fishes one of the banks: your first casts there meet wary fish, unless you bring groundbait, and the bank chip says who is about. And the landed card's bonus stamps now show what the lodge actually paid once your catch is saved.",
   "The lake asks a little less of your phone again: shadows are redrawn at most thirty times a second, the shore's foam does less work each frame, and the anglers you only see in rain or fog and the deer, moose and hare of dawn and dusk now load only when they come out.",
   "A water's page names kinds and lures as the rest of the book does, and each of its counts opens just the fish it counted. Its copied summary adds the next outing there and the fish lost or missed.",
