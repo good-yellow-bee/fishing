@@ -1856,7 +1856,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT405~~ | ~~News card 2026-10-20-game50 covers GT403 and GT404: the landed card tells what the server paid, and bank stock across the week~~ (#1591) | ui | S |
 | ~~GT406~~ | ~~The line on the reel: the walk signs' Line button swaps light, standard or heavy line between casts (kept from visit to visit); light line bites 0.85x sooner but snaps at 0.9 of the strain (frayed too, with a mark on the tension bar), heavy line holds 1.1x the strain but bites 1.15x slower; the wait hint and the fight card say so~~ (#1593) | gameplay | M |
 | ~~GT407~~ | ~~Stewards of the week: the Board ranks the lodge's anglers by the fish they let go this week (from Monday 00:00 UTC), and the angler's own place below the top ten~~ (#1594) | gameplay | M |
-| GT408 | News card game51 covers GT406 and GT407 | ui | S |
+| ~~GT408~~ | ~~News card 2026-10-20-game51 covers GT406 and GT407: the line on the reel and the stewards of the week~~ (#PR) | ui | S |
 
 ## Risks / open questions for the owner
 
