@@ -7,7 +7,7 @@ import { bestLureAt } from "../waterLure";
 import { getUnits, t, tn, useT } from "../../i18n";
 import { fishCountLabel, formatDay, outingName, tripWhen } from "../format";
 import { useTackleItems } from "../gear/TackleState";
-import { outNowAt, plainName } from "../tripDates";
+import { outingDay, outNowAt, plainName } from "../tripDates";
 import { inSentence } from "../MonthBars";
 import { useLogbook } from "../LogbookState";
 import {
@@ -44,7 +44,7 @@ import { daysBetween, kmBetween, lastOutByWater, spotsByLastFish } from "../spot
 import { NearestWater, canFindNearest, distanceText } from "../NearestWater";
 import { datedName, downloadFile } from "../download";
 import { gpxFor } from "../gpx";
-import { countedBook, countedFish } from "../milestones";
+import { countedBook } from "../milestones";
 import { focusPageHeading } from "../pageFocus";
 import { pieceName } from "../gear/pieceKey";
 import "./spot-map.css";
@@ -358,7 +358,7 @@ export function SpotMapPage() {
   // The lists under each sheet go by the water fished most recently, as the Waters page does.
   // Not the game's lake: it has no place on a real map.
   // Ordered by the angler's own fish, as the Waters page is, so a sample week dated later doesn't put its waters on top.
-  const ownRows = spotsByLastFish({ ...book, catches: countedFish(book.catches) });
+  const ownRows = spotsByLastFish({ ...book, catches: countedBook(book).catches });
   const ownOrder = new Map(ownRows.map((row, index) => [row.spot.id, index]));
   const rows = spotsByLastFish(book)
     .filter((row) => row.spot.id !== PLAY_LAKE_ID)
@@ -374,12 +374,14 @@ export function SpotMapPage() {
   const counted = countedBook(book);
   const ownRow = new Map(ownRows.map((row) => [row.spot.id, row]));
   const ownHere = (id: string) => (ownRow.get(id)?.fishCount ?? 0) > 0 || counted.trips.some((trip) => trip.spotId === id);
-  const ownLastOut = lastOutByWater(counted, today);
-  const lastOut = new Map([...lastOutByWater(book, today)].map(([id, day]) => [id, ownLastOut.get(id) ?? day]));
+  // Last evening's outing, still going in the small hours, is no finished blank yet, as Waters takes it.
+  const fishedBy = outingDay(today);
+  const ownLastOut = lastOutByWater(counted, fishedBy);
+  const lastOut = new Map([...lastOutByWater(book, fishedBy)].map(([id, day]) => [id, ownLastOut.get(id) ?? day]));
   const rowOf = (spotId: string) => (ownHere(spotId) ? ownRow.get(spotId) : rows.find((each) => each.spot.id === spotId));
   const fishOf = (spotId: string) => rowOf(spotId)?.fishCount ?? 0;
-  // From the fish the Waters page counts: the sample week's go with the angler's first own fish.
-  const bestLure = (spotId: string) => bestLureAt(countedFish(book.catches), spotId);
+  // From the fish the Waters card counts: the angler's own where it counts theirs, an untouched sample water what it has.
+  const bestLure = (spotId: string) => bestLureAt(ownHere(spotId) ? counted.catches : book.catches, spotId);
   const fishLine = (spotId: string) => {
     const row = rowOf(spotId);
     const fish = fishCountLabel(row?.fishCount ?? 0);

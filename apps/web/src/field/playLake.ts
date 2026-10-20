@@ -1,4 +1,4 @@
-import { upcomingTrips, type Logbook, type Trip } from "@stillwater/shared";
+import { foldText, upcomingTrips, type Logbook, type Trip } from "@stillwater/shared";
 import { exactTerm } from "./findLinks";
 
 /** The game's own lake: what is landed or fished there in play is kept apart from the angler's real days. */
@@ -15,7 +15,8 @@ export function upcomingOwnTrips(book: Logbook, today: string): Trip[] {
 export function withoutPlayLake(book: Logbook, term: string, rows: readonly { spotId: string }[]): string {
   const lake = book.spots.find((spot) => spot.id === PLAY_LAKE_ID);
   // Left out by name: when a real water shares it, leaving the name out would drop that water's fish as well.
-  const named = (name: string) => name.trim().toLowerCase();
-  if (lake && book.spots.some((spot) => spot.id !== PLAY_LAKE_ID && named(spot.name) === named(lake.name))) return term;
+  // As a search reads names: "Stillwáter " is the lake's name too. Folded here, as spotOrder's twinName would import this file.
+  const folded = (name: string) => foldText(name.trim().replace(/\s+/g, " ")).toLowerCase();
+  if (lake && book.spots.some((spot) => spot.id !== PLAY_LAKE_ID && folded(spot.name) === folded(lake.name))) return term;
   return lake && rows.some((row) => !offPlayLake(row)) ? `${term} -${exactTerm("water", lake.name)}` : term;
 }

@@ -4,6 +4,7 @@ import { isSampleSpot, ownWatersFirst } from "./bookCopy";
 import { countedFish } from "./milestones";
 import { PLAY_LAKE_ID } from "./playLake";
 import { spotsByLastFish } from "./spotOrder";
+import { plainName } from "./tripDates";
 
 /** Past this many of the angler's own waters, a picker opens with the ones fished lately. */
 const LATELY_FROM = 6;
@@ -26,12 +27,12 @@ export function WaterOptions({ book, spots }: { book: Logbook; spots: readonly S
       : [];
   const option = (spot: Spot) => (
     <option key={spot.id} value={spot.id}>
-      {spot.name}
+      {plainName(spot.name)}
     </option>
   );
   if (lately.length === 0) return <>{ordered.map(option)}</>;
   const picked = new Set(lately.map((spot) => spot.id));
-  const byName = (a: Spot, b: Spot) => a.name.localeCompare(b.name, locale());
+  const byName = (a: Spot, b: Spot) => plainName(a.name).localeCompare(plainName(b.name), locale());
   const rest = [...own.filter((spot) => !picked.has(spot.id)).sort(byName), ...ordered.filter((spot) => !own.includes(spot))];
   return (
     <>

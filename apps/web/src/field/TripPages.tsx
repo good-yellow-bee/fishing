@@ -81,6 +81,8 @@ import { daysBetween, likelyWater, spotsByLastFish } from "./spotOrder";
 import { notesHere } from "./outingNotes";
 import { useStepKeys } from "./stepKeys";
 import { newestOutingFirst } from "./catchNeighbors";
+import { countedSearch } from "./countedSearch";
+import { bookKindName } from "./speciesLink";
 
 /** The moon an outing fishes under: that day's evening, as the lake's forecast reads it. */
 function tripNight(date: string) {
@@ -594,7 +596,7 @@ function TripView() {
       {lastHere?.note.trim() && trip.date >= today ? <p className="meta last-note">{t("Last time you wrote: “{note}”", { note: lastHere.note.trim() })}</p> : null}
       {/* A game day's kinds open its own fish there, not the kind's page of the angler's own. */}
       {/* Each kind opens this outing's fish of it, as the lure chips do; its own page is one tap away on each fish. */}
-      <SpeciesChips catches={catches} outing={trip} water={play ? undefined : spot?.name} />
+      <SpeciesChips catches={catches} outing={trip} water={play || !spot ? undefined : plainName(spot.name)} />
       {newKinds.length > 0 ? (
         <p className="meta new-kinds">
           {t("First time at this water:")}{" "}
@@ -606,7 +608,7 @@ function TripView() {
           ))}
         </p>
       ) : null}
-      <LureChips catches={catches} outing={trip} water={spot?.name} />
+      <LureChips catches={catches} outing={trip} water={spot ? plainName(spot.name) : undefined} />
       <FishCsv catches={catches} name={`${trip.date} ${outingName(trip, book.spots)}`} />
       {loose.length > 0 ? (
         <p className="meta loose-fish" role="status">
@@ -781,7 +783,7 @@ function TripView() {
       {/* A hard day is worth telling too: a past blank outing with a note, or fish lost or missed. Today's plan with only a note isn't a day yet. */}
       {catches.length > 0 || (!samplePlan && (trip.date < fishedBy || trip.lost || trip.missed) && (trip.note.trim() || trip.lost || trip.missed)) ? <CopySummary text={() => tripSummary(trip, spot ? plainName(spot.name) : null, catches, (id) => { const name = spotById(book, id)?.name; return name === undefined ? null : plainName(name); }, countedFish(book.catches))} file="stillwater-outing.txt" /> : null}
       {/* Planning ahead: what has worked on this water before. */}
-      {!fished && spot && !play ? <WaterTipsBox catches={countedFish(catchesForSpot(book, spot.id))} on={trip.date} within={exactTerm("water", spot.name)} /> : null}
+      {!fished && spot && !play ? <WaterTipsBox catches={countedFish(catchesForSpot(book, spot.id))} on={trip.date} within={countedSearch(book, exactTerm("water", plainName(spot.name)), catchesForSpot(book, spot.id))} /> : null}
       <TripWeather catches={catches} />
       {/* Once the day comes, the fish lead; before that, the bag does. */}
       {fishFirst ? fish : tackle}
@@ -1077,7 +1079,7 @@ function TripForm() {
           </div>
           {pastWeek.length > 0 ? (
             <p className="wide form-note">
-              {sameTimeText(pastWeek)}
+              {sameTimeText(pastWeek, bookKindName(book.catches))}
             </p>
           ) : null}
           {sameDay ? (

@@ -10,6 +10,7 @@ import { localId } from "../game/localId";
 import { PLAY_LAKE_ID } from "./playLake";
 import { isSampleSpot } from "./bookCopy";
 import { foldName } from "./spotOrder";
+import { plainName } from "./tripDates";
 
 /** In a water's link, the water to merge it into: the merge box opens with it picked. */
 export const MERGE_PARAM = "merge";
@@ -23,7 +24,7 @@ export function MergeWater({ spotId }: { spotId: string }) {
   const navigate = useNavigate();
   const location = useLocation();
   // The sample week's waters are made up: merged either way, their fish would count as the angler's or theirs would sit on a made-up place.
-  const others = book.spots.filter((spot) => spot.id !== spotId && spot.id !== PLAY_LAKE_ID && !isSampleSpot(spot.id)).sort((a, b) => a.name.trim().localeCompare(b.name.trim(), locale()));
+  const others = book.spots.filter((spot) => spot.id !== spotId && spot.id !== PLAY_LAKE_ID && !isSampleSpot(spot.id)).sort((a, b) => plainName(a.name).localeCompare(plainName(b.name), locale()));
   const [params] = useSearchParams();
   const asked = params.get(MERGE_PARAM);
   const [into, setInto] = useState(() => (asked && others.some((spot) => spot.id === asked) ? asked : ""));
@@ -80,7 +81,7 @@ export function MergeWater({ spotId }: { spotId: string }) {
             <option value="">{t("Choose a water")}</option>
             {others.map((spot) => (
               <option key={spot.id} value={spot.id}>
-                {twinNames.has(foldName(spot.name)) ? `${spot.name} · ${tn(fishAt(spot.id), "{n} fish", "{n} fish")}` : spot.name}
+                {twinNames.has(foldName(spot.name)) ? `${plainName(spot.name)} · ${tn(fishAt(spot.id), "{n} fish", "{n} fish")}` : plainName(spot.name)}
               </option>
             ))}
           </select>
@@ -95,7 +96,7 @@ export function MergeWater({ spotId }: { spotId: string }) {
                   : t("Moves {what}.", { what: moves.outings > 0 ? tn(moves.outings, "{n} outing", "{n} outings") : tn(moves.fish, "{n} fish", "{n} fish") })) +
                 (moves.joined > 0 ? ` ${tn(moves.joined, "{n} outing joins the one on its day.", "{n} outings join the ones on their days.")}` : "") +
                 // What the kept water holds after, so a merge into the wrong one shows itself in its totals too.
-                (kept ? ` ${t("{name} then holds {fish} and {outings}.", { name: kept.name, fish: tn(kept.fish + moves.fish, "{n} fish", "{n} fish"), outings: tn(kept.outings + moves.outings - moves.joined, "{n} outing", "{n} outings") })}` : "")
+                (kept ? ` ${t("{name} then holds {fish} and {outings}.", { name: plainName(kept.name), fish: tn(kept.fish + moves.fish, "{n} fish", "{n} fish"), outings: tn(kept.outings + moves.outings - moves.joined, "{n} outing", "{n} outings") })}` : "")
             : null}
         </p>
         <p className="field-hint" id="merge-water-hint">

@@ -86,13 +86,15 @@ export function nearestWater(book: Logbook, here: { lat: number; lng: number }):
 /** The last day each water was fished, by an outing before today or a fish logged there, whichever is later; not the game's lake. */
 export function lastOutByWater(book: Logbook, today: string): Map<string, string> {
   const last = new Map<string, string>();
-  const note = (spotId: string, day: string) => {
-    if (day <= today && day > (last.get(spotId) ?? "")) last.set(spotId, day);
+  const note = (spotId: string, day: string, until: string) => {
+    if (day <= until && day > (last.get(spotId) ?? "")) last.set(spotId, day);
   };
   // Today's outing counts once it has a fish, which the fish below already says.
-  for (const trip of book.trips) if (trip.date < today && trip.spotId !== PLAY_LAKE_ID) note(trip.spotId, trip.date);
-  // A night's small-hours fish on its outing's day, as the rest of the book dates it.
-  for (const entry of book.catches) if (entry.spotId !== PLAY_LAKE_ID) note(entry.spotId, bookFishDay(book, entry));
+  for (const trip of book.trips) if (trip.date < today && trip.spotId !== PLAY_LAKE_ID) note(trip.spotId, trip.date, today);
+  // A night's small-hours fish on its outing's day, as the rest of the book dates it; one logged loose after midnight
+  // on the calendar's day, though `today` is still last evening's.
+  const calendarDay = localDate(new Date());
+  for (const entry of book.catches) if (entry.spotId !== PLAY_LAKE_ID) note(entry.spotId, bookFishDay(book, entry), today > calendarDay ? today : calendarDay);
   return last;
 }
 

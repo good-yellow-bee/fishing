@@ -14,17 +14,17 @@ import { bookFishDay } from "./tripMonths";
 import { tempText } from "../i18n/content";
 import { tempBandLabel, tempBandSearch } from "./WeatherBars";
 import { nearSunCount } from "./sunLight";
-import { speciesCounts } from "./speciesLink";
+import { bookKindName, kindNames, speciesCounts } from "./speciesLink";
 
 /**
  * "Around this date in earlier years here: 9 fish, Northern pike, Perch; most on Spinnerbait.": what a water gave within
  * a fortnight of a planned day in years before, for a box or form about one outing.
  */
-export function sameTimeText(fish: readonly CatchEntry[]): string {
+export function sameTimeText(fish: readonly CatchEntry[], kindName = kindNames(fish)): string {
   const text = t("Around this date in earlier years here: {fish}, {species}.", {
     fish: fishCountLabel(fish.length),
     species: speciesCounts(fish)
-      .map((row) => t(row.species))
+      .map((row) => kindName(row.species))
       .join(", "),
   });
   // A tie names no lure: "most on" would be a coin toss.
@@ -164,7 +164,7 @@ export function WaterTipsBox({
         {pastWeek.length > 0 ? (
           <>
             <br />
-            {sameTimeText(pastWeek)}
+            {sameTimeText(pastWeek, bookKindName(book.catches))}
           </>
         ) : null}
       </p>

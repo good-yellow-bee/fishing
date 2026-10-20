@@ -26,7 +26,7 @@ export function mergeWaters(book: Logbook, fromId: string, intoId: string): Logb
   for (const [id, host] of foldInto) {
     const trip = book.trips.find((each) => each.id === id)!;
     const was = folded.get(host.id) ?? host;
-    const named = (title: string) => [from.name, into.name].some((name) => name.trim().toLowerCase() === title.trim().toLowerCase()) || !title.trim();
+    const named = (title: string) => [from.name, into.name].some((name) => sameName(name, title)) || !title.trim();
     const lost = Math.min(TRIP_COUNT_CAP, (was.lost ?? 0) + (trip.lost ?? 0));
     const missed = Math.min(TRIP_COUNT_CAP, (was.missed ?? 0) + (trip.missed ?? 0));
     folded.set(host.id, {

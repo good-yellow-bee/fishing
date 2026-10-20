@@ -6,23 +6,26 @@ import { exactTerm, findWithLink } from "./findLinks";
 import { pieceTally } from "./pieceTally";
 import { pieceName } from "./gear/pieceKey";
 
-/** The kinds among some fish, each a link to its own page, or with `within` (a water's name) to just those fish there. */
+/** The kinds among some fish, each a link to its own page, or with `within` (a search, a water's) to just those fish there. */
 /** With `outing`, each kind opens that outing's fish of it, as counted; with `water` too, only those on its water. */
 export function SpeciesChips({
   catches,
   within,
   outing,
   water,
+  kindName: named,
 }: {
   catches: readonly CatchEntry[];
   within?: string;
   outing?: { date: string; title: string };
   water?: string;
+  /** How to name a kind; by default as these fish write it most. */
+  kindName?: (species: string) => string;
 }) {
   useT();
   if (catches.length === 0) return null;
   // As the book writes the kind most, as its page and the kinds list name it ("Zander" for a book of "zander").
-  const kindName = kindNames(catches);
+  const kindName = named ?? kindNames(catches);
   return (
     <p className="species-chips">
       {/* A chip that opens the kind's page counts as that page does. */}
@@ -33,7 +36,7 @@ export function SpeciesChips({
             outing
               ? findWithLink([exactTerm("outing", `${outing.date} ${outing.title}`), ...(water ? [exactTerm("water", water)] : [])].join(" + "), exactTerm("species", t(row.species)))
               : within
-                ? findWithLink(exactTerm("water", within), exactTerm("species", t(row.species)))
+                ? findWithLink(within, exactTerm("species", t(row.species)))
                 : speciesLink(row.species)
           }
         >
