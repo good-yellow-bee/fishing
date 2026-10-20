@@ -758,7 +758,7 @@ export function useFishingGame(
     setGroundbait(next);
     if (anglerIdRef.current) saveSwim(anglerIdRef.current, next ? { ...next, at: swimRef.current.at, ...(swimRef.current.primed ? { primed: true } : {}) } : null);
   };
-  // The angler's swim from an earlier visit, read when they sign in: left overnight, the feeders have gathered over it, once.
+  // The angler's swim from an earlier visit, read when they sign in: left long enough for the season, the feeders have gathered over it, once.
   useEffect(() => {
     const swim = profile?.userId ? loadSwim(profile.userId) : null;
     const now = swimNow(swim, Date.now(), season);
