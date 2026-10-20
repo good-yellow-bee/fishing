@@ -14,14 +14,14 @@ import { useSkinnedFigure } from "./skinFigure";
 const DARK = "#22201e";
 
 /** A bird's colours and size: the robin, or the blackbird out in the rain. */
-export type BirdLook = { back: string; breast: string; belly: string; bill: string; eye: string; scale: number };
+export type BirdLook = { back: string; breast: string; belly: string; bill: string; ring?: string; scale: number };
 /** Larger than life, so it reads from behind the angler. */
-export const ROBIN: BirdLook = { back: "#7a5f44", breast: "#e0662e", belly: "#efe6da", bill: DARK, eye: DARK, scale: 2.2 };
-/** All black but its orange-yellow bill and eye ring, and a little bigger. */
-export const BLACKBIRD: BirdLook = { back: "#1d1b1c", breast: "#232022", belly: "#2b2829", bill: "#e9a41f", eye: "#e9a41f", scale: 2.6 };
+export const ROBIN: BirdLook = { back: "#7a5f44", breast: "#e0662e", belly: "#efe6da", bill: DARK, scale: 2.2 };
+/** Black but for its orange-yellow bill and eye ring (a sooty black that still reads on a dark wet bank), and a little bigger. */
+export const BLACKBIRD: BirdLook = { back: "#2b282a", breast: "#312d30", belly: "#3a3537", bill: "#e9a41f", ring: "#e9a41f", scale: 2.6 };
 
 /** The round body and legs, the breast to the front (+z). */
-export function robinBodyShape(look = ROBIN) {
+export function birdBodyShape(look = ROBIN) {
   return mergePainted([
     { geometry: new THREE.SphereGeometry(1, 12, 10), position: [0, 0.05, 0], scale: [0.04, 0.042, 0.05], color: look.back },
     { geometry: new THREE.SphereGeometry(1, 10, 8), position: [0, 0.05, 0.016], scale: [0.034, 0.036, 0.036], color: look.breast },
@@ -31,17 +31,18 @@ export function robinBodyShape(look = ROBIN) {
 }
 
 /** The head with its face, eyes and fine bill, from the neck. */
-export function robinHeadShape(look = ROBIN) {
+export function birdHeadShape(look = ROBIN) {
   return mergePainted([
     { geometry: new THREE.SphereGeometry(0.026, 10, 8), position: [0, 0.012, 0], color: look.back },
     { geometry: new THREE.SphereGeometry(0.022, 8, 6), position: [0, 0.008, 0.008], color: look.breast },
-    ...[-1, 1].map((side) => ({ geometry: new THREE.SphereGeometry(0.005, 5, 4), position: [side * 0.017, 0.016, 0.014] as const, color: look.eye })),
+    ...[-1, 1].map((side) => ({ geometry: new THREE.SphereGeometry(0.005, 5, 4), position: [side * 0.017, 0.016, 0.014] as const, color: DARK })),
+    ...(look.ring ? [-1, 1].map((side) => ({ geometry: new THREE.SphereGeometry(0.0068, 6, 4), position: [side * 0.0158, 0.016, 0.0128] as const, color: look.ring! })) : []),
     { geometry: new THREE.ConeGeometry(0.005, 0.016, 5), position: [0, 0.01, 0.032], rotation: [Math.PI / 2, 0, 0], color: look.bill },
   ]);
 }
 
 /** The tail, from where it joins the body. */
-export function robinTailShape(look = ROBIN) {
+export function birdTailShape(look = ROBIN) {
   return mergePainted([{ geometry: new THREE.BoxGeometry(0.026, 0.006, 0.05), position: [0, 0, -0.025], color: look.back }]);
 }
 
@@ -51,7 +52,7 @@ function RobinBird({ name, poseAt, look = ROBIN }: { name: string; poseAt: (time
   const head = useRef<THREE.Group>(null);
   const tail = useRef<THREE.Group>(null);
   const wings = useRef<THREE.Group>(null);
-  const shapes = useMemo(() => ({ body: robinBodyShape(look), head: robinHeadShape(look), tail: robinTailShape(look), wing: new THREE.SphereGeometry(1, 8, 6) }), [look]);
+  const shapes = useMemo(() => ({ body: birdBodyShape(look), head: birdHeadShape(look), tail: birdTailShape(look), wing: new THREE.SphereGeometry(1, 8, 6) }), [look]);
   const materials = useMemo(
     () => ({ painted: new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), wing: new THREE.MeshToonMaterial({ color: look.back, gradientMap: toonRamp() }) }),
     [look],
@@ -122,39 +123,31 @@ export function DockRobin({ snow, startledAt }: { snow: boolean; startledAt: Rea
   return <RobinBird name="dock-robin" poseAt={poseAt} />;
 }
 
-/** The robin coming to the angler's feet while they stand ashore by day, off the dock and out of the boat (robinHop.ts). */
-export function GroundRobin({ phase }: { phase: ScenePhase }) {
+/** A bird coming to the angler's feet while they stand ashore, off the dock and out of the boat (robinHop.ts): `shareWithDock` for the robin, so the dock robin sits its visits out. */
+function GroundBird({ phase, name, look, shareWithDock }: { phase: ScenePhase; name: string; look: BirdLook; shareWithDock: boolean }) {
   const still = useReducedMotion();
   const state = useRef<HopState | null>(null);
   const lastPhase = useRef(phase);
   const poseAt = useCallback(
     (time: number) => {
-      const ashore = anglerAshore();
       const struck = phase === "fight" && lastPhase.current !== "fight";
       lastPhase.current = phase;
-      const world = { dockRobinHere: robinAt(time).here && !sharedVisits.has(robinVisitIndex(time)), struck, still };
-      state.current = hopStep(state.current ?? hopStart(time), time, anglerPose, ashore, world);
-      if (state.current.mode !== "away") sharedVisits.add(robinVisitIndex(time));
+      const dockRobinHere = shareWithDock && robinAt(time).here && !sharedVisits.has(robinVisitIndex(time));
+      state.current = hopStep(state.current ?? hopStart(time), time, anglerPose, anglerAshore(), { dockRobinHere, struck, still });
+      if (shareWithDock && state.current.mode !== "away") sharedVisits.add(robinVisitIndex(time));
       return hopAt(state.current, time, still);
     },
-    [still, phase],
+    [still, phase, shareWithDock],
   );
-  return <RobinBird name="ground-robin" poseAt={poseAt} />;
+  return <RobinBird name={name} poseAt={poseAt} look={look} />;
 }
 
-/** A blackbird out on the bank behind the angler on wet days, hopping about and tugging at worms; the robin's hops (robinHop.ts). */
+/** The robin coming to the angler's feet while they stand ashore by day. */
+export function GroundRobin({ phase }: { phase: ScenePhase }) {
+  return <GroundBird phase={phase} name="ground-robin" look={ROBIN} shareWithDock />;
+}
+
+/** A blackbird at the angler's feet on the bank on wet days, hopping about and pecking at the soaked ground. */
 export function GroundBlackbird({ phase }: { phase: ScenePhase }) {
-  const still = useReducedMotion();
-  const state = useRef<HopState | null>(null);
-  const lastPhase = useRef(phase);
-  const poseAt = useCallback(
-    (time: number) => {
-      const struck = phase === "fight" && lastPhase.current !== "fight";
-      lastPhase.current = phase;
-      state.current = hopStep(state.current ?? hopStart(time), time, anglerPose, anglerAshore(), { dockRobinHere: false, struck, still });
-      return hopAt(state.current, time, still);
-    },
-    [still, phase],
-  );
-  return <RobinBird name="ground-blackbird" poseAt={poseAt} look={BLACKBIRD} />;
+  return <GroundBird phase={phase} name="ground-blackbird" look={BLACKBIRD} shareWithDock={false} />;
 }

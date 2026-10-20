@@ -108,6 +108,7 @@ describe("dock robin", () => {
     expect(robinOut("day", "rain", "summer")).toBe(false);
     expect(blackbirdOut("day", "clear", "summer")).toBe(false);
     expect(blackbirdOut("dusk", "rain", "summer")).toBe(false);
+    expect(blackbirdOut("day", "rain", "summer", true)).toBe(false);
     // Winter's rain falls as snow, and the robin is out then.
     expect(blackbirdOut("day", "rain", "winter")).toBe(false);
     expect(robinOut("day", "rain", "winter")).toBe(true);
