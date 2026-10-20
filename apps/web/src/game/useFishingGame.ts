@@ -62,7 +62,7 @@ import { castSnags, onRockEdge, onShoreIce, ROCK_EDGE_WAIT, SNAG_AT_MS, SNAG_TAP
 import { FLUTTER_SEC, flutterGrabberFor, flutterTip, followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { AGAIN_CASTS, castForGotAway, gotAwayAfterDrop, PATIENT_DROP_RANK, gotAwayAfterLoss, type GotAway } from "./gotAway";
 import { LINE_SNAP, LINE_WAIT, type LineWeight } from "./lineWeight";
-import { countAtBank, loadBankMemory, saveBankMemory, waryFromYesterday, YESTERDAY_WAIT } from "./bankMemory";
+import { countAtBank, loadBankMemory, rollBankMemory, saveBankMemory, waryFromYesterday, YESTERDAY_WAIT, type BankMemory } from "./bankMemory";
 import { castForLodgeTag, castForReleased, loadReleased, saveReleased, type Recaught } from "./releasedFish";
 import { weightText } from "../i18n/content";
 import { FRENZY_SLOT_MS, frenzyOn, HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, slotFrenzy, type Hotspot } from "./hotspot";
@@ -366,6 +366,16 @@ export function useFishingGame(
   fishedDownRef.current = fishedDownBanks;
   const luckyLuresRef = useRef(luckyLures);
   luckyLuresRef.current = luckyLures;
+  /** The banks' memory this visit: read from the browser once, then kept here too, so a blocked store still counts casts. */
+  const bankMemoryRef = useRef<{ userId: string; memory: BankMemory } | null>(null);
+  const bankMemoryNow = (userId: string) => {
+    const kept = bankMemoryRef.current;
+    return kept && kept.userId === userId ? rollBankMemory(kept.memory, new Date()) : loadBankMemory(userId);
+  };
+  const keepBankMemory = (userId: string, memory: BankMemory) => {
+    bankMemoryRef.current = { userId, memory };
+    saveBankMemory(userId, memory);
+  };
   /** Read live in the frame loop, which outlives a render's profile. */
   const anglerIdRef = useRef(profile?.userId);
   anglerIdRef.current = profile?.userId;
@@ -1027,14 +1037,14 @@ export function useFishingGame(
     const pressureWait = pressure.pressured && !switched.relieved && !bait.baited && !mercyRef.current ? PRESSURE_WAIT : 1;
     if (pressureWait > 1) reasons.unshift(t("This water has been fished hard and the fish are wary of the line, so the bites come slow. Try another bank or another kind of lure."));
     else if (switched.relieved && !bait.baited && !mercyRef.current) reasons.unshift(t("The wary fish here haven't seen this kind of lure yet, so they come to it."));
-    // A bank fished hard yesterday keeps its fish wary for today's first casts there; as with today's pressure, fish on
-    // groundbait or a lure they haven't seen don't mind, and a beginner is spared.
-    const banks = loadBankMemory(current.userId);
-    const unrelieved = !switched.relieved && !bait.baited && !mercyRef.current;
+    // A bank fished hard yesterday keeps its fish wary for today's first casts there, and another angler fishes one bank
+    // each day, so its first casts meet fish already wary (told once, not stacked). Fish on groundbait don't mind, and a
+    // beginner is spared.
+    const banks = bankMemoryNow(current.userId);
+    const unrelieved = !bait.baited && !mercyRef.current;
     const yesterdayWait = waryFromYesterday(banks, spotRef.current) && unrelieved ? YESTERDAY_WAIT : 1;
-    // Another angler fishes one bank each day, so its first casts meet fish already wary; told once, not stacked on yesterday's.
     const crowdedWait = yesterdayWait === 1 && crowdedBankForDay(new Date()) === spotRef.current && (banks.today.casts[spotRef.current] ?? 0) < CROWDED_CASTS && unrelieved ? CROWDED_WAIT : 1;
-    saveBankMemory(current.userId, countAtBank(banks, spotRef.current, "casts"));
+    keepBankMemory(current.userId, countAtBank(banks, spotRef.current, "casts"));
     if (yesterdayWait > 1) reasons.unshift(t("This bank was fished hard yesterday, so its fish are still wary for your first casts."));
     if (crowdedWait > 1) reasons.unshift(t("Another angler has been fishing this bank today, so its fish are wary for your first casts."));
     // The visit's first cast at a bank meets fish that haven't seen a lure today; it is told last, so the bank's own reasons come first.
@@ -1798,7 +1808,7 @@ export function useFishingGame(
                 : t("{fish}: you let this one go here on {date}, and it's back on your line.", { fish: t(current.species.name), date: new Date(recaught.at).toLocaleDateString(locale(), { month: "long", day: "numeric" }) });
             const landedNote = [back, fed, schooled, followed, scuffed].filter(Boolean).join(" ");
             const angler = anglerIdRef.current;
-            if (angler) saveBankMemory(angler, countAtBank(loadBankMemory(angler), spotRef.current, "landed"));
+            if (angler) keepBankMemory(angler, countAtBank(bankMemoryNow(angler), spotRef.current, "landed"));
             setOutcome({
               kind: "landed",
               id: localId(),
