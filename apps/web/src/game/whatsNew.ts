@@ -1,14 +1,14 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-scene54";
+export const NEWS_ID = "2026-10-20-game45";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "A big fish worn down in a fight can now find a second wind: it gathers itself once and runs hard again, as the fight card calls. Each lure climbs tiers as you land fish on it, Proven, Trusted and Lucky, shown in the lure picker, and a Lucky lure's hook sets a little more solid. And when another angler lands a fish you let go, the lake tells you on your next visit.",
   "Fishing from the bank, you now have company in any weather: on wet evenings a toad hops past behind you, on rainy days a blackbird comes to your feet in place of the robin, and on winter nights a wood mouse pops out of the snow and scurries across, leaving tiny tracks.",
   "In a fight, F or the fight card's Drag button turns the reel's drag: a light drag lets a run take more line but pulls softly, a heavy one holds a run short but loads the line even let go. The lodge board now ranks each angler's day's bag, their five heaviest fish of the day, and the landed card shows yours. And a fish another angler let go can come up at the same bank on a later day: landing it pays you 30 points and them 20.",
   "The rowboats and the float no longer turn black: their colours load properly again. On a phone held upright, the view now opens wider, so you see the whole dock, the boat and both shores instead of a narrow slice of the lake. And see-through things like rain rings and dragonfly wings now draw in one pass, so the lake runs a little smoother.",
-  "Four fish learned a second trick: a bluegill's tight circles twist your line toward a tangle, a carp bolts the first time it sees the net, a catfish lifts its head at the net only a moment, and a burbot slithers off the hook if you leave the line slack between its runs.",
   "The lake opens sooner on a phone: it now fetches its code and your profile together and each model only once, so on a slow signal it is ready about three seconds earlier, and coming back to it no longer downloads every model again. In high contrast, a switched-on Headlamp now stands out in amber.",
   "On dry evenings a hedgehog now snuffles past behind you on the bank, curling into a ball at any fuss. In a feeding frenzy the bubbles boil with little silver baitfish leaping out, and at night your headlamp throws a beam onto the float. Out on the boat in a strong wind, the anchored hull now swings less toward a run, as the fight card says.",
   "Fishing from the bank by day, the robin now comes to you too, landing by your feet to hop about and peck before it flies off. And the lake now draws about a third fewer pieces each frame, so it runs smoother on a phone.",

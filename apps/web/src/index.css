@@ -1410,6 +1410,30 @@ html[data-reduce-motion="1"] .fight-bar .fight-note {
   .fight-bar .fight-drag-btn {
     min-height: 32px;
   }
+
+  /* With larger text on a touch screen the drag's explanation took the card two lines further down, under the Reel
+     button on a 360 x 640 phone and over the header held sideways: the knob says the drag, and a screen reader still
+     reads the line. */
+  html[data-text-size] .fight-bar .fight-drag-line {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
+/* And at any text size on a phone held sideways or narrower than 360 px, where the card had no line to spare either. */
+@media (pointer: coarse) and (max-height: 500px), (pointer: coarse) and (max-width: 359px) {
+  .fight-bar .fight-drag-line {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
 }
 
 .fight-bar .fight-clean {
