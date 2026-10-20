@@ -474,9 +474,10 @@ export function fightWind(wind: string | undefined): FightWind | undefined {
  * drag the line over it), `weedBall` through a duckweed mat (a ball of weed slows the reel till the first run), `edge`
  * along the point's rock edge (runs dive off the ledge as at the drop-off, clear of the shallow rocks), `bed` over the
  * sunfish beds (an egg raider bolts from the guarding sunfish, so its first run is the long one), `foam` in a wind's
- * foam lane (a slack line drifts out faster still).
+ * foam lane (a slack line drifts out faster still), `lantern` in the dock lantern's light at night (it sees the net and
+ * bolts from it once, as a carp does).
  */
-export type FightCover = { farRock?: boolean; weedBall?: boolean; edge?: boolean; bed?: boolean; foam?: boolean };
+export type FightCover = { farRock?: boolean; weedBall?: boolean; edge?: boolean; bed?: boolean; foam?: boolean; lantern?: boolean };
 /** In a foam lane on a breezy or strong day the wind's drift is at its strongest: a slack line drifts out this much faster still. */
 export const FOAM_DRIFT = 1.3;
 export type FightWater = "open" | "weeds" | "current" | "deep" | "rocks" | "boat" | "pilings" | "log";
@@ -599,7 +600,7 @@ export function makeFight(
   /** What the fish was hooked by, on top of the spot's water. */
   cover: FightCover = {},
 ): FightRuntime {
-  const { farRock = false, weedBall = false, edge = false, bed = false, foam = false } = cover;
+  const { farRock = false, weedBall = false, edge = false, bed = false, foam = false, lantern = false } = cover;
   const weedy = water === "weeds";
   // Hooked along the rock edge, past the shallow rocks, the fish dives off the ledge rather than dragging the line over them.
   const rockWater = (water === "rocks" && !edge) || farRock;
@@ -674,7 +675,7 @@ export function makeFight(
 
   let netFrom = 0;
   let wasReeling = false;
-  const netShy = NET_SHY.has(species.id);
+  const netShy = NET_SHY.has(species.id) || lantern;
   let shyDone = false;
   const headMs = THRASHERS.has(species.id) ? THRASH_HEAD_MS : NET_HEAD_MS;
   const slipper = SLIPPERS.has(species.id);
