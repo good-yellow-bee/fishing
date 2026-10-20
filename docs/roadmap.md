@@ -1778,6 +1778,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT369~~ | ~~Feeding frenzy: now and then (one 90 s slot in every 20 minutes of the wall clock) the bubbling hotspot boils with baitfish: its bank's sign is marked, casts into it bite twice as fast with the hunters crowding in, and the hint calls the frenzy's start and end~~ (#1502) | gameplay | M |
 | ~~GT370~~ | ~~Netting the fish: once a fish (not a panfish masher, not a new angler's easy fish) is spent at the boat or bank, it surfaces and the angler must strike again as its head comes up to net it; a mistimed net makes it bolt for one short run and the angler tries again~~ (#1503) | gameplay | M |
 | ~~GT371~~ | ~~News card 2026-10-20-game40 covers GT367 and GT368: species mastery and weekly challenges~~ (#1500) | ui | S |
+| ~~GT372~~ | ~~News card 2026-10-20-game41 covers GT369 and GT370: the feeding frenzy and netting the fish~~ (#1505) | ui | S |
 
 ## Risks / open questions for the owner
 
