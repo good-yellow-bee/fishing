@@ -1823,7 +1823,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT389~~ | ~~News card 2026-10-20-game46 covers GT386 to GT388: a let-go fish stays itself, the sunken log fights back, and the bass and trout slams~~ (#1549) | ui | S |
 | ~~GT390~~ | ~~The far rock fights back: a fish hooked from the boat tight to the far rock runs round it, and reeling while an unturned run drags the line over the rock frays it, as off the point (the boat's own fight stays); the fight card says "Far rock: turn every run"~~ (#1552) | gameplay | S |
 | ~~GT391~~ | ~~Duckweed on the line: a fish hooked through the duckweed comes in under a ball of weed, so the line reels in 0.75x as fast until its first run strips the weed off; the fight card says so~~ (#1556) | gameplay | S |
-| GT392 | Yesterday's pressure: a bank fished hard yesterday (eight or more fish landed there) starts today wary, its first casts biting slower, and the wait hint says why | gameplay | M |
+| ~~GT392~~ | ~~Yesterday's pressure: a bank where eight or more fish were landed yesterday (this browser remembers each bank's fish by local day) starts today wary: its first five casts there bite 1.15x slower, and the wait hint says why; groundbait or a lure the fish haven't seen lifts it as it does today's pressure, and a new angler is spared~~ (#1557) | gameplay | M |
 | GT393 | News card game47 covers GT390 to GT392 | ui | S |
 
 ## Risks / open questions for the owner
