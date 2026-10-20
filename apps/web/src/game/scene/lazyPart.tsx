@@ -1,4 +1,5 @@
 import { use, useEffect, useLayoutEffect, useState, type ComponentType } from "react";
+import type { LakeHour, LakeSeason, Sky } from "@stillwater/shared";
 
 /**
  * Scene parts seen only at night, in one season or in wet weather live in their own chunks (parts/*), so a
@@ -79,4 +80,17 @@ export function useSceneParts() {
       window.clearTimeout(timer);
     };
   }, []);
+}
+
+/** The chunks a scene at this hour, sky and season is likely to show at once: asked for as soon as the lake starts, alongside its models, rather than when its parts first render. */
+export function partsFor(hour: LakeHour, sky: Sky | undefined, season: LakeSeason): PartGroup[] {
+  const groups: PartGroup[] = [season];
+  if (hour === "dusk" || hour === "night") groups.push("night");
+  if (sky === "rain" || sky === "fog") groups.push("weather");
+  return groups;
+}
+
+/** Starts downloading the chunks `partsFor` names. */
+export function loadPartsFor(hour: LakeHour, sky: Sky | undefined, season: LakeSeason) {
+  for (const group of partsFor(hour, sky, season)) void loadParts(group);
 }

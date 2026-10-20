@@ -148,7 +148,7 @@ import { createFrameWatch, noteEffectsSteppedDown } from "../frameWatch";
 import { frameDue, frameThrottle, idleNow } from "./frameCap";
 import { GOLDEN_ACCENT, GOLDEN_COLOR } from "../../components/FishMark";
 import { LIFT_RISE, LIGHT_PLUNGE, liftTilt, ROLL_SPLASH, RUN_PLUNGE, runSlide, takeStyle } from "../nibblePlan";
-import { lazyPart, useSceneParts } from "./lazyPart";
+import { lazyPart, loadPartsFor, useSceneParts } from "./lazyPart";
 
 const Lightning = lazyPart("weather", "Lightning");
 const Aurora = lazyPart("night", "Aurora");
@@ -2315,6 +2315,8 @@ function LakeCamera() {
 
 /** Memoized: the cast charge reaches the scene through powerRef, so holding a cast re-renders nothing here. */
 export const FishingWorld = memo(function FishingWorld(props: Props) {
+  // The scene parts this hour, sky and season show, fetched now alongside the models so they never hold the lake back.
+  loadPartsFor(props.hour, props.sky, props.season ?? "summer");
   // Read once per visit: flipping shadows on a live renderer leaves materials compiled for the old setting.
   const [quality] = useState(() => ({ shadows: settings.shadows, dpr: settings.sharpness === "sharp" ? ([1, 1.75] as [number, number]) : 1 }));
   return (
