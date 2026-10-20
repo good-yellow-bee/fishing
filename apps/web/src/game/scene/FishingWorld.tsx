@@ -368,20 +368,21 @@ function FitFov({ phase }: { phase: ScenePhase }) {
     camera.fov = fovFor(aspect);
     camera.updateProjectionMatrix();
   }, [camera, aspect]);
-  // On a tall phone the view eases up while a fish is on, raising the fight above the fight card.
+  // On a phone held upright the view eases up while a fish is on, raising the fight above the fight card, and drops
+  // back at once when it ends (the landing camera is moving then anyway), so aiming and the catch photo never see it.
   const lift = useRef(0);
+  const shown = useRef({ lift: 0, width: 0, height: 0 });
   const calm = useReducedMotion();
   useFrame(({ size }, delta) => {
-    const target = phase === "fight" || phase === "hookset" ? fightLiftFor(size.width / size.height) : 0;
-    const next = calm ? target : lift.current + (target - lift.current) * (1 - Math.exp(-3 * Math.min(delta, 0.1)));
-    const was = lift.current;
-    lift.current = next < 1e-4 ? 0 : next;
-    if (lift.current === 0 && was === 0) return;
-    // Applied afresh each frame it is lifted, so a turned phone mid-fight never keeps the old size's offset.
+    const target = isFighting(phase) ? fightLiftFor(size.width / size.height) : 0;
+    lift.current = target === 0 || calm ? target : lift.current + (target - lift.current) * (1 - Math.exp(-3 * Math.min(delta, 0.1)));
+    const was = shown.current;
+    if (Math.abs(lift.current - was.lift) < 1e-4 && was.width === size.width && was.height === size.height) return;
+    shown.current = { lift: lift.current, width: size.width, height: size.height };
     if (lift.current === 0) camera.clearViewOffset();
     else camera.setViewOffset(size.width, size.height, 0, lift.current * size.height, size.width, size.height);
-    camera.updateProjectionMatrix();
   });
+  useEffect(() => () => camera.clearViewOffset(), [camera]);
   return null;
 }
 

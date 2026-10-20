@@ -18,9 +18,10 @@ describe("fovFor", () => {
     expect(sideways(BASE_FOV, 390 / 844)).toBeLessThan(24);
   });
 
-  it("lifts a tall phone's view while a fish is on, and no other screen's", () => {
+  it("lifts an upright phone's view while a fish is on, and no other screen's", () => {
     expect(fightLiftFor(390 / 844)).toBe(FIGHT_LIFT);
-    expect(fightLiftFor(0.7)).toBe(FIGHT_LIFT);
-    for (const aspect of [0.8, 1.6, 2.16, 0, Number.NaN]) expect(fightLiftFor(aspect)).toBe(0);
+    expect(fightLiftFor(360 / 640)).toBe(FIGHT_LIFT);
+    // A tablet held upright (768x1024) keeps its view.
+    for (const aspect of [768 / 1024, 0.8, 1.6, 2.16, 0, Number.NaN]) expect(fightLiftFor(aspect)).toBe(0);
   });
 });

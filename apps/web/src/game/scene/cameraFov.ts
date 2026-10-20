@@ -14,10 +14,11 @@ export function fovFor(aspect: number) {
   return Math.min(MAX_FOV, wide / toRad);
 }
 
-/** While a fish is on, a tall phone's view lifts this share of its height, raising the fight above the fight card at the foot of the lake. */
+/** While a fish is on, a phone held upright (narrower than this) lifts its view this share of its height, raising the fight above the fight card at the foot of the lake. */
+const PHONE_ASPECT = 0.65;
 export const FIGHT_LIFT = 0.18;
 
-/** How far a screen `aspect` wide lifts its view while a fish is on: none on a wide screen, where the card sits clear of the fight. */
+/** How far a screen `aspect` wide lifts its view while a fish is on: none on a wider screen (a tablet held upright, a desktop), where the card sits clear of the fight. */
 export function fightLiftFor(aspect: number) {
-  return aspect > 0 && aspect < NARROW_ASPECT ? FIGHT_LIFT : 0;
+  return aspect > 0 && aspect < PHONE_ASPECT ? FIGHT_LIFT : 0;
 }
