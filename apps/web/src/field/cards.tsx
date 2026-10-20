@@ -22,7 +22,7 @@ import { useTackleItems } from "./gear/TackleState";
 import { catchLink, type ListKey } from "./catchList";
 import { FROM_LIST } from "./leaveDeleted";
 import { isPlanned } from "./TripMonthHead";
-import { outingDay, outNow, sameName, stillGoing } from "./tripDates";
+import { outingDay, outNow, sameName } from "./tripDates";
 import { bookSpelling, pieceName } from "./gear/pieceKey";
 import { bookFishDay } from "./tripMonths";
 
@@ -123,7 +123,7 @@ export function TripCard({
       ? // Still ahead, or today's before its first fish, with nothing packed: planned, not a blank day.
         isPlanned(trip, today, fishCount)
         ? // Last evening's, still going in the small hours: the angler is sitting on it, as the Map says.
-          trip.date < today && stillGoing(book, trip)
+          trip.date < today && outNow(book, trip)
           ? t("Out now")
           : t("Planned")
         : // Beside "3 lost", a count: "0 fish · 3 lost", not "Nothing logged · 3 lost".

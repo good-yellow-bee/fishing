@@ -1,4 +1,4 @@
-import { useId, useRef, useState, type FormEvent } from "react";
+import { useId, useMemo, useRef, useState, type FormEvent } from "react";
 import { isLureLabel, localDate, itemsForTrip, lureClass, packedCount, type CatchEntry, type Spot, type TackleItem, type Trip } from "@stillwater/shared";
 import { useT } from "../../i18n";
 import { fishCountLabel, formatDay, messageText, outingName } from "../format";
@@ -8,7 +8,7 @@ import { CopySummary } from "../CopySummary";
 import { pieceKey, pieceName, shownPieceKey } from "./pieceKey";
 import { isSampleOuting, isSampleTrip } from "../bookCopy";
 import { newestOutingFirst } from "../catchNeighbors";
-import { stillGoing } from "../tripDates";
+import { outingDay, stillGoing } from "../tripDates";
 import "./gear.css";
 
 /**
@@ -44,7 +44,7 @@ export function TackleList({
   caught = [],
   trips = [],
   spots = [],
-  catches = [],
+  catches,
 }: {
   tripId: string;
   heading?: string;
@@ -59,7 +59,7 @@ export function TackleList({
 }) {
   const t = useT();
   const { items, toggle, add, remove, unpackTrip, copyTrip, unsavedTrip, updateTackle } = useTackle();
-  const book = { spots: [...spots], trips: [...trips], catches: [...catches] };
+  const book = useMemo(() => ({ spots: [...spots], trips: [...trips], catches: [...(catches ?? [])] }), [spots, trips, catches]);
   // The last Unpack all or ×, with its way back, until the list changes another way.
   const [taken, setTaken] = useState<{ text: string; undo: (current: TackleItem[]) => TackleItem[] } | null>(null);
   const rows = itemsForTrip(items, tripId);
@@ -84,7 +84,9 @@ export function TackleList({
   for (const entry of caught) took.set(readKey(entry.lure), (took.get(readKey(entry.lure)) ?? 0) + 1);
   const outing = trips.find((row) => row.id === tripId);
   // Done once its day is over, unless it is last night's still going in the small hours (as the lure record takes it).
-  const idle = outing && caught.length > 0 && outing.date < localDate(new Date()) && !stillGoing(book, outing) ? rows.filter((item) => item.packed && isLureLabel(item.label) && !took.has(readKey(item.label))) : [];
+  // Without the book's fish to tell, done once the outing's day (last night's in the small hours) is over.
+  const done = outing && (catches ? outing.date < localDate(new Date()) && !stillGoing(book, outing) : outing.date < outingDay(localDate(new Date())));
+  const idle = outing && caught.length > 0 && done ? rows.filter((item) => item.packed && isLureLabel(item.label) && !took.has(readKey(item.label))) : [];
   const [label, setLabel] = useState("");
   const [error, setError] = useState("");
   // While packing, the pieces already in the bag can step aside.

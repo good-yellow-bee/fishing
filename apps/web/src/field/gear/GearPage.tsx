@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   WATER_LABELS,
@@ -143,7 +143,7 @@ function LureRecord({ today }: { today: string }) {
   const found = pieceRecords(atWater, items, today);
   const records = orderedRecords(found, found.length > 2 ? order : "most");
   // A kind as the book writes it most, as Bests names it.
-  const kindName = kindNames(countedBook(book).catches);
+  const kindName = useMemo(() => kindNames(countedBook(book).catches), [book]);
   // The book the record counts: the sample week's made-up lures go with the first outing of the angler's own.
   const quiet = notYetThisYear(countedBook(atWater).catches, new Date(), (entry) => entry.lure, (entry) => bookFishDay(book, entry), (name) => shownPieceKey(name));
   const [all, setAll] = useState(false);
@@ -243,8 +243,8 @@ function LureRecord({ today }: { today: string }) {
                     type="button"
                     className="text-button"
                     onClick={() => {
-                      // As the button names it: the book's own spelling, or the dictionary's in Polish.
-                      if (add(next.id, pieceName(row.name)) !== null) return;
+                      // The book's own spelling, as its fish were logged: the button shows it in the reader's language.
+                      if (add(next.id, row.name) !== null) return;
                       focusPacked.current = true;
                       setJustPacked(row.label);
                     }}
@@ -279,7 +279,7 @@ function LureRecord({ today }: { today: string }) {
             type="button"
             className="text-button"
             onClick={() => {
-              const packed = best.filter((row) => add(next.id, pieceName(row.name)) === null).map((row) => row.name);
+              const packed = best.filter((row) => add(next.id, row.name) === null).map((row) => row.name);
               if (packed.length === 0) return;
               focusPackedBest.current = true;
               setPackedBest(packed);
