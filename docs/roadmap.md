@@ -1799,7 +1799,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT376~~ | ~~News card 2026-10-20-game42 covers GT373 and GT374: the legend hunt and the weekend derby~~ (#1521) | ui | S |
 | ~~GT377~~ | ~~News card 2026-10-20-game43 covers GT375: second fight habits for bluegill, carp, catfish and burbot~~ (#1526) | ui | S |
 | ~~GT378~~ | ~~The reel's drag: in a fight, F or the fight card's Drag button turns it light, normal or heavy (kept from fight to fight, taking hold from the next run); a light drag lets a run take 1.35x the line, slipping some even under a turning reel, but pulls 0.7x on it; a heavy one holds a run to 0.65x the line but pulls 1.3x and loads the line even let go, so a big fresh run goes red (and tears a soft mouth), never snapping~~ (#1529) | gameplay | M |
-| GT379 | The day's bag: the Board ranks each angler's five heaviest fish landed that day (UTC, one ranking for the lodge) by their total weight, and the landed card shows the angler's bag with the new fish in it and how much it raised it, or what the next fish must beat | gameplay | M |
+| ~~GT379~~ | ~~The day's bag: the Board ranks each angler's five heaviest fish landed that day (UTC, one ranking for the lodge) by their total weight, and the landed card shows the angler's bag with the new fish in it and how much it raised it, or what the next fish must beat~~ (#1530) | gameplay | M |
 | GT380 | Lodge-tagged fish: a fish one angler lets go can be hooked by another at the same bank on a later day, grown a little; the landed card says who let it go and when, and it pays a bonus to both | gameplay | M |
 | GT381 | News card game44 covers GT378 to GT380 | ui | S |
 

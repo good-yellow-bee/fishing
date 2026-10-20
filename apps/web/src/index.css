@@ -3882,6 +3882,12 @@ html[data-contrast="high"] .sound-captions li {
   }
 }
 
+/* Each row says its own rank, so the list draws no numbers of its own. */
+.derby-entries {
+  list-style: none;
+  padding-left: 0;
+}
+
 .derby-entries li[data-you="1"] {
   color: var(--amber);
   font-weight: 700;
