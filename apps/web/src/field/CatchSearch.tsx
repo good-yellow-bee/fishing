@@ -35,7 +35,7 @@ import { isSampleCatch } from "./bookCopy";
 import { offPlayLake } from "./playLake";
 import { bookSpelling, shownPieceKey } from "./gear/pieceKey";
 import { bookKindName, kindKey, mostWritten } from "./speciesLink";
-import { bookLureName } from "./pieceTally";
+import { bookLureName, onPiece, pieceTally } from "./pieceTally";
 import { plainName } from "./tripDates";
 
 /** A book name as the Polish UI shows it, or itself when Polish has no line for it. */
@@ -1042,8 +1042,10 @@ function MatchSplits({ matches, all, search, largest, counted }: { matches: read
   const kinds = [...spelled.values()]
     .map((forms): [string, number] => [mostWritten(forms), [...forms.values()].reduce((sum, n) => sum + n, 0)])
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-  // Named as the book writes each kind most, as Bests and the kind's page name it.
+  // Named as the book writes each kind and lure most, as Bests, Gear and the kind's page name them.
   const kindName = bookKindName(book.catches);
+  const lureName = bookLureName(book.catches);
+  const lures = pieceTally(matches, Infinity).map((row): [string, number] => [row.lure, row.count]);
   const years = tally((entry) => bookFishDay(book, entry).slice(0, 4)).sort((a, b) => b[0].localeCompare(a[0]));
   // Waters by name, most fish first: the water search opens a name, so two waters read the same are one row.
   const nameOf = new Map(book.spots.map((spot) => [spot.id, plainName(spot.name)]));
@@ -1093,6 +1095,8 @@ function MatchSplits({ matches, all, search, largest, counted }: { matches: read
       {line(t("By year:"), years, (year) => year, (year) => year, (entry, year) => bookFishDay(book, entry).startsWith(`${year}-`), bestIn)}
       {/* Where it came from: "pike" answers "where" in one tap, each water narrowing the search. */}
       {line(t("By water:"), waters, (key) => exactTerm("water", shownWater.get(key)!), (key) => shownWater.get(key)!, (entry, key) => waterKey(entry) === key)}
+      {/* What it was taken on, each lure however written one entry, named as the book writes it. */}
+      {line(t("By lure:"), lures, (lure) => exactTerm("lure", lureName(lure)), (lure) => lureName(lure), (entry, lure) => onPiece(entry, lure))}
     </>
   );
 }
