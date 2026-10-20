@@ -33,6 +33,7 @@ import {
   type CatchEntry,
   type Logbook,
   type Measure,
+  type Trip,
 } from "@stillwater/shared";
 import { CatchCard } from "./cards";
 import { sameSizeSearch } from "./sizeQuery";
@@ -66,7 +67,7 @@ import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
 import { catchNews } from "./catchNews";
 import { likelyDuplicate } from "./likelyDuplicate";
-import { isSampleCatch, isSampleOnly, isSampleSpot } from "./bookCopy";
+import { isSampleCatch, isSampleOnly, isSampleOuting, isSampleSpot } from "./bookCopy";
 import { WaterOptions } from "./WaterOptions";
 import { readDeletedFish } from "./deletedFish";
 import { focusPageHeading } from "./pageFocus";
@@ -301,6 +302,15 @@ export function CatchesPage() {
   );
 }
 
+/**
+ * The outings the catch form offers at a water: never one of the sample week's made-up ones, as tripForFish files a
+ * fish, unless the fish is on it already, the form was opened from it, or the fish is a sample one itself.
+ */
+export function formOutings(book: Logbook, water: string, existing?: CatchEntry, presetTripId?: string): Trip[] {
+  const sampleFish = existing !== undefined && isSampleCatch(existing.id);
+  return tripsForSpot(book, water).filter((trip) => sampleFish || !isSampleOuting(trip) || trip.id === existing?.tripId || trip.id === presetTripId);
+}
+
 export function CatchFormPage() {
   const { catchId } = useParams();
   const [params] = useSearchParams();
@@ -416,6 +426,7 @@ function CatchForm() {
   const [tripId, setTripId] = useState(() =>
     existing ? (existing.tripId ?? "") : (presetTrip?.id ?? tripForFish(book, presetSpot, carriedTime ?? toLocalInput(new Date()))?.id ?? ""),
   );
+  const outingsAt = (water: string) => formOutings(book, water, existing, presetTrip?.id);
   // Until the player picks an outing themselves, the outing follows the water and the day.
   const [tripPicked, setTripPicked] = useState(Boolean(existing || presetTrip));
   // The outing a change of water took the fish off, until the outing is picked again.
@@ -548,7 +559,7 @@ function CatchForm() {
 
   const pickUp = (kept: KeptDraft) => {
     const keptSpot = book.spots.some((spot) => spot.id === kept.spotId) ? kept.spotId : spotId;
-    const keptTrip = tripsForSpot(book, keptSpot).some((trip) => trip.id === kept.tripId) ? kept.tripId : "";
+    const keptTrip = outingsAt(keptSpot).some((trip) => trip.id === kept.tripId) ? kept.tripId : "";
     setSpecies(pieceName(kept.species));
     setMeasureKind(kept.measureKind);
     // The draft's measure was the player's: the kind it names doesn't move it.
@@ -608,13 +619,13 @@ function CatchForm() {
   });
 
   // A long book makes these slow enough to drag typing, so they wait for the book, water or language to change.
-  const spotTrips = useMemo(() => tripsForSpot(book, spotId), [book, spotId]);
+  const spotTrips = useMemo(() => outingsAt(spotId), [book, spotId]);
   const hereCatches = useMemo(() => catchesNewestFirst(book).filter((entry) => sameWater(twinKeys, entry.spotId, spotId)), [book, spotId, twinKeys]);
   // Named as the catch cards name them, however the book wrote them: "spinnerbaits" reads "Spinnerbait" in Polish too.
   const hereLures = useMemo(() => ownFirst((waterTips(hereCatches)?.lures ?? []).map((row) => row.lure), [], pieceName), [hereCatches, lang]);
   // One-tap picks: the kinds this water gives, and once a kind is typed, the lures that took it here.
   // One chip each however the book names them: "Pike" and "Northern pike" both read "Szczupak" in Polish.
-  const hereSpecies = useMemo(() => ownFirst(waterSpecies(hereCatches), [], pieceName), [hereCatches, lang]);
+  const hereSpecies = useMemo(() => ownFirst(waterSpecies(hereCatches, 3, (name) => kindKey(shownKind(name))), [], pieceName), [hereCatches, lang]);
   const kindLures = useMemo(
     () => ownFirst(speciesLures(hereCatches.map((entry) => ({ ...entry, species: shownKind(entry.species) })), species), [], pieceName),
     [hereCatches, species, lang],
@@ -660,7 +671,7 @@ function CatchForm() {
   const onSpot = (nextSpot: string) => {
     spotTouched.current = true;
     setSpotId(nextSpot);
-    if (tripId && tripsForSpot(book, nextSpot).some((trip) => trip.id === tripId)) return;
+    if (tripId && outingsAt(nextSpot).some((trip) => trip.id === tripId)) return;
     // Back on the fish's own water: the outing it was on comes back with it.
     if (existing?.tripId && nextSpot === existing.spotId && waterTookTrip && tripById(book, existing.tripId)) {
       setLeftTrip("");
