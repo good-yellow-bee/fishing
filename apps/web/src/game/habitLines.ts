@@ -1,4 +1,4 @@
-import { BREACHERS, BROADSIDERS, CHARGERS, COVER_DIVERS, DARTERS, DIVERS, HEAD_SHAKERS, LEAPERS, LONG_RUNNERS, QUITTERS, ROLLERS, SCRAPPERS, SOFT_MOUTHS, STICKERS, TAIL_WALKERS, TOOTHY } from "./fight";
+import { BREACHERS, BROADSIDERS, CHARGERS, COVER_DIVERS, DARTERS, DIVERS, LINE_SPINNERS, NET_SHY, SLIPPERS, THRASHERS, HEAD_SHAKERS, LEAPERS, LONG_RUNNERS, QUITTERS, ROLLERS, SCRAPPERS, SOFT_MOUTHS, STICKERS, TAIL_WALKERS, TOOTHY } from "./fight";
 import { t } from "../i18n";
 
 /** A kind of fish's own fight habits in words, for the fight card and the field guide. */
@@ -18,6 +18,10 @@ export function habitLines(speciesId: string, strongLift = false): string[] {
   if (STICKERS.has(speciesId)) {
     lines.push(strongLift ? t("Bottom-sticker: it sticks to the bottom, but your Strength lifts it in one pump") : t("Bottom-sticker: when it sulks it takes two pumps to lift, not one"));
   }
+  if (LINE_SPINNERS.has(speciesId)) lines.push(t("Line-spinner: its tight circles twist the line, so retie after a few"));
+  if (NET_SHY.has(speciesId)) lines.push(t("Net-shy: the first time it sees the net it bolts, so be ready to bring it back"));
+  if (THRASHERS.has(speciesId)) lines.push(t("Thrasher: at the net it lifts its head only a moment, so strike quick"));
+  if (SLIPPERS.has(speciesId)) lines.push(t("Slippery: on a slack line it slithers off the hook, so keep it tight"));
   if (DARTERS.has(speciesId)) lines.push(t("Darter: halfway through a run it cuts back the other way, so switch sides to keep turning it"));
   if (COVER_DIVERS.has(speciesId)) lines.push(t("Cover-diver: at the reeds or the dock it buries itself in cover and stays put, so turn every run there"));
   if (LONG_RUNNERS.has(speciesId)) lines.push(t("Long runner: the first run is the long one, so let it go"));
