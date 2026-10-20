@@ -3,6 +3,7 @@ import { hillFront } from "./farHills";
 import { BUSH, HEDGE_EAST, HEDGE_ROWS, HEDGE_WEST, NIGHT_DIM, facetFront, hedgeBushes, hedgeColor, rowY } from "./hedgeRows";
 import { RUN_TOP } from "./sledRun";
 import { ROWS as ORCHARD_ROWS } from "./orchardRows";
+import { hedgeShape, paintHedges } from "./HillHedges";
 
 describe("hill hedgerows", () => {
   const bushes = hedgeBushes();
@@ -51,5 +52,19 @@ describe("hill hedgerows", () => {
     expect(new Set(seasons).size).toBe(4);
     expect(hedgeColor("summer", "night", 0).dim).toBe(NIGHT_DIM);
     expect(hedgeColor("summer", "day", 0).dim).toBe(1);
+  });
+
+  it("draws every bush from one shared shape and repaints it for the season without rebuilding", () => {
+    const shape = hedgeShape(bushes);
+    const per = shape.getAttribute("position").count / bushes.length;
+    expect(Number.isInteger(per)).toBe(true);
+    const color = shape.getAttribute("color");
+    paintHedges(shape, bushes, "summer", "day");
+    const summer = color.getX(0);
+    paintHedges(shape, bushes, "fall", "day");
+    expect(color.getX(0)).not.toBe(summer);
+    paintHedges(shape, bushes, "fall", "night");
+    expect(color.getX(per * 3)).toBeLessThan(1);
+    shape.dispose();
   });
 });
