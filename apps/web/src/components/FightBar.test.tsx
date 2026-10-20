@@ -220,6 +220,24 @@ describe("FightBar for screen readers", () => {
     expect(status()).not.toBe("It's played out — reel it in!");
   });
 
+  it("calls a second wind as the fish gathers itself and runs, but a leap's own warning first", () => {
+    mount({ peakTension: 0.3, maxLine: 1 });
+    const status = () => container!.querySelector(".fight-status")!.textContent;
+    sim.current.secondWind = true;
+    frame();
+    expect(status()).toBe("Second wind — it's gathering itself!");
+    sim.current.surge = 1;
+    frame();
+    expect(status()).toBe("Let go now — it found a second wind!");
+    sim.current.surge = 2;
+    frame();
+    expect(status()).toBe("Let it run — a second wind, it'll tire again!");
+    sim.current.surge = 1;
+    sim.current.jump = true;
+    frame();
+    expect(status()).not.toMatch(/second wind/i);
+  });
+
   it("tells the angler to pump a sulking fish off the bottom", () => {
     mount({ peakTension: 0.3, maxLine: 1 });
     const status = () => container!.querySelector(".fight-status")!.textContent;

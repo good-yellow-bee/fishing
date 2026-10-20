@@ -218,10 +218,13 @@ export const WIND_STRIKE = { breezy: 0.85, strong: 0.7 } as const;
 export const JIG_SOLID = 1.25;
 
 /** How quick a strike must be, in ms, to set the hook solid in a window this long, in this wind, on this lure, with a dull point, this far out, at this level. */
-export function solidStrikeMs(windowMs: number, windy?: keyof typeof WIND_STRIKE, lure?: string, dull = false, long = false, level = 1) {
+export function solidStrikeMs(windowMs: number, windy?: keyof typeof WIND_STRIKE, lure?: string, dull = false, long = false, level = 1, lucky = false) {
   const jig = !!lure?.trim() && lureClass(lure).id === "jig";
-  return windowMs * solidShareForLevel(level) * (windy ? WIND_STRIKE[windy] : 1) * (jig ? JIG_SOLID : 1) * (dull ? DULL_SOLID : 1) * (long ? LONG_CAST_SOLID : 1);
+  return windowMs * solidShareForLevel(level) * (windy ? WIND_STRIKE[windy] : 1) * (jig ? JIG_SOLID : 1) * (dull ? DULL_SOLID : 1) * (long ? LONG_CAST_SOLID : 1) * (lucky ? LUCKY_SOLID : 1);
 }
+
+/** A lucky lure (75 fish in the field log) sets its hook a little more solid: the solid share of the strike window grows this much. */
+export const LUCKY_SOLID = 1.1;
 
 /** A lure landing past this share of the angler's reach is a long cast. */
 export const LONG_CAST_SHARE = 0.75;
