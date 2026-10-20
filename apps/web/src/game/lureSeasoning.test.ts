@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { CatchEntry } from "@stillwater/shared";
+import { PLAY_LAKE_ID, type CatchEntry } from "@stillwater/shared";
 import { lureCatchCount, lureTier, lureTierReachedBy } from "./lureSeasoning";
 
 describe("seasoned lures", () => {
@@ -18,8 +18,8 @@ describe("seasoned lures", () => {
     expect(lureTierReachedBy(74)).toBe("lucky");
   });
 
-  it("counts a lure's fish however it was spelled", () => {
-    const entry = (lure: string) => ({ lure }) as CatchEntry;
-    expect(lureCatchCount([entry("Spinnerbait"), entry("spinnerbaits "), entry("Popper"), entry("")], "Spinnerbait")).toBe(2);
+  it("counts the game's fish on a lure however its plural was spelled, and none logged at a real water", () => {
+    const entry = (lure: string, spotId = PLAY_LAKE_ID) => ({ lure, spotId }) as CatchEntry;
+    expect(lureCatchCount([entry("Spinnerbait"), entry("spinnerbaits "), entry("Popper"), entry(""), entry("Spinnerbait", "spot-home")], "Spinnerbait")).toBe(2);
   });
 });

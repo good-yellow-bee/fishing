@@ -19,7 +19,7 @@ type Props = {
 /** The picker's name for a lure, with what favors it: this bank, the lake right now, or both. */
 function optionText(t: ReturnType<typeof useT>, lure: string, here: boolean, now: boolean, tier: LureTier | null) {
   const text = here && now ? t("{lure} · good here and now", { lure: t(lure) }) : here ? t("{lure} · good here", { lure: t(lure) }) : now ? t("{lure} · good now", { lure: t(lure) }) : t(lure);
-  return tier ? `${text} · ${t(LURE_TIER_WORD[tier])}` : text;
+  return tier ? t("{lure} · {tier}", { lure: text, tier: t(LURE_TIER_WORD[tier]) }) : text;
 }
 
 export function LureChoice({ choices, value, spot, now, tierOf, locked, onChange }: Props) {

@@ -259,13 +259,13 @@ export function DockPage() {
       live = false;
     };
   }, [angler]);
-  // Each packed lure's tier from the fish the field log took on it, read again after each catch.
-  const [bookCatches, setBookCatches] = useState(0);
-  const lureTiers = useMemo(() => {
-    const book = bookForPlay();
-    return new Map(lureChoices.map((choice) => [choice, lureTier(lureCatchCount(book.catches, choice))]));
-  }, [lureChoices, bookCatches]);
-  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind, legend, lodgeReleased, lureTiers.get(chosenLure) === "lucky");
+  // Each packed lure's tier from the fish the game landed on it, as the field log keeps them; read again after each save.
+  const [bookCatches, setBookCatches] = useState(() => bookForPlay().catches);
+  const lureTiers = useMemo(() => new Map(lureChoices.map((choice) => [choice, lureTier(lureCatchCount(bookCatches, choice))])), [lureChoices, bookCatches]);
+  const bookCatchesRef = useRef(bookCatches);
+  bookCatchesRef.current = bookCatches;
+  const luckyLures = useMemo(() => new Set(lureChoices.filter((choice) => lureTiers.get(choice) === "lucky")), [lureChoices, lureTiers]);
+  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind, legend, lodgeReleased, luckyLures);
   // The cast's left-out reasons, opened from its hint; each cast's list starts closed.
   const [reasonsOpenFor, setReasonsOpenFor] = useState<readonly string[] | null>(null);
   const reasonsOpen = reasonsOpenFor === game.moreReasons;
@@ -365,7 +365,7 @@ export function DockPage() {
   const shotFor = useRef<{ seq: number; id: string; dataUrl: string } | null>(null);
   const shotBase = useRef<{ id: string; seq: number } | null>(null);
   /** The tier the tied lure climbs to with this landed fish, read from the book before the fish goes in. */
-  const lureReached = useMemo(() => (game.outcome?.kind === "landed" ? lureTierReachedBy(lureCatchCount(bookForPlay().catches, tiedLure.current)) : null), [game.outcome]);
+  const lureReached = useMemo(() => (game.outcome?.kind === "landed" ? lureTierReachedBy(lureCatchCount(bookCatchesRef.current, tiedLure.current)) : null), [game.outcome]);
   const fieldBeat = useMemo(() => {
     if (game.outcome?.kind !== "landed") return null;
     const book = bookForPlay();
@@ -723,7 +723,7 @@ export function DockPage() {
         lure: tiedLure.current,
         weather: dailyConditions(openedAt, sky),
       });
-      setBookCatches((count) => count + 1);
+      setBookCatches(bookForPlay().catches);
       setFieldSaved(true);
       setFieldLogError("");
     } catch (err) {
