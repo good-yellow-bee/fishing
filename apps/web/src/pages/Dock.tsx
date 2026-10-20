@@ -1451,7 +1451,7 @@ export function DockPage() {
         <div className="level-status" role="status">
           {effectsNotice && (
             <div className="toast effects-toast">
-              <p>{t("Effects set to Lite to keep the lake smooth. Settings can turn them back.")}</p>
+              <p>{t("Effects set to Lite to keep the lake smooth, with shadows off and a faster picture from the next visit. Settings can turn them back.")}</p>
             </div>
           )}
           {shownLevel && (

@@ -20,7 +20,7 @@ export type Settings = {
   shake: ShakeLevel;
   /** Lite draws half the rain, fireflies and mist, and no sun halo. */
   particles: "full" | "lite";
-  /** Effects may step down to Lite on their own when frames sag; off once the player picks effects themselves. */
+  /** Effects, shadows and picture may step down on their own when frames sag; off once the player picks any of them. */
   autoEffects: boolean;
   shadows: boolean;
   /** Sharp renders up to 1.75 device pixels per CSS pixel; fast renders one. */

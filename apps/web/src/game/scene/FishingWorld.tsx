@@ -143,7 +143,7 @@ import { LIFT_START_AGE, liftDepth, liftFlop } from "./catchLift";
 import { sweetBand } from "../logic";
 import { settings, SHAKE_SCALE, updateSettings, useSettings } from "../settings";
 import { recolourFloatUvs } from "./floatColour";
-import { createFrameWatch, noteEffectsSteppedDown } from "../frameWatch";
+import { createFrameWatch, noteEffectsSteppedDown, STEP_DOWN } from "../frameWatch";
 import { frameDue, frameThrottle, idleNow } from "./frameCap";
 import { GOLDEN_ACCENT, GOLDEN_COLOR } from "../../components/FishMark";
 import { LIFT_RISE, LIGHT_PLUNGE, liftTilt, ROLL_SPLASH, RUN_PLUNGE, runSlide, takeStyle } from "../nibblePlan";
@@ -2199,14 +2199,14 @@ function FrameCap() {
   return null;
 }
 
-/** Steps the effects down to Lite once if the frame rate sags, unless the player picked effects themselves. */
+/** Steps the effects, shadows and picture down once if the frame rate sags, unless the player picked them themselves. */
 function FrameWatch() {
   const watch = useMemo(() => createFrameWatch(), []);
   useFrame((_, delta) => {
     // Battery saver and the idle drop run at 30 a second on purpose; that is no sign of a slow machine.
     if (!settings.autoEffects || settings.particles !== "full" || settings.frameRate === "saver" || frameThrottle.idle) return;
     if (!watch(delta)) return;
-    updateSettings({ particles: "lite", autoEffects: false });
+    updateSettings(STEP_DOWN);
     noteEffectsSteppedDown();
   });
   return null;
