@@ -74,11 +74,18 @@ export function legendaryCanBite(
   return canLand(profile, species) && species.spots.includes(spot);
 }
 
+/** The catch's local day for the fish of the week, if it lies within a day of the server's own; a day further off can't pick another week's fish. */
+function weekDayFor(day: string | undefined, at: Date): string | Date {
+  if (!day) return at;
+  const off = Math.abs(Date.parse(`${day}T12:00:00.000Z`) - Date.parse(`${at.toISOString().slice(0, 10)}T12:00:00.000Z`));
+  return off <= 86_400_000 ? day : at;
+}
+
 export type CatchOk = { ok: true; points: number; species: FishSpecies };
 export type CatchErr = { ok: false; error: string; status: 400 | 409 };
 export type CatchResult = CatchOk | CatchErr;
 
-/** `at` is when the catch is recorded; it picks the fish of the week. */
+/** `at` is when the catch is recorded; the catch's own local day picks the fish of the week when it is within a day of `at`, else `at` does. */
 /** `requestId`, when given, rolls for a golden fish. */
 /**
  * `priorBest` is the heaviest of this species the angler landed before, for the personal best bonus; `othersBest` the heaviest any other angler landed, for the lodge record bonus;
@@ -109,7 +116,7 @@ export function validateCatch(
     return { ok: false, error: "line too light for this fish", status: 409 };
   }
   const golden = request.requestId !== undefined && isGolden(request.requestId) ? GOLDEN_BONUS : 1;
-  return { ok: true, points: catchPoints(species, request.weight, request.clean, weeklyBonus(species.id, at) * golden * cleanRunBonus(request.clean, request.cleanRun) * bestBonus(request.weight, priorBest, othersBest) * dayRunBonus(catchDays, request.day) * masteryBonus(priorCaught)), species };
+  return { ok: true, points: catchPoints(species, request.weight, request.clean, weeklyBonus(species.id, weekDayFor(request.day, at)) * golden * cleanRunBonus(request.clean, request.cleanRun) * bestBonus(request.weight, priorBest, othersBest) * dayRunBonus(catchDays, request.day) * masteryBonus(priorCaught)), species };
 }
 
 export type UpgradeOk = { ok: true; cost: number; nextRank: number };

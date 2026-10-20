@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { weekStart } from "./board.ts";
 import { fishById } from "./fish.ts";
 import { catchPoints, validateCatch } from "./rules.ts";
+import { weekFishFor, weekOf } from "./weeklyChallenges.ts";
 import { SEASON_SPECIES } from "./season.ts";
 import type { Profile } from "./types.ts";
 import { seasonForWeek, WEEKLY_FISH_BONUS, weeklyBonus, weeklyFish, weeklyFishPool } from "./weeklyFish.ts";
@@ -48,5 +49,30 @@ describe("fish of the week", () => {
     const result = validateCatch(angler, { speciesId: named.id, weight, spot: named.spots[0]! }, at);
     expect(result).toMatchObject({ ok: true, points: catchPoints(fishById(named.id)!, weight, false, WEEKLY_FISH_BONUS) });
     expect(catchPoints(named, weight, false, WEEKLY_FISH_BONUS)).toBeGreaterThan(catchPoints(named, weight));
+  });
+});
+
+describe("one week for the board and the bonus", () => {
+  const profile = { userId: "a", displayName: "A", points: 0, lifetimePoints: 1_000_000, strength: 8, accuracy: 8, patience: 8 };
+  // A pair of weeks with different fish, so a Sunday evening that is Monday in UTC tells them apart.
+  const sunday = ["2026-10-25", "2026-11-01", "2026-11-08", "2026-11-15", "2026-11-22"].find((day) => {
+    const next = new Date(Date.UTC(Number(day.slice(0, 4)), Number(day.slice(5, 7)) - 1, Number(day.slice(8)) + 1, 3));
+    return weeklyFish(day).id !== weeklyFish(next).id;
+  })!;
+  const mondayUtc = new Date(Date.UTC(Number(sunday.slice(0, 4)), Number(sunday.slice(5, 7)) - 1, Number(sunday.slice(8)) + 1, 3));
+
+  it("names the local Sunday's fish, the same as the weekly challenges, though UTC has turned to Monday", () => {
+    expect(weeklyFish(sunday).id).not.toBe(weeklyFish(mondayUtc).id);
+    expect(weeklyFish(sunday).id).toBe(weekFishFor(weekOf(sunday)).id);
+  });
+
+  it("pays the catch's local week within a day of the server's, and the server's own week for a day further off", () => {
+    const fish = weeklyFish(sunday);
+    const catchOn = (day?: string, at = mondayUtc) => validateCatch(profile, { speciesId: fish.id, weight: fish.maxWeight, spot: fish.spots[0]!, clean: false, day }, at);
+    const local = catchOn(sunday);
+    const utc = catchOn(undefined);
+    const stale = catchOn(sunday, new Date(mondayUtc.getTime() + 14 * 86_400_000));
+    expect(local.ok && utc.ok && local.points > utc.points).toBe(true);
+    expect(stale.ok && local.ok && stale.points < local.points).toBe(true);
   });
 });

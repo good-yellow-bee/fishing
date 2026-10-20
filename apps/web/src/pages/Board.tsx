@@ -1,6 +1,6 @@
 import { useEffect, useState, type KeyboardEvent } from "react";
 import { Link } from "react-router-dom";
-import { anglerTitle, BOARD_LIMIT, FISH, weeklyFish, type BoardEntry, type BoardPeriod, type BoardView, type SpeciesRecord } from "@stillwater/shared";
+import { anglerTitle, BOARD_LIMIT, FISH, localDate, weeklyFish, type BoardEntry, type BoardPeriod, type BoardView, type SpeciesRecord } from "@stillwater/shared";
 import { errorText, getBoard, getSpeciesRecords } from "../api";
 import { FishMark } from "../components/FishMark";
 import { t, tn, useT } from "../i18n";
@@ -106,13 +106,13 @@ export function BoardPage() {
         ))}
       </div>
       {(() => {
-        const fish = weeklyFish();
+        const fish = weeklyFish(localDate(new Date()));
         return (
           <p className="weekly-fish">
             <FishMark species={fish} />
             <span>
               <strong>{t("Fish of the week: {fish}", { fish: t(fish.name) })}</strong>
-              <small>{t("Lands for 1.5× points until Monday 00:00 UTC.")}</small>
+              <small>{t("Lands for 1.5× points through Sunday.")}</small>
             </span>
           </p>
         );

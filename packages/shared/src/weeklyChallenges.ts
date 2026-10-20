@@ -39,7 +39,7 @@ export function weekDays(monday: string): string[] {
 
 /** The week's fish for the week starting `monday`. */
 export function weekFishFor(monday: string) {
-  return weeklyFish(new Date(`${monday}T12:00:00.000Z`));
+  return weeklyFish(monday);
 }
 
 /** The week's goals: the same three for every angler that week, picked by its Monday with no stored state; the banks goal
