@@ -112,11 +112,11 @@ export const BANK_WALK_BOARDS: readonly BankBoard[] = [
   ...boardsAlong(INLET_WALK, 0.24, "walk"),
 ];
 
-/** Inland edge of each pad, so the post is on the stand and out of the cast. */
+/** On each pad, to the left of where the angler stands (as the camera sees it, from inland): on the stand, out of the cast, and no longer between the camera and the angler. */
 export const BANK_POSTS: readonly { x: number; z: number; spot: "reeds" | "dropoff" | "inlet" }[] = [
-  { x: REEDS_STAND.x, z: REEDS_STAND.z + 0.36, spot: "reeds" },
-  { x: DROPOFF_STAND.x, z: DROPOFF_STAND.z + 0.2, spot: "dropoff" },
-  { x: INLET_STAND.x - 0.4, z: INLET_STAND.z, spot: "inlet" },
+  { x: REEDS_STAND.x - 0.55, z: REEDS_STAND.z + 0.1, spot: "reeds" },
+  { x: DROPOFF_STAND.x - 0.3, z: DROPOFF_STAND.z + 0.05, spot: "dropoff" },
+  { x: INLET_STAND.x - 0.47, z: INLET_STAND.z + 0.1, spot: "inlet" },
 ];
 
 export const BANK_STAND_BOARDS: readonly BankBoard[] = [
