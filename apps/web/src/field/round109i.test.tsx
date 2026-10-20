@@ -11,7 +11,7 @@ describe("round 109 ideas: a water's tips", () => {
         <TackleList tripId="t" {...tipProps([{ lure: "Jig", count: 4 }, { lure: "Spinner", count: 2 }])} />
       </TackleProvider>,
     );
-    expect(html).toContain("+ Jig (4)");
-    expect(html).toContain("+ Spinner (2)");
+    expect(html).toContain("+ Jig (4 fish)");
+    expect(html).toContain("+ Spinner (2 fish)");
   });
 });

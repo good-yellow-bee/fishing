@@ -711,6 +711,7 @@ export const PL_FIELD: PlBook = {
   "Kinds": "Gatunki",
   "Lures": "Przynęty",
   "Released fish": "Wypuszczone ryby",
+  "+ {lure} ({n} fish)": ["+ {lure} ({n} ryba)", "+ {lure} ({n} ryby)", "+ {lure} ({n} ryb)"],
   "Only my outings": "Tylko moje wyprawy",
   "Copy the plan": "Skopiuj plan",
   "Plan copied.": "Skopiowano plan.",

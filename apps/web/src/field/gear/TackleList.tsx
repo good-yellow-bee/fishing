@@ -1,6 +1,6 @@
 import { useId, useMemo, useRef, useState, type FormEvent } from "react";
 import { isLureLabel, localDate, itemsForTrip, lureClass, packedCount, type CatchEntry, type Spot, type TackleItem, type Trip } from "@stillwater/shared";
-import { useT } from "../../i18n";
+import { tn, useT } from "../../i18n";
 import { fishCountLabel, formatDay, messageText, outingName } from "../format";
 import { useTackle } from "./TackleState";
 import { packingText } from "./packingText";
@@ -334,7 +334,9 @@ export function TackleList({
                 setError(message ?? "");
                 if (!message) focusAfter();
               }}>
-              {t("+ {lure}", { lure: suggestCounts?.get(lure) ? `${pieceName(lure)} (${suggestCounts.get(lure)})` : pieceName(lure) })}
+              {suggestCounts?.get(lure)
+                ? tn(suggestCounts.get(lure)!, "+ {lure} ({n} fish)", "+ {lure} ({n} fish)", { lure: pieceName(lure) })
+                : t("+ {lure}", { lure: pieceName(lure) })}
             </button>
           ))}
           {/* A fresh list takes them all in one tap, rather than one tap each with the tips scrolling away. */}
