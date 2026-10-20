@@ -1424,6 +1424,18 @@ html[data-reduce-motion="1"] .fight-bar .fight-note {
   }
 }
 
+/* And at any text size on a phone held sideways or narrower than 360 px, where the card had no line to spare either. */
+@media (pointer: coarse) and (max-height: 500px), (pointer: coarse) and (max-width: 359px) {
+  .fight-bar .fight-drag-line {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
 .fight-bar .fight-clean {
   margin: 8px auto 0;
   width: fit-content;
