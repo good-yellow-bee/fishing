@@ -2,7 +2,7 @@ import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Database from "better-sqlite3";
-import { BAG_SIZE, SLAMS, fishById, TAG_RETURN_BONUS, TAGGABLE_IDS, isLakeHour, isTrophyWeight, TROPHY_RELEASE_BONUS, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type LodgeRelease, type LodgeTrack, type TagReturn, type SpeciesRecord, type SpotId } from "@stillwater/shared";
+import { BAG_SIZE, SLAMS, fishById, TAG_RETURN_BONUS, TAGGABLE_IDS, isLakeHour, isTrophyWeight, TROPHY_RELEASE_BONUS, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type LodgeRelease, type LodgeTrack, type StudyFact, type TagReturn, type SpeciesRecord, type SpotId } from "@stillwater/shared";
 
 const dir = dirname(fileURLToPath(import.meta.url));
 export const dataDir = join(dir, "../data");
@@ -95,6 +95,13 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS catch_user_created ON catch (user_id, created_at DESC);
   CREATE INDEX IF NOT EXISTS catch_species_created ON catch (species_id, created_at);
   CREATE INDEX IF NOT EXISTS catch_created ON catch (created_at);
+
+  CREATE TABLE IF NOT EXISTS study_claim (
+    user_id TEXT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
+    species_id TEXT NOT NULL,
+    claimed_at TEXT NOT NULL,
+    PRIMARY KEY (user_id, species_id)
+  );
 
   CREATE TABLE IF NOT EXISTS daily_request_claim (
     user_id TEXT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
@@ -291,6 +298,28 @@ export function listDayBags(from: string, to: string, limit: number) {
        ) WHERE nth <= ? GROUP BY userId ORDER BY total DESC, madeAt ASC, userId ASC LIMIT ?`,
     )
     .all(from, to, BAG_SIZE, limit) as { userId: string; displayName: string; total: number; count: number; madeAt: string }[];
+}
+
+/** Each kind's banks, hours and heaviest the angler landed it at, for the studies. */
+export function listStudyFacts(userId: string): StudyFact[] {
+  return db
+    .prepare(`SELECT species_id as speciesId, spot, hour, MAX(weight) as heaviest FROM catch WHERE user_id = ? GROUP BY species_id, spot, hour`)
+    .all(userId) as StudyFact[];
+}
+
+/** The kinds whose studies the angler has been paid for. */
+export function listStudyClaims(userId: string): string[] {
+  return (db.prepare(`SELECT species_id FROM study_claim WHERE user_id = ?`).all(userId) as { species_id: string }[]).map((row) => row.species_id);
+}
+
+/** Pays a kind's finished studies once; null when they were paid already. */
+export function claimStudy(userId: string, speciesId: string, reward: number): number | null {
+  return db.transaction(() => {
+    const claim = db.prepare(`INSERT OR IGNORE INTO study_claim (user_id, species_id, claimed_at) VALUES (?, ?, ?)`).run(userId, speciesId, new Date().toISOString());
+    if (claim.changes !== 1) return null;
+    db.prepare(`UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`).run(reward, reward, userId);
+    return reward;
+  })();
 }
 
 /** Each angler's count of fish let go since `since`, most first; of equal counts, by name. */
