@@ -43,7 +43,7 @@ import { LIST_PARAM, catchLink, catchList, largestList, type ListKey } from "./c
 import { catchBadge } from "./catchBadge";
 import { photoPlace, photoTakenAt } from "./photoTime";
 import { AT_PARAM, PHOTO_PARAM, RESUME_PARAM, anotherCatchLink } from "./anotherCatch";
-import { catchesOfSpecies, kindOnPage, speciesLink } from "./speciesLink";
+import { catchesOfSpecies, kindKey, kindOnPage, speciesLink } from "./speciesLink";
 import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
@@ -186,6 +186,11 @@ function bookName(typed: string, names: readonly string[]): string {
   const clean = typed.trim().toLowerCase();
   return names.find((name) => t(name).toLowerCase() === clean) ?? typed;
 }
+
+/** Whether what was typed is a pick's kind, however written: "perches" presses the "Perch" chip. */
+const sameKind = (typed: string, name: string) => typed.trim().toLowerCase() === name.toLowerCase() || (typed.trim() !== "" && kindKey(typed) === kindKey(name));
+/** The same for a lure: "spinners" presses the "Spinner" chip. */
+const samePiece = (typed: string, name: string) => typed.trim().toLowerCase() === name.toLowerCase() || (typed.trim() !== "" && pieceKey(typed) === pieceKey(name));
 
 /** After a step link that keeps the same fish on screen: back to the top, with the page's heading taking focus. */
 function stepFocus() {
@@ -376,7 +381,7 @@ function CatchForm() {
       kindMounted.current = true;
       return;
     }
-    const askedHolds = (asked === "weight" || asked === "length") && species.trim().toLowerCase() === t(params.get("species") ?? "").trim().toLowerCase();
+    const askedHolds = (asked === "weight" || asked === "length") && kindKey(species) === kindKey(t(params.get("species") ?? ""));
     if (existing || measurePicked || askedHolds || amount.trim() || alsoAmount.trim()) return;
     const kind = kindMeasure(book, species, t);
     if (kind) setMeasureKind(kind);
@@ -1022,10 +1027,10 @@ function CatchForm() {
                   key={name}
                   type="button"
                   className="lure-tip"
-                  aria-pressed={species.trim().toLowerCase() === name.toLowerCase()}
+                  aria-pressed={sameKind(species, name)}
                   // A toggle: pressed again, the kind is cleared for one typed in.
                   onClick={() => {
-                    if (species.trim().toLowerCase() !== name.toLowerCase()) return setSpecies(name);
+                    if (!sameKind(species, name)) return setSpecies(name);
                     setSpecies("");
                     focusSoon('input[name="species"]');
                   }}
@@ -1162,9 +1167,9 @@ function CatchForm() {
                   key={name}
                   type="button"
                   className="lure-tip"
-                  aria-pressed={lure.trim().toLowerCase() === name.toLowerCase()}
+                  aria-pressed={samePiece(lure, name)}
                   onClick={() => {
-                    if (lure.trim().toLowerCase() !== name.toLowerCase()) return setLure(name);
+                    if (!samePiece(lure, name)) return setLure(name);
                     setLure("");
                     focusSoon('input[name="lure"]');
                   }}
@@ -1743,8 +1748,8 @@ function CatchView() {
   };
   // Which best the badge is for: a fish both measured and weighed may hold either. Among the fish the badge was
   // drawn from (countedBook), or a sample fish would hold the weight and the angler's own heaviest read as "longest".
-  const bests = badge ? personalBests({ ...book, catches: countedBook(book).catches }) : null;
-  const kindBests = bests?.species.find((row) => row.species.trim().toLowerCase() === entry.species.trim().toLowerCase());
+  const bests = badge ? personalBests({ ...book, catches: countedBook(book).catches }, kindKey) : null;
+  const kindBests = bests?.species.find((row) => kindKey(row.species) === kindKey(entry.species));
   const heavy = (badge === "book" ? bests?.heaviest : kindBests?.heaviest)?.id === entry.id;
 
   return (

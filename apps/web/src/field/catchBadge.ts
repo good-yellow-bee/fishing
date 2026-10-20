@@ -1,5 +1,6 @@
 import { measuresOf, personalBests, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { countedBook } from "./milestones";
+import { kindKey } from "./speciesLink";
 
 export type CatchBadge = "book" | "species" | null;
 
@@ -12,18 +13,18 @@ export function bookBadges(book: Logbook): Map<string, Exclude<CatchBadge, null>
   // The sample week's fish hold no record over the angler's own, as on the other pages: they go with the angler's
   // first fish or outing, as Home and Bests count them (countedBook).
   const real = { ...book, catches: countedBook(book).catches };
-  const bests = personalBests(real);
+  const bests = personalBests(real, kindKey);
   const rivals = new Map<string, number>();
   for (const entry of real.catches) {
     for (const measure of measuresOf(entry)) {
-      const key = `${entry.species.trim().toLowerCase()}\u0000${measure.kind}`;
+      const key = `${kindKey(entry.species)}\u0000${measure.kind}`;
       rivals.set(key, (rivals.get(key) ?? 0) + 1);
     }
   }
   const badges = new Map<string, Exclude<CatchBadge, null>>();
   for (const row of bests.species) {
     for (const [best, kind] of [[row.heaviest, "weight"], [row.longest, "length"]] as const) {
-      if (best && (rivals.get(`${best.species.trim().toLowerCase()}\u0000${kind}`) ?? 0) > 1) badges.set(best.id, "species");
+      if (best && (rivals.get(`${kindKey(best.species)}\u0000${kind}`) ?? 0) > 1) badges.set(best.id, "species");
     }
   }
   for (const best of [bests.heaviest, bests.longest]) if (best) badges.set(best.id, "book");

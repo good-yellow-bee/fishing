@@ -4,7 +4,7 @@ import { t, useT } from "../i18n";
 import { pageCounts, speciesCounts, speciesLink } from "./speciesLink";
 import { exactTerm, findWithLink } from "./findLinks";
 import { pieceTally } from "./pieceTally";
-import { bookSpelling, pieceName } from "./gear/pieceKey";
+import { pieceName } from "./gear/pieceKey";
 
 /** The kinds among some fish, each a link to its own page, or with `within` (a water's name) to just those fish there. */
 /** With `outing`, each kind opens that outing's fish of it, as counted; with `water` too, only those on its water. */
@@ -36,7 +36,7 @@ export function SpeciesChips({
           }
         >
           {/* "zander" and "tench" as the kinds list writes them, in the reader's language. */}
-          {t(bookSpelling(row.species))} ({row.count})
+          {pieceName(row.species)} ({row.count})
         </Link>
       ))}
     </p>
@@ -57,7 +57,7 @@ export function LureChips({ catches, outing, water }: { catches: readonly CatchE
       <span className="meta">{t("Took:")}</span>
       {lures.map((row) => (
         // With the water too: two outings of a day can share a name, or both go unnamed.
-        <Link key={row.lure} to={findWithLink([exactTerm("outing", `${outing.date} ${outing.title}`), ...(water ? [exactTerm("water", water)] : [])].join(" + "), exactTerm("lure", t(row.lure)))}>
+        <Link key={row.lure} to={findWithLink([exactTerm("outing", `${outing.date} ${outing.title}`), ...(water ? [exactTerm("water", water)] : [])].join(" + "), exactTerm("lure", pieceName(row.lure)))}>
           {pieceName(row.lure)} ({row.count})
         </Link>
       ))}

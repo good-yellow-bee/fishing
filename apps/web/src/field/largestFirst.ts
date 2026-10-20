@@ -1,4 +1,5 @@
 import { likelyWeight, measureOf, sizePairs, type CatchEntry, type SizePair } from "@stillwater/shared";
+import { kindKey } from "./speciesLink";
 
 /** About a pound for a 14-inch fish: the weight a length suggests when the kind has no weighed and measured pairs to go by. */
 const ROUGH_FACTOR = 1 / 2700;
@@ -11,9 +12,9 @@ const ROUGH_FACTOR = 1 / 2700;
 export function largestFirst(catches: CatchEntry[]): CatchEntry[] {
   const pairsOf = new Map<string, SizePair[]>();
   const pairs = (entry: CatchEntry) => {
-    const key = entry.species.trim().toLowerCase();
+    const key = kindKey(entry.species);
     let found = pairsOf.get(key);
-    if (!found) pairsOf.set(key, (found = sizePairs(catches.filter((other) => other.species.trim().toLowerCase() === key))));
+    if (!found) pairsOf.set(key, (found = sizePairs(catches.filter((other) => kindKey(other.species) === key))));
     return found;
   };
   const rank = (entry: CatchEntry): number => {
