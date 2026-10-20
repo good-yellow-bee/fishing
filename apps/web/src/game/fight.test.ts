@@ -1225,6 +1225,13 @@ describe("a nest guarder over the sunfish beds", () => {
     expect(firstRun("bluegill", true)).toBeCloseTo(firstRun("bluegill", false) * BED_GUARD_RUN, -2);
     expect(firstRun("perch", true)).toBe(firstRun("perch", false));
   });
+
+  it("still charges a full charge over the bed, so slack through it costs as before", () => {
+    const f = makeFight(fish("smallmouth-bass"), 1, 3, () => 0, 1, "weeds", undefined, false, false, false, false, false, false, false, 1, 1, false, { bed: true });
+    let now = 0;
+    for (let i = 0; i < 20_000 && !f.performance.slackCharge; i++) f.step((now += 10), 0.01, f.sim.surge === 0 && f.sim.tension < 0.5);
+    expect(f.performance.slackCharge).toBe(true);
+  });
 });
 
 describe("the dock's pilings", () => {
