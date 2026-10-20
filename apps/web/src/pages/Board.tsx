@@ -112,7 +112,7 @@ export function BoardPage() {
             <FishMark species={fish} />
             <span>
               <strong>{t("Fish of the week: {fish}", { fish: t(fish.name) })}</strong>
-              <small>{t("Lands for 1.5× points until Monday 00:00 UTC.")}</small>
+              <small>{t("Lands for 1.5× points through Sunday.")}</small>
             </span>
           </p>
         );

@@ -58,7 +58,7 @@ export const PL_PAGES: PlBook = {
   "Lifetime": "Łącznie",
   "Reading the lodge board…": "Czytam tablicę przystani…",
   "Fish of the week: {fish}": "Ryba tygodnia: {fish}",
-  "Lands for 1.5× points until Monday 00:00 UTC.": "Daje 1,5× punktów do poniedziałku 00:00 UTC.",
+  "Lands for 1.5× points through Sunday.": "Daje 1,5× punktów do końca niedzieli.",
   "Catch log": "Rejestr połowów",
   "Board period": "Okres tablicy",
   "Top {limit} anglers by points landed since Monday 00:00 UTC. Heaviest fish this week breaks a tie.":
