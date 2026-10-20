@@ -15,7 +15,6 @@ export { NightRower } from "../NightRower";
 export { PorchRocker } from "../PorchRocker";
 export { PostOwl } from "../PostOwl";
 export { Starlings } from "../Starlings";
-export { WindowGlow } from "../WindowGlow";
 export { Stars } from "../Stars";
 export { MoonRoad } from "../MoonRoad";
 export { Aurora } from "../Aurora";

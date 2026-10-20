@@ -2,7 +2,6 @@
 export { BirdFeeder } from "../BirdFeeder";
 export { Crows } from "../Crows";
 export { DiamondDust } from "../DiamondDust";
-export { DockFrost } from "../DockFrost";
 export { DockSnow } from "../DockSnow";
 export { EaveLights } from "../EaveLights";
 export { IceFloes } from "../IceFloes";

@@ -1,11 +1,10 @@
-import { use, useEffect, useState, type ComponentType } from "react";
-import type { LakeHour } from "@stillwater/shared";
+import { use, useEffect, useLayoutEffect, useState, type ComponentType } from "react";
 
 /**
  * Scene parts seen only at night, in one season or in wet weather live in their own chunks (parts/*), so a
  * first visit downloads only what its hour, season and weather show. Parts out when the scene first appears
  * hold its reveal until their chunk is in (like the models), so nothing pops in; a part that comes out later
- * draws once its chunk arrives, and the chunks likely next are fetched ahead (preloadParts).
+ * draws once its chunk arrives, and the chunks a visit may turn to (the weather, the night) are fetched ahead.
  */
 const GROUPS = {
   night: () => import("./parts/night"),
@@ -15,33 +14,47 @@ const GROUPS = {
   fall: () => import("./parts/fall"),
   weather: () => import("./parts/weather"),
 };
-export type PartGroup = keyof typeof GROUPS;
+type Groups = typeof GROUPS;
+export type PartGroup = keyof Groups;
+type Parts<G extends PartGroup> = Awaited<ReturnType<Groups[G]>>;
 
-const loaded: Partial<Record<PartGroup, Record<string, unknown>>> = {};
+/** How long to wait before trying a chunk again after it failed to download. */
+const RETRY_MS = 15_000;
+
+const loaded: { [G in PartGroup]?: Parts<G> } = {};
 const loading: Partial<Record<PartGroup, Promise<void>>> = {};
 let shown = false;
 
+/** Downloads a chunk once. A failed download is logged, not thrown, so the lake still draws; the next ask tries again. */
 export function loadParts(group: PartGroup) {
-  return (loading[group] ??= GROUPS[group]().then((module) => {
-    loaded[group] = module;
-  }));
-}
-
-/** The scene has appeared: parts coming out from now on draw when their chunk arrives rather than holding the scene back. */
-export function markSceneShown() {
-  shown = true;
+  return (loading[group] ??= GROUPS[group]().then(
+    (module) => {
+      (loaded as Record<PartGroup, unknown>)[group] = module;
+    },
+    (error: unknown) => {
+      console.warn(`Scene parts "${group}" failed to load; trying again shortly.`, error);
+      delete loading[group];
+    },
+  ));
 }
 
 /** A scene part `name` from chunk `group`, loaded on first use. */
-export function lazyPart<P>(group: PartGroup, name: string): ComponentType<P> {
-  function Part(props: P) {
-    const [, arrived] = useState(false);
-    const module = loaded[group];
+export function lazyPart<G extends PartGroup, N extends keyof Parts<G> & string>(group: G, name: N) {
+  type Props = Parts<G>[N] extends ComponentType<infer P> ? P : never;
+  function Part(props: Props) {
+    const [, arrived] = useState(0);
+    const module = loaded[group] as Parts<G> | undefined;
     useEffect(() => {
-      if (!module) void loadParts(group).then(() => arrived(true));
+      if (module) return;
+      let retry = 0;
+      void loadParts(group).then(() => {
+        if (loaded[group]) arrived((n) => n + 1);
+        else retry = window.setTimeout(() => arrived((n) => n + 1), RETRY_MS);
+      });
+      return () => window.clearTimeout(retry);
     }, [module]);
     if (!module) {
-      // Out as the scene first appears: hold the reveal until it is in.
+      // Out as the scene first appears: hold the reveal until it is in (or has failed, when it is left out).
       if (!shown) use(loadParts(group));
       return null;
     }
@@ -52,8 +65,18 @@ export function lazyPart<P>(group: PartGroup, name: string): ComponentType<P> {
   return Part;
 }
 
-/** Fetches the chunks likely needed next, once the scene is up: the wet-weather one (the sky can turn any time), and the night one from dusk. */
-export function preloadParts(hour: LakeHour) {
-  void loadParts("weather");
-  if (hour === "dusk" || hour === "night") void loadParts("night");
+/** Marks the scene shown from its commit (later parts then draw when their chunk arrives instead of holding it back), and fetches the chunks a visit may turn to: the wet-weather one (the sky can turn any time) and the night one. Unmounting it puts the hold back for the next scene. */
+export function useSceneParts() {
+  useLayoutEffect(() => {
+    shown = true;
+    // After the first moments' downloads.
+    const timer = window.setTimeout(() => {
+      void loadParts("weather");
+      void loadParts("night");
+    }, 4000);
+    return () => {
+      shown = false;
+      window.clearTimeout(timer);
+    };
+  }, []);
 }
