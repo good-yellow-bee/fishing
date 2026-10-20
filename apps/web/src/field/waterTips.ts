@@ -140,10 +140,9 @@ export function packingTips(book: Logbook, trip: Trip, today: string): string[] 
 export function packingTipRows(book: Logbook, trip: Trip, today: string): LureTally[] {
   // Last night's outing still listed under Coming up in the small hours keeps its tips.
   if (trip.date < today && !lateOutings(book).some((late) => late.id === trip.id)) return [];
-  // The angler's own fish for their own outing, as the water's page tips: the sample week's only for its own outings.
+  // The angler's own fish for their own outing, none yet before their first: the sample week's only for its own outings.
   const here = catchesForSpot(book, trip.spotId);
-  const own = !isSampleOuting(trip) && book.catches.some(ownFish);
-  return waterTips(own ? here.filter(ownFish) : countedFish(here))?.lures ?? [];
+  return waterTips(isSampleOuting(trip) ? countedFish(here) : here.filter(ownFish))?.lures ?? [];
 }
 
 /**

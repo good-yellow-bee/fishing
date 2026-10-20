@@ -40,11 +40,12 @@ import { offPlayLake } from "../playLake";
 import { countedBook, ownFish } from "../milestones";
 import { isSampleOnly, nextRealTrips, upcomingRealTrips } from "../bookCopy";
 import { outingFish } from "../outingFish";
-import { lateOutings, outNow, plainName, sameName, underWay } from "../tripDates";
+import { lateOutings, outingDay, outNow, plainName, sameName, underWay } from "../tripDates";
 import { focusPageHeading } from "../pageFocus";
-import { onPiece } from "../pieceTally";
+import { bookLureName, onPiece } from "../pieceTally";
 import { newestOutingFirst } from "../catchNeighbors";
 import { kindNames } from "../speciesLink";
+import { twinName } from "../spotOrder";
 
 function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
   const { book } = useLogbook();
@@ -131,26 +132,36 @@ function LureRecord({ today }: { today: string }) {
   // for, once there are two; the sample's only while the book has nothing of the angler's own, as the record counts.
   const counted = countedBook(book);
   const packedFor = new Set(items.map((item) => item.tripId));
-  const bookAt = (spotId: string) => ({ ...book, trips: book.trips.filter((trip) => trip.spotId === spotId), catches: book.catches.filter((entry) => entry.spotId === spotId) });
-  // Only a water with a record of its own: one picked never empties the record and takes its choice with it.
-  const waters = counted.spots.filter(
-    (spot) => counted.trips.some((trip) => trip.spotId === spot.id && trip.date <= today && packedFor.has(trip.id)) && pieceRecords(bookAt(spot.id), items, today).length > 0,
-  );
+  // A water and any that read the same: its links search the name, which opens both.
+  const bookAt = (spotId: string) => {
+    const name = book.spots.find((spot) => spot.id === spotId)?.name ?? "";
+    const here = new Set(book.spots.filter((spot) => spot.id === spotId || twinName(spot.name, name)).map((spot) => spot.id));
+    return { ...book, trips: book.trips.filter((trip) => here.has(trip.spotId)), catches: book.catches.filter((entry) => here.has(entry.spotId)) };
+  };
+  // Only a water with a record of its own: one picked never empties the record and takes its choice with it. Waters
+  // that read the same are one choice, as their record is one.
+  const waters = counted.spots
+    .filter((spot) => counted.trips.some((trip) => trip.spotId === spot.id && trip.date <= today && packedFor.has(trip.id)) && pieceRecords(bookAt(spot.id), items, today).length > 0)
+    .filter((spot, index, all) => all.findIndex((other) => twinName(other.name, spot.name)) === index);
+
   const [waterId, setWaterId] = useState("all");
   const water = waters.find((spot) => spot.id === waterId) ?? null;
   const atWater = water ? bookAt(water.id) : book;
   // The order picked holds while its control shows.
   const found = pieceRecords(atWater, items, today);
   const records = orderedRecords(found, found.length > 2 ? order : "most");
-  // A kind as the book writes it most, as Bests names it.
+  // A kind and a lure as the book writes them most, as Bests and the cards name them, whichever water is picked.
   const kindName = useMemo(() => kindNames(countedBook(book).catches), [book]);
+  const lureName = bookLureName(book.catches);
   // The book the record counts: the sample week's made-up lures go with the first outing of the angler's own.
-  const quiet = notYetThisYear(countedBook(atWater).catches, new Date(), (entry) => entry.lure, (entry) => bookFishDay(book, entry), (name) => shownPieceKey(name));
+  // This year as the book counts it: during a New Year's Eve session past midnight, still the old one.
+  const quiet = notYetThisYear(countedBook(atWater).catches, new Date(`${outingDay(today)}T12:00:00`), (entry) => entry.lure, (entry) => bookFishDay(book, entry), (name) => shownPieceKey(name));
   const [all, setAll] = useState(false);
   // A lure that took fish goes straight into the next outing's bag, unless it is already there.
   // Only for an outing on the water picked: another water's lures are no tip for it.
   const coming = nextRealTrips(book, today)[0];
-  const next = coming && (!water || water.id === coming.spotId) ? coming : undefined;
+  // At the water picked or a twin of it, as its record counts them.
+  const next = coming && (!water || twinName(water.name, book.spots.find((spot) => spot.id === coming.spotId)?.name ?? "")) ? coming : undefined;
   const onNext = new Set(next ? items.filter((item) => item.tripId === next.id).map((item) => shownPieceKey(item.label)) : []);
   const [justPacked, setJustPacked] = useState<string | null>(null);
   // The button goes once the lure is on the list: focus moves to the line saying so.
@@ -176,7 +187,7 @@ function LureRecord({ today }: { today: string }) {
             wrap
             label={t("Water")}
             value={water ? water.id : "all"}
-            options={[{ id: "all", label: t("All waters") }, ...waters.map((spot) => ({ id: spot.id, label: spot.name }))]}
+            options={[{ id: "all", label: t("All waters") }, ...waters.map((spot) => ({ id: spot.id, label: plainName(spot.name) }))]}
             onChange={setWaterId}
           />
         </div>
@@ -201,7 +212,7 @@ function LureRecord({ today }: { today: string }) {
           <li key={row.label}>
             {/* A lure that took fish opens them in the catch search. */}
             {/* With a water picked, its fish there. */}
-            {row.lure ? <Link to={findLink(countedSearch(book, [exactTerm("lure", pieceName(row.name)), ...(water ? [exactTerm("water", plainName(water.name))] : [])].join(" + "), atWater.catches.filter((entry) => onPiece(entry, row.lure!))))}>{pieceName(row.name)}</Link> : <span>{pieceName(row.name)}</span>}
+            {row.lure ? <Link to={findLink(countedSearch(book, [exactTerm("lure", lureName(row.name)), ...(water ? [exactTerm("water", plainName(water.name))] : [])].join(" + "), atWater.catches.filter((entry) => onPiece(entry, row.lure!))))}>{lureName(row.name)}</Link> : <span>{lureName(row.name)}</span>}
             <span className="meta">
               {fishCountLabel(row.fish)} · {tn(row.outings, "{n} outing", "{n} outings")}
               {/* How often it pays, once it has been out more than once. */}
@@ -251,7 +262,7 @@ function LureRecord({ today }: { today: string }) {
                   >
                     {t("Pack for {outing}", { outing: outingName(next, book.spots) })}
                     {/* Which lure, for a list of buttons that would otherwise all read the same. */}
-                    <span className="sr-only">: {pieceName(row.name)}</span>
+                    <span className="sr-only">: {lureName(row.name)}</span>
                   </button>
                 </span>
               ) : null}
@@ -299,7 +310,7 @@ function LureRecord({ today }: { today: string }) {
       {/* Packed again and again and never a fish: a lure that may as well stay home, said where the folded list hides it. */}
       {blanks.length > 0 ? (
         <p className="meta never-took">
-          {t("Packed for {n} or more outings without a fish: {lures}.", { n: NEVER_TOOK_OUTINGS, lures: blanks.map((row) => `${pieceName(row.name)} (${row.outings})`).join(", ") })}
+          {t("Packed for {n} or more outings without a fish: {lures}.", { n: NEVER_TOOK_OUTINGS, lures: blanks.map((row) => `${lureName(row.name)} (${row.outings})`).join(", ") })}
         </p>
       ) : null}
       {/* Lures that took fish last year and none yet this year: worth a swim before the season ends. */}
@@ -307,11 +318,11 @@ function LureRecord({ today }: { today: string }) {
         <p className="meta not-yet">
           <span>
             {t("Not yet this year:")}{" "}
-            {inReadersOrder(quiet, pieceName).map((lure, index) => (
+            {inReadersOrder(quiet, lureName).map((lure, index) => (
               <Fragment key={lure}>
                 {index > 0 ? ", " : null}
                 {/* Counted for the water picked, so each opens that water's fish on it. */}
-                <Link to={findLink(countedSearch(book, [exactTerm("lure", pieceName(lure)), ...(water ? [exactTerm("water", plainName(water.name))] : [])].join(" + "), atWater.catches.filter((entry) => onPiece(entry, lure))))}>{pieceName(lure)}</Link>
+                <Link to={findLink(countedSearch(book, [exactTerm("lure", lureName(lure)), ...(water ? [exactTerm("water", plainName(water.name))] : [])].join(" + "), atWater.catches.filter((entry) => onPiece(entry, lure))))}>{lureName(lure)}</Link>
               </Fragment>
             ))}
           </span>
@@ -324,7 +335,7 @@ function LureRecord({ today }: { today: string }) {
           <button
             type="button"
             className="text-button"
-            onClick={() => downloadFile(lureRecordCsv(records, kindName), "text/csv;charset=utf-8", datedName(water ? `${fileSlug(water.name)}-lures.csv` : "stillwater-lures.csv"))}
+            onClick={() => downloadFile(lureRecordCsv(records, kindName, lureName), "text/csv;charset=utf-8", datedName(water ? `${fileSlug(water.name)}-lures.csv` : "stillwater-lures.csv"))}
           >
             {t("Download the lure record as a spreadsheet")}
           </button>
@@ -494,7 +505,7 @@ export function GearPage() {
               {spot ? (
                 <>
                   {" · "}
-                  <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
+                  <Link to={`/spots/${spot.id}`}>{plainName(spot.name)}</Link>
                   {" · "}
                   {t(WATER_LABELS[spot.waterType])}
                 </>

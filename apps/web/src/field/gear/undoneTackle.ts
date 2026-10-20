@@ -9,11 +9,14 @@ export function undoneTackle(current: readonly TackleItem[], before: readonly Ta
   const was = new Map(before.map((item) => [item.id, item]));
   const made = new Set(after.map((item) => item.id));
   const renamed = new Map(after.filter((item) => was.has(item.id) && was.get(item.id)!.label !== item.label).map((item) => [item.id, was.get(item.id)!.label]));
+  // A tick the change carried over (from a dropped row) goes back too, unless it has been changed since.
+  const ticked = new Set(after.filter((item) => was.has(item.id) && !was.get(item.id)!.packed && item.packed).map((item) => item.id));
   const kept = current.flatMap((item) => {
     // Added by the change: it goes with the Undo.
     if (!was.has(item.id) && made.has(item.id)) return [];
     const label = renamed.get(item.id);
-    return [label === undefined ? item : { ...item, label }];
+    const back = label === undefined ? item : { ...item, label };
+    return [ticked.has(item.id) && item.packed ? { ...back, packed: false } : back];
   });
   // Dropped by the change (a list that already held the merged name): back as it was, unless it has come back since.
   const here = new Set(kept.map((item) => item.id));
