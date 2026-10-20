@@ -114,7 +114,6 @@ import { Kingfisher } from "./Kingfisher";
 import { kingfisherOut } from "./kingfisherFlight";
 import { Swallows } from "./Swallows";
 import { duckShape, ducklingShape } from "./duckShapes";
-import { fastVertexNormals } from "./waterNormals";
 import { fishBuild } from "./fishBuild";
 import { swallowsOut } from "./swallowFlight";
 import { BaskingLog, Turtle } from "./Turtle";
@@ -993,6 +992,18 @@ function makeWaveSurface(radiusX: number, radiusZ: number) {
   }
   geometry.userData.chopBasis = chopBasis(worldPoints);
   geometry.userData.chop = new Float32Array(position.count);
+  geometry.userData.slopeX = new Float32Array(position.count);
+  geometry.userData.slopeZ = new Float32Array(position.count);
+  // The shore fade's own slope, so the normals tilt where the chop dies out too.
+  const fadeSlope = new Float32Array(position.count * 2);
+  const step = 0.05;
+  for (let i = 0; i < position.count; i += 1) {
+    const x = worldPoints[i * 2]!;
+    const z = worldPoints[i * 2 + 1]!;
+    fadeSlope[i * 2] = (waterShoreWeight(x + step, z) - waterShoreWeight(x - step, z)) / (2 * step);
+    fadeSlope[i * 2 + 1] = (waterShoreWeight(x, z + step) - waterShoreWeight(x, z - step)) / (2 * step);
+  }
+  geometry.userData.fadeSlope = fadeSlope;
   return geometry;
 }
 
@@ -1006,16 +1017,33 @@ function displaceWater(geometry: THREE.BufferGeometry, time: number) {
     geometry.setAttribute("color", colors);
   }
   const chop = geometry.userData.chop as Float32Array;
-  writeChop(geometry.userData.chopBasis as Float32Array, time, chop);
+  const slopeX = geometry.userData.slopeX as Float32Array;
+  const slopeZ = geometry.userData.slopeZ as Float32Array;
+  const fadeSlope = geometry.userData.fadeSlope as Float32Array;
+  writeChop(geometry.userData.chopBasis as Float32Array, time, chop, slopeX, slopeZ);
+  const normal = geometry.getAttribute("normal") as THREE.BufferAttribute;
+  const p = position.array as Float32Array;
+  const n = normal.array as Float32Array;
+  const c = colors.array as Float32Array;
   for (let i = 0; i < position.count; i += 1) {
-    const height = chop[i]! * shoreWeights[i]!;
-    position.setZ(i, height);
+    const weight = shoreWeights[i]!;
+    const height = chop[i]! * weight;
+    p[i * 3 + 2] = height;
+    // Local +Y runs to world -Z, so the z slope flips sign; (-dh/dx, -dh/dy, 1) normalised.
+    const hx = slopeX[i]! * weight + chop[i]! * fadeSlope[i * 2]!;
+    const hz = slopeZ[i]! * weight + chop[i]! * fadeSlope[i * 2 + 1]!;
+    const inverse = 1 / Math.sqrt(hx * hx + hz * hz + 1);
+    n[i * 3] = -hx * inverse;
+    n[i * 3 + 1] = hz * inverse;
+    n[i * 3 + 2] = inverse;
     const crest = 1 + height * 0.55;
-    colors.setXYZ(i, tints[i * 3]! * crest, tints[i * 3 + 1]! * crest, tints[i * 3 + 2]! * crest);
+    c[i * 3] = tints[i * 3]! * crest;
+    c[i * 3 + 1] = tints[i * 3 + 1]! * crest;
+    c[i * 3 + 2] = tints[i * 3 + 2]! * crest;
   }
   colors.needsUpdate = true;
   position.needsUpdate = true;
-  fastVertexNormals(geometry);
+  normal.needsUpdate = true;
 }
 
 function edgePoints(offset: number) {
