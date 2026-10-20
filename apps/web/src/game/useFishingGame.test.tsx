@@ -556,7 +556,7 @@ describe("useFishingGame live shiner", () => {
   });
 
   it("keeps each angler's own shiner on the hook and handfuls in the bag", () => {
-    const kept = new Map<string, string>([[shinerKey(profile.userId), "lively"], [bagKey(profile.userId), "3"]]);
+    const kept = new Map<string, string>([[shinerKey(profile.userId), "lively"], [bagKey(profile.userId), JSON.stringify({ handfuls: 3, day: "2000-01-01" })]]);
     vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
     mount();
     const bag = () => container!.querySelector("[data-testid=groundbait]")?.textContent?.split("|")[0];
