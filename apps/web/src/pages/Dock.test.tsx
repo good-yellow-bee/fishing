@@ -5,14 +5,14 @@ import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { badgeProgress, catchPoints, CLEAN_RUN_BONUS, DAY_RUN_BONUS, GOLDEN_BONUS, LODGE_RECORD_BONUS, PB_BONUS, isGolden, weeklyBonus, dailyConditions, skyTurnForDay, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky, type SpotId, MASTER_BONUS, localDate } from "@stillwater/shared";
-import { buyGroundbait, buyShiner, getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
+import { buyGroundbait, buyShiner, getGiants, getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { sessionKey, startSession } from "../game/session";
 import type { Outcome } from "../game/useFishingGame";
 
 const scene = vi.fn<(props: { hour: LakeHour; sky: Sky; species?: FishSpecies | null; weight?: number; tracks?: readonly LodgeTrack[]; released?: boolean }) => void>();
-const landed = vi.hoisted(() => ({ outcome: null as Outcome | null, fishedHard: null as SpotId[] | null, waiting: null as { hint: string; more: string[] } | null, bite: null as string | null }));
+const landed = vi.hoisted(() => ({ outcome: null as Outcome | null, fishedHard: null as SpotId[] | null, waiting: null as { hint: string; more: string[] } | null, bite: null as string | null, stance: null as SpotId | null }));
 
 vi.mock("../api", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../api")>()),
@@ -34,7 +34,7 @@ vi.mock("../game/useFishingGame", async (importOriginal) => {
     ...real,
     useFishingGame: (...args: Parameters<typeof real.useFishingGame>) => {
       const game = real.useFishingGame(...args);
-      return { ...game, ...(landed.outcome ? { outcome: landed.outcome } : {}), ...(landed.fishedHard ? { fishedHard: landed.fishedHard } : {}), ...(landed.waiting ? { phase: "waiting" as const, hint: landed.waiting.hint, moreReasons: landed.waiting.more } : {}), ...(landed.bite ? { phase: "hookset" as const, hint: landed.bite } : {}) };
+      return { ...game, ...(landed.outcome ? { outcome: landed.outcome } : {}), ...(landed.fishedHard ? { fishedHard: landed.fishedHard } : {}), ...(landed.waiting ? { phase: "waiting" as const, hint: landed.waiting.hint, moreReasons: landed.waiting.more } : {}), ...(landed.bite ? { phase: "hookset" as const, hint: landed.bite } : {}), ...(landed.stance ? { stance: landed.stance } : {}) };
     },
   };
 });
@@ -92,6 +92,8 @@ afterEach(() => {
   landed.fishedHard = null;
   landed.waiting = null;
   landed.bite = null;
+  landed.stance = null;
+  vi.mocked(getGiants).mockResolvedValue([]);
   browser.window.localStorage.clear();
   scene.mockClear();
   vi.mocked(fx.ambient.setConditions).mockClear();
@@ -190,6 +192,22 @@ describe("dock weather", () => {
     expect(page.querySelector(".hint")?.textContent).toBe("Fresh water. Glassy water, made for a topwater. The chop hides the topwater.");
     expect(page.querySelector(".hint .hint-more")).toBeNull();
     expect(document.activeElement).not.toBe(more);
+  });
+
+  it("marks the walk signs of the banks whose giant is still out there, and the stance it is at", async () => {
+    landed.stance = "dock";
+    vi.mocked(getGiants).mockResolvedValue([
+      { spot: "reeds", name: "Iron Jaw", speciesId: "pike", weight: 19, landedBy: null, landedAt: null },
+      { spot: "point", name: "Old Moss", speciesId: "carp", weight: 17, landedBy: "Mara", landedAt: "2026-10-20T10:00:00Z" },
+      { spot: "dock", name: "Tarnish", speciesId: "smallmouth-bass", weight: 3.9, landedBy: null, landedAt: null },
+    ]);
+    const spring = await openDock("/?hour=day&sky=partly-cloudy&season=spring");
+    const sign = (name: string) => [...spring.querySelectorAll(".walk-signs button")].find((button) => button.textContent?.startsWith(name));
+    expect(sign("Reeds")?.getAttribute("aria-label")).toBe("Reeds: bites sooner now · Iron Jaw, its giant, is still out there");
+    expect(sign("Reeds")?.querySelector(".sign-giant")).not.toBeNull();
+    expect(sign("Point")?.querySelector(".sign-giant")).toBeNull();
+    expect(sign("Point")?.hasAttribute("aria-label")).toBe(false);
+    expect(spring.querySelector(".stance-chip")?.textContent).toContain("Tarnish, the bank's giant, is out here");
   });
 
   it("dims the walk signs of the banks fished hard, and says so to a screen reader", async () => {

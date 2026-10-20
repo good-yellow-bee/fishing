@@ -961,7 +961,14 @@ export function DockPage() {
   /** A bank whose bubbles boil in a feeding frenzy right now: its sign carries a star. */
   const frenzyAt = (target: WalkTarget) => game.frenzy && game.hotspot?.spot === target;
   /** What a walk sign tells a screen reader and the tooltip beyond its bank's name. */
-  const signNote = (target: WalkTarget, label: string) =>
+  const giantAt = (bank: string) => openGiants.find((giant) => giant.spot === bank);
+  // A bank whose giant is still out there says so after its other news.
+  const signNote = (target: WalkTarget, label: string) => {
+    const giant = giantAt(target);
+    const note = bankNote(target, label);
+    return giant ? t("{note} · {name}, its giant, is still out there", { note: note ?? t(label), name: t(giant.name) }) : note;
+  };
+  const bankNote = (target: WalkTarget, label: string) =>
     frenzyAt(target)
       ? fishedHardAt(target)
         ? t("{bank}: feeding frenzy now, but fished hard", { bank: t(label) })
@@ -1144,6 +1151,7 @@ export function DockPage() {
           {!rowing && game.stance === hotBank && <small className="stance-hot"> · {t("biting today")}</small>}
           {!rowing && !mercy && game.stance === crowdedBank && <small className="stance-cold"> · {t("another angler here today")}</small>}
           {!rowing && isFishingStance(game.stance) && game.stance !== "open" && favoredNow(game.stance) && <small className="stance-hot"> · {t("bites sooner now")}</small>}
+          {!rowing && giantAt(game.stance) && <small className="stance-hot"> · {t("{name}, the bank's giant, is out here", { name: t(giantAt(game.stance)!.name) })}</small>}
           {rising && <small className="stance-hot"> · {t("fish rising")}</small>}
           {!rowing && clouded && isFishingStance(game.stance) && SHALLOW_BANKS.has(game.stance) && <small className="stance-hot"> · {t("cloud over the sun")}</small>}
           {!rowing && moonPass && isFishingStance(game.stance) && <small className="stance-hot"> · {t(moonPass === "overhead" ? "moon overhead" : "moon underfoot")}</small>}
@@ -1286,6 +1294,7 @@ export function DockPage() {
                 {t(label)}
                 {favoredNow(target) && <span className="sign-now" aria-hidden="true"> •</span>}
                 {frenzyAt(target) && <span className="sign-frenzy" aria-hidden="true"> ✦</span>}
+                {giantAt(target) && <span className="sign-giant" aria-hidden="true"> ♦</span>}
               </button>
             ))}
           </nav>
