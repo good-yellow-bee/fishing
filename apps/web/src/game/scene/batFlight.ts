@@ -74,21 +74,35 @@ export function swoopAt(t: number) {
   return Math.min(smoothstep(into / SWOOP_EASE_SEC), smoothstep((SWOOP_SEC - into) / SWOOP_EASE_SEC));
 }
 
-/** Bat `index` at `time`, heading the way it flies. `still` holds it gliding with wings out, for reduced motion. */
-export function batAt(index: number, time: number, still = false): BatPose {
-  const bat = BATS[((index % BAT_COUNT) + BAT_COUNT) % BAT_COUNT]!;
-  const t = still ? 0 : time;
-  const here = place(bat, t);
-  const ahead = place(bat, t + 0.05);
-  const flap = still ? 0 : Math.sin((time + bat.phase) * BAT_FLAP_HZ * Math.PI * 2);
-  const yaw = Math.atan2(ahead.x - here.x, ahead.z - here.z);
-  const swoop = index === 0 && !still ? swoopAt(t) : 0;
-  if (swoop === 0) return { ...here, yaw, flap };
+/** The moths at the angler's lit headlamp, set by PlayerHeadlamp each frame: whether they are out, when they gathered, and where they loop. */
+export const lampMoths = { on: false, since: 0, x: 0, y: 0, z: 0 };
+export type LampMoths = typeof lampMoths;
+/** The second bat comes to hawk them this often and for this long, from a little after they gather, when its loop brings it this near. */
+export const LAMP_SWOOP_EVERY_SEC = 17;
+export const LAMP_SWOOP_SEC = 5;
+export const LAMP_SWOOP_FROM_M = 8;
+const LAMP_SWOOP_FIRST_SEC = 6;
+const LAMP_SWOOP_EASE_SEC = 1.6;
+
+/** How far the second bat means to be off its loop for the headlamp's moths at `t`, 0 to 1 (the bats smooth their way to it). */
+export function lampSwoopAt(t: number, lamp: LampMoths) {
+  if (!lamp.on) return 0;
+  const since = t - lamp.since - LAMP_SWOOP_FIRST_SEC;
+  if (since < 0) return 0;
+  const into = since % LAMP_SWOOP_EVERY_SEC;
+  if (into >= LAMP_SWOOP_SEC) return 0;
+  const from = place(BATS[1]!, t - into);
+  if (Math.hypot(from.x - lamp.x, from.z - lamp.z) > LAMP_SWOOP_FROM_M) return 0;
+  return Math.min(smoothstep(into / LAMP_SWOOP_EASE_SEC), smoothstep((LAMP_SWOOP_SEC - into) / LAMP_SWOOP_EASE_SEC));
+}
+
+/** A bat `swoop` of the way from its loop (`here`, heading `yaw`) onto a tight circle round `centre`. */
+function circling(here: { x: number; y: number; z: number }, yaw: number, flap: number, centre: { x: number; y: number; z: number }, swoop: number, t: number, above = 0): BatPose {
   // Round the light, its heading turning from its loop's to the circle's as it comes in, and back as it goes.
   const turn = t * SWOOP_SPIN;
-  const x = SWOOP_CENTER.x + Math.cos(turn) * SWOOP_RADIUS;
-  const y = SWOOP_CENTER.y + 0.08 * Math.sin(turn * 2);
-  const z = SWOOP_CENTER.z + Math.sin(turn) * SWOOP_RADIUS;
+  const x = centre.x + Math.cos(turn) * SWOOP_RADIUS;
+  const y = centre.y + above + 0.08 * Math.sin(turn * 2);
+  const z = centre.z + Math.sin(turn) * SWOOP_RADIUS;
   return {
     x: here.x + (x - here.x) * swoop,
     y: here.y + (y - here.y) * swoop,
@@ -97,6 +111,21 @@ export function batAt(index: number, time: number, still = false): BatPose {
     yaw: turnBetween(yaw, Math.atan2(-Math.sin(turn), Math.cos(turn)), smoothstep(swoop * 2)),
     flap,
   };
+}
+
+/** Bat `index` at `time`, heading the way it flies. `still` holds it gliding with wings out, for reduced motion. `atLamp` is how far the second bat is off its loop for the moths at `lamp` (lampSwoopAt, smoothed by the bats). */
+export function batAt(index: number, time: number, still = false, atLamp = 0, lamp: { x: number; y: number; z: number } = lampMoths): BatPose {
+  const bat = BATS[((index % BAT_COUNT) + BAT_COUNT) % BAT_COUNT]!;
+  const t = still ? 0 : time;
+  const here = place(bat, t);
+  const ahead = place(bat, t + 0.05);
+  const flap = still ? 0 : Math.sin((time + bat.phase) * BAT_FLAP_HZ * Math.PI * 2);
+  const yaw = Math.atan2(ahead.x - here.x, ahead.z - here.z);
+  const swoop = index === 0 && !still ? swoopAt(t) : 0;
+  if (swoop > 0) return circling(here, yaw, flap, SWOOP_CENTER, swoop, t);
+  // The second hawks the moths at a lit headlamp, a little above the beam.
+  if (index === 1 && !still && atLamp > 0) return circling(here, yaw, flap, lamp, atLamp, t, 0.2);
+  return { ...here, yaw, flap };
 }
 
 /** Whether a bat is over the lake; the loops are sized so it always is, and the turns at the lantern are off the dock's end. */
