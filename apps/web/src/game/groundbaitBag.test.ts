@@ -1,6 +1,7 @@
 import { JSDOM } from "jsdom";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { bagKey, DAILY_HANDFULS, LEGACY_BAG_KEY, LEGACY_SHINER_KEY, loadBag, loadShiner, saveBag, saveShiner, shinerKey } from "./groundbaitBag";
+import { GROUNDBAIT_HANDFULS as DAILY_HANDFULS } from "./logic";
+import { bagKey, LEGACY_BAG_KEY, LEGACY_SHINER_KEY, loadBag, loadShiner, saveBag, saveShiner, shinerKey } from "./groundbaitBag";
 
 const dom = new JSDOM("", { url: "http://localhost/" });
 
@@ -24,6 +25,19 @@ describe("the groundbait bag", () => {
     expect(loadBag("mara", day(20))).toBe(DAILY_HANDFULS);
     dom.window.localStorage.setItem(bagKey("ash"), JSON.stringify({ handfuls: 9, day: "2026-10-22" }));
     expect(loadBag("ash", day(22))).toBe(3);
+  });
+
+  it("doesn't spend the next day's free handful when a visit runs past midnight", () => {
+    expect(loadBag("ash", new Date(2026, 9, 20, 23, 50))).toBe(DAILY_HANDFULS);
+    saveBag("ash", 0, new Date(2026, 9, 21, 0, 10));
+    expect(loadBag("ash", new Date(2026, 9, 21, 9))).toBe(DAILY_HANDFULS);
+  });
+
+  it("leaves another angler's old browser-wide bag alone when this angler's bag is unreadable", () => {
+    dom.window.localStorage.setItem(bagKey("ash"), JSON.stringify({ handfuls: "x" }));
+    dom.window.localStorage.setItem(LEGACY_BAG_KEY, "3");
+    expect(loadBag("ash", day(20))).toBe(DAILY_HANDFULS);
+    expect(dom.window.localStorage.getItem(LEGACY_BAG_KEY)).toBe("3");
   });
 
   it("reads a bag kept before the free handful came once a day, and one from before anglers had their own", () => {

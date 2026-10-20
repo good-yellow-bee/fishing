@@ -658,7 +658,7 @@ export function useFishingGame(
   /** This cast landed in a school; the scene shows it milling round the float while it waits. */
   const [schooled, setSchooled] = useState(false);
   // Handfuls left in the bag this visit, and the bank the last one still feeds, so the page can offer and show it.
-  // A handful comes free with each visit; ones bought at the shack stay in the bag across a reload.
+  // A handful comes free once a day; ones bought at the shack stay in the bag across a reload.
   const [handfuls, setHandfuls] = useState(GROUNDBAIT_HANDFULS);
   const handfulsRef = useRef(GROUNDBAIT_HANDFULS);
   /** A handful thrown or bought is kept for the angler it belongs to. */

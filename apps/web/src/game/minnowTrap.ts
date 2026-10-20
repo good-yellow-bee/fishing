@@ -8,7 +8,7 @@ export function trapKey(userId: string) {
 export const TRAP_SOAK_MS = 6 * 3_600_000;
 /** Left longer than this, the shiners have nosed their way out again and the trap comes up empty. */
 export const TRAP_STALE_MS = 72 * 3_600_000;
-/** The most shiners a trap holds: few, since a visit's free handful can bait it. */
+/** The most shiners a trap holds: few, since a day's free handful can bait it. */
 export const TRAP_MAX = 2;
 
 export type Trap = { setAt: number };
