@@ -27,8 +27,9 @@ afterEach(() => setLang("en"));
 describe("round 102 ideas: the outings sheet names the lures", () => {
   it("most first, a piece however it was typed, beside the kinds", () => {
     const [head, row] = tripsCsv(book, "2026-10-19").replace(/^\uFEFF/, "").split("\r\n");
-    expect(head).toBe("Date,Trip,Water,Fish,Kinds,Lures,Lost fish,Missed strikes,Released fish,Note");
-    expect(row).toBe('2026-10-10,Dawn,Own Lake,4,Zander ×4,"Spinner ×2, Jig",0,0,0,');
+    expect(head).toBe("Date,Trip,Water,Fish,Kinds,Lures,Lost fish,Missed strikes,Released fish,Fish times,Note");
+    // The fish times (by the clock where the tests run) aside.
+    expect(row.replace(/,\d\d:\d\d(?:–\d\d:\d\d)?,$/, ",")).toBe('2026-10-10,Dawn,Own Lake,4,Zander ×4,"Spinner ×2, Jig",0,0,0,');
   });
 
   it("in Polish too", () => {

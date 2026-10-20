@@ -9,7 +9,7 @@ describe("round 108 ideas: the outings sheet", () => {
   it("counts the fish that went back beside the fish", () => {
     const book: Logbook = { spots: [{ id: "own", name: "Own Lake", waterType: "lake", notes: "", bestConditions: "" }], trips: [{ id: "t", date: "2026-10-10", spotId: "own", title: "Dawn", note: "" }], catches: [fish("a", true), fish("b", true), fish("c", false)] };
     const [head, row] = tripsCsv(book, "2026-10-19").replace(/^\uFEFF/, "").split("\r\n");
-    expect(head!.split(",")).toEqual(["Date", "Trip", "Water", "Fish", "Kinds", "Lures", "Lost fish", "Missed strikes", "Released fish", "Note"]);
+    expect(head!.split(",")).toEqual(["Date", "Trip", "Water", "Fish", "Kinds", "Lures", "Lost fish", "Missed strikes", "Released fish", "Fish times", "Note"]);
     expect(row!.split(",")[3]).toBe("3");
     expect(row!.split(",")[8]).toBe("2");
   });

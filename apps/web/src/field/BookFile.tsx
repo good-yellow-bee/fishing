@@ -311,6 +311,11 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
           .filter((spot) => !idsHere.has(spot.id) && namesHere.has(foldText(spot.name)))
           .map((spot) => ({ id: spot.id, name: spot.name, into: here.book.spots.find((other) => foldText(other.name) === foldText(spot.name))!.id }))
       : [];
+    // The angler's own fish said apart from the game's, as the file's summary above counted them.
+    const hereIds = new Set(here.book.catches.map((entry) => entry.id));
+    const added = next.book.catches.filter((entry) => !hereIds.has(entry.id));
+    const addedGame = added.filter((entry) => !offPlayLake(entry)).length;
+    const addedReal = added.length - addedGame;
     setNotice({
       tone: "loaded",
       ...(twins.length > 0 ? { twins } : {}),
@@ -319,7 +324,10 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
             // Just the waters and outings, or the photos, when the file brought no fish.
             ...(next.book.catches.length > here.book.catches.length ||
             (next.book.spots.length + next.book.trips.length === here.book.spots.length + here.book.trips.length && Object.keys(next.photos).length === Object.keys(here.photos).length && counted === 0)
-              ? [t("Fish added from the file: {count}.", { count: next.book.catches.length - here.book.catches.length })]
+              ? [
+                  ...(addedReal > 0 || addedGame === 0 ? [t("Fish added from the file: {count}.", { count: addedReal })] : []),
+                  ...(addedGame > 0 ? [t("Fish from the game added too: {count}.", { count: addedGame })] : []),
+                ]
               : []),
             ...(counted > 0 ? [t("Outings with newer lost and missed counts: {count}.", { count: counted })] : []),
             ...(next.book.spots.length > here.book.spots.length ? [t("Waters added: {count}.", { count: next.book.spots.length - here.book.spots.length })] : []),
