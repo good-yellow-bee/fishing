@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-game51";
+export const NEWS_ID = "2026-10-20-field68";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "A water's page names kinds and lures as the rest of the book does, and each of its counts opens just the fish it counted. Its copied summary adds the next outing there and the fish lost or missed.",
   "A Line button by the bank signs now swaps the line on your reel between casts: light line brings more bites but snaps sooner, heavy line holds more strain but the fish see it. And the lodge board now names the week's stewards, the anglers who let the most fish go.",
   "If the lake runs slowly on your phone, it now also turns shadows off and draws a lighter picture from your next visit, besides lighter effects, and says so; Settings can turn each back. And the moving water costs less of every frame, so the lake runs a little smoother everywhere.",
   "A bank where you kept thirty or more fish this week is fished down: its fish come smaller until it rests, and the bank chip says so. Fish you let go don't count, so releasing them keeps a bank stocked. And once a catch is saved, the landed card shows the points the server paid, with a lodge tag's stamp only when the tag was paid.",

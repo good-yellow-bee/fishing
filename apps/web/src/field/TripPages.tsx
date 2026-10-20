@@ -69,7 +69,7 @@ import { looseFishFor } from "./looseFish";
 import { countedBook, countedFish, ownFish } from "./milestones";
 import { isSampleOnly, isSamplePlan, isSampleSpot, isSampleOuting, upcomingRealTrips } from "./bookCopy";
 import { looseFishDays, outingFish } from "./outingFish";
-import { pieceTally } from "./pieceTally";
+import { bookLureName, pieceTally } from "./pieceTally";
 import { WaterOptions } from "./WaterOptions";
 import { kindKey, kindNames, speciesCounts, speciesLink } from "./speciesLink";
 import { pieceName } from "./gear/pieceKey";
@@ -1079,7 +1079,7 @@ function TripForm() {
           </div>
           {pastWeek.length > 0 ? (
             <p className="wide form-note">
-              {sameTimeText(pastWeek, bookKindName(book.catches))}
+              {sameTimeText(pastWeek, bookKindName(book.catches), bookLureName(book.catches))}
             </p>
           ) : null}
           {sameDay ? (

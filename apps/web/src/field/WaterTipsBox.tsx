@@ -2,8 +2,7 @@ import { Fragment } from "react";
 import { Link } from "react-router-dom";
 import { MOON_QUARTER_LABELS, SEASON_LABELS, localDate, moonQuarterOf, shiftDate, SKY_LABELS, WIND_LABELS, type CatchEntry } from "@stillwater/shared";
 import { inSentence } from "./MonthBars";
-import { pieceTally } from "./pieceTally";
-import { pieceName } from "./gear/pieceKey";
+import { bookLureName, lureNames, pieceTally } from "./pieceTally";
 import { getUnits, t, useT } from "../i18n";
 import { exactTerm, findLink, findWithLink } from "./CatchSearch";
 import { lureByTemp, readingBefore, waterTips, type WaterReading } from "./waterTips";
@@ -20,7 +19,7 @@ import { bookKindName, kindNames, speciesCounts } from "./speciesLink";
  * "Around this date in earlier years here: 9 fish, Northern pike, Perch; most on Spinnerbait.": what a water gave within
  * a fortnight of a planned day in years before, for a box or form about one outing.
  */
-export function sameTimeText(fish: readonly CatchEntry[], kindName = kindNames(fish)): string {
+export function sameTimeText(fish: readonly CatchEntry[], kindName = kindNames(fish), lureName = lureNames(fish)): string {
   const text = t("Around this date in earlier years here: {fish}, {species}.", {
     fish: fishCountLabel(fish.length),
     species: speciesCounts(fish)
@@ -29,7 +28,7 @@ export function sameTimeText(fish: readonly CatchEntry[], kindName = kindNames(f
   });
   // A tie names no lure: "most on" would be a coin toss.
   const [lure, second] = pieceTally(fish, 2);
-  const withLure = lure && lure.count >= 2 && (!second || lure.count > second.count) ? `${text} ${t("Most on {lure}.", { lure: pieceName(lure.lure) })}` : text;
+  const withLure = lure && lure.count >= 2 && (!second || lure.count > second.count) ? `${text} ${t("Most on {lure}.", { lure: lureName(lure.lure) })}` : text;
   const water = waterThen(fish);
   return water ? `${withLure} ${water}` : withLure;
 }
@@ -88,6 +87,8 @@ export function WaterTipsBox({
 }) {
   useT();
   const { book } = useLogbook();
+  // Kinds and lures named as the book writes them most, as Bests and Gear name them.
+  const lureName = bookLureName(book.catches);
   const heading = label ?? t("What works here");
   const tips = waterTips(catches);
   if (!tips) return null;
@@ -129,7 +130,7 @@ export function WaterTipsBox({
         {tips.lures.map((row, index) => (
           <Fragment key={row.lure}>
             {index > 0 ? " · " : null}
-            <Link to={find(exactTerm("lure", pieceName(row.lure)))}>{pieceName(row.lure)}</Link>{"\u00a0"}({row.count})
+            <Link to={find(exactTerm("lure", lureName(row.lure)))}>{lureName(row.lure)}</Link>{"\u00a0"}({row.count})
           </Fragment>
         ))}
         {tips.time ? <TipLine text="Most fish at: {time}" name="time" value={t(tips.time.label)} to={find(exactTerm("time", t(tips.time.label)))} /> : null}
@@ -138,7 +139,7 @@ export function WaterTipsBox({
         {byTemp.length > 0 ? (
           <>
             <br />
-            {t("Lure by water temperature: {bands}", { bands: byTemp.map((row) => `${tempBandLabel(row.band)}: ${pieceName(row.lure)}`).join(" · ") })}
+            {t("Lure by water temperature: {bands}", { bands: byTemp.map((row) => `${tempBandLabel(row.band)}: ${lureName(row.lure)}`).join(" · ") })}
           </>
         ) : null}
         {tips.moon ? <TipLine text="Best moon: {moon}" name="moon" value={t(MOON_QUARTER_LABELS[tips.moon])} to={find(exactTerm("moon", t(MOON_QUARTER_LABELS[tips.moon])))} /> : null}
@@ -158,13 +159,13 @@ export function WaterTipsBox({
             {t("Last water temperature noted: {temp} on {day}.", { temp: tempText(tips.lastTemp.fahrenheit), day: readingDay(tips.lastTemp) })}
             {trend ? ` ${trend}` : null}
             {/* The lure that led in the band the water was last in: what to tie on first. */}
-            {lureNow ? ` ${t("{lure} led at that temperature.", { lure: pieceName(lureNow) })}` : null}
+            {lureNow ? ` ${t("{lure} led at that temperature.", { lure: lureName(lureNow) })}` : null}
           </>
         ) : null}
         {pastWeek.length > 0 ? (
           <>
             <br />
-            {sameTimeText(pastWeek, bookKindName(book.catches))}
+            {sameTimeText(pastWeek, bookKindName(book.catches), lureName)}
           </>
         ) : null}
       </p>

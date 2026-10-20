@@ -72,9 +72,12 @@ export function spotSummary(
   best: { trip: Trip; fish: number } | null,
   /** "Last fished here: Fri, Oct 16 · 3 fish", as the page's line says it. */
   last: string | null = null,
+  /** The page's other lines a mate would ask about: fish lost and strikes missed here, and the next outing planned. */
+  more: { hooks?: string | null; next?: string | null; lureName?: (lure: string) => string } = {},
 ): string {
+  const lureName = more.lureName ?? pieceName;
   const lures = pieceTally(catches, 3)
-    .map((row) => `${pieceName(row.lure)} (${row.count})`)
+    .map((row) => `${lureName(row.lure)} (${row.count})`)
     .join(", ");
   return [
     `${plainName(spot.name)} · ${t(WATER_LABELS[spot.waterType])}`,
@@ -84,6 +87,8 @@ export function spotSummary(
     `${tn(outings, "{n} outing", "{n} outings")} · ${outings > 0 ? tn(catches.length, "{n} fish", "{n} fish") : fishCountLabel(catches.length)}`,
     ...(average ? [average] : []),
     ...(last ? [last] : []),
+    ...(more.next ? [more.next] : []),
+    ...(more.hooks ? [more.hooks] : []),
     ...(best ? [`${t("Best outing here:")} ${outingName(best.trip, [spot])} · ${formatDatedDay(new Date(`${best.trip.date}T12:00:00`))}, ${fishCountLabel(best.fish)}`] : []),
     ...(lures ? [t("Lures that took the most: {lures}", { lures })] : []),
     ...(spot.bestConditions.trim() ? [t("Best conditions: {conditions}", { conditions: spot.bestConditions.trim() })] : []),

@@ -23,9 +23,9 @@ import { catchLink, type ListKey } from "./catchList";
 import { FROM_LIST } from "./leaveDeleted";
 import { isPlanned } from "./TripMonthHead";
 import { outingDay, outNow, plainName, sameName } from "./tripDates";
-import { pieceName } from "./gear/pieceKey";
 import { bookFishDay } from "./tripMonths";
 import { bookKindName } from "./speciesLink";
+import { bookLureName } from "./pieceTally";
 
 /** A card's heading sits one below the section it is listed under. */
 type CardLevel = 2 | 3 | 4;
@@ -51,6 +51,7 @@ export const CatchCard = memo(function CatchCard({
   const { book, photoFor } = useLogbook();
   const photo = photoFor(entry.id);
   const badge = catchBadge(book, entry);
+  const lure = bookLureName(book.catches)(entry.lure);
   return (
     <article className={photo ? "catch-card has-photo" : "catch-card"}>
       {photo ? <img className="catch-thumb" src={photo} alt="" /> : null}
@@ -63,7 +64,7 @@ export const CatchCard = memo(function CatchCard({
         </Head>
         <p className="meta">
           {/* Every fish taken on this lure, as on the catch page. */}
-          <Link to={findLink(exactTerm("lure", pieceName(entry.lure)))}>{pieceName(entry.lure)}</Link>
+          <Link to={findLink(exactTerm("lure", lure))}>{lure}</Link>
           <span aria-hidden="true">·</span>
           {spotName !== null ? (
             <>
@@ -161,6 +162,7 @@ export function SpotCard({
   waterTemp = null,
   biggest = null,
   kindName = (species: string) => species,
+  lureName,
   outNow = null,
 }: {
   spot: Spot;
@@ -179,6 +181,8 @@ export function SpotCard({
   biggest?: { entry: CatchEntry; kind: "length" | "weight" } | null;
   /** How the book names a kind, for its best fish. */
   kindName?: (species: string) => string;
+  /** How the book names a lure, for its best lure. */
+  lureName: (lure: string) => string;
   /** The outing the angler is out on there now, by name. */
   outNow?: string | null;
 }) {
@@ -196,7 +200,7 @@ export function SpotCard({
         {" · "}
         {tn(tripCount, "{n} outing", "{n} outings")}
         {lastFishDay ? ` · ${t("Last fish: {day}", { day: formatDay(lastFishDay) })}` : ""}
-        {bestLure ? ` · ${t("best on {lure}", { lure: pieceName(bestLure) })}` : ""}
+        {bestLure ? ` · ${t("best on {lure}", { lure: lureName(bestLure) })}` : ""}
       </p>
       {restDays !== null ? <p className="meta">{restDays === 0 ? t("Fished here today") : restDays === 1 ? t("Last fished here yesterday") : tn(restDays, "Last fished here {n} day ago", "Last fished here {n} days ago")}</p> : null}
       {biggest ? <p className="meta">{t("Best here: {species}, {size}", { species: kindName(biggest.entry.species), size: measureText(measureOf(biggest.entry, biggest.kind)!) })}</p> : null}

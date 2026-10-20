@@ -19,7 +19,7 @@ import {
   parseSpotPlace,
   foldText,
 } from "@stillwater/shared";
-import { pieceTally } from "./pieceTally";
+import { bookLureName, pieceTally } from "./pieceTally";
 import { CatchCard, SpotCard, TripCard } from "./cards";
 import { PagedCatches } from "./PagedCatches";
 import { FishSum } from "./FishSum";
@@ -41,7 +41,6 @@ import { EditDelete } from "./EditDelete";
 import { fishCountLabel, formatDay, formatTimeOfDay, messageText, outingName, outingNameById, tripWhen } from "./format";
 import { outingDay, outingFished, outNow, outNowAt, plainName } from "./tripDates";
 import { newestOutingFirst } from "./catchNeighbors";
-import { pieceName } from "./gear/pieceKey";
 import { useLogbook } from "./LogbookState";
 import { locale, num, t, tn, useT } from "../i18n";
 import { tempText } from "../i18n/content";
@@ -196,6 +195,7 @@ export function SpotsPage() {
   };
   const [ownFishAt, allFishAt] = [fishAt(countedCatches), fishAt(book.catches)];
   const kindName = bookKindName(book.catches);
+  const lureName = bookLureName(book.catches);
   const fishedHere = (id: string) => {
     const own = ownHere(id);
     const trips = own ? ownTrips(id) : tripsForSpot(book, id);
@@ -367,6 +367,7 @@ export function SpotsPage() {
                   biggest={biggestAt(ownHere(row.spot.id) ? countedCatches : book.catches, row.spot.id)}
                   waterTemp={recentTemp(ownHere(row.spot.id) ? countedCatches : book.catches, row.spot.id, today, (entry) => bookFishDay(book, entry))}
                   kindName={kindName}
+                  lureName={lureName}
                   outNow={outNowName(row.spot.id)}
                 />
               ))}
@@ -475,6 +476,7 @@ function SpotView() {
   // Its links open the fish its counts count: the sample week's beside the angler's own left out, as here.
   // Kinds named as the book writes them most, as Bests and the catch cards name them, not as this water's few fish do.
   const kindName = bookKindName(book.catches);
+  const lureName = bookLureName(book.catches);
   const here = summed.length < catches.length ? `${exactTerm("water", plainName(spot.name))} -${t("sample|search word")}` : exactTerm("water", plainName(spot.name));
   // A search finds a water by its name, so while another shares it, this page's links open both waters' fish.
   const twin = book.spots.find((other) => other.id !== spot.id && twinName(other.name, spot.name));
@@ -567,7 +569,7 @@ function SpotView() {
         {/* When it was last fished, by its last outing or fish: how long it has rested. */}
         {lastHere ? (
           <p className="meta last-here">
-            <LastHereLine rest={restHere} day={lastHere} trip={lastHereTrip} fish={fishOn} catches={catches} />
+            <LastHereLine rest={restHere} day={lastHere} trip={lastHereTrip} fish={fishOn} catches={catches} lureName={lureName} />
           </p>
         ) : null}
         {/* How long the angler has known this water: its first fish, once another fish day has followed it. */}
@@ -634,7 +636,13 @@ function SpotView() {
       {/* A water fished only blank has something to send too: "skip this one". */}
       {summed.length > 0 || fishedOutings > 0 ? (
         <CopySummary
-          text={() => spotSummary(spot, fishedOutings, summed, average, top ? { trip: top, fish: fishOn(top.id) } : null, lastHereText)}
+          text={() =>
+            spotSummary(spot, fishedOutings, summed, average, top ? { trip: top, fish: fishOn(top.id) } : null, lastHereText, {
+              hooks: hooks ? hookText(hooks) : null,
+              next: nextHere ? t("Next outing here: {when}", { when: tripWhen(nextHere.date, today, tomorrow) }) : null,
+              lureName,
+            })
+          }
           file="stillwater-water.txt"
         />
       ) : null}
@@ -1068,7 +1076,21 @@ function SunAtWater({ place }: { place: { lat: number; lng: number } }) {
 
 /** "Water temperature in 2026: Apr 20 52°F → Jun 3 64°F → Sep 9 58°F", from the readings noted with fish. */
 /** "Last fished here 8 days ago · Sat, Oct 10 · 2 fish · Spinner ×1": that day's outing, with what it gave and on what. */
-function LastHereLine({ rest, day, trip, fish, catches }: { rest: number; day: string; trip: Trip | undefined; fish: (tripId: string) => number; catches: readonly CatchEntry[] }) {
+function LastHereLine({
+  rest,
+  day,
+  trip,
+  fish,
+  catches,
+  lureName,
+}: {
+  rest: number;
+  day: string;
+  trip: Trip | undefined;
+  fish: (tripId: string) => number;
+  catches: readonly CatchEntry[];
+  lureName: (lure: string) => string;
+}) {
   const when = rest === 0 ? t("Fished here today") : rest === 1 ? t("Last fished here yesterday") : `${tn(rest, "Last fished here {n} day ago", "Last fished here {n} days ago")} · ${formatDay(day)}`;
   // A day fished off any outing (fish logged loose) has no page to open: the line stays as it was.
   if (!trip) return <>{when}</>;
@@ -1081,7 +1103,7 @@ function LastHereLine({ rest, day, trip, fish, catches }: { rest: number; day: s
     <Link to={`/trips/${trip.id}`}>
       {/* A count in a sentence: a blank outing was "0 fish", not "Nothing logged". */}
       {when} · {tn(caught, "{n} fish", "{n} fish")}
-      {led ? ` · ${pieceName(led.lure)} ×${led.count}` : ""}
+      {led ? ` · ${lureName(led.lure)} ×${led.count}` : ""}
     </Link>
   );
 }

@@ -1,6 +1,8 @@
 import type { CatchEntry, LureTally } from "@stillwater/shared";
 import { pieceName, shownPieceKey } from "./gear/pieceKey";
 import { mostWritten } from "./speciesLink";
+import { countedFish } from "./milestones";
+import { getLang } from "../i18n";
 
 /**
  * The lures that took the most fish, most first, grouped as the exact lure search and Gear group them: "Spinnerbait"
@@ -33,6 +35,21 @@ export function pieceTally(catches: readonly CatchEntry[], limit = 5): LureTally
 export function lureNames(catches: readonly CatchEntry[]): (lure: string) => string {
   const spelled = new Map(pieceTally(catches, Infinity).map((row) => [shownPieceKey(row.lure), row.lure]));
   return (lure) => (lure.trim() ? pieceName(spelled.get(shownPieceKey(lure.trim())) ?? lure) : "");
+}
+
+const lureNameCache = new WeakMap<readonly CatchEntry[], { lang: string; name: (lure: string) => string }>();
+
+/**
+ * lureNames for a book's own fish, kept while the book and the language stay the same (its spellings are grouped by
+ * the reader's words): a lure named as Gear and Bests name it.
+ */
+export function bookLureName(catches: readonly CatchEntry[]): (lure: string) => string {
+  const lang = getLang();
+  const known = lureNameCache.get(catches);
+  if (known?.lang === lang) return known.name;
+  const name = lureNames(countedFish(catches));
+  lureNameCache.set(catches, { lang, name });
+  return name;
 }
 
 /** Whether a fish was taken on the piece `lure` names, however it was spelled. */
