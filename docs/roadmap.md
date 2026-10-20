@@ -1891,7 +1891,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT423~~ | ~~Night line: with a live shiner on the hook, the sign of the bank underfoot leaves it out on a set line (only where the angler could land one of the bank's night feeders); six hours to two days later the same sign brings it in, mostly with a night feeder of that bank (landed, not clean), else an empty hook; past two days the bait is long gone. Kept per angler in the browser~~ (#1635) | gameplay | M |
 | ~~GT424~~ | ~~Giant hunter badge: be first to land three of the lake's weekly giants (counted from the giants table, as derby wins are)~~ (#1637) | gameplay | S |
 | ~~GT425~~ | ~~News card 2026-10-20-game57 covers GT423-GT424: the night line and the Giant hunter badge~~ (#1638) | ui | S |
-| ~~GT426~~ | ~~A night line reads the sky over its night (the forecast's evening sky): rain 85%, overcast 75%, fog 70%, clear 55% to hold a fish, and setting it says when the night is wet or clear~~ (#1640) | gameplay | S |
+| ~~GT426~~ | ~~A night line reads the sky over its night (the forecast's evening sky): rain 85%, overcast 75%, fog 70%, clear 55% to hold a fish, and setting it says when the night is wet or clear; a line comes in only once its night is out~~ (#1640) | gameplay | S |
 
 ## Risks / open questions for the owner
 
