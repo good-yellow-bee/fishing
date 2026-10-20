@@ -1,5 +1,6 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { DRAGS, type Drag } from "./drag";
+import { LINE_WEIGHTS, type LineWeight } from "./lineWeight";
 import { FLOAT_COLOURS, type FloatColour } from "./scene/floatColour";
 
 /**
@@ -20,7 +21,7 @@ export type Settings = {
   shake: ShakeLevel;
   /** Lite draws half the rain, fireflies and mist, and no sun halo. */
   particles: "full" | "lite";
-  /** Effects may step down to Lite on their own when frames sag; off once the player picks effects themselves. */
+  /** Effects, shadows and picture may step down on their own when frames sag; off once the player picks any of them. */
   autoEffects: boolean;
   shadows: boolean;
   /** Sharp renders up to 1.75 device pixels per CSS pixel; fast renders one. */
@@ -51,6 +52,8 @@ export type Settings = {
   lastLure: string | null;
   /** The reel's drag, kept from fight to fight until the angler turns it. */
   drag: Drag;
+  /** The line on the reel, changed between casts. */
+  line: LineWeight;
 };
 
 export const SETTINGS_KEY = "stillwater.settings.v1";
@@ -77,6 +80,7 @@ export const DEFAULT_SETTINGS: Settings = {
   floatColour: "blue",
   lastLure: null,
   drag: "normal",
+  line: "standard",
 };
 
 export const SHAKE_SCALE: Record<ShakeLevel, number> = { off: 0, soft: 0.45, full: 1 };
@@ -130,6 +134,7 @@ export function parseSettings(raw: string | null, wantsContrast = systemWantsCon
     floatColour: pick(data.floatColour, FLOAT_COLOURS, d.floatColour),
     lastLure: typeof data.lastLure === "string" && data.lastLure ? data.lastLure : null,
     drag: pick(data.drag, DRAGS, d.drag),
+    line: pick(data.line, LINE_WEIGHTS, d.line),
   };
 }
 

@@ -1442,6 +1442,10 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC251~~ | ~~Calmer lake for reduced motion: creatures already held still, but the lake bed's caustic shimmer (the biggest moving area, up to a sixth of the frame) and the player's rocking rowboat kept going; with reduced motion the caustics now drift at a quarter pace and the boat rides the water's height without pitching or rolling (changed pixels a second apart, summer day: 16% to 11%)~~ (#1583) | scene | S |
 | ~~SC252~~ | ~~The fight above the card on a tall phone: the fight card sits at the foot of the lake, which on a portrait phone is its middle, right over the angler, the line and the fish; while a fish is on (hookset and fight) a phone held upright (narrower than 0.65) eases its view up 18% of its height, so the fight shows above the card, dropping back at once when it ends (so aiming and the catch photo never see it); tablets and wider screens unchanged~~ (#1587) | scene | S |
 | ~~SC253~~ | ~~News card scene59 covers SC251 and SC252: the fight above the card on an upright phone and a calmer lake for reduced motion~~ (#1590) | scene | S |
+| SC254 | Slow phones step down further: when the frame-rate watcher finds the lake slow (under 40 a second for 6 s after the warm-up), besides Lite effects it now also turns shadows off and the picture to Fast (1 device pixel) from the next visit; the notice says so and Settings can turn each back, and picking effects, picture or shadows by hand stops the step-down (phone 390x844 at 3x, 12x CPU throttle: 20 to 23 fps, median frame 50 to 40 ms; draw calls 193 to 152) | scene | S |
+| SC255 | Cheaper moving lake: the surface's chop was four sines per point every frame (about 8,000 a frame); each wave's place-only part is now worked out once per point, leaving a few sines a frame, with the same heights (phone, 6x CPU throttle, effects Lite: the surface's update 4.5% to 1.4% of frame time) | scene | S |
+| SC256 | Lake normals from the waves: the moving surface rebuilt its shading normals from its triangles every frame; they now come straight from the waves' own slope (and the shore fade's), worked out alongside the chop, with values written straight into the buffers (phone, 6x CPU throttle, effects Lite: the surface's update, chop plus normals, 4.3% to 2.1% of frame time; day and dusk shots unchanged) | scene | S |
+| SC257 | News card scene60 covers SC254 to SC256: slow phones also dropping shadows and render resolution, and the cheaper moving lake | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1850,7 +1854,10 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT401~~ | ~~News card 2026-10-20-game49 covers GT398 to GT400: risers leap first, the lantern-lit net and fired up on the fry~~ (#1580) | ui | S |
 | ~~GT403~~ | ~~The landed card tells what the server paid: once the catch is saved, its points line shows the saved points, and a lodge tag's stamp shows only if the server paid the tag (another angler may have landed that fish first)~~ (#1585) | gameplay | S |
 | ~~GT404~~ | ~~Bank stock across the week: a bank where the angler kept 30 or more fish in the last seven days (fish let go don't count) is fished down, so a fresh fish there keeps only 0.6 of its weight above its kind's least (no trophies) till the bank rests; the stance chip says so, a new angler is spared, and the server counts the week's kept fish on its own call once a visit~~ (#1588) | gameplay | M |
-| GT405 | News card game50 covers GT403 and GT404 | ui | S |
+| ~~GT405~~ | ~~News card 2026-10-20-game50 covers GT403 and GT404: the landed card tells what the server paid, and bank stock across the week~~ (#1591) | ui | S |
+| ~~GT406~~ | ~~The line on the reel: the walk signs' Line button swaps light, standard or heavy line between casts (kept from visit to visit); light line bites 0.85x sooner but snaps at 0.9 of the strain (frayed too, with a mark on the tension bar), heavy line holds 1.1x the strain but bites 1.15x slower; the wait hint and the fight card say so~~ (#1593) | gameplay | M |
+| ~~GT407~~ | ~~Stewards of the week: the Board ranks the lodge's anglers by the fish they let go this week (from Monday 00:00 UTC), and the angler's own place below the top ten~~ (#1594) | gameplay | M |
+| GT408 | News card game51 covers GT406 and GT407 | ui | S |
 
 ## Risks / open questions for the owner
 

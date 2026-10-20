@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { anglerTitle, BOARD_LIMIT, FISH, localDate, weeklyFish, type BoardEntry, type BoardPeriod, type BoardView, type SpeciesRecord } from "@stillwater/shared";
 import { errorText, getBoard, getSpeciesRecords } from "../api";
 import { DayBagCard } from "../components/DayBagCard";
+import { StewardsCard } from "../components/StewardsCard";
 import { DerbyCard } from "../components/DerbyCard";
 import { FishMark } from "../components/FishMark";
 import { t, tn, useT } from "../i18n";
@@ -121,6 +122,7 @@ export function BoardPage() {
       })()}
       <DerbyCard />
       <DayBagCard />
+      <StewardsCard />
       <div id="board-panel" role="tabpanel" aria-labelledby={`board-tab-${board.period}`}>
         <p>
           {week

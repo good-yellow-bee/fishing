@@ -8,6 +8,7 @@ import {
   surfaceScroll,
   bobberRingHeight,
   causticStrength,
+  chopBasis,
   glitterDirection,
   glitterOnWater,
   waterDepth,
@@ -15,6 +16,7 @@ import {
   waterHeight,
   waterHeightWithShoreWeight,
   waterShoreWeight,
+  writeChop,
   type WaterRgb,
 } from "./water.ts";
 import { PIER_TOP } from "./pierDeck.ts";
@@ -70,6 +72,25 @@ describe("precomputed water values", () => {
       [0, 40, 3.1],
     ] as const) {
       expect(waterHeightWithShoreWeight(x, z, time, waterShoreWeight(x, z))).toBeCloseTo(waterHeight(x, z, time), 12);
+    }
+  });
+
+  it("moves a whole surface from its cached place phases to the same chop and slope as point by point", () => {
+    const points = [0, LAKE_CENTER_Z, -12.4, -4.7, 15.2, -18.9, 3.3, -9];
+    const basis = chopBasis(points);
+    const out = new Float32Array(points.length / 2);
+    const slopeX = new Float32Array(out.length);
+    const slopeZ = new Float32Array(out.length);
+    const step = 1e-4;
+    for (const time of [0, 1.8, 47.3, 3600.5]) {
+      writeChop(basis, time, out, slopeX, slopeZ);
+      out.forEach((chop, i) => {
+        const [x, z] = [points[i * 2]!, points[i * 2 + 1]!];
+        const at = (dx: number, dz: number) => waterHeightWithShoreWeight(x + dx, z + dz, time, 1);
+        expect(chop).toBeCloseTo(at(0, 0), 5);
+        expect(slopeX[i]).toBeCloseTo((at(step, 0) - at(-step, 0)) / (2 * step), 4);
+        expect(slopeZ[i]).toBeCloseTo((at(0, step) - at(0, -step)) / (2 * step), 4);
+      });
     }
   });
 });

@@ -147,6 +147,18 @@ export const PL_GAME: PlBook = {
   "Lantern light: it will see the net in the light and bolt from it once, so be ready to bring it back": "Światło latarni: w jego blasku zobaczy podbierak i raz przed nim ucieknie, więc przygotuj się, by ją przyciągnąć",
   "Fired up on the fry: its first run doesn't tire it at all": "Rozgrzana pogonią za narybkiem: pierwszy odjazd wcale jej nie męczy",
   "fished down this week": "przetrzebione w tym tygodniu",
+  "Line: light": "Żyłka: cienka",
+  "Light line: it snaps here": "Cienka żyłka: pęka tutaj",
+  "Thin": "Cienka",
+  "Line": "Żyłka",
+  "Thick": "Gruba",
+  "Line: standard": "Żyłka: zwykła",
+  "Line: heavy": "Żyłka: gruba",
+  "Change the line: light line brings more bites but snaps sooner, heavy line holds more but the fish see it.": "Zmień żyłkę: cienka daje więcej brań, ale pęka szybciej, gruba wytrzymuje więcej, ale ryby ją widzą.",
+  "Heavy line: the fish can see it, so the bites come slower.": "Gruba żyłka: ryby ją widzą, więc brania przychodzą wolniej.",
+  "Light line: the fish can't see it, so the bites come sooner.": "Cienka żyłka: ryby jej nie widzą, więc brania przychodzą szybciej.",
+  "Light line: it snaps sooner, so keep out of the red": "Cienka żyłka: pęka szybciej, więc nie wchodź na czerwone",
+  "Heavy line: it holds more strain before it snaps": "Gruba żyłka: wytrzyma większe napięcie, zanim pęknie",
   "Drag: light": "Hamulec: lekki",
   "Drag: normal": "Hamulec: zwykły",
   "Drag: heavy": "Hamulec: mocny",
@@ -182,8 +194,10 @@ export const PL_GAME: PlBook = {
   "Not yet": "Jeszcze nie",
   "All three found: the {legend} bites far more often at the {bank} for the rest of the week.": "Wszystkie trzy znalezione: {legend} bierze dużo częściej na łowisku {bank} do końca tygodnia.",
   "The {fish} your hunt tracked down haunts this water.": "{fish}, którego wytropiono, krąży po tej wodzie.",
-  "A fish hooked along the point's rock edge now dives off the ledge instead of dragging your line over the rocks. A perch or smallmouth hooked raiding the sunfish beds bolts from the guarding sunfish, so its first run is the long one. And on a windy day a fish hooked in a foam lane lets a slack line drift out faster still.":
-    "Ryba zacięta przy skalnej krawędzi cypla nurkuje teraz za półkę, zamiast ciągnąć żyłkę po kamieniach. Okoń albo bass małogębowy zacięty, gdy podkrada ikrę z gniazd, ucieka przed strzegącymi ich rybami, więc pierwszy odjazd ma najdłuższy. A w wietrzny dzień ryba zacięta w pasie piany pozwala luźnej żyłce odpływać jeszcze szybciej.",
+  "A bank where you kept thirty or more fish this week is fished down: its fish come smaller until it rests, and the bank chip says so. Fish you let go don't count, so releasing them keeps a bank stocked. And once a catch is saved, the landed card shows the points the server paid, with a lodge tag's stamp only when the tag was paid.":
+    "Łowisko, z którego w tym tygodniu zabrano trzydzieści lub więcej ryb, jest przetrzebione: ryby są tam mniejsze, dopóki nie odpocznie, co pokazuje etykieta łowiska. Wypuszczone ryby się nie liczą, więc wypuszczanie ich chroni łowisko. A gdy połów zostanie zapisany, karta ryby pokazuje punkty przyznane przez serwer, a oznaczenie z przystani tylko wtedy, gdy zostało zapłacone.",
+  "If the lake runs slowly on your phone, it now also turns shadows off and draws a lighter picture from your next visit, besides lighter effects, and says so; Settings can turn each back. And the moving water costs less of every frame, so the lake runs a little smoother everywhere.":
+    "Jeśli jezioro działa wolno na twoim telefonie, od następnej wizyty wyłącza też cienie i rysuje lżejszy obraz, oprócz lżejszych efektów, i mówi o tym; każde z nich możesz przywrócić w Ustawieniach. A ruchoma woda zabiera mniej z każdej klatki, więc jezioro działa nieco płynniej wszędzie.",
   "On a phone held upright, the view now lifts while you play a fish, so you can watch the fight above the fight card instead of behind it. And with reduced motion on, the lake bed's shimmer slows and your boat no longer rocks.":
     "Na telefonie trzymanym pionowo widok unosi się teraz podczas holu, więc walkę z rybą widać nad kartą holu, a nie za nią. A przy ograniczonym ruchu migotanie dna jeziora zwalnia, a twoja łódka już się nie kołysze.",
   "Out on the boat, the cormorant no longer dries its wings right beside you: it slips off its rock and fishes out on the far side while you are at anchor. And at the bank stands the lantern post now stands beside you instead of in front of the camera.":
@@ -867,7 +881,7 @@ export const PL_GAME: PlBook = {
   "Fish of the week · 1.5× points": "Ryba tygodnia · 1,5× punktów",
   "Golden fish · 2× points": "Złota ryba · 2× punktów",
   "The picture could not be made in this browser.": "Ta przeglądarka nie zdołała zrobić obrazka.",
-  "Effects set to Lite to keep the lake smooth. Settings can turn them back.": "Efekty przełączone na lekkie, by jezioro działało płynnie. Możesz je przywrócić w Ustawieniach.",
+  "Effects set to Lite to keep the lake smooth, with shadows off and a faster picture from the next visit. Settings can turn them back.": "Efekty przełączone na lekkie, by jezioro działało płynnie, a od następnej wizyty bez cieni i z szybszym obrazem. Możesz je przywrócić w Ustawieniach.",
   "{n} points|hud": ["{n} pkt", "{n} pkt", "{n} pkt"],
   "Settings|hud": "Opcje",
   Greenhorn: "Żółtodziób",

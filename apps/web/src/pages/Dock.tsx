@@ -123,6 +123,7 @@ import { settings as savedSettings, updateSettings, useSettings } from "../game/
 import { rarityLabel } from "../game/logic";
 import { locale, t, tn, useT } from "../i18n";
 import { nextDrag } from "../game/drag";
+import { nextLine, type LineWeight } from "../game/lineWeight";
 import { boatSwingShare, canTurnRuns, fightWind } from "../game/fight";
 import { fightNotesText } from "../game/fightNotes";
 import { savePng, saveShareCard, shareCardFileName } from "../game/shareCard";
@@ -174,6 +175,10 @@ const SIGNPOSTS: readonly { target: WalkTarget; label: string }[] = [
 
 /** How long the "effects set to Lite" notice stays up. */
 const EFFECTS_NOTICE_MS = 5000;
+
+/** The walk signs' line button, naming the line on the reel. */
+const LINE_WORD: Record<LineWeight, string> = { light: "Line: light", standard: "Line: standard", heavy: "Line: heavy" };
+const LINE_SHORT: Record<LineWeight, string> = { light: "Thin", standard: "Line", heavy: "Thick" };
 
 export function DockPage() {
   useT();
@@ -1186,6 +1191,23 @@ export function DockPage() {
                 <span className="bait-short" aria-hidden="true">{t("Bait")}</span>
               </button>
             )}
+            {fishing && !rowing && (
+              <button
+                className="panel-btn"
+                type="button"
+                title={t("Change the line: light line brings more bites but snaps sooner, heavy line holds more but the fish see it.")}
+                aria-label={`${t(LINE_WORD[prefs.line])}. ${t("Change the line: light line brings more bites but snaps sooner, heavy line holds more but the fish see it.")}`}
+                onClick={(event) => {
+                  // Leave Space free for casting.
+                  event.currentTarget.blur();
+                  updateSettings({ line: nextLine(prefs.line) });
+                }}
+              >
+                {/* A phone's sign row has no room for the long words, so it shows the short one; the label keeps the full name. */}
+                <span className="bait-full">{t(LINE_WORD[prefs.line])}</span>
+                <span className="bait-short" aria-hidden="true">{t(LINE_SHORT[prefs.line])}</span>
+              </button>
+            )}
             {hour === "night" && !rowing && (
               <button
                 className="panel-btn"
@@ -1451,7 +1473,7 @@ export function DockPage() {
         <div className="level-status" role="status">
           {effectsNotice && (
             <div className="toast effects-toast">
-              <p>{t("Effects set to Lite to keep the lake smooth. Settings can turn them back.")}</p>
+              <p>{t("Effects set to Lite to keep the lake smooth, with shadows off and a faster picture from the next visit. Settings can turn them back.")}</p>
             </div>
           )}
           {shownLevel && (

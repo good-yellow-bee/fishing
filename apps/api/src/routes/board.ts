@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { bagDay, BOARD_LIMIT, boardView, derbyOn, isBoardPeriod, lastDerby, nextDerby, weekStart } from "@stillwater/shared";
-import { listBoardStats, listDayBags, listDerbyEntries, listSpeciesRecords } from "../db.ts";
+import { listBoardStats, listDayBags, listDerbyEntries, listSpeciesRecords, listStewards } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
 export const boardRoutes = new Hono();
@@ -42,6 +42,17 @@ boardRoutes.get("/board/bag", (c) => {
     day: day.from,
     entries: ranked.slice(0, 10).map((row, index) => ({ rank: index + 1, userId: row.userId, displayName: row.displayName, total: row.total, count: row.count })),
     you: yourRank >= 0 ? { rank: yourRank + 1, total: ranked[yourRank]!.total, count: ranked[yourRank]!.count } : null,
+  });
+});
+
+/** This week's stewards (from Monday 00:00 UTC): the anglers who let the most fish go, and where the angler stands. */
+boardRoutes.get("/board/stewards", (c) => {
+  const user = c.get("user") as SessionUser;
+  const ranked = listStewards(weekStart().toISOString());
+  const yourRank = ranked.findIndex((row) => row.userId === user.id);
+  return c.json({
+    entries: ranked.slice(0, 10).map((row, index) => ({ rank: index + 1, userId: row.userId, displayName: row.displayName, count: row.count })),
+    you: yourRank >= 0 ? { rank: yourRank + 1, count: ranked[yourRank]!.count } : null,
   });
 });
 
