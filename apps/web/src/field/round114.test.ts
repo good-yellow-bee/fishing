@@ -3,6 +3,7 @@ import type { Logbook, Trip } from "@stillwater/shared";
 import { NEWS_ID, NEWS_KEY } from "../game/whatsNew";
 import { fieldNewsDue, markFieldNewsSeen, newestFieldNews } from "./fieldNews";
 import { nextRealTrips, upcomingRealTrips } from "./bookCopy";
+import { outingStreak } from "./outingAverage";
 
 const stored = new Map<string, string>();
 beforeEach(() => {
@@ -44,5 +45,13 @@ describe("round 114: two outings today", () => {
     };
     expect(upcomingRealTrips(book, "2026-10-20").map((each) => each.id)).toEqual(["dawn", "evening"]);
     expect(nextRealTrips(book, "2026-10-20").map((each) => each.id)).toEqual(["evening"]);
+  });
+});
+
+describe("round 114: a run of outings with a fish", () => {
+  it("is not made by a loose fish on another water that day", () => {
+    const trips: Trip[] = [{ id: "a", date: "2026-10-10", spotId: "x", title: "", note: "" }, { id: "b", date: "2026-10-12", spotId: "x", title: "", note: "" }];
+    const streak = outingStreak(trips, (id) => (id === "a" ? 1 : 0), "2026-10-20", ["2026-10-12"]);
+    expect(streak.going).toBe(false);
   });
 });

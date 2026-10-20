@@ -10,6 +10,9 @@ export const FIELD_ARCHIVE_VERSION = 1;
 export const FIELD_ARCHIVE_REFUSAL =
   "That file is not a Stillwater field log. This book was left as it is.";
 
+export const FIELD_ARCHIVE_NEWER =
+  "That file comes from a newer Stillwater. Reload this page to update it, then try again. This book was left as it is.";
+
 export const FIELD_ARCHIVE_TOO_LARGE =
   "That file has more photos than this browser should keep. This book was left as it is.";
 
@@ -230,7 +233,10 @@ export function mergeFieldArchive(here: FieldArchive, file: FieldArchive, delete
 
 export function parseFieldArchive(value: unknown): FieldArchiveResult {
   if (!isRecord(value)) return refuse();
-  if (value.kind !== FIELD_ARCHIVE_KIND || value.version !== FIELD_ARCHIVE_VERSION) return refuse();
+  if (value.kind !== FIELD_ARCHIVE_KIND) return refuse();
+  // A file written by a later version says so, rather than reading as no field log at all.
+  if (typeof value.version === "number" && value.version > FIELD_ARCHIVE_VERSION) return { ok: false, message: FIELD_ARCHIVE_NEWER };
+  if (value.version !== FIELD_ARCHIVE_VERSION) return refuse();
   // A fish's weather this build can't read is refused, not dropped: a file loading "fine" would lose its sky and wind.
   if (!weatherReadable(value.book)) return refuse();
   const prepared = prepareStoredLogbook(value.book);

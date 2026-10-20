@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseFieldArchive } from "./archive.ts";
-import { FIELD_ARCHIVE_KIND, FIELD_ARCHIVE_VERSION } from "./archive.ts";
+import { FIELD_ARCHIVE_KIND, FIELD_ARCHIVE_NEWER, FIELD_ARCHIVE_VERSION } from "./archive.ts";
 
 const file = (book: unknown) => ({ kind: FIELD_ARCHIVE_KIND, version: FIELD_ARCHIVE_VERSION, book, tackle: { items: [] }, photos: {} });
 const book = (trip: Record<string, unknown>, weather: unknown) => ({
@@ -18,5 +18,12 @@ describe("round 114: a book file read in", () => {
   });
   it("refuses weather it can't read rather than dropping it", () => {
     expect(parseFieldArchive(file(book({ date: "2026-02-20" }, { sky: "clear", wind: "calm", waterTempF: "14" }))).ok).toBe(false);
+  });
+});
+
+describe("round 114: a book file from a newer version", () => {
+  it("says so", () => {
+    const result = parseFieldArchive({ ...file(book({ date: "2026-02-20" }, null)), version: FIELD_ARCHIVE_VERSION + 1 });
+    expect(result.ok ? "" : result.message).toBe(FIELD_ARCHIVE_NEWER);
   });
 });

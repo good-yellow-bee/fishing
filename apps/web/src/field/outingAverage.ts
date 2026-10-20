@@ -74,10 +74,11 @@ export function outingStreak(
     const day = days.get(trip.date) ?? { outings: 0, fished: 0 };
     days.set(trip.date, { outings: day.outings + 1, fished: day.fished + (fishOn(trip.id) > 0 ? 1 : 0) });
   }
+  // A day with fish logged off any outing is a fished step; on a day with outings, a loose fish already counts for its
+  // water's one outing through fishOn, and gives no fish to an outing on another water.
   for (const day of looseDays) {
-    if (day > today) continue;
-    const held = days.get(day);
-    days.set(day, held ? { ...held, fished: held.outings } : { outings: 1, fished: 1 });
+    if (day > today || days.has(day)) continue;
+    days.set(day, { outings: 1, fished: 1 });
   }
   let best = 0;
   let run = 0;

@@ -437,7 +437,8 @@ export function HomePage() {
           {/* On the day, a fish goes straight onto this outing. */}
           {next && (next.date === today || next === lateOuting) ? (
             <small className="next-log">
-              <Link to={`/catches/new?trip=${next.id}&spot=${next.spotId}`}>{t("Log a catch")}</Link>
+              {/* Not onto the sample week's made-up plan: a real fish there would sit on an outing no list shows. */}
+              <Link to={isSampleOuting(next) ? `/catches/new?spot=${next.spotId}` : `/catches/new?trip=${next.id}&spot=${next.spotId}`}>{t("Log a catch")}</Link>
             </small>
           ) : null}
         </div>
