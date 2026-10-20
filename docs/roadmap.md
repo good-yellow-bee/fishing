@@ -1930,6 +1930,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT451~~ | ~~A trophy that broke a line before (the angler's old foe or another angler's lost one) knows the hook: its first run doesn't tire it, and the fight card says so~~ (#1677) | gameplay | S |
 | ~~GT452~~ | ~~News card 2026-10-20-game66 covers GT450-GT451: bucket shiners' three days and hook-wise trophies~~ (#1678) | ui | S |
 | ~~GT453~~ | ~~The shiner trap by the shack: baited with a handful of groundbait at the shop, after six hours it holds one or two shiners for the bait bucket (lifted only when the bucket has room); left past three days they have found their way out~~ (#1680) | gameplay | M |
+| ~~GT454~~ | ~~Holding a run on a heavy drag works the angler's arm as reeling does, so it gets no rest through the run; the heavy drag's note says it tires the arm~~ (#PR) | gameplay | S |
+| GT455 | News card game67 covers GT453-GT454 | ui | S |
 
 ## Risks / open questions for the owner
 

@@ -252,7 +252,7 @@ export const PL_GAME: PlBook = {
   "Drag: heavy": "Hamulec: mocny",
   "A run takes more line, even as you reel, but pulls softly": "Odjazd wybiera więcej linki, nawet przy zwijaniu, ale ciągnie łagodnie",
   "Light lets a run go easy; heavy holds it short": "Lekki puszcza odjazd swobodnie, mocny trzyma go krótko",
-  "A run takes less line, but loads it even let go: a strong one goes red": "Odjazd wybiera mniej linki, ale napina ją nawet bez zwijania: mocny wchodzi na czerwone",
+  "A run takes less line, but loads it even let go, and tires your arm: a strong one goes red": "Odjazd wybiera mniej linki, ale napina ją nawet bez zwijania i męczy ci rękę: mocny wchodzi na czerwone",
   "Known fish: {fish} · {n} landed": "Znana ryba: {fish} · złowiono {n}",
   "Skilled: {fish} · {n} landed": "Wprawa: {fish} · złowiono {n}",
   "Mastered: {fish} · 1.1× points from the next one": "Mistrzostwo: {fish} · od następnej 1,1× punktów",

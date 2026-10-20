@@ -946,7 +946,8 @@ export function makeFight(
     performance.peakTension = Math.max(performance.peakTension, sim.tension);
     performance.maxLine = Math.max(performance.maxLine, sim.line);
     performance.fightSec = (performance.fightSec ?? 0) + dtSec;
-    reelSec = reeling ? reelSec + dtSec : Math.max(0, reelSec - dtSec * ARM_REST_RECOVER);
+    // Holding a run against a heavy drag works the arm as reeling does, so it gets no rest.
+    reelSec = reeling || heavyRun ? reelSec + dtSec : Math.max(0, reelSec - dtSec * ARM_REST_RECOVER);
     if (armMul(reelSec) < ARM_TELL) sim.armTired = true;
     else delete sim.armTired;
     // Fought too long, a pike chews the line it swallowed down to frayed.
