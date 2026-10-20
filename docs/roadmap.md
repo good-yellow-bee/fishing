@@ -1809,7 +1809,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT382~~ | ~~Word of a tag: when another angler lands a fish you let go, your next visit to the lake shows it once ("Your tag came back: Mara landed your carp, let go at 6 lb, back at 6.2 lb · +20 pts"), for a week after~~ (#1536) | gameplay | S |
 | ~~GT383~~ | ~~Second wind: a big fish (past 60% of its kind's weight range, not a panfish masher) worn under 0.4 stamina between runs finds a second wind once a fight: it gathers itself for a moment (the card calls it), takes back 0.3 stamina and runs at once; the landed card's notes say "Wore down its second wind"~~ (#1538) | gameplay | M |
 | ~~GT384~~ | ~~Seasoned lures: each packed lure climbs tiers as the game lands fish on it (counted from the field log's own lake, however its plural was spelled) (Proven at 10, Trusted at 30, Lucky at 75); the lure picker names each lure's tier, the landed card stamps a lure's new tier, and a Lucky lure's hook sets a little more solid (1.1x the solid share, on the strike bar's mark too)~~ (#1539) | gameplay | M |
-| GT385 | News card game45 covers GT382 to GT384 | ui | S |
+| ~~GT385~~ | ~~News card 2026-10-20-game45 covers GT382 to GT384: word of a tag, the second wind and seasoned lures~~ (#PR) | ui | S |
 
 ## Risks / open questions for the owner
 
