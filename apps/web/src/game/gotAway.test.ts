@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { AGAIN_CASTS, AGAIN_ODDS, BIG_LURE_AGAIN_ODDS, castForGotAway, DROPPED_ODDS, gotAwayAfterDrop, gotAwayAfterLoss, PATIENT_DROP_RANK, PATIENT_DROPPED_ODDS } from "./gotAway";
+import { AGAIN_CASTS, AGAIN_ODDS, backAgain, BIG_LURE_AGAIN_ODDS, castForGotAway, DROPPED_ODDS, gotAwayAfterDrop, gotAwayAfterLoss, PATIENT_DROP_RANK, PATIENT_DROPPED_ODDS } from "./gotAway";
 
 const pike = FISH.find((fish) => fish.id === "pike")!;
 const perch = FISH.find((fish) => fish.id === "perch")!;
@@ -64,5 +64,20 @@ describe("a let-go fish that gets away again", () => {
     expect(castForGotAway(lost, "reeds", 0, false, 1).again?.back).toBe(back);
     expect(gotAwayAfterDrop(carp, 6.2, "reeds", back).back).toBe(back);
     expect(gotAwayAfterLoss(carp, 6.2, "reeds", null)!.back).toBeUndefined();
+  });
+});
+
+describe("a giant that gets away", () => {
+  const species = FISH.find((fish) => fish.id === "pike")!;
+  const lost = gotAwayAfterLoss(species, 19.5, "reeds", { species, weight: 19.5, was: 19.5, at: 0, giant: "Iron Jaw" })!;
+  const ironJaw = { spot: "reeds" as const, name: "Iron Jaw", speciesId: "pike", weight: 19.5 };
+
+  it("comes back as the bank's giant while no one has landed it", () => {
+    expect(backAgain(lost, [ironJaw])?.giant).toBe("Iron Jaw");
+  });
+
+  it("comes back as just a big fish once someone has landed it, or the week has turned", () => {
+    expect(backAgain(lost, [])).toBeUndefined();
+    expect(backAgain(lost, [{ ...ironJaw, name: "Old Moss" }])).toBeUndefined();
   });
 });

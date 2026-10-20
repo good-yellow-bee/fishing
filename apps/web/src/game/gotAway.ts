@@ -1,4 +1,4 @@
-import type { FishSpecies, SpotId } from "@stillwater/shared";
+import type { FishSpecies, Giant, SpotId } from "@stillwater/shared";
 import type { Recaught } from "./releasedFish";
 
 /** Chance a cast back at the bank brings the lost fish up again. */
@@ -33,6 +33,12 @@ export function gotAwayAfterLoss(species: FishSpecies, weight: number, spot: Spo
 /** The fish that dropped the bait, still about its bank for the next cast only; any fish, common ones too. */
 export function gotAwayAfterDrop(species: FishSpecies, weight: number, spot: SpotId, back?: Recaught | null): GotAway {
   return { spot, species, weight, casts: 1, dropped: true, ...(back ? { back } : {}) };
+}
+
+/** A lost fish's own self when it bites again; a giant someone landed meanwhile, or last week's, comes back as just a big fish. */
+export function backAgain(lost: GotAway, openGiants: readonly Giant[]): Recaught | undefined {
+  const giant = lost.back?.giant;
+  return giant && !openGiants.some((one) => one.spot === lost.spot && one.name === giant) ? undefined : lost.back;
 }
 
 /** Whether this cast brings the fish that got away back, and what is still waiting after it. */
