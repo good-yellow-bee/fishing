@@ -1759,7 +1759,7 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
       }
     }
     // A fish hooked through duckweed comes in under a ball of weed till its first run strips it (fight.ts weedBall).
-    if (weedBall.current && hookedPose?.show && (phase === "hookset" || phase === "fight") && sim.current?.weedBall === true) {
+    if (weedBall.current && hookedPose?.show && phase === "fight" && sim.current?.weedBall === true) {
       weedBall.current.visible = true;
       weedBall.current.position.set(hookedPose.x, waterHeight(hookedPose.x, hookedPose.z, t) + 0.02, hookedPose.z);
     }
