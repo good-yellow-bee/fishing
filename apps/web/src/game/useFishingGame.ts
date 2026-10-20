@@ -67,7 +67,7 @@ import { FLUTTER_SEC, flutterGrabberFor, flutterTip, followCall, followerFor, GR
 import { BUCKET_SIZE, loadBucket, saveBucket } from "./baitBucket";
 import { loadSwim, saveSwim, swimNow } from "./swim";
 import { castForFoe, foeGone, isOldFoe, loadOldFoe, saveOldFoe } from "./oldFoe";
-import { loadNightLine, nightLineCatch, nightLineKinds, nightLineState, nightSkyFor, saveNightLine, type NightLine } from "./nightLine";
+import { loadNightLine, nightLineCatch, nightLineKinds, nightLineState, nightSkyFor, saveNightLine, wormLineHour, type NightLine } from "./nightLine";
 import { markShy, loadGiantShy, rollGiantShy, saveGiantShy, shyOf, type GiantShy } from "./giantShy";
 import { AGAIN_CASTS, backAgain, castForGotAway, gotAwayAfterDrop, PATIENT_DROP_RANK, gotAwayAfterLoss, type GotAway } from "./gotAway";
 import { LINE_SNAP, LINE_WAIT, type LineWeight } from "./lineWeight";
@@ -433,7 +433,7 @@ export function useFishingGame(
   useEffect(() => {
     setGiantShy(profile?.userId ? giantShyNow(profile.userId) : null);
   }, [profile?.userId]);
-  /** A shiner the angler left out on a night line, read from the browser once per angler. */
+  /** A shiner or worm the angler left out on a night line, read from the browser once per angler. */
   const [nightLine, setNightLineOut] = useState<NightLine | null>(null);
   useEffect(() => {
     setNightLineOut(profile?.userId ? loadNightLine(profile.userId) : null);
@@ -2255,12 +2255,12 @@ export function useFishingGame(
     setHint(t("You hook a shiner from your bucket on as live bait. Cast it out to the hunters."));
   };
 
-  /** Leave the shiner on the hook out on a night line at this bank, for a later visit to check. */
+  /** Leave a shiner, or at dusk or night a worm on the hook, out on a night line at this bank, for a later visit to check. */
   const setNightLine = () => {
     const spot = stanceRef.current;
     // With no shiner to spare, a worm on the hook goes out instead: free, but fewer night feeders come to it.
     const shiner = liveShinerRef.current || bucketRef.current > 0;
-    if (!profile || nightLine || (!shiner && !isLiveBait(lureRef?.current)) || phaseRef.current !== "idle" || !isFishingStance(spot) || spot === "open" || nightLineKinds(spot, profile).length === 0) return;
+    if (!profile || nightLine || (!shiner && !(isLiveBait(lureRef?.current) && wormLineHour(hourRef.current))) || phaseRef.current !== "idle" || !isFishingStance(spot) || spot === "open" || nightLineKinds(spot, profile).length === 0) return;
     // A spare from the bucket goes out first, so the shiner on the hook stays for casting.
     if (bucketRef.current > 0) keepBucket(profile.userId, bucketRef.current - 1);
     else if (shiner) hookShiner(null);
@@ -2282,7 +2282,7 @@ export function useFishingGame(
     keepNightLine(profile.userId, null);
     const caught = nightLineCatch(nightLine, now, profile, anglerLevel(profile.lifetimePoints), Math.random);
     if (!caught) {
-      setHint(state === "stale" ? t("The night line sat out too long: the bait is long gone, and nothing is on it.") : t("The night line comes in empty: something stole the shiner in the dark."));
+      setHint(state === "stale" ? t("The night line sat out too long: the bait is long gone, and nothing is on it.") : nightLine.bait === "worm" ? t("The night line comes in empty: something stole the worm in the dark.") : t("The night line comes in empty: something stole the shiner in the dark."));
       return;
     }
     const fish = downAtBank(caught, fishedDownRef.current.has(spot) && !mercyRef.current);

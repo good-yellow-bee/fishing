@@ -439,7 +439,7 @@ describe("useFishingGame live shiner", () => {
 
   it("leaves a worm out on a night line when there is no shiner to spare", () => {
     const strong = { ...profile, strength: 10, accuracy: 10 };
-    mount(DOCK_BUBBLES.at, strong, "day", false, "Nightcrawler");
+    mount(DOCK_BUBBLES.at, strong, "dusk", false, "Nightcrawler");
     const press = (name: string) => act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === name) as HTMLButtonElement).click());
     try {
       act(() => frames.at(-1)!(now));

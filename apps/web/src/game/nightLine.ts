@@ -25,6 +25,11 @@ export function nightSkyFor(setAt: number): Sky {
 /** A worm on a night line draws this share of a shiner's odds: free, but the night feeders come to it less. */
 export const WORM_LINE_ODDS = 0.6;
 
+/** A worm goes out on a line as the light goes, at dusk or night; a bought or landed shiner may go out any time. */
+export function wormLineHour(hour: string): boolean {
+  return hour === "dusk" || hour === "night";
+}
+
 /** A bait left out on a set line at a bank, and when; lines from before worms were left out carry a shiner. */
 export type NightLine = { spot: SpotId; setAt: number; bait?: "shiner" | "worm" };
 
