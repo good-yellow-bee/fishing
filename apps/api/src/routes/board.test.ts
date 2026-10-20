@@ -124,17 +124,18 @@ describe("GET /board/bag", () => {
 
 describe("GET /board/stewards", () => {
   it("ranks this week's anglers by the fish they let go, and puts the angler in it", async () => {
+    const { releaseCatch } = await import("../db.ts");
     const letGo = (userId: string, at: string) => {
       landed(userId, "perch", 1, 1, at);
-      db.prepare(`UPDATE catch SET released = 1 WHERE id = ?`).run(`c${n}`);
+      db.prepare(`UPDATE catch SET released = 1, released_at = ? WHERE id = ?`).run(at, `c${n}`);
     };
     letGo("mara", thisWeek);
     letGo("mara", thisWeek);
     letGo("ash", thisWeek);
     letGo("idle", lastWeek);
-    // Landed last week, let go this week: it counts this week.
+    // Landed last week, let go now: it counts this week.
     landed("idle", "perch", 1, 1, lastWeek);
-    db.prepare(`UPDATE catch SET released = 1, released_at = ? WHERE id = ?`).run(thisWeek, `c${n}`);
+    releaseCatch("idle", `r${n}`);
     const body = await get<{ entries: { userId: string; count: number }[]; you: { rank: number; count: number } | null }>("/board/stewards");
     expect(body.entries.map((row) => [row.userId, row.count])).toEqual([["mara", 2], ["ash", 1], ["idle", 1]]);
     expect(body.you).toEqual({ rank: 2, count: 1 });

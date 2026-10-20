@@ -147,6 +147,7 @@ if (!catchColumns.some((column) => column.name === "day")) {
 // When the angler let the fish go; older releases have only their catch's time.
 if (!catchColumns.some((column) => column.name === "released_at")) {
   db.exec(`ALTER TABLE catch ADD COLUMN released_at TEXT`);
+  db.exec(`UPDATE catch SET released_at = created_at WHERE released = 1`);
 }
 // A fish another angler let go and this catch landed again: that catch's id.
 if (!catchColumns.some((column) => column.name === "tagged_from")) {
@@ -154,6 +155,7 @@ if (!catchColumns.some((column) => column.name === "tagged_from")) {
 }
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS catch_user_request ON catch (user_id, request_id)`);
 db.exec(`CREATE INDEX IF NOT EXISTS catch_user_day ON catch (user_id, day)`);
+db.exec(`CREATE INDEX IF NOT EXISTS catch_released_at ON catch (released_at) WHERE released_at IS NOT NULL`);
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS catch_tagged_from ON catch (tagged_from) WHERE tagged_from IS NOT NULL`);
 
 export type ProfileRow = {
@@ -297,8 +299,8 @@ export function listStewards(since: string) {
     .prepare(
       `SELECT c.user_id as userId, p.display_name as displayName, COUNT(*) as count
        FROM catch c JOIN profile p ON p.user_id = c.user_id
-       WHERE c.released = 1 AND COALESCE(c.released_at, c.created_at) >= ?
-       GROUP BY c.user_id ORDER BY count DESC, displayName ASC, userId ASC`,
+       WHERE c.released_at >= ?
+       GROUP BY c.user_id ORDER BY count DESC, displayName COLLATE NOCASE ASC, userId ASC LIMIT 1000`,
     )
     .all(since) as { userId: string; displayName: string; count: number }[];
 }
