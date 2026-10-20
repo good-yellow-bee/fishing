@@ -1469,6 +1469,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | SC277 | News card scene66 covers SC275 and SC276: long shadows at dawn and dusk, and the phone's framing at rest | scene | S |
 | SC278 | The bait bucket seen: GT429's bucket of spare live shiners showed only in words; while it holds any, a small tin bucket with water in it (a shiner in it for each spare) stands at the angler's feet whenever they stand still, on the dock or at any bank, a little ahead and to their right where the camera sees it (clear of the thermos; the first dry side where that is water), hidden while walking or in the boat | scene | S |
 | SC279 | The weed ball seen: GT391's fish hooked through the duckweed "comes in under a ball of weed" only on the fight card; now a low green clump of duckweed rides the water over the hooked fish from the start of the fight till its first run strips it off (fight.ts sim.weedBall) | scene | S |
+| SC280 | News card scene67 covers SC278 and SC279: the bait bucket and the weed ball seen | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
