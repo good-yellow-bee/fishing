@@ -338,6 +338,9 @@ export function useFishingGame(
 ) {
   const luckyLuresRef = useRef(luckyLures);
   luckyLuresRef.current = luckyLures;
+  /** Read live in the frame loop, which outlives a render's profile. */
+  const anglerIdRef = useRef(profile?.userId);
+  anglerIdRef.current = profile?.userId;
   const legendRef = useRef(legend);
   legendRef.current = legend;
   const lodgeReleasedRef = useRef(lodgeReleased);
@@ -982,11 +985,12 @@ export function useFishingGame(
     const pressureWait = pressure.pressured && !switched.relieved && !bait.baited && !mercyRef.current ? PRESSURE_WAIT : 1;
     if (pressureWait > 1) reasons.unshift(t("This water has been fished hard and the fish are wary of the line, so the bites come slow. Try another bank or another kind of lure."));
     else if (switched.relieved && !bait.baited && !mercyRef.current) reasons.unshift(t("The wary fish here haven't seen this kind of lure yet, so they come to it."));
-    // A bank fished hard yesterday keeps its fish wary for today's first casts there; a beginner is spared.
-    const banks = loadBankMemory();
-    const yesterdayWait = waryFromYesterday(banks, spotRef.current) && !mercyRef.current ? YESTERDAY_WAIT : 1;
-    saveBankMemory(countAtBank(banks, spotRef.current, "casts"));
-    if (yesterdayWait > 1) reasons.unshift(t("The {bank} was fished hard yesterday, so its fish are still wary for your first casts.", { bank: t(SPOT_LABELS[spotRef.current]) }));
+    // A bank fished hard yesterday keeps its fish wary for today's first casts there; as with today's pressure, fish on
+    // groundbait or a lure they haven't seen don't mind, and a beginner is spared.
+    const banks = loadBankMemory(current.userId);
+    const yesterdayWait = waryFromYesterday(banks, spotRef.current) && !switched.relieved && !bait.baited && !mercyRef.current ? YESTERDAY_WAIT : 1;
+    saveBankMemory(current.userId, countAtBank(banks, spotRef.current, "casts"));
+    if (yesterdayWait > 1) reasons.unshift(t("This bank was fished hard yesterday, so its fish are still wary for your first casts."));
     // The visit's first cast at a bank meets fish that haven't seen a lure today; it is told last, so the bank's own reasons come first.
     // The anchor's splash puts the fish down for a few seconds; a cast into it doesn't spend the fresh water's first look.
     const anchorWait = anchorSplashWaitMul(spotRef.current, boat.mode === "anchored" ? Date.now() - boat.anchoredAt : null);
@@ -1734,7 +1738,8 @@ export function useFishingGame(
                 ? t("{fish}: you let this one go here on {date}, and it has put on {gain} since.", { fish: t(current.species.name), date: new Date(recaught.at).toLocaleDateString(locale(), { month: "long", day: "numeric" }), gain: weightText(recaught.weight - recaught.was) })
                 : t("{fish}: you let this one go here on {date}, and it's back on your line.", { fish: t(current.species.name), date: new Date(recaught.at).toLocaleDateString(locale(), { month: "long", day: "numeric" }) });
             const landedNote = [back, fed, schooled, followed, scuffed].filter(Boolean).join(" ");
-            saveBankMemory(countAtBank(loadBankMemory(), spotRef.current, "landed"));
+            const angler = anglerIdRef.current;
+            if (angler) saveBankMemory(angler, countAtBank(loadBankMemory(angler), spotRef.current, "landed"));
             setOutcome({
               kind: "landed",
               id: localId(),

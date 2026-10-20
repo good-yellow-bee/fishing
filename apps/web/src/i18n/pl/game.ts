@@ -139,7 +139,7 @@ export const PL_GAME: PlBook = {
   "Far rock: turn every run; reeling while it drags round the rock frays the line": "Daleka skała: zawracaj każdy odjazd; zwijanie, gdy ryba ciągnie żyłkę wokół skały, przeciera ją",
   "The far rock frayed your line: it snaps sooner until you retie it.": "Daleka skała przetarła żyłkę: pęknie szybciej, dopóki jej nie przewiążesz.",
   "Duckweed: a ball of weed on the line slows the reel till its first run strips it off": "Rzęsa: kula zielska na żyłce spowalnia zwijanie, aż pierwszy odjazd ją zerwie",
-  "The {bank} was fished hard yesterday, so its fish are still wary for your first casts.": "Łowisko {bank} było wczoraj mocno obłowione, więc ryby są jeszcze płochliwe przy pierwszych rzutach.",
+  "This bank was fished hard yesterday, so its fish are still wary for your first casts.": "Wczoraj tu dużo łowiono, więc ryby są jeszcze płochliwe przy pierwszych rzutach.",
   "Drag: light": "Hamulec: lekki",
   "Drag: normal": "Hamulec: zwykły",
   "Drag: heavy": "Hamulec: mocny",

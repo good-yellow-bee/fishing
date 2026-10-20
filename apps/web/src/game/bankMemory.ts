@@ -1,6 +1,9 @@
 import { daysBetween, localDate, type SpotId } from "@stillwater/shared";
 
-export const BANK_MEMORY_KEY = "stillwater.bankdays.v1";
+/** Kept per angler, as the outing is, so another angler on the same browser starts with fresh banks. */
+export function bankMemoryKey(userId: string) {
+  return `stillwater.bankdays.${userId}.v1`;
+}
 /** A bank where this many fish were landed yesterday was fished hard. */
 export const YESTERDAY_HARD_FISH = 8;
 /** Its first this many casts today bite this much slower, while the fish there are still wary. */
@@ -28,17 +31,17 @@ export function rollBankMemory(stored: unknown, now: Date): BankMemory {
   return { today: fresh(today), yesterday: daysBetween(memory.today.day, today) === 1 ? memory.today : null };
 }
 
-export function loadBankMemory(now = new Date()): BankMemory {
+export function loadBankMemory(userId: string, now = new Date()): BankMemory {
   try {
-    return rollBankMemory(JSON.parse(localStorage.getItem(BANK_MEMORY_KEY) ?? "null"), now);
+    return rollBankMemory(JSON.parse(localStorage.getItem(bankMemoryKey(userId)) ?? "null"), now);
   } catch {
     return rollBankMemory(null, now);
   }
 }
 
-export function saveBankMemory(memory: BankMemory) {
+export function saveBankMemory(userId: string, memory: BankMemory) {
   try {
-    localStorage.setItem(BANK_MEMORY_KEY, JSON.stringify(memory));
+    localStorage.setItem(bankMemoryKey(userId), JSON.stringify(memory));
   } catch {
     // A blocked store only means the banks forget yesterday.
   }
