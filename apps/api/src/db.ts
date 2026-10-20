@@ -2,7 +2,7 @@ import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Database from "better-sqlite3";
-import { BAG_SIZE, SLAMS, fishById, TAG_RETURN_BONUS, TAGGABLE_IDS, isLakeHour, isTrophyWeight, TROPHY_RELEASE_BONUS, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type BonusId, type LodgeRelease, type LodgeTrack, type StudyFact, type TagReturn, type SpeciesRecord, type SpotId } from "@stillwater/shared";
+import { BAG_SIZE, SLAMS, fishById, TAG_RETURN_BONUS, TAGGABLE_IDS, isLakeHour, isTrophyWeight, releaseBonus, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type BonusId, type LodgeRelease, type LodgeTrack, type StudyFact, type TagReturn, type SpeciesRecord, type SpotId } from "@stillwater/shared";
 
 const dir = dirname(fileURLToPath(import.meta.url));
 export const dataDir = join(dir, "../data");
@@ -566,14 +566,14 @@ export function recordCatch(row: CatchRow): RecordCatchResult {
 }
 
 /** A catch the offline queue posts late counts on the day the server saved it, not the day it was landed. */
-/** Marks the angler's catch released; it keeps its points, and the first release of a trophy-weight fish pays TROPHY_RELEASE_BONUS. Undefined when there is no such catch. */
+/** Marks the angler's catch released; it keeps its points, and its first release pays releaseBonus (a trophy, a guarder off its nest). Undefined when there is no such catch. */
 export function releaseCatch(userId: string, requestId: string): { row: CatchRow; bonus: number } | undefined {
   return db.transaction(() => {
     const change = db.prepare(`UPDATE catch SET released = 1, released_at = ? WHERE user_id = ? AND request_id = ? AND released = 0`).run(new Date().toISOString(), userId, requestId);
     const row = findCatchByRequestId(userId, requestId);
     if (!row) return undefined;
     const species = fishById(row.species_id);
-    const bonus = change.changes === 1 && species && isTrophyWeight(species, row.weight) ? TROPHY_RELEASE_BONUS : 0;
+    const bonus = change.changes === 1 && species ? releaseBonus(species, row.weight, row.spot, row.season) : 0;
     if (bonus) {
       db.prepare(`UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`).run(bonus, bonus, userId);
     }

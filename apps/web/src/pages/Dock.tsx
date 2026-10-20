@@ -59,12 +59,12 @@ import {
   moonLight,
   moonName,
   moonPhase,
-  isTrophyWeight,
   showsSolidMark,
   skyBlurb,
   skyLabel,
   weatherFromSearch,
-  TROPHY_RELEASE_BONUS,
+  releaseBonus as bonusForRelease,
+  offItsNest,
   type CatchSubmission,
   type LakeHour,
   type LakeSeason,
@@ -1462,18 +1462,20 @@ export function DockPage() {
               )}
               {landedReleased ? (
                 <p className="catch-stamp released" ref={releasedNote} tabIndex={-1}>
-                  {releaseBonus > 0
-                    ? t("Released back into the lake · +{bonus} pts for letting a trophy go", { bonus: releaseBonus })
-                    : t("Released back into the lake")}
+                  {releaseBonus > 0 && offItsNest(game.outcome.species.id, game.outcome.spot, season)
+                    ? t("Released back to its nest · +{bonus} pts", { bonus: releaseBonus })
+                    : releaseBonus > 0
+                      ? t("Released back into the lake · +{bonus} pts for letting a trophy go", { bonus: releaseBonus })
+                      : t("Released back into the lake")}
                   {/* A fish the lake remembers shies from the lure it was caught on. */}
                   {game.outcome.lure && remembersReleased(game.outcome.species) && ` · ${t("it will shy from the {lure} now", { lure: t(game.outcome.lure) })}`}
                 </p>
               ) : (
-                <button className="panel-btn" type="button" onClick={() => void releaseFish()} aria-disabled={releasing || undefined}>
+                <button className="panel-btn" type="button" title={offItsNest(game.outcome.species.id, game.outcome.spot, season) ? t("Hooked off its spring nest: letting it go back to guard it pays a little extra.") : undefined} onClick={() => void releaseFish()} aria-disabled={releasing || undefined}>
                   {releasing
                     ? t("Releasing…")
-                    : isTrophyWeight(game.outcome.species, game.outcome.weight)
-                      ? t("Release · +{bonus} pts", { bonus: TROPHY_RELEASE_BONUS })
+                    : bonusForRelease(game.outcome.species, game.outcome.weight, game.outcome.spot, season) > 0
+                      ? t("Release · +{bonus} pts", { bonus: bonusForRelease(game.outcome.species, game.outcome.weight, game.outcome.spot, season) })
                       : t("Release")}
                 </button>
               )}

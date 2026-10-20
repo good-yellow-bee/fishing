@@ -290,6 +290,17 @@ describe("POST /catches", () => {
     expect(after.lifetime_points).toBe(before.lifetime_points + TROPHY_RELEASE_BONUS);
   });
 
+  it("pays a nest guarder's release bonus for one hooked off its spring nest, and none in summer", async () => {
+    const { NEST_RELEASE_BONUS } = await import("@stillwater/shared");
+    db.prepare(`UPDATE profile SET strength = 10, accuracy = 10 WHERE user_id = ?`).run(user.id);
+    await post({ requestId, speciesId: "smallmouth-bass", weight: 2, spot: "dock", season: "spring" });
+    const release = (id: string) => app.request(`http://test/catches/${id}/release`, { method: "POST" });
+    expect(await (await release(requestId)).json()).toMatchObject({ released: true, bonus: NEST_RELEASE_BONUS });
+    const summer = "6a5b4c3d-2e1f-4a0b-9c8d-7e6f5a4b3c2d";
+    await post({ requestId: summer, speciesId: "smallmouth-bass", weight: 2, spot: "dock", season: "summer" });
+    expect(await (await release(summer)).json()).toMatchObject({ released: true, bonus: 0 });
+  });
+
   it("refuses to release a catch that is not saved, or a malformed ID", async () => {
     expect((await app.request(`http://test/catches/${requestId}/release`, { method: "POST" })).status).toBe(404);
     expect((await app.request("http://test/catches/nope/release", { method: "POST" })).status).toBe(400);
