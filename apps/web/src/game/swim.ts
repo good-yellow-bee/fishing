@@ -1,4 +1,4 @@
-import { SPOT_IDS, type SpotId } from "@stillwater/shared";
+import { SPOT_IDS, type LakeSeason, type SpotId } from "@stillwater/shared";
 import { readAngler, writeAngler } from "./anglerStore";
 import { GROUNDBAIT_CASTS, type Groundbait } from "./logic";
 
@@ -10,6 +10,19 @@ export function swimKey(userId: string) {
 export const SWIM_PRIMED_MS = 6 * 3_600_000;
 /** Left longer than this, the groundbait is eaten and gone. */
 export const SWIM_GONE_MS = 48 * 3_600_000;
+/** Summer's hungry fish find a swim left behind sooner, and eat it within a day. */
+export const SWIM_HOT_PRIMED_MS = 3 * 3_600_000;
+export const SWIM_HOT_GONE_MS = 24 * 3_600_000;
+/** Winter's slow fish take longer to gather over it, but it keeps four days in the cold. */
+export const SWIM_COLD_PRIMED_MS = 12 * 3_600_000;
+export const SWIM_COLD_GONE_MS = 96 * 3_600_000;
+
+/** When a swim left behind primes and when it is gone, judged by the lake's season when the angler comes back. */
+export function swimTimes(season: LakeSeason | undefined): { primedMs: number; goneMs: number } {
+  if (season === "summer") return { primedMs: SWIM_HOT_PRIMED_MS, goneMs: SWIM_HOT_GONE_MS };
+  if (season === "winter") return { primedMs: SWIM_COLD_PRIMED_MS, goneMs: SWIM_COLD_GONE_MS };
+  return { primedMs: SWIM_PRIMED_MS, goneMs: SWIM_GONE_MS };
+}
 
 /** A groundbaited swim, when the handful went in, and whether the feeders have already gathered over it once. */
 export type Swim = Groundbait & { at: number; primed?: boolean };
@@ -32,10 +45,11 @@ export function saveSwim(userId: string, swim: Swim | null) {
   writeAngler(swimKey(userId), swim);
 }
 
-/** The swim on a new visit: as it was if soon after, freshly baited once when the feeders have gathered overnight, gone two days after the handful went in. */
-export function swimNow(swim: Swim | null, now: number): (Swim & { primedNow: boolean }) | null {
+/** The swim on a new visit: as it was if soon after, freshly baited once when the feeders have gathered, gone once the season's days run out. */
+export function swimNow(swim: Swim | null, now: number, season?: LakeSeason): (Swim & { primedNow: boolean }) | null {
   if (!swim || swim.casts <= 0) return null;
   const age = now - swim.at;
-  if (age > SWIM_GONE_MS) return null;
-  return age >= SWIM_PRIMED_MS && !swim.primed ? { spot: swim.spot as SpotId, casts: GROUNDBAIT_CASTS, at: swim.at, primed: true, primedNow: true } : { ...swim, primedNow: false };
+  const { primedMs, goneMs } = swimTimes(season);
+  if (age > goneMs) return null;
+  return age >= primedMs && !swim.primed ? { spot: swim.spot as SpotId, casts: GROUNDBAIT_CASTS, at: swim.at, primed: true, primedNow: true } : { ...swim, primedNow: false };
 }

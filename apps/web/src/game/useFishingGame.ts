@@ -761,7 +761,7 @@ export function useFishingGame(
   // The angler's swim from an earlier visit, read when they sign in: left overnight, the feeders have gathered over it, once.
   useEffect(() => {
     const swim = profile?.userId ? loadSwim(profile.userId) : null;
-    const now = swimNow(swim, Date.now());
+    const now = swimNow(swim, Date.now(), season);
     groundbaitRef.current = now ? { spot: now.spot, casts: now.casts } : null;
     swimRef.current = { at: now?.at ?? 0, primed: !!now?.primed };
     setSwimPrimed(!!now?.primed);
@@ -2283,8 +2283,15 @@ export function useFishingGame(
     keepGroundbait({ spot: spotRef.current, casts: GROUNDBAIT_CASTS }, Date.now());
     keepHandfuls(handfulsRef.current - 1);
     fx.plop();
-    setHint(t("You toss a handful of groundbait. The fish will gather to feed here for the next {casts} casts.", { casts: GROUNDBAIT_CASTS }));
-  }, []);
+    const tossed = t("You toss a handful of groundbait. The fish will gather to feed here for the next {casts} casts.", { casts: GROUNDBAIT_CASTS });
+    setHint(
+      season === "summer"
+        ? `${tossed} ${t("In the summer heat, any left draws them back after three hours but is eaten within a day.")}`
+        : season === "winter"
+          ? `${tossed} ${t("In the winter cold, any left takes twelve hours to draw them back but keeps four days.")}`
+          : tossed,
+    );
+  }, [season]);
 
   /** A handful bought at the shack goes in the bag, which carries no more than GROUNDBAIT_CARRY. */
   const addHandful = useCallback(() => keepHandfuls(Math.min(GROUNDBAIT_CARRY, handfulsRef.current + 1)), []);
