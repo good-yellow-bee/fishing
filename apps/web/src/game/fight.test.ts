@@ -1210,6 +1210,23 @@ describe("the point's rock edge", () => {
   });
 });
 
+describe("an egg raider on the sunfish beds", () => {
+  /** How long the first run lasts. */
+  const firstRun = (id: string, bed: boolean) => {
+    const f = makeFight(fish(id), fish(id).minWeight, 3, () => 0, 1, "pilings", undefined, false, false, false, false, false, false, false, 1, 1, false, { bed });
+    let now = 0;
+    while (f.sim.surge !== 2) f.step((now += 10), 0.01, false);
+    const start = now;
+    while (f.sim.surge === 2) f.step((now += 10), 0.01, false);
+    return now - start;
+  };
+
+  it("makes a raider's first run the long one as it bolts from the guarding sunfish, and leaves other fish as they are", () => {
+    expect(firstRun("smallmouth-bass", true)).toBeCloseTo(firstRun("smallmouth-bass", false) * FIRST_RUN_LONGER, -2);
+    expect(firstRun("crappie", true)).toBe(firstRun("crappie", false));
+  });
+});
+
 describe("the dock's pilings", () => {
   /** Lets one run go unturned, then reels or rests through the calm after it. */
   function afterRun(water: "pilings" | "open", turn: boolean, reel: boolean) {

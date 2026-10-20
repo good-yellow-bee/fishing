@@ -1,6 +1,6 @@
 import { isTrophyWeight, type ChallengeId, type FishSpecies } from "@stillwater/shared";
 import { t } from "../i18n";
-import { difficulty01 } from "./logic";
+import { BED_RAIDERS, difficulty01 } from "./logic";
 import type { Drag } from "./drag";
 import { biteStyle } from "./nibblePlan";
 
@@ -472,9 +472,10 @@ export function fightWind(wind: string | undefined): FightWind | undefined {
 /**
  * Cover a fish was hooked tight to, on top of the spot's water: `farRock` from the boat by the far rock (unturned runs
  * drag the line over it), `weedBall` through a duckweed mat (a ball of weed slows the reel till the first run), `edge`
- * along the point's rock edge (runs dive off the ledge as at the drop-off, clear of the shallow rocks).
+ * along the point's rock edge (runs dive off the ledge as at the drop-off, clear of the shallow rocks), `bed` over the
+ * sunfish beds (an egg raider bolts from the guarding sunfish, so its first run is the long one).
  */
-export type FightCover = { farRock?: boolean; weedBall?: boolean; edge?: boolean };
+export type FightCover = { farRock?: boolean; weedBall?: boolean; edge?: boolean; bed?: boolean };
 export type FightWater = "open" | "weeds" | "current" | "deep" | "rocks" | "boat" | "pilings" | "log";
 /** Water where an unturned run wraps the line round wood: the dock's pilings, or the half-sunk log a fish was hooked tight to. */
 export function wrapsLine(water: FightWater | undefined): water is "pilings" | "log" {
@@ -595,7 +596,7 @@ export function makeFight(
   /** What the fish was hooked by, on top of the spot's water. */
   cover: FightCover = {},
 ): FightRuntime {
-  const { farRock = false, weedBall = false, edge = false } = cover;
+  const { farRock = false, weedBall = false, edge = false, bed = false } = cover;
   const weedy = water === "weeds";
   // Hooked along the rock edge, past the shallow rocks, the fish dives off the ledge rather than dragging the line over them.
   const rockWater = (water === "rocks" && !edge) || farRock;
@@ -640,7 +641,7 @@ export function makeFight(
   const tailWalker = TAIL_WALKERS.has(species.id);
   let walked = false;
   const roller = ROLLERS.has(species.id);
-  const longRunner = LONG_RUNNERS.has(species.id) || trophy;
+  const longRunner = LONG_RUNNERS.has(species.id) || trophy || (bed && BED_RAIDERS.has(species.id));
   const coverDiver = COVER_DIVERS.has(species.id);
   const darter = DARTERS.has(species.id);
   const headShaker = HEAD_SHAKERS.has(species.id);
