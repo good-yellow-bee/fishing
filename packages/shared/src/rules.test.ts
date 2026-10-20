@@ -635,3 +635,17 @@ describe("validateShinerBuy", () => {
     expect(validateShinerBuy({ ...profile, points: SHINER_PRICE - 1 })).toMatchObject({ ok: false, error: "not enough points", status: 409 });
   });
 });
+
+
+describe("the bonuses a catch was paid", () => {
+  it("names each bonus that raised the points, and a lodge record in place of a personal best", () => {
+    const profile = { userId: "u", displayName: "U", points: 0, lifetimePoints: 0, strength: 5, accuracy: 5, patience: 5 };
+    const plain = validateCatch(profile, { speciesId: "perch", weight: 0.6, spot: "dock" }, new Date(), null, null);
+    expect(plain.ok && plain.bonuses).not.toContain("pb");
+    const pb = validateCatch(profile, { speciesId: "perch", weight: 0.9, spot: "dock" }, new Date(), 0.5, null);
+    expect(pb.ok && pb.bonuses).toContain("pb");
+    const record = validateCatch(profile, { speciesId: "perch", weight: 0.9, spot: "dock" }, new Date(), 0.5, 0.7);
+    expect(record.ok && record.bonuses).toEqual(expect.arrayContaining(["lodgeRecord"]));
+    expect(record.ok && record.bonuses).not.toContain("pb");
+  });
+});

@@ -332,6 +332,7 @@ describe("POST /catches", () => {
       expect(response.status).toBe(200);
       expect((await response.json()).points).toBe(plain + TAG_FINDER_BONUS);
       expect(points("other")).toBe(TAG_RETURN_BONUS);
+      expect((db.prepare(`SELECT bonuses FROM catch WHERE request_id = ?`).get(requestId) as { bonuses: string }).bonuses.split(",")).toContain("tag");
       // Landed, it is out of the lake for everyone: a second claim saves a plain catch.
       const again = await landTag(2.2, { requestId: "3c2d1e4f-5a6b-4c7d-8e9f-0a1b2c3d4e5f" });
       expect(again.status).toBe(200);

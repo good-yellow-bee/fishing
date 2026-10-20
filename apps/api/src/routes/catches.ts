@@ -70,6 +70,7 @@ catchRoutes.post("/catches", async (c) => {
     golden: isGolden(body.requestId) ? 1 : 0,
     day: body.day ?? null,
     tagged_from: tag?.catchId ?? null,
+    bonuses: [...result.bonuses, ...(tag ? ["tag" as const] : [])].join(","),
     created_at: new Date().toISOString(),
   };
   const saved = recordCatch(record);
