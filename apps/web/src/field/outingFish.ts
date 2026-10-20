@@ -1,4 +1,4 @@
-import { fishCountsByTrip, type Logbook } from "@stillwater/shared";
+import { fishCountsByTrip, type Logbook, type Trip } from "@stillwater/shared";
 import { countedBook } from "./milestones";
 import { bookFishDay } from "./tripMonths";
 
@@ -33,6 +33,11 @@ export function outingFish(book: Logbook, onItsWater = false): (tripId: string) 
 }
 
 /** The days with fish the angler logged without an outing, as YYYY-MM-DD: each a fished day for a run of outings. */
+/** Under way as Trips counts it (`fishOn` from `outingFish`): a fish, a lost one or a miss; a dawn and a dusk's loose fish is neither's. */
+export function underWayOn(trip: Trip, fishOn: (tripId: string) => number): boolean {
+  return fishOn(trip.id) > 0 || Boolean(trip.lost || trip.missed);
+}
+
 export function looseFishDays(book: Logbook): string[] {
   const own = countedBook(book);
   return [...new Set(own.catches.filter((entry) => !entry.tripId).map((entry) => bookFishDay(own, entry)))];

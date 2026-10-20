@@ -137,6 +137,7 @@ export const PL_FIELD: PlBook = {
   "One fewer missed strike": "O jedno puste branie mniej",
   "Landed {landed} of {hooked} hooked.": "Wyholowane: {landed} z {hooked} zaciętych.",
   "Every outing on this water": "Wszystkie wyprawy na tym łowisku",
+  "Outing {n} of {total} on this water": "Wyprawa {n} z {total} na tym łowisku",
   "On outings you counted ({outings}): landed {landed} of {hooked} hooked, missed strikes: {missed}.":
     "Na policzonych wyprawach ({outings}): wyholowane {landed} z {hooked} zaciętych, puste brania: {missed}.",
   "{water}, {distance} away.": "{water}, {distance} stąd.",
