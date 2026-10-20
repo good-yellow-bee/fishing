@@ -1,20 +1,11 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { MOTH_COUNT, mothAt } from "./mothOrbit";
+import { MOTH_COLOR, MOTH_COUNT, mothAt, mothGeometry } from "./mothOrbit";
 import { useReducedMotion } from "./reducedMotion";
 
-const MOTH_COLOR = "#f3e6c8";
 /** Drawn larger than life so they read from the dock camera. */
 const SIZE = 0.08;
-
-/** Two wings as a bow tie in the xz plane, hinged along the z axis. */
-function mothGeometry() {
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute("position", new THREE.Float32BufferAttribute([0, 0, -0.4, 1, 0, 0.2, 0, 0, 0.5, 0, 0, -0.4, -1, 0, 0.2, 0, 0, 0.5], 3));
-  geo.computeVertexNormals();
-  return geo;
-}
 
 /** Pale moths looping round the lit lanterns after dark. */
 export function Moths() {
