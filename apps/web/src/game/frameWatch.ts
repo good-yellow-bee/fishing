@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import type { Settings } from "./settings";
 
 /** Under this many frames a second, held for SLOW_WINDOWS windows in a row, the effects step down. */
 export const SLOW_FPS = 40;
@@ -40,6 +41,9 @@ export function createFrameWatch() {
     return true;
   };
 }
+
+/** What a slow machine gives up: effects go Lite at once; shadows and the sharp picture go from the next visit, when the renderer is built again. */
+export const STEP_DOWN: Partial<Settings> = { particles: "lite", shadows: false, sharpness: "fast", autoEffects: false };
 
 /** When effects last stepped down on their own, for the Dock's one-line notice. */
 let steppedDownAt = 0;

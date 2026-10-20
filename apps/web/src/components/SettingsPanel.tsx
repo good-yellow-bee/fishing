@@ -17,8 +17,8 @@ function Choices<K extends keyof Settings>({ name, legend, options }: { name: K;
             type="radio"
             name={name}
             checked={current === option.value}
-            // Picking effects by hand stops them stepping down on their own.
-            onChange={() => updateSettings({ [name]: option.value, ...(name === "particles" ? { autoEffects: false } : {}) } as Partial<Settings>)}
+            // Picking effects or picture by hand stops them stepping down on their own.
+            onChange={() => updateSettings({ [name]: option.value, ...(name === "particles" || name === "sharpness" ? { autoEffects: false } : {}) } as Partial<Settings>)}
           />
           {option.label}
         </label>
@@ -224,7 +224,7 @@ export function SettingsPanel({ onClose, onPhoto, onKeys }: { onClose: () => voi
           ]}
         />
         <label className="settings-check">
-          <input type="checkbox" checked={current.shadows} onChange={(event) => updateSettings({ shadows: event.target.checked })} />
+          <input type="checkbox" checked={current.shadows} onChange={(event) => updateSettings({ shadows: event.target.checked, autoEffects: false })} />
           {t("Shadows")}
         </label>
         <p className="settings-note">{t("Picture and shadows change the next time you open the lake.")}</p>
