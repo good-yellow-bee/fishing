@@ -3,6 +3,7 @@ import { locale, t, useT } from "../i18n";
 import { tempText } from "../i18n/content";
 import { isTurnover, rainedYesterday, waterSwing, waterTempFor } from "../game/logic";
 import { daytimeMoonPass } from "../game/solunar";
+import { nightSkyFor } from "../game/nightLine";
 
 function dayName(date: Date, index: number) {
   if (index === 0) return t("Today");
@@ -61,6 +62,13 @@ function windwardTip(day: ForecastDay) {
   return WINDWARD_TIPS[wind] ?? null;
 }
 
+/** A wet night fills more night lines (NIGHT_LINE_ODDS), so the board names one worth setting a line for. */
+const NIGHT_LINE_TIP = "A wet night: a good one to leave a night line out.";
+function wetNight(date: Date) {
+  const sky = nightSkyFor(new Date(date.getFullYear(), date.getMonth(), date.getDate(), 20).getTime());
+  return sky === "rain" || sky === "overcast";
+}
+
 /** Chalked on the shack wall: the next three days' sky and which fish it brings out. */
 export function ForecastBoard({ now = new Date() }: { now?: Date }) {
   useT();
@@ -88,6 +96,7 @@ export function ForecastBoard({ now = new Date() }: { now?: Date }) {
             {waterSwing(day.date) && <span className="forecast-tip">{t(WATER_SWING_TIPS[waterSwing(day.date)!], { temp: tempText(waterTempFor(day.date)) })}</span>}
             <span className="forecast-tip">{t(MOON_PASS_TIPS[daytimeMoonPass(day.date).pass], { hour: daytimeMoonPass(day.date).hour })}</span>
             {(day.sky === "rain" || day.turn?.to === "rain") && <span className="forecast-tip">{t(RAIN_TIP)}</span>}
+            {wetNight(day.date) && <span className="forecast-tip">{t(NIGHT_LINE_TIP)}</span>}
             {nightMoon(day.date) && <span className="forecast-moon">{t(MOON_LABELS[nightMoon(day.date)!])}</span>}
             {nightMoon(day.date) && <span className="forecast-tip">{t(MOON_TIPS[nightMoon(day.date)!])}</span>}
           </li>
