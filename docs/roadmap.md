@@ -1922,7 +1922,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT446~~ | ~~News card 2026-10-20-game64 covers GT445: letting a giant go~~ (#1672) | ui | S |
 | ~~GT447~~ | ~~A night line on a worm: with no shiner to spare, a worm tied on can go out on the night line at dusk or night, free but drawing 60% of a shiner's odds; the Giant hunter badge's blurb now counts a giant landed after one was let go~~ (#1673) | gameplay | S |
 | ~~GT448~~ | ~~The stance chip says what is about the bank underfoot: the angler's old foe ("foe about", from the day after it broke off) and another angler's lost trophy ("lost trophy")~~ (#1674) | gameplay | S |
-| GT449 | News card game65 covers GT447-GT448 | ui | S |
+| ~~GT449~~ | ~~News card 2026-10-20-game65 covers GT447-GT448: the worm night line and the chip's foe and lost trophy~~ (#1675) | ui | S |
 
 ## Risks / open questions for the owner
 
