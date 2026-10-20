@@ -1339,7 +1339,7 @@ describe("useFishingGame strike timing", () => {
     step.mockReturnValueOnce("fighting");
     now += 16;
     act(() => frames.at(-1)!(now));
-    expect(step).toHaveBeenLastCalledWith(expect.any(Number), expect.any(Number), true, 0);
+    expect(step).toHaveBeenLastCalledWith(expect.any(Number), expect.any(Number), true, 0, "normal");
   });
 
   it("pulls the rod with ← → or A D and a held side button in a fight, and lets go when they do", () => {

@@ -1,5 +1,5 @@
 import { useEffect, useSyncExternalStore } from "react";
-import type { Drag } from "./fight";
+import { DRAGS, type Drag } from "./drag";
 import { FLOAT_COLOURS, type FloatColour } from "./scene/floatColour";
 
 /**
@@ -129,7 +129,7 @@ export function parseSettings(raw: string | null, wantsContrast = systemWantsCon
     vibration: typeof data.vibration === "boolean" ? data.vibration : d.vibration,
     floatColour: pick(data.floatColour, FLOAT_COLOURS, d.floatColour),
     lastLure: typeof data.lastLure === "string" && data.lastLure ? data.lastLure : null,
-    drag: pick(data.drag, ["light", "normal", "heavy"], d.drag),
+    drag: pick(data.drag, DRAGS, d.drag),
   };
 }
 

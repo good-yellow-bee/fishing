@@ -109,7 +109,8 @@ import { useCatchSync } from "../game/useCatchSync";
 import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
 import { rarityLabel } from "../game/logic";
 import { locale, t, tn, useT } from "../i18n";
-import { boatSwingShare, canTurnRuns, fightWind, nextDrag } from "../game/fight";
+import { nextDrag } from "../game/drag";
+import { boatSwingShare, canTurnRuns, fightWind } from "../game/fight";
 import { fightNotesText } from "../game/fightNotes";
 import { savePng, saveShareCard, shareCardFileName } from "../game/shareCard";
 import { lakePictureFileName, requestLakeShot } from "../game/scene/lakeShot";
@@ -761,7 +762,8 @@ export function DockPage() {
         retieKey.current();
         return;
       }
-      if (event.code === "KeyF" && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      // The drag is turned in a fight, where its card shows it.
+      if (event.code === "KeyF" && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey && scenePhaseRef.current === "fight") {
         event.preventDefault();
         updateSettings({ drag: nextDrag(savedSettings.drag) });
         return;
