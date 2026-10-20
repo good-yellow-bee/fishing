@@ -1139,6 +1139,30 @@ describe("keeping a fish clear of the reeds' weeds and the point's rocks", () =>
   });
 });
 
+describe("the far rock from the boat", () => {
+  it("frays the line on an unturned run dragged round the rock, keeping the boat's own fight, and notes runs turned clear", () => {
+    const twoRuns = (farRock: boolean, turn: boolean) => {
+      const runtime = makeFight(fish("lake-whitefish"), 2, 3, () => 0, 1, "boat", undefined, false, false, false, false, false, false, false, 1, 1, false, farRock);
+      let runs = 0;
+      let was = runtime.sim.surge;
+      let rocky = false;
+      for (let now = 0; now < 60_000 && runs < 2; now += 50) {
+        const steer = turn && runtime.sim.surge === 2 ? (-runtime.sim.runSide as Steer) : 0;
+        if (runtime.step(now, 0.05, runtime.sim.surge !== 1 && runtime.sim.tension < 0.6, steer) !== "fighting") break;
+        rocky ||= runtime.sim.rocky === true;
+        if (was === 2 && runtime.sim.surge === 0) runs += 1;
+        was = runtime.sim.surge;
+      }
+      return { scuffed: runtime.performance.scuffed, clearOf: runtime.performance.clearOf, rocky };
+    };
+    expect(twoRuns(true, false)).toMatchObject({ scuffed: true, rocky: true });
+    expect(twoRuns(true, true)).toMatchObject({ clearOf: "rocks" });
+    expect(twoRuns(true, true).scuffed).toBeFalsy();
+    expect(twoRuns(false, false)).toMatchObject({ rocky: false });
+    expect(twoRuns(false, false).scuffed).toBeFalsy();
+  });
+});
+
 describe("the dock's pilings", () => {
   /** Lets one run go unturned, then reels or rests through the calm after it. */
   function afterRun(water: "pilings" | "open", turn: boolean, reel: boolean) {

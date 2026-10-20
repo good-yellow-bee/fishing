@@ -582,8 +582,11 @@ export function makeFight(
   turnCut = 1,
   /** The spent fish must be netted with a fresh strike as its head comes up, rather than landing as the line comes in. */
   net = false,
+  /** Hooked from the boat tight to the far rock: an unturned run drags the line over the rock as off the point. */
+  farRock = false,
 ): FightRuntime {
   const weedy = water === "weeds";
+  const rockWater = water === "rocks" || farRock;
   const deepRuns = water === "deep" || (DIVERS.has(species.id) && (water === "open" || water === "boat"));
   const pattern = PATTERNS[species.challenge];
   const t = difficulty01(species, weight);
@@ -755,7 +758,7 @@ export function makeFight(
           wrapUntil = nowMs + WRAP_MS * coverHold;
         }
         // A clean run at the reeds or the point counts toward the landed card's note; one that went in spoils it.
-        if ((weedy || water === "rocks" || wrapsLine(water)) && turnable && !sim.jump && !sim.roll && !sim.charge) {
+        if ((weedy || rockWater || wrapsLine(water)) && turnable && !sim.jump && !sim.roll && !sim.charge) {
           if (sim.weeded || sim.wrapped || rockedThisRun) fouled = true;
           performance.clearOf = fouled ? undefined : weedy ? "weeds" : wrapsLine(water) ? water : "rocks";
         }
@@ -846,7 +849,7 @@ export function makeFight(
     sim.withRun = withRunFrom !== null && nowMs - withRunFrom >= WITH_RUN_GRACE_SEC * 1000;
     const escalation = species.challenge === "surge" ? Math.min(0.25, completedSurges * 0.05) : 0;
     const eff = (pattern.strength * surgeScale + escalation) * SURGE_PULL * (1 - worn() * (1 - SPENT_PULL)) * (deepRuns ? DEEP_PULL : 1);
-    const rocky = water === "rocks" && turnable && !sim.turning && !sim.roll && !sim.charge;
+    const rocky = rockWater && turnable && !sim.turning && !sim.roll && !sim.charge;
     sim.rocky = rocky && sim.surge === 2 && !sim.jump;
     sim.diving = deepRuns && sim.surge === 2 && !sim.jump && !sim.roll && !sim.charge;
     sim.downstream = water === "current" && turnable && sim.surge === 2 && !sim.jump && !sim.roll && !sim.charge && !sim.turning && sim.runSide === DOWNSTREAM_SIDE;
