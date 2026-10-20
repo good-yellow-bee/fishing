@@ -54,6 +54,8 @@ export type CatchRecord = {
   requestId: string | null;
   /** Another angler's let-go fish, landed again: the server paid the tag. */
   tagged: boolean;
+  /** The bonuses the server paid on it (names from shared `BonusId`). */
+  bonuses: string[];
   createdAt: string;
 };
 

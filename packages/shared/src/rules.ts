@@ -81,7 +81,9 @@ function weekDayFor(day: string | undefined, at: Date): string | Date {
   return off <= 86_400_000 ? day : at;
 }
 
-export type CatchOk = { ok: true; points: number; species: FishSpecies };
+/** A bonus the server paid on a catch, so the landed card stamps only what it really paid. */
+export type BonusId = "golden" | "weekly" | "cleanRun" | "pb" | "lodgeRecord" | "dayRun" | "mastery" | "tag";
+export type CatchOk = { ok: true; points: number; species: FishSpecies; bonuses: BonusId[] };
 export type CatchErr = { ok: false; error: string; status: 400 | 409 };
 export type CatchResult = CatchOk | CatchErr;
 
@@ -116,7 +118,14 @@ export function validateCatch(
     return { ok: false, error: "line too light for this fish", status: 409 };
   }
   const golden = request.requestId !== undefined && isGolden(request.requestId) ? GOLDEN_BONUS : 1;
-  return { ok: true, points: catchPoints(species, request.weight, request.clean, weeklyBonus(species.id, weekDayFor(request.day, at)) * golden * cleanRunBonus(request.clean, request.cleanRun) * bestBonus(request.weight, priorBest, othersBest) * dayRunBonus(catchDays, request.day) * masteryBonus(priorCaught)), species };
+  const weekly = weeklyBonus(species.id, weekDayFor(request.day, at));
+  const cleanRun = cleanRunBonus(request.clean, request.cleanRun);
+  const lodge = lodgeRecordBonus(request.weight, priorBest, othersBest);
+  const best = bestBonus(request.weight, priorBest, othersBest);
+  const dayRun = dayRunBonus(catchDays, request.day);
+  const mastery = masteryBonus(priorCaught);
+  const paid: [BonusId, boolean][] = [["golden", golden > 1], ["weekly", weekly > 1], ["cleanRun", cleanRun > 1], ["lodgeRecord", lodge > 1], ["pb", lodge === 1 && best > 1], ["dayRun", dayRun > 1], ["mastery", mastery > 1]];
+  return { ok: true, points: catchPoints(species, request.weight, request.clean, weekly * golden * cleanRun * best * dayRun * mastery), species, bonuses: paid.filter(([, on]) => on).map(([id]) => id) };
 }
 
 export type UpgradeOk = { ok: true; cost: number; nextRank: number };

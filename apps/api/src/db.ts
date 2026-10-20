@@ -2,7 +2,7 @@ import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Database from "better-sqlite3";
-import { BAG_SIZE, SLAMS, fishById, TAG_RETURN_BONUS, TAGGABLE_IDS, isLakeHour, isTrophyWeight, TROPHY_RELEASE_BONUS, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type LodgeRelease, type LodgeTrack, type StudyFact, type TagReturn, type SpeciesRecord, type SpotId } from "@stillwater/shared";
+import { BAG_SIZE, SLAMS, fishById, TAG_RETURN_BONUS, TAGGABLE_IDS, isLakeHour, isTrophyWeight, TROPHY_RELEASE_BONUS, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type BonusId, type LodgeRelease, type LodgeTrack, type StudyFact, type TagReturn, type SpeciesRecord, type SpotId } from "@stillwater/shared";
 
 const dir = dirname(fileURLToPath(import.meta.url));
 export const dataDir = join(dir, "../data");
@@ -151,6 +151,10 @@ if (!catchColumns.some((column) => column.name === "released")) {
 if (!catchColumns.some((column) => column.name === "day")) {
   db.exec(`ALTER TABLE catch ADD COLUMN day TEXT`);
 }
+// The bonuses the catch was paid, comma-separated, so the landed card stamps only those.
+if (!catchColumns.some((column) => column.name === "bonuses")) {
+  db.exec(`ALTER TABLE catch ADD COLUMN bonuses TEXT`);
+}
 // When the angler let the fish go; older releases have only their catch's time.
 if (!catchColumns.some((column) => column.name === "released_at")) {
   db.exec(`ALTER TABLE catch ADD COLUMN released_at TEXT`);
@@ -193,6 +197,8 @@ export type CatchRow = {
   day: string | null;
   /** Another angler's let-go fish this catch landed again. */
   tagged_from?: string | null;
+  /** The bonuses it was paid, comma-separated. */
+  bonuses?: string | null;
   created_at: string;
 };
 
@@ -504,9 +510,9 @@ export function recordCatch(row: CatchRow): RecordCatchResult {
       .get(row.user_id, cutoff) as { count: number };
     if (count.count >= 12) return { kind: "rate_limited" } as const;
     db.prepare(
-      `INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, hour, sky, season, golden, day, tagged_from, created_at)
-       VALUES (@id, @user_id, @species_id, @weight, @points, @spot, @request_id, @clean, @hour, @sky, @season, @golden, @day, @tagged_from, @created_at)`,
-    ).run({ ...row, tagged_from: row.tagged_from ?? null });
+      `INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, hour, sky, season, golden, day, tagged_from, bonuses, created_at)
+       VALUES (@id, @user_id, @species_id, @weight, @points, @spot, @request_id, @clean, @hour, @sky, @season, @golden, @day, @tagged_from, @bonuses, @created_at)`,
+    ).run({ ...row, tagged_from: row.tagged_from ?? null, bonuses: row.bonuses ?? null });
     // The angler who let the fish go is paid for it once, when it is landed again.
     const tagged = row.tagged_from ? (db.prepare(`SELECT user_id FROM catch WHERE id = ?`).get(row.tagged_from) as { user_id: string } | undefined) : undefined;
     if (tagged) db.prepare(`UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`).run(TAG_RETURN_BONUS, TAG_RETURN_BONUS, tagged.user_id);
@@ -649,6 +655,7 @@ export function toCatch(row: CatchRow) {
     released: row.released === 1,
     requestId: row.request_id,
     tagged: !!row.tagged_from,
+    bonuses: (row.bonuses ? row.bonuses.split(",") : []) as BonusId[],
     createdAt: row.created_at,
   };
 }
