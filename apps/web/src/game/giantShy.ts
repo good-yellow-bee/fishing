@@ -5,8 +5,8 @@ export function giantShyKey(userId: string) {
   return `stillwater.giantshy.${userId}.v1`;
 }
 
-/** The lures each bank's giant broke free of this week, and so will not take again till the giants change on Monday. */
-export type GiantShy = { week: string; lures: Partial<Record<SpotId, string[]>> };
+/** The lures each bank's giant, by name, broke free of this week, and so will not take again till the giants change on Monday. */
+export type GiantShy = { week: string; lures: Partial<Record<SpotId, { giant: string; lures: string[] }>> };
 
 /** The stored shyness as of `now`: a new week's giants have never seen a lure. */
 export function rollGiantShy(stored: unknown, now: Date): GiantShy {
@@ -31,11 +31,14 @@ export function saveGiantShy(userId: string, shy: GiantShy) {
   }
 }
 
-export function shyOf(shy: GiantShy, spot: SpotId, lure: string | undefined): boolean {
-  return !!lure && (shy.lures[spot] ?? []).includes(lure);
+export function shyOf(shy: GiantShy, spot: SpotId, giant: string, lure: string | undefined): boolean {
+  const known = shy.lures[spot];
+  return !!lure && known?.giant === giant && known.lures.includes(lure);
 }
 
 /** The shyness after the bank's giant broke free of `lure`. */
-export function markShy(shy: GiantShy, spot: SpotId, lure: string): GiantShy {
-  return shyOf(shy, spot, lure) ? shy : { ...shy, lures: { ...shy.lures, [spot]: [...(shy.lures[spot] ?? []), lure] } };
+export function markShy(shy: GiantShy, spot: SpotId, giant: string, lure: string): GiantShy {
+  if (shyOf(shy, spot, giant, lure)) return shy;
+  const known = shy.lures[spot]?.giant === giant ? shy.lures[spot]!.lures : [];
+  return { ...shy, lures: { ...shy.lures, [spot]: { giant, lures: [...known, lure] } } };
 }

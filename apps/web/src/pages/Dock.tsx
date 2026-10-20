@@ -1153,7 +1153,7 @@ export function DockPage() {
           {!rowing && !mercy && game.stance === crowdedBank && <small className="stance-cold"> · {t("another angler here today")}</small>}
           {!rowing && isFishingStance(game.stance) && game.stance !== "open" && favoredNow(game.stance) && <small className="stance-hot"> · {t("bites sooner now")}</small>}
           {!rowing && giantAt(game.stance) && (
-            game.giantShy && isFishingStance(game.stance) && shyOf(game.giantShy, game.stance, chosenLure)
+            game.giantShy && isFishingStance(game.stance) && shyOf(game.giantShy, game.stance, giantAt(game.stance)!.name, lure)
               ? <small className="stance-cold"> · {t("giant: {name}, shy of this lure", { name: t(giantAt(game.stance)!.name) })}</small>
               : <small className="stance-hot"> · {t("giant: {name}", { name: t(giantAt(game.stance)!.name) })}</small>
           )}

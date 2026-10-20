@@ -402,12 +402,14 @@ export function useFishingGame(
   /** Read live in the frame loop, which outlives a render's profile. */
   const anglerIdRef = useRef(profile?.userId);
   anglerIdRef.current = profile?.userId;
-  /** The lures this week's giants broke free of: read from the browser once per angler, then kept here too. */
+  /** The lures this week's giants broke free of: read from the browser once per angler, then kept here, and shown to the Dock. */
   const [giantShy, setGiantShy] = useState<GiantShy | null>(null);
   const giantShyRef = useRef<{ userId: string; shy: GiantShy } | null>(null);
   const giantShyNow = (userId: string) => {
     const kept = giantShyRef.current;
-    return kept && kept.userId === userId ? rollGiantShy(kept.shy, new Date()) : loadGiantShy(userId);
+    const shy = kept && kept.userId === userId ? rollGiantShy(kept.shy, new Date()) : loadGiantShy(userId);
+    giantShyRef.current = { userId, shy };
+    return shy;
   };
   const keepGiantShy = (userId: string, shy: GiantShy) => {
     giantShyRef.current = { userId, shy };
@@ -415,7 +417,7 @@ export function useFishingGame(
     setGiantShy(shy);
   };
   useEffect(() => {
-    setGiantShy(profile?.userId ? loadGiantShy(profile.userId) : null);
+    setGiantShy(profile?.userId ? giantShyNow(profile.userId) : null);
   }, [profile?.userId]);
   const legendRef = useRef(legend);
   legendRef.current = legend;
@@ -1138,8 +1140,10 @@ export function useFishingGame(
     // The fish that broke off here may come back, at the same weight; while it's about this bank its shadow circles the float.
     setLurking(gotAwayRef.current?.spot === spotRef.current);
     // A giant that broke free of the tied lure this week will not take it again, whether still about or fresh.
-    const lureShy = shyOf(giantShyNow(current.userId), spotRef.current, lureRef?.current);
-    const lost = castForGotAway(gotAwayRef.current, spotRef.current, lureShy && gotAwayRef.current?.back?.giant ? 1 : Math.random(), favorsLargeFish(lureRef?.current ?? ""), current.patience);
+    const shyNow = giantShyNow(current.userId);
+    const lureShy = (giant: string | undefined) => !!giant && shyOf(shyNow, spotRef.current, giant, lureRef?.current);
+    const waiting = gotAwayRef.current;
+    const lost = castForGotAway(waiting, spotRef.current, waiting && lureShy(backAgain(waiting, openGiantsRef.current)?.giant) ? 1 : Math.random(), favorsLargeFish(lureRef?.current ?? ""), current.patience);
     gotAwayRef.current = lost.next;
     againRef.current = lost.again !== null;
     followedRef.current = !!lost.again?.follow;
@@ -1151,7 +1155,8 @@ export function useFishingGame(
     const tagged = released && !released.fish && lodgeReleasedRef.current.length > 0 ? castForLodgeTag(lodgeReleasedRef.current, spotRef.current, Date.now(), Math.random(), takenTags(landedTagsRef.current, gotAwayRef.current), current) : null;
     // A let-go fish that broke off or dropped the bait is still that fish when it bites again.
     // Rarely, the bank's giant comes up, if no one has landed it this week and the angler's line could hold it.
-    const giant = !lost.again && !mercyNow && !lureShy && !released?.fish && !tagged ? openGiantsRef.current.find((one) => one.spot === spotRef.current) : undefined;
+    const bankGiant = !lost.again && !mercyNow && !released?.fish && !tagged ? openGiantsRef.current.find((one) => one.spot === spotRef.current) : undefined;
+    const giant = bankGiant && !lureShy(bankGiant.name) ? bankGiant : undefined;
     const giantKind = giant ? FISH.find((fish) => fish.id === giant.speciesId) : undefined;
     const giantUp = giant && giantKind && canLand(current, giantKind) && Math.random() < GIANT_ODDS ? { species: giantKind, weight: giant.weight, was: giant.weight, at: Date.now(), giant: giant.name } : null;
     recaughtRef.current = (lost.again ? backAgain(lost.again, openGiantsRef.current) : undefined) ?? released?.fish ?? tagged ?? giantUp;
@@ -1745,7 +1750,7 @@ export function useFishingGame(
       const lure = lureRef?.current;
       const userId = anglerIdRef.current;
       if (!giant || !lure || !userId) return "";
-      keepGiantShy(userId, markShy(giantShyNow(userId), spotRef.current, lure));
+      keepGiantShy(userId, markShy(giantShyNow(userId), spotRef.current, giant, lure));
       return ` ${t("{name} knows the {lure} now, and won't take one again this week.", { name: t(giant), lure: t(lure) })}`;
     };
     const loop = (now: number) => {

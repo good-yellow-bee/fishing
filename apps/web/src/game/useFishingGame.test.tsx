@@ -117,6 +117,7 @@ vi.mock("./fight", async (importOriginal) => {
 });
 
 import { updateSettings } from "./settings";
+import { giantShyKey } from "./giantShy";
 import { carriesBait, FALSE_STRIKE_MS, FIGURE_EIGHT_ODDS, FIGURE_TURN_MS, FIGURE_WINDOW_MS, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TIRE_REASONS, TOPWATER_POPS, useFishingGame, WAIT_REASONS } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
@@ -2666,6 +2667,11 @@ describe("level unlock integration", () => {
     } finally {
       harnessGiants.current = [];
       vi.mocked(Math.random).mockRestore();
+      try {
+        localStorage.removeItem(giantShyKey(profile.userId));
+      } catch {
+        // No store in this run, so nothing was kept.
+      }
     }
   });
 
