@@ -20,7 +20,8 @@ export function hedgeShape(bushes: readonly Bush[] = hedgeBushes()) {
   const v = new THREE.Vector3();
   bushes.forEach((bush, k) => {
     const r = BUSH * bush.size;
-    place.compose(new THREE.Vector3(bush.x, bush.y, bush.z), new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), k), new THREE.Vector3(r * 1.3, r * 0.75, r));
+    // Lined up along the row (a small turn each, from its shade), so neighbours overlap into one hedge rather than beads.
+    place.compose(new THREE.Vector3(bush.x, bush.y, bush.z), new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), (bush.shade - 0.5) * 0.6), new THREE.Vector3(r * 1.6, r * 0.8, r));
     turn.getNormalMatrix(place);
     for (let i = 0; i < per; i += 3) {
       v.set(up[i]!, up[i + 1]!, up[i + 2]!).applyMatrix4(place).toArray(positions, k * per + i);

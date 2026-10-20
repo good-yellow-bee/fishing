@@ -14,7 +14,7 @@ export const HEDGE_ROWS = [5.6, 7.0, 8.5, 10.0] as const;
 export const HEDGE_WEST = -14;
 export const HEDGE_EAST = 12;
 /** Bush spacing along a row, and a bush's radius, drawn large enough to read at the hills' distance. */
-const STEP = 0.26;
+const STEP = 0.18;
 export const BUSH = 0.16;
 /** How far a row rises and falls as it follows the slope. */
 const WAVE = 0.25;
