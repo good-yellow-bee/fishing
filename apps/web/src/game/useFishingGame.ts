@@ -66,6 +66,7 @@ import { castSnags, onRockEdge, onShoreIce, ROCK_EDGE_WAIT, SNAG_AT_MS, SNAG_TAP
 import { FLUTTER_SEC, flutterGrabberFor, flutterTip, followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { BUCKET_SIZE, liveShiners, loadBucket, saveBucket } from "./baitBucket";
 import { loadSwim, saveSwim, swimNow } from "./swim";
+import { loadTrap, saveTrap, trapCatch, trapState, type Trap } from "./minnowTrap";
 import { castForFoe, foeGone, isOldFoe, loadOldFoe, saveOldFoe } from "./oldFoe";
 import { loadNightLine, nightLineCatch, nightLineKinds, nightLineState, nightSkyFor, saveNightLine, wormLineHour, type NightLine } from "./nightLine";
 import { markShy, loadGiantShy, rollGiantShy, saveGiantShy, shyOf, type GiantShy } from "./giantShy";
@@ -464,6 +465,11 @@ export function useFishingGame(
   };
   /** The spare shiners alive right now: one whose three days ran out during the visit has died. */
   const bucketNow = () => liveShiners(bucketRef.current, Date.now());
+  /** The shiner trap by the shack, read when the angler signs in. */
+  const [trap, setTrapState] = useState<Trap | null>(null);
+  useEffect(() => {
+    setTrapState(profile?.userId ? loadTrap(profile.userId) : null);
+  }, [profile?.userId]);
   /** The bucket with a fresh shiner in, or with its oldest one taken out. */
   const bucketIn = () => [...bucketNow(), Date.now()];
   const bucketOut = () => bucketNow().slice(1);
@@ -2261,6 +2267,35 @@ export function useFishingGame(
     setHint(t("The shiner goes in your bait bucket: {n} of {max}.", { n: bucketRef.current.length, max: BUCKET_SIZE }));
   };
 
+  /** Bait the shiner trap by the shack with a handful of groundbait, for a later visit to lift. */
+  const setTrap = () => {
+    if (!profile || trap || handfulsRef.current <= 0) return;
+    const next = { setAt: Date.now() };
+    keepHandfuls(handfulsRef.current - 1);
+    saveTrap(profile.userId, next);
+    setTrapState(next);
+    setHint(t("You bait the shiner trap with a handful of groundbait and sink it by the shack. Lift it after six hours, within three days."));
+  };
+
+  /** Lift the shiner trap: the shiners in it go in the bait bucket, as many as it holds room for, and the rest go back. */
+  const liftTrap = () => {
+    if (!profile || !trap || trapState(trap, Date.now()) === "soaking") return;
+    const caught = trapCatch(trap, Date.now(), Math.random);
+    saveTrap(profile.userId, null);
+    setTrapState(null);
+    let kept = bucketNow();
+    for (let i = 0; i < caught && kept.length < BUCKET_SIZE; i += 1) kept = [...kept, Date.now()];
+    const added = kept.length - bucketNow().length;
+    keepBucket(profile.userId, kept);
+    setHint(
+      caught === 0
+        ? t("The trap comes up empty: it sat too long, and the shiners found their way out.")
+        : added < caught
+          ? t("Shiners in the trap: {caught}. Your bait bucket takes {added}, and the rest go back, the bucket being full.", { caught, added })
+          : t("Shiners in the trap: {caught}, all into your bait bucket.", { caught }),
+    );
+  };
+
   /** Hook a spare shiner from the bait bucket. */
   const hookFromBucket = () => {
     if (!profile || liveShinerRef.current || bucketNow().length === 0) return;
@@ -2353,6 +2388,9 @@ export function useFishingGame(
     fishedHard,
     giantShy,
     nightLine,
+    trap,
+    setTrap,
+    liftTrap,
     lostReport,
     livelyShiner,
     bucket,

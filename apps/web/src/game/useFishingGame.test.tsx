@@ -120,6 +120,7 @@ import { updateSettings } from "./settings";
 import { giantShyKey } from "./giantShy";
 import { nightLineKey, nightLineReadyAt } from "./nightLine";
 import { BUCKET_LIFE_MS, baitBucketKey } from "./baitBucket";
+import { TRAP_SOAK_MS } from "./minnowTrap";
 import { bagKey, shinerKey } from "./groundbaitBag";
 import { oldFoeKey } from "./oldFoe";
 import { SWIM_PRIMED_MS, swimKey } from "./swim";
@@ -199,6 +200,8 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <button type="button" onClick={game.addShiner}>buy shiner</button>
       <button type="button" onClick={game.setNightLine}>set night line</button>
       <button type="button" onClick={game.hookFromBucket}>hook from bucket</button>
+      <button type="button" onClick={game.setTrap}>set trap</button>
+      <button type="button" onClick={game.liftTrap}>lift trap</button>
       <i data-testid="bucket">{game.bucket}</i>
       <button type="button" onClick={game.checkNightLine}>check night line</button>
       <i data-testid="caught-hour">{game.outcome?.kind === "landed" ? (game.outcome.hour ?? "") : ""}</i>
@@ -453,6 +456,26 @@ describe("useFishingGame live shiner", () => {
         // No store in this run, so nothing was kept.
       }
     }
+  });
+
+  it("baits the shiner trap with a handful, and lifted later its shiners go in the bucket", () => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    mount();
+    const press = (name: string) => act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === name) as HTMLButtonElement).click());
+    const bag = () => container!.querySelector("[data-testid=groundbait]")?.textContent?.split("|")[0];
+    const before = Number(bag());
+    press("set trap");
+    expect(Number(bag())).toBe(before - 1);
+    expect(hint()).toMatch(/^You bait the shiner trap/);
+    // Too soon, it stays down.
+    press("lift trap");
+    expect(container!.querySelector("[data-testid=bucket]")?.textContent).toBe("0");
+    vi.setSystemTime(DOCK_BUBBLES.at + TRAP_SOAK_MS);
+    press("lift trap");
+    // Math.random is pinned to 0 here, so the trap holds one.
+    expect(container!.querySelector("[data-testid=bucket]")?.textContent).toBe("1");
+    expect(hint()).toBe("Shiners in the trap: 1, all into your bait bucket.");
   });
 
   it("lets a spare shiner die after three days in the bucket, and says so on the next visit", () => {
