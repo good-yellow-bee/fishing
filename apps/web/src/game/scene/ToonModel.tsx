@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { useGLTF } from "@react-three/drei";
+import { useGLTF } from "./loadGltf";
 import * as THREE from "three";
 import type { LakeSeason } from "@stillwater/shared";
 import { applyToon, releaseSharedMaterials, shadeColours, shareMaterials } from "./toon";

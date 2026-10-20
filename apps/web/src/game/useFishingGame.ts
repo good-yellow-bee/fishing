@@ -31,7 +31,7 @@ import {
   legendaryCanBite,
 } from "@stillwater/shared";
 import { locale, t } from "../i18n";
-import { fightLines, liftsStickerInOne, netsFish, TOOTHY, fightWater, fightWind, isCleanFight, isCloseCall, LEAPERS, makeFight, seasonTireMul, thrivesInCold, floodedInlet, warmTireMul, rainCooled, deepCooled, runTireMul, nestTireMul, nightTireMul, spentTireMul, twilightTireMul, springRunTireMul, currentTireMul, fallFeedTireMul, rainHunterTireMul, summerStrengthTireMul, SOFT_MOUTHS, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type FightWater, type FightWind, type Steer, type SurgeState } from "./fight";
+import { fightLines, liftsStickerInOne, LINE_SPINNERS, netsFish, SPIN_TWIST, TOOTHY, fightWater, fightWind, isCleanFight, isCloseCall, LEAPERS, makeFight, seasonTireMul, thrivesInCold, floodedInlet, warmTireMul, rainCooled, deepCooled, runTireMul, nestTireMul, nightTireMul, spentTireMul, twilightTireMul, springRunTireMul, currentTireMul, fallFeedTireMul, rainHunterTireMul, summerStrengthTireMul, SOFT_MOUTHS, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type FightWater, type FightWind, type Steer, type SurgeState } from "./fight";
 import { boat } from "./scene/boat";
 import { fightInput } from "./scene/fightMotion";
 import { settings } from "./settings";
@@ -1213,7 +1213,7 @@ export function useFishingGame(
     // A line twisted by a spinner's blade kinks on the cast now and then, until it is retied.
     if (castTangles(twistRef.current, Math.random(), mercyRef.current)) {
       setOutcome({ kind: "miss", message: t("A wind knot: the twisted line kinked on the cast.") });
-      resetToIdle(t("A spinner twists the line as it turns. Retie to take the twist out."));
+      resetToIdle(t("A spinner's turns and a bluegill's circles twist the line. Retie to take the twist out."));
       return;
     }
     setTwist(twistAfterCast(twistRef.current, lureRef?.current));
@@ -1657,6 +1657,8 @@ export function useFishingGame(
           if (result === "landed") {
             fx.land();
             fx.haptic("land");
+            // A bluegill's tight circles leave the line twisted, nearer a tangle.
+            if (LINE_SPINNERS.has(current.species.id)) setTwist(twistRef.current + SPIN_TWIST);
             const clean = isCleanFight(runtime.performance);
             cleanRunRef.current = clean ? cleanRunRef.current + 1 : 0;
             schoolRef.current = schoolAfterLanding(current.species.id, spotRef.current, hourRef.current, season, castBaitedRef.current);
@@ -1754,6 +1756,9 @@ export function useFishingGame(
             if (sim.tornOut && sim.lightHook && !SOFT_MOUTHS.has(current.species.id)) {
               setOutcome({ kind: "broke", message: t("The light hook pulled out of the {fish}.", { fish: t(current.species.name) }) + trophy });
               resetToIdle(t("Hooked light — strike sooner, and ease off as soon as the bar turns red.") + stillAbout());
+            } else if (sim.slipped) {
+              setOutcome({ kind: "broke", message: t("The {fish} slithered off the hook on the slack line.", { fish: t(current.species.name) }) + trophy });
+              resetToIdle(t("Slippery — keep the line tight between its runs.") + stillAbout());
             } else if (sim.thrown) {
               setOutcome({ kind: "broke", message: t("The {fish} charged straight at you and the light hook dropped out of the slack line.", { fish: t(current.species.name) }) + trophy });
               resetToIdle(t("Hooked light — when it charges, reel fast to keep the line tight.") + stillAbout());
