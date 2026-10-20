@@ -1880,7 +1880,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT417~~ | ~~The lake's giants: each week (from Monday 00:00 UTC) every bank holds one named giant, a big fish of a kind that lives there, shared by the whole lodge; a cast there rarely brings it up (about 1 in 80, if the angler's line can hold it), the first angler to land it is paid 200 points and named on the Board, and it is gone for everyone till next week~~ (#1619) | gameplay | M |
 | ~~GT418~~ | ~~News card 2026-10-20-game55 covers GT417: the lake's giants~~ (#1622) | ui | S |
 | ~~GT419~~ | ~~A giant that got away comes back as the bank's giant only while no one has landed it and its week still runs; otherwise it is just the big fish that got away~~ (#1625) | gameplay | S |
-| GT420 | The bank picker marks each bank whose giant is still out there, so the angler can choose where to try for one | gameplay | S |
+| ~~GT420~~ | ~~The walk signs mark each bank whose giant is still out there (♦, named for a screen reader), and the stance chip names the giant of the bank the angler stands at~~ (#1627) | gameplay | S |
 
 ## Risks / open questions for the owner
 
