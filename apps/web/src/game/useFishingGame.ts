@@ -167,7 +167,7 @@ export function lostTrophy(species: FishSpecies, weight: number) {
 
 /** How the angler played this fish, for a line on the landed card. */
 /** cleanRun counts this clean fight and the clean ones landed right before it this session; 0 when this one was not clean. */
-export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; lightHook?: boolean; turnedRuns: number; cleanRun?: number; closeCall?: boolean; fightSec?: number; bowedLeaps?: number; easedShakes?: number; followedDarts?: number; encore?: boolean; secondWind?: boolean; secondTake?: boolean; grabbed?: string; gotAway?: boolean; followedIn?: boolean; recaught?: boolean; clearOf?: "weeds" | "rocks" | "pilings" | "current" };
+export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; lightHook?: boolean; turnedRuns: number; cleanRun?: number; closeCall?: boolean; fightSec?: number; bowedLeaps?: number; easedShakes?: number; followedDarts?: number; encore?: boolean; secondWind?: boolean; secondTake?: boolean; grabbed?: string; gotAway?: boolean; followedIn?: boolean; recaught?: boolean; clearOf?: "weeds" | "rocks" | "pilings" | "log" | "current" };
 
 export type Outcome =
   | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes; note?: string; tag?: { id: string; by: string } }
@@ -281,8 +281,9 @@ export const SECOND_TAKE_NIBBLE_MS = 300;
 export const FOLLOW_MS = 1200;
 
 /** Said once, when a fight first frays the line: what did it, and what to do. */
-function scuffNote(spot: SpotId, teeth = false) {
+function scuffNote(spot: SpotId, teeth = false, log = false) {
   if (teeth) return t("Its teeth frayed your line: it snaps sooner until you retie it.");
+  if (log) return t("Rubbing round the sunken log frayed your line: it snaps sooner until you retie it.");
   return spot === "dock"
     ? t("Rubbing round the piling frayed your line: it snaps sooner until you retie it.")
     : t("The rocks frayed your line: it snaps sooner until you retie it.");
@@ -666,9 +667,10 @@ export function useFishingGame(
     const deep = late && (isLiveBait(lureRef?.current) || shinerTakenRef.current);
     const lightHook = late && !deep;
     const underpowered = !canLand(current, species);
-    // A fish hooked tight to the lily pads dives for the stems, so the fight there is a weed fight whatever the bank.
+    // A fish hooked tight to the lily pads dives for the stems, so the fight there is a weed fight whatever the bank;
+    // one hooked tight to the sunken log runs for the log and can wrap the line round it.
     const pads = castPadsRef.current;
-    const water = pads ? "weeds" : fightWater(spotRef.current);
+    const water: FightWater = pads ? "weeds" : castLogRef.current ? "log" : fightWater(spotRef.current);
     const windy = fightWind(windRef.current);
     const next = { species, weight, underpowered, water, windy, lightHook, pads, strongLift: liftsStickerInOne(species.id, current.strength) };
     fightRef.current = next;
@@ -1699,7 +1701,7 @@ export function useFishingGame(
             // The landed card covers the hint, so what the bank holds now rides on the card too.
             const fed = fedRef.current ? t("{fish}: it came in to feed on the groundbait.", { fish: t(current.species.name) }) : "";
             const frays = runtime.performance.scuffed || runtime.performance.bitten;
-            const scuffed = frays && !frayedRef.current ? scuffNote(spotRef.current, !runtime.performance.scuffed) : "";
+            const scuffed = frays && !frayedRef.current ? scuffNote(spotRef.current, !runtime.performance.scuffed, current.water === "log") : "";
             if (frays) markFrayed(true);
             // The fish took the worm, so a fresh one goes on.
             setSoak(0);
@@ -1776,7 +1778,7 @@ export function useFishingGame(
             schoolRef.current = null;
             gotAwayRef.current = gotAwayAfterLoss(current.species, current.weight, spotRef.current, recaughtRef.current);
             const frays = runtime.performance.scuffed || runtime.performance.bitten;
-            const trophy = lostTrophy(current.species, current.weight) + (frays && !frayedRef.current ? ` ${scuffNote(spotRef.current, !runtime.performance.scuffed)}` : "");
+            const trophy = lostTrophy(current.species, current.weight) + (frays && !frayedRef.current ? ` ${scuffNote(spotRef.current, !runtime.performance.scuffed, current.water === "log")}` : "");
             if (frays) markFrayed(true);
             if (sim.tornOut && sim.lightHook && !SOFT_MOUTHS.has(current.species.id)) {
               setOutcome({ kind: "broke", message: t("The light hook pulled out of the {fish}.", { fish: t(current.species.name) }) + trophy });

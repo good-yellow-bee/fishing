@@ -191,7 +191,7 @@ export type FightPerformance = {
   /** Seconds of fight played so far, by game time, so a paused tab doesn't count. */
   fightSec?: number;
   /** At the reeds, the point or the dock, every run so far kept out of the weeds, off the rocks or clear of the pilings; at the inlet, every run downstream turned upstream. Unset once one wasn't. */
-  clearOf?: "weeds" | "rocks" | "pilings" | "current";
+  clearOf?: "weeds" | "rocks" | "pilings" | "log" | "current";
   /** The line was reeled over the rocks or wrapped round a piling, and is frayed until retied. */
   scuffed?: boolean;
   /** A pike's teeth frayed the line during this fight, and it stays frayed until retied. */
@@ -465,7 +465,11 @@ export type FightWind = keyof typeof WIND_SLACK;
 export function fightWind(wind: string | undefined): FightWind | undefined {
   return wind === "breezy" || wind === "strong" ? wind : undefined;
 }
-export type FightWater = "open" | "weeds" | "current" | "deep" | "rocks" | "boat" | "pilings";
+export type FightWater = "open" | "weeds" | "current" | "deep" | "rocks" | "boat" | "pilings" | "log";
+/** Water where an unturned run wraps the line round wood: the dock's pilings, or the half-sunk log a fish was hooked tight to. */
+export function wrapsLine(water: FightWater | undefined): boolean {
+  return water === "pilings" || water === "log";
+}
 /** The water a spot gives the fight. */
 export function fightWater(spot: string): FightWater {
   return spot === "reeds" ? "weeds" : spot === "inlet" ? "current" : spot === "dropoff" ? "deep" : spot === "point" ? "rocks" : spot === "open" ? "boat" : spot === "dock" ? "pilings" : "open";
@@ -745,15 +749,15 @@ export function makeFight(
           sim.weeded = true;
           weedUntil = nowMs + WEED_MS * coverHold;
         }
-        // At the dock it wraps the line round a piling instead.
-        if (water === "pilings" && turnable && !sim.jump && !sim.roll && !sim.charge && !turnedThisRun && sim.line > 0) {
+        // At the dock it wraps the line round a piling instead, and by the sunken log round the log.
+        if (wrapsLine(water) && turnable && !sim.jump && !sim.roll && !sim.charge && !turnedThisRun && sim.line > 0) {
           sim.wrapped = true;
           wrapUntil = nowMs + WRAP_MS * coverHold;
         }
         // A clean run at the reeds or the point counts toward the landed card's note; one that went in spoils it.
-        if ((weedy || water === "rocks" || water === "pilings") && turnable && !sim.jump && !sim.roll && !sim.charge) {
+        if ((weedy || water === "rocks" || wrapsLine(water)) && turnable && !sim.jump && !sim.roll && !sim.charge) {
           if (sim.weeded || sim.wrapped || rockedThisRun) fouled = true;
-          performance.clearOf = fouled ? undefined : weedy ? "weeds" : water === "pilings" ? "pilings" : "rocks";
+          performance.clearOf = fouled ? undefined : weedy ? "weeds" : water === "pilings" || water === "log" ? water : "rocks";
         }
         // At the inlet only a run downstream counts: turned upstream it keeps the note, left to run with the current it spoils it.
         if (water === "current" && turnable && !sim.jump && !sim.roll && !sim.charge && sim.runSide === DOWNSTREAM_SIDE) {

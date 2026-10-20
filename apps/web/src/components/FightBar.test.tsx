@@ -250,7 +250,7 @@ describe("FightBar for screen readers", () => {
   });
 
   it("says what the reeds and the inlet do to a fight, and nothing on open water", () => {
-    const water = (w?: "weeds" | "current" | "deep" | "rocks" | "boat" | "pilings") => {
+    const water = (w?: "weeds" | "current" | "deep" | "rocks" | "boat" | "pilings" | "log") => {
       act(() => root!.render(<FightBar fight={{ species: perch, weight: 0.8, underpowered: false, water: w }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
       // The perch's own habit line is not about the water.
       return [...container!.querySelectorAll(".fight-water")].map((line) => line.textContent ?? "").find((line) => !line.startsWith("Quitter:")) ?? null;
@@ -261,6 +261,10 @@ describe("FightBar for screen readers", () => {
     expect(water("current")).toMatch(/current takes line/);
     expect(water("deep")).toMatch(/dive/);
     expect(water("rocks")).toMatch(/rocks/);
+    // A perch can't be turned, so the log goes unmentioned for it, as the pilings do.
+    expect(water("log")).toBeNull();
+    act(() => root!.render(<FightBar fight={{ species: trout, weight: 2, underpowered: false, water: "log" }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
+    expect([...container!.querySelectorAll(".fight-water")].map((line) => line.textContent)).toContain("Sunken log: turn every run, or it wraps the line round the log and frays it");
     expect(water("boat")).toMatch(/swings to follow a run/);
     act(() => root!.render(<FightBar fight={{ species: perch, weight: 0.8, underpowered: false, water: "boat", windy: "strong" }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
     expect([...container!.querySelectorAll(".fight-water")].map((line) => line.textContent)).toContain("Boat: the strong wind holds the hull back on its anchor line, so it follows a run less and runs take more line");
