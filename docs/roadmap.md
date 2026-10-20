@@ -1480,6 +1480,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | SC286 | The shiner trap seen: while one is set (GT453), a wire cage lies in the shallows below the shack, its cord tied to a stake on the bank; once it is ready to lift, a shiner flips at the surface inside it now and then (not with reduced motion: it lies still). Seen from the shack; the dock view faces away | scene | S |
 | SC287 | The trap fills on time: waiting at the shack, the cage shows its shiner and the bait shop offers the lift the moment the soak ends, and the trap goes empty once it has sat too long, without anything else on screen changing first | scene | S |
 | SC288 | News card scene69 covers SC286 and SC287: the shiner trap seen in the shallows below the shack, a shiner flipping once it is ready, and the trap turning ready on time while you wait | scene | S |
+| SC289 | The night line turns over on time: waiting on the bank, the line's sign offers to bring it in the moment its night is out, and the line goes stale once it has sat too long, without anything else on screen changing first (the trap's re-check from SC287, now shared by both) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1945,6 +1946,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT459~~ | ~~The shiner trap follows the season: baited in winter it goes into cold water, so it soaks twelve hours instead of six and holds one shiner, not up to two; the shack's trap note says which before baiting, and the trap keeps the season it went in~~ (#1693) | gameplay | S |
 | ~~GT460~~ | ~~The bait bucket follows the season: a spare shiner keeps five days in winter's cold water and only two in summer's heat (three otherwise), judged by the season when the angler comes back, so stocking the bucket ahead is a seasonal call; the shack's shiner note says the season's days before a spare goes in, and the died-while-away hint names them~~ (#1695) | gameplay | S |
 | GT461 | News card 2026-10-20-game69 covers GT459-GT460: the winter shiner trap and the bait bucket's seasonal days (#1699) | ui | S |
+| GT462 | The groundbaited swim follows the season: a swim left behind primes after three hours in summer but is eaten within a day, and after twelve hours in winter but keeps four days (six hours and two days otherwise), judged by the season when the angler comes back, like the bait bucket; the toss hint says the season's timing in summer and winter (#1702) | gameplay | S |
+| GT463 | The night line follows the season: set in summer, it soaks only three hours (so a small-hours line is ready by dawn) but crayfish strip the bait within a day (still holding it till the evening after its night, whenever it went out); set in winter, it soaks twelve hours (an evening line comes in by mid-morning, not dawn) but the bait keeps four days (six hours and two days otherwise); the season is fixed when the line goes out, like the winter trap, since the line's ready time is promised then; the set-line hint names the season's timing (#1706) | gameplay | S |
 
 ## Risks / open questions for the owner
 

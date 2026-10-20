@@ -118,12 +118,12 @@ vi.mock("./fight", async (importOriginal) => {
 
 import { updateSettings } from "./settings";
 import { giantShyKey } from "./giantShy";
-import { nightLineKey, nightLineReadyAt } from "./nightLine";
+import { NIGHT_LINE_STALE_MS, nightLineKey, nightLineReadyAt, nightLineState } from "./nightLine";
 import { BUCKET_COLD_LIFE_MS, BUCKET_HOT_LIFE_MS, BUCKET_LIFE_MS, baitBucketKey } from "./baitBucket";
 import { TRAP_COLD_SOAK_MS, TRAP_SOAK_MS, TRAP_STALE_MS, trapKey, trapState } from "./minnowTrap";
 import { bagKey, shinerKey } from "./groundbaitBag";
 import { oldFoeKey } from "./oldFoe";
-import { SWIM_PRIMED_MS, swimKey } from "./swim";
+import { SWIM_COLD_GONE_MS, SWIM_COLD_PRIMED_MS, SWIM_HOT_GONE_MS, SWIM_HOT_PRIMED_MS, SWIM_PRIMED_MS, swimKey } from "./swim";
 import { carriesBait, FALSE_STRIKE_MS, FIGURE_EIGHT_ODDS, FIGURE_TURN_MS, FIGURE_WINDOW_MS, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TIRE_REASONS, TOPWATER_POPS, useFishingGame, WAIT_REASONS } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
@@ -209,6 +209,7 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <i data-testid="lost-from">{game.outcome?.kind === "landed" ? (game.outcome.lostFrom?.by ?? "") : ""}</i>
       <i data-testid="lost-report">{game.lostReport ? `${game.lostReport.speciesId}|${game.lostReport.weight}|${game.lostReport.spot}|${game.lostReport.id}` : ""}</i>
       <i data-testid="night-line">{game.nightLine ? game.nightLine.spot : ""}</i>
+      <i data-testid="line-state">{game.nightLine ? nightLineState(game.nightLine, Date.now()) : "none"}</i>
       <i data-testid="live-shiner">{String(game.liveShiner)}</i>
       <i data-testid="frayed">{String(game.frayed)}</i>
       <i data-testid="twisted">{String(game.twisted)}</i>
@@ -441,6 +442,40 @@ describe("useFishingGame live shiner", () => {
     }
   });
 
+  it.each([
+    ["summer", "Check it once the night is out, and before that evening: in the summer heat crayfish strip the bait fast."],
+    ["winter", "In the winter cold the fish are slow: check it once the night is out and it has soaked twelve hours, and within four days."],
+  ] as const)("keeps the season a night line goes out in and says its timing: %s", (season, said) => {
+    const strong = { ...profile, strength: 10, accuracy: 10 };
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    mount(DOCK_BUBBLES.at, strong, "day", false, undefined, undefined, undefined, season);
+    act(() => frames.at(-1)!(now));
+    const press = (name: string) => act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === name) as HTMLButtonElement).click());
+    press("buy shiner");
+    press("set night line");
+    expect(hint()).toMatch(new RegExp(`^You leave the shiner out on a night line here\\. ${said.replace(/\./g, "\\.")}`));
+    expect(JSON.parse(kept.get(nightLineKey(strong.userId))!).season).toBe(season);
+  });
+
+  it("shows the night line turn ready, then stale, while the angler waits on the bank", () => {
+    // Set in the small hours, off the lake's three-minute marks, so nothing else re-renders at its turns.
+    const setAt = new Date(2026, 9, 21, 1, 0, 7).getTime();
+    const kept = new Map([[nightLineKey(profile.userId), JSON.stringify({ spot: "dock", setAt })]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    mount(setAt);
+    const state = () => container!.querySelector("[data-testid=line-state]")?.textContent;
+    expect(state()).toBe("soaking");
+    act(() => vi.advanceTimersByTime(nightLineReadyAt(setAt) - setAt - 1));
+    expect(state()).toBe("soaking");
+    act(() => vi.advanceTimersByTime(1));
+    expect(state()).toBe("ready");
+    act(() => vi.advanceTimersByTime(setAt + NIGHT_LINE_STALE_MS - nightLineReadyAt(setAt)));
+    expect(state()).toBe("ready");
+    act(() => vi.advanceTimersByTime(1));
+    expect(state()).toBe("stale");
+  });
+
   it("leaves a worm out on a night line when there is no shiner to spare", () => {
     const strong = { ...profile, strength: 10, accuracy: 10 };
     mount(DOCK_BUBBLES.at, strong, "dusk", false, "Nightcrawler");
@@ -617,6 +652,27 @@ describe("useFishingGame live shiner", () => {
     act(() => root!.render(<Harness />));
     expect(liveShiner()).toBe("true");
     expect(bag()).toBe("3");
+  });
+
+  it.each([
+    ["summer", SWIM_HOT_PRIMED_MS, SWIM_HOT_GONE_MS, "You toss a handful of groundbait. The fish will gather to feed here for the next 5 casts. In the summer heat, any left draws them back after three hours but is eaten within a day."],
+    ["winter", SWIM_COLD_PRIMED_MS, SWIM_COLD_GONE_MS, "You toss a handful of groundbait. The fish will gather to feed here for the next 5 casts. In the winter cold, any left takes twelve hours to draw them back but keeps four days."],
+  ] as const)("times a swim left behind by the season: %s", (season, primed, gone, said) => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    const visit = (age: number) => {
+      kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 1, at: DOCK_BUBBLES.at - age }));
+      if (root) act(() => root!.unmount());
+      container?.remove();
+      mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, undefined, season);
+      return container!.querySelector("[data-testid=groundbait]")?.textContent?.split("|")[1];
+    };
+    expect(visit(primed - 60_000)).toBe("dock:1");
+    expect(visit(primed + 60_000)).toBe(`dock:${GROUNDBAIT_CASTS}`);
+    expect(visit(gone + 60_000)).toBe("");
+    expect(kept.has(swimKey(profile.userId))).toBe(false);
+    act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === "groundbait") as HTMLButtonElement).click());
+    expect(hint()).toBe(said.replace("5 casts", `${GROUNDBAIT_CASTS} casts`));
   });
 
   it("keeps a groundbaited swim for the next visit, primed once the feeders have gathered overnight", () => {

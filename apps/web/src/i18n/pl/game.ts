@@ -208,6 +208,8 @@ export const PL_GAME: PlBook = {
   "{name} is out again for the week": "{name} znów czeka do końca tygodnia",
   "Your arm is tiring — rest it a moment between pumps.": "Ręka ci słabnie — daj jej chwilę odpocząć między pompowaniami.",
   "The groundbait you left at the {bank} has the feeders gathered there: {casts} casts of it.": "Zanęta zostawiona na łowisku {bank} zwabiła tam ryby: starczy jej na {casts} rzutów.",
+  "In the summer heat, any left draws them back after three hours but is eaten within a day.": "W letnim upale resztki zanęty zwabią je z powrotem już po trzech godzinach, ale znikną w ciągu doby.",
+  "In the winter cold, any left takes twelve hours to draw them back but keeps four days.": "W zimowym chłodzie resztki zanęty zwabią je z powrotem dopiero po dwunastu godzinach, ale przetrwają cztery dni.",
   "Your lost trophy was found": "Twoje zgubione trofeum się znalazło",
   "{name} landed the {fish} that broke your line": "Trofeum, które zerwało ci żyłkę ({fish}), złowione przez: {name}",
   "{weight} at the {bank}": "{weight}, łowisko: {bank}",
@@ -237,6 +239,10 @@ export const PL_GAME: PlBook = {
   "night line ready": "nocna linka gotowa",
   "night line left too long": "nocna linka stała za długo",
   "night line out at the {bank}": "nocna linka czeka na łowisku: {bank}",
+  "You leave the shiner out on a night line here.": "Zostawiasz złotawca na nocnej lince.",
+  "You leave a worm out on a night line here.": "Zostawiasz robaka na nocnej lince.",
+  "Check it once the night is out, and before that evening: in the summer heat crayfish strip the bait fast.": "Sprawdź ją, gdy minie noc, ale przed wieczorem: w letnim upale raki szybko objadają przynętę.",
+  "In the winter cold the fish are slow: check it once the night is out and it has soaked twelve hours, and within four days.": "W zimowym chłodzie ryby są powolne: sprawdź ją, gdy minie noc i upłynie dwanaście godzin, ale przed upływem czterech dni.",
   "You leave the shiner out on a night line here. Come back to check it once the night is out, and within two days.": "Zostawiasz złotawca na nocnej lince. Wróć ją sprawdzić, gdy minie noc, ale przed upływem dwóch dni.",
   "The night line sat out too long: the bait is long gone, and nothing is on it.": "Nocna linka stała za długo: przynęty dawno nie ma i nic na niej nie siedzi.",
   "The night line comes in empty: something stole the shiner in the dark.": "Nocna linka wraca pusta: coś ukradło złotawca w ciemności.",
@@ -907,6 +913,8 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "On a small phone held upright, the cast meter now always sits low beside the walking stick, clear of the hint over the lake. And with larger text, the note naming where you stand stops after a few rows instead of pushing the hint down onto the stick and the meter; a screen reader still hears all of it.":
+    "Na małym telefonie trzymanym pionowo miernik rzutu stoi teraz zawsze nisko, obok drążka chodzenia, z dala od podpowiedzi nad jeziorem. A przy większym tekście notka z nazwą miejsca, w którym stoisz, kończy się po kilku wierszach, zamiast spychać podpowiedź na drążek i miernik; czytnik ekranu nadal odczytuje ją całą.",
   "On a phone you can now watch the whole fight: the fight card moves up to the top of the screen, over the far shore, and the header steps aside until the fish is in; held sideways it waits beside the action, above the steering buttons. Left-handed, the steering buttons now take the other corner from the Reel button instead of lying under it.":
     "Na telefonie widać teraz cały hol: karta holu przechodzi na górę ekranu, nad dalekim brzegiem, a nagłówek ustępuje jej miejsca, aż ryba będzie na brzegu; na telefonie trzymanym poziomo czeka z boku, nad przyciskami sterowania. Dla leworęcznych przyciski sterowania stoją teraz w drugim rogu niż przycisk zwijania, a nie pod nim.",
   "{lure} · good here": "{lure} · dobra tutaj",
