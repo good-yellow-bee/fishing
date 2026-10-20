@@ -1,7 +1,7 @@
 import { Fragment, useRef, useState, type ReactNode } from "react";
 import { MapAnchor } from "./MapAnchor";
 import { Link } from "react-router-dom";
-import { MOON_QUARTER_LABELS, catchesForTrip, itemsForTrip, localDate, moonQuarterOf, packedCount, recentCatches, recentTrips, shiftDate, spotById, type Logbook, type Spot, type Trip } from "@stillwater/shared";
+import { MOON_QUARTER_LABELS, catchesForTrip, itemsForTrip, localDate, moonQuarterOf, packedCount, recentCatches, shiftDate, spotById, type Logbook, type Spot, type Trip } from "@stillwater/shared";
 import { BookFile, SET_ASIDE_ID } from "./BookFile";
 import { readUnreadableBook } from "./storage";
 import { CatchSearch } from "./CatchSearch";
@@ -12,7 +12,7 @@ import { countedSearch } from "./countedSearch";
 import { RESUME_PARAM } from "./anotherCatch";
 import { hasSampleLeft, isSampleCatch, isSampleOnly, isSamplePlan, isSampleSpot, isSampleOuting, upcomingRealTrips, withoutSample } from "./bookCopy";
 import { outingFish } from "./outingFish";
-import { lateOutings, outingDay } from "./tripDates";
+import { lateOutings, outingDay, plainName, sameName } from "./tripDates";
 import { sheetOutings } from "./catchCsv";
 import { NEWS_ITEMS, markNewsSeen, newsDue, readSeenNews } from "../game/whatsNew";
 import { FIELD_NEWS } from "./fieldNews";
@@ -142,14 +142,19 @@ export function HomePage() {
   const countedOwn = countedBook(book);
   // The angler's own, as the counts above them: not a round of the game, nor the sample week beside fish of their own.
   const catches = recentCatches({ ...countedOwn, catches: countedOwn.catches.filter(offPlayLake) }, 4);
-  // In the small hours, last evening's outing is still the one out on the water: it stays first, with its log link.
-  // Only one still going, with no fish yet or one in the last twelve hours; a morning plan for today doesn't end a
-  // session with a fish this past hour, though one that has a fish of its own does, as does any plan for one still blank.
-  const lateOuting = lateOutings(book, now)[0];
-  const upcoming = [...(lateOuting ? [lateOuting] : []), ...upcomingRealTrips(book, today)];
+  // In the small hours, last evening's outings still on the water stay first, as Trips lists them; the newest leads Next
+  // with its log link.
+  const late = lateOutings(book, now);
+  const lateOuting = late[0];
+  const lateIds = new Set(late.map((trip) => trip.id));
+  const upcoming = [...late, ...upcomingRealTrips(book, today)];
   // Just back from the water, not from a round of the game, nor the sample week's plans once their day has passed.
   // Last evening's outing still on the water shows once, among what's coming up.
-  const recent = recentTrips({ ...countedOwn, trips: countedOwn.trips.filter((trip) => offPlayLake(trip) && trip.id !== lateOuting?.id && !isSamplePlan(book, trip)) }, today, 3);
+  // Newest first, a day's dusk before its dawn, as Trips lists them.
+  const recent = countedOwn.trips
+    .filter((trip) => trip.date < today && offPlayLake(trip) && !lateIds.has(trip.id) && !isSamplePlan(book, trip))
+    .sort(newestOutingFirst(book))
+    .slice(0, 3);
   // Each outing's fish with those logged loose that day on its water, as the Trips page counts them.
   const fishOn = outingFish(book);
   // The day whose outings are fished: in the small hours, last evening's, as the Trips page counts them.
@@ -339,7 +344,7 @@ export function HomePage() {
               {comparable ? `\u00a0· ${t("{n} by this date last year", { n: lastYearByNow })}` : null}
               {/* Where this year's pace ends it, against the goal, as the goal on Bests says it. */}
               {/* Behind it, what a week now needs to catch up: "on pace for 8" says the year is short, not what to do. */}
-              {pace ? `\u00a0· ${pace.ahead < 0 ? t("{left} to go, about {n} a week", { left: pace.left, n: pace.perWeek }) : t("on pace for {n}", { n: pace.pace })}` : null}
+              {pace ? `\u00a0· ${pace.ahead < 0 ? (pace.daysLeft < 7 ? tn(pace.daysLeft, "{left} to go, {n} day left", "{left} to go, {n} days left", { left: pace.left }) : t("{left} to go, about {n} a week", { left: pace.left, n: pace.perWeek })) : t("on pace for {n}", { n: pace.pace })}` : null}
               {/* A round number a few fish off: the next one worth a cheer. */}
               {nextMark ? `\u00a0· ${t("{n} more to {mark}", { n: nextMark.left, mark: nextMark.mark })}` : null}
             </small>
@@ -375,10 +380,10 @@ export function HomePage() {
                 {nextSpot ? (
                   <>
                     {" · "}
-                    {outingName(next, book.spots) !== nextSpot.name ? (
-                      <Link to={`/spots/${nextSpot.id}`}>{nextSpot.name}</Link>
+                    {!sameName(outingName(next, book.spots), nextSpot.name) ? (
+                      <Link to={`/spots/${nextSpot.id}`}>{plainName(nextSpot.name)}</Link>
                     ) : (
-                      <Link to={`/spots/${nextSpot.id}`} aria-label={t("{water}: water page", { water: nextSpot.name })}>
+                      <Link to={`/spots/${nextSpot.id}`} aria-label={t("{water}: water page", { water: plainName(nextSpot.name) })}>
                         {t("Water page")}
                       </Link>
                     )}

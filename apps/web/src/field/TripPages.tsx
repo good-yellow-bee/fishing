@@ -73,13 +73,14 @@ import { pieceTally } from "./pieceTally";
 import { WaterOptions } from "./WaterOptions";
 import { kindKey, kindNames, speciesCounts, speciesLink } from "./speciesLink";
 import { pieceName } from "./gear/pieceKey";
-import { datePicks, lateOutings, outingDay, ownTitle, pastTitles, stillGoing } from "./tripDates";
+import { datePicks, lateOutings, outingDay, ownTitle, pastTitles, plainName, sameName, stillGoing } from "./tripDates";
 import "./search.css";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 import { bestFishDay, bookFishDay } from "./tripMonths";
 import { daysBetween, likelyWater, spotsByLastFish } from "./spotOrder";
 import { notesHere } from "./outingNotes";
 import { useStepKeys } from "./stepKeys";
+import { newestOutingFirst } from "./catchNeighbors";
 
 /** The moon an outing fishes under: that day's evening, as the lake's forecast reads it. */
 function tripNight(date: string) {
@@ -162,7 +163,7 @@ function lastTimeNote(book: Logbook, trip: Trip): string {
 export function planText(book: Logbook, trip: Trip, tackleItems: TackleItem[]): string {
   const spot = spotById(book, trip.spotId);
   // An untitled outing's name is its water's, which follows anyway.
-  const head = [ownTitle(trip, book.spots), formatDay(trip.date), spot?.name ?? t("Unknown water")].filter(Boolean).join(" · ");
+  const head = [ownTitle(trip, book.spots), formatDay(trip.date), spot ? plainName(spot.name) : t("Unknown water")].filter(Boolean).join(" · ");
   return [head, ...calendarNotes(book, trip, tackleItems), trip.note.trim()].filter(Boolean).join("\n");
 }
 
@@ -170,9 +171,9 @@ export function planText(book: Logbook, trip: Trip, tackleItems: TackleItem[]): 
 export function saveOutingIcs(book: Logbook, trip: Trip, tackleItems: TackleItem[], today: string) {
   const spot = spotById(book, trip.spotId);
   // An untitled outing goes by its water's name, as its heading does.
-  const named = { ...trip, title: outingName(trip, book.spots) };
+  const named = { ...trip, title: plainName(outingName(trip, book.spots)) };
   const alarm = trip.date > today ? t("Pack for {outing} tomorrow", { outing: named.title }) : undefined;
-  downloadFile(tripIcs(named, spot?.name ?? null, new Date(), spot?.place, calendarNotes(book, trip, tackleItems), alarm), "text/calendar;charset=utf-8", tripIcsName(named));
+  downloadFile(tripIcs(named, spot ? plainName(spot.name) : null, new Date(), spot?.place, calendarNotes(book, trip, tackleItems), alarm), "text/calendar;charset=utf-8", tripIcsName(named));
 }
 
 /** Trips' two lists: last evening's outings still going lead Coming up, as on Home; the rest of yesterday is Recent. */
@@ -184,7 +185,7 @@ export function tripLists(book: Logbook, now = new Date()): { upcoming: Trip[]; 
   // Today's round of the game too, as Coming up leaves it out; not the sample week's plans once their day has passed.
   const recent = [
     ...book.trips.filter((trip) => trip.date === today && !offPlayLake(trip)),
-    ...recentTrips(book, today).filter((trip) => !going.has(trip.id) && !isSamplePlan(book, trip)),
+    ...recentTrips(book, today).filter((trip) => !going.has(trip.id) && !isSamplePlan(book, trip)).sort(newestOutingFirst(book)),
   ];
   return { upcoming, recent };
 }
@@ -333,8 +334,8 @@ export function TripsPage() {
                 onClick={() => {
                   const outings = toCalendar.map((trip) => {
                     const spot = spotById(book, trip.spotId);
-                    const title = outingName(trip, book.spots);
-                    return { trip: { ...trip, title }, place: spot?.name ?? null, at: spot?.place, more: calendarNotes(book, trip, tackleItems), alarm: trip.date > today ? t("Pack for {outing} tomorrow", { outing: title }) : undefined };
+                    const title = plainName(outingName(trip, book.spots));
+                    return { trip: { ...trip, title }, place: spot ? plainName(spot.name) : null, at: spot?.place, more: calendarNotes(book, trip, tackleItems), alarm: trip.date > today ? t("Pack for {outing} tomorrow", { outing: title }) : undefined };
                   });
                   downloadFile(tripsIcs(outings), "text/calendar;charset=utf-8", datedName("stillwater-coming-up.ics"));
                 }}
@@ -777,7 +778,7 @@ function TripView() {
         ) : null
       )}
       {/* A hard day is worth telling too: a past blank outing with a note, or fish lost or missed. Today's plan with only a note isn't a day yet. */}
-      {catches.length > 0 || (!samplePlan && (trip.date < fishedBy || trip.lost || trip.missed) && (trip.note.trim() || trip.lost || trip.missed)) ? <CopySummary text={() => tripSummary(trip, spot?.name ?? null, catches, (id) => spotById(book, id)?.name ?? null)} file="stillwater-outing.txt" /> : null}
+      {catches.length > 0 || (!samplePlan && (trip.date < fishedBy || trip.lost || trip.missed) && (trip.note.trim() || trip.lost || trip.missed)) ? <CopySummary text={() => tripSummary(trip, spot ? plainName(spot.name) : null, catches, (id) => { const name = spotById(book, id)?.name; return name === undefined ? null : plainName(name); }, countedFish(book.catches))} file="stillwater-outing.txt" /> : null}
       {/* Planning ahead: what has worked on this water before. */}
       {!fished && spot && !play ? <WaterTipsBox catches={countedFish(catchesForSpot(book, spot.id))} on={trip.date} within={exactTerm("water", spot.name)} /> : null}
       <TripWeather catches={catches} />
@@ -1044,7 +1045,7 @@ function TripForm() {
             {lastHere ? (
               <small className="field-hint" id="last-here">
                 {/* An untitled outing goes by the water's name, which the field above already shows. */}
-                {outingName(lastHere, book.spots) === spotById(book, lastHere.spotId)?.name
+                {sameName(outingName(lastHere, book.spots), spotById(book, lastHere.spotId)?.name ?? "")
                   ? t("Last here: {day} · {fish}", { day: formatDay(lastHere.date), fish: fishSum(outingFish(book, true)(lastHere.id)) })
                   : t("Last here: {title}, {day} · {fish}", {
                       title: outingName(lastHere, book.spots),

@@ -1,7 +1,7 @@
 import { catchesNewestFirst, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { offPlayLake } from "./playLake";
 import { isSampleCatch } from "./bookCopy";
-import { t } from "../i18n";
+import { getLang, t } from "../i18n";
 import { bookSpelling, pieceKey } from "./gear/pieceKey";
 
 /** The page for one kind of fish, by the name the book keeps it under. */
@@ -73,8 +73,9 @@ export function kindNames(catches: readonly CatchEntry[]): (species: string) => 
   return (species) => {
     const name = species.trim();
     const best = mostWritten(spellings.get(kindKey(name)) ?? new Map([[name, 1]]));
-    // As the dictionary spells it, so a kind only ever typed "zander" still reads "Sandacz" in Polish.
-    return t(bookSpelling(best));
+    // In Polish as the dictionary spells it ("zander" reads "Sandacz"); in English as the book writes it most, the same
+    // before and after the Polish book has loaded.
+    return getLang() === "pl" ? t(bookSpelling(best)) : best;
   };
 }
 
