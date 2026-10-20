@@ -36,7 +36,7 @@ import { Mayflies } from "./Mayflies";
 import { RodBell } from "./RodBell";
 import { dogOut } from "./dogMood";
 import { paperBoatOut } from "./paperDrift";
-import { BASE_FOV, fightLiftFor, fovFor } from "./cameraFov";
+import { BASE_FOV, fightLiftFor, fovFor, restDropFor } from "./cameraFov";
 import { PlayerHeadlamp } from "./PlayerHeadlamp";
 import { DockRobin, GroundBlackbird, GroundRobin } from "./DockRobin";
 import { hedgehogOut } from "./hedgehogWalk";
@@ -387,7 +387,7 @@ function PartsAhead() {
   return null;
 }
 
-/** Opens the view up on a tall phone screen (cameraFov.ts). */
+/** Opens the view up on a tall phone screen and frames the lake a little lower on it (cameraFov.ts). */
 function FitFov({ phase }: { phase: ScenePhase }) {
   const camera = useThree((state) => state.camera) as THREE.PerspectiveCamera;
   const aspect = useThree((state) => state.size.width / state.size.height);
@@ -407,10 +407,19 @@ function FitFov({ phase }: { phase: ScenePhase }) {
     const was = shown.current;
     if (Math.abs(lift.current - was.lift) < 1e-4 && was.width === size.width && was.height === size.height) return;
     shown.current = { lift: lift.current, width: size.width, height: size.height };
-    if (lift.current === 0) camera.clearViewOffset();
-    else camera.setViewOffset(size.width, size.height, 0, lift.current * size.height, size.width, size.height);
+    // An upright phone also frames the lake lower all the time (cameraFov.ts restDropFor).
+    const offset = lift.current - restDropFor(size.width / size.height);
+    if (offset === 0) camera.clearViewOffset();
+    else camera.setViewOffset(size.width, size.height, 0, offset * size.height, size.width, size.height);
   });
-  useEffect(() => () => camera.clearViewOffset(), [camera]);
+  useEffect(
+    () => () => {
+      camera.clearViewOffset();
+      // Cleared from outside the frame loop, so the next frame (after a remount) sets the framing again.
+      shown.current = { lift: 0, width: 0, height: 0 };
+    },
+    [camera],
+  );
   return null;
 }
 

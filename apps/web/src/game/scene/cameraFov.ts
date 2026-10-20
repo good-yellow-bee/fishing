@@ -23,3 +23,14 @@ export const FIGHT_LIFT = 0;
 export function fightLiftFor(aspect: number) {
   return aspect > 0 && aspect < PHONE_ASPECT ? FIGHT_LIFT : 0;
 }
+
+/**
+ * An upright phone frames the lake this share of its height lower than a wide screen does, so the far bank and the
+ * hills clear the panels at the top and less of the empty walk fills the bottom.
+ */
+export const PHONE_REST_DROP = 0.08;
+
+/** How far a screen `aspect` wide frames the lake lower: only a phone held upright. */
+export function restDropFor(aspect: number) {
+  return aspect > 0 && aspect < PHONE_ASPECT ? PHONE_REST_DROP : 0;
+}
