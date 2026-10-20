@@ -1239,6 +1239,22 @@ describe("a foam lane on a windy day", () => {
   });
 });
 
+describe("the lantern's light at the net", () => {
+  it("makes any netted fish bolt once on first seeing the net, as a net-shy carp does", () => {
+    const atNet = (lantern: boolean) => {
+      const f = makeFight(fish("pike"), 6, 10, () => 0, 1, "pilings", undefined, false, false, false, false, false, false, false, 1, 1, true, { lantern });
+      f.sim.line = 0.01;
+      f.sim.stamina = 0.1;
+      let now = 0;
+      while (!f.sim.netting && now < 30_000) f.step((now += 50), 0.05, true);
+      for (let at = 0; at < NET_SHY_MS + 200; at += 50) f.step((now += 50), 0.05, false);
+      return f.sim.shyBolt === true;
+    };
+    expect(atNet(true)).toBe(true);
+    expect(atNet(false)).toBe(false);
+  });
+});
+
 describe("the dock's pilings", () => {
   /** Lets one run go unturned, then reels or rests through the calm after it. */
   function afterRun(water: "pilings" | "open", turn: boolean, reel: boolean) {
