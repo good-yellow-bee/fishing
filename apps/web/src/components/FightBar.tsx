@@ -134,7 +134,9 @@ export function FightBar({ fight, sim, performance, best = null, note = null, cl
               : state.surge === 0 && state.weeded
               ? t("It ran into the weeds — reel slow and steady!")
               : state.surge === 0 && state.wrapped
-              ? t("It wrapped the line round a piling — ease off till it swings free!")
+              ? fight.water === "log"
+                ? t("It wrapped the line round the log — ease off till it swings free!")
+                : t("It wrapped the line round a piling — ease off till it swings free!")
               : state.surge === 2 && state.downstream
               ? t("It's running with the current — turn it upstream!")
               : state.surge === 2 && state.darted && !state.turning
@@ -189,7 +191,7 @@ export function FightBar({ fight, sim, performance, best = null, note = null, cl
     };
     frame = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frame);
-  }, [fight.species.challenge, leapLines, lines, performance, sim, t, cleanLine]);
+  }, [fight.species.challenge, fight.water, leapLines, lines, performance, sim, t, cleanLine]);
 
   return (
     <div ref={card} className="fight-bar">
@@ -291,6 +293,7 @@ export function FightBar({ fight, sim, performance, best = null, note = null, cl
           {fight.water === "deep" && <p className="fight-water">{t("Drop-off: runs dive and pull harder, but tire the fish faster")}</p>}
           {fight.water === "rocks" && <p className="fight-water">{t("Point: turn every run; reeling while it drags over the rocks frays the line")}</p>}
           {fight.water === "pilings" && canTurnRuns(fight.species.challenge) && <p className="fight-water">{t("Dock: turn every run, or it wraps the line round a piling and frays it")}</p>}
+          {fight.water === "log" && canTurnRuns(fight.species.challenge) && <p className="fight-water">{t("Sunken log: turn every run, or it wraps the line round the log and frays it")}</p>}
           {fight.water === "boat" && (
             <p className="fight-water">
               {fight.windy === "strong"

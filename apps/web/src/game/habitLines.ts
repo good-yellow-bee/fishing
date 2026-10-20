@@ -23,7 +23,7 @@ export function habitLines(speciesId: string, strongLift = false): string[] {
   if (THRASHERS.has(speciesId)) lines.push(t("Thrasher: at the net it lifts its head only a moment, so strike quick"));
   if (SLIPPERS.has(speciesId)) lines.push(t("Slippery: on a slack line it slithers off the hook, so keep it tight"));
   if (DARTERS.has(speciesId)) lines.push(t("Darter: halfway through a run it cuts back the other way, so switch sides to keep turning it"));
-  if (COVER_DIVERS.has(speciesId)) lines.push(t("Cover-diver: at the reeds or the dock it buries itself in cover and stays put, so turn every run there"));
+  if (COVER_DIVERS.has(speciesId)) lines.push(t("Cover-diver: at the reeds, the dock or the sunken log it buries itself in cover and stays put, so turn every run there"));
   if (LONG_RUNNERS.has(speciesId)) lines.push(t("Long runner: the first run is the long one, so let it go"));
   if (TOOTHY.has(speciesId)) lines.push(t("Sharp teeth: when it swallows the bait, they fray the line if the fight runs long"));
   if (CHARGERS.has(speciesId)) lines.push(t("Charger: once a fight it runs straight at you, so reel fast to keep the line tight"));
