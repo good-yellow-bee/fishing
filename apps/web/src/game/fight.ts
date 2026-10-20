@@ -282,6 +282,12 @@ export const WRAP_PULL = 0.5;
 export const BOAT_RUN = 0.65;
 /** In a strong wind the hull lies pushed back on its anchor line and can't follow a run as well, so a run takes this share. */
 export const STRONG_WIND_BOAT_RUN = 0.85;
+/** How far the anchored hull swings round toward a run, as a share of its full swing: by the share of the run it takes up, so less in a strong wind, and not at all off the boat's water (a pads fight). */
+export function boatSwingShare(fight: { water?: FightWater; windy?: FightWind } | null) {
+  if (fight?.water !== "boat") return 0;
+  return (1 - (fight.windy === "strong" ? STRONG_WIND_BOAT_RUN : BOAT_RUN)) / (1 - BOAT_RUN);
+}
+
 /** In winter's cold water a hooked fish is sluggish: it tires this much faster on a run or against the reel. */
 export const WINTER_TIRE = 1.25;
 
