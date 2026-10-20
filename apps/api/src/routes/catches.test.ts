@@ -363,8 +363,8 @@ describe("POST /catches", () => {
     expect(firstBody.points - againBody.points).toBeGreaterThanOrEqual(GIANT_BONUS - 1);
     const bonuses = (id: string) => (db.prepare(`SELECT bonuses FROM catch WHERE request_id = ?`).get(id) as { bonuses: string }).bonuses.split(",");
     expect(bonuses(requestId)).toContain("giant");
-    const { listBadgeFacts } = await import("../db.ts");
-    expect(listBadgeFacts(user.id).filter((row) => row.giant).map((row) => row.count)).toEqual([1]);
+    const { countGiantsLanded } = await import("../db.ts");
+    expect(countGiantsLanded(user.id)).toBe(1);
     expect(bonuses("4d3e2f1a-6b7c-4d8e-9f0a-1b2c3d4e5f60")).not.toContain("giant");
     // A wrong weight claims nothing.
     db.exec(`DELETE FROM giant_landed`);

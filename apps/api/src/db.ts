@@ -343,6 +343,11 @@ export function payGiant(catchId: string, userId: string, bonus: number) {
   })();
 }
 
+/** How many of the weekly giants the angler was first to land. */
+export function countGiantsLanded(userId: string): number {
+  return (db.prepare(`SELECT COUNT(*) as n FROM giant_landed WHERE user_id = ?`).get(userId) as { n: number }).n;
+}
+
 /** Who landed each of a week's giants, and when. */
 export function listGiantsLanded(week: string): { spot: string; displayName: string; landedAt: string }[] {
   return db
@@ -430,8 +435,8 @@ export function firstCatchAt(userId: string): string | null {
 export function listBadgeFacts(userId: string): BadgeFactRow[] {
   const rows = db
     .prepare(
-      `SELECT species_id, spot, hour, sky, season, clean, golden, released, (',' || COALESCE(bonuses, '') || ',' LIKE '%,giant,%') as giant, COUNT(*) as count, MAX(weight) as heaviest
-       FROM catch WHERE user_id = ? GROUP BY species_id, spot, hour, sky, season, clean, golden, released, giant`,
+      `SELECT species_id, spot, hour, sky, season, clean, golden, released, COUNT(*) as count, MAX(weight) as heaviest
+       FROM catch WHERE user_id = ? GROUP BY species_id, spot, hour, sky, season, clean, golden, released`,
     )
     .all(userId) as {
     species_id: string;
@@ -442,7 +447,6 @@ export function listBadgeFacts(userId: string): BadgeFactRow[] {
     clean: 0 | 1;
     golden: 0 | 1;
     released: 0 | 1;
-    giant: 0 | 1;
     count: number;
     heaviest: number;
   }[];
@@ -455,7 +459,6 @@ export function listBadgeFacts(userId: string): BadgeFactRow[] {
     clean: row.clean === 1,
     golden: row.golden === 1,
     released: row.released === 1,
-    ...(row.giant === 1 ? { giant: true } : {}),
     count: Number(row.count),
     heaviest: row.heaviest,
   }));

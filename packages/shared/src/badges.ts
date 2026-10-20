@@ -23,17 +23,16 @@ export type BadgeFactRow = {
   golden: boolean;
   /** Let go after landing; false on catches saved before release. */
   released: boolean;
-  /** A week's giant of its bank, landed first. */
-  giant?: boolean;
   count: number;
   heaviest: number;
 };
 
 /**
  * What the grouped facts can't carry: the longest run of consecutive local days with a fish, the weekend derbies the
- * angler held the top spot of when they ended, and the most of each slam's kinds landed on one day.
+ * angler held the top spot of when they ended, the most of each slam's kinds landed on one day, and the weekly giants
+ * they were first to land.
  */
-export type BadgeHistory = { longestStreak: number; derbyWins?: number; slams?: Partial<Record<SlamId, number>> };
+export type BadgeHistory = { longestStreak: number; derbyWins?: number; slams?: Partial<Record<SlamId, number>>; giants?: number };
 
 export type BadgeId = "four-banks" | "night-owl" | "rain-pike" | "clean-sweep" | "trophy" | "full-book" | "four-seasons" | "gold" | "steward" | "regular" | "early-bird" | "whole-lake" | "trophy-hunter" | "derby-champion" | "bass-slam" | "trout-slam" | "giant-hunter";
 
@@ -207,7 +206,7 @@ export const BADGES: readonly Badge[] = [
     label: "Giant hunter",
     blurb: "Be first to land three of the lake's weekly giants.",
     need: 3,
-    have: (facts) => count(facts, (row) => row.giant === true),
+    have: (_facts, history) => history.giants ?? 0,
   },
 ];
 
