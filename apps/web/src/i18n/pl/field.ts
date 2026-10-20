@@ -684,6 +684,7 @@ export const PL_FIELD: PlBook = {
   "lost|search word": "spięte",
   "planned|search word": "zaplanowane",
   "with a note|search word": "z notatką",
+  "untitled|search word": "bez tytułu",
   "Quick searches": "Szybkie wyszukiwania",
   "{n} missed": ["{n} puste branie", "{n} puste brania", "{n} pustych brań"],
   "{n} from the game": ["{n} z gry", "{n} z gry", "{n} z gry"],

@@ -2,7 +2,6 @@ import { memo } from "react";
 import { Link } from "react-router-dom";
 import {
   WATER_LABELS,
-  catchesForTrip,
   itemsForTrip,
   localDate,
   measureOf,
@@ -27,6 +26,7 @@ import { outNow, plainName, sameName } from "./tripDates";
 import { bookFishDay } from "./tripMonths";
 import { bookKindName } from "./speciesLink";
 import { bookLureName } from "./pieceTally";
+import { sameDayFishTimes } from "./tripTimes";
 
 /** A card's heading sits one below the section it is listed under. */
 type CardLevel = 2 | 3 | 4;
@@ -137,14 +137,10 @@ export function TripCard({
       : packed === bag.length
         ? t("All packed")
         : t("{packed} of {total} packed", { packed, total: bag.length });
-  // With another outing on its water that day, when its fish came, so a dawn and a dusk tell apart: "5:30–6:10 AM".
-  const fishTimes = book.trips.some((other) => other.id !== trip.id && other.spotId === trip.spotId && other.date === trip.date)
-    ? catchesForTrip(book, trip.id)
-        .map((entry) => entry.caughtAt)
-        .filter((at) => !Number.isNaN(Date.parse(at)))
-        .sort()
-    : [];
-  const span = fishTimes.length === 0 ? null : fishTimes.length === 1 || formatTimeOfDay(fishTimes[0]!) === formatTimeOfDay(fishTimes.at(-1)!) ? formatTimeOfDay(fishTimes[0]!) : `${formatTimeOfDay(fishTimes[0]!)}–${formatTimeOfDay(fishTimes.at(-1)!)}`;
+  // With another outing on its water that day, when its fish came, so a dawn and a dusk tell apart: "5:30 AM–6:10 AM".
+  const times = sameDayFishTimes(book).get(trip.id);
+  const [from, to] = times ? [formatTimeOfDay(times.first), formatTimeOfDay(times.last)] : [];
+  const span = !from ? null : from === to ? from : `${from}–${to}`;
   return (
     <Link to={`/trips/${trip.id}`} className="trip-card" state={FROM_LIST}>
       <p className="when">{tripWhen(trip.date, today, tomorrow, outNow(book, trip))}</p>
