@@ -886,8 +886,8 @@ export const PL_GAME: PlBook = {
     "„Co nowego” na stronie głównej mówi już tylko o dzienniku. Gdy nic nie jest zaplanowane, strona główna podaje ostatni dzień nad wodą z odnośnikiem „Jedź jeszcze raz”, a gdy cel roku jest zagrożony, mówi, ile ryb tygodniowo potrzeba. Plik dziennika daje połowy z tego roku jako osobny arkusz, a ostatnia kopia mówi, ile ryb zawierała.",
   "Find a catch offers its best words as one-tap searches, and a search's spreadsheet is named after it. A fish's page says its place on the outing, such as fish 3 of 5.":
     "„Znajdź połów” podsuwa najlepsze słowa jako wyszukiwania na jedno dotknięcie, a arkusz z wyszukiwania nosi jego nazwę. Strona ryby podaje jej miejsce na wyprawie, na przykład ryba 3 z 5.",
-  "Find an outing offers its best words as one-tap searches. In the small hours last evening's outing reads Last night, outing cards count missed strikes, and a water's tackle tips go on the list all at once.":
-    "„Znajdź wyprawę” podsuwa najlepsze słowa jako wyszukiwania na jedno dotknięcie. Po północy wczorajsza wyprawa nazywa się Wczoraj wieczorem, karty wypraw liczą puste brania, a podpowiedzi sprzętu z łowiska trafiają na listę naraz.",
+  "On dry evenings a hedgehog now snuffles past behind you on the bank, curling into a ball at any fuss. In a feeding frenzy the bubbles boil with little silver baitfish leaping out, and at night your headlamp throws a beam onto the float. Out on the boat in a strong wind, the anchored hull now swings less toward a run, as the fight card says.":
+    "W suche wieczory za tobą na brzegu przechodzi teraz jeż, który na każdy hałas zwija się w kulkę. Podczas żerowania bąbelki kipią od srebrnych rybek wyskakujących z wody, a nocą twoja czołówka rzuca snop światła na spławik. Na łódce przy silnym wietrze zakotwiczony kadłub słabiej obraca się za odjeżdżającą rybą, tak jak mówi karta walki.",
   "Keep the lake's sounds playing in another tab or app": "Graj odgłosy jeziora, gdy gra jest w innej karcie lub aplikacji",
   "Frame rate": "Płynność",
   Smooth: "Płynnie",
