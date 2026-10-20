@@ -1489,6 +1489,8 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
     const power = powerRef.current;
     const t = state.clock.elapsedTime;
     if (isFrozen(t, fightView.freezeUntil)) return;
+    // Off unless this frame's fight shows it below; several paths return before getting there.
+    if (weedBall.current) weedBall.current.visible = false;
     const aiming = isAiming(phase);
     const castStarted = prevPhase.current === "casting" && phase === "waiting";
     const fightStarted = prevPhase.current !== "fight" && phase === "fight";
@@ -1757,10 +1759,9 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
       }
     }
     // A fish hooked through duckweed comes in under a ball of weed till its first run strips it (fight.ts weedBall).
-    if (weedBall.current) {
-      const ball = weedBall.current;
-      ball.visible = (phase === "hookset" || phase === "fight") && sim.current?.weedBall === true && hookedPose?.show === true;
-      if (ball.visible && hookedPose) ball.position.set(hookedPose.x, waterHeight(hookedPose.x, hookedPose.z, t) + 0.02, hookedPose.z);
+    if (weedBall.current && hookedPose?.show && (phase === "hookset" || phase === "fight") && sim.current?.weedBall === true) {
+      weedBall.current.visible = true;
+      weedBall.current.position.set(hookedPose.x, waterHeight(hookedPose.x, hookedPose.z, t) + 0.02, hookedPose.z);
     }
     // A leap: the fish clears the water nose first, then turns over and falls back.
     const leaping = phase === "fight" && sim.current?.jump === true && sim.current.surge === 2;
