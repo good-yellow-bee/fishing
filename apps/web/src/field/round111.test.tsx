@@ -6,6 +6,7 @@ import type { CatchEntry, Logbook } from "@stillwater/shared";
 import { SpeciesChips } from "./SpeciesChips";
 import { PLAY_LAKE_ID, withoutPlayLake } from "./playLake";
 import { seasonWaters } from "./seasonWaters";
+import { lastOutByWater } from "./spotOrder";
 
 const fish = (id: string, spotId: string, tripId: string | null = null): CatchEntry => ({ id, species: "Perch", measure: { kind: "length", inches: 9 }, lure: "Jig", spotId, tripId, caughtAt: "2026-08-20T08:00:00.000Z", note: "", weather: null });
 const spot = (id: string, name: string) => ({ id, name, waterType: "lake" as const, notes: "", bestConditions: "" });
@@ -38,5 +39,17 @@ describe("round 111: this season's waters in the small hours", () => {
     expect(seasonWaters(book, "2026-10-20").fished).toBe(0);
     vi.setSystemTime(new Date(2026, 9, 20, 5, 0));
     expect(seasonWaters(book, "2026-10-20").fished).toBe(1);
+  });
+});
+
+describe("round 111: a water's last day out in the small hours", () => {
+  afterEach(() => vi.useRealTimers());
+
+  it("takes a fish logged loose after midnight", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 9, 20, 1, 0));
+    const loose = { ...fish("n", "a"), caughtAt: new Date(2026, 9, 20, 0, 30).toISOString() };
+    const book: Logbook = { spots: [spot("a", "Pine Pond")], trips: [], catches: [loose] };
+    expect(lastOutByWater(book, "2026-10-19").get("a")).toBe("2026-10-20");
   });
 });

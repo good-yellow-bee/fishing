@@ -160,6 +160,7 @@ export function SpotCard({
   bestLure = null,
   waterTemp = null,
   biggest = null,
+  kindName = (species: string) => species,
   outNow = null,
 }: {
   spot: Spot;
@@ -176,11 +177,12 @@ export function SpotCard({
   waterTemp?: { fahrenheit: number; day: string; trend?: "warming" | "cooling" } | null;
   /** The water's best fish and the measure it is best by. */
   biggest?: { entry: CatchEntry; kind: "length" | "weight" } | null;
+  /** How the book names a kind, for its best fish. */
+  kindName?: (species: string) => string;
   /** The outing the angler is out on there now, by name. */
   outNow?: string | null;
 }) {
   const t = useT();
-  const { book } = useLogbook();
   return (
     <Link to={`/spots/${spot.id}`} className="spot-card" state={FROM_LIST}>
       <div className="spot-card-top">
@@ -197,7 +199,7 @@ export function SpotCard({
         {bestLure ? ` · ${t("best on {lure}", { lure: pieceName(bestLure) })}` : ""}
       </p>
       {restDays !== null ? <p className="meta">{restDays === 0 ? t("Fished here today") : restDays === 1 ? t("Last fished here yesterday") : tn(restDays, "Last fished here {n} day ago", "Last fished here {n} days ago")}</p> : null}
-      {biggest ? <p className="meta">{t("Best here: {species}, {size}", { species: bookKindName(book.catches)(biggest.entry.species), size: measureText(measureOf(biggest.entry, biggest.kind)!) })}</p> : null}
+      {biggest ? <p className="meta">{t("Best here: {species}, {size}", { species: kindName(biggest.entry.species), size: measureText(measureOf(biggest.entry, biggest.kind)!) })}</p> : null}
       {/* Plain words: the whole card is the link. */}
       {outNow ? <p className="meta out-now">{t("Out now: {outing}", { outing: outNow })}</p> : null}
       {nextOuting ? <p className="meta next-outing">{nextOuting}</p> : null}

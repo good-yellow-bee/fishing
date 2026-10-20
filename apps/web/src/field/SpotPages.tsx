@@ -185,9 +185,21 @@ export function SpotsPage() {
   const placed = withPlace.some((spot) => !isSampleSpot(spot.id)) ? withPlace.filter((spot) => !isSampleSpot(spot.id)) : withPlace;
   const ownHere = (id: string) => id !== PLAY_LAKE_ID && ((ownRow.get(id)?.fishCount ?? 0) > 0 || ownTrips(id).length > 0);
   // Outings fished, as the water's own page counts them: not those still planned, and today's once it has a fish.
+  const fishAt = (catches: readonly CatchEntry[]) => {
+    const bySpot = new Map<string, CatchEntry[]>();
+    for (const entry of catches) {
+      const list = bySpot.get(entry.spotId);
+      if (list) list.push(entry);
+      else bySpot.set(entry.spotId, [entry]);
+    }
+    return bySpot;
+  };
+  const [ownFishAt, allFishAt] = [fishAt(countedCatches), fishAt(book.catches)];
+  const kindName = bookKindName(book.catches);
   const fishedHere = (id: string) => {
-    const trips = ownHere(id) ? ownTrips(id) : tripsForSpot(book, id);
-    const { fishOn } = outingFishHere(book, fishOnTrip, (ownHere(id) ? countedCatches : book.catches).filter((entry) => entry.spotId === id), trips);
+    const own = ownHere(id);
+    const trips = own ? ownTrips(id) : tripsForSpot(book, id);
+    const { fishOn } = outingFishHere(book, fishOnTrip, (own ? ownFishAt : allFishAt).get(id) ?? [], trips);
     return trips.filter((trip) => outingFished(trip, fishedBy, fishOn(trip.id) > 0)).length;
   };
   // Each card's own count, as "Most fish" orders them.
@@ -354,6 +366,7 @@ export function SpotsPage() {
                   bestLure={bestLureAt(ownHere(row.spot.id) ? countedCatches : book.catches, row.spot.id)}
                   biggest={biggestAt(ownHere(row.spot.id) ? countedCatches : book.catches, row.spot.id)}
                   waterTemp={recentTemp(ownHere(row.spot.id) ? countedCatches : book.catches, row.spot.id, today, (entry) => bookFishDay(book, entry))}
+                  kindName={kindName}
                   outNow={outNowName(row.spot.id)}
                 />
               ))}
@@ -722,7 +735,8 @@ function SpotView() {
         spotId={spot.id}
         kindLink={(species) => (kindOnPage(book, species).some((entry) => entry.spotId === spot.id) ? speciesLink(species) : findWithLink(here, exactTerm("species", t(species))))}
       />
-      <PhotoStrip catches={catches} within={here} named list={`water:${spot.id}`} />
+      {/* Every photo it shows, the sample week's too, so its count opens them all. */}
+      <PhotoStrip catches={catches} within={exactTerm("water", plainName(spot.name))} named list={`water:${spot.id}`} />
       <FishCsv catches={catches} name={spot.name} />
       {summed.length > 1 ? (
         <>

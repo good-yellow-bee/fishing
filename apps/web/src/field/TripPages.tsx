@@ -81,6 +81,8 @@ import { daysBetween, likelyWater, spotsByLastFish } from "./spotOrder";
 import { notesHere } from "./outingNotes";
 import { useStepKeys } from "./stepKeys";
 import { newestOutingFirst } from "./catchNeighbors";
+import { countedSearch } from "./countedSearch";
+import { bookKindName } from "./speciesLink";
 
 /** The moon an outing fishes under: that day's evening, as the lake's forecast reads it. */
 function tripNight(date: string) {
@@ -781,7 +783,7 @@ function TripView() {
       {/* A hard day is worth telling too: a past blank outing with a note, or fish lost or missed. Today's plan with only a note isn't a day yet. */}
       {catches.length > 0 || (!samplePlan && (trip.date < fishedBy || trip.lost || trip.missed) && (trip.note.trim() || trip.lost || trip.missed)) ? <CopySummary text={() => tripSummary(trip, spot ? plainName(spot.name) : null, catches, (id) => { const name = spotById(book, id)?.name; return name === undefined ? null : plainName(name); }, countedFish(book.catches))} file="stillwater-outing.txt" /> : null}
       {/* Planning ahead: what has worked on this water before. */}
-      {!fished && spot && !play ? <WaterTipsBox catches={countedFish(catchesForSpot(book, spot.id))} on={trip.date} within={exactTerm("water", spot.name)} /> : null}
+      {!fished && spot && !play ? <WaterTipsBox catches={countedFish(catchesForSpot(book, spot.id))} on={trip.date} within={countedSearch(book, exactTerm("water", plainName(spot.name)), catchesForSpot(book, spot.id))} /> : null}
       <TripWeather catches={catches} />
       {/* Once the day comes, the fish lead; before that, the bag does. */}
       {fishFirst ? fish : tackle}
@@ -1077,7 +1079,7 @@ function TripForm() {
           </div>
           {pastWeek.length > 0 ? (
             <p className="wide form-note">
-              {sameTimeText(pastWeek)}
+              {sameTimeText(pastWeek, bookKindName(book.catches))}
             </p>
           ) : null}
           {sameDay ? (
