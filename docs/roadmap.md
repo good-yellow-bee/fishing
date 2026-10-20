@@ -1482,6 +1482,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | SC288 | News card scene69 covers SC286 and SC287: the shiner trap seen in the shallows below the shack, a shiner flipping once it is ready, and the trap turning ready on time while you wait | scene | S |
 | SC289 | The night line turns over on time: waiting on the bank, the line's sign offers to bring it in the moment its night is out, and the line goes stale once it has sat too long, without anything else on screen changing first (the trap's re-check from SC287, now shared by both) | scene | S |
 | SC290 | The night line's state seen on the bank: once a fish is on, the stake's top bows toward the water, the line runs taut and the tag knocks now and then (held still under reduced motion); left too long, the line hangs slack; still one draw | scene | S |
+| SC291 | News card scene70 covers SC289 and SC290: the night line's stick bows, runs taut and knocks once a fish is on, hangs slack when left too long, and turns ready on time while you wait on the bank | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
