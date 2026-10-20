@@ -34,8 +34,8 @@ import { dateWords, monthWord } from "./dateWords";
 import { isSampleCatch } from "./bookCopy";
 import { offPlayLake } from "./playLake";
 import { bookSpelling, pieceName, shownPieceKey } from "./gear/pieceKey";
-import { kindKey, mostWritten } from "./speciesLink";
-import { lureNames } from "./pieceTally";
+import { bookKindName, kindKey, mostWritten } from "./speciesLink";
+import { bookLureName, lureNames } from "./pieceTally";
 import { plainName } from "./tripDates";
 
 /** A book name as the Polish UI shows it, or itself when Polish has no line for it. */
@@ -937,7 +937,7 @@ export function CatchSearch() {
       {settled ? (
         <>
           {/* Split as the count above sums: the angler's own, when there are any. */}
-          {matches.length > 1 ? <MatchSplits matches={mine.length > 0 ? mine : matches} all={matches} search={settled} largest={largest} /> : null}
+          {matches.length > 1 ? <MatchSplits matches={mine.length > 0 ? mine : matches} all={matches} search={settled} largest={largest} counted={mine.length > 0} /> : null}
           {(matches.length === 0 && /(^|[\s+])([<>]\s?\d+(?:[.,]\d+)?|\d+(?:[.,]\d+)?\s?[-–]\s?\d+(?:[.,]\d+)?)(?=[\s+]|$)/.test(settled)) || /(^|\s)\d+(?:[.,]\d+)?\+(?=\s*$|\s+\+|\s+(?!(?:lbs?|oz|kg|dag|g|in|cm|mm|°?[cf]|″|")(?:\s|$)))/i.test(settled) ? (
             // ">30" finds nothing without saying what it measures; "pike 30+" finds every pike, the number unread.
             <p className="search-tip">{t("Add a unit to a size, as in “{size}”.", { size: metric ? ">70 cm" : ">30 in" })}</p>
@@ -954,7 +954,7 @@ export function CatchSearch() {
                 type="button"
                 className="text-button"
                 // The angler's own fish, as the count and the copy hold them: a sheet sent on doesn't carry the sample's.
-                onClick={() => downloadFile(catchesCsv({ ...book, catches: mine.length > 0 ? mine : matches }), "text/csv;charset=utf-8", csvName(settled))}
+                onClick={() => downloadFile(catchesCsv({ ...book, catches: mine.length > 0 ? mine : matches }, { kindName: bookKindName(book.catches), lureName: bookLureName(book.catches), dayOf: (entry) => bookFishDay(book, entry) }), "text/csv;charset=utf-8", csvName(settled))}
               >
                 {t("Download these as a spreadsheet")}
               </button>
@@ -1017,12 +1017,13 @@ function leader<T>(catches: readonly CatchEntry[], of: (entry: CatchEntry) => T 
  * `matches`: the fish counted (the angler's own among those found); `all`: everything found, so each narrowed search
  * leaves out the sample week's and the game's as the count did. The order shown goes with it.
  */
-function MatchSplits({ matches, all, search, largest }: { matches: readonly CatchEntry[]; all: readonly CatchEntry[]; search: string; largest: boolean }) {
+/** `counted`: the angler's own fish are what is counted; when none were found (a search of the game or the sample week), all are, and the links leave none out. */
+function MatchSplits({ matches, all, search, largest, counted }: { matches: readonly CatchEntry[]; all: readonly CatchEntry[]; search: string; largest: boolean; counted: boolean }) {
   const t = useT();
   const { book } = useLogbook();
   const { pathname } = useLocation();
   const narrow = (term: string, rows: readonly CatchEntry[]) =>
-    `${pathname}?${new URLSearchParams({ [FIND_PARAM]: countedSearch(book, `${search} + ${term}`, rows, "book"), ...(largest ? { [ORDER_PARAM]: "largest" } : {}) }).toString()}`;
+    `${pathname}?${new URLSearchParams({ [FIND_PARAM]: counted ? countedSearch(book, `${search} + ${term}`, rows, "book") : `${search} + ${term}`, ...(largest ? { [ORDER_PARAM]: "largest" } : {}) }).toString()}`;
   const tally = (key: (entry: CatchEntry) => string) => {
     const counts = new Map<string, number>();
     for (const entry of matches) counts.set(key(entry), (counts.get(key(entry)) ?? 0) + 1);
@@ -1126,14 +1127,19 @@ function TopLure({ catches }: { catches: readonly CatchEntry[] }) {
     const at = new Date(entry.caughtAt);
     return Number.isNaN(at.getTime()) ? null : biteTimeOf(at.getHours());
   });
-  const water = leader(catches, (entry) => entry.spotId);
+  // Waters that read the same are one, as "By water" and the search take them.
+  const water = leader(catches, (entry) => {
+    const name = spotById(book, entry.spotId)?.name;
+    return name ? foldText(plainName(name)).toLowerCase() : null;
+  });
+  const waterName = water ? plainName(spotById(book, catches.find((entry) => foldText(plainName(spotById(book, entry.spotId)?.name ?? "")).toLowerCase() === water.value)!.spotId)!.name) : "";
   // Under the spelling most of its fish carry, not the first one found.
   const lureName = lure ? lureNames(catches)(catches.find((entry) => lureKey(entry) === lure.value)!.lure) : "";
   const lines = [
     lure ? t("Most on {lure}.", { lure: `${lureName} (${lure.count})` }) : null,
     // Polish writes the part of the day in lower case inside a sentence: "Najczęściej o tej porze: świt (2)."
     time ? t("Best time of day: {time}.", { time: `${inSentence(t(BITE_TIMES.find((row) => row.id === time.value)!.label))} (${time.count})` }) : null,
-    water ? t("Most from {water}.", { water: `${spotById(book, water.value)?.name ?? ""} (${water.count})` }) : null,
+    water ? t("Most from {water}.", { water: `${waterName} (${water.count})` }) : null,
   ].filter(Boolean);
   return lines.length > 0 ? <p className="meta top-lure">{lines.join(" ")}</p> : null;
 }

@@ -9,7 +9,7 @@ import { formatClock, formatDay } from "./format";
 import { useLogbook } from "./LogbookState";
 import { catchPage, useShowMore } from "./PagedCatches";
 import { bookFishDay, monthName } from "./tripMonths";
-import { kindKey, kindNames, speciesCounts } from "./speciesLink";
+import { kindKey, speciesCounts } from "./speciesLink";
 import { FROM_LIST } from "./leaveDeleted";
 import { catchLink } from "./catchList";
 import { FIND_PARAM, exactTerm } from "./findLinks";
@@ -18,6 +18,8 @@ import { MatchOrder, useLargestOrder } from "./MatchOrder";
 import { largestFirst } from "./largestFirst";
 import { countedFish, ownFish } from "./milestones";
 import { hasSampleFish, isSampleCatch } from "./bookCopy";
+import { bookKindName } from "./speciesLink";
+import { plainName } from "./tripDates";
 
 /** The photos' stored length, as JSON.stringify would give it, without building a copy of every picture to count it. */
 export function storedSize(photos: Record<string, string>): number {
@@ -105,7 +107,7 @@ export function PhotosPage() {
   const pictured = catchesWithPhotos(catchesNewestFirst(book), (id) => photoFor(id) !== null);
   const kinds = speciesCounts(pictured);
   // A kind as the book writes it most, in the reader's language: one name on chips, cards and links.
-  const kindName = kindNames(book.catches);
+  const kindName = bookKindName(book.catches);
   // A kind picked that has since lost its last photo shows them all again.
   // An older link's "perches" picks the same kind as "perch".
   const picked = kind && kinds.some((row) => kindKey(row.species) === kindKey(kind)) ? kindKey(kind) : null;
@@ -114,7 +116,7 @@ export function PhotosPage() {
   const perWater = new Map<string, number>();
   for (const entry of pictured) perWater.set(entry.spotId, (perWater.get(entry.spotId) ?? 0) + 1);
   const waters = [...perWater]
-    .map(([id, count]) => ({ id, name: spotById(book, id)?.name ?? t("Unknown water"), count }))
+    .map(([id, count]) => ({ id, name: plainName(spotById(book, id)?.name ?? t("Unknown water")), count }))
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
   const pickedWater = water && waters.some((row) => row.id === water) ? water : null;
   const ofWater = pickedWater ? ofKind.filter((entry) => entry.spotId === pickedWater) : ofKind;
@@ -280,7 +282,7 @@ export function PhotosPage() {
                           <small>
                             {/* A night's small-hours fish says its clock time, as the catch cards do. */}
                             {size} · {bookFishDay(book, entry) === localDate(new Date(entry.caughtAt)) ? formatDay(bookFishDay(book, entry)) : formatClock(entry.caughtAt)}
-                            {spotById(book, entry.spotId) ? ` · ${spotById(book, entry.spotId)!.name}` : ""}
+                            {spotById(book, entry.spotId) ? ` · ${plainName(spotById(book, entry.spotId)!.name)}` : ""}
                           </small>
                         </span>
                       </Link>

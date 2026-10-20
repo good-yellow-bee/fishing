@@ -43,7 +43,7 @@ import { LIST_PARAM, catchLink, catchList, largestList, type ListKey } from "./c
 import { catchBadge } from "./catchBadge";
 import { photoPlace, photoTakenAt } from "./photoTime";
 import { AT_PARAM, PHOTO_PARAM, RESUME_PARAM, anotherCatchLink } from "./anotherCatch";
-import { catchesOfSpecies, kindKey, kindNames, kindOnPage, speciesCounts, speciesLink } from "./speciesLink";
+import { bookKindName, catchesOfSpecies, kindKey, kindOnPage, speciesCounts, speciesLink } from "./speciesLink";
 import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
@@ -57,7 +57,7 @@ import { speciesLures, waterSpecies, waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, gramsAsKilos, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 import { getUnits, locale, t, tn, useLang, useT, type Units } from "../i18n";
 import { pieceKey, pieceName } from "./gear/pieceKey";
-import { ownTitle, plainName } from "./tripDates";
+import { outNow, ownTitle, plainName } from "./tripDates";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { ChoiceRow } from "./ChoiceRow";
 import { lengthText, measureText, measuresText, tempText, weatherText, weightText } from "../i18n/content";
@@ -86,7 +86,7 @@ import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "./playLake";
 import { sameDayBefore } from "./sameDayBefore";
 import { countedSearch } from "./countedSearch";
 import { useStepKeys } from "./stepKeys";
-import { lureNames as lureNamesOf, pieceTally } from "./pieceTally";
+import { bookLureName, onPiece, pieceTally } from "./pieceTally";
 
 /** When the outing's newest fish came, so a session still going past the small hours keeps the clock's day. */
 function lastFishOn(book: Logbook, tripId: string | undefined): string | undefined {
@@ -1513,7 +1513,7 @@ function CatchForm() {
         {/* The same kind at the same water a few minutes apart is more likely one fish logged twice than two. */}
         {twin ? (
           <p className="form-note" role="status">
-            {t("A {species} was already logged here at {time}. Saving adds another.", { species: t(twin.species), time: formatTimeOfDay(twin.caughtAt) })}{" "}
+            {t("A {species} was already logged here at {time}. Saving adds another.", { species: bookKindName(book.catches)(twin.species), time: formatTimeOfDay(twin.caughtAt) })}{" "}
             <Link to={`/catches/${twin.id}`}>{t("Open it")}</Link>
           </p>
         ) : null}
@@ -1605,8 +1605,8 @@ export function CatchPage() {
 function CatchView() {
   const { book, deleteCatch, fileCatches, photoFor } = useLogbook();
   // A kind as the book writes it most ("Perch" for a fish typed "perch "), as its page, chips and lists name it.
-  const kindName = useMemo(() => kindNames(book.catches), [book.catches]);
-  const lureName = useMemo(() => lureNamesOf(book.catches), [book.catches]);
+  const kindName = bookKindName(book.catches);
+  const lureName = bookLureName(book.catches);
   useT();
   useStepKeys();
   const navigate = useNavigate();
@@ -1647,14 +1647,15 @@ function CatchView() {
   const listPhotos: ListPhoto[] = (list?.rows ?? []).flatMap((fish) => {
     const src = photoFor(fish.id);
     return src
-      ? [{ id: fish.id, src, alt: t("Photo of {species}", { species: t(fish.species) }), name: `${t(fish.species)} ${bookFishDay(book, fish)}`, caption: photoCaption(fish), to: catchLink(fish.id, list?.key) }]
+      ? [{ id: fish.id, src, alt: t("Photo of {species}", { species: kindName(fish.species) }), name: `${kindName(fish.species)} ${bookFishDay(book, fish)}`, caption: photoCaption(fish), to: catchLink(fish.id, list?.key) }]
       : [];
   });
   const { newer, older } = list ? neighborsIn(list.rows, entry.id) : catchNeighbors(book, entry.id);
   const listIndex = list ? list.rows.findIndex((row) => row.id === entry.id) : -1;
-  // A past outing's page lists its fish first fish first: the count goes as the page reads.
+  // A past outing's page lists its fish first fish first, a night session still going newest first: the count goes as
+  // the page reads.
   const listTrip = list?.key.startsWith("trip:") ? tripById(book, list.key.slice(5)) : undefined;
-  const listAt = list ? (listTrip && listTrip.date < localDate(new Date()) ? list.rows.length - listIndex : listIndex + 1) : 0;
+  const listAt = list ? (listTrip && listTrip.date < localDate(new Date()) && !outNow(book, listTrip) ? list.rows.length - listIndex : listIndex + 1) : 0;
   const badge = catchBadge(book, entry);
   // Newest first, so the oldest fish of the kind is number one.
   const kind = catchesOfSpecies(book, entry.species);
@@ -1696,8 +1697,8 @@ function CatchView() {
   const lureHereSearch = lureHere && isCounted ? countedSearch(book, `${lureHere[0]} + ${lureHere[1]}`, lureHereRows, "book") : null;
   const lureHereCount = lureHereSearch ? findCatches(book, lureHereSearch, t, (id) => photoFor(id) !== null).length : lureHereRows.length;
   // A bigger one of its kind on the same lure: what this lure can do.
-  const lureKey = pieceKey(entry.lure);
-  const onLure = isCounted && lureKey ? counted.filter((other) => pieceKey(other.lure) === lureKey && measureOf(other, entry.measure.kind)) : [];
+  // One lure however it was written, as the lure search and "On {lure} at {water}" group it.
+  const onLure = isCounted && entry.lure.trim() ? counted.filter((other) => onPiece(other, entry.lure) && measureOf(other, entry.measure.kind)) : [];
   const lureTop = onLure.length > 1 ? personalBests({ spots: [], trips: [], catches: onLure }) : null;
   const lureBestFish = lureTop ? (entry.measure.kind === "weight" ? lureTop.heaviest : lureTop.longest) : null;
   // Only a bigger one: a tie would name another fish the same size as this one, beside its own "longest" line.
@@ -1761,7 +1762,9 @@ function CatchView() {
   // drawn from (countedBook), or a sample fish would hold the weight and the angler's own heaviest read as "longest".
   const bests = badge ? personalBests({ ...book, catches: countedBook(book).catches }, kindKey) : null;
   const kindBests = bests?.species.find((row) => kindKey(row.species) === kindKey(entry.species));
-  const heavy = (badge === "book" ? bests?.heaviest : kindBests?.heaviest)?.id === entry.id;
+  // A kind's badge by weight only when more than one of its fish was weighed, as the badge itself was drawn.
+  const weighedOfKind = countedBook(book).catches.filter((other) => kindKey(other.species) === kindKey(entry.species) && measureOf(other, "weight")).length;
+  const heavy = badge === "book" ? bests?.heaviest?.id === entry.id : kindBests?.heaviest?.id === entry.id && weighedOfKind > 1;
 
   return (
     <div className="sheet">
@@ -1797,7 +1800,7 @@ function CatchView() {
           <span>{measuresText(entry)}</span>
           {" · "}
           {/* Every fish taken on this lure, through the catch search. */}
-          <Link to={findLink(exactTerm("lure", pieceName(entry.lure)))}>{pieceName(entry.lure)}</Link>
+          <Link to={findLink(exactTerm("lure", lureName(entry.lure)))}>{lureName(entry.lure)}</Link>
           {spot ? (
             <>
               {" · "}
