@@ -1,4 +1,5 @@
 import type { Logbook, Trip } from "@stillwater/shared";
+import { sameName } from "./tripDates";
 
 /** The most a lost or missed tally holds, and the longest an outing note runs, as the book allows. */
 const TRIP_COUNT_CAP = 999;
@@ -115,7 +116,7 @@ export function mergedInto(merged: Record<string, string>, id: string, inBook: (
 
 /** An outing moved to another water; one untitled, so named after the water it left, takes the new water's name. */
 function movedTrip(trip: Trip, fromName: string, into: { id: string; name: string }): Trip {
-  const untitled = fromName.trim() !== "" && trip.title.trim().toLowerCase() === fromName.trim().toLowerCase();
+  const untitled = fromName.trim() !== "" && sameName(trip.title, fromName);
   return { ...trip, spotId: into.id, ...(untitled ? { title: into.name } : {}) };
 }
 

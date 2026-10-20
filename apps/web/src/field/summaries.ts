@@ -18,13 +18,14 @@ import { pieceName } from "./gear/pieceKey";
  * An outing as plain text to paste into a message: the day, the water, then each fish in the order it came.
  * A fish from another water than the outing's names its own; the day carries its year, as the text may be read years on.
  */
-export function tripSummary(trip: Trip, spotName: string | null, catches: readonly CatchEntry[], waterOf: (spotId: string) => string | null = () => null): string {
+/** `all` is the book's fish its kinds and lures are named by, as the book writes them most. */
+export function tripSummary(trip: Trip, spotName: string | null, catches: readonly CatchEntry[], waterOf: (spotId: string) => string | null = () => null, all: readonly CatchEntry[] = catches): string {
   // An outing saved without a title, which keeps its water's name for one, starts at its day.
   const title = trip.title.trim();
   const water = spotName === null ? null : plainName(spotName);
   const head = [water && sameName(title, water) ? "" : title, formatDatedDay(new Date(`${trip.date}T12:00:00`)), ...(water ? [water] : [])].filter(Boolean).join(" · ");
-  const kindName = kindNames(catches);
-  const lureName = lureNames(catches);
+  const kindName = kindNames(all);
+  const lureName = lureNames(all);
   const fish = [...catches]
     .sort((a, b) => a.caughtAt.localeCompare(b.caughtAt))
     .map((entry) => {
@@ -48,8 +49,8 @@ export function tripSummary(trip: Trip, spotName: string | null, catches: readon
 }
 
 /** One fish as plain text: what it was, its size and lure, then when and where, and its note. */
-export function catchSummary(entry: CatchEntry, spotName: string | null, outing: string | null = null): string {
-  const what = [pieceName(entry.species), measuresText(entry), pieceName(entry.lure), ...(entry.released ? [t("Released")] : [])].join(", ");
+export function catchSummary(entry: CatchEntry, spotName: string | null, outing: string | null = null, all: readonly CatchEntry[] = [entry]): string {
+  const what = [kindNames(all)(entry.species), measuresText(entry), lureNames(all)(entry.lure), ...(entry.released ? [t("Released")] : [])].join(", ");
   const when = [`${formatDatedDay(new Date(entry.caughtAt))} ${formatTimeOfDay(entry.caughtAt)}`, ...(spotName ? [spotName] : [])].join(" · ");
   // The conditions as the page shows them, so a pasted fish reads whole: the weather, the moon and its outing.
   const at = new Date(entry.caughtAt);
@@ -75,7 +76,7 @@ export function spotSummary(
     .map((row) => `${pieceName(row.lure)} (${row.count})`)
     .join(", ");
   return [
-    `${spot.name.trim()} · ${t(WATER_LABELS[spot.waterType])}`,
+    `${plainName(spot.name)} · ${t(WATER_LABELS[spot.waterType])}`,
     // Where it is, for "meet me here": the numbers and a map that opens on any phone.
     ...(spot.place ? [`${formatCoord(spot.place.lat, spot.place.lng)} · ${osmLink(spot.place.lat, spot.place.lng)}`] : []),
     // Beside its outings, a count: "2 outings · 0 fish", not "Nothing logged" when two were.
@@ -110,12 +111,12 @@ export function speciesSummary(
   ];
   const first = catches[catches.length - 1];
   const newest = catches[0];
-  const named = waters.filter((row) => row.name).map((row) => `${row.name} (${row.count})`);
+  const named = waters.filter((row) => row.name).map((row) => `${plainName(row.name!)} (${row.count})`);
   const lures = pieceTally(catches, 3)
     .map((row) => `${pieceName(row.lure)} (${row.count})`)
     .join(", ");
   return [
-    pieceName(species),
+    kindNames(catches)(species),
     [fishCountLabel(catches.length), ...(released > 0 ? [tn(released, "{n} released", "{n} released")] : [])].join(" · "),
     ...(sizes.length > 0 ? [sizes.join(" · ")] : []),
     ...(first && newest && catches.length > 1
@@ -146,7 +147,7 @@ export function yearSummary(book: Logbook, year: string, today: string, goal: nu
   const waters = speciesWaters(book, catches)
     .filter((row) => row.name)
     .slice(0, 3)
-    .map((row) => `${row.name} (${row.count})`);
+    .map((row) => `${plainName(row.name!)} (${row.count})`);
   const [y, m, d] = today.split("-").map(Number) as [number, number, number];
   const pace = goal !== null && today.startsWith(`${year}-`) ? goalPace(catches.length, goal, new Date(y, m - 1, d)) : null;
   const lures = pieceTally(catches, 3)
@@ -188,9 +189,9 @@ function searchLabel(parts: readonly string[]): string {
  * with its day, kind, size, lure and water.
  */
 /** `largest`: the list was shown largest first, so the copy keeps that order and says so. */
-export function searchSummary(parts: readonly string[], matches: readonly CatchEntry[], waterOf: (spotId: string) => string | null, largest = false): string {
-  const kindName = kindNames(matches);
-  const lureName = lureNames(matches);
+export function searchSummary(parts: readonly string[], matches: readonly CatchEntry[], waterOf: (spotId: string) => string | null, largest = false, all: readonly CatchEntry[] = matches): string {
+  const kindName = kindNames(all);
+  const lureName = lureNames(all);
   const fish = (largest ? [...matches] : [...matches].sort((a, b) => a.caughtAt.localeCompare(b.caughtAt)))
     .map((entry) => {
       const water = waterOf(entry.spotId);

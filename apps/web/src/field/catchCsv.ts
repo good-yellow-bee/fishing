@@ -3,6 +3,7 @@ import { getLang, getUnits, num, t } from "../i18n";
 import { CM_PER_IN, KG_PER_LB } from "../i18n/content";
 import { lureNames } from "./pieceTally";
 import { plainName } from "./tripDates";
+import { newestOutingFirst } from "./catchNeighbors";
 import { noteText, outingName, outingNameById } from "./format";
 import { countedBook } from "./milestones";
 import { bookFishDay } from "./tripMonths";
@@ -137,7 +138,8 @@ export function tripsCsv(whole: Logbook, today: string): string {
       .map(([name, count]) => (count > 1 ? `${name} ×${count}` : name))
       .join(", ");
   const rows = [...book.trips]
-    .sort((a, b) => b.date.localeCompare(a.date))
+    // Newest first, a day's dusk before its dawn, as Trips lists them.
+    .sort(newestOutingFirst(whole))
     // An untitled outing goes by its water's name, as the list names it.
     .map((trip) => [trip.date, plainName(outingName(trip, book.spots)), plainName(spotById(book, trip.spotId)?.name ?? ""), String(fish.get(trip.id) ?? 0), tallyOf(kinds, trip.id), tallyOf(lures, trip.id), String(trip.lost ?? 0), String(trip.missed ?? 0), noteText(trip.note)]);
   return sheet([header, ...rows], separator);

@@ -962,7 +962,7 @@ export function CatchSearch() {
           ) : null}
           {matches.length > 0 ? (
             // The angler's own fish, as the count above sums them: a pasted copy doesn't credit them with the sample's.
-            <CopySummary text={() => searchSummary(searchParts(book, settled), mine.length > 0 ? mine : matches, (id) => { const name = spotById(book, id)?.name; return name === undefined ? null : plainName(name); }, largest)} file="stillwater-search.txt" />
+            <CopySummary text={() => searchSummary(searchParts(book, settled), mine.length > 0 ? mine : matches, (id) => { const name = spotById(book, id)?.name; return name === undefined ? null : plainName(name); }, largest, book.catches)} file="stillwater-search.txt" />
           ) : null}
           {matches.length > 1 ? (
             // "Which was my biggest pike at Cedar": the same matches, largest first.

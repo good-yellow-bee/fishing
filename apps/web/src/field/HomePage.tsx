@@ -1,7 +1,7 @@
 import { Fragment, useRef, useState, type ReactNode } from "react";
 import { MapAnchor } from "./MapAnchor";
 import { Link } from "react-router-dom";
-import { MOON_QUARTER_LABELS, catchesForTrip, itemsForTrip, localDate, moonQuarterOf, packedCount, recentCatches, recentTrips, shiftDate, spotById, type Logbook, type Spot, type Trip } from "@stillwater/shared";
+import { MOON_QUARTER_LABELS, catchesForTrip, itemsForTrip, localDate, moonQuarterOf, packedCount, recentCatches, shiftDate, spotById, type Logbook, type Spot, type Trip } from "@stillwater/shared";
 import { BookFile, SET_ASIDE_ID } from "./BookFile";
 import { readUnreadableBook } from "./storage";
 import { CatchSearch } from "./CatchSearch";
@@ -12,7 +12,7 @@ import { countedSearch } from "./countedSearch";
 import { RESUME_PARAM } from "./anotherCatch";
 import { hasSampleLeft, isSampleCatch, isSampleOnly, isSamplePlan, isSampleSpot, isSampleOuting, upcomingRealTrips, withoutSample } from "./bookCopy";
 import { outingFish } from "./outingFish";
-import { lateOutings, outingDay } from "./tripDates";
+import { lateOutings, outingDay, plainName, sameName } from "./tripDates";
 import { sheetOutings } from "./catchCsv";
 import { NEWS_ITEMS, markNewsSeen, newsDue, readSeenNews } from "../game/whatsNew";
 import { FIELD_NEWS } from "./fieldNews";
@@ -149,7 +149,11 @@ export function HomePage() {
   const upcoming = [...(lateOuting ? [lateOuting] : []), ...upcomingRealTrips(book, today)];
   // Just back from the water, not from a round of the game, nor the sample week's plans once their day has passed.
   // Last evening's outing still on the water shows once, among what's coming up.
-  const recent = recentTrips({ ...countedOwn, trips: countedOwn.trips.filter((trip) => offPlayLake(trip) && trip.id !== lateOuting?.id && !isSamplePlan(book, trip)) }, today, 3);
+  // Newest first, a day's dusk before its dawn, as Trips lists them.
+  const recent = countedOwn.trips
+    .filter((trip) => trip.date < today && offPlayLake(trip) && trip.id !== lateOuting?.id && !isSamplePlan(book, trip))
+    .sort(newestOutingFirst(book))
+    .slice(0, 3);
   // Each outing's fish with those logged loose that day on its water, as the Trips page counts them.
   const fishOn = outingFish(book);
   // The day whose outings are fished: in the small hours, last evening's, as the Trips page counts them.
@@ -375,10 +379,10 @@ export function HomePage() {
                 {nextSpot ? (
                   <>
                     {" · "}
-                    {outingName(next, book.spots) !== nextSpot.name ? (
-                      <Link to={`/spots/${nextSpot.id}`}>{nextSpot.name}</Link>
+                    {!sameName(outingName(next, book.spots), nextSpot.name) ? (
+                      <Link to={`/spots/${nextSpot.id}`}>{plainName(nextSpot.name)}</Link>
                     ) : (
-                      <Link to={`/spots/${nextSpot.id}`} aria-label={t("{water}: water page", { water: nextSpot.name })}>
+                      <Link to={`/spots/${nextSpot.id}`} aria-label={t("{water}: water page", { water: plainName(nextSpot.name) })}>
                         {t("Water page")}
                       </Link>
                     )}

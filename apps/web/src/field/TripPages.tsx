@@ -73,7 +73,7 @@ import { pieceTally } from "./pieceTally";
 import { WaterOptions } from "./WaterOptions";
 import { kindKey, kindNames, speciesCounts, speciesLink } from "./speciesLink";
 import { pieceName } from "./gear/pieceKey";
-import { datePicks, lateOutings, outingDay, ownTitle, pastTitles, stillGoing } from "./tripDates";
+import { datePicks, lateOutings, outingDay, ownTitle, pastTitles, plainName, stillGoing } from "./tripDates";
 import "./search.css";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 import { bestFishDay, bookFishDay } from "./tripMonths";
@@ -162,7 +162,7 @@ function lastTimeNote(book: Logbook, trip: Trip): string {
 export function planText(book: Logbook, trip: Trip, tackleItems: TackleItem[]): string {
   const spot = spotById(book, trip.spotId);
   // An untitled outing's name is its water's, which follows anyway.
-  const head = [ownTitle(trip, book.spots), formatDay(trip.date), spot?.name ?? t("Unknown water")].filter(Boolean).join(" · ");
+  const head = [ownTitle(trip, book.spots), formatDay(trip.date), spot ? plainName(spot.name) : t("Unknown water")].filter(Boolean).join(" · ");
   return [head, ...calendarNotes(book, trip, tackleItems), trip.note.trim()].filter(Boolean).join("\n");
 }
 
@@ -777,7 +777,7 @@ function TripView() {
         ) : null
       )}
       {/* A hard day is worth telling too: a past blank outing with a note, or fish lost or missed. Today's plan with only a note isn't a day yet. */}
-      {catches.length > 0 || (!samplePlan && (trip.date < fishedBy || trip.lost || trip.missed) && (trip.note.trim() || trip.lost || trip.missed)) ? <CopySummary text={() => tripSummary(trip, spot?.name ?? null, catches, (id) => spotById(book, id)?.name ?? null)} file="stillwater-outing.txt" /> : null}
+      {catches.length > 0 || (!samplePlan && (trip.date < fishedBy || trip.lost || trip.missed) && (trip.note.trim() || trip.lost || trip.missed)) ? <CopySummary text={() => tripSummary(trip, spot ? plainName(spot.name) : null, catches, (id) => { const name = spotById(book, id)?.name; return name === undefined ? null : plainName(name); }, book.catches)} file="stillwater-outing.txt" /> : null}
       {/* Planning ahead: what has worked on this water before. */}
       {!fished && spot && !play ? <WaterTipsBox catches={countedFish(catchesForSpot(book, spot.id))} on={trip.date} within={exactTerm("water", spot.name)} /> : null}
       <TripWeather catches={catches} />
