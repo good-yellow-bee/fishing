@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { sampleLogbook, type CatchEntry, type Logbook, type Spot, type Trip } from "@stillwater/shared";
-import { outingFish } from "./outingFish";
+import { outingFish, underWayOn } from "./outingFish";
 import { averagedOutings, placeOnWater } from "./TripPages";
 
 const TODAY = "2026-10-15";
@@ -44,10 +44,11 @@ describe("round 118 ideas: an outing's page says where it falls among the water'
 });
 
 describe("round 118 ideas: a dawn and a dusk today with a loose fish stay plans on their pages, as on Trips", () => {
-  it("credits neither with the loose fish", () => {
+  it("credits neither with the loose fish, so neither is under way", () => {
     const book: Logbook = { spots: [water("own")], trips: [trip("old", "2026-10-01"), trip("dawn", TODAY), trip("dusk", TODAY)], catches: [fish("1", null, 9)] };
     const fishOn = outingFish(book);
     expect(fishOn("dawn") + fishOn("dusk")).toBe(0);
+    expect(book.trips.filter((each) => underWayOn(each, fishOn)).map((each) => each.id)).toEqual([]);
     expect(placeOnWater(book, book.trips[1]!, book.trips, TODAY, fishOn)).toBeNull();
   });
 });

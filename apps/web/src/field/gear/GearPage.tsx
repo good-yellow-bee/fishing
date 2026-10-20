@@ -39,8 +39,8 @@ import { measureText } from "../../i18n/content";
 import { offPlayLake } from "../playLake";
 import { countedBook, ownFish } from "../milestones";
 import { isSampleOnly, nextRealTrips, upcomingRealTrips } from "../bookCopy";
-import { outingFish } from "../outingFish";
-import { lateOutings, outingDay, outNow, plainName, sameName, underWay } from "../tripDates";
+import { outingFish, underWayOn } from "../outingFish";
+import { lateOutings, outingDay, outNow, plainName, sameName } from "../tripDates";
 import { focusPageHeading } from "../pageFocus";
 import { bookLureName, onPiece } from "../pieceTally";
 import { newestOutingFirst } from "../catchNeighbors";
@@ -52,8 +52,8 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
   const { items } = useTackle();
   useT();
   const spot = spotById(book, trip.spotId);
-  // Under way once anything bit, as the outing's own page takes it: a fish (loose on its water too), a lost one or a miss.
-  const fished = underWay(book, trip);
+  // Under way once anything bit, as the outing's own page and Trips take it: a fish, a lost one or a miss.
+  const fished = underWayOn(trip, outingFish(book));
 
   return (
     <section className="tackle-trip">
