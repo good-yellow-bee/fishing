@@ -16,7 +16,9 @@ import {
   type SpotId,
   masteryTier,
   nextMastery,
+  STUDY_REWARD,
 } from "@stillwater/shared";
+import type { Study } from "../api";
 import { Link } from "react-router-dom";
 import { bestHourFor, GROUNDBAIT_FEEDERS, lureSizeFor, rarityLabel, SCHOOLERS, type LureSize } from "../game/logic";
 import { biteStyle, type BiteStyle } from "../game/nibblePlan";
@@ -29,6 +31,9 @@ import { speciesLink } from "../field/speciesLink";
 
 type Props = {
   stats: CatchStat[];
+  /** Each landed kind's studies from the server, once read; left out, the guide shows none. */
+  studies?: readonly Study[] | null;
+  onClaimStudy?: (speciesId: string) => void;
   /** How many fish of a kind the field log on this device holds, so a card can open that page. */
   inBook?: (name: string) => number;
 };
@@ -103,7 +108,32 @@ function masteryLine(caught: number): string {
     : t("Mastery: {n} to {next}", { n: next.toGo, next: t(next.tier.label) });
 }
 
-function GuideCard({ entry, inBook = 0 }: { entry: GuideEntry; inBook?: number }) {
+/** A kind's three studies, and its claim once all are done. */
+function Studies({ study, onClaim }: { study: Study; onClaim?: (speciesId: string) => void }) {
+  const mark = (done: boolean) => (done ? "✓" : "·");
+  return (
+    <div className="guide-studies">
+      <p>
+        {study.claimed
+          ? t("Studied")
+          : t("Studies: banks {banks} {bankMark} · hours {hours} {hourMark} · trophy {trophyMark}", {
+              banks: `${study.banks.have}/${study.banks.need}`,
+              bankMark: mark(study.banks.have >= study.banks.need),
+              hours: `${study.hours.have}/${study.hours.need}`,
+              hourMark: mark(study.hours.have >= study.hours.need),
+              trophyMark: mark(study.trophy),
+            })}
+      </p>
+      {study.done && !study.claimed && onClaim && (
+        <button type="button" className="panel-btn" onClick={() => onClaim(study.speciesId)}>
+          {t("Claim · +{points} pts", { points: STUDY_REWARD })}
+        </button>
+      )}
+    </div>
+  );
+}
+
+function GuideCard({ entry, inBook = 0, study, onClaimStudy }: { entry: GuideEntry; inBook?: number; study?: Study; onClaimStudy?: (speciesId: string) => void }) {
   const { species } = entry;
   const known = entry.caught > 0;
   const hourAt = (spot: SpotId) => hourName(bestHourFor(species, spot));
@@ -122,6 +152,7 @@ function GuideCard({ entry, inBook = 0 }: { entry: GuideEntry; inBook?: number }
           </p>
           <p>{t("Trophy ≥ {weight}", { weight: weightText(trophyWeight(species)) })}</p>
           <p className="guide-mastery">{masteryLine(entry.caught)}</p>
+          {study && <Studies study={study} onClaim={onClaimStudy} />}
         </>
       )}
       <p>{shadowLabel(shadowSize(species))}</p>
@@ -156,7 +187,7 @@ function GuideCard({ entry, inBook = 0 }: { entry: GuideEntry; inBook?: number }
   );
 }
 
-export function FieldGuide({ stats, inBook }: Props) {
+export function FieldGuide({ stats, inBook, studies, onClaimStudy }: Props) {
   useT();
   const entries = fieldGuide(stats);
   const { found, total } = guideProgress(entries);
@@ -173,7 +204,7 @@ export function FieldGuide({ stats, inBook }: Props) {
       </p>
       <div className="guide-grid">
         {entries.map((entry) => (
-          <GuideCard key={entry.species.id} entry={entry} inBook={inBook?.(entry.species.name)} />
+          <GuideCard key={entry.species.id} entry={entry} inBook={inBook?.(entry.species.name)} study={studies?.find((one) => one.speciesId === entry.species.id)} onClaimStudy={onClaimStudy} />
         ))}
       </div>
     </section>
