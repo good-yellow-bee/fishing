@@ -1916,6 +1916,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT440~~ | ~~News card 2026-10-20-game62 covers GT438-GT439: news of a lost trophy found, and the Board's lost trophies~~ (#1665) | ui | S |
 | ~~GT441~~ | ~~A lost trophy's lodge report takes its id from the client at the moment of the loss, so the angler's own foe holds it at once (landing it the same day closes the report) and a retried report is filed only once~~ (#1666) | gameplay | S |
 | ~~GT442~~ | ~~The pre-baited swim: groundbait thrown at a bank is kept per angler for the next visit; soon after it keeps its casts, left six hours or more the feeders have gathered and it fishes as freshly baited (the load says so), past two days it is gone~~ (#1667) | gameplay | M |
+| ~~GT443~~ | ~~The angler's arm tires in a long fight: past 45 seconds plus 3 for each point of Strength, the reel wins 1% less line each second, down to 60% of its pace, and the fight's status says so when the fish is calm~~ (#PR) | gameplay | M |
+| GT444 | News card game63 covers GT442-GT443 | ui | S |
 
 ## Risks / open questions for the owner
 

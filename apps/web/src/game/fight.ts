@@ -12,6 +12,8 @@ export type SurgeState = 0 | 1 | 2; // 0 calm, 1 warning (telegraph), 2 surging
  * `turning`: the angler is pulling the rod against the run, so it is cut short.
  */
 export type FightSim = {
+  /** The angler's arm is tiring in a long fight, so the reel wins less line. */
+  armTired?: boolean;
   /** A slippery fish on a slack line, slithering toward slipping the hook. */
   slipping?: boolean;
   /** It slipped the hook on a slack line. */
@@ -350,6 +352,19 @@ export function thrivesInCold(season: string | undefined, speciesId?: string) {
 export function seasonTireMul(season: string | undefined, speciesId?: string) {
   return season === "winter" && !thrivesInCold(season, speciesId) ? WINTER_TIRE : 1;
 }
+/** In a long fight the angler's arm tires: past this many seconds, and ARM_STRENGTH_SEC more for each point of Strength, */
+export const ARM_FRESH_SEC = 45;
+export const ARM_STRENGTH_SEC = 3;
+/** ...the reel wins this much less line for each further second, down to ARM_FLOOR of its pace. */
+export const ARM_TIRE_PER_SEC = 0.01;
+export const ARM_FLOOR = 0.6;
+
+/** How fast a tiring arm still reels, from 1 while it is fresh down to ARM_FLOOR. */
+export function armMul(fightSec: number, strength: number): number {
+  const past = fightSec - (ARM_FRESH_SEC + strength * ARM_STRENGTH_SEC);
+  return past <= 0 ? 1 : Math.max(ARM_FLOOR, 1 - past * ARM_TIRE_PER_SEC);
+}
+
 /** Cold-water fish: summer's warm water holds little air for them, so they tire sooner. */
 export const COLDWATER: ReadonlySet<string> = new Set(["brook-trout", "rainbow-trout", "salmon", "lake-whitefish"]);
 /** In summer a cold-water fish tires this much faster on a run or against the reel. */
@@ -887,7 +902,7 @@ export function makeFight(
       sim.tension += (tensionUpCalm + (sim.surge === 2 && !charging ? eff * rockPull * DRAG_RUN_PULL[runDrag] : 0) + (sim.wrapped ? WRAP_PULL : 0)) * dtSec;
       // Line under real pressure comes in faster, for an angler brave enough to reel in the amber.
       const pressure = sim.tension >= TIGHT_TENSION && sim.tension < RED_TENSION ? PRESSURE_REEL : 1;
-      sim.line -= reelRate * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * (sim.weeded ? WEED_REEL : 1) * (sim.wrapped ? 0 : 1) * (broadsider && sim.stamina >= TIRING_STAMINA ? BROADSIDE_REEL : 1) * (charging ? CHARGE_REEL / pattern.reelSurge : 1) * (sim.withRun ? WITH_RUN_REEL : 1) * (sim.headTurned ? TURNED_HEAD_REEL : 1) * (sim.weedBall ? WEED_BALL_REEL : 1) * dtSec;
+      sim.line -= reelRate * armMul(performance.fightSec ?? 0, strength) * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * (sim.weeded ? WEED_REEL : 1) * (sim.wrapped ? 0 : 1) * (broadsider && sim.stamina >= TIRING_STAMINA ? BROADSIDE_REEL : 1) * (charging ? CHARGE_REEL / pattern.reelSurge : 1) * (sim.withRun ? WITH_RUN_REEL : 1) * (sim.headTurned ? TURNED_HEAD_REEL : 1) * (sim.weedBall ? WEED_BALL_REEL : 1) * dtSec;
       if (lightRun) sim.line += driftSurge * DRAG_RUN_LINE.light * LIGHT_DRAG_SLIP * dtSec;
     } else if (heavyRun) {
       sim.tension =
@@ -924,6 +939,7 @@ export function makeFight(
     performance.peakTension = Math.max(performance.peakTension, sim.tension);
     performance.maxLine = Math.max(performance.maxLine, sim.line);
     performance.fightSec = (performance.fightSec ?? 0) + dtSec;
+    sim.armTired = armMul(performance.fightSec, strength) < 1;
     // Fought too long, a pike chews the line it swallowed down to frayed.
     if (toothed && !sim.frayed && performance.fightSec >= TEETH_SEC) {
       sim.frayed = true;
