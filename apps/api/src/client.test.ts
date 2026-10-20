@@ -12,6 +12,8 @@ writeFileSync(join(dist, "assets", "app-abc.js"), `console.log("${"x".repeat(200
 writeFileSync(join(dist, "manifest.webmanifest"), "{}");
 mkdirSync(join(dist, "models"));
 writeFileSync(join(dist, "models", "tree.glb"), Buffer.alloc(4000, 7));
+mkdirSync(join(dist, "textures"));
+writeFileSync(join(dist, "textures", "water.jpg"), Buffer.alloc(3000, 9));
 
 const app = new Hono();
 app.get("/api/health", (c) => c.json({ ok: true }));
@@ -37,16 +39,21 @@ describe("serveClient", () => {
     expect(res.headers.get("content-type")).toContain("javascript");
     expect(res.headers.get("content-encoding")).toBe("gzip");
     expect(res.headers.get("cache-control")).toContain("immutable");
-    expect((await app.request("/manifest.webmanifest")).headers.get("cache-control")).toBeNull();
+    expect((await app.request("/manifest.webmanifest")).headers.get("cache-control")).toBe("no-cache");
   });
 
-  it("caches the lake's models for a day, and answers a repeat check with a 304", async () => {
-    const res = await app.request("/models/tree.glb");
-    expect(res.status).toBe(200);
-    expect(res.headers.get("cache-control")).toBe("public, max-age=86400");
-    const tag = res.headers.get("etag");
-    expect(tag).toBeTruthy();
-    expect((await app.request("/models/tree.glb", { headers: { "If-None-Match": tag! } })).status).toBe(304);
+  it("makes the lake's models and textures revalidate with an ETag, gzipped or not", async () => {
+    for (const [path, headers] of [["/models/tree.glb", { "Accept-Encoding": "gzip" }], ["/textures/water.jpg", {}]] as const) {
+      const res = await app.request(path, { headers });
+      expect(res.status).toBe(200);
+      expect(res.headers.get("cache-control")).toBe("no-cache");
+      const tag = res.headers.get("etag");
+      expect(tag).toBeTruthy();
+      const again = await app.request(path, { headers: { ...headers, "If-None-Match": tag! } });
+      expect(again.status).toBe(304);
+      expect(again.headers.get("cache-control")).toBe("no-cache");
+    }
+    expect((await app.request("/models/tree.glb", { headers: { "Accept-Encoding": "gzip" } })).headers.get("content-encoding")).toBe("gzip");
   });
 
   it("leaves a missing script and unknown API paths as 404", async () => {

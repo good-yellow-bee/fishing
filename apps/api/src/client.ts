@@ -16,12 +16,12 @@ export function serveClient(app: Hono, distDir: string) {
     await next();
     if (c.res.ok) c.res.headers.set("Cache-Control", "public, max-age=31536000, immutable");
   });
-  // Models and textures keep their names across releases, so a day's cache, then a check that costs a 304 when they
-  // have not changed: a returning angler no longer downloads every model again each visit.
-  for (const path of ["/models/*", "/textures/*"]) {
+  // Models, textures, icons and the manifest keep their names across releases (the offline worker's "static" files, which
+  // it refreshes on every visit): an ETag lets each refresh cost a 304 when nothing changed, and no-cache keeps it asking.
+  for (const path of ["/models/*", "/textures/*", "/icons/*", "/env/*", "/manifest.webmanifest"]) {
     app.use(path, etag(), async (c, next) => {
       await next();
-      if (c.res.ok) c.res.headers.set("Cache-Control", "public, max-age=86400");
+      if (c.res.status === 200 || c.res.status === 304) c.res.headers.set("Cache-Control", "no-cache");
     });
   }
   app.get("*", (c, next) => (isApi(c.req.path) ? next() : files(c, next)));
