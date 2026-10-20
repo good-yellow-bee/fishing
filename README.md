@@ -67,6 +67,33 @@ The game is at [http://localhost:5173](http://localhost:5173) as above. SQLite l
 
 Force a lake hour while developing: `http://localhost:5173/?hour=dawn` (`day`, `dusk`, `night`).
 
+## Visual tests
+
+Screenshot tests in `e2e/visual` catch the lake or the field log drawing wrong (a black boat, a missing sky). They build the client, serve it from the API in production mode on a throwaway database, and compare views of the lake (summer day, night with the headlamp, fog, rain, snow, dawn, an upright and a sideways phone) and the field log (Home in English and Polish, a catch page) against PNGs in `e2e/visual/__screenshots__`.
+
+Each shot is the same on every run: the browser's clock is fixed (a Wednesday noon in July, UTC), `Math.random` is seeded, and the lake loads with time standing still and then draws exactly four frames. Fonts and other outside requests are blocked, the lodge's weekly answers (giants, lost trophies) are fixed, and the lake's passing hints and toasts are masked.
+
+The baselines are Linux PNGs made by the **Visual** workflow in Playwright's container (`mcr.microsoft.com/playwright:v1.58.2-noble`, software rendering), so they only compare there.
+
+```bash
+pnpm visual                       # runs every view; on macOS or Windows it checks the flows but not the pictures
+VISUAL_COMPARE=1 pnpm visual      # compare anyway (expect font and renderer differences off Linux)
+```
+
+To update the baselines after an intended change:
+
+1. Run the **Visual** workflow from the Actions tab (Run workflow → your branch) with **update_snapshots** ticked.
+2. Download its `visual-results` artifact and copy `e2e/visual/__screenshots__` into your branch, then commit the PNGs.
+
+Or make them locally in the same container, from a separate clone (it installs Linux `node_modules` into the folder it runs in; on an Apple-silicon Mac keep `--platform linux/amd64`, as software rendering on ARM differs slightly from CI's):
+
+```bash
+docker run --rm --platform linux/amd64 -v "$PWD":/work -w /work mcr.microsoft.com/playwright:v1.58.2-noble \
+  bash -c "npm i -g pnpm@10.14.0 && pnpm install --frozen-lockfile && CI=1 pnpm visual --update-snapshots"
+```
+
+The container ships an older Node than the one CI installs; if the API won't start there, use the workflow instead.
+
 ## Layout
 
 ```
