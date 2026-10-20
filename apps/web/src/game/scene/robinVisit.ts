@@ -37,6 +37,11 @@ export function robinOut(hour: LakeHour, sky: Sky | undefined, season: LakeSeaso
   return (hour === "dawn" || hour === "day" || (hour === "dusk" && season === "winter")) && (sky !== "rain" || snowing(sky, season));
 }
 
+/** The blackbird is out on the bank on wet days instead, when the rain brings the worms up: dawn and day, rain that isn't snow, and not in a thunderstorm. */
+export function blackbirdOut(hour: LakeHour, sky: Sky | undefined, season: LakeSeason, storm = false) {
+  return (hour === "dawn" || hour === "day") && sky === "rain" && !snowing(sky, season) && !storm;
+}
+
 function smooth(t: number) {
   const c = Math.min(1, Math.max(0, t));
   return c * c * (3 - 2 * c);

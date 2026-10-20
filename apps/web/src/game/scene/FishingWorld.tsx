@@ -42,10 +42,10 @@ import { DockMallard } from "./DockMallard";
 import { BankHedgehog } from "./BankHedgehog";
 import { BASE_FOV, fovFor } from "./cameraFov";
 import { PlayerHeadlamp } from "./PlayerHeadlamp";
-import { DockRobin, GroundRobin } from "./DockRobin";
+import { DockRobin, GroundBlackbird, GroundRobin } from "./DockRobin";
 import { hedgehogOut } from "./hedgehogWalk";
 import { mallardOut } from "./mallardWaddle";
-import { robinOut, robinVisitIndex } from "./robinVisit";
+import { blackbirdOut, robinOut, robinVisitIndex } from "./robinVisit";
 import { useStrikeStartle } from "./useStrikeStartle";
 import { knitsOut } from "./scarfKnit";
 import { leavesOut, petalsOut } from "./leafFall";
@@ -2247,6 +2247,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       {mallardOut(hour, sky, season) && <DockMallard phase={phase} atDock={spot === "dock"} />}
       {robinAbout && <DockRobin snow={dockSnowy(season)} startledAt={robinStartledAt} />}
       {robinAbout && <GroundRobin phase={phase} />}
+      {blackbirdOut(hour, sky, season, storm) && <GroundBlackbird phase={phase} />}
       {hedgehogOut(hour, sky, season) && <BankHedgehog phase={phase} />}
       {headlamp && <PlayerHeadlamp phase={phase} float={bobberWorld} />}
       {dogOut(hour, sky, season) && <DockDog key={season} phase={phase} robin={robinAbout ? robinStartledAt : null} paperWind={paperBoatOut(hour, sky, season) ? (wind ?? NO_WIND).x : null} winter={knitsOut(season)} nibble={nibble && spot === "dock" ? bobberWorld : null} snowfall={snowing(sky, season)} />}
