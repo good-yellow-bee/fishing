@@ -109,7 +109,7 @@ export function validateCatch(
     return { ok: false, error: "line too light for this fish", status: 409 };
   }
   const golden = request.requestId !== undefined && isGolden(request.requestId) ? GOLDEN_BONUS : 1;
-  return { ok: true, points: catchPoints(species, request.weight, request.clean, weeklyBonus(species.id, at) * golden * cleanRunBonus(request.clean, request.cleanRun) * bestBonus(request.weight, priorBest, othersBest) * dayRunBonus(catchDays, request.day) * masteryBonus(priorCaught)), species };
+  return { ok: true, points: catchPoints(species, request.weight, request.clean, weeklyBonus(species.id, request.day ?? at) * golden * cleanRunBonus(request.clean, request.cleanRun) * bestBonus(request.weight, priorBest, othersBest) * dayRunBonus(catchDays, request.day) * masteryBonus(priorCaught)), species };
 }
 
 export type UpgradeOk = { ok: true; cost: number; nextRank: number };

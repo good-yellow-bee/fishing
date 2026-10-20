@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { weekStart } from "./board.ts";
 import { fishById } from "./fish.ts";
 import { catchPoints, validateCatch } from "./rules.ts";
+import { weekFishFor, weekOf } from "./weeklyChallenges.ts";
 import { SEASON_SPECIES } from "./season.ts";
 import type { Profile } from "./types.ts";
 import { seasonForWeek, WEEKLY_FISH_BONUS, weeklyBonus, weeklyFish, weeklyFishPool } from "./weeklyFish.ts";
@@ -48,5 +49,24 @@ describe("fish of the week", () => {
     const result = validateCatch(angler, { speciesId: named.id, weight, spot: named.spots[0]! }, at);
     expect(result).toMatchObject({ ok: true, points: catchPoints(fishById(named.id)!, weight, false, WEEKLY_FISH_BONUS) });
     expect(catchPoints(named, weight, false, WEEKLY_FISH_BONUS)).toBeGreaterThan(catchPoints(named, weight));
+  });
+});
+
+describe("one week for the board and the bonus", () => {
+  it("reads a local day by the angler's own Monday-to-Sunday week, the week the weekly challenges keep", () => {
+    // A local Sunday whose evening is already Monday in UTC still names the Sunday's week.
+    expect(weeklyFish("2026-10-25").id).toBe(weeklyFish(new Date(Date.UTC(2026, 9, 25, 12))).id);
+    expect(weeklyFish("2026-10-25").id).toBe(weekFishFor(weekOf("2026-10-25")).id);
+    expect(weeklyBonus(weeklyFish("2026-10-25").id, "2026-10-25")).toBe(WEEKLY_FISH_BONUS);
+  });
+
+  it("pays the catch's local week in validateCatch, not the server's UTC week", () => {
+    const sunday = "2026-10-25";
+    const fish = weeklyFish(sunday);
+    const mondayUtc = new Date(Date.UTC(2026, 9, 26, 3));
+    const local = validateCatch({ userId: "a", displayName: "A", points: 0, lifetimePoints: 1_000_000, strength: 8, accuracy: 8, patience: 8 }, { speciesId: fish.id, weight: fish.maxWeight, spot: fish.spots[0]!, clean: false, day: sunday }, mondayUtc);
+    const utc = validateCatch({ userId: "a", displayName: "A", points: 0, lifetimePoints: 1_000_000, strength: 8, accuracy: 8, patience: 8 }, { speciesId: fish.id, weight: fish.maxWeight, spot: fish.spots[0]!, clean: false }, mondayUtc);
+    expect(local.ok && utc.ok && local.points >= utc.points).toBe(true);
+    if (weeklyFish(mondayUtc).id !== fish.id) expect(local.ok && utc.ok && local.points > utc.points).toBe(true);
   });
 });

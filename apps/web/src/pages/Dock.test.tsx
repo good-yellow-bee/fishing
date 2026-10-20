@@ -4,7 +4,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { badgeProgress, catchPoints, CLEAN_RUN_BONUS, DAY_RUN_BONUS, GOLDEN_BONUS, LODGE_RECORD_BONUS, PB_BONUS, isGolden, weeklyBonus, dailyConditions, skyTurnForDay, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky, type SpotId, MASTER_BONUS } from "@stillwater/shared";
+import { badgeProgress, catchPoints, CLEAN_RUN_BONUS, DAY_RUN_BONUS, GOLDEN_BONUS, LODGE_RECORD_BONUS, PB_BONUS, isGolden, weeklyBonus, dailyConditions, skyTurnForDay, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky, type SpotId, MASTER_BONUS, localDate } from "@stillwater/shared";
 import { buyGroundbait, buyShiner, getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
@@ -322,7 +322,7 @@ describe("lodge records", () => {
     const stamps = [...page.querySelectorAll(".landed-card .catch-stamp")].map((p) => p.textContent);
     expect(stamps).toContain("Lodge record · was 12.3 lb (Mara) · 1.5× points");
     const pike = fishById("pike")!;
-    const points = catchPoints(pike, 13.1, false, LODGE_RECORD_BONUS * weeklyBonus(pike.id) * (isGolden("catch-big-pike") ? GOLDEN_BONUS : 1));
+    const points = catchPoints(pike, 13.1, false, LODGE_RECORD_BONUS * weeklyBonus(pike.id, localDate(new Date())) * (isGolden("catch-big-pike") ? GOLDEN_BONUS : 1));
     expect(page.querySelector(".landed-card")!.textContent).toContain(`+${points} pts`);
     expect(page.querySelector(".landed-card .guide-fish path")?.getAttribute("d")).toBe(pike.silhouette);
     expect(page.querySelector(".landed-card .guide-fish path")?.getAttribute("fill")).toBe(pike.color);
@@ -441,7 +441,7 @@ describe("days on the water", () => {
     });
     const stamps = [...page.querySelectorAll(".landed-card .catch-stamp")].map((p) => p.textContent);
     expect(stamps).toContain("First fish of day 3 in a row · 1.5× points");
-    const points = catchPoints(perch, 0.6, false, DAY_RUN_BONUS * weeklyBonus(perch.id) * (isGolden("catch-run") ? GOLDEN_BONUS : 1));
+    const points = catchPoints(perch, 0.6, false, DAY_RUN_BONUS * weeklyBonus(perch.id, localDate(new Date())) * (isGolden("catch-run") ? GOLDEN_BONUS : 1));
     expect(page.querySelector(".landed-card")!.textContent).toContain(`+${points} pts`);
   });
 });

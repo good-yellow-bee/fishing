@@ -26,14 +26,15 @@ function weekIndex(start: Date): number {
   return Math.floor((s - Math.floor(s)) * 1_000_000);
 }
 
-/** The fish of the week holding `at`, chosen when the board turns over on Monday 00:00 UTC. */
-export function weeklyFish(at: Date = new Date()): FishSpecies {
-  const start = weekStart(at);
+/** The fish of the week holding `at`: a Date by its UTC week, or an angler's local day (YYYY-MM-DD) by their own
+ * Monday-to-Sunday week, the week the catch bonus and the shack's weekly challenges both keep. */
+export function weeklyFish(at: Date | string = new Date()): FishSpecies {
+  const start = weekStart(typeof at === "string" ? new Date(`${at}T12:00:00.000Z`) : at);
   const pool = weeklyFishPool(seasonForWeek(start));
   return pool[weekIndex(start) % pool.length]!;
 }
 
-/** The bonus for a catch of `speciesId` landed at `at`: WEEKLY_FISH_BONUS for the fish of the week, else 1. */
-export function weeklyBonus(speciesId: string, at: Date = new Date()): number {
+/** The bonus for a catch of `speciesId` landed at `at` (a Date, or the catch's local day): WEEKLY_FISH_BONUS for the fish of the week, else 1. */
+export function weeklyBonus(speciesId: string, at: Date | string = new Date()): number {
   return weeklyFish(at).id === speciesId ? WEEKLY_FISH_BONUS : 1;
 }

@@ -1182,12 +1182,12 @@ export function DockPage() {
                   game.outcome.species,
                   game.outcome.weight,
                   game.outcome.clean,
-                  weeklyBonus(game.outcome.species.id) * (landedGolden ? GOLDEN_BONUS : 1) * cleanRunBonus(game.outcome.clean, game.outcome.notes?.cleanRun) * (lodgeTaken ? LODGE_RECORD_BONUS : stamp?.kind === "pb" ? PB_BONUS : 1) * (dayRun > 0 ? DAY_RUN_BONUS : 1) * masteryBonus(priorCaught),
+                  weeklyBonus(game.outcome.species.id, localDate(new Date())) * (landedGolden ? GOLDEN_BONUS : 1) * cleanRunBonus(game.outcome.clean, game.outcome.notes?.cleanRun) * (lodgeTaken ? LODGE_RECORD_BONUS : stamp?.kind === "pb" ? PB_BONUS : 1) * (dayRun > 0 ? DAY_RUN_BONUS : 1) * masteryBonus(priorCaught),
                 ),
               })}
             </p>
             {landedGolden && <p className="catch-stamp golden">{t("Golden fish · 2× points")}</p>}
-            {weeklyBonus(game.outcome.species.id) > 1 && <p className="catch-stamp">{t("Fish of the week · 1.5× points")}</p>}
+            {weeklyBonus(game.outcome.species.id, localDate(new Date())) > 1 && <p className="catch-stamp">{t("Fish of the week · 1.5× points")}</p>}
             {game.outcome.clean && (
               <p className="catch-stamp">
                 {(game.outcome.notes?.cleanRun ?? 0) >= CLEAN_RUN_FROM
