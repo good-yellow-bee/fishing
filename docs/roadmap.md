@@ -1862,7 +1862,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT408~~ | ~~News card 2026-10-20-game51 covers GT406 and GT407: the line on the reel and the stewards of the week~~ (#1598) | ui | S |
 | ~~GT409~~ | ~~The Board's derby, day's bag and stewards cards share one read and one ranked list (no change to what they show)~~ (#1601) | ui | S |
 | ~~GT410~~ | ~~Species studies: each landed kind in the field guide has three studies (land it at every bank it lives at, at three of the lake's four hours, and at trophy weight); finishing all three lets the angler claim 100 points once and marks it Studied; the server reads the studies from the angler's catches on its own call~~ (#1603) | gameplay | M |
-| ~~GT411~~ | ~~News card 2026-10-20-game52 covers GT410: species studies~~ (#PR) | ui | S |
+| ~~GT411~~ | ~~News card 2026-10-20-game52 covers GT410: species studies~~ (#1606) | ui | S |
 
 ## Risks / open questions for the owner
 
