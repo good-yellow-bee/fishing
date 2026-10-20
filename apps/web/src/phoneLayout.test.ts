@@ -351,3 +351,10 @@ describe("the cast meter on a short upright phone", () => {
     expect(/\n  \.scene-wrap \.power-meter \{([^}]*)\}/.exec(short)?.[1]).toContain("bottom: calc(104px / var(--text-zoom, 1));");
   });
 });
+
+describe("the bank chip on a small upright phone with larger text", () => {
+  it("stops at three rows, so the hint under it stays clear of the walk stick", () => {
+    const small = css.slice(css.indexOf("@media (max-width: 360px) and (min-height: 501px) and (max-height: 667px) {"));
+    expect(/\n  html\[data-text-size\] \.stance-chip \{([^}]*)\}/.exec(small)?.[1]).toContain("-webkit-line-clamp: 3;");
+  });
+});
