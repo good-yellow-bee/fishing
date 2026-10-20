@@ -169,6 +169,8 @@ export type Fight = {
   rising?: boolean;
   /** Hooked among the lantern's minnows at night, so it sees the net in the light and bolts from it once. */
   lantern?: boolean;
+  /** Hooked chasing the kingfisher's fry, so its first run doesn't tire it. */
+  fired?: boolean;
   /** A breezy or strong day, when the wind bellies a slack line. */
   windy?: FightWind;
   /** A catfish or sturgeon the angler's Strength lifts off the bottom in one pump. */
@@ -705,7 +707,9 @@ export function useFishingGame(
     const rising = (castBugRef.current || castMidgeRef.current) && !isTopwater(lureRef?.current) && season !== "winter";
     // One hooked among the lantern's minnows at night sees the net in the light, if it comes to the net at all.
     const lantern = castMinnowRef.current && netsFish(species, mercyRef.current);
-    const next = { species, weight, underpowered, water, windy, lightHook, pads, farRock, weedBall, edge, bed, foam, rising, lantern, strongLift: liftsStickerInOne(species.id, current.strength) };
+    // One hooked chasing the kingfisher's fry is fired up.
+    const fired = castFryRef.current;
+    const next = { species, weight, underpowered, water, windy, lightHook, pads, farRock, weedBall, edge, bed, foam, rising, lantern, fired, strongLift: liftsStickerInOne(species.id, current.strength) };
     fightRef.current = next;
     setFight(next);
     setPhaseBoth("fight");
@@ -718,7 +722,7 @@ export function useFishingGame(
         resetToIdle(current.strength < species.minStrength ? t("Line parted. Spend points on Strength.") : t("Line parted. Spend points on Accuracy."));
       }, 1400);
     } else {
-      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)) * seasonTireMul(season, species.id) * warmTireMul(season, species.id, sky, spotRef.current) * runTireMul(season, species.id) * nestTireMul(season, species.id, spotRef.current) * nightTireMul(hourRef.current, species.id) * spentTireMul(season, species.id) * twilightTireMul(hourRef.current, species.id) * springRunTireMul(season, species.id, spotRef.current) * currentTireMul(species.id, spotRef.current) * fallFeedTireMul(season, species.id) * rainHunterTireMul(sky, species.id) * summerStrengthTireMul(season, species.id), water, windy, isTopwater(lureRef?.current) || rising, hasTrebles(lureRef?.current) || deep, seasonTireMul(season, species.id) > 1, isTrophyWeight(species, weight), floodedInlet(spotRef.current, season, sky), frayedRef.current, deep, lineSnapForLevel(anglerLevel(current.lifetimePoints)), turnCutMulForLevel(anglerLevel(current.lifetimePoints)), netsFish(species, mercyRef.current), { farRock, weedBall, edge, bed, foam, lantern });
+      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)) * seasonTireMul(season, species.id) * warmTireMul(season, species.id, sky, spotRef.current) * runTireMul(season, species.id) * nestTireMul(season, species.id, spotRef.current) * nightTireMul(hourRef.current, species.id) * spentTireMul(season, species.id) * twilightTireMul(hourRef.current, species.id) * springRunTireMul(season, species.id, spotRef.current) * currentTireMul(species.id, spotRef.current) * fallFeedTireMul(season, species.id) * rainHunterTireMul(sky, species.id) * summerStrengthTireMul(season, species.id), water, windy, isTopwater(lureRef?.current) || rising, hasTrebles(lureRef?.current) || deep, seasonTireMul(season, species.id) > 1, isTrophyWeight(species, weight), floodedInlet(spotRef.current, season, sky), frayedRef.current, deep, lineSnapForLevel(anglerLevel(current.lifetimePoints)), turnCutMulForLevel(anglerLevel(current.lifetimePoints)), netsFish(species, mercyRef.current), { farRock, weedBall, edge, bed, foam, lantern, fired });
       runtimeRef.current = runtime;
       simRef.current = runtime.sim;
       performanceRef.current = runtime.performance;
@@ -1657,6 +1661,7 @@ export function useFishingGame(
             castBugRef.current = false;
             castMidgeRef.current = false;
             castMinnowRef.current = false;
+            castFryRef.current = false;
             beginFight(taken.species, taken.weight, grab.profile);
             // The pike is where the shiner was, not back at the far end of the line.
             if (runtimeRef.current) runtimeRef.current.sim.line = sim.line;

@@ -1840,7 +1840,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT397~~ | ~~News card 2026-10-20-game48 covers GT394 to GT396: the rock edge's ledge, egg raiders bolt and the foam lane's drift~~ (#1572) | ui | S |
 | ~~GT398~~ | ~~Risers leap first: a jumper hooked rising to the hatching bugs or midges is already at the top, so its first run is a leap, as off a popper (not in winter, when jumpers stay down); the fight card says so~~ (#1575) | gameplay | S |
 | ~~GT399~~ | ~~Lantern-lit net: at night a fish hooked on a minnow lure among the dock lantern's minnows sees the net in the light and bolts from it once, as a carp does; the fight card says so~~ (#1578) | gameplay | S |
-| GT400 | Fired up on fry: a fish hooked chasing the kingfisher's fry is fired up, so its first run doesn't tire it at all; the fight card says so | gameplay | S |
+| ~~GT400~~ | ~~Fired up on fry: a fish hooked chasing the kingfisher's fry is fired up, so its first run doesn't tire it at all; the fight card says so~~ (#1579) | gameplay | S |
 | GT401 | News card game49 covers GT398 to GT400 | ui | S |
 
 ## Risks / open questions for the owner

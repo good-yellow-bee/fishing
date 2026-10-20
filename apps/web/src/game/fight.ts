@@ -475,9 +475,9 @@ export function fightWind(wind: string | undefined): FightWind | undefined {
  * along the point's rock edge (runs dive off the ledge as at the drop-off, clear of the shallow rocks), `bed` over the
  * sunfish beds (an egg raider bolts from the guarding sunfish, so its first run is the long one), `foam` in a wind's
  * foam lane (a slack line drifts out faster still), `lantern` in the dock lantern's light at night (it sees the net and
- * bolts from it once, as a carp does).
+ * bolts from it once, as a carp does), `fired` chasing the kingfisher's fry (fired up, its first run doesn't tire it).
  */
-export type FightCover = { farRock?: boolean; weedBall?: boolean; edge?: boolean; bed?: boolean; foam?: boolean; lantern?: boolean };
+export type FightCover = { farRock?: boolean; weedBall?: boolean; edge?: boolean; bed?: boolean; foam?: boolean; lantern?: boolean; fired?: boolean };
 /** In a foam lane on a breezy or strong day the wind's drift is at its strongest: a slack line drifts out this much faster still. */
 export const FOAM_DRIFT = 1.3;
 export type FightWater = "open" | "weeds" | "current" | "deep" | "rocks" | "boat" | "pilings" | "log";
@@ -600,7 +600,7 @@ export function makeFight(
   /** What the fish was hooked by, on top of the spot's water. */
   cover: FightCover = {},
 ): FightRuntime {
-  const { farRock = false, weedBall = false, edge = false, bed = false, foam = false, lantern = false } = cover;
+  const { farRock = false, weedBall = false, edge = false, bed = false, foam = false, lantern = false, fired = false } = cover;
   const weedy = water === "weeds";
   // Hooked along the rock edge, past the shallow rocks, the fish dives off the ledge rather than dragging the line over them.
   const rockWater = (water === "rocks" && !edge) || farRock;
@@ -916,7 +916,9 @@ export function makeFight(
     }
     if (nowMs < graceUntil) sim.tension = Math.min(sim.tension, GRACE_TENSION);
     // Bigger fish have more fight in them.
-    const tire = sim.weeded ? -REST : sim.surge === 2 ? TIRE_RUN * (deepRuns ? DEEP_TIRE : 1) * (charging ? CHARGE_TIRE : 1) + (sim.turning ? TIRE_TURN : 0) : reeling ? TIRE_REEL : -REST;
+    // Fired up on the fry, a fish's first run costs it nothing.
+    const firedRun = fired && completedSurges === 0 && sim.surge === 2;
+    const tire = sim.weeded ? -REST : firedRun ? 0 : sim.surge === 2 ? TIRE_RUN * (deepRuns ? DEEP_TIRE : 1) * (charging ? CHARGE_TIRE : 1) + (sim.turning ? TIRE_TURN : 0) : reeling ? TIRE_REEL : -REST;
     sim.stamina = Math.min(1, Math.max(0, sim.stamina - (tire > 0 ? tire * tireMul * tireHabit : tire) * dtSec));
     sim.line = Math.min(1.3, Math.max(0, sim.line));
     performance.peakTension = Math.max(performance.peakTension, sim.tension);
