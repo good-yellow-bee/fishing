@@ -19,6 +19,9 @@ import {
   badgeById,
   lodgeStamp,
   type SpeciesRecord,
+  type LodgeRelease,
+  TAG_FINDER_BONUS,
+  TAG_RETURN_BONUS,
   LAKE_HOUR_BLURB,
   lakeHour,
   lakeHourFromSearch,
@@ -62,7 +65,7 @@ import {
   type SkillId,
   type StanceId,
 } from "@stillwater/shared";
-import { buyGroundbait, buyShiner, buyUpgrade, errorText, getMe, getSpeciesRecords, getWeeklyChallenges, releaseCatch, type Me, type WeeklyBoard } from "../api";
+import { buyGroundbait, buyShiner, buyUpgrade, errorText, getLodgeReleased, getMe, getSpeciesRecords, getWeeklyChallenges, releaseCatch, type Me, type WeeklyBoard } from "../api";
 import { DailyRequestsPanel } from "../components/DailyRequestsPanel";
 import { WeeklyChallengesPanel } from "../components/WeeklyChallengesPanel";
 import { FightBar } from "../components/FightBar";
@@ -240,7 +243,20 @@ export function DockPage() {
   }, [angler, latestCatch]);
   // A hunt only holds for its own week, even in a tab left open past Sunday midnight.
   const legend = hunt && hunt.week === weekOf(localDate(new Date())) && hunt.rumor.clues.every(Boolean) ? { legendId: hunt.rumor.legendId, spot: hunt.rumor.spot } : null;
-  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind, legend);
+  // Other anglers' let-go fish, read once a visit, for a cast to find.
+  const [lodgeReleased, setLodgeReleased] = useState<LodgeRelease[]>([]);
+  useEffect(() => {
+    if (!angler) return;
+    let live = true;
+    getLodgeReleased()
+      .then((rows) => live && setLodgeReleased(rows))
+      // Without the list the lake simply holds no tagged fish this visit.
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [angler]);
+  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind, legend, lodgeReleased);
   // The cast's left-out reasons, opened from its hint; each cast's list starts closed.
   const [reasonsOpenFor, setReasonsOpenFor] = useState<readonly string[] | null>(null);
   const reasonsOpen = reasonsOpenFor === game.moreReasons;
@@ -458,7 +474,7 @@ export function DockPage() {
   const retryServerSave = () => {
     const outcome = game.outcome;
     if (outcome?.kind === "landed" && posted.current !== outcome.id) {
-      void saveOutcome(outcome.id, { requestId: outcome.id, speciesId: outcome.species.id, weight: outcome.weight, spot: outcome.spot, clean: outcome.clean, cleanRun: outcome.notes?.cleanRun, hour, sky, season, day: landedDay.current });
+      void saveOutcome(outcome.id, { requestId: outcome.id, speciesId: outcome.species.id, weight: outcome.weight, spot: outcome.spot, clean: outcome.clean, cleanRun: outcome.notes?.cleanRun, hour, sky, season, day: landedDay.current, taggedFrom: outcome.tag?.id });
       return;
     }
     void catchSync.sync();
@@ -713,12 +729,12 @@ export function DockPage() {
       setReleaseError(false);
       return;
     }
-    const { id, species, weight, spot: catchSpot, clean, notes } = game.outcome;
+    const { id, species, weight, spot: catchSpot, clean, notes, tag } = game.outcome;
     if (posted.current === id) return;
     landedDay.current = localDate(new Date());
     saveFieldLog();
     if (!userId) return;
-    void saveOutcome(id, { requestId: id, speciesId: species.id, weight, spot: catchSpot, clean, cleanRun: notes?.cleanRun, hour, sky, season, day: landedDay.current });
+    void saveOutcome(id, { requestId: id, speciesId: species.id, weight, spot: catchSpot, clean, cleanRun: notes?.cleanRun, hour, sky, season, day: landedDay.current, taggedFrom: tag?.id });
   }, [game.outcome, saveFieldLog, saveOutcome, userId, hour, sky, season]);
 
   useEffect(() => {
@@ -1222,10 +1238,11 @@ export function DockPage() {
                   game.outcome.weight,
                   game.outcome.clean,
                   weeklyBonus(game.outcome.species.id, landedDay.current) * (landedGolden ? GOLDEN_BONUS : 1) * cleanRunBonus(game.outcome.clean, game.outcome.notes?.cleanRun) * (lodgeTaken ? LODGE_RECORD_BONUS : stamp?.kind === "pb" ? PB_BONUS : 1) * (dayRun > 0 ? DAY_RUN_BONUS : 1) * masteryBonus(priorCaught),
-                ),
+                ) + (game.outcome.tag ? TAG_FINDER_BONUS : 0),
               })}
             </p>
             {landedGolden && <p className="catch-stamp golden">{t("Golden fish · 2× points")}</p>}
+            {game.outcome.tag && <p className="catch-stamp">{t("Tagged by {name} · +{points} pts, and {back} for them", { name: game.outcome.tag.by, points: TAG_FINDER_BONUS, back: TAG_RETURN_BONUS })}</p>}
             {weeklyBonus(game.outcome.species.id, landedDay.current) > 1 && <p className="catch-stamp">{t("Fish of the week · 1.5× points")}</p>}
             {game.outcome.clean && (
               <p className="catch-stamp">
