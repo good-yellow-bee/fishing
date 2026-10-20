@@ -1045,6 +1045,7 @@ export function DockPage() {
           schooled={game.schooled}
           lurking={game.lurking}
           lurkerCloseInMs={game.lurkerCloseInMs}
+          follow={game.follow}
           topwater={isTopwater(lure)}
           hour={hour}
           sky={sky}
