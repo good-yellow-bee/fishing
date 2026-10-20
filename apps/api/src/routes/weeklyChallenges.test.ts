@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Hono } from "hono";
-import { fishById, trophyWeight, weekDays, weekFishFor, weeklyChallengesFor, type WeeklyChallenge } from "@stillwater/shared";
+import { fishById, rumorFor, trophyWeight, weekDays, weekFishFor, weeklyChallengesFor, type WeeklyChallenge } from "@stillwater/shared";
 import type { SessionUser } from "../session.ts";
 
 const testDir = mkdtempSync(join(tmpdir(), "stillwater-weekly-"));
@@ -76,6 +76,8 @@ describe("weekly challenges", () => {
     expect(body.weekFish).toBe(weekFishFor(week).id);
     expect(body.challenges.map((row) => row.id)).toEqual(weeklyChallengesFor(week).map((row) => row.id));
     expect(body.challenges.find((row) => row.id === trophy.id)).toMatchObject({ progress: 1, claimed: false });
+    // The trophy is also the hunt's third clue; the rumor is the week's own.
+    expect((body as unknown as { rumor: { legendId: string; clues: boolean[] } }).rumor).toMatchObject({ ...rumorFor(week), clues: [expect.any(Boolean), expect.any(Boolean), true] });
   });
 
   it("pays a finished goal once and refuses an unfinished one", async () => {

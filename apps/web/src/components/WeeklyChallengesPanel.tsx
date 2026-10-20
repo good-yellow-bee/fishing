@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { localDate } from "@stillwater/shared";
+import { fishById, LAKE_HOUR_LABELS, localDate, SPOT_LABELS } from "@stillwater/shared";
 import { ApiError, claimWeeklyChallenge, errorText, getWeeklyChallenges, type WeeklyBoard } from "../api";
 import { t, useT } from "../i18n";
 import { weeklyChallengeText } from "../i18n/content";
@@ -94,11 +94,41 @@ export function WeeklyChallengesPanel({ catchKey, onClaimed }: Props) {
         !error && <p className="daily-requests-note">{t("Reading the board…")}</p>
       )}
       {board && <p className="daily-requests-note">{t("Goals run Monday to Sunday.")}</p>}
+      {board && <LegendRumor rumor={board.rumor} />}
       {error && (
         <p className="warn" role="alert">
           {error}
         </p>
       )}
     </section>
+  );
+}
+
+/** The week's rumor of a legend and the three clues that draw it to its bank. */
+function LegendRumor({ rumor }: { rumor: WeeklyBoard["rumor"] }) {
+  const legend = t(fishById(rumor.legendId)!.name);
+  const bank = t(SPOT_LABELS[rumor.spot]);
+  const clues = [
+    t("A {fish} at the {bank}", { fish: t(fishById(rumor.preyId)!.name).toLowerCase(), bank }),
+    t("A fish at the {bank} at {hour}", { bank, hour: t(LAKE_HOUR_LABELS[rumor.hour]).toLowerCase() }),
+    t("A trophy of any kind"),
+  ];
+  return (
+    <div className="legend-rumor">
+      <p className="daily-requests-note">{t("Rumor: a {legend} haunts the {bank}. Find three clues this week to draw it out.", { legend, bank })}</p>
+      <ul>
+        {clues.map((clue, i) => (
+          <li key={clue} data-claimed={rumor.clues[i] ? "1" : "0"}>
+            <span className="daily-request-label">{clue}</span>
+            <span className="daily-request-progress" data-done={rumor.clues[i] ? "1" : "0"}>
+              {rumor.clues[i] ? t("Found") : t("Not yet")}
+            </span>
+          </li>
+        ))}
+      </ul>
+      {rumor.clues.every(Boolean) && (
+        <p className="daily-requests-note">{t("All three found: the {legend} bites three times as often at the {bank} for the rest of the week.", { legend, bank })}</p>
+      )}
+    </div>
   );
 }

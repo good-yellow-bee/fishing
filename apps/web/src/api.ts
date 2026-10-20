@@ -1,5 +1,6 @@
 import {
   localDate,
+  type Rumor,
   type WeeklyChallenge,
   type BoardView,
   type BadgeProgress,
@@ -34,7 +35,7 @@ export type DailyRequestRow = DailyRequest & { progress: number; claimed: boolea
 
 export type DailyBoard = { day: string; requests: DailyRequestRow[] };
 export type WeeklyChallengeRow = WeeklyChallenge & { progress: number; claimed: boolean };
-export type WeeklyBoard = { week: string; weekFish: string; challenges: WeeklyChallengeRow[] };
+export type WeeklyBoard = { week: string; weekFish: string; challenges: WeeklyChallengeRow[]; rumor: Rumor & { clues: [boolean, boolean, boolean] } };
 
 export class ApiError extends Error {
   readonly status: number;

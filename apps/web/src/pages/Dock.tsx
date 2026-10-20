@@ -57,7 +57,7 @@ import {
   type SkillId,
   type StanceId,
 } from "@stillwater/shared";
-import { buyGroundbait, buyShiner, buyUpgrade, errorText, getMe, getSpeciesRecords, releaseCatch, type Me } from "../api";
+import { buyGroundbait, buyShiner, buyUpgrade, errorText, getMe, getSpeciesRecords, getWeeklyChallenges, releaseCatch, type Me, type WeeklyBoard } from "../api";
 import { DailyRequestsPanel } from "../components/DailyRequestsPanel";
 import { WeeklyChallengesPanel } from "../components/WeeklyChallengesPanel";
 import { FightBar } from "../components/FightBar";
@@ -217,7 +217,22 @@ export function DockPage() {
   const tiedLure = useRef(chosenLure);
   const caughtTotal = me?.speciesStats.reduce((sum, stat) => sum + stat.caught, 0) ?? 0;
   const mercy = isMercy(caughtTotal);
-  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind);
+  // The week's legend hunt, read with the weekly challenges; a solved one draws its legend to its bank.
+  const [hunt, setHunt] = useState<WeeklyBoard["rumor"] | null>(null);
+  const latestCatch = me?.catches[0]?.id;
+  const angler = me?.profile.userId;
+  useEffect(() => {
+    if (!angler) return;
+    let live = true;
+    getWeeklyChallenges()
+      .then((board) => live && setHunt(board.rumor))
+      .catch(() => live && setHunt(null));
+    return () => {
+      live = false;
+    };
+  }, [angler, latestCatch]);
+  const legend = useMemo(() => (hunt && hunt.clues.every(Boolean) ? { legendId: hunt.legendId, spot: hunt.spot } : null), [hunt]);
+  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind, legend);
   // The cast's left-out reasons, opened from its hint; each cast's list starts closed.
   const [reasonsOpenFor, setReasonsOpenFor] = useState<readonly string[] | null>(null);
   const reasonsOpen = reasonsOpenFor === game.moreReasons;
