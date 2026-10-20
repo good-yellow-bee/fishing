@@ -203,7 +203,7 @@ export function lostTrophy(species: FishSpecies, weight: number) {
 export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; lightHook?: boolean; turnedRuns: number; cleanRun?: number; closeCall?: boolean; fightSec?: number; bowedLeaps?: number; easedShakes?: number; followedDarts?: number; encore?: boolean; secondWind?: boolean; secondTake?: boolean; grabbed?: string; gotAway?: boolean; followedIn?: boolean; recaught?: boolean; clearOf?: "weeds" | "rocks" | "pilings" | "log" | "current" };
 
 export type Outcome =
-  | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes; note?: string; tag?: { id: string; by: string }; giant?: string; hour?: LakeHour; lure?: string; lostFrom?: { id: string; by: string }; closesLost?: string }
+  | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes; note?: string; tag?: { id: string; by: string }; giant?: string; giantBonus?: number; hour?: LakeHour; lure?: string; lostFrom?: { id: string; by: string }; closesLost?: string }
   | { kind: "broke"; message: string }
   | { kind: "miss"; message: string; fish?: { species: FishSpecies; weight: number } }
   | { kind: "error"; message: string };
@@ -386,8 +386,8 @@ export function useFishingGame(
   luckyLures: ReadonlySet<string> = new Set(),
   /** Banks the angler has fished down this week: their fish come smaller till they rest. */
   fishedDownBanks: ReadonlySet<SpotId> = new Set(),
-  /** The week's giants no one has landed yet, one per bank. */
-  openGiants: readonly Giant[] = [],
+  /** The week's giants no one has landed yet, one per bank, with what landing each pays when the lodge says. */
+  openGiants: readonly (Giant & { bonus?: number })[] = [],
   /** Other anglers' lost trophies still about their banks. */
   lodgeLost: readonly LodgeLost[] = [],
 ) {
@@ -1236,7 +1236,7 @@ export function useFishingGame(
     const bankGiant = !lost.again && !mercyNow && !released?.fish && !tagged ? openGiantsRef.current.find((one) => one.spot === spotRef.current) : undefined;
     const giant = bankGiant && !lureShy(bankGiant.name) ? bankGiant : undefined;
     const giantKind = giant ? FISH.find((fish) => fish.id === giant.speciesId) : undefined;
-    const giantUp = giant && giantKind && canLand(current, giantKind) && Math.random() < GIANT_ODDS ? { species: giantKind, weight: giant.weight, was: giant.weight, at: Date.now(), giant: giant.name } : null;
+    const giantUp = giant && giantKind && canLand(current, giantKind) && Math.random() < GIANT_ODDS ? { species: giantKind, weight: giant.weight, was: giant.weight, at: Date.now(), giant: giant.name, ...(giant.bonus ? { giantBonus: giant.bonus } : {}) } : null;
     // Failing all those, the trophy that broke off here on an earlier day may be back.
     const storedFoe = loadOldFoe(current.userId);
     if (storedFoe && foeGone(storedFoe, Date.now())) saveOldFoe(current.userId, null);
@@ -2059,7 +2059,7 @@ export function useFishingGame(
               clean,
               ...(landedNote ? { note: landedNote } : {}),
               ...(recaught?.tag ? { tag: recaught.tag } : {}),
-              ...(recaught?.giant ? { giant: recaught.giant } : {}),
+              ...(recaught?.giant ? { giant: recaught.giant, ...(recaught.giantBonus ? { giantBonus: recaught.giantBonus } : {}) } : {}),
               ...(recaught?.lost ? { lostFrom: { id: recaught.lost.id, by: recaught.lost.by } } : {}),
               ...(closesLost ? { closesLost } : {}),
               ...(lureRef?.current ? { lure: lureRef.current } : {}),

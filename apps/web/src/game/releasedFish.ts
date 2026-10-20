@@ -16,7 +16,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 export type ReleasedFish = { species: string; weight: number; spot: SpotId; at: number; lure?: string };
 
 /** A let-go fish come back to the line, grown since; one another angler let go carries their name and its catch's id as a tag. */
-export type Recaught = { species: FishSpecies; weight: number; was: number; at: number; tag?: { id: string; by: string }; giant?: string; foe?: { lure?: string }; lost?: { id: string; by: string } };
+export type Recaught = { species: FishSpecies; weight: number; was: number; at: number; tag?: { id: string; by: string }; giant?: string; giantBonus?: number; foe?: { lure?: string }; lost?: { id: string; by: string } };
 
 const dayOf = (ms: number) => new Date(ms).toDateString();
 

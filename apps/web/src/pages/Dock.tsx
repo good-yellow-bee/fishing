@@ -309,7 +309,9 @@ export function DockPage() {
     () => new Set((Object.keys({ ...bankWeek, ...keptHere }) as SpotId[]).filter((bank) => fishedDown((bankWeek[bank] ?? 0) + (keptHere[bank] ?? 0)))),
     [bankWeek, keptHere],
   );
-  // The week's giants, read when the visit opens and again after each saved catch, so one landed by anyone leaves the lake.
+  // The week's giants, read when the visit opens, again after each saved catch, so one landed by anyone leaves the lake,
+  // and after the angler lets one go, so it shows out again.
+  const [giantLetGo, setGiantLetGo] = useState(0);
   const [giants, setGiants] = useState<GiantStatus[]>([]);
   useEffect(() => {
     if (!angler) return;
@@ -321,7 +323,7 @@ export function DockPage() {
     return () => {
       live = false;
     };
-  }, [angler, latestCatch]);
+  }, [angler, latestCatch, giantLetGo]);
   const openGiants = useMemo(() => giants.filter((giant) => !giant.landedBy), [giants]);
   // Other anglers' lost trophies, read like the giants; one of the angler's own that someone landed is no foe of theirs any more.
   const [lodgeLost, setLodgeLost] = useState<LodgeLost[]>([]);
@@ -794,6 +796,7 @@ export function DockPage() {
       const { bonus } = await releaseCatch(outcome.id);
       setPaidReleaseBonus(bonus);
       setReleasedId(outcome.id);
+      if (outcome.giant) setGiantLetGo((count) => count + 1);
       // The lake remembers the fish, so it may bite again at this bank another day, a little heavier.
       rememberReleased(outcome.species, outcome.weight, outcome.spot, Date.now(), outcome.lure);
       // Let go, it went back to its bank, so the bank's week no longer counts it.
@@ -1438,11 +1441,11 @@ export function DockPage() {
                   game.outcome.weight,
                   game.outcome.clean,
                   weeklyBonus(game.outcome.species.id, landedDay.current) * (landedGolden ? GOLDEN_BONUS : 1) * cleanRunBonus(game.outcome.clean, game.outcome.notes?.cleanRun) * (lodgeTaken ? LODGE_RECORD_BONUS : stamp?.kind === "pb" ? PB_BONUS : 1) * (dayRun > 0 ? DAY_RUN_BONUS : 1) * masteryBonus(priorCaught),
-                ) + (game.outcome.tag ? TAG_FINDER_BONUS : 0) + (game.outcome.giant ? GIANT_BONUS : 0) + (game.outcome.lostFrom ? LOST_FINDER_BONUS : 0),
+                ) + (game.outcome.tag ? TAG_FINDER_BONUS : 0) + (game.outcome.giant ? (game.outcome.giantBonus ?? GIANT_BONUS) : 0) + (game.outcome.lostFrom ? LOST_FINDER_BONUS : 0),
               })}
             </p>
             {landedGolden && paid("golden", true) && <p className="catch-stamp golden">{t("Golden fish · 2× points")}</p>}
-            {game.outcome.giant && paid("giant", true) && <p className="catch-stamp golden">{t("{name}, the bank's giant · +{points} pts", { name: t(game.outcome.giant), points: GIANT_BONUS })}</p>}
+            {game.outcome.giant && paid("giant", true) && <p className="catch-stamp golden">{t("{name}, the bank's giant · +{points} pts", { name: t(game.outcome.giant), points: game.outcome.giantBonus ?? GIANT_BONUS })}</p>}
             {game.outcome.lostFrom && paid("found", true) && <p className="catch-stamp">{t("{name}'s lost trophy · +{points} pts", { name: game.outcome.lostFrom.by, points: LOST_FINDER_BONUS })}</p>}
             {game.outcome.tag && paid("tag", true) && <p className="catch-stamp">{t("Tagged by {name} · +{points} pts, and {back} for them", { name: game.outcome.tag.by, points: TAG_FINDER_BONUS, back: TAG_RETURN_BONUS })}</p>}
             {paid("weekly", weeklyBonus(game.outcome.species.id, landedDay.current) > 1) && <p className="catch-stamp">{t("Fish of the week · 1.5× points")}</p>}
@@ -1524,6 +1527,7 @@ export function DockPage() {
                         : t("Released back into the lake")}
                   {/* A fish the lake remembers shies from the lure it was caught on. */}
                   {game.outcome.lure && remembersReleased(game.outcome.species) && ` · ${t("it will shy from the {lure} now", { lure: t(game.outcome.lure) })}`}
+                  {game.outcome.giant && ` · ${t("{name} is out again for the week", { name: t(game.outcome.giant) })}`}
                 </p>
               ) : (
                 <button className="panel-btn" type="button" onClick={() => void releaseFish()} aria-disabled={releasing || undefined}>

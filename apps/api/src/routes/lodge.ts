@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { BANK_STOCK_DAYS, fishById, giantsForWeek, giantWeek, lostSince, reportsLost, SPOT_IDS, tagWindow, TRACK_LIMIT, TRACK_WINDOW_MS, type LodgeTrack } from "@stillwater/shared";
+import { BANK_STOCK_DAYS, fishById, GIANT_AGAIN_BONUS, GIANT_BONUS, giantsForWeek, giantWeek, lostSince, reportsLost, SPOT_IDS, tagWindow, TRACK_LIMIT, TRACK_WINDOW_MS, type LodgeTrack } from "@stillwater/shared";
 import { countReportedLost, ownsLost, listBankCounts, listGiantsLanded, listLodgeLost, listLodgeReleases, listMineFound, listRecentLodgeCatches, reportLost } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 import { requestIdPattern } from "./catches.ts";
@@ -47,7 +47,15 @@ lodgeRoutes.get("/lodge/giants", (c) => {
   return c.json({
     giants: giantsForWeek().map((giant) => {
       const by = landed.get(giant.spot);
-      return { ...giant, landedBy: by?.displayName ?? null, landedAt: by?.landedAt ?? null };
+      // Let go by its first angler and not landed since, it is out again, for half the bonus.
+      const out = !by || (by.released === 1 && !by.againName);
+      return {
+        ...giant,
+        landedBy: out ? null : (by.againName ?? by.displayName),
+        landedAt: out ? null : (by.againAt ?? by.landedAt),
+        letGoBy: by && by.released === 1 ? by.displayName : null,
+        bonus: by ? GIANT_AGAIN_BONUS : GIANT_BONUS,
+      };
     }),
   });
 });

@@ -3,7 +3,7 @@ import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Database from "better-sqlite3";
-import { BAG_SIZE, SLAMS, fishById, TAG_RETURN_BONUS, TAGGABLE_IDS, isLakeHour, lakeSeason, releaseBonus, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type BonusId, type LodgeLost, type LostFound, type LodgeRelease, type LodgeTrack, type StudyFact, type TagReturn, type SpeciesRecord, type SpotId } from "@stillwater/shared";
+import { BAG_SIZE, SLAMS, fishById, TAG_RETURN_BONUS, TAGGABLE_IDS, isLakeHour, lakeSeason, releaseBonus, giantWeek, GIANT_BONUS, GIANT_AGAIN_BONUS, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type BonusId, type LodgeLost, type LostFound, type LodgeRelease, type LodgeTrack, type StudyFact, type TagReturn, type SpeciesRecord, type SpotId } from "@stillwater/shared";
 
 const dir = dirname(fileURLToPath(import.meta.url));
 export const dataDir = join(dir, "../data");
@@ -178,6 +178,13 @@ if (!catchColumns.some((column) => column.name === "bonuses")) {
   db.exec(`ALTER TABLE catch ADD COLUMN bonuses TEXT`);
 }
 // When the angler let the fish go; older releases have only their catch's time.
+// A giant its first angler let go is out again for the week, once: who landed it after, and when.
+const giantColumns = db.prepare(`PRAGMA table_info(giant_landed)`).all() as { name: string }[];
+if (!giantColumns.some((column) => column.name === "released_at")) {
+  db.exec(`ALTER TABLE giant_landed ADD COLUMN released_at TEXT`);
+  db.exec(`ALTER TABLE giant_landed ADD COLUMN again_user_id TEXT`);
+  db.exec(`ALTER TABLE giant_landed ADD COLUMN again_at TEXT`);
+}
 if (!catchColumns.some((column) => column.name === "released_at")) {
   db.exec(`ALTER TABLE catch ADD COLUMN released_at TEXT`);
   db.exec(`UPDATE catch SET released_at = created_at WHERE released = 1`);
@@ -340,13 +347,24 @@ export function claimGiant(week: string, spot: string, userId: string): boolean 
   return db.prepare(`INSERT OR IGNORE INTO giant_landed (week, spot, user_id, landed_at) VALUES (?, ?, ?, ?)`).run(week, spot, userId, new Date().toISOString()).changes === 1;
 }
 
-/** Claims the giant and pays its bonus together, or neither; false when someone landed it first. */
-export function claimAndPayGiant(week: string, spot: string, userId: string, catchId: string, bonus: number): boolean {
+/** Claims the giant and pays its bonus together, or neither: GIANT_BONUS to the first to land it, GIANT_AGAIN_BONUS to the next after its first angler let it go; 0 when it was not out. */
+export function claimAndPayGiant(week: string, spot: string, userId: string, catchId: string): number {
   return db.transaction(() => {
-    if (!claimGiant(week, spot, userId)) return false;
-    payBonus(catchId, userId, bonus, "giant");
-    return true;
+    const bonus = claimGiant(week, spot, userId)
+      ? GIANT_BONUS
+      : db
+            .prepare(`UPDATE giant_landed SET again_user_id = ?, again_at = ? WHERE week = ? AND spot = ? AND released_at IS NOT NULL AND again_user_id IS NULL AND user_id != ?`)
+            .run(userId, new Date().toISOString(), week, spot, userId).changes === 1
+        ? GIANT_AGAIN_BONUS
+        : 0;
+    if (bonus) payBonus(catchId, userId, bonus, "giant");
+    return bonus;
   })();
+}
+
+/** Lets a landed giant go back for the rest of its week, once, so the next angler may land it. */
+export function releaseGiant(week: string, spot: string, userId: string) {
+  db.prepare(`UPDATE giant_landed SET released_at = ? WHERE week = ? AND spot = ? AND user_id = ? AND released_at IS NULL`).run(new Date().toISOString(), week, spot, userId);
 }
 
 /** Pays a saved catch a bonus it won after saving, on the catch (with its id in bonuses) and the angler's points. */
@@ -410,14 +428,17 @@ export function claimAndPayLost(lostId: string, fish: { speciesId: string; weigh
 
 /** How many of the weekly giants the angler was first to land. */
 export function countGiantsLanded(userId: string): number {
-  return (db.prepare(`SELECT COUNT(*) as n FROM giant_landed WHERE user_id = ?`).get(userId) as { n: number }).n;
+  return (db.prepare(`SELECT COUNT(*) as n FROM giant_landed WHERE user_id = ? OR again_user_id = ?`).get(userId, userId) as { n: number }).n;
 }
 
-/** Who landed each of a week's giants, and when. */
-export function listGiantsLanded(week: string): { spot: string; displayName: string; landedAt: string }[] {
+/** Who landed each of a week's giants and when, whether they let it go, and who landed it again after. */
+export function listGiantsLanded(week: string): { spot: string; displayName: string; landedAt: string; released: 0 | 1; againName: string | null; againAt: string | null }[] {
   return db
-    .prepare(`SELECT g.spot, p.display_name as displayName, g.landed_at as landedAt FROM giant_landed g JOIN profile p ON p.user_id = g.user_id WHERE g.week = ?`)
-    .all(week) as { spot: string; displayName: string; landedAt: string }[];
+    .prepare(
+      `SELECT g.spot, p.display_name as displayName, g.landed_at as landedAt, g.released_at IS NOT NULL as released, a.display_name as againName, g.again_at as againAt
+       FROM giant_landed g JOIN profile p ON p.user_id = g.user_id LEFT JOIN profile a ON a.user_id = g.again_user_id WHERE g.week = ?`,
+    )
+    .all(week) as { spot: string; displayName: string; landedAt: string; released: 0 | 1; againName: string | null; againAt: string | null }[];
 }
 
 /** The kinds whose studies the angler has been paid for. */
@@ -640,6 +661,8 @@ export function releaseCatch(userId: string, requestId: string): { row: CatchRow
     const species = fishById(row.species_id);
     // The season is the server's own, from when the catch was saved, not the one the client sent.
     const bonus = change.changes === 1 && species ? releaseBonus(species, row.weight, row.spot, lakeSeason(new Date(row.created_at))) : 0;
+    // A giant let go goes back to its bank for the rest of its week.
+    if (change.changes === 1 && (row.bonuses ?? "").split(",").includes("giant")) releaseGiant(giantWeek(new Date(row.created_at)), row.spot, userId);
     if (bonus) {
       db.prepare(`UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`).run(bonus, bonus, userId);
     }

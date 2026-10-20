@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { Hono } from "hono";
-import { daysBetween, fishById, giantAt, GIANT_BONUS, giantWeek, lostSince, LOST_FINDER_BONUS, isGolden, isTaggable, isLakeHour, isLakeSeason, isLocalDay, isSky, TAG_FINDER_BONUS, tagWindow, taggedWeightFits, validateCatch, SPOT_IDS, type CatchSubmission } from "@stillwater/shared";
+import { daysBetween, fishById, giantAt, giantWeek, lostSince, LOST_FINDER_BONUS, isGolden, isTaggable, isLakeHour, isLakeSeason, isLocalDay, isSky, TAG_FINDER_BONUS, tagWindow, taggedWeightFits, validateCatch, SPOT_IDS, type CatchSubmission } from "@stillwater/shared";
 import { claimAndPayGiant, claimAndPayLost, countCatches, findCatchByRequestId, findLodgeRelease, getProfile, heaviestCatch, listCatchDays, othersHeaviestCatch, recordCatch, releaseCatch, toProfile, type CatchRow } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
@@ -92,12 +92,12 @@ catchRoutes.post("/catches", async (c) => {
   // The giant of the week the fish was landed in, so a catch the queue posts after Monday's turn still counts.
   const landedAt = body.day ? new Date(`${body.day}T12:00:00.000Z`) : new Date();
   const giant = body.giant ? giantAt(body.spot, landedAt) : undefined;
-  const wonGiant = !!giant && giant.speciesId === body.speciesId && Math.abs(giant.weight - body.weight) < 0.005 && claimAndPayGiant(giantWeek(landedAt), body.spot, user.id, record.id, GIANT_BONUS);
+  const giantPaid = giant && giant.speciesId === body.speciesId && Math.abs(giant.weight - body.weight) < 0.005 ? claimAndPayGiant(giantWeek(landedAt), body.spot, user.id, record.id) : 0;
   // Another angler's lost trophy pays only the first to land it: the same kind, bank and weight, still out there.
   const foundLost = !!body.lostFrom && claimAndPayLost(body.lostFrom, body, lostSince(), user.id, record.id, LOST_FINDER_BONUS);
   return c.json({
     id: record.id,
-    points: record.points + (wonGiant ? GIANT_BONUS : 0) + (foundLost ? LOST_FINDER_BONUS : 0),
+    points: record.points + giantPaid + (foundLost ? LOST_FINDER_BONUS : 0),
     speciesId: body.speciesId,
     weight: body.weight,
   });
