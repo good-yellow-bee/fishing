@@ -45,3 +45,22 @@ describe("daily requests client", () => {
     }
   });
 });
+
+describe("the lake's early profile", () => {
+  it("serves the first getMe from the early request, and asks again after a refusal", async () => {
+    const { prefetchMe, getMe } = await import("./api");
+    const me = { profile: { userId: "u1" } };
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify(me)));
+    vi.stubGlobal("fetch", fetchMock);
+    prefetchMe();
+    expect(await getMe()).toEqual(me);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await getMe();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    fetchMock.mockImplementationOnce(async () => new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 }));
+    prefetchMe();
+    expect(await getMe()).toEqual(me);
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+  });
+});

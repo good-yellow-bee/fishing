@@ -70,8 +70,19 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return data;
 }
 
+let earlyMe: Promise<Me> | null = null;
+
+/** A page load of the lake asks for the profile while the lake's code downloads; the next getMe takes that answer. */
+export function prefetchMe() {
+  earlyMe = request<Me>("/api/me");
+  earlyMe.catch(() => undefined);
+}
+
 export function getMe() {
-  return request<Me>("/api/me");
+  const early = earlyMe;
+  earlyMe = null;
+  // Asked before signing in, the early answer was a refusal: ask again.
+  return early ? early.catch(() => request<Me>("/api/me")) : request<Me>("/api/me");
 }
 
 export function recordCatch(body: CatchSubmission) {
