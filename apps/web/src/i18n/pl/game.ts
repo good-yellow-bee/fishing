@@ -113,6 +113,8 @@ export const PL_GAME: PlBook = {
   "At night: switch the headlamp on or off": "W nocy: włącz lub wyłącz czołówkę",
   "In a fight: turn the reel's drag, light, normal or heavy": "W holu: ustaw hamulec kołowrotka, lekki, zwykły lub mocny",
   "Turn the reel's drag: light, normal or heavy. It takes hold from the next run.": "Ustaw hamulec kołowrotka: lekki, zwykły lub mocny. Działa od następnego odjazdu.",
+  "Day's bag {weight} in {n} fish · up {more}": "Dzienna siatka {weight}, ryby: {n} · więcej o {more}",
+  "Day's bag {weight} · beat {least} to raise it": "Dzienna siatka {weight} · przebij {least}, by ją powiększyć",
   "Drag: light": "Hamulec: lekki",
   "Drag: normal": "Hamulec: zwykły",
   "Drag: heavy": "Hamulec: mocny",

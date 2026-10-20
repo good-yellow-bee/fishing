@@ -4,7 +4,10 @@ import * as THREE from "three";
 import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { useSkinnedFigure } from "./skinFigure";
-import { toadAt } from "./toadHop";
+import { anglerAshore } from "./bankAngler";
+import { BANK_TOAD_AWAY, bankToadAt, bankToadStart, bankToadStep, type BankToadState } from "./bankToad";
+import { anglerPose } from "./pose";
+import { toadAt, toadVisitIndex, type ToadPose } from "./toadHop";
 import { toonRamp } from "./toon";
 
 const SKIN = "#7a6a44";
@@ -56,10 +59,11 @@ export function toadLegShape(side: number) {
   ]);
 }
 
-/** A toad that crosses the boards behind the angler on wet evenings and nights (toadHop.ts). */
-export function DockToad() {
+/** A toad, posed each frame by `poseAt(time, still)`; `name` labels it in the scene. */
+function Toad({ name, poseAt }: { name: string; poseAt: (time: number, still: boolean) => ToadPose }) {
   const still = useReducedMotion();
   const root = useRef<THREE.Group>(null);
+  const scaled = useRef<THREE.Group>(null);
   const throat = useRef<THREE.Mesh>(null);
   const lids = useRef<THREE.Group>(null);
   const legs = useRef<(THREE.Group | null)[]>([]);
@@ -72,10 +76,8 @@ export function DockToad() {
     },
     [shapes, material, throatMaterial],
   );
-  const outAt = useRef<number | null>(null);
   useFrame(({ clock }) => {
-    outAt.current ??= clock.elapsedTime;
-    const pose = toadAt(clock.elapsedTime - outAt.current, still);
+    const pose = poseAt(clock.elapsedTime, still);
     const toad = root.current;
     if (!toad) return;
     toad.visible = pose.here;
@@ -83,6 +85,7 @@ export function DockToad() {
     toad.position.set(pose.x, pose.y, pose.z);
     // Tipped nose-up about its own sideways axis as it pushes off, level again as it lands.
     toad.rotation.set(-pose.kick * 0.35, pose.yaw, 0);
+    scaled.current?.scale.setScalar(TOAD_SCALE * pose.show);
     for (const leg of legs.current) if (leg) leg.rotation.x = -pose.kick * 1.1;
     if (throat.current) throat.current.scale.set(0.012, 0.006 + pose.throat * 0.007, 0.012);
     if (lids.current) lids.current.visible = pose.blink > 0;
@@ -90,8 +93,8 @@ export function DockToad() {
   useSkinnedFigure(root, material);
 
   return (
-    <group ref={root} name="dock-toad" visible={false} rotation={[0, 0, 0, "YXZ"]}>
-      <group scale={TOAD_SCALE}>
+    <group ref={root} name={name} visible={false} rotation={[0, 0, 0, "YXZ"]}>
+      <group ref={scaled} scale={TOAD_SCALE}>
         <mesh geometry={shapes.body} material={material} castShadow />
         <group position={[0, 0.022, 0.044]}>
           <mesh geometry={shapes.head} material={material} />
@@ -114,5 +117,40 @@ export function DockToad() {
         ))}
       </group>
     </group>
+  );
+}
+
+/** The toad crossing the dock's boards behind the angler on wet evenings (toadHop.ts). It sits out a crossing that comes while the angler is ashore, where the bank toad comes to them instead. */
+export function DockToad() {
+  const outAt = useRef<number | null>(null);
+  const kept = useRef(new Map<number, boolean>());
+  return (
+    <Toad
+      name="dock-toad"
+      poseAt={(time, still) => {
+        outAt.current ??= time;
+        const since = time - outAt.current;
+        const visit = toadVisitIndex(since);
+        if (!kept.current.has(visit)) kept.current.set(visit, !anglerAshore());
+        const pose = toadAt(since, still);
+        return still || kept.current.get(visit) ? pose : { ...pose, here: false };
+      }}
+    />
+  );
+}
+
+/** The toad hopping past behind the angler on a bank on wet evenings (bankToad.ts). */
+export function BankToad() {
+  const state = useRef<BankToadState | null>(null);
+  return (
+    <Toad
+      name="bank-toad"
+      poseAt={(time, still) => {
+        // With reduced motion it never comes, rather than popping up behind the angler every minute.
+        if (still) return BANK_TOAD_AWAY;
+        state.current = bankToadStep(state.current ?? bankToadStart(time), time, anglerPose, anglerAshore());
+        return bankToadAt(state.current, time);
+      }}
+    />
   );
 }

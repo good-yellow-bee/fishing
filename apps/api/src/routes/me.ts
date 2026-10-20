@@ -1,6 +1,6 @@
 import { Hono } from "hono";
-import { anglerLevel, badgeProgress, canUseSpot, pastDerbies, streakDays } from "@stillwater/shared";
-import { countDerbyWins, firstCatchAt, getProfile, listBadgeFacts, listCatchDays, listCatches, listSpeciesStats, toCatch, toProfile } from "../db.ts";
+import { anglerLevel, bagDay, badgeProgress, canUseSpot, pastDerbies, streakDays } from "@stillwater/shared";
+import { countDerbyWins, firstCatchAt, getProfile, listBadgeFacts, listBagWeights, listCatchDays, listCatches, listSpeciesStats, toCatch, toProfile } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
 export const meRoutes = new Hono();
@@ -22,6 +22,7 @@ meRoutes.get("/me", (c) => {
   const days = listCatchDays(user.id);
   // The longest run doesn't depend on today; the page reads the current one from `recentDays` on its own calendar.
   const { longest } = streakDays(days, "0000-01-01");
+  const today = bagDay();
   return c.json({
     user: { id: user.id, email: user.email, name: user.name },
     profile,
@@ -39,5 +40,6 @@ meRoutes.get("/me", (c) => {
     badges: badgeProgress(listBadgeFacts(user.id), { longestStreak: longest, derbyWins: derbyWins(user.id) }),
     longestStreak: longest,
     recentDays: days.slice(-60),
+    todayBag: { day: today.from, weights: listBagWeights(user.id, today.from, today.to) },
   });
 });

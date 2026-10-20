@@ -1416,6 +1416,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC230~~ | ~~One pass for see-through double-sided materials: three draws a transparent double-sided material twice (back faces, then front) and re-checks its shader each time; the 34 here have no depth writes and are additive, one colour, or flat sheets that each face one way (so the back/front split never reorders overlapping pieces), where one pass draws the same pixels, so they now set forceSinglePass; singlePass.test.ts keeps new ones to it~~ (#1522) | scene | S |
 | ~~SC231~~ | ~~A wider view on a tall phone: the camera's fixed 48° vertical view left a portrait phone (390x844) a 23° slot of lake, the angler filling half the screen and the boat cut off; below 0.8 width-to-height the view opens up to keep the side-to-side view a 0.8 screen gets, capped at 70° (which portrait phones reach: about 36° across); wider screens unchanged~~ (#1527) | scene | S |
 | ~~SC232~~ | ~~News card scene53 covers SC229 to SC231: the black rowboats and float fixed, one-pass see-through materials, and the wider view on a tall phone~~ (#1528) | scene | S |
+| ~~SC233~~ | ~~Toad on the bank: on wet dawns, dusks and nights from spring to fall (when the dock toad is out), while the angler fishes ashore, now and then a toad creeps out of the wet grass behind them, hops across behind their heels with sits between, and creeps back in; shares the dock toad's figure and hop rhythm (crossingAt) and the hedgehog's dry way behind the angler~~ (#1531) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1799,7 +1800,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT376~~ | ~~News card 2026-10-20-game42 covers GT373 and GT374: the legend hunt and the weekend derby~~ (#1521) | ui | S |
 | ~~GT377~~ | ~~News card 2026-10-20-game43 covers GT375: second fight habits for bluegill, carp, catfish and burbot~~ (#1526) | ui | S |
 | ~~GT378~~ | ~~The reel's drag: in a fight, F or the fight card's Drag button turns it light, normal or heavy (kept from fight to fight, taking hold from the next run); a light drag lets a run take 1.35x the line, slipping some even under a turning reel, but pulls 0.7x on it; a heavy one holds a run to 0.65x the line but pulls 1.3x and loads the line even let go, so a big fresh run goes red (and tears a soft mouth), never snapping~~ (#1529) | gameplay | M |
-| GT379 | The day's bag: the Board ranks each angler's five heaviest fish landed that day (UTC, one ranking for the lodge) by their total weight, and the dock shows the angler's own bag and what the next fish must beat to raise it | gameplay | M |
+| ~~GT379~~ | ~~The day's bag: the Board ranks each angler's five heaviest fish landed that day (UTC, one ranking for the lodge) by their total weight, and the landed card shows the angler's bag with the new fish in it and how much it raised it, or what the next fish must beat~~ (#1530) | gameplay | M |
 | GT380 | Lodge-tagged fish: a fish one angler lets go can be hooked by another at the same bank on a later day, grown a little; the landed card says who let it go and when, and it pays a bonus to both | gameplay | M |
 | GT381 | News card game44 covers GT378 to GT380 | ui | S |
 
