@@ -323,7 +323,7 @@ export function FightBar({ fight, sim, performance, best = null, note = null, cl
               {t(DRAG_WORD[drag])}
               <span className="on-pointer"> (F)</span>
             </button>{" "}
-            {t(DRAG_LINE[drag])}
+            <span className="fight-drag-line">{t(DRAG_LINE[drag])}</span>
           </p>
           <p ref={clean} className="fight-clean">{cleanLine}</p>
           {reelMode === "toggle" ? (
