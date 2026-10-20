@@ -2420,3 +2420,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR581~~ | ~~Round 107 catch-page fixes: a kind however it was typed is one kind for badges, milestones, the form and its saved spelling, sizing, search summaries, Photos and the species page; water names read trimmed~~ (#1550) | field | S |
 | ~~BR582~~ | ~~Round 107 catch-page ideas: a By water split in a search's summary, how near a fish came to its kind's best~~ (#1553) | field | S |
 | ~~BR583~~ | ~~Round 108 Home and export fixes: English kind names steady before and after the Polish book loads, copies name kinds across the book, a day's outings in one order everywhere, every outing still going on Home, untitled outings and water names read cleanly~~ (#1561) | field | S |
+| ~~BR584~~ | ~~Round 108 Home and export ideas: Out now on Home's Next, today's plan to the calendar, released fish in the outings sheet~~ (#1564) | field | S |
