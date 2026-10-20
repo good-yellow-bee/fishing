@@ -2,6 +2,7 @@ import { memo } from "react";
 import { Link } from "react-router-dom";
 import {
   WATER_LABELS,
+  catchesForTrip,
   itemsForTrip,
   localDate,
   measureOf,
@@ -13,7 +14,7 @@ import {
 } from "@stillwater/shared";
 import { tn, useT } from "../i18n";
 import { measureText, measuresText, tempText } from "../i18n/content";
-import { daysAheadLabel, fishCountLabel, fishSum, formatClock, formatDay, noteText, outingName, tripWhen } from "./format";
+import { daysAheadLabel, fishCountLabel, fishSum, formatClock, formatDay, formatTimeOfDay, noteText, outingName, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { catchBadge } from "./catchBadge";
 import { WeatherLine } from "./Weather";
@@ -136,6 +137,14 @@ export function TripCard({
       : packed === bag.length
         ? t("All packed")
         : t("{packed} of {total} packed", { packed, total: bag.length });
+  // With another outing on its water that day, when its fish came, so a dawn and a dusk tell apart: "5:30–6:10 AM".
+  const fishTimes = book.trips.some((other) => other.id !== trip.id && other.spotId === trip.spotId && other.date === trip.date)
+    ? catchesForTrip(book, trip.id)
+        .map((entry) => entry.caughtAt)
+        .filter((at) => !Number.isNaN(Date.parse(at)))
+        .sort()
+    : [];
+  const span = fishTimes.length === 0 ? null : fishTimes.length === 1 || formatTimeOfDay(fishTimes[0]!) === formatTimeOfDay(fishTimes.at(-1)!) ? formatTimeOfDay(fishTimes[0]!) : `${formatTimeOfDay(fishTimes[0]!)}–${formatTimeOfDay(fishTimes.at(-1)!)}`;
   return (
     <Link to={`/trips/${trip.id}`} className="trip-card" state={FROM_LIST}>
       <p className="when">{tripWhen(trip.date, today, tomorrow, outNow(book, trip))}</p>
@@ -144,7 +153,7 @@ export function TripCard({
         <p className="meta">
           {/* The fish that got away and the strikes missed too, so a hard day stands out in the list. */}
           {/* An untitled outing is already named after its water. */}
-          {[spotName && sameName(spotName, outingName(trip, book.spots)) ? null : spotName, waterType ? t(WATER_LABELS[waterType]) : null, tally, fishCount === 0 ? daysAheadLabel(trip.date, today) : null, trip.lost ? tn(trip.lost, "{n} lost", "{n} lost") : null, trip.missed ? tn(trip.missed, "{n} missed", "{n} missed") : null].filter(Boolean).join(" · ")}
+          {[spotName && sameName(spotName, outingName(trip, book.spots)) ? null : spotName, waterType ? t(WATER_LABELS[waterType]) : null, tally, span, fishCount === 0 ? daysAheadLabel(trip.date, today) : null, trip.lost ? tn(trip.lost, "{n} lost", "{n} lost") : null, trip.missed ? tn(trip.missed, "{n} missed", "{n} missed") : null].filter(Boolean).join(" · ")}
         </p>
       </div>
     </Link>

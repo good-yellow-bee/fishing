@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-game53";
+export const NEWS_ID = "2026-10-20-field69";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "Two outings on one water and day now show when each one's fish came, so a dawn and a dusk tell apart on Trips. The outing search finds those “with a note” and those left “untitled”, and an outing's page names kinds and lures as the rest of the book does.",
   "Each day another angler fishes one of the banks: your first casts there meet wary fish, unless you bring groundbait, and the bank chip says who is about. And the landed card's bonus stamps now show what the lodge actually paid once your catch is saved.",
   "The lake asks a little less of your phone again: shadows are redrawn at most thirty times a second, the shore's foam does less work each frame, and the anglers you only see in rain or fog and the deer, moose and hare of dawn and dusk now load only when they come out.",
   "Each kind you have landed now has three studies in the field guide on your catch log: land it at every bank it lives at, at three of the lake's four hours, and at trophy weight. Finish all three to claim 100 points once and mark the kind Studied.",

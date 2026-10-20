@@ -48,6 +48,9 @@ const LOST = ["lost", "lost fish", "spięte", "spięta", "spiętych"].map(plain)
 const MISSED = ["missed", "missed strikes", "puste brania", "puste branie"].map(plain);
 /** Words that ask for the outings still planned: ahead, or today's before its first fish, as the month headings count them. */
 const PLANNED = ["planned", "plans", "zaplanowane", "zaplanowana", "zaplanowanych"].map(plain);
+/** Words that ask for the outings with a write-up, and for those never given a title of their own. */
+const NOTED = ["with a note", "note", "notes", "z notatka", "notatka", "notatki"].map(plain);
+const UNTITLED = ["untitled", "no title", "bez tytulu", "bez nazwy"].map(plain);
 /** Words that ask for the outings on a Saturday or Sunday, or on the days between, as Bests splits them. */
 const WEEKEND = ["weekend", "weekends", "weekendy", "weekendowe"].map(plain);
 const WEEKDAY = ["weekday", "weekdays", "dni powszednie", "dzien powszedni", "w tygodniu"].map(plain);
@@ -140,6 +143,8 @@ export function findTrips(
     if (LOST.includes(part)) return (trip.lost ?? 0) > 0;
     if (MISSED.includes(part)) return (trip.missed ?? 0) > 0;
     if (PLANNED.includes(part)) return isPlanned(trip, today, fishOn(trip.id), book);
+    if (NOTED.includes(part)) return trip.note.trim() !== "";
+    if (UNTITLED.includes(part)) return trip.title.trim() === "";
     // The game's rounds stay out, as Bests leaves them out of the split these words open.
     if (WEEKEND.includes(part) || WEEKDAY.includes(part)) {
       if (!offPlayLake(trip)) return false;
