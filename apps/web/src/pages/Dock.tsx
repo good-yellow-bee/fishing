@@ -87,7 +87,7 @@ import { useEffectsSteppedDown } from "../game/frameWatch";
 import { useEffectsNotice } from "../game/effectsNotice";
 import { saveLogbook } from "../field/storage";
 import { fx } from "../game/fx";
-import { canBaitShiner, GROUNDBAIT_CASTS, hookWindowMs, isMercy, longShadowWaitMul, solidStrikeMs } from "../game/logic";
+import { canBaitShiner, GROUNDBAIT_CASTS, hookWindowMs, isMercy, lampLit, longShadowWaitMul, solidStrikeMs } from "../game/logic";
 import { useBadgeToast } from "../game/useBadgeToast";
 import { bookSeasonNote, bookSessionTitle, loadSession, saveSession, sessionTitle, startSession, withSessionFish, type SessionDraft } from "../game/session";
 import { TripRecap } from "../components/TripRecap";
@@ -911,6 +911,7 @@ export function DockPage() {
           released={landedReleased}
           moon={moon}
           wind={wind}
+          headlamp={lampLit(game.lamp, hour)}
           hotspot={game.hotspot}
           groundbait={game.groundbait}
           rising={rising}

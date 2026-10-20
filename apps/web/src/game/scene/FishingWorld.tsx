@@ -39,6 +39,7 @@ import { dogOut } from "./dogMood";
 import { paperBoatOut } from "./paperDrift";
 import { DockMallard } from "./DockMallard";
 import { BankHedgehog } from "./BankHedgehog";
+import { PlayerHeadlamp } from "./PlayerHeadlamp";
 import { DockRobin, GroundRobin } from "./DockRobin";
 import { hedgehogOut } from "./hedgehogWalk";
 import { mallardOut } from "./mallardWaddle";
@@ -188,6 +189,8 @@ type Props = {
   moon?: number;
   /** The day's wind as a downwind drift on a sitting float, meters a second. */
   wind?: { x: number; z: number };
+  /** The angler's headlamp lit on the water (logic.ts lampLit). */
+  headlamp?: boolean;
   hotspot: Hotspot | null;
   /** The groundbait tossed off a bank, while it still feeds the fish there. */
   groundbait?: Groundbait | null;
@@ -2163,7 +2166,7 @@ function Tone({ hour }: { hour: LakeHour }) {
   return null;
 }
 
-function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, topwater = false, hour, sky, season = "summer", species, weight, golden = false, released = false, moon, wind, hotspot, groundbait = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
+function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, topwater = false, hour, sky, season = "summer", species, weight, golden = false, released = false, moon, wind, headlamp = false, hotspot, groundbait = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
   // How this fish takes the bait: a topwater lure makes every take a hit at the top.
   const take = species !== null ? takeStyle(species.id, topwater) : null;
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
@@ -2225,6 +2228,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       {robinAbout && <DockRobin snow={dockSnowy(season)} startledAt={robinStartledAt} />}
       {robinAbout && <GroundRobin phase={phase} />}
       {hedgehogOut(hour, sky, season) && <BankHedgehog phase={phase} />}
+      {headlamp && <PlayerHeadlamp phase={phase} float={bobberWorld} />}
       {dogOut(hour, sky, season) && <DockDog key={season} phase={phase} robin={robinAbout ? robinStartledAt : null} paperWind={paperBoatOut(hour, sky, season) ? (wind ?? NO_WIND).x : null} winter={knitsOut(season)} nibble={nibble && spot === "dock" ? bobberWorld : null} snowfall={snowing(sky, season)} />}
       {littleOwlOut(hour, sky, season) && <PostOwl snow={dockSnowy(season)} moths={mothsOut(hour, season)} phase={phase} atDock={spot === "dock"} />}
       <SchoolShadows phase={phase} schooled={schooled} bobber={bobberWorld} />
