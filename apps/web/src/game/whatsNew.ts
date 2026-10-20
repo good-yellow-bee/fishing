@@ -6,6 +6,7 @@ export const NEWS_KEY = "stillwater.news.v1";
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
   "A fish hooked along the point's rock edge now dives off the ledge instead of dragging your line over the rocks. A perch or smallmouth hooked raiding the sunfish beds bolts from the guarding sunfish, so its first run is the long one. And on a windy day a fish hooked in a foam lane lets a slack line drift out faster still.",
+  "At night your headlamp now draws moths: from spring to fall a few find the beam one by one and flutter round it, and on summer nights a bat comes now and then to hawk them.",
   "With a screen reader, the call to strike is now said the moment a fish takes, not after the hint before it; in your first fight the coach no longer repeats each run over the fight card; and following Field log from the lake lands on the page's heading. On a small or sideways phone the fight card keeps clear of the Reel button.",
   "Home's Next says Out now while today's outing is being fished, and offers today's plan for the calendar until it is under way. The outings spreadsheet counts the fish released on each outing.",
   "The lake now runs a little smoother on a phone: it spends less of each frame sorting out how to draw its creatures and their shadows. And on spring nights the pollen on the water no longer glows yellow in the dark.",
