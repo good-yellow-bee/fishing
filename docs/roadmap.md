@@ -1833,7 +1833,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT393~~ | ~~News card 2026-10-20-game47 covers GT390 to GT392: the far rock fights back, duckweed on the line and yesterday's pressure~~ (#1559) | ui | S |
 | ~~GT394~~ | ~~The rock edge's ledge: a fish hooked along the point's rock edge, past the shallow rocks, dives off the ledge as at the drop-off (runs pull harder but tire it faster) instead of dragging the line over the rocks, and the fight card says so; the fight's cover (far rock, duckweed, rock edge) now travels as one set~~ (#1562) | gameplay | S |
 | ~~GT395~~ | ~~Egg raiders bolt: a perch or smallmouth hooked raiding the sunfish beds by the dock is chased off by the guarding sunfish, so its first run is the long one; the fight card says so~~ (#1566) | gameplay | S |
-| GT396 | The foam lane's drift: on a breezy or strong day a fish hooked in a foam lane fights where the wind's drift is strongest, so a slack line drifts out 1.3x faster still between runs; the fight card says so | gameplay | S |
+| ~~GT396~~ | ~~The foam lane's drift: on a breezy or strong day a fish hooked in a foam lane fights where the wind's drift is strongest, so a slack line drifts out 1.3x faster still between runs; the fight card says so~~ (#1570) | gameplay | S |
 | GT397 | News card game48 covers GT394 to GT396 | ui | S |
 
 ## Risks / open questions for the owner
