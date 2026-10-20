@@ -130,7 +130,8 @@ export function claimStudy(speciesId: string) {
   return request<{ speciesId: string; points: number }>(`/api/studies/${encodeURIComponent(speciesId)}/claim`, { method: "POST" });
 }
 
-export type GiantStatus = Giant & { landedBy: string | null; landedAt: string | null };
+/** A week's giant on the lodge board: who landed it, who let it go back if anyone did, and what landing it now pays. */
+export type GiantStatus = Giant & { landedBy: string | null; landedAt: string | null; letGoBy: string | null; letGoByYou: boolean; bonus: number };
 
 export function getGiants() {
   return request<{ giants: GiantStatus[] }>("/api/lodge/giants").then((body) => body.giants);

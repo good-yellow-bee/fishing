@@ -23,7 +23,13 @@ export function GiantsCard() {
           const line = t("{bank}: {name}, a {weight} {fish}", { bank: t(SPOT_LABELS[giant.spot]), name: t(giant.name), weight: weightText(giant.weight), fish: fish ? t(fish.name).toLowerCase() : giant.speciesId });
           return (
             <li key={giant.spot} data-you="0">
-              {giant.landedBy ? t("{giant} · landed by {name}", { giant: line, name: giant.landedBy }) : t("{giant} · still out there", { giant: line })}
+              {giant.landedBy && giant.letGoBy
+                ? t("{giant} · let go by {first}, landed again by {name}", { giant: line, first: giant.letGoBy, name: giant.landedBy })
+                : giant.landedBy
+                  ? t("{giant} · landed by {name}", { giant: line, name: giant.landedBy })
+                  : giant.letGoBy
+                    ? t("{giant} · let go by {name}, out again for {points} pts", { giant: line, name: giant.letGoBy, points: giant.bonus })
+                    : t("{giant} · still out there", { giant: line })}
             </li>
           );
         })}

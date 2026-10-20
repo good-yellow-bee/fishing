@@ -392,6 +392,28 @@ describe("POST /catches", () => {
     expect((db.prepare(`SELECT COUNT(*) as n FROM giant_landed`).get() as { n: number }).n).toBe(0);
   });
 
+  it("lets a landed giant go back for the week: its angler keeps the credit, and the next angler to land it is paid half", async () => {
+    const { claimAndPayGiant, countGiantsLanded } = await import("../db.ts");
+    const { GIANT_AGAIN_BONUS, giantWeek } = await import("@stillwater/shared");
+    db.prepare(`UPDATE profile SET strength = 10, accuracy = 10 WHERE user_id = ?`).run(user.id);
+    const giant = giantAt("dock")!;
+    await post({ requestId, speciesId: giant.speciesId, weight: giant.weight, spot: "dock", giant: true });
+    expect((await app.request(`http://test/catches/${requestId}/release`, { method: "POST" })).status).toBe(200);
+    const row = () => db.prepare(`SELECT released_at, again_user_id FROM giant_landed`).get() as { released_at: string | null; again_user_id: string | null };
+    expect(row().released_at).not.toBeNull();
+    // The angler who let it go can't land it again for pay.
+    const own = await post({ requestId: "8c7d6e5f-4a3b-4c2d-9e1f-0a9b8c7d6e5f", speciesId: giant.speciesId, weight: giant.weight, spot: "dock", giant: true });
+    expect(own.status).toBe(200);
+    expect(row().again_user_id).toBeNull();
+    const at = new Date().toISOString();
+    db.prepare(`INSERT INTO "user" (id, name, email, emailVerified, createdAt, updatedAt) VALUES ('mara', 'Mara', 'mara@x.test', 0, ?, ?)`).run(at, at);
+    db.prepare(`INSERT INTO profile (user_id, display_name) VALUES ('mara', 'Mara')`).run();
+    expect(claimAndPayGiant(giantWeek(), "dock", "mara", "none")).toBe(GIANT_AGAIN_BONUS);
+    expect(claimAndPayGiant(giantWeek(), "dock", "mara", "none")).toBe(0);
+    expect(countGiantsLanded(user.id)).toBe(1);
+    expect(countGiantsLanded("mara")).toBe(1);
+  });
+
   it("pays the finder of another angler's lost trophy once, on a catch that matches it", async () => {
     const { reportLost } = await import("../db.ts");
     const { LOST_FINDER_BONUS } = await import("@stillwater/shared");

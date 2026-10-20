@@ -78,6 +78,8 @@ export const PL_PAGES: PlBook = {
   "{bank}: {name}, a {weight} {fish}": "{bank}: {name}, {fish} {weight}",
   "{giant} · landed by {name}": "{giant} · złowiony przez: {name}",
   "{giant} · still out there": "{giant} · wciąż czeka",
+  "{giant} · let go by {first}, landed again by {name}": "{giant} · wypuszczony przez: {first}, złowiony znów przez: {name}",
+  "{giant} · let go by {name}, out again for {points} pts": "{giant} · wypuszczony przez: {name}, znów czeka za {points} pkt",
   "Studies: banks {banks} {bankMark} · hours {hours} {hourMark} · trophy {trophyMark}": "Badania: łowiska {banks} {bankMark} · pory {hours} {hourMark} · trofeum {trophyMark}",
   "Claim · +{points} pts": "Odbierz · +{points} pkt",
   "studies not finished": "badania nie są ukończone",

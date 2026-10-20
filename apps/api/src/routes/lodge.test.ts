@@ -151,6 +151,18 @@ describe("GET /lodge/giants", () => {
     expect(giants.find((giant) => giant.spot === "reeds")?.landedBy).toBe("Mara");
     expect(giants.find((giant) => giant.spot === "dock")?.landedBy).toBeNull();
   });
+
+  it("shows a giant let go back as out again, for half, until another angler lands it", async () => {
+    const { claimGiant, releaseGiant, claimAndPayGiant } = await import("../db.ts");
+    const { giantWeek, GIANT_AGAIN_BONUS } = await import("@stillwater/shared");
+    claimGiant(giantWeek(), "reeds", "ash");
+    releaseGiant(giantWeek(), "reeds", "ash");
+    const reeds = async () => ((await (await app.request("http://test/lodge/giants")).json()) as { giants: { spot: string; landedBy: string | null; letGoBy: string | null; letGoByYou: boolean; bonus: number }[] }).giants.find((giant) => giant.spot === "reeds")!;
+    // Out again for the lodge, though not for Ash, who let it go.
+    expect(await reeds()).toMatchObject({ landedBy: null, letGoBy: "Ash", letGoByYou: true, bonus: GIANT_AGAIN_BONUS });
+    claimAndPayGiant(giantWeek(), "reeds", "mara", "none");
+    expect(await reeds()).toMatchObject({ landedBy: "Mara", letGoBy: "Ash", bonus: 0 });
+  });
 });
 
 describe("the lodge's lost trophies", () => {
