@@ -2455,3 +2455,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR586~~ | ~~Round 109 gear and map ideas: Log a catch on the Map's Out now row, fish counts on a water's tips~~ (#1577) | field | S |
 | ~~BR587~~ | ~~Round 110 Bests fixes: today's outing under way counted in the small hours, a kind named as Bests does on its page, cards and copies, links search what they show, waters sorted and named tidily, a record's age in whole years~~ (#1584) | field | S |
 | ~~BR588~~ | ~~Round 110 Bests ideas: the season's best water beside its best lure, a kind's Last fish opening that fish~~ (#1589) | field | S |
+| ~~BR589~~ | ~~Round 111 waters fixes: a water's links open the fish it counts, Map and Waters count alike, small-hours outings and outing order as Trips, kinds named as the book writes them, tidy names, ties by name~~ (#1599) | field | S |
