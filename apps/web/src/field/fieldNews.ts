@@ -5,6 +5,7 @@ import { NEWS_ID, NEWS_ITEMS, markNewsSeen, readSeenNews } from "../game/whatsNe
  * Each new field-log line goes in here too, newest first, word for word as in `NEWS_ITEMS`.
  */
 export const FIELD_NEWS: ReadonlySet<string> = new Set([
+  "Gear's lure record says where each lure took most of its fish, opening them, and a packed piece says how many fish it took on the outing's water. Undo on a packing list never puts a piece back twice.",
   "The outings spreadsheet says when each outing's fish came, so a dawn and a dusk tell apart. Adding a book file says how many of its fish were the game's, and Home's Next goes to the outing you are fishing when a day has two.",
   "A search's summary now splits its fish by lure too, each opening that lure's fish, and a fish caught after midnight says whose night it counts on. The catch form finds a kind typed in Polish however the book wrote it.",
   "Two outings on one water and day now show when each one's fish came, so a dawn and a dusk tell apart on Trips. The outing search finds those “with a note” and those left “untitled”, and an outing's page names kinds and lures as the rest of the book does.",
