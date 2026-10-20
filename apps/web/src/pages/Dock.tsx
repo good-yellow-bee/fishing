@@ -121,6 +121,7 @@ import { bankSuitsNow } from "../game/bankNow";
 import { PowerMeter } from "../game/scene/PowerMeter";
 import { prefersReducedMotion } from "../game/scene/reducedMotion";
 import { shyOf } from "../game/giantShy";
+import { nightLineKinds, nightLineState } from "../game/nightLine";
 import { isLiveBait, isTopwater, touchScreen, useFishingGame } from "../game/useFishingGame";
 import { useCatchSync } from "../game/useCatchSync";
 import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
@@ -963,11 +964,24 @@ export function DockPage() {
   const frenzyAt = (target: WalkTarget) => game.frenzy && game.hotspot?.spot === target;
   /** What a walk sign tells a screen reader and the tooltip beyond its bank's name. */
   const giantAt = (bank: string) => openGiants.find((giant) => giant.spot === bank);
-  // A bank whose giant is still out there says so after its other news.
+  const lineAt = (bank: string) => (game.nightLine?.spot === bank ? nightLineState(game.nightLine, Date.now()) : null);
+  // The bank underfoot's own sign sets a night line with the shiner on the hook, or brings in the one out there.
+  const lineAction = (target: WalkTarget) =>
+    target !== game.stance || !me
+      ? null
+      : lineAt(target) && lineAt(target) !== "soaking"
+        ? "check"
+        : !game.nightLine && game.liveShiner && isFishingStance(target) && nightLineKinds(target, me.profile).length > 0
+          ? "set"
+          : null;
+  // A bank whose giant is still out there, or where the night line is out, says so after its other news.
   const signNote = (target: WalkTarget, label: string) => {
+    const action = lineAction(target);
+    if (action) return action === "set" ? t("{bank}: leave the shiner out on a night line here", { bank: t(label) }) : t("{bank}: bring in your night line", { bank: t(label) });
     const giant = giantAt(target);
     const note = bankNote(target, label);
-    return giant ? t("{note} · {name}, its giant, is still out there", { note: note ?? t(label), name: t(giant.name) }) : note;
+    const withGiant = giant ? t("{note} · {name}, its giant, is still out there", { note: note ?? t(label), name: t(giant.name) }) : note;
+    return lineAt(target) ? t("{note} · your night line is out here", { note: withGiant ?? t(label) }) : withGiant;
   };
   const bankNote = (target: WalkTarget, label: string) =>
     frenzyAt(target)
@@ -1152,6 +1166,7 @@ export function DockPage() {
           {!rowing && game.stance === hotBank && <small className="stance-hot"> · {t("biting today")}</small>}
           {!rowing && !mercy && game.stance === crowdedBank && <small className="stance-cold"> · {t("another angler here today")}</small>}
           {!rowing && isFishingStance(game.stance) && game.stance !== "open" && favoredNow(game.stance) && <small className="stance-hot"> · {t("bites sooner now")}</small>}
+          {!rowing && lineAt(game.stance) && (lineAt(game.stance) === "soaking" ? <small className="stance-cold"> · {t("night line soaking")}</small> : <small className="stance-hot"> · {t("night line ready")}</small>)}
           {!rowing && giantAt(game.stance) && (
             game.giantShy && isFishingStance(game.stance) && shyOf(game.giantShy, game.stance, giantAt(game.stance)!.name, lure)
               ? <small className="stance-cold"> · {t("giant: {name}, shy of this lure", { name: t(giantAt(game.stance)!.name) })}</small>
@@ -1289,14 +1304,18 @@ export function DockPage() {
                 title={signNote(target, label)}
                 data-now={favoredNow(target) ? "1" : undefined}
                 data-cold={fishedHardAt(target) ? "1" : undefined}
-                disabled={game.stance === target}
+                disabled={game.stance === target && !lineAction(target)}
                 onClick={(event) => {
                   // Leave Space free for casting.
                   event.currentTarget.blur();
-                  walkAnglerTo(WALK_TARGETS[target].x, WALK_TARGETS[target].z);
+                  const action = lineAction(target);
+                  if (action === "set") game.setNightLine();
+                  else if (action === "check") game.checkNightLine();
+                  else walkAnglerTo(WALK_TARGETS[target].x, WALK_TARGETS[target].z);
                 }}
               >
-                {t(label)}
+                {lineAction(target) === "set" ? t("Night line") : lineAction(target) === "check" ? t("Check line") : t(label)}
+                {lineAt(target) && !lineAction(target) && <span className="sign-line" aria-hidden="true"> ≈</span>}
                 {favoredNow(target) && <span className="sign-now" aria-hidden="true"> •</span>}
                 {frenzyAt(target) && <span className="sign-frenzy" aria-hidden="true"> ✦</span>}
                 {giantAt(target) && <span className="sign-giant" aria-hidden="true"> ♦</span>}

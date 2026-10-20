@@ -8,6 +8,7 @@ import { badgeProgress, catchPoints, CLEAN_RUN_BONUS, DAY_RUN_BONUS, GOLDEN_BONU
 import { buyGroundbait, buyShiner, getGiants, getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
+import { SHINER_KEY } from "../game/groundbaitBag";
 import { sessionKey, startSession } from "../game/session";
 import type { Outcome } from "../game/useFishingGame";
 
@@ -208,6 +209,26 @@ describe("dock weather", () => {
     expect(sign("Point")?.querySelector(".sign-giant")).toBeNull();
     expect(sign("Point")?.hasAttribute("aria-label")).toBe(false);
     expect(spring.querySelector(".stance-chip")?.textContent).toContain("· giant: Tarnish");
+  });
+
+  it("turns the bank underfoot's own sign into the night line with a shiner on, and marks the bank a line is out at", async () => {
+    vi.mocked(getMe).mockResolvedValue({ ...me, profile: { ...me.profile, strength: 5, accuracy: 5 } });
+    landed.stance = "dock";
+    localStorage.setItem(SHINER_KEY, "live");
+    const page = await openDock("/?hour=day&sky=clear");
+    const sign = (name: string) => [...page.querySelectorAll<HTMLButtonElement>(".walk-signs button")].find((button) => button.textContent?.startsWith(name));
+    expect(sign("Night line")?.disabled).toBe(false);
+    expect(sign("Night line")?.getAttribute("aria-label")).toBe("Dock: leave the shiner out on a night line here");
+    act(() => root!.unmount());
+    root = null;
+    container?.remove();
+    localStorage.setItem("stillwater.nightline.u1.v1", JSON.stringify({ spot: "reeds", setAt: Date.now() }));
+    const later = await openDock("/?hour=day&sky=clear");
+    const reeds = [...later.querySelectorAll(".walk-signs button")].find((button) => button.textContent?.startsWith("Reeds"));
+    expect(reeds?.querySelector(".sign-line")).not.toBeNull();
+    expect(reeds?.getAttribute("aria-label")).toMatch(/your night line is out here$/);
+    // With a line out, the shiner stays on the hook rather than setting a second one.
+    expect([...later.querySelectorAll(".walk-signs button")].some((button) => button.textContent === "Night line")).toBe(false);
   });
 
   it("dims the walk signs of the banks fished hard, and says so to a screen reader", async () => {

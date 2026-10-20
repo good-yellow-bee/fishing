@@ -62,6 +62,7 @@ import { DUCKWEED_FOUL_WAIT, DUCKWEED_TOPWATER_WAIT, duckweedCast, inDuckweed } 
 import { FAR_ROCK_WAIT, tightToFarRock } from "./farRock";
 import { castSnags, onRockEdge, onShoreIce, ROCK_EDGE_WAIT, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { FLUTTER_SEC, flutterGrabberFor, flutterTip, followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
+import { loadNightLine, nightLineCatch, nightLineKinds, nightLineState, saveNightLine, type NightLine } from "./nightLine";
 import { markShy, loadGiantShy, rollGiantShy, saveGiantShy, shyOf, type GiantShy } from "./giantShy";
 import { AGAIN_CASTS, backAgain, castForGotAway, gotAwayAfterDrop, PATIENT_DROP_RANK, gotAwayAfterLoss, type GotAway } from "./gotAway";
 import { LINE_SNAP, LINE_WAIT, type LineWeight } from "./lineWeight";
@@ -419,6 +420,15 @@ export function useFishingGame(
   useEffect(() => {
     setGiantShy(profile?.userId ? giantShyNow(profile.userId) : null);
   }, [profile?.userId]);
+  /** A shiner the angler left out on a night line, read from the browser once per angler. */
+  const [nightLine, setNightLineOut] = useState<NightLine | null>(null);
+  useEffect(() => {
+    setNightLineOut(profile?.userId ? loadNightLine(profile.userId) : null);
+  }, [profile?.userId]);
+  const keepNightLine = (userId: string, line: NightLine | null) => {
+    saveNightLine(userId, line);
+    setNightLineOut(line);
+  };
   const legendRef = useRef(legend);
   legendRef.current = legend;
   const lodgeReleasedRef = useRef(lodgeReleased);
@@ -2126,6 +2136,35 @@ export function useFishingGame(
     setHint(t("You hook the shop's shiner on as live bait. Cast it out to the hunters."));
   };
 
+  /** Leave the shiner on the hook out on a night line at this bank, for a later visit to check. */
+  const setNightLine = () => {
+    const spot = stanceRef.current;
+    if (!profile || nightLine || !liveShinerRef.current || phaseRef.current !== "idle" || !isFishingStance(spot) || spot === "open" || nightLineKinds(spot, profile).length === 0) return;
+    hookShiner(null);
+    keepNightLine(profile.userId, { spot, setAt: Date.now() });
+    setHint(t("You leave the shiner out on a night line here. Come back to check it after six hours, and within two days."));
+  };
+
+  /** Bring in the night line set at this bank: a night feeder of the bank, or an empty hook. */
+  const checkNightLine = () => {
+    const spot = nightLine?.spot;
+    if (!profile || !spot || stanceRef.current !== spot || phaseRef.current !== "idle") return;
+    const now = Date.now();
+    const state = nightLineState(nightLine, now);
+    if (state === "soaking") return;
+    keepNightLine(profile.userId, null);
+    const caught = nightLineCatch(nightLine, now, profile, anglerLevel(profile.lifetimePoints), Math.random);
+    if (!caught) {
+      setHint(state === "stale" ? t("The night line sat out too long: the bait is long gone, and nothing is on it.") : t("The night line comes in empty: something stole the shiner in the dark."));
+      return;
+    }
+    const fish = downAtBank(caught, fishedDownRef.current.has(spot) && !mercyRef.current);
+    keepBankMemory(profile.userId, countAtBank(bankMemoryNow(profile.userId), spot, "landed"));
+    setOutcome({ kind: "landed", id: localId(), species: fish.species, weight: fish.weight, spot, clean: false, note: t("{fish} took the shiner on your night line.", { fish: t(fish.species.name) }) });
+    setPhaseBoth("result");
+    setHint(castHint("landed"));
+  };
+
   const dismissResult = () => {
     setOutcome(null);
     resetToIdle(idleHint(stanceRef.current));
@@ -2159,6 +2198,9 @@ export function useFishingGame(
     groundbait,
     fishedHard,
     giantShy,
+    nightLine,
+    setNightLine,
+    checkNightLine,
     throwGroundbait,
     addHandful,
     addShiner,
