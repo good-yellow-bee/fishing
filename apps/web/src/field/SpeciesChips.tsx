@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import type { CatchEntry } from "@stillwater/shared";
 import { t, useT } from "../i18n";
-import { pageCounts, speciesCounts, speciesLink } from "./speciesLink";
+import { pageCounts, speciesCounts, speciesLink, kindNames } from "./speciesLink";
 import { exactTerm, findWithLink } from "./findLinks";
 import { pieceTally } from "./pieceTally";
 import { pieceName } from "./gear/pieceKey";
@@ -21,6 +21,8 @@ export function SpeciesChips({
 }) {
   useT();
   if (catches.length === 0) return null;
+  // As the book writes the kind most, as its page and the kinds list name it ("Zander" for a book of "zander").
+  const kindName = kindNames(catches);
   return (
     <p className="species-chips">
       {/* A chip that opens the kind's page counts as that page does. */}
@@ -36,7 +38,7 @@ export function SpeciesChips({
           }
         >
           {/* "zander" and "tench" as the kinds list writes them, in the reader's language. */}
-          {pieceName(row.species)} ({row.count})
+          {kindName(row.species)} ({row.count})
         </Link>
       ))}
     </p>

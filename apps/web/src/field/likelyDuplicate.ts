@@ -1,4 +1,5 @@
 import type { CatchEntry, Logbook } from "@stillwater/shared";
+import { kindKey } from "./speciesLink";
 
 /** Minutes within which the same kind at the same water reads as the same fish logged twice. */
 const SAME_FISH_MINUTES = 10;
@@ -21,7 +22,7 @@ export function likelyDuplicate(
     book.catches.find(
       (entry) =>
         entry.spotId === fish.spotId &&
-        (entry.species.toLowerCase() === want || shown(entry.species).toLowerCase() === want) &&
+        (kindKey(entry.species) === kindKey(want) || shown(entry.species).toLowerCase() === want) &&
         Math.abs(new Date(entry.caughtAt).getTime() - at) <= SAME_FISH_MINUTES * 60 * 1000 &&
         sameSize(entry),
     ) ?? null

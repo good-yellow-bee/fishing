@@ -190,10 +190,10 @@ function bookName(typed: string, names: readonly string[], keyOf?: (name: string
   return (keyOf && clean ? names.find((name) => keyOf(name) === keyOf(clean)) : undefined) ?? names.find((name) => t(name).toLowerCase() === clean) ?? typed;
 }
 
-/** Whether what was typed is a pick's kind, however written: "perches" presses the "Perch" chip. */
-const sameKind = (typed: string, name: string) => typed.trim().toLowerCase() === name.toLowerCase() || (typed.trim() !== "" && kindKey(typed) === kindKey(name));
-/** The same for a lure: "spinners" presses the "Spinner" chip. */
-const samePiece = (typed: string, name: string) => typed.trim().toLowerCase() === name.toLowerCase() || (typed.trim() !== "" && pieceKey(typed) === pieceKey(name));
+/** Whether what was typed is a pick, however written: "perches" presses the "Perch" chip, "spinners" the "Spinner". */
+const samePick = (keyOf: (name: string) => string) => (typed: string, name: string) => typed.trim() !== "" && keyOf(typed) === keyOf(name);
+const sameKind = samePick(kindKey);
+const samePiece = samePick(pieceKey);
 
 /** After a step link that keeps the same fish on screen: back to the top, with the page's heading taking focus. */
 function stepFocus() {
@@ -477,8 +477,10 @@ function CatchForm() {
 
   // The names a pick from the lists is filed under: the book's, in English, whatever language the form shows.
   // The book's most-written spelling of each kind and piece first, so a plural typed joins it.
-  const speciesNames = [...(existing ? [existing.species] : []), ...speciesCounts(book.catches).map((row) => row.species), ...book.catches.map((entry) => entry.species), ...SPECIES];
-  const lureNames = [...(existing ? [existing.lure] : []), ...pieceTally(book.catches, Infinity).map((row) => row.lure), ...bookLures(book), ...BAITS];
+  const bookKinds = useMemo(() => speciesCounts(book.catches).map((row) => row.species), [book.catches]);
+  const bookPieces = useMemo(() => pieceTally(book.catches, Infinity).map((row) => row.lure), [book.catches]);
+  const speciesNames = [...(existing ? [existing.species] : []), ...bookKinds, ...book.catches.map((entry) => entry.species), ...SPECIES];
+  const lureNames = [...(existing ? [existing.lure] : []), ...bookPieces, ...bookLures(book), ...BAITS];
   // Kept under the book's names too, so a draft picked up after a switch of language reads, and saves, as the same fish.
   const keptNames = () => ({ species: bookName(species, speciesNames, kindKey), lure: bookName(lure, lureNames, pieceKey) });
 
@@ -1603,8 +1605,8 @@ export function CatchPage() {
 function CatchView() {
   const { book, deleteCatch, fileCatches, photoFor } = useLogbook();
   // A kind as the book writes it most ("Perch" for a fish typed "perch "), as its page, chips and lists name it.
-  const kindName = kindNames(book.catches);
-  const lureName = lureNamesOf(book.catches);
+  const kindName = useMemo(() => kindNames(book.catches), [book.catches]);
+  const lureName = useMemo(() => lureNamesOf(book.catches), [book.catches]);
   useT();
   useStepKeys();
   const navigate = useNavigate();
@@ -1640,7 +1642,7 @@ function CatchView() {
   const photo = photoFor(entry.id);
   // Opened from a list (a search, a kind, an outing, a water): the steps keep to it, and lead back to it.
   const list = catchList(book, params.get(LIST_PARAM), entry.id, t, (id) => photoFor(id) !== null);
-  const photoCaption = (fish: CatchEntry) => [kindName(fish.species), measuresText(fish), formatDay(bookFishDay(book, fish)), ...(spotById(book, fish.spotId) ? [spotById(book, fish.spotId)!.name] : [])].join(" · ");
+  const photoCaption = (fish: CatchEntry) => [kindName(fish.species), measuresText(fish), formatDay(bookFishDay(book, fish)), ...(spotById(book, fish.spotId) ? [plainName(spotById(book, fish.spotId)!.name)] : [])].join(" · ");
   // Opened from a list, the full-size view steps through the list's other photos too.
   const listPhotos: ListPhoto[] = (list?.rows ?? []).flatMap((fish) => {
     const src = photoFor(fish.id);
@@ -1746,7 +1748,7 @@ function CatchView() {
     const caught = new Date(`${bookFishDay(book, entry)}T12:00:00`);
     const text = {
       title: kindName(entry.species),
-      detail: [measuresText(entry), spot?.name].filter(Boolean).join(" · "),
+      detail: [measuresText(entry), spot ? plainName(spot.name) : null].filter(Boolean).join(" · "),
       conditions: entry.weather ? weatherText(entry.weather) : pieceName(entry.lure),
       date: caught.toLocaleDateString(locale(), { year: "numeric", month: "long", day: "numeric" }),
     };
@@ -1797,7 +1799,7 @@ function CatchView() {
           {spot ? (
             <>
               {" · "}
-              <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
+              <Link to={`/spots/${spot.id}`}>{plainName(spot.name)}</Link>
             </>
           ) : null}
           {" · "}

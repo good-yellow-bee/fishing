@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { CatchEntry, Logbook } from "@stillwater/shared";
 import { catchBadge } from "./catchBadge";
 import { largestFirst } from "./largestFirst";
+import { likelyDuplicate } from "./likelyDuplicate";
 import { milestoneOf } from "./milestones";
 import { speciesCatches } from "./suggestions";
 
@@ -28,8 +29,16 @@ describe("round 107: a kind however it was typed, on the catch pages", () => {
 describe("round 107: a kind's first fish", () => {
   it("is not a later fish typed in the plural", () => {
     const at = (day: string) => `2026-08-${day}T08:00:00.000Z`;
-    const catches = [fish("a", "Perch", { kind: "length", inches: 9 }, { caughtAt: at("01") }), fish("b", "Perch", { kind: "length", inches: 9 }, { caughtAt: at("02") }), fish("c", "Perches", { kind: "length", inches: 9 }, { caughtAt: at("03") })];
+    // Two plurals after the kind's first: before, the plurals were a kind of their own and "c" its first.
+    const catches = [fish("a", "Perch", { kind: "length", inches: 9 }, { caughtAt: at("01") }), fish("b", "Perch", { kind: "length", inches: 9 }, { caughtAt: at("02") }), fish("c", "Perches", { kind: "length", inches: 9 }, { caughtAt: at("03") }), fish("d", "Perches", { kind: "length", inches: 9 }, { caughtAt: at("04") })];
     const book: Logbook = { spots: [], trips: [], catches };
     expect(milestoneOf(book, catches[2]!)).not.toEqual({ of: "kind", n: 1 });
+  });
+});
+
+describe("round 107: the same fish logged twice", () => {
+  it("is caught by its kind however it was typed", () => {
+    const book: Logbook = { spots: [], trips: [], catches: [fish("a", "Perch", { kind: "length", inches: 9 })] };
+    expect(likelyDuplicate(book, { species: "perches", spotId: "own", caughtAt: "2026-08-20T08:02:00.000Z" })?.id).toBe("a");
   });
 });
