@@ -77,6 +77,8 @@ export type CatchRequest = {
   taggedFrom?: string;
   /** This is the week's giant of its bank. */
   giant?: boolean;
+  /** The report of another angler's lost trophy that this one is. */
+  lostFrom?: string;
 };
 
 export type CatchSubmission = CatchRequest & {

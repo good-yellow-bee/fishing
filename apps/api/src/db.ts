@@ -1,8 +1,9 @@
+import { randomUUID } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Database from "better-sqlite3";
-import { BAG_SIZE, SLAMS, fishById, TAG_RETURN_BONUS, TAGGABLE_IDS, isLakeHour, lakeSeason, releaseBonus, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type BonusId, type LodgeRelease, type LodgeTrack, type StudyFact, type TagReturn, type SpeciesRecord, type SpotId } from "@stillwater/shared";
+import { BAG_SIZE, SLAMS, fishById, TAG_RETURN_BONUS, TAGGABLE_IDS, isLakeHour, lakeSeason, releaseBonus, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type BonusId, type LodgeLost, type LostFound, type LodgeRelease, type LodgeTrack, type StudyFact, type TagReturn, type SpeciesRecord, type SpotId } from "@stillwater/shared";
 
 const dir = dirname(fileURLToPath(import.meta.url));
 export const dataDir = join(dir, "../data");
@@ -95,6 +96,19 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS catch_user_created ON catch (user_id, created_at DESC);
   CREATE INDEX IF NOT EXISTS catch_species_created ON catch (species_id, created_at);
   CREATE INDEX IF NOT EXISTS catch_created ON catch (created_at);
+
+  CREATE TABLE IF NOT EXISTS lost_fish (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
+    species_id TEXT NOT NULL,
+    weight REAL NOT NULL,
+    spot TEXT NOT NULL,
+    lost_at TEXT NOT NULL,
+    found_by TEXT,
+    found_at TEXT
+  );
+  CREATE INDEX IF NOT EXISTS lost_fish_lost_at ON lost_fish (lost_at);
+  CREATE INDEX IF NOT EXISTS lost_fish_user ON lost_fish (user_id, lost_at);
 
   CREATE TABLE IF NOT EXISTS giant_landed (
     week TEXT NOT NULL,
@@ -330,16 +344,56 @@ export function claimGiant(week: string, spot: string, userId: string): boolean 
 export function claimAndPayGiant(week: string, spot: string, userId: string, catchId: string, bonus: number): boolean {
   return db.transaction(() => {
     if (!claimGiant(week, spot, userId)) return false;
-    payGiant(catchId, userId, bonus);
+    payBonus(catchId, userId, bonus, "giant");
     return true;
   })();
 }
 
-/** Pays a catch the giant's bonus, on the catch and the angler's points. */
-export function payGiant(catchId: string, userId: string, bonus: number) {
+/** Pays a saved catch a bonus it won after saving, on the catch (with its id in bonuses) and the angler's points. */
+export function payBonus(catchId: string, userId: string, bonus: number, id: BonusId) {
   db.transaction(() => {
-    db.prepare(`UPDATE catch SET points = points + ?, bonuses = CASE WHEN bonuses IS NULL OR bonuses = '' THEN 'giant' ELSE bonuses || ',giant' END WHERE id = ?`).run(bonus, catchId);
+    db.prepare(`UPDATE catch SET points = points + ?, bonuses = CASE WHEN bonuses IS NULL OR bonuses = '' THEN ? ELSE bonuses || ',' || ? END WHERE id = ?`).run(bonus, id, id, catchId);
     db.prepare(`UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`).run(bonus, bonus, userId);
+  })();
+}
+
+/** Files a trophy the angler lost, for the rest of the lodge to meet at its bank. */
+export function reportLost(userId: string, fish: { speciesId: string; weight: number; spot: string }): string {
+  const id = randomUUID();
+  db.prepare(`INSERT INTO lost_fish (id, user_id, species_id, weight, spot, lost_at) VALUES (?, ?, ?, ?, ?, ?)`).run(id, userId, fish.speciesId, fish.weight, fish.spot, new Date().toISOString());
+  return id;
+}
+
+/** Other anglers' lost trophies since `since` that no one has landed yet, the newest first. */
+export function listLodgeLost(userId: string, since: string, limit: number): LodgeLost[] {
+  return db
+    .prepare(
+      `SELECT l.id, l.species_id as speciesId, l.weight, l.spot, l.lost_at as at, p.display_name as by FROM lost_fish l JOIN profile p ON p.user_id = l.user_id
+       WHERE l.user_id != ? AND l.found_by IS NULL AND l.lost_at >= ? ORDER BY l.lost_at DESC LIMIT ?`,
+    )
+    .all(userId, since, limit) as LodgeLost[];
+}
+
+/** How many trophies the angler has reported lost since `since`, landed by anyone since or not. */
+export function countReportedLost(userId: string, since: string): number {
+  return (db.prepare(`SELECT COUNT(*) as n FROM lost_fish WHERE user_id = ? AND lost_at >= ?`).get(userId, since) as { n: number }).n;
+}
+
+/** The angler's own lost trophies since `since` that someone else has landed. */
+export function listMineFound(userId: string, since: string): LostFound[] {
+  return db.prepare(`SELECT species_id as speciesId, weight, spot FROM lost_fish WHERE user_id = ? AND found_by IS NOT NULL AND lost_at >= ?`).all(userId, since) as LostFound[];
+}
+
+/** Claims a lost trophy for the catch that landed it, and pays a finder who isn't the angler who lost it, together or neither; false when nothing was paid. The angler landing their own lost trophy only closes it. */
+export function claimAndPayLost(lostId: string, fish: { speciesId: string; weight: number; spot: string }, since: string, userId: string, catchId: string, bonus: number): boolean {
+  return db.transaction(() => {
+    const row = db.prepare(`SELECT user_id FROM lost_fish WHERE id = ?`).get(lostId) as { user_id: string } | undefined;
+    const claimed = db
+      .prepare(`UPDATE lost_fish SET found_by = ?, found_at = ? WHERE id = ? AND found_by IS NULL AND lost_at >= ? AND species_id = ? AND spot = ? AND ABS(weight - ?) < 0.005`)
+      .run(userId, new Date().toISOString(), lostId, since, fish.speciesId, fish.spot, fish.weight);
+    if (claimed.changes !== 1 || row?.user_id === userId) return false;
+    payBonus(catchId, userId, bonus, "found");
+    return true;
   })();
 }
 

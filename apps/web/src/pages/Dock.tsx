@@ -24,6 +24,8 @@ import {
   type BonusId,
   type LodgeRelease,
   TAG_FINDER_BONUS,
+  LOST_FINDER_BONUS,
+  type LodgeLost,
   GIANT_BONUS,
   TAG_RETURN_BONUS,
   fishById,
@@ -74,7 +76,7 @@ import {
   type SkillId,
   type StanceId,
 } from "@stillwater/shared";
-import { buyGroundbait, buyShiner, buyUpgrade, errorText, getBankWeek, getGiants, type GiantStatus, getLodgeReleased, getMe, getSpeciesRecords, getWeeklyChallenges, releaseCatch, type Me, type WeeklyBoard } from "../api";
+import { buyGroundbait, buyShiner, buyUpgrade, errorText, getBankWeek, getGiants, getLodgeLost, reportLost, type GiantStatus, getLodgeReleased, getMe, getSpeciesRecords, getWeeklyChallenges, releaseCatch, type Me, type WeeklyBoard } from "../api";
 import { DailyRequestsPanel } from "../components/DailyRequestsPanel";
 import { WeeklyChallengesPanel } from "../components/WeeklyChallengesPanel";
 import { FightBar } from "../components/FightBar";
@@ -124,6 +126,7 @@ import { PowerMeter } from "../game/scene/PowerMeter";
 import { prefersReducedMotion } from "../game/scene/reducedMotion";
 import { shyOf } from "../game/giantShy";
 import { nightLineKinds, nightLineState } from "../game/nightLine";
+import { isOldFoe, loadOldFoe, saveOldFoe } from "../game/oldFoe";
 import { BUCKET_SIZE } from "../game/baitBucket";
 import { isLiveBait, isTopwater, touchScreen, useFishingGame } from "../game/useFishingGame";
 import { useCatchSync } from "../game/useCatchSync";
@@ -316,8 +319,42 @@ export function DockPage() {
     };
   }, [angler, latestCatch]);
   const openGiants = useMemo(() => giants.filter((giant) => !giant.landedBy), [giants]);
+  // Other anglers' lost trophies, read like the giants; one of the angler's own that someone landed is no foe of theirs any more.
+  const [lodgeLost, setLodgeLost] = useState<LodgeLost[]>([]);
+  useEffect(() => {
+    if (!angler) return;
+    let live = true;
+    getLodgeLost()
+      .then(({ lost, mineFound }) => {
+        if (!live) return;
+        setLodgeLost(lost);
+        const foe = loadOldFoe(angler);
+        if (foe && mineFound.some((found) => found.spot === foe.spot && isOldFoe(foe, { species: { id: found.speciesId }, weight: found.weight }))) saveOldFoe(angler, null);
+      })
+      // Without the list no other angler's lost trophy comes up this visit.
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [angler, latestCatch]);
   const giantBanks = useMemo(() => openGiants.map((giant) => giant.spot), [openGiants]);
-  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind, legend, lodgeReleased, luckyLures, fishedDownBanks, openGiants);
+  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind, legend, lodgeReleased, luckyLures, fishedDownBanks, openGiants, lodgeLost);
+  // A trophy that broke the line is filed with the lodge once, for other anglers to meet at its bank.
+  const reportedLost = useRef<string | null>(null);
+  useEffect(() => {
+    const lost = game.lostReport;
+    if (!lost || reportedLost.current === lost.id) return;
+    reportedLost.current = lost.id;
+    const { id: _local, ...fish } = lost;
+    // The angler's own foe keeps the report's id, so landing it themselves closes it for the lodge.
+    reportLost(fish)
+      .then(({ id }) => {
+        const foe = angler ? loadOldFoe(angler) : null;
+        if (angler && foe && isOldFoe(foe, { species: { id: fish.speciesId }, weight: fish.weight })) saveOldFoe(angler, { ...foe, reportId: id });
+      })
+      // A report that fails only means the rest of the lodge never meets this one.
+      .catch(() => undefined);
+  }, [game.lostReport]);
   useEffect(() => {
     if (game.outcome?.kind !== "landed") return;
     const bank = game.outcome.spot;
@@ -559,7 +596,7 @@ export function DockPage() {
   const retryServerSave = () => {
     const outcome = game.outcome;
     if (outcome?.kind === "landed" && posted.current !== outcome.id) {
-      void saveOutcome(outcome.id, { requestId: outcome.id, speciesId: outcome.species.id, weight: outcome.weight, spot: outcome.spot, clean: outcome.clean, cleanRun: outcome.notes?.cleanRun, hour: outcome.hour ?? hour, sky, season, day: landedDay.current, taggedFrom: outcome.tag?.id, giant: outcome.giant ? true : undefined });
+      void saveOutcome(outcome.id, { requestId: outcome.id, speciesId: outcome.species.id, weight: outcome.weight, spot: outcome.spot, clean: outcome.clean, cleanRun: outcome.notes?.cleanRun, hour: outcome.hour ?? hour, sky, season, day: landedDay.current, taggedFrom: outcome.tag?.id, giant: outcome.giant ? true : undefined, lostFrom: outcome.lostFrom?.id ?? outcome.closesLost });
       return;
     }
     void catchSync.sync();
@@ -823,12 +860,12 @@ export function DockPage() {
       setReleaseError(false);
       return;
     }
-    const { id, species, weight, spot: catchSpot, clean, notes, tag, giant, hour: caughtAt } = game.outcome;
+    const { id, species, weight, spot: catchSpot, clean, notes, tag, giant, hour: caughtAt, lostFrom, closesLost } = game.outcome;
     if (posted.current === id) return;
     landedDay.current = localDate(new Date());
     saveFieldLog();
     if (!userId) return;
-    void saveOutcome(id, { requestId: id, speciesId: species.id, weight, spot: catchSpot, clean, cleanRun: notes?.cleanRun, hour: caughtAt ?? hour, sky, season, day: landedDay.current, taggedFrom: tag?.id, giant: giant ? true : undefined });
+    void saveOutcome(id, { requestId: id, speciesId: species.id, weight, spot: catchSpot, clean, cleanRun: notes?.cleanRun, hour: caughtAt ?? hour, sky, season, day: landedDay.current, taggedFrom: tag?.id, giant: giant ? true : undefined, lostFrom: lostFrom?.id ?? closesLost });
   }, [game.outcome, saveFieldLog, saveOutcome, userId, hour, sky, season]);
 
   useEffect(() => {
@@ -1394,11 +1431,12 @@ export function DockPage() {
                   game.outcome.weight,
                   game.outcome.clean,
                   weeklyBonus(game.outcome.species.id, landedDay.current) * (landedGolden ? GOLDEN_BONUS : 1) * cleanRunBonus(game.outcome.clean, game.outcome.notes?.cleanRun) * (lodgeTaken ? LODGE_RECORD_BONUS : stamp?.kind === "pb" ? PB_BONUS : 1) * (dayRun > 0 ? DAY_RUN_BONUS : 1) * masteryBonus(priorCaught),
-                ) + (game.outcome.tag ? TAG_FINDER_BONUS : 0) + (game.outcome.giant ? GIANT_BONUS : 0),
+                ) + (game.outcome.tag ? TAG_FINDER_BONUS : 0) + (game.outcome.giant ? GIANT_BONUS : 0) + (game.outcome.lostFrom ? LOST_FINDER_BONUS : 0),
               })}
             </p>
             {landedGolden && paid("golden", true) && <p className="catch-stamp golden">{t("Golden fish · 2× points")}</p>}
             {game.outcome.giant && paid("giant", true) && <p className="catch-stamp golden">{t("{name}, the bank's giant · +{points} pts", { name: t(game.outcome.giant), points: GIANT_BONUS })}</p>}
+            {game.outcome.lostFrom && paid("found", true) && <p className="catch-stamp">{t("{name}'s lost trophy · +{points} pts", { name: game.outcome.lostFrom.by, points: LOST_FINDER_BONUS })}</p>}
             {game.outcome.tag && paid("tag", true) && <p className="catch-stamp">{t("Tagged by {name} · +{points} pts, and {back} for them", { name: game.outcome.tag.by, points: TAG_FINDER_BONUS, back: TAG_RETURN_BONUS })}</p>}
             {paid("weekly", weeklyBonus(game.outcome.species.id, landedDay.current) > 1) && <p className="catch-stamp">{t("Fish of the week · 1.5× points")}</p>}
             {game.outcome.clean && (

@@ -1,6 +1,6 @@
 import { Hono } from "hono";
-import { BANK_STOCK_DAYS, giantsForWeek, giantWeek, tagWindow, TRACK_LIMIT, TRACK_WINDOW_MS, type LodgeTrack } from "@stillwater/shared";
-import { listBankCounts, listGiantsLanded, listLodgeReleases, listRecentLodgeCatches } from "../db.ts";
+import { BANK_STOCK_DAYS, fishById, giantsForWeek, giantWeek, lostSince, reportsLost, SPOT_IDS, tagWindow, TRACK_LIMIT, TRACK_WINDOW_MS, type LodgeTrack } from "@stillwater/shared";
+import { countReportedLost, listBankCounts, listGiantsLanded, listLodgeLost, listLodgeReleases, listMineFound, listRecentLodgeCatches, reportLost } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
 export const lodgeRoutes = new Hono();
@@ -49,4 +49,36 @@ lodgeRoutes.get("/lodge/giants", (c) => {
       return { ...giant, landedBy: by?.displayName ?? null, landedAt: by?.landedAt ?? null };
     }),
   });
+});
+
+/** Lost reports one angler may file in LOST_DAYS, landed since or not, so a flood of them can't crowd the lodge's list or be farmed. */
+const LOST_REPORT_LIMIT = 3;
+
+/** Files a trophy that broke the angler's line, for the rest of the lodge to meet at its bank. */
+lodgeRoutes.post("/lodge/lost", async (c) => {
+  const user = c.get("user") as SessionUser;
+  const body = (await c.req.json().catch(() => null)) as { speciesId?: unknown; weight?: unknown; spot?: unknown } | null;
+  const species = typeof body?.speciesId === "string" ? fishById(body.speciesId) : undefined;
+  const weight = typeof body?.weight === "number" ? body.weight : NaN;
+  const spot = body?.spot;
+  if (
+    !species ||
+    !Number.isFinite(weight) ||
+    weight > species.maxWeight ||
+    typeof spot !== "string" ||
+    !(SPOT_IDS as readonly string[]).includes(spot) ||
+    !species.spots.includes(spot as (typeof species.spots)[number]) ||
+    !reportsLost(species, weight)
+  ) {
+    return c.json({ error: "invalid lost fish" }, 400);
+  }
+  if (countReportedLost(user.id, lostSince()) >= LOST_REPORT_LIMIT) return c.json({ error: "too many lost fish" }, 429);
+  return c.json({ id: reportLost(user.id, { speciesId: species.id, weight, spot }) });
+});
+
+/** Other anglers' lost trophies still about their banks, and which of this angler's own someone else has landed. */
+lodgeRoutes.get("/lodge/lost", (c) => {
+  const user = c.get("user") as SessionUser;
+  const since = lostSince();
+  return c.json({ lost: listLodgeLost(user.id, since, 30), mineFound: listMineFound(user.id, since) });
 });

@@ -1,4 +1,4 @@
-import { canLand, FISH, fishById, isTaggable, LODGE_RECAPTURE_ODDS, RELEASED_GROWTH_CAP, tagWindow, type FishSpecies, type LodgeRelease, type Profile, type SpotId } from "@stillwater/shared";
+import { canLand, FISH, fishById, isTaggable, LODGE_LOST_ODDS, LODGE_RECAPTURE_ODDS, reportsLost, type LodgeLost, RELEASED_GROWTH_CAP, tagWindow, type FishSpecies, type LodgeRelease, type Profile, type SpotId } from "@stillwater/shared";
 
 export const RELEASED_KEY = "stillwater.released.v1";
 /** Chance a cast at a bank brings up a fish let go there on an earlier day. */
@@ -16,7 +16,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 export type ReleasedFish = { species: string; weight: number; spot: SpotId; at: number; lure?: string };
 
 /** A let-go fish come back to the line, grown since; one another angler let go carries their name and its catch's id as a tag. */
-export type Recaught = { species: FishSpecies; weight: number; was: number; at: number; tag?: { id: string; by: string }; giant?: string; foe?: { lure?: string } };
+export type Recaught = { species: FishSpecies; weight: number; was: number; at: number; tag?: { id: string; by: string }; giant?: string; foe?: { lure?: string }; lost?: { id: string; by: string } };
 
 const dayOf = (ms: number) => new Date(ms).toDateString();
 
@@ -70,6 +70,16 @@ export function castForReleased(list: readonly ReleasedFish[], spot: SpotId, now
 function recaughtFrom(species: FishSpecies, was: number, at: number, now: number): Recaught {
   const days = Math.max(1, Math.round((now - at) / DAY_MS));
   return { species, weight: grownWeight(species, was, days), was, at };
+}
+
+/** Whether this cast brings up a trophy another angler lost at this bank, one this angler's line can hold and not yet landed this visit. */
+export function castForLodgeLost(list: readonly LodgeLost[], spot: SpotId, roll: number, landed: ReadonlySet<string>, angler: Pick<Profile, "strength" | "accuracy">): Recaught | null {
+  const back = list.find((one) => {
+    const species = fishById(one.speciesId);
+    return one.spot === spot && !landed.has(one.id) && reportsLost(species, one.weight) && canLand(angler, species);
+  });
+  if (!back || roll >= LODGE_LOST_ODDS) return null;
+  return { species: fishById(back.speciesId)!, weight: back.weight, was: back.weight, at: Date.parse(back.at), lost: { id: back.id, by: back.by } };
 }
 
 /** Whether this cast brings up a fish another angler let go at this bank before today (UTC), one this angler's line can hold and not yet landed this visit. */

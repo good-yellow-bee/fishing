@@ -49,7 +49,7 @@ async function tracks() {
 
 beforeEach(() => {
   clearLodgeCache();
-  db.exec(`DELETE FROM giant_landed; DELETE FROM catch; DELETE FROM profile; DELETE FROM "user";`);
+  db.exec(`DELETE FROM lost_fish; DELETE FROM giant_landed; DELETE FROM catch; DELETE FROM profile; DELETE FROM "user";`);
   angler("ash", "Ash");
   angler("mara", "Mara");
 });
@@ -150,5 +150,39 @@ describe("GET /lodge/giants", () => {
     expect(giants.map((giant) => giant.spot)).toEqual(GIANT_BANKS);
     expect(giants.find((giant) => giant.spot === "reeds")?.landedBy).toBe("Mara");
     expect(giants.find((giant) => giant.spot === "dock")?.landedBy).toBeNull();
+  });
+});
+
+describe("the lodge's lost trophies", () => {
+  const pike = { speciesId: "pike", weight: 14.5, spot: "reeds" };
+  const report = (body: object) => app.request("http://test/lodge/lost", { method: "POST", body: JSON.stringify(body), headers: { "Content-Type": "application/json" } });
+
+  it("files only a trophy at a bank its kind lives at, and keeps an angler to a few a week, landed since or not", async () => {
+    expect((await report({ ...pike, weight: 2 })).status).toBe(400);
+    expect((await report({ ...pike, spot: "inlet" })).status).toBe(400);
+    expect((await report({ ...pike, speciesId: "golden-shiner", weight: 0.5 })).status).toBe(400);
+    for (let i = 0; i < 3; i++) expect((await report(pike)).status).toBe(200);
+    db.exec(`UPDATE lost_fish SET found_by = 'mara'`);
+    expect((await report(pike)).status).toBe(429);
+  });
+
+  it("lists other anglers' lost trophies, and tells the angler which of their own someone landed", async () => {
+    const { reportLost, claimAndPayLost } = await import("../db.ts");
+    const { lostSince } = await import("@stillwater/shared");
+    const maras = reportLost("mara", pike);
+    reportLost("ash", { ...pike, weight: 14.8 });
+    const read = async () => (await (await app.request("http://test/lodge/lost")).json()) as { lost: { id: string; by: string }[]; mineFound: { weight: number }[] };
+    expect((await read()).lost.map((row) => [row.id, row.by])).toEqual([[maras, "Mara"]]);
+    landed("c1", "ash", "pike", "reeds", 1);
+    expect(claimAndPayLost(maras, { ...pike, weight: 14 }, lostSince(), "ash", "c1", 30)).toBe(false);
+    expect(claimAndPayLost(maras, pike, lostSince(), "ash", "c1", 30)).toBe(true);
+    expect(claimAndPayLost(maras, pike, lostSince(), "ash", "c1", 30)).toBe(false);
+    expect((await read()).lost).toEqual([]);
+    // Landing one's own lost trophy pays nothing, and closes it for everyone.
+    const ashLost = db.prepare(`SELECT id FROM lost_fish WHERE user_id = 'ash'`).get() as { id: string };
+    expect(claimAndPayLost(ashLost.id, { ...pike, weight: 14.8 }, lostSince(), "ash", "c1", 30)).toBe(false);
+    expect((db.prepare(`SELECT found_by FROM lost_fish WHERE id = ?`).get(ashLost.id) as { found_by: string }).found_by).toBe("ash");
+    db.prepare(`UPDATE lost_fish SET found_by = 'mara' WHERE id = ?`).run(ashLost.id);
+    expect((await read()).mineFound.map((row) => row.weight)).toEqual([14.8]);
   });
 });

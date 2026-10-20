@@ -2,7 +2,7 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { canLand, DOCK_STAND_X, DOCK_STAND_Z, FISH, type Giant, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind, type SpotId } from "@stillwater/shared";
+import { canLand, DOCK_STAND_X, DOCK_STAND_Z, FISH, type Giant, type LodgeLost, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind, type SpotId } from "@stillwater/shared";
 import { floodedInlet, makeFight, springRunTireMul, SPRING_RUN_TIRE, currentTireMul, CURRENT_FIGHTER_TIRE, type FightOutcome, type FightPerformance, type FightSim } from "./fight";
 import { FRENZY_SLOT_MS, HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt, slotFrenzy } from "./hotspot";
 import { bedRaider, COLD_WORK_GAP_MS, LONG_CAST_SOLID, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, castIntoSpooked, isSkipCast, castOnFreshWater, TWIST_CASTS, twistAfterCast, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, PRESSURE_CASTS, GROUNDBAIT_CASTS, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WARMING_WAIT, COOLING_WAIT, waterSwingWaitMul, anchorSplashWaitMul, ANCHOR_SPLASH_WAIT, LAMP_WINDOW } from "./logic";
@@ -169,9 +169,10 @@ function pointer(type: string, pointerId = 1) {
 /** The solved legend hunt the harness hands the hook, if a test sets one. */
 const harnessLegend: { current: { legendId: string; spot: SpotId } | null } = { current: null };
 const harnessGiants: { current: Giant[] } = { current: [] };
+const harnessLost: { current: LodgeLost[] } = { current: [] };
 
 function Harness({ current = profile, hour = "day", rising = false, lure, wind, sky, season }: { current?: Profile; hour?: LakeHour; rising?: boolean; lure?: string; wind?: Wind; sky?: Sky; season?: LakeSeason }) {
-  const game = useFishingGame(current, hour, lure === undefined ? undefined : { current: lure }, sky, false, season, undefined, rising, wind, undefined, harnessLegend.current, undefined, undefined, undefined, harnessGiants.current);
+  const game = useFishingGame(current, hour, lure === undefined ? undefined : { current: lure }, sky, false, season, undefined, rising, wind, undefined, harnessLegend.current, undefined, undefined, undefined, harnessGiants.current, harnessLost.current);
   return (
     <>
       <div ref={game.surfaceRef} data-stance="dock" data-aim="0.5,3" data-angler="0.15,7.42">
@@ -200,6 +201,8 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <i data-testid="bucket">{game.bucket}</i>
       <button type="button" onClick={game.checkNightLine}>check night line</button>
       <i data-testid="caught-hour">{game.outcome?.kind === "landed" ? (game.outcome.hour ?? "") : ""}</i>
+      <i data-testid="lost-from">{game.outcome?.kind === "landed" ? (game.outcome.lostFrom?.by ?? "") : ""}</i>
+      <i data-testid="lost-report">{game.lostReport ? `${game.lostReport.speciesId}|${game.lostReport.weight}|${game.lostReport.spot}` : ""}</i>
       <i data-testid="night-line">{game.nightLine ? game.nightLine.spot : ""}</i>
       <i data-testid="live-shiner">{String(game.liveShiner)}</i>
       <i data-testid="frayed">{String(game.frayed)}</i>
@@ -1065,6 +1068,8 @@ describe("useFishingGame lost fight", () => {
     castAndFight(surface, 1);
     expect(message()).toMatch(/threw the hook\. It looked like a trophy\. It will be about this bank in the days to come\.$/);
     expect(JSON.parse(kept.get(oldFoeKey(profile.userId))!)).toMatchObject({ species: "pike", weight: pike.maxWeight, spot: "dock", lure: "Pheasant tails" });
+    // And it goes to the lodge, for other anglers to meet.
+    expect(container!.querySelector("[data-testid=lost-report]")?.textContent).toBe(`pike|${pike.maxWeight}|dock`);
   });
 
   it("says a light hook dropped out of the slack line when a charge was left slack", () => {
@@ -2768,6 +2773,21 @@ describe("level unlock integration", () => {
       } catch {
         // No store in this run, so nothing was kept.
       }
+    }
+  });
+
+  it("brings up a trophy another angler lost here, names them, and lands it for the lodge to pay", () => {
+    harnessLost.current = [{ id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d", speciesId: "pike", weight: 14.5, spot: "dock", at: "2026-10-19T10:00:00.000Z", by: "Mara" }];
+    const strong = { ...profile, strength: 10, accuracy: 10 };
+    try {
+      const surface = mount(DOCK_BUBBLES.at, strong, "day", false, "Pheasant tails");
+      step.mockReturnValueOnce("landed");
+      castAndFight(surface, 1);
+      expect(phase()).toBe("result:landed");
+      expect(container!.querySelector("[data-testid=lost-from]")?.textContent).toBe("Mara");
+      expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toMatch(/^Northern pike: the trophy Mara lost here\./);
+    } finally {
+      harnessLost.current = [];
     }
   });
 
