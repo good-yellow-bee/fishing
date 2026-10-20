@@ -86,10 +86,16 @@ function waterFishLine(catches: readonly CatchEntry[], kindName: (species: strin
   return top.count > next.count ? t("{fish}, mostly {species}", { fish, species: kindName(top.species) }) : fish;
 }
 
-/** "Last fish: Sat, Oct 10" under a water, from its newest fish, on the day it counts on (a night fish on its outing's). */
-function lastFishLine(book: Logbook, catches: readonly CatchEntry[]) {
+/**
+ * "Last fish: Sat, Oct 10" under a kind or a water, from its newest fish, on the day it counts on (a night fish on its
+ * outing's); `linked` opens that fish, for a card that is not itself a link.
+ */
+function lastFishLine(book: Logbook, catches: readonly CatchEntry[], linked = false) {
   const last = catches.reduce<CatchEntry | null>((newest, entry) => (!newest || entry.caughtAt > newest.caughtAt ? entry : newest), null);
-  return last ? <p className="meta">{t("Last fish: {day}", { day: formatDay(bookFishDay(book, last)) })}</p> : null;
+  if (!last) return null;
+  const text = t("Last fish: {day}", { day: formatDay(bookFishDay(book, last)) });
+  // Opening that fish, as every other dated line on Bests does.
+  return <p className="meta">{linked ? <Link to={`/catches/${last.id}`}>{text}</Link> : text}</p>;
 }
 
 /** A fish's size by one measure, inches or pounds, to set two fish of a kind side by side. */
@@ -389,6 +395,7 @@ export function BestsPage() {
           outings={{ count: sheetOutings(whole, fishedBy).trips.filter((trip) => trip.date.startsWith(`${year}-`)).length, to: `/trips?${new URLSearchParams({ find: tripDaySearch(all, year, new Set(whole.trips.map((trip) => trip.id)), t) }).toString()}` }}
           kindsId="by-species"
           lureLink={(lure) => linkFor(exactTerm("lure", pieceName(lure)))}
+          waterLink={(water) => linkFor(exactTerm("water", water))}
         />
       ) : null}
 
@@ -531,7 +538,7 @@ export function BestsPage() {
                       {measures ? ` · ${measures}` : ""}
                     </p>
                     <KindLeaders book={book} species={row.species} />
-                    {lastFishLine(whole, kindFish.get(kindKey(row.species)) ?? [])}
+                    {lastFishLine(whole, kindFish.get(kindKey(row.species)) ?? [], true)}
                   </article>
                 );
               })}
