@@ -310,7 +310,7 @@ export const PL_GAME: PlBook = {
   "The lake asks a little less of your phone again: shadows are redrawn at most thirty times a second, the shore's foam does less work each frame, and the anglers you only see in rain or fog and the deer, moose and hare of dawn and dusk now load only when they come out.":
     "Jezioro znów trochę mniej obciąża twój telefon: cienie odświeżają się najwyżej trzydzieści razy na sekundę, piana przy brzegu wymaga mniej pracy w każdej klatce, a wędkarze widoczni tylko w deszczu lub mgle oraz jelenie, łosie i zające o świcie i zmierzchu wczytują się dopiero, gdy się pojawiają.",
   "The shiner trap now follows the season: baited in winter's cold water, it soaks twelve hours and holds just one shiner. And spare shiners in your bait bucket keep five days in winter, but only two in the summer heat.":
-    "Pułapka na złotawce zależy teraz od pory roku: zanęcona zimą, w zimnej wodzie, czeka dwanaście godzin i zwabia tylko jednego złotawca. A zapasowe złotawce w wiaderku żyją zimą pięć dni, ale w letnim upale tylko dwa.",
+    "Pułapka na złotawce zależy teraz od pory roku: zanęcona zimą, w zimnej wodzie, czeka dwanaście godzin i mieści tylko jednego złotawca. A zapasowe złotawce w wiaderku żyją zimą pięć dni, ale w letnim upale tylko dwa.",
   "Tight to the lily pads, where the bass and pike wait in ambush.": "Tuż przy liściach grzybieni, gdzie w zasadzce czekają bassy i szczupaki.",
   "Tight to the far rock, where the walleye hold in its shadow.": "Tuż przy dalekiej skale, gdzie w jej cieniu trzymają się sandacze.",
   "Along the rock edge, where the point drops off and the bass hold.": "Wzdłuż skalnej krawędzi, gdzie cypel opada w głąb i trzymają się bassy.",
