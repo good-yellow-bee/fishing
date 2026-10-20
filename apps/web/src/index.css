@@ -2512,6 +2512,19 @@ html[data-input="pad"] .fight-bar .on-pad {
   }
 }
 
+/* The strike's note ("Hooked solid in 0.3 s! … a long first run.") added three lines to the card just as the fish, still
+   out where it took, lay under it: on a phone up to 700 px tall, or held sideways, a screen reader still says it. */
+@media (pointer: coarse) and (max-width: 800px) and (min-height: 501px) and (max-height: 700px), (pointer: coarse) and (max-height: 500px) {
+  .fight-bar .fight-note {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
 @media (max-width: 520px) {
   .hud-user,
   .skill-chip {
