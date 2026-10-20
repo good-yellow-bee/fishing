@@ -471,7 +471,7 @@ function SpotView() {
   const split = weekendSplit(countedTrips, fishOn, fishedBy);
   // Last year's kinds here still to come back, and the day this water gave the most kinds: as Bests says them for the book.
   // Dated as the season line above dates them, so a New Year's Eve night fish is last year's on both.
-  const notYet = notYetThisYear(summed, new Date(`${outingDay(today)}T12:00:00`), undefined, (entry) => bookFishDay(book, entry));
+  const notYet = notYetThisYear(summed, new Date(`${fishedBy}T12:00:00`), undefined, (entry) => bookFishDay(book, entry));
   const kindsDay = mostKindsDay({ ...book, catches: summed });
   // Its links open the fish its counts count: the sample week's beside the angler's own left out, as here.
   // Kinds named as the book writes them most, as Bests and the catch cards name them, not as this water's few fish do.

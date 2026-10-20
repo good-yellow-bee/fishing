@@ -276,8 +276,10 @@ export function TackleList({
                 onClick={() => {
                   // Back in its place on Undo, unless it has come back since, however it was added again (a tip, the Lure record).
                   const at = items.findIndex((other) => other.id === item.id);
+                  // A same-named row already there before (an older list) doesn't stop the Undo.
+                  const before = new Set(items.filter((other) => other.id !== item.id).map((other) => other.id));
                   remove(item.id);
-                  setTaken({ text: t("{piece} taken off the list.", { piece: pieceName(item.label) }), undo: (current) => (current.some((other) => other.id === item.id || (other.tripId === item.tripId && shownPieceKey(other.label) === shownPieceKey(item.label))) ? current : [...current.slice(0, at), item, ...current.slice(at)]) });
+                  setTaken({ text: t("{piece} taken off the list.", { piece: pieceName(item.label) }), undo: (current) => (current.some((other) => other.id === item.id || (!before.has(other.id) && other.tripId === item.tripId && shownPieceKey(other.label) === shownPieceKey(item.label))) ? current : [...current.slice(0, at), item, ...current.slice(at)]) });
                   focusAfter(index);
                 }}
                 aria-label={t("Take {piece} off the list", { piece: pieceName(item.label) })}

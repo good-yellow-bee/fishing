@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { TackleItem } from "@stillwater/shared";
 import { renamedTackle } from "./gear/renamedTackle";
+import { undoneTackle } from "./gear/undoneTackle";
 import { gpxFor } from "./gpx";
 
 describe("round 115: merging two spellings on a packing list", () => {
@@ -9,7 +10,10 @@ describe("round 115: merging two spellings on a packing list", () => {
       { id: "a", tripId: "t", label: "Spiner", packed: true },
       { id: "b", tripId: "t", label: "Spinner", packed: false },
     ];
-    expect(renamedTackle(items, "Spiner", "Spinner")).toEqual([{ id: "b", tripId: "t", label: "Spinner", packed: true }]);
+    const after = renamedTackle(items, "Spiner", "Spinner")!;
+    expect(after).toEqual([{ id: "b", tripId: "t", label: "Spinner", packed: true }]);
+    // Undone, each row as it was.
+    expect(undoneTackle(after, items, after)).toEqual([{ id: "b", tripId: "t", label: "Spinner", packed: false }, items[0]]);
   });
 });
 

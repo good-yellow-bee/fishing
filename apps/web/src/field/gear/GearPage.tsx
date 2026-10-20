@@ -160,7 +160,8 @@ function LureRecord({ today }: { today: string }) {
   // A lure that took fish goes straight into the next outing's bag, unless it is already there.
   // Only for an outing on the water picked: another water's lures are no tip for it.
   const coming = nextRealTrips(book, today)[0];
-  const next = coming && (!water || water.id === coming.spotId) ? coming : undefined;
+  // At the water picked or a twin of it, as its record counts them.
+  const next = coming && (!water || twinName(water.name, book.spots.find((spot) => spot.id === coming.spotId)?.name ?? "")) ? coming : undefined;
   const onNext = new Set(next ? items.filter((item) => item.tripId === next.id).map((item) => shownPieceKey(item.label)) : []);
   const [justPacked, setJustPacked] = useState<string | null>(null);
   // The button goes once the lure is on the list: focus moves to the line saying so.
