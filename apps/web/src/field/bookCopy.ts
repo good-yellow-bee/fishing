@@ -1,4 +1,4 @@
-import { sampleLogbook, type Logbook, type TackleItem } from "@stillwater/shared";
+import { sampleLogbook, type Logbook, type TackleItem, type Trip } from "@stillwater/shared";
 import { PLAY_LAKE_ID, offPlayLake, upcomingOwnTrips } from "./playLake";
 import { bookFishDay } from "./tripMonths";
 
@@ -81,16 +81,27 @@ export function withoutSample(book: Logbook): Logbook {
  */
 export function upcomingRealTrips(book: Logbook, today: string) {
   const ahead = upcomingOwnTrips(book, today);
-  return isSampleOnly(book) ? ahead : ahead.filter((trip) => !isSampleOuting(trip));
+  const real = isSampleOnly(book) ? ahead : ahead.filter((trip) => !isSampleOuting(trip));
+  // Of a day's outings, the one being fished first: Next and its "Log a catch" go to it, not to a later plan that day.
+  const going = underWayToday(book, today);
+  return real.sort((a, b) => a.date.localeCompare(b.date) || Number(going(b)) - Number(going(a)));
+}
+
+/**
+ * Whether today's outing is under way: a fish of its own, one logged loose on its water today, a fish lost or a strike
+ * missed, as underWay and Out now take it. Loose fish by the day they count on, so last evening's small-hours fish stays
+ * that session's.
+ */
+function underWayToday(book: Logbook, today: string): (trip: Trip) => boolean {
+  const fished = new Set(book.catches.map((entry) => entry.tripId));
+  const looseAt = new Set(book.catches.filter((entry) => entry.tripId === null && bookFishDay(book, entry) === today).map((entry) => entry.spotId));
+  return (trip) => trip.date === today && (fished.has(trip.id) || looseAt.has(trip.spotId) || Boolean(trip.lost || trip.missed));
 }
 
 /** The outings still to start, for "Next outing": today's once it has a fish is under way, not ahead. */
 export function nextRealTrips(book: Logbook, today: string) {
-  const fished = new Set(book.catches.map((entry) => entry.tripId));
-  // A fish logged loose on its water today puts it under way too, as underWay and Out now take it: by the day it counts
-  // on, so last evening's small-hours fish stays that session's.
-  const looseAt = new Set(book.catches.filter((entry) => entry.tripId === null && bookFishDay(book, entry) === today).map((entry) => entry.spotId));
-  return upcomingRealTrips(book, today).filter((trip) => trip.date > today || !(fished.has(trip.id) || looseAt.has(trip.spotId) || trip.lost || trip.missed));
+  const going = underWayToday(book, today);
+  return upcomingRealTrips(book, today).filter((trip) => !going(trip));
 }
 
 /** Whether taking the sample week out would take anything: a fish, an outing or a water of it with none of the player's own. */

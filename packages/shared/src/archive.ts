@@ -1,4 +1,4 @@
-import { isLogbook, type CatchEntry, type Logbook, type Measure, type Spot, type Trip } from "./logbook.ts";
+import { isLogbook, localDate, type CatchEntry, type Logbook, type Measure, type Spot, type Trip } from "./logbook.ts";
 import { CATCH_PHOTO_STORE_MAX_CHARS, isCatchPhoto, photosForBook, type CatchPhotoMap } from "./photo.ts";
 import { isTackleBox, type TackleItem } from "./tackle.ts";
 import { prepareStoredLogbook } from "./weather.ts";
@@ -9,6 +9,9 @@ export const FIELD_ARCHIVE_VERSION = 1;
 
 export const FIELD_ARCHIVE_REFUSAL =
   "That file is not a Stillwater field log. This book was left as it is.";
+
+export const FIELD_ARCHIVE_NEWER =
+  "That file comes from a newer Stillwater. Reload this page to update it, then try again. This book was left as it is.";
 
 export const FIELD_ARCHIVE_TOO_LARGE =
   "That file has more photos than this browser should keep. This book was left as it is.";
@@ -90,7 +93,8 @@ function cleanCatch(entry: CatchEntry): CatchEntry {
 function datesReadable(book: Logbook): boolean {
   return (
     book.catches.every((entry) => !Number.isNaN(Date.parse(entry.caughtAt))) &&
-    book.trips.every((trip) => /^\d{4}-\d{2}-\d{2}$/.test(trip.date) && !Number.isNaN(new Date(`${trip.date}T12:00:00`).getTime()))
+    // A day the calendar has: "2026-02-31" would roll over to March 3 on its card and stay February everywhere else.
+    book.trips.every((trip) => /^\d{4}-\d{2}-\d{2}$/.test(trip.date) && localDate(new Date(`${trip.date}T12:00:00`)) === trip.date)
   );
 }
 
@@ -223,7 +227,10 @@ export function mergeFieldArchive(here: FieldArchive, file: FieldArchive, delete
 
 export function parseFieldArchive(value: unknown): FieldArchiveResult {
   if (!isRecord(value)) return refuse();
-  if (value.kind !== FIELD_ARCHIVE_KIND || value.version !== FIELD_ARCHIVE_VERSION) return refuse();
+  if (value.kind !== FIELD_ARCHIVE_KIND) return refuse();
+  // A file written by a later version says so, rather than reading as no field log at all.
+  if (typeof value.version === "number" && value.version > FIELD_ARCHIVE_VERSION) return { ok: false, message: FIELD_ARCHIVE_NEWER };
+  if (value.version !== FIELD_ARCHIVE_VERSION) return refuse();
   const prepared = prepareStoredLogbook(value.book);
   if (!isLogbook(prepared) || !datesReadable(prepared) || !sizesReadable(prepared)) return refuse();
   if (!isTackleBox(value.tackle)) return refuse();

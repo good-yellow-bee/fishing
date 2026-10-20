@@ -36,6 +36,7 @@ import { largestFirst } from "./largestFirst";
 import { MatchOrder, useLargestOrder } from "./MatchOrder";
 import { spreadRows } from "./spreadRows";
 import { outingDay, plainName } from "./tripDates";
+import { bookLureName } from "./pieceTally";
 
 /** One kind of fish across the whole book: how many, how big, on what, and where. */
 /** How many of the kind's newest photos show here; the rest are a search away. */
@@ -202,7 +203,7 @@ function SpeciesView() {
         <p className="meta water-range">{t("Caught in water of {temp}.", { temp: waterRange(countedFish(catches))! })}</p>
       ) : null}
       <WaterTipsBox catches={catches} label={t("What it takes")} within={kindTerm} />
-      <CopySummary text={() => speciesSummary(name, catches, waters, (entry) => bookFishDay(book, entry))} file="stillwater-species.txt" />
+      <CopySummary text={() => speciesSummary(name, catches, waters, (entry) => bookFishDay(book, entry), bookLureName(book.catches))} file="stillwater-species.txt" />
       <BestGrowth catches={catches} />
       <LengthAndWeight catches={catches} />
       <PhotoStrip catches={catches} within={kindTerm} list={`species:${species}`} />

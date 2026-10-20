@@ -548,6 +548,8 @@ export const PL_FIELD: PlBook = {
     "Dziennik ma już tyle zdjęć, ile ta przeglądarka powinna przechować.",
   "That file is not a Stillwater field log. This book was left as it is.":
     "Ten plik nie jest dziennikiem połowów Stillwater. Dziennik został bez zmian.",
+  "That file comes from a newer Stillwater. Reload this page to update it, then try again. This book was left as it is.":
+    "Ten plik pochodzi z nowszej wersji Stillwater. Odśwież tę stronę, aby ją zaktualizować, i spróbuj ponownie. Dziennik został bez zmian.",
   "That file has more photos than this browser should keep. This book was left as it is.":
     "Ten plik ma więcej zdjęć, niż ta przeglądarka powinna przechować. Dziennik został bez zmian.",
   "Name the piece in a few words.": "Nazwij sprzęt w kilku słowach.",
