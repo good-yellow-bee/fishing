@@ -1919,6 +1919,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT443~~ | ~~The angler's arm tires in a long fight: past 45 seconds of reeling, the reel wins 1% less line each further second, down to 70% of its pace; resting the reel gives the arm back half a second a second, and the status says to rest it~~ (#1668) | gameplay | M |
 | ~~GT444~~ | ~~News card 2026-10-20-game63 covers GT442-GT443: the pre-baited swim and the tiring arm~~ (#1670) | ui | S |
 | ~~GT445~~ | ~~Letting a giant go: a landed giant let go goes back to its bank for the rest of its week, once; its first angler keeps the Giant hunter credit, the next angler to land it is paid 100, and the Board says who let it go~~ (#1671) | gameplay | M |
+| ~~GT446~~ | ~~News card 2026-10-20-game64 covers GT445: letting a giant go~~ (#1672) | ui | S |
 
 ## Risks / open questions for the owner
 
