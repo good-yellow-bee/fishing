@@ -23,6 +23,7 @@ meRoutes.get("/me", (c) => {
   // The longest run doesn't depend on today; the page reads the current one from `recentDays` on its own calendar.
   const { longest } = streakDays(days, "0000-01-01");
   const today = bagDay();
+  const slamDays = listSlamDays(user.id);
   return c.json({
     user: { id: user.id, email: user.email, name: user.name },
     profile,
@@ -37,9 +38,11 @@ meRoutes.get("/me", (c) => {
     },
     catches,
     speciesStats,
-    badges: badgeProgress(listBadgeFacts(user.id), { longestStreak: longest, derbyWins: derbyWins(user.id), slams: slamBest(listSlamDays(user.id)) }),
+    badges: badgeProgress(listBadgeFacts(user.id), { longestStreak: longest, derbyWins: derbyWins(user.id), slams: slamBest(slamDays) }),
     longestStreak: longest,
     recentDays: days.slice(-60),
+    // Two days back covers every angler's local today, for the landed card's slam stamp.
+    recentSlams: slamDays.filter((row) => row.day >= new Date(Date.now() - 2 * 86_400_000).toISOString().slice(0, 10)),
     todayBag: { day: today.from, weights: listBagWeights(user.id, today.from, today.to) },
     tagReturns: listTagReturns(user.id, new Date(Date.now() - TAG_NEWS_DAYS * 86_400_000).toISOString(), 20),
   });

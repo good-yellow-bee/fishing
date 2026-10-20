@@ -11,7 +11,7 @@ export const SLAMS: readonly Slam[] = [
 export function slamBest(days: readonly { day: string; speciesId: string }[]): Record<SlamId, number> {
   const byDay = new Map<string, Set<string>>();
   for (const { day, speciesId } of days) byDay.set(day, (byDay.get(day) ?? new Set()).add(speciesId));
-  const best = { "bass-slam": 0, "trout-slam": 0 } as Record<SlamId, number>;
+  const best = Object.fromEntries(SLAMS.map((slam) => [slam.id, 0])) as Record<SlamId, number>;
   for (const kinds of byDay.values()) {
     for (const slam of SLAMS) best[slam.id] = Math.max(best[slam.id], slam.kinds.filter((kind) => kinds.has(kind)).length);
   }

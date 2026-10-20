@@ -417,11 +417,15 @@ export function DockPage() {
   const [session, setSession] = useState<SessionDraft | null>(null);
   const sessionRef = useRef(session);
   sessionRef.current = session;
-  /** The slam this landed fish completes, with today's earlier fish of the outing, read before it joins them. */
+  const recentSlamsRef = useRef(me?.recentSlams ?? []);
+  recentSlamsRef.current = me?.recentSlams ?? [];
+  /** The slam this landed fish completes with today's earlier fish, saved or still in this outing, read before it joins them. */
   const slam = useMemo(() => {
     if (game.outcome?.kind !== "landed") return null;
-    const today = sessionRef.current?.date === localDate(new Date()) ? sessionRef.current.fish.map((fish) => fish.speciesId) : [];
-    return slamCompletedBy(today, game.outcome.species.id);
+    const day = localDate(new Date());
+    const saved = recentSlamsRef.current.filter((row) => row.day === day).map((row) => row.speciesId);
+    const outing = sessionRef.current?.date === day ? sessionRef.current.fish.map((fish) => fish.speciesId) : [];
+    return slamCompletedBy([...saved, ...outing], game.outcome.species.id);
   }, [game.outcome]);
   const [recap, setRecap] = useState<{ leftover: boolean } | null>(null);
   const [filedTrip, setFiledTrip] = useState<{ id: string; title: string } | null>(null);
