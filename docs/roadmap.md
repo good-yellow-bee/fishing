@@ -1865,7 +1865,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT410~~ | ~~Species studies: each landed kind in the field guide has three studies (land it at every bank it lives at, at three of the lake's four hours, and at trophy weight); finishing all three lets the angler claim 100 points once and marks it Studied; the server reads the studies from the angler's catches on its own call~~ (#1603) | gameplay | M |
 | ~~GT411~~ | ~~News card 2026-10-20-game52 covers GT410: species studies~~ (#1606) | ui | S |
 | ~~GT412~~ | ~~The landed card's bonus stamps follow what the server paid: once the catch is saved, the golden, fish-of-the-week, clean-run, personal-best, lodge-record, day-run, mastery and tag stamps show only the bonuses the server applied (it now saves them with the catch)~~ (#1607) | gameplay | M |
-| ~~GT413~~ | ~~A crowded bank: each day another angler fishes one bank (never the day's hot bank), so the angler's first six casts there bite 1.15x slower unless groundbait or a new kind of lure brings the fish on; the stance chip and the wait hint say so, and a new angler is spared~~ (#PR) | gameplay | S |
+| ~~GT413~~ | ~~A crowded bank: each day another angler fishes one bank (never the day's hot bank), so the angler's first six casts there bite 1.15x slower unless groundbait or a new kind of lure brings the fish on; the stance chip and the wait hint say so, and a new angler is spared~~ (#1610) | gameplay | S |
 | GT414 | News card game53 covers GT412 and GT413 | ui | S |
 
 ## Risks / open questions for the owner
