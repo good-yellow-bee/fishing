@@ -226,6 +226,23 @@ describe("dock weather", () => {
   });
 });
 
+describe("the landed card's points", () => {
+  it("shows what the server paid once the catch is saved, and drops a tag the server didn't pay", async () => {
+    const bass = fishById("smallmouth-bass")!;
+    vi.mocked(recordCatch).mockResolvedValue({ id: "c-tag", points: 12, speciesId: bass.id, weight: 2 });
+    const saved = { ...me, catches: [{ id: "c-tag", userId: "u", speciesId: bass.id, weight: 2, points: 12, spot: "dock" as const, hour: null, sky: null, season: null, golden: false, released: false, requestId: "catch-tagged", tagged: false, createdAt: new Date().toISOString() }] };
+    vi.mocked(getMe).mockResolvedValueOnce(me).mockResolvedValue(saved);
+    landed.outcome = { kind: "landed", id: "catch-tagged", species: bass, weight: 2, spot: "dock", clean: false, tag: { id: "t1", by: "Mara" } };
+    const page = await openDock("/");
+    await act(async () => {
+      await Promise.resolve();
+    });
+    const card = page.querySelector(".landed-card")!;
+    expect(card.textContent).toContain("+12 pts");
+    expect(card.textContent).not.toContain("Tagged by Mara");
+  });
+});
+
 describe("dock scene fish", () => {
   it("shows the landed fish at its weight, and the fish that turned away on a missed strike", async () => {
     const perch = fishById("perch")!;

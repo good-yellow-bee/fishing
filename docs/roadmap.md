@@ -1844,6 +1844,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT399~~ | ~~Lantern-lit net: at night a fish hooked on a minnow lure among the dock lantern's minnows sees the net in the light and bolts from it once, as a carp does; the fight card says so~~ (#1578) | gameplay | S |
 | ~~GT400~~ | ~~Fired up on fry: a fish hooked chasing the kingfisher's fry is fired up, so its first run doesn't tire it at all; the fight card says so~~ (#1579) | gameplay | S |
 | ~~GT401~~ | ~~News card 2026-10-20-game49 covers GT398 to GT400: risers leap first, the lantern-lit net and fired up on the fry~~ (#1580) | ui | S |
+| ~~GT403~~ | ~~The landed card tells what the server paid: once the catch is saved, its points line shows the saved points, and a lodge tag's stamp shows only if the server paid the tag (another angler may have landed that fish first)~~ (#PR) | gameplay | S |
+| GT404 | Bank stock across the week: a bank where the angler landed many fish in the last seven days is fished down, so its fish come smaller until it rests; the bank's sign says so, and the server reads the week's catches on its own call | gameplay | M |
+| GT405 | News card game50 covers GT403 and GT404 | ui | S |
 
 ## Risks / open questions for the owner
 

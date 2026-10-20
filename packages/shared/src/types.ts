@@ -50,6 +50,10 @@ export type CatchRecord = {
   golden: boolean;
   /** The angler let it go after landing; it keeps its points and counts toward Steward. */
   released: boolean;
+  /** The landed card's id it was saved under, so the card can show what the server paid. */
+  requestId?: string | null;
+  /** Another angler's let-go fish, landed again: the server paid the tag. */
+  tagged?: boolean;
   createdAt: string;
 };
 
