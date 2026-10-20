@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { Link, Navigate, Outlet, Route, Routes } from "react-router-dom";
+import { prefetchMe } from "./api";
 import { authClient } from "./auth-client";
 import { useT } from "./i18n";
 import { useRootSettings } from "./game/settings";
@@ -24,8 +25,11 @@ import { RegisterPage } from "./pages/Register";
 // sign-in and the field log open without waiting for the 3D bundle.
 const loadDock = () => import("./pages/Dock");
 const DockPage = lazy(() => loadDock().then((module) => ({ default: module.DockPage })));
-// Opened straight at the lake, its code downloads while the sign-in check is still out, not after it.
-if (window.location.pathname === "/play") void loadDock().catch(() => undefined);
+// Opened straight at the lake, its code and the angler's profile download while the sign-in check is still out, not after it.
+if (window.location.pathname === "/play") {
+  void loadDock().catch(() => undefined);
+  prefetchMe();
+}
 const LogPage = lazy(() => import("./pages/Log").then((module) => ({ default: module.LogPage })));
 const BoardPage = lazy(() => import("./pages/Board").then((module) => ({ default: module.BoardPage })));
 const loadMap = () => import("./field/map/SpotMapPage");
