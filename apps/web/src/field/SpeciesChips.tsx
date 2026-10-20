@@ -13,16 +13,19 @@ export function SpeciesChips({
   within,
   outing,
   water,
+  kindName: named,
 }: {
   catches: readonly CatchEntry[];
   within?: string;
   outing?: { date: string; title: string };
   water?: string;
+  /** How to name a kind; by default as these fish write it most. */
+  kindName?: (species: string) => string;
 }) {
   useT();
   if (catches.length === 0) return null;
   // As the book writes the kind most, as its page and the kinds list name it ("Zander" for a book of "zander").
-  const kindName = kindNames(catches);
+  const kindName = named ?? kindNames(catches);
   return (
     <p className="species-chips">
       {/* A chip that opens the kind's page counts as that page does. */}

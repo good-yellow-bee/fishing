@@ -594,7 +594,7 @@ function TripView() {
       {lastHere?.note.trim() && trip.date >= today ? <p className="meta last-note">{t("Last time you wrote: “{note}”", { note: lastHere.note.trim() })}</p> : null}
       {/* A game day's kinds open its own fish there, not the kind's page of the angler's own. */}
       {/* Each kind opens this outing's fish of it, as the lure chips do; its own page is one tap away on each fish. */}
-      <SpeciesChips catches={catches} outing={trip} water={play ? undefined : spot?.name} />
+      <SpeciesChips catches={catches} outing={trip} water={play || !spot ? undefined : plainName(spot.name)} />
       {newKinds.length > 0 ? (
         <p className="meta new-kinds">
           {t("First time at this water:")}{" "}
@@ -606,7 +606,7 @@ function TripView() {
           ))}
         </p>
       ) : null}
-      <LureChips catches={catches} outing={trip} water={spot?.name} />
+      <LureChips catches={catches} outing={trip} water={spot ? plainName(spot.name) : undefined} />
       <FishCsv catches={catches} name={`${trip.date} ${outingName(trip, book.spots)}`} />
       {loose.length > 0 ? (
         <p className="meta loose-fish" role="status">

@@ -27,7 +27,7 @@ import { FishCsv } from "./FishCsv";
 import { TallyBars } from "./TallyBars";
 import { WaterTipsBox } from "./WaterTipsBox";
 import { exactTerm, findWithLink } from "./findLinks";
-import { kindNames, kindOnPage, speciesLink } from "./speciesLink";
+import { bookKindName, kindOnPage, speciesLink } from "./speciesLink";
 import { SpeciesChips } from "./SpeciesChips";
 import { daysBetween, lastOutByWater, spotsByLastFish, twinName } from "./spotOrder";
 import { bookFishDay, yearTally } from "./tripMonths";
@@ -192,13 +192,15 @@ export function SpotsPage() {
   };
   // Each card's own count, as "Most fish" orders them.
   const shownCount = (row: { spot: { id: string }; fishCount: number }) => (ownHere(row.spot.id) ? ownRow.get(row.spot.id)?.fishCount ?? 0 : row.fishCount);
-  if (order === "name") rows.sort((a, b) => plainName(a.spot.name).localeCompare(plainName(b.spot.name), locale()));
-  if (order === "most") rows.sort((a, b) => shownCount(b) - shownCount(a));
+  // Ties by name under every order, so two waters never fished keep one place.
+  const tidyOrder = (a: { spot: { name: string } }, b: { spot: { name: string } }) => plainName(a.spot.name).localeCompare(plainName(b.spot.name), locale());
+  if (order === "name") rows.sort(tidyOrder);
+  if (order === "most") rows.sort((a, b) => shownCount(b) - shownCount(a) || tidyOrder(a, b));
   if (order === "rested") {
     rows.sort((a, b) => {
       const x = lastOut.get(a.spot.id);
       const y = lastOut.get(b.spot.id);
-      return !x ? (y ? 1 : 0) : !y ? -1 : x < y ? -1 : x > y ? 1 : 0;
+      return (!x ? (y ? 1 : 0) : !y ? -1 : x < y ? -1 : x > y ? 1 : 0) || tidyOrder(a, b);
     });
   }
   // Once the angler has fish of their own, the sample week's invented waters follow theirs under every order, as they
@@ -458,6 +460,8 @@ function SpotView() {
   const notYet = notYetThisYear(summed, new Date(), undefined, (entry) => bookFishDay(book, entry));
   const kindsDay = mostKindsDay({ ...book, catches: summed });
   // Its links open the fish its counts count: the sample week's beside the angler's own left out, as here.
+  // Kinds named as the book writes them most, as Bests and the catch cards name them, not as this water's few fish do.
+  const kindName = bookKindName(book.catches);
   const here = summed.length < catches.length ? `${exactTerm("water", plainName(spot.name))} -${t("sample|search word")}` : exactTerm("water", plainName(spot.name));
   // A search finds a water by its name, so while another shares it, this page's links open both waters' fish.
   const twin = book.spots.find((other) => other.id !== spot.id && twinName(other.name, spot.name));
@@ -692,15 +696,15 @@ function SpotView() {
       {summed.length < catches.length ? (
         <p className="meta">{tn(catches.length - summed.length, "Also listed: {n} fish from the sample week or the game.", "Also listed: {n} fish from the sample week or the game.")}</p>
       ) : null}
-      <SpeciesChips catches={summed} within={here} />
+      <SpeciesChips catches={summed} within={here} kindName={kindName} />
       {notYet.length > 0 ? (
         <p className="meta not-yet">
           <span>
             {t("Not yet this year:")}{" "}
-            {inReadersOrder(notYet, kindNames(summed)).map((name, index) => (
+            {inReadersOrder(notYet, kindName).map((name, index) => (
               <Fragment key={name}>
                 {index > 0 ? ", " : null}
-                <Link to={findWithLink(here, exactTerm("species", kindNames(summed)(name)))}>{kindNames(summed)(name)}</Link>
+                <Link to={findWithLink(here, exactTerm("species", kindName(name)))}>{kindName(name)}</Link>
               </Fragment>
             ))}
           </span>
@@ -713,6 +717,7 @@ function SpotView() {
       ) : null}
       {/* The game's lake and a sample water beside the angler's own: a kind's page holds other fish, so the kind opens this water's. */}
       <BiggestHere
+        kindName={kindName}
         catches={summed}
         spotId={spot.id}
         kindLink={(species) => (kindOnPage(book, species).some((entry) => entry.spotId === spot.id) ? speciesLink(species) : findWithLink(here, exactTerm("species", t(species))))}
