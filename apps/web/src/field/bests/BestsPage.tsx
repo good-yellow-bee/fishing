@@ -254,7 +254,6 @@ export function BestsPage() {
     if (list) list.push(entry);
     else kindFish.set(key, [entry]);
   }
-  const kindReleased = (row: (typeof bests.species)[number]) => (kindFish.get(kindKey(row.species)) ?? []).filter((entry) => entry.released).length;
   const freshKinds = year ? new Set(seasonRecap(whole, year, today).newKinds.map(kindKey)) : null;
   // In a picked season, the kinds whose longest or heaviest beat every season before it: what an angler asks of a year.
   const earlier = year ? new Map(personalBests({ ...whole, catches: countedFish(whole.catches).filter((entry) => dayOf(entry) < `${year}-01-01`) }, kindKey).species.map((row) => [kindKey(row.species), row])) : null;
@@ -267,7 +266,6 @@ export function BestsPage() {
       ...(before.heaviest && sizeOf(row.heaviest, "weight") > sizeOf(before.heaviest, "weight") ? [{ entry: before.heaviest, kind: "weight" as const }] : []),
     ];
   };
-  const newBest = (row: (typeof bests.species)[number]) => beaten(row).length > 0;
   // The newest fish of the angler's own and how long ago it came, for a dry spell measured in days.
   const lastFish = countedFish(whole.catches).reduce<CatchEntry | null>((newest, entry) => (!newest || dayOf(entry) > dayOf(newest) ? entry : newest), null);
   const lastFishDay = lastFish ? dayOf(lastFish) : null;
@@ -546,6 +544,8 @@ export function BestsPage() {
             <div className="card-grid">
               {bests.species.map((row) => {
                 const measures = bestMeasures(row.longest, row.heaviest);
+                const was = beaten(row);
+                const freed = (kindFish.get(kindKey(row.species)) ?? []).filter((entry) => entry.released).length;
                 return (
                   <article key={row.species} className="spot-card">
                     <div className="spot-card-top">
@@ -557,24 +557,38 @@ export function BestsPage() {
                       {/* A kind the season brought into the book for the first time. */}
                       {freshKinds?.has(kindKey(row.species)) ? <span className="stamp">{t("New this season")}</span> : null}
                       {/* A kind the season set a new record for. */}
-                      {newBest(row) ? <span className="stamp">{t("New best")}</span> : null}
+                      {was.length > 0 ? <span className="stamp">{t("New best")}</span> : null}
                     </div>
                     <p className="meta">
                       {fishCountLabel(row.count)}
                       {measures ? ` · ${measures}` : ""}
                     </p>
-                    {newBest(row) ? (
+                    {/* Each opening the old record fish; one fish that held both records is named once: "30 in, 12 lb". */}
+                    {was.length > 0 ? (
                       <p className="meta">
-                        {beaten(row)
-                          .map((was) => t("Previous best: {size} ({year})", { size: measureText(measureOf(was.entry, was.kind)!), year: dayOf(was.entry).slice(0, 4) }))
-                          .join(" · ")}
+                        {[...new Set(was.map((each) => each.entry))].map((entry, index) => (
+                          <Fragment key={entry.id}>
+                            {index > 0 ? " · " : null}
+                            <Link to={`/catches/${entry.id}`}>
+                              {t("Previous best: {size} ({year})", {
+                                size: was
+                                  .filter((each) => each.entry === entry)
+                                  .map((each) => measureText(measureOf(entry, each.kind)!))
+                                  .join(", "),
+                                year: dayOf(entry).slice(0, 4),
+                              })}
+                            </Link>
+                          </Fragment>
+                        ))}
                       </p>
                     ) : null}
                     <KindLeaders book={book} species={row.species} lureName={lureName} />
                     {/* How many went back, opening those fish: a catch-and-release angler's own record of the kind. */}
-                    {kindReleased(row) > 0 ? (
+                    {freed > 0 ? (
                       <p className="meta">
-                        <Link to={linkFor(`${exactTerm("species", kindName(row.species))} + ${t("Released")}`)}>{t("Released: {count} of {total}", { count: kindReleased(row), total: row.count })}</Link>
+                        <Link to={linkFor(`${exactTerm("species", kindName(row.species))} + ${t("Released")}`)} aria-label={`${kindName(row.species)}, ${t("Released: {count} of {total}", { count: freed, total: row.count })}`}>
+                          {t("Released: {count} of {total}", { count: freed, total: row.count })}
+                        </Link>
                       </p>
                     ) : null}
                     {lastFishLine(whole, kindFish.get(kindKey(row.species)) ?? [], true)}
