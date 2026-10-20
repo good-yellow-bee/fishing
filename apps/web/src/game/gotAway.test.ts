@@ -55,3 +55,14 @@ describe("the one that got away", () => {
     expect(castForGotAway(lost, "dock", AGAIN_ODDS, false, 8).again).toBeNull();
   });
 });
+
+describe("a let-go fish that gets away again", () => {
+  it("stays itself, with any angler's tag, when it bites again", () => {
+    const carp = FISH.find((fish) => fish.id === "carp")!;
+    const back = { species: carp, weight: 6.2, was: 6, at: 0, tag: { id: "c1", by: "Mara" } };
+    const lost = gotAwayAfterLoss(carp, 6.2, "reeds", back)!;
+    expect(castForGotAway(lost, "reeds", 0, false, 1).again?.back).toBe(back);
+    expect(gotAwayAfterDrop(carp, 6.2, "reeds", back).back).toBe(back);
+    expect(gotAwayAfterLoss(carp, 6.2, "reeds", null)!.back).toBeUndefined();
+  });
+});

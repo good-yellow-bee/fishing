@@ -1,4 +1,5 @@
 import type { FishSpecies, SpotId } from "@stillwater/shared";
+import type { Recaught } from "./releasedFish";
 
 /** Chance a cast back at the bank brings the lost fish up again. */
 export const AGAIN_ODDS = 0.3;
@@ -19,18 +20,19 @@ export function droppedOdds(patience: number): number {
 
 /**
  * follow marks a hunter that followed a landed small fish in, rather than a fish that broke off;
- * dropped marks a fish that let go of the bait before the strike, waiting only for the very next cast.
+ * dropped marks a fish that let go of the bait before the strike, waiting only for the very next cast;
+ * back is a let-go fish come back to the line (another angler's carries their tag), which stays itself when it bites again.
  */
-export type GotAway = { spot: SpotId; species: FishSpecies; weight: number; casts: number; follow?: boolean; dropped?: boolean };
+export type GotAway = { spot: SpotId; species: FishSpecies; weight: number; casts: number; follow?: boolean; dropped?: boolean; back?: Recaught };
 
 /** The fish that broke off, waiting to bite again at its bank; small common fish are never remembered. */
-export function gotAwayAfterLoss(species: FishSpecies, weight: number, spot: SpotId): GotAway | null {
-  return species.rarity === "common" ? null : { spot, species, weight, casts: AGAIN_CASTS };
+export function gotAwayAfterLoss(species: FishSpecies, weight: number, spot: SpotId, back?: Recaught | null): GotAway | null {
+  return species.rarity === "common" ? null : { spot, species, weight, casts: AGAIN_CASTS, ...(back ? { back } : {}) };
 }
 
 /** The fish that dropped the bait, still about its bank for the next cast only; any fish, common ones too. */
-export function gotAwayAfterDrop(species: FishSpecies, weight: number, spot: SpotId): GotAway {
-  return { spot, species, weight, casts: 1, dropped: true };
+export function gotAwayAfterDrop(species: FishSpecies, weight: number, spot: SpotId, back?: Recaught | null): GotAway {
+  return { spot, species, weight, casts: 1, dropped: true, ...(back ? { back } : {}) };
 }
 
 /** Whether this cast brings the fish that got away back, and what is still waiting after it. */

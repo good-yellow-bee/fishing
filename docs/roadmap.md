@@ -1811,6 +1811,10 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT383~~ | ~~Second wind: a big fish (past 60% of its kind's weight range, not a panfish masher) worn under 0.4 stamina between runs finds a second wind once a fight: it gathers itself for a moment (the card calls it), takes back 0.3 stamina and runs at once; the landed card's notes say "Wore down its second wind"~~ (#1538) | gameplay | M |
 | ~~GT384~~ | ~~Seasoned lures: each packed lure climbs tiers as the game lands fish on it (counted from the field log's own lake, however its plural was spelled) (Proven at 10, Trusted at 30, Lucky at 75); the lure picker names each lure's tier, the landed card stamps a lure's new tier, and a Lucky lure's hook sets a little more solid (1.1x the solid share, on the strike bar's mark too)~~ (#1539) | gameplay | M |
 | ~~GT385~~ | ~~News card 2026-10-20-game45 covers GT382 to GT384: word of a tag, the second wind and seasoned lures~~ (#1541) | ui | S |
+| ~~GT386~~ | ~~A let-go fish that breaks off or drops the bait stays itself: when it bites again it still carries its release note, and another angler's tag still pays both~~ (#PR) | gameplay | S |
+| GT387 | The sunken log fights back: a fish hooked tight to the half-sunk log off the west bank runs for it, and a run the angler doesn't turn wraps the line round the log as round a dock piling (fraying it); the fight card says "Sunken log: turn every run" | gameplay | M |
+| GT388 | Slams: land both bass (smallmouth and largemouth) in one day for the Bass slam badge, and brook trout, rainbow trout and salmon in one day for the Trout slam; the landed card stamps the slam the fish completes | gameplay | M |
+| GT389 | News card game46 covers GT386 to GT388 | ui | S |
 
 ## Risks / open questions for the owner
 
