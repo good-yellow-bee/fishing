@@ -351,15 +351,8 @@ export function DockPage() {
     const lost = game.lostReport;
     if (!lost || reportedLost.current === lost.id) return;
     reportedLost.current = lost.id;
-    const { id: _local, ...fish } = lost;
-    // The angler's own foe keeps the report's id, so landing it themselves closes it for the lodge.
-    reportLost(fish)
-      .then(({ id }) => {
-        const foe = angler ? loadOldFoe(angler) : null;
-        if (angler && foe && isOldFoe(foe, { species: { id: fish.speciesId }, weight: fish.weight })) saveOldFoe(angler, { ...foe, reportId: id });
-      })
-      // A report that fails only means the rest of the lodge never meets this one.
-      .catch(() => undefined);
+    // A report that fails only means the rest of the lodge never meets this one.
+    reportLost(lost).catch(() => undefined);
   }, [game.lostReport]);
   useEffect(() => {
     if (game.outcome?.kind !== "landed") return;

@@ -1070,6 +1070,8 @@ describe("useFishingGame lost fight", () => {
     expect(JSON.parse(kept.get(oldFoeKey(profile.userId))!)).toMatchObject({ species: "pike", weight: pike.maxWeight, spot: "dock", lure: "Pheasant tails" });
     // And it goes to the lodge, for other anglers to meet.
     expect(container!.querySelector("[data-testid=lost-report]")?.textContent).toBe(`pike|${pike.maxWeight}|dock`);
+    // The foe keeps the report's id from the moment it broke off, so landing it oneself closes the report.
+    expect(JSON.parse(kept.get(oldFoeKey(profile.userId))!).reportId).toMatch(/^[0-9a-f-]{36}$/);
   });
 
   it("says a light hook dropped out of the slack line when a charge was left slack", () => {

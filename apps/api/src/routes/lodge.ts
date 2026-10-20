@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { BANK_STOCK_DAYS, fishById, giantsForWeek, giantWeek, lostSince, reportsLost, SPOT_IDS, tagWindow, TRACK_LIMIT, TRACK_WINDOW_MS, type LodgeTrack } from "@stillwater/shared";
-import { countReportedLost, listBankCounts, listGiantsLanded, listLodgeLost, listLodgeReleases, listMineFound, listRecentLodgeCatches, reportLost } from "../db.ts";
+import { countReportedLost, ownsLost, listBankCounts, listGiantsLanded, listLodgeLost, listLodgeReleases, listMineFound, listRecentLodgeCatches, reportLost } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
 export const lodgeRoutes = new Hono();
@@ -51,13 +51,16 @@ lodgeRoutes.get("/lodge/giants", (c) => {
   });
 });
 
+/** The client's id for a lost report, as for a catch's request. */
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 /** Lost reports one angler may file in LOST_DAYS, landed since or not, so a flood of them can't crowd the lodge's list or be farmed. */
 const LOST_REPORT_LIMIT = 3;
 
 /** Files a trophy that broke the angler's line, for the rest of the lodge to meet at its bank. */
 lodgeRoutes.post("/lodge/lost", async (c) => {
   const user = c.get("user") as SessionUser;
-  const body = (await c.req.json().catch(() => null)) as { speciesId?: unknown; weight?: unknown; spot?: unknown } | null;
+  const body = (await c.req.json().catch(() => null)) as { id?: unknown; speciesId?: unknown; weight?: unknown; spot?: unknown } | null;
   const species = typeof body?.speciesId === "string" ? fishById(body.speciesId) : undefined;
   const weight = typeof body?.weight === "number" ? body.weight : NaN;
   const spot = body?.spot;
@@ -68,12 +71,16 @@ lodgeRoutes.post("/lodge/lost", async (c) => {
     typeof spot !== "string" ||
     !(SPOT_IDS as readonly string[]).includes(spot) ||
     !species.spots.includes(spot as (typeof species.spots)[number]) ||
-    !reportsLost(species, weight)
+    !reportsLost(species, weight) ||
+    (body?.id !== undefined && (typeof body.id !== "string" || !uuidPattern.test(body.id)))
   ) {
     return c.json({ error: "invalid lost fish" }, 400);
   }
+  const id = typeof body?.id === "string" ? body.id : undefined;
+  // A retry of a report already filed by this angler answers as filed, and doesn't count again.
+  if (id && ownsLost(user.id, id)) return c.json({ id });
   if (countReportedLost(user.id, lostSince()) >= LOST_REPORT_LIMIT) return c.json({ error: "too many lost fish" }, 429);
-  return c.json({ id: reportLost(user.id, { speciesId: species.id, weight, spot }) });
+  return c.json({ id: reportLost(user.id, { speciesId: species.id, weight, spot }, id) });
 });
 
 /** Other anglers' lost trophies still about their banks, and which of this angler's own someone else has landed. */
