@@ -430,8 +430,8 @@ export function firstCatchAt(userId: string): string | null {
 export function listBadgeFacts(userId: string): BadgeFactRow[] {
   const rows = db
     .prepare(
-      `SELECT species_id, spot, hour, sky, season, clean, golden, released, COUNT(*) as count, MAX(weight) as heaviest
-       FROM catch WHERE user_id = ? GROUP BY species_id, spot, hour, sky, season, clean, golden, released`,
+      `SELECT species_id, spot, hour, sky, season, clean, golden, released, (',' || COALESCE(bonuses, '') || ',' LIKE '%,giant,%') as giant, COUNT(*) as count, MAX(weight) as heaviest
+       FROM catch WHERE user_id = ? GROUP BY species_id, spot, hour, sky, season, clean, golden, released, giant`,
     )
     .all(userId) as {
     species_id: string;
@@ -442,6 +442,7 @@ export function listBadgeFacts(userId: string): BadgeFactRow[] {
     clean: 0 | 1;
     golden: 0 | 1;
     released: 0 | 1;
+    giant: 0 | 1;
     count: number;
     heaviest: number;
   }[];
@@ -454,6 +455,7 @@ export function listBadgeFacts(userId: string): BadgeFactRow[] {
     clean: row.clean === 1,
     golden: row.golden === 1,
     released: row.released === 1,
+    ...(row.giant === 1 ? { giant: true } : {}),
     count: Number(row.count),
     heaviest: row.heaviest,
   }));

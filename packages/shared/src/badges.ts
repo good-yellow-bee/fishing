@@ -23,6 +23,8 @@ export type BadgeFactRow = {
   golden: boolean;
   /** Let go after landing; false on catches saved before release. */
   released: boolean;
+  /** A week's giant of its bank, landed first. */
+  giant?: boolean;
   count: number;
   heaviest: number;
 };
@@ -33,7 +35,7 @@ export type BadgeFactRow = {
  */
 export type BadgeHistory = { longestStreak: number; derbyWins?: number; slams?: Partial<Record<SlamId, number>> };
 
-export type BadgeId = "four-banks" | "night-owl" | "rain-pike" | "clean-sweep" | "trophy" | "full-book" | "four-seasons" | "gold" | "steward" | "regular" | "early-bird" | "whole-lake" | "trophy-hunter" | "derby-champion" | "bass-slam" | "trout-slam";
+export type BadgeId = "four-banks" | "night-owl" | "rain-pike" | "clean-sweep" | "trophy" | "full-book" | "four-seasons" | "gold" | "steward" | "regular" | "early-bird" | "whole-lake" | "trophy-hunter" | "derby-champion" | "bass-slam" | "trout-slam" | "giant-hunter";
 
 export type Badge = {
   id: BadgeId;
@@ -199,6 +201,13 @@ export const BADGES: readonly Badge[] = [
     blurb: "Land a brook trout, a rainbow trout and a salmon on the same day.",
     need: slamSize("trout-slam"),
     have: (_facts, history) => history.slams?.["trout-slam"] ?? 0,
+  },
+  {
+    id: "giant-hunter",
+    label: "Giant hunter",
+    blurb: "Be first to land three of the lake's weekly giants.",
+    need: 3,
+    have: (facts) => count(facts, (row) => row.giant === true),
   },
 ];
 
