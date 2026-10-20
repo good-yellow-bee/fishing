@@ -3,7 +3,6 @@ import { Link, useParams } from "react-router-dom";
 import {
   WATER_LABELS,
   catchesForTrip,
-  foldText,
   localDate,
   lureTally,
   measureOf,
@@ -45,8 +44,8 @@ import { lateOutings, outingDay, outNow, plainName, sameName, underWay } from ".
 import { focusPageHeading } from "../pageFocus";
 import { bookLureName, onPiece } from "../pieceTally";
 import { newestOutingFirst } from "../catchNeighbors";
-import { kindNames } from "../speciesLink";
-import { twinName } from "../spotOrder";
+import { kindNames, mostWritten } from "../speciesLink";
+import { foldName, twinName } from "../spotOrder";
 
 function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
   const { book } = useLogbook();
@@ -154,19 +153,25 @@ function LureRecord({ today }: { today: string }) {
   // A kind and a lure as the book writes them most, as Bests and the cards name them, whichever water is picked.
   const kindName = useMemo(() => kindNames(countedBook(book).catches), [book]);
   const lureName = bookLureName(book.catches);
-  // With all waters shown, where a lure took most of its fish, once one water clearly led: where to pack it for.
-  const countedFishes = countedBook(book).catches;
+  // With all waters shown, where a lure took most of its fish, once one water clearly led among two or more: where to
+  // pack it for. Waters that read the same are one, under the name most of its fish were logged at.
+  const nameOf = new Map(book.spots.map((spot) => [spot.id, spot.name]));
   const bestWater = (lure: string) => {
-    const byWater = new Map<string, { name: string; count: number }>();
-    for (const entry of countedFishes) {
-      const name = book.spots.find((spot) => spot.id === entry.spotId)?.name;
+    const byWater = new Map<string, Map<string, number>>();
+    for (const entry of counted.catches) {
+      const name = nameOf.get(entry.spotId);
       if (!name || !onPiece(entry, lure)) continue;
-      const key = foldText(name);
-      byWater.set(key, { name: byWater.get(key)?.name ?? plainName(name), count: (byWater.get(key)?.count ?? 0) + 1 });
+      const names = byWater.get(foldName(name)) ?? new Map<string, number>();
+      names.set(plainName(name), (names.get(plainName(name)) ?? 0) + 1);
+      byWater.set(foldName(name), names);
     }
-    const [top, next] = [...byWater.values()].sort((a, b) => b.count - a.count);
+    const [top, next] = [...byWater.values()]
+      .map((names) => ({ name: mostWritten(names), count: [...names.values()].reduce((sum, n) => sum + n, 0) }))
+      .sort((a, b) => b.count - a.count);
     return top && byWater.size > 1 && top.count >= 2 && top.count > (next?.count ?? 0) ? top : null;
   };
+  // Each row's best water worked out once, with all waters shown.
+  const mostAt = new Map(water ? [] : records.flatMap((row) => (row.lure ? [[row.label, bestWater(row.lure)] as const] : [])).filter(([, best]) => best !== null));
   // The book the record counts: the sample week's made-up lures go with the first outing of the angler's own.
   // This year as the book counts it: during a New Year's Eve session past midnight, still the old one.
   const quiet = notYetThisYear(countedBook(atWater).catches, new Date(`${outingDay(today)}T12:00:00`), (entry) => entry.lure, (entry) => bookFishDay(book, entry), (name) => shownPieceKey(name));
@@ -248,10 +253,10 @@ function LureRecord({ today }: { today: string }) {
                 </>
               ) : null}
               {/* Where it took most, opening its fish there. */}
-              {!water && row.lure && bestWater(row.lure) ? (
+              {mostAt.get(row.label) ? (
                 <span className="lure-last">
-                  <Link to={findLink(countedSearch(book, `${exactTerm("lure", lureName(row.name))} + ${exactTerm("water", bestWater(row.lure)!.name)}`, book.catches.filter((entry) => onPiece(entry, row.lure!)), "book"))}>
-                    {t("most at {water} ({count})", { water: bestWater(row.lure)!.name, count: bestWater(row.lure)!.count })}
+                  <Link to={findLink(countedSearch(book, `${exactTerm("lure", lureName(row.name))} + ${exactTerm("water", mostAt.get(row.label)!.name)}`, book.catches.filter((entry) => onPiece(entry, row.lure!)), "book"))}>
+                    {t("most at {water} ({count})", { water: mostAt.get(row.label)!.name, count: mostAt.get(row.label)!.count })}
                   </Link>
                 </span>
               ) : null}
