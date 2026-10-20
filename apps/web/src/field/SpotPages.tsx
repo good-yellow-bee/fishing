@@ -493,6 +493,8 @@ function SpotView() {
   // For the copied summary: the day it was last fished and what that day's outing gave, the first thing a mate asks.
   // Of a dawn and a dusk, the later, as Out now takes it.
   const lastHereTrip = lastHere ? countedTrips.filter((trip) => trip.date === lastHere).sort(newestOutingFirst(book))[0] : undefined;
+  // Its loose fish that day, as fishOn adds them: the angler's own, when it was the day's one outing here.
+  const lastHereLoose = lastHereTrip && countedTrips.filter((trip) => trip.date === lastHereTrip.date).length === 1 ? summed.filter((entry) => !entry.tripId && bookFishDay(book, entry) === lastHereTrip.date) : [];
   const lastHereText = lastHere ? t("Last fished here: {day}", { day: lastHereTrip ? `${formatDay(lastHere)} · ${tn(fishOn(lastHereTrip.id), "{n} fish", "{n} fish")}` : formatDay(lastHere) }) : null;
   // By the day a fish counts on, as the year search each bar opens reads it.
   const years = yearTally(summed, (entry) => bookFishDay(book, entry));
@@ -571,7 +573,7 @@ function SpotView() {
         {/* When it was last fished, by its last outing or fish: how long it has rested. */}
         {lastHere ? (
           <p className="meta last-here">
-            <LastHereLine rest={restHere} day={lastHere} trip={lastHereTrip} fish={fishOn} catches={catches} lureName={lureName} />
+            <LastHereLine rest={restHere} day={lastHere} trip={lastHereTrip} fish={fishOn} catches={catches} loose={lastHereLoose} lureName={lureName} />
           </p>
         ) : null}
         {/* How long the angler has known this water: its first fish, once another fish day has followed it. */}
@@ -1084,6 +1086,7 @@ function LastHereLine({
   trip,
   fish,
   catches,
+  loose,
   lureName,
 }: {
   rest: number;
@@ -1091,19 +1094,17 @@ function LastHereLine({
   trip: Trip | undefined;
   fish: (tripId: string) => number;
   catches: readonly CatchEntry[];
+  /** The fish logged loose here that day, when the count beside it holds them: the day's one outing here. */
+  loose: readonly CatchEntry[];
   lureName: (lure: string) => string;
 }) {
-  const { book } = useLogbook();
   const when = rest === 0 ? t("Fished here today") : rest === 1 ? t("Last fished here yesterday") : `${tn(rest, "Last fished here {n} day ago", "Last fished here {n} days ago")} · ${formatDay(day)}`;
   // A day fished off any outing (fish logged loose) has no page to open: the line stays as it was.
   if (!trip) return <>{when}</>;
   const caught = fish(trip.id);
   // The lure that took most that day here, once it clearly led: one of a tie, or one fish each, says nothing. This
   // water's fish only, as the count beside it: an outing that moved on to another water doesn't lend it its lures.
-  // With the fish logged loose here that day when the count beside it holds them too.
-  const filed = catches.filter((entry) => entry.tripId === trip.id);
-  const loose = caught > filed.length ? catches.filter((entry) => !entry.tripId && bookFishDay(book, entry) === trip.date) : [];
-  const [lure, next] = pieceTally([...filed, ...loose], 2);
+  const [lure, next] = pieceTally([...catches.filter((entry) => entry.tripId === trip.id), ...loose], 2);
   const led = lure && lure.count > 1 && (!next || next.count < lure.count) ? lure : null;
   return (
     <Link to={`/trips/${trip.id}`}>

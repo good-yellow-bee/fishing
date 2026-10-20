@@ -31,7 +31,7 @@ import { PLAY_LAKE_ID } from "../playLake";
 import { countedSearch } from "../countedSearch";
 import { countedBook, countedFish } from "../milestones";
 import { isSampleCatch, isSampleOnly, isSampleOuting, withoutSample } from "../bookCopy";
-import { daysBetween, foldName } from "../spotOrder";
+import { daysBetween, foldName, waterKeys } from "../spotOrder";
 import { SameKinds } from "./SameKinds";
 import { tripDaySearch } from "../tripSearch";
 import { gaveWay, outingDay, plainName } from "../tripDates";
@@ -170,9 +170,9 @@ export function BestsPage() {
   // A night session's small hours on its outing's day, as the calendar and the goal count them.
   const dayOf = (entry: CatchEntry) => bookFishDay(whole, entry);
   const monthOf = (entry: CatchEntry) => dayOf(entry).slice(0, 7);
-  const waterKeys = new Map(whole.spots.map((spot) => [spot.id, foldName(spot.name)]));
+  const waterOf = waterKeys(whole);
   const notYet = notYetThisYear(real.catches, new Date(), undefined, dayOf);
-  const newWaters = newWatersThisYear(real.catches, new Date(), dayOf, (id) => waterKeys.get(id) ?? id).flatMap((id) => whole.spots.filter((spot) => spot.id === id));
+  const newWaters = newWatersThisYear(real.catches, new Date(), dayOf, (id) => waterOf.get(id) ?? id).flatMap((id) => whole.spots.filter((spot) => spot.id === id));
   const wholeFishByTrip = fishCountsByTrip(whole);
   // An outing's fish with those logged loose on its water that day, as Trips and the outings link count them.
   const fishOn = outingFish(whole);

@@ -10,6 +10,11 @@ export function foldName(name: string): string {
   return foldText(name.trim().replace(/\s+/g, " ")).toLowerCase();
 }
 
+/** Each water's twin key by its id, for grouping fish by water as a search reads them. */
+export function waterKeys(book: Logbook): Map<string, string> {
+  return new Map(book.spots.map((spot) => [spot.id, foldName(spot.name)]));
+}
+
 /** Two waters a search can't tell apart by name. */
 export function twinName(a: string, b: string): boolean {
   return foldName(a) === foldName(b);

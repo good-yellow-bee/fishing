@@ -3,7 +3,7 @@ import { countedBook } from "./milestones";
 import { PLAY_LAKE_ID } from "./playLake";
 import { bookFishDay } from "./tripMonths";
 import { outingCounted, outingDay } from "./tripDates";
-import { foldName } from "./spotOrder";
+import { waterKeys } from "./spotOrder";
 
 /**
  * This season's waters: those with a fish of the angler's own or an outing fished this year, and how many of them
@@ -19,7 +19,7 @@ export function seasonWaters(book: Logbook, today: string): { fished: number; fi
   // Each water's first day in the book and whether it was fished this year.
   const firstDay = new Map<string, string>();
   const thisYear = new Set<string>();
-  const waterOf = new Map(book.spots.map((spot) => [spot.id, foldName(spot.name)]));
+  const waterOf = waterKeys(book);
   const note = (spotId: string, day: string) => {
     if (spotId === PLAY_LAKE_ID || day > today) return;
     const water = waterOf.get(spotId) ?? spotId;

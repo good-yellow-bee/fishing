@@ -7,7 +7,7 @@ import { CatchCard } from "./cards";
 import { FishSum } from "./FishSum";
 import { FishCsv } from "./FishCsv";
 import { fishCountLabel, formatDay, outingNameById } from "./format";
-import { daysBetween, foldName } from "./spotOrder";
+import { daysBetween, waterKeys } from "./spotOrder";
 import { useLogbook } from "./LogbookState";
 import { PagedCatches } from "./PagedCatches";
 import { bookFishDay, yearTally } from "./tripMonths";
@@ -372,7 +372,7 @@ function TypicalByWater({ catches, waters }: { catches: readonly CatchEntry[]; w
 function NewWaters({ catches, name, waters }: { catches: readonly CatchEntry[]; name: string; waters: readonly { spotId: string; spotIds: string[]; name?: string | null }[] }) {
   const { book } = useLogbook();
   // Twin waters as one, as the list above and the search each name opens take them.
-  const waterOf = new Map(book.spots.map((spot) => [spot.id, foldName(spot.name)]));
+  const waterOf = waterKeys(book);
   const found = newWatersThisYear(catches, new Date(), (entry) => bookFishDay(book, entry), (id) => waterOf.get(id) ?? id).flatMap((id) => waters.filter((water) => water.spotIds.includes(id) && water.name));
   if (found.length === 0) return null;
   return (
