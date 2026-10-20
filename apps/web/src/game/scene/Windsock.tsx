@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { DOCK_PLANKS } from "@stillwater/shared";
 import { mergePainted } from "./mergeParts";
 import { WINDSOCK_AT, WINDSOCK_POLE, windsockPose } from "./sockPose";
+import { toonRamp } from "./toon";
 
 /** Meters along the sock, from its hoop to its tail. */
 const SOCK_LENGTH = 0.62;
@@ -25,7 +26,7 @@ export function Windsock({ wind }: { wind: { x: number; z: number } }) {
   const swivel = useRef<THREE.Group>(null);
   const sock = useRef<THREE.Group>(null);
   const shape = useMemo(sockShape, []);
-  const cloth = useMemo(() => new THREE.MeshStandardMaterial({ color: "#ffffff", vertexColors: true, side: THREE.DoubleSide, roughness: 0.8 }), []);
+  const cloth = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, side: THREE.DoubleSide, gradientMap: toonRamp() }), []);
   useEffect(
     () => () => {
       shape.dispose();
@@ -45,7 +46,7 @@ export function Windsock({ wind }: { wind: { x: number; z: number } }) {
     <group position={[WINDSOCK_AT.x, DOCK_PLANKS.top, WINDSOCK_AT.z]}>
       <mesh position={[0, WINDSOCK_POLE / 2, 0]} castShadow>
         <cylinderGeometry args={[0.025, 0.03, WINDSOCK_POLE, 8]} />
-        <meshStandardMaterial color="#6a432c" roughness={0.9} />
+        <meshToonMaterial color="#6a432c" gradientMap={toonRamp()} />
       </mesh>
       <group ref={swivel} position={[0, WINDSOCK_POLE - 0.06, 0]}>
         <group ref={sock}>
