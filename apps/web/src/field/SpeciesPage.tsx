@@ -11,7 +11,7 @@ import { daysBetween } from "./spotOrder";
 import { useLogbook } from "./LogbookState";
 import { PagedCatches } from "./PagedCatches";
 import { bookFishDay, yearTally } from "./tripMonths";
-import { catchesOfSpecies, kindKey, kindOnPage, speciesWaters } from "./speciesLink";
+import { catchesOfSpecies, kindKey, kindNames, kindOnPage, speciesCounts, speciesWaters } from "./speciesLink";
 import { pieceName } from "./gear/pieceKey";
 import { FROM_LIST } from "./leaveDeleted";
 import { isSampleCatch } from "./bookCopy";
@@ -137,7 +137,10 @@ function SpeciesView() {
   // The angler's own fish of the kind, as Bests counts them; a kind only ever caught in the game shows its game fish.
   const every = catchesOfSpecies(book, species);
   const catches = kindOnPage(book, species);
-  const name = catches[0]?.species ?? species;
+  // The book's spelling most of its fish carry, the name its searches, renames and new fish go by; shown as Bests and its
+  // cards show it (the dictionary's in Polish).
+  const name = speciesCounts(catches)[0]?.species ?? species;
+  const shown = kindNames(catches)(name);
   // Its searches leave the game's lake out when the page does, so each count opens the fish it counted.
   const shownIds = new Set(catches.map((entry) => entry.id));
   const leftOut = every.filter((entry) => !shownIds.has(entry.id));
@@ -149,7 +152,7 @@ function SpeciesView() {
   if (catches.length === 0) {
     return (
       <div className="sheet">
-        <h1>{t(name)}</h1>
+        <h1>{shown}</h1>
         <p className="lede">{t("No fish of this kind in the book.")}</p>
         <Link to="/bests">{t("Back to bests")}</Link>
       </div>
@@ -173,7 +176,7 @@ function SpeciesView() {
           <p className="eyebrow">
             <Link to="/bests">{t("Bests")}</Link>
           </p>
-          <h1>{t(name)}</h1>
+          <h1>{shown}</h1>
         </div>
         <div className="sheet-actions">
           {/* Lake fish also have a card in the game's field guide, on its Log page. */}

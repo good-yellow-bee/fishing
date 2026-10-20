@@ -34,7 +34,7 @@ import { isSampleCatch, isSampleOnly, isSampleOuting, withoutSample } from "../b
 import { daysBetween } from "../spotOrder";
 import { SameKinds } from "./SameKinds";
 import { tripDaySearch } from "../tripSearch";
-import { outingDay } from "../tripDates";
+import { outingDay, plainName } from "../tripDates";
 import { outingFish } from "../outingFish";
 import { pieceName } from "../gear/pieceKey";
 import { kindKey } from "../speciesLink";
@@ -118,7 +118,7 @@ function KindLeaders({ book, species }: { book: Logbook; species: string }) {
   // A tie has no leader, as the catch search's own "Most on" line takes it.
   const parts = [
     lure && lure.count >= 2 && lure.count > (nextLure?.count ?? 0) ? t("Most on {lure} ({count})", { lure: pieceName(lure.lure), count: lure.count }) : null,
-    water && water.name && water.count >= 2 && water.count > (nextWater?.count ?? 0) ? t("Most from {water} ({count})", { water: water.name, count: water.count }) : null,
+    water && water.name && water.count >= 2 && water.count > (nextWater?.count ?? 0) ? t("Most from {water} ({count})", { water: plainName(water.name), count: water.count }) : null,
   ].filter(Boolean);
   return parts.length > 0 ? <p className="meta kind-leaders">{parts.join(" · ")}</p> : null;
 }
@@ -245,7 +245,7 @@ export function BestsPage() {
     const stood = year ? "" : recordStood(day, today);
     return stood ? ` · ${stood}` : "";
   };
-  const nameOf = (spotId: string) => spotById(book, spotId)?.name ?? t("Unknown water");
+  const nameOf = (spotId: string) => { const name = spotById(book, spotId)?.name; return name === undefined ? t("Unknown water") : plainName(name); };
   const titleOf = (tripId: string | null) => (tripId ? outingNameById(book, tripId) : null);
 
   // A book with no fish and no outings yet: one line and the way to the first, not a page of empty tiles. Outings
@@ -303,7 +303,7 @@ export function BestsPage() {
               {newWaters.map((spot, index) => (
                 <Fragment key={spot.id}>
                   {index > 0 ? ", " : null}
-                  <Link to={`/spots/${spot.id}`}>{spot.name.trim()}</Link>
+                  <Link to={`/spots/${spot.id}`}>{plainName(spot.name)}</Link>
                 </Fragment>
               ))}
             </span>
@@ -388,7 +388,7 @@ export function BestsPage() {
           // The season's outings already fished, as the outings page it opens counts them ("Outings: 6 · 1 planned").
           outings={{ count: sheetOutings(whole, fishedBy).trips.filter((trip) => trip.date.startsWith(`${year}-`)).length, to: `/trips?${new URLSearchParams({ find: tripDaySearch(all, year, new Set(whole.trips.map((trip) => trip.id)), t) }).toString()}` }}
           kindsId="by-species"
-          lureLink={(lure) => linkFor(exactTerm("lure", t(lure)))}
+          lureLink={(lure) => linkFor(exactTerm("lure", pieceName(lure)))}
         />
       ) : null}
 
@@ -518,7 +518,7 @@ export function BestsPage() {
                     <div className="spot-card-top">
                       <h3>
                         {/* In a picked season, the kind's fish of that season, as counted here. */}
-                        <Link to={year ? linkFor(exactTerm("species", t(row.species))) : speciesLink(row.species)}>{kindName(row.species)}</Link>
+                        <Link to={year ? linkFor(exactTerm("species", kindName(row.species))) : speciesLink(row.species)}>{kindName(row.species)}</Link>
                       </h3>
                       {row.large ? <span className="stamp">{t("Large")}</span> : null}
                       {/* A kind the season brought into the book for the first time. */}
@@ -607,7 +607,7 @@ export function BestsPage() {
               <h2>{t("Lures that worked")}</h2>
             </div>
             {/* Every lure that took a fish, the top five until asked for the rest. */}
-            <TallyBars key={year ?? ""} limit={5} rows={pieceTally(book.catches, Infinity).map((row) => ({ key: row.lure, label: pieceName(row.lure), count: row.count, to: linkFor(exactTerm("lure", t(row.lure))) }))} />
+            <TallyBars key={year ?? ""} limit={5} rows={pieceTally(book.catches, Infinity).map((row) => ({ key: row.lure, label: pieceName(row.lure), count: row.count, to: linkFor(exactTerm("lure", pieceName(row.lure))) }))} />
           </section>
 
           <section>
@@ -618,9 +618,9 @@ export function BestsPage() {
             </div>
             <div className="card-grid">
               {bests.waters.map((water) => (
-                <Link key={water.spotId} to={year ? linkFor(exactTerm("water", water.name)) : `/spots/${water.spotId}`} className="spot-card">
+                <Link key={water.spotId} to={year ? linkFor(exactTerm("water", plainName(water.name))) : `/spots/${water.spotId}`} className="spot-card">
                   <div className="spot-card-top">
-                    <h3>{water.name === "Unknown water" ? t(water.name) : water.name}</h3>
+                    <h3>{water.name === "Unknown water" ? t(water.name) : plainName(water.name)}</h3>
                   </div>
                   <p className="meta">{waterFishLine(bySpot.get(water.spotId) ?? [], kindName)}</p>
                   {/* When it last gave one: a water gone quiet is worth a visit, or a rest. */}

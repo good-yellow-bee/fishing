@@ -595,6 +595,8 @@ export function toCatch(row: CatchRow) {
     season: row.season,
     golden: row.golden === 1,
     released: row.released === 1,
+    requestId: row.request_id,
+    tagged: !!row.tagged_from,
     createdAt: row.created_at,
   };
 }

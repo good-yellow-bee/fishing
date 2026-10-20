@@ -94,6 +94,16 @@ export function outNowAt(book: Logbook, spotId: string, now = new Date()): Trip 
   return book.trips.filter((trip) => trip.spotId === spotId && !isSampleOuting(trip) && outNow(book, trip, now)).sort(newestOutingFirst(book))[0];
 }
 
+/**
+ * Whether an outing counts as fished by `today` (the counted day, last evening's in the small hours): one before it, or
+ * that day's once it has a fish; in the small hours the calendar's own day too, once its outing has a fish.
+ */
+export function outingFished(trip: { date: string }, today: string, hasFish: boolean, now = new Date()): boolean {
+  if (trip.date < today) return true;
+  const calendarDay = localDate(now);
+  return hasFish && (trip.date === today || (today < calendarDay && trip.date === calendarDay));
+}
+
 /** Whether an outing's title is only the name of a water: what an untitled outing is saved under. */
 function waterNamed(title: string, spots: Logbook["spots"]): boolean {
   return spots.some((spot) => sameName(spot.name, title));

@@ -13,6 +13,7 @@ import { kindNames } from "../speciesLink";
 import { pieceTally } from "../pieceTally";
 import { pieceName } from "../gear/pieceKey";
 import { countedFish } from "../milestones";
+import { plainName } from "../tripDates";
 
 /** "42, 8 more than 2025": a season's count against the one before, when the one before had any. */
 function against(count: number, before: number, year: string): string {
@@ -29,7 +30,7 @@ function seasonFirsts(book: Logbook, year: string, today: string) {
   const top = bestFishDay({ ...book, catches: book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${year}-`)) });
   const bestDay = top && top.count > 1 ? [t("Best day: {day} · {fish}", { day: formatDay(top.date), fish: tn(top.count, "{n} fish", "{n} fish") })] : [];
   // The waters that gave their first fish that season.
-  const newWaters = newWatersThisYear(book.catches, new Date(Number(year), 6, 1), (entry) => bookFishDay(book, entry)).flatMap((id) => book.spots.filter((spot) => spot.id === id).map((spot) => spot.name.trim()));
+  const newWaters = newWatersThisYear(book.catches, new Date(Number(year), 6, 1), (entry) => bookFishDay(book, entry)).flatMap((id) => book.spots.filter((spot) => spot.id === id).map((spot) => plainName(spot.name)));
   const recap = seasonRecap(book, year, today);
   const firsts = [
     ...bestDay,
