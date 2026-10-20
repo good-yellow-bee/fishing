@@ -97,7 +97,7 @@ import { bestPounds } from "../game/bestWeight";
 import { hookNoteMs } from "../game/hookNote";
 import { bookForPlay, markReleasedInBook, saveLandedCatch, saveLandedPhoto } from "../field/keepCatch";
 import { LURE_TIER_WORD, lureCatchCount, lureTier, lureTierReachedBy } from "../game/lureSeasoning";
-import { rememberReleased } from "../game/releasedFish";
+import { rememberReleased, remembersReleased } from "../game/releasedFish";
 import { readTackle } from "../field/gear/storage";
 import { useEffectsSteppedDown } from "../game/frameWatch";
 import { useEffectsNotice } from "../game/effectsNotice";
@@ -122,6 +122,7 @@ import { PowerMeter } from "../game/scene/PowerMeter";
 import { prefersReducedMotion } from "../game/scene/reducedMotion";
 import { shyOf } from "../game/giantShy";
 import { nightLineKinds, nightLineState } from "../game/nightLine";
+import { BUCKET_SIZE } from "../game/baitBucket";
 import { isLiveBait, isTopwater, touchScreen, useFishingGame } from "../game/useFishingGame";
 import { useCatchSync } from "../game/useCatchSync";
 import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
@@ -743,7 +744,7 @@ export function DockPage() {
       setReleaseBonus(bonus);
       setReleasedId(outcome.id);
       // The lake remembers the fish, so it may bite again at this bank another day, a little heavier.
-      rememberReleased(outcome.species, outcome.weight, outcome.spot);
+      rememberReleased(outcome.species, outcome.weight, outcome.spot, Date.now(), outcome.lure);
       // Let go, it went back to its bank, so the bank's week no longer counts it.
       setKeptHere((counts) => ({ ...counts, [outcome.spot]: Math.max(0, (counts[outcome.spot] ?? 0) - 1) }));
       try {
@@ -973,7 +974,7 @@ export function DockPage() {
       ? null
       : lineAt(game.stance) && lineAt(game.stance) !== "soaking"
         ? "check"
-        : !game.nightLine && game.liveShiner && isFishingStance(game.stance) && game.stance !== "open" && nightLineKinds(game.stance, me.profile).length > 0
+        : !game.nightLine && (game.liveShiner || game.bucket > 0) && isFishingStance(game.stance) && game.stance !== "open" && nightLineKinds(game.stance, me.profile).length > 0
           ? "set"
           : null;
   const lineAction = (target: WalkTarget) => (target === game.stance ? stanceLine : null);
@@ -1173,7 +1174,7 @@ export function DockPage() {
           {!rowing && !mercy && game.stance === crowdedBank && <small className="stance-cold"> · {t("another angler here today")}</small>}
           {!rowing && isFishingStance(game.stance) && game.stance !== "open" && favoredNow(game.stance) && <small className="stance-hot"> · {t("bites sooner now")}</small>}
           {!rowing && lineAt(game.stance) && (lineAt(game.stance) === "ready" ? <small className="stance-hot"> · {t("night line ready")}</small> : <small className="stance-cold"> · {t(lineAt(game.stance) === "soaking" ? "night line soaking" : "night line left too long")}</small>)}
-          {!rowing && game.nightLine && game.nightLine.spot !== game.stance && game.liveShiner && <small className="stance-cold"> · {t("night line out at the {bank}", { bank: t(SPOT_LABELS[game.nightLine.spot]) })}</small>}
+          {!rowing && game.nightLine && game.nightLine.spot !== game.stance && (game.liveShiner || game.bucket > 0) && <small className="stance-cold"> · {t("night line out at the {bank}", { bank: t(SPOT_LABELS[game.nightLine.spot]) })}</small>}
           {!rowing && giantAt(game.stance) && (
             game.giantShy && isFishingStance(game.stance) && shyOf(game.giantShy, game.stance, giantAt(game.stance)!.name, lure)
               ? <small className="stance-cold"> · {t("giant: {name}, shy of this lure", { name: t(giantAt(game.stance)!.name) })}</small>
@@ -1463,6 +1464,8 @@ export function DockPage() {
                   {releaseBonus > 0
                     ? t("Released back into the lake · +{bonus} pts for letting a trophy go", { bonus: releaseBonus })
                     : t("Released back into the lake")}
+                  {/* A fish the lake remembers shies from the lure it was caught on. */}
+                  {game.outcome.lure && remembersReleased(game.outcome.species) && ` · ${t("it will shy from the {lure} now", { lure: t(game.outcome.lure) })}`}
                 </p>
               ) : (
                 <button className="panel-btn" type="button" onClick={() => void releaseFish()} aria-disabled={releasing || undefined}>
@@ -1482,11 +1485,16 @@ export function DockPage() {
                 {t("Keep fishing")}
               </button>
               {/* A shiner goes back out on the hook as live bait, for the pike and bass that hunt it. */}
-              {!landedReleased && canBaitShiner(game.outcome.species.id) && (
+              {/* A shiner landed clean is lively, so it takes the place of a plain one on the hook. */}
+              {!landedReleased && canBaitShiner(game.outcome.species.id) && (!game.liveShiner || (game.outcome.clean && !game.livelyShiner) ? (
                 <button className="panel-btn" type="button" onClick={game.baitShiner} title={game.outcome.clean ? t("Hook it on as live bait: landed clean, it's lively and draws more of the hunters here.") : t("Hook it on as live bait: the next cast draws the hunters here. A shiner landed in a clean fight is livelier.")}>
                   {t("Use it as bait")}
                 </button>
-              )}
+              ) : game.bucket < BUCKET_SIZE && (
+                <button className="panel-btn" type="button" onClick={game.baitShiner} title={t("A shiner is on your hook already, so this one goes in your bait bucket for later.")}>
+                  {t("Keep it in the bucket")}
+                </button>
+              ))}
               {fieldLogError && (
                 <button className="panel-btn" type="button" onClick={saveFieldLog}>
                   {t("Try saving again")}
@@ -1572,7 +1580,7 @@ export function DockPage() {
               {t("The shack")}
             </h2>
             <UpgradePanel profile={me.profile} busy={busy || scenePhase !== "idle"} onBuy={onBuy} />
-            <BaitShop points={me.profile.points} lifetimePoints={me.profile.lifetimePoints} handfuls={game.handfuls} shinerOn={game.liveShiner} busy={busy || scenePhase !== "idle"} onBuy={onBuyBait} onBuyShiner={onBuyShiner} />
+            <BaitShop points={me.profile.points} lifetimePoints={me.profile.lifetimePoints} handfuls={game.handfuls} shinerOn={game.liveShiner} bucket={game.bucket} busy={busy || scenePhase !== "idle"} onBuy={onBuyBait} onBuyShiner={onBuyShiner} onHookFromBucket={game.hookFromBucket} />
             <DailyRequestsPanel key={userId} catchKey={me.catches[0]?.id} onClaimed={refresh} />
             <WeeklyChallengesPanel key={`week-${userId}`} catchKey={me.catches[0]?.id} onClaimed={refresh} />
             <ForecastBoard />

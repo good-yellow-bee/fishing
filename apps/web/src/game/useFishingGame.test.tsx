@@ -119,6 +119,7 @@ vi.mock("./fight", async (importOriginal) => {
 import { updateSettings } from "./settings";
 import { giantShyKey } from "./giantShy";
 import { nightLineKey, nightLineReadyAt } from "./nightLine";
+import { baitBucketKey } from "./baitBucket";
 import { carriesBait, FALSE_STRIKE_MS, FIGURE_EIGHT_ODDS, FIGURE_TURN_MS, FIGURE_WINDOW_MS, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TIRE_REASONS, TOPWATER_POPS, useFishingGame, WAIT_REASONS } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
@@ -193,6 +194,8 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <button type="button" onClick={game.baitShiner}>bait shiner</button>
       <button type="button" onClick={game.addShiner}>buy shiner</button>
       <button type="button" onClick={game.setNightLine}>set night line</button>
+      <button type="button" onClick={game.hookFromBucket}>hook from bucket</button>
+      <i data-testid="bucket">{game.bucket}</i>
       <button type="button" onClick={game.checkNightLine}>check night line</button>
       <i data-testid="caught-hour">{game.outcome?.kind === "landed" ? (game.outcome.hour ?? "") : ""}</i>
       <i data-testid="night-line">{game.nightLine ? game.nightLine.spot : ""}</i>
@@ -424,6 +427,39 @@ describe("useFishingGame live shiner", () => {
         localStorage.removeItem(nightLineKey(strong.userId));
       } catch {
         // No store in this run, so nothing was kept.
+      }
+    }
+  });
+
+  it("keeps spare shiners in a bait bucket: a night line takes one from it first, and one can be hooked from it later", () => {
+    const strong = { ...profile, strength: 10, accuracy: 10 };
+    mount(DOCK_BUBBLES.at, strong);
+    const press = (name: string) => act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === name) as HTMLButtonElement).click());
+    const bucket = () => container!.querySelector("[data-testid=bucket]")?.textContent;
+    try {
+      act(() => frames.at(-1)!(now));
+      press("buy shiner");
+      press("buy shiner");
+      expect(liveShiner()).toBe("true");
+      expect(bucket()).toBe("1");
+      expect(hint()).toBe("The shiner goes in your bait bucket: 1 of 3.");
+      press("buy shiner");
+      press("buy shiner");
+      press("buy shiner");
+      expect(bucket()).toBe("3");
+      press("set night line");
+      expect(bucket()).toBe("2");
+      expect(liveShiner()).toBe("true");
+      // Nothing to hook while one is on.
+      press("hook from bucket");
+      expect(bucket()).toBe("2");
+    } finally {
+      for (const key of [baitBucketKey(strong.userId), nightLineKey(strong.userId)]) {
+        try {
+          localStorage.removeItem(key);
+        } catch {
+          // No store in this run, so nothing was kept.
+        }
       }
     }
   });
@@ -2933,13 +2969,18 @@ describe("useFishingGame groundbait", () => {
     expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toBe("Common carp: it came in to feed on the groundbait.");
   });
 
+  it("casts the tied lure at the bank's let-go fish, so one shy of it stays down", () => {
+    cast(mount(DOCK_BUBBLES.at, profile, "day", false, "Mepps spinner"));
+    expect(castForReleased).toHaveBeenLastCalledWith([], "dock", expect.any(Number), expect.any(Number), "Mepps spinner");
+  });
+
   it("brings back a fish let go here on an earlier day, grown, and says so on the card", () => {
     const surface = mount();
     const pike = FISH.find((fish) => fish.id === "pike")!;
     const at = new Date(2026, 9, 4, 12).getTime();
     vi.mocked(castForReleased).mockReturnValueOnce({ fish: { species: pike, weight: 6.5, was: 6, at }, next: [] });
     cast(surface);
-    expect(castForReleased).toHaveBeenCalledWith([], "dock", expect.any(Number), expect.any(Number));
+    expect(castForReleased).toHaveBeenCalledWith([], "dock", expect.any(Number), expect.any(Number), undefined);
     expect(container!.querySelector("[data-testid=bite]")?.textContent).toMatch(/^pike\|6\.5/);
     step.mockReturnValueOnce("landed");
     act(() => vi.advanceTimersByTime(2_201));

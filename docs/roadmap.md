@@ -1464,6 +1464,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | SC272 | Signs of the giants: while a bank's giant (GT417) is still out this week, now and then (about once a minute, the banks taking turns) it rolls out on that bank's water, two wide rings spreading round a dark back that rises and sinks; drawn only while it swirls, none with reduced motion | scene | S |
 | SC273 | The night line staked: while GT423's night line is out, a forked stick stands at the bank it was set at, leaning out over the water with a white tag at its tip and the line running down into the water (on the dock, from the deck's west edge; at a bank, at the waterline a step from the stand, clear of the walk boards); one draw | scene | S |
 | SC274 | News card scene65 covers SC272 and SC273: signs of the giants and the night line staked | scene | S |
+| SC275 | The low sun's long shadows made true: the long-shadow rule (the drop-off at dawn and the inlet at dusk bite slower, "the low sun behind you throws your shadow across the water") showed no shadow, as the sun stood where shadows fell behind their casters and level water caught too little of it; the dawn and dusk suns now stand low in the south behind the bank cameras, and on a clear or partly cloudy dawn or dusk a shadow layer on the water (drawn over the caustics) shows the angler's, the rival's, the trees' long shadows reaching out across it; day and night unchanged | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1894,6 +1895,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT424~~ | ~~Giant hunter badge: be first to land three of the lake's weekly giants (counted from the giants table, as derby wins are)~~ (#1637) | gameplay | S |
 | ~~GT425~~ | ~~News card 2026-10-20-game57 covers GT423-GT424: the night line and the Giant hunter badge~~ (#1638) | ui | S |
 | ~~GT426~~ | ~~A night line reads the sky over its night (the forecast's evening sky): rain 85%, overcast 75%, fog 70%, clear 55% to hold a fish, and setting it says when the night is wet or clear; a line comes in only once its night is out~~ (#1640) | gameplay | S |
+| ~~GT427~~ | ~~A fish let go remembers the lure it was caught on: back at its bank on a later day it won't take that lure again, though another may bring it up; the release stamp says so~~ (#1644) | gameplay | S |
+| ~~GT428~~ | ~~News card 2026-10-20-game58 covers GT426-GT427: the night line's night and sky, and released fish that shy from their lure~~ (#1645) | ui | S |
+| ~~GT429~~ | ~~Bait bucket: up to three spare live shiners kept per angler beside the one on the hook; the shack sells into it while a shiner is on, a landed shiner can go in it, a night line takes from it first, and the shack hooks one from it~~ (#1646) | gameplay | M |
 
 ## Risks / open questions for the owner
 

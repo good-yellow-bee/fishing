@@ -177,6 +177,14 @@ export const PL_GAME: PlBook = {
   "{bank}: bring in your night line": "{bank}: wyciągnij swoją nocną linkę",
   "{note} · your night line is out here": "{note} · tu stoi twoja nocna linka",
   "Night line": "Nocna linka",
+  "The shiner goes in your bait bucket: {n} of {max}.": "Złotawiec trafia do wiaderka na przynętę: {n} z {max}.",
+  "You hook a shiner from your bucket on as live bait. Cast it out to the hunters.": "Zakładasz złotawca z wiaderka jako żywą przynętę. Zarzuć go drapieżnikom.",
+  "Your hook and your bait bucket are full.": "Haczyk i wiaderko na przynętę są pełne.",
+  "A shiner is on your hook, so another goes in your bait bucket, which holds {n} of {max}.": "Na haczyku jest już złotawiec, więc kolejny trafi do wiaderka na przynętę, w którym jest {n} z {max}.",
+  "Hook one from your bucket ({n} left)": "Załóż jednego z wiaderka (zostało: {n})",
+  "A shiner is on your hook already, so this one goes in your bait bucket for later.": "Na haczyku jest już złotawiec, więc ten trafi na później do wiaderka na przynętę.",
+  "Keep it in the bucket": "Do wiaderka",
+  "it will shy from the {lure} now": "teraz będzie unikać tej przynęty ({lure})",
   "Rain tonight: the night feeders will be roaming.": "W nocy pada: nocne ryby będą krążyć.",
   "A clear night: the feeders keep close to cover, so the line may come in empty.": "Pogodna noc: ryby trzymają się kryjówek, więc linka może wrócić pusta.",
   "Check line": "Sprawdź linkę",
@@ -238,8 +246,8 @@ export const PL_GAME: PlBook = {
   "Not yet": "Jeszcze nie",
   "All three found: the {legend} bites far more often at the {bank} for the rest of the week.": "Wszystkie trzy znalezione: {legend} bierze dużo częściej na łowisku {bank} do końca tygodnia.",
   "The {fish} your hunt tracked down haunts this water.": "{fish}, którego wytropiono, krąży po tej wodzie.",
-  "The walk signs now mark with a diamond each bank whose giant is still out there, and where you stand the chip names it. A giant that breaks free learns the lure it was hooked on and won't take one again that week: tie on another to meet it again.":
-    "Drogowskazy oznaczają teraz rombem każde łowisko, którego olbrzym wciąż czeka, a tam, gdzie stoisz, plakietka podaje jego imię. Olbrzym, który się zerwie, zapamiętuje przynętę, na którą go zacięto, i w tym tygodniu już jej nie weźmie: załóż inną, by znów go spotkać.",
+  "A night line now fishes through its night and comes in once the night is out, and the sky over that night matters: rain fills more lines, a clear night fewer, so the forecast tells when to set one. And a fish you let go remembers the lure it was caught on: back at its bank it won't take that lure again, though another may bring it up.":
+    "Nocna linka łowi teraz przez całą noc i można ją wyciągnąć, gdy noc minie, a niebo tej nocy ma znaczenie: deszcz daje więcej ryb, pogodna noc mniej, więc prognoza podpowiada, kiedy ją zastawić. A wypuszczona ryba pamięta przynętę, na którą ją złowiono: na swoim łowisku już jej nie weźmie, choć inna przynęta może ją wywabić.",
   "While a bank's giant is still out there this week, now and then it rolls on that bank's water in a big swirl. And a night line you leave out now shows at its bank: a forked stick leaning over the water, the line running down into it.":
     "Dopóki olbrzym tego łowiska wciąż czeka w tym tygodniu, co jakiś czas przewala się na jego wodzie w wielkim wirze. A nocną linkę, którą zostawisz, widać teraz przy jej brzegu: rozwidlony kij pochylony nad wodą i żyłkę schodzącą w toń.",
   "The angler who fishes the day's crowded bank now sits there on a camp chair a few steps from you, rod out, from dawn to dusk. And a pike that follows your lure in for the figure-eight now shows as a long shadow behind the float, swinging round as it turns.":
