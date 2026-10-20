@@ -3,7 +3,8 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { lastSplash } from "./duckFlush";
 import { mergePainted } from "./mergeParts";
-import { CORMORANT_ROCK, cormorantPose, cormorantStartle } from "./cormorantPerch";
+import { ANCHOR, boat } from "./boat";
+import { CORMORANT_ROCK, cormorantAway, cormorantPose, cormorantStartle, shyBlend, shyTarget, stepShy } from "./cormorantPerch";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
 import { useSkinnedFigure } from "./skinFigure";
@@ -45,6 +46,8 @@ export function Cormorant() {
   const body = useRef<THREE.Group>(null);
   const wings = useRef<(THREE.Group | null)[]>([null, null]);
   const shift = useRef(0);
+  // Already off if it comes out with the boat at anchor.
+  const away = useRef(shyTarget(boat.u, ANCHOR));
   const spread = useRef(0);
   const shapes = useMemo(cormorantShapes, []);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
@@ -59,7 +62,12 @@ export function Cormorant() {
     if (!group) return;
     const time = clock.elapsedTime;
     shift.current = cormorantStartle(time, shift.current, lastSplash);
-    const pose = cormorantPose(time + shift.current);
+    // The boat coming out to its anchor by the rock keeps it off, fishing out on the far side; it comes back as the boat rows home.
+    away.current = stepShy(away.current, shyTarget(boat.u, ANCHOR), Math.min(delta, 0.1));
+    // A splash by the rock only startles it while it is there to be startled.
+    if (away.current === 0) shift.current = cormorantStartle(time, shift.current, lastSplash);
+    const near = cormorantPose(time + shift.current);
+    const pose = away.current === 0 ? near : shyBlend(near, cormorantAway(time, ANCHOR), away.current);
     const surface = pose.swimming ? waterHeight(pose.x, pose.z, time) : 0;
     group.visible = pose.under < 1;
     group.position.set(pose.x, pose.y + surface - (pose.swimming ? 0.18 : 0) - pose.under * 0.4, pose.z);
