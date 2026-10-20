@@ -10,7 +10,7 @@ import { newWatersThisYear } from "./notYet";
 import { bestFishDay, bookFishDay } from "../tripMonths";
 import { formatDay } from "../format";
 import { kindNames } from "../speciesLink";
-import { pieceTally } from "../pieceTally";
+import { bookLureName, pieceTally } from "../pieceTally";
 import { pieceName } from "../gear/pieceKey";
 import { countedFish } from "../milestones";
 import { plainName } from "../tripDates";
@@ -101,7 +101,7 @@ export function SeasonRecapBox({
   // The lure the season was won on, once one clearly led: the box is what gets shared.
   const [lure, nextLure] = pieceTally(book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${year}-`)), 2);
   const topLure = lure && lure.count >= 2 && lure.count > (nextLure?.count ?? 0) ? lure : null;
-  const lureLine = topLure ? t("Best lure: {lure} ({count})", { lure: pieceName(topLure.lure), count: topLure.count }) : null;
+  const lureLine = topLure ? t("Best lure: {lure} ({count})", { lure: bookLureName(book.catches)(topLure.lure), count: topLure.count }) : null;
   // And the water it was won on, once one clearly led: the "where" beside the "on what". Waters that read the same are
   // one, as the search its link opens takes them; the game's lake and the sample week are left out, as there.
   const byWater = new Map<string, { name: string; count: number }>();

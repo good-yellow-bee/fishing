@@ -1,5 +1,5 @@
 import { MOON_LABELS, WATER_LABELS, localDate, moonName, moonPhase, measureOf, personalBests, type CatchEntry, type Logbook, type Spot, type Trip } from "@stillwater/shared";
-import { lureNames, pieceTally } from "./pieceTally";
+import { bookLureName, lureNames, pieceTally } from "./pieceTally";
 import { formatCoord } from "./map/places";
 import { osmLink } from "./osmLink";
 import { t, tn } from "../i18n";
@@ -107,6 +107,8 @@ export function speciesSummary(
   catches: readonly CatchEntry[],
   waters: ReadonlyArray<{ name: string | null; count: number }>,
   dayOf: (entry: CatchEntry) => string = (entry) => localDate(new Date(entry.caughtAt)),
+  /** Lures as the whole book names them, as the cards and Gear do. */
+  lureName: (lure: string) => string = pieceName,
 ): string {
   const dated = (entry: CatchEntry) => formatDatedDay(new Date(`${dayOf(entry)}T12:00:00`));
   const released = catches.filter((entry) => entry.released).length;
@@ -119,7 +121,7 @@ export function speciesSummary(
   const newest = catches[0];
   const named = waters.filter((row) => row.name).map((row) => `${plainName(row.name!)} (${row.count})`);
   const lures = pieceTally(catches, 3)
-    .map((row) => `${pieceName(row.lure)} (${row.count})`)
+    .map((row) => `${lureName(row.lure)} (${row.count})`)
     .join(", ");
   return [
     kindNames(catches)(species),
@@ -157,7 +159,7 @@ export function yearSummary(book: Logbook, year: string, today: string, goal: nu
   const [y, m, d] = today.split("-").map(Number) as [number, number, number];
   const pace = goal !== null && today.startsWith(`${year}-`) ? goalPace(catches.length, goal, new Date(y, m - 1, d)) : null;
   const lures = pieceTally(catches, 3)
-    .map((row) => `${pieceName(row.lure)} (${row.count})`)
+    .map((row) => `${bookLureName(book.catches)(row.lure)} (${row.count})`)
     .join(", ");
   return [
     t("{year} in the book", { year }),

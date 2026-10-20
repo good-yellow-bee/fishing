@@ -1,7 +1,7 @@
-import { isLogbook, type CatchEntry, type Logbook, type Measure, type Spot, type Trip } from "./logbook.ts";
+import { isLogbook, localDate, type CatchEntry, type Logbook, type Measure, type Spot, type Trip } from "./logbook.ts";
 import { CATCH_PHOTO_STORE_MAX_CHARS, isCatchPhoto, photosForBook, type CatchPhotoMap } from "./photo.ts";
 import { isTackleBox, type TackleItem } from "./tackle.ts";
-import { prepareStoredLogbook } from "./weather.ts";
+import { isWeather, prepareStoredLogbook } from "./weather.ts";
 
 export const FIELD_ARCHIVE_KIND = "stillwater-field-log";
 
@@ -86,11 +86,18 @@ function cleanCatch(entry: CatchEntry): CatchEntry {
   };
 }
 
+/** Each fish's weather, where the file gives one, is weather this build reads; none (null or left out) is fine. */
+function weatherReadable(book: unknown): boolean {
+  if (!isRecord(book) || !Array.isArray(book.catches)) return true;
+  return book.catches.every((entry) => !isRecord(entry) || entry.weather === undefined || entry.weather === null || isWeather(entry.weather));
+}
+
 /** Every catch time and outing day is a real date, as the book writes them: a file with "yesterday" in it would stop the pages that show it. */
 function datesReadable(book: Logbook): boolean {
   return (
     book.catches.every((entry) => !Number.isNaN(Date.parse(entry.caughtAt))) &&
-    book.trips.every((trip) => /^\d{4}-\d{2}-\d{2}$/.test(trip.date) && !Number.isNaN(new Date(`${trip.date}T12:00:00`).getTime()))
+    // A day the calendar has: "2026-02-31" would roll over to March 3 on its card and stay February everywhere else.
+    book.trips.every((trip) => /^\d{4}-\d{2}-\d{2}$/.test(trip.date) && localDate(new Date(`${trip.date}T12:00:00`)) === trip.date)
   );
 }
 
@@ -224,6 +231,8 @@ export function mergeFieldArchive(here: FieldArchive, file: FieldArchive, delete
 export function parseFieldArchive(value: unknown): FieldArchiveResult {
   if (!isRecord(value)) return refuse();
   if (value.kind !== FIELD_ARCHIVE_KIND || value.version !== FIELD_ARCHIVE_VERSION) return refuse();
+  // A fish's weather this build can't read is refused, not dropped: a file loading "fine" would lose its sky and wind.
+  if (!weatherReadable(value.book)) return refuse();
   const prepared = prepareStoredLogbook(value.book);
   if (!isLogbook(prepared) || !datesReadable(prepared) || !sizesReadable(prepared)) return refuse();
   if (!isTackleBox(value.tackle)) return refuse();

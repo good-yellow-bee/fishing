@@ -62,7 +62,7 @@ export function speciesWaters(book: Logbook, catches: readonly CatchEntry[]) {
  * A kind's name as the book writes it most, in the reader's language: "zander", "Zander " and "Zander" are one kind, so
  * a sheet or a copied text names it once, as "Sandacz" in Polish, not as three.
  */
-export function kindNames(catches: readonly CatchEntry[]): (species: string) => string {
+export function kindNames(catches: readonly Pick<CatchEntry, "species">[]): (species: string) => string {
   const spellings = new Map<string, Map<string, number>>();
   for (const entry of catches) {
     const name = entry.species.trim();

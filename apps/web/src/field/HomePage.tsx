@@ -14,8 +14,8 @@ import { hasSampleLeft, isSampleCatch, isSampleOnly, isSamplePlan, isSampleSpot,
 import { outingFish } from "./outingFish";
 import { lateOutings, outNow, outingDay, plainName, sameName, underWay } from "./tripDates";
 import { sheetOutings } from "./catchCsv";
-import { NEWS_ITEMS, markNewsSeen, newsDue, readSeenNews } from "../game/whatsNew";
-import { FIELD_NEWS } from "./fieldNews";
+import { NEWS_ITEMS } from "../game/whatsNew";
+import { FIELD_NEWS, fieldNewsDue, markFieldNewsSeen } from "./fieldNews";
 import { readKeptDraft } from "./catchDraft";
 import { t, tn, useT } from "../i18n";
 import { daysBetween } from "./spotOrder";
@@ -32,7 +32,7 @@ import { ThemeChoice } from "./ThemeChoice";
 import { sunTimes } from "./sunTimes";
 import { placeFor } from "./map/places";
 import { useTackleItems } from "./gear/TackleState";
-import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "./playLake";
+import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 import { newestOutingFirst } from "./catchNeighbors";
 import { planText, saveOutingIcs } from "./TripPages";
 import { CopySummary } from "./CopySummary";
@@ -135,7 +135,7 @@ export function HomePage() {
   const heading = useRef<HTMLHeadingElement>(null);
   const [setAside, setSetAside] = useState(() => readUnreadableBook() !== null);
   // The news the game's dock shows, here too for an angler who only keeps the book: decided once per visit.
-  const [news, setNews] = useState(() => newsDue(storedBook.catches.filter((entry) => offPlayLake(entry) && !isSampleCatch(entry.id)).length, readSeenNews()));
+  const [news, setNews] = useState(() => fieldNewsDue(storedBook.catches.filter((entry) => offPlayLake(entry) && !isSampleCatch(entry.id)).length));
   // A first visit: the invented sample and nothing of the player's own yet.
   const sampleOnly = isSampleOnly(storedBook);
   // Every pictured fish, the game's snapshots too: the photo wall it opens shows them all.
@@ -267,7 +267,7 @@ export function HomePage() {
             ))}
           </ul>
           <button type="button" className="text-button" onClick={() => {
-              markNewsSeen();
+              markFieldNewsSeen();
               setNews(false);
               heading.current?.focus();
             }}>
@@ -480,7 +480,7 @@ export function HomePage() {
                       {tn(yearsBack(entry, now) ?? 1, "{n} year ago", "{n} years ago")}
                       {" · "}
                       {/* The whole day it came from, in the catch search. */}
-                      <Link to={findLink(withoutPlayLake(book, bookFishDay(book, entry), book.catches))}>{t("Every fish that day")}</Link>
+                      <Link to={findLink(countedSearch(book, bookFishDay(book, entry), book.catches.filter((other) => bookFishDay(book, other) === bookFishDay(book, entry)), "book"))}>{t("Every fish that day")}</Link>
                     </p>
                     <CatchCard
                       level={4}

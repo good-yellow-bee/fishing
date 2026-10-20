@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { Link } from "react-router-dom";
-import { FIELD_ARCHIVE_KIND, FIELD_ARCHIVE_REFUSAL, FIELD_ARCHIVE_VERSION, catchesNewestFirst, foldText, fieldArchiveDocument, localDate, mergeFieldArchive, newFishIn, parseFieldArchiveText, type CatchPhotoMap, type FieldArchive, type Logbook } from "@stillwater/shared";
+import { FIELD_ARCHIVE_KIND, FIELD_ARCHIVE_REFUSAL, FIELD_ARCHIVE_VERSION, catchesNewestFirst, foldText, fieldArchiveDocument, localDate, mergeFieldArchive, newFishIn, parseFieldArchiveText, type CatchEntry, type CatchPhotoMap, type FieldArchive, type Logbook } from "@stillwater/shared";
 import { commitFieldArchive } from "./archiveStore";
 import { catchesCsv, sheetOutings, tripsCsv } from "./catchCsv";
 import { bookSignature, changedDaysSince, clearCopiedAt, copyNudge, hasSampleLeft, hasSampleWaters, isSampleCatch, isSampleOnly, isSampleSpot, isSampleOuting, ownCatches, readCopiedAt, readCopyMark, lowerCopiedAt, readCopyRecord, restoreCopyRecord, saveCopiedAt, withoutSample } from "./bookCopy";
@@ -23,7 +23,8 @@ import { outingDay } from "./tripDates";
 import { bookFishDay } from "./tripMonths";
 import { t, useT } from "../i18n";
 import { homeScreenTip, installApp, useInstallOffer } from "../installPrompt";
-import { pieceName } from "./gear/pieceKey";
+import { bookKindName, kindNames } from "./speciesLink";
+import { bookLureName } from "./pieceTally";
 
 /** When a book's newest fish came in, or "" for a book with none. */
 function newestAt(book: Logbook): string {
@@ -86,7 +87,9 @@ function withoutSampleFor(file: FieldArchive, here: Logbook): FieldArchive {
 
 /** The first few fish by kind and day, then how many more. */
 function fishPreview(entries: readonly { species: string; caughtAt: string }[]): string {
-  const shown = entries.slice(0, PREVIEW_FISH).map((entry) => `${pieceName(entry.species)} ${formatCatchDay(entry.caughtAt)}`).join(", ");
+  // A kind however written named once, as the file writes it most.
+  const kindName = kindNames(entries);
+  const shown = entries.slice(0, PREVIEW_FISH).map((entry) => `${kindName(entry.species)} ${formatCatchDay(entry.caughtAt)}`).join(", ");
   return entries.length > PREVIEW_FISH ? t("{list} and {n} more", { list: shown, n: entries.length - PREVIEW_FISH }) : shown;
 }
 const PREVIEW_FISH = 3;
@@ -370,6 +373,8 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
   const now = new Date();
   const ownFish = countedBook(book).catches;
   const thisYear = localDate(now).slice(0, 4);
+  // A year's sheet names kinds and lures, and dates a night fish, as the whole book does.
+  const wholeBookNames = { kindName: bookKindName(book.catches), lureName: bookLureName(book.catches), dayOf: (entry: CatchEntry) => bookFishDay(book, entry) };
   const thisYearFish = ownFish.filter((entry) => bookFishDay(book, entry).startsWith(`${thisYear}-`));
   // Last year's in the first months, when its returns fall due and this year's sheet holds little or nothing yet.
   const lastYear = String(Number(thisYear) - 1);
@@ -485,7 +490,7 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
             type="button"
             className="text-button"
             onClick={() => {
-              downloadFile(catchesCsv({ ...book, catches: thisYearFish }), "text/csv;charset=utf-8", `stillwater-catches-${thisYear}.csv`);
+              downloadFile(catchesCsv({ ...book, catches: thisYearFish }, wholeBookNames), "text/csv;charset=utf-8", `stillwater-catches-${thisYear}.csv`);
               setNotice({ tone: "ok", text: t("The catches were downloaded as a spreadsheet.") });
             }}
           >
@@ -497,7 +502,7 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
             type="button"
             className="text-button"
             onClick={() => {
-              downloadFile(catchesCsv({ ...book, catches: lastYearFish }), "text/csv;charset=utf-8", `stillwater-catches-${lastYear}.csv`);
+              downloadFile(catchesCsv({ ...book, catches: lastYearFish }, wholeBookNames), "text/csv;charset=utf-8", `stillwater-catches-${lastYear}.csv`);
               setNotice({ tone: "ok", text: t("The catches were downloaded as a spreadsheet.") });
             }}
           >

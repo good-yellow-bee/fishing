@@ -1,3 +1,5 @@
+import { NEWS_ID, NEWS_ITEMS, markNewsSeen, readSeenNews } from "../game/whatsNew";
+
 /**
  * The What's new lines about the field log, as the game's card lists them: Home shows these, not the game's scenery.
  * Each new field-log line goes in here too, newest first, word for word as in `NEWS_ITEMS`.
@@ -27,3 +29,38 @@ export const FIELD_NEWS: ReadonlySet<string> = new Set([
   "A season on Bests shows its fish an outing against the season before, and its outings open from the box. A search for one kind gives each year's biggest beside its count, and “31.12” finds that day.",
   "The lure record can be downloaded as a spreadsheet, for the water picked or all of them. The Map finds the water nearest you, and saves all your waters for a GPS in one file.",
 ]);
+
+/** The newest field line the angler dismissed on Home: the game's and the lake's batches don't bring the card back. */
+const FIELD_NEWS_KEY = "stillwater.news.field.v1";
+
+/** The newest field-log line of What's new, which Home's card leads with. */
+export function newestFieldNews(): string | undefined {
+  return NEWS_ITEMS.find((item) => FIELD_NEWS.has(item));
+}
+
+/**
+ * Whether Home's card is due: someone who has fished, with a field line newer than the one they dismissed. Before
+ * this mark existed, dismissing the batch on show counts.
+ */
+export function fieldNewsDue(caughtTotal: number): boolean {
+  const newest = newestFieldNews();
+  if (caughtTotal === 0 || !newest) return false;
+  let seen: string | null = null;
+  try {
+    seen = localStorage.getItem(FIELD_NEWS_KEY);
+  } catch {
+    return readSeenNews() !== NEWS_ID;
+  }
+  return seen === null ? readSeenNews() !== NEWS_ID : seen !== newest;
+}
+
+/** Dismissed on Home: this field line, and the batch too, so the game's card doesn't repeat it. */
+export function markFieldNewsSeen() {
+  markNewsSeen();
+  try {
+    const newest = newestFieldNews();
+    if (newest) localStorage.setItem(FIELD_NEWS_KEY, newest);
+  } catch {
+    // Private mode: the card shows again next visit.
+  }
+}
