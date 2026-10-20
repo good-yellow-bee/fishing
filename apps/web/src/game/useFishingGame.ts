@@ -77,6 +77,7 @@ import { castForLodgeLost, castForLodgeTag, castForReleased, loadReleased, saveR
 import { weightText } from "../i18n/content";
 import { FRENZY_SLOT_MS, frenzyOn, HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, slotFrenzy, type Hotspot } from "./hotspot";
 import { loadBag, loadShiner, saveBag, saveShiner, type HookedShiner } from "./groundbaitBag";
+import { loadTin, saveTin, WORM_TIN_DAILY } from "./wormTin";
 import { BACKLASH_POWER, BED_RAIDERS, COLD_WORK_WAIT, tooQuickForCold, isLongCast, castIntoSchool, castOverGroundbait, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, canBaitShiner, shinerHunter, bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, type Groundbait, castIntoSpooked, castUnderPressure, castNewLure, type LuresShown, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, colourSuits, colourWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, anchorSplashWaitMul, openGlareWaitMul, frenzyHunter, FRENZY_WAIT, lampLit, LAMP_WAIT, LAMP_WINDOW, longShadowWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, waterSwingWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
@@ -697,6 +698,18 @@ export function useFishingGame(
   useEffect(() => {
     handfulsRef.current = profile?.userId ? loadBag(profile.userId) : GROUNDBAIT_HANDFULS;
     setHandfuls(handfulsRef.current);
+  }, [profile?.userId]);
+  // Worms dug for the day: a fresh one on a washed-out hook, or one out on a night line, comes from the tin.
+  const [worms, setWorms] = useState(WORM_TIN_DAILY);
+  const wormsRef = useRef(WORM_TIN_DAILY);
+  const keepWorms = (next: number) => {
+    wormsRef.current = next;
+    setWorms(next);
+    if (anglerIdRef.current) saveTin(anglerIdRef.current, next);
+  };
+  useEffect(() => {
+    wormsRef.current = profile?.userId ? loadTin(profile.userId) : WORM_TIN_DAILY;
+    setWorms(wormsRef.current);
   }, [profile?.userId]);
   /** The line came out of a fight over the rocks or round a piling frayed, and snaps sooner until retied. */
   const frayedRef = useRef(false);
@@ -2267,19 +2280,30 @@ export function useFishingGame(
     const wasFrayed = frayedRef.current;
     const wasTwisted = isTwisted(twistRef.current);
     const wasDull = dullRef.current;
+    // A fresh worm for a washed-out one on the hook comes from the tin; with none left the washed-out one stays on.
+    const washedOn = isWashedOut(soakRef.current) && isLiveBait(lureRef?.current);
+    const tinEmpty = washedOn && wormsRef.current === 0;
+    const emptyTin = t("Your worm tin is empty, so the washed-out worm stays on. More worms are dug each day.");
+    if (tinEmpty && !wasFrayed && !wasTwisted && !wasDull) {
+      setHint(emptyTin);
+      return;
+    }
     markFrayed(false);
     setTwist(0);
     markDull(false);
-    setSoak(0);
-    setHint(
-      wasFrayed
-        ? t("You cut off the frayed line and tie the lure on again. The line holds full strain.")
-        : wasTwisted
-          ? t("You cut off the twisted line and tie the lure on again. It casts clean.")
-          : wasDull
-            ? t("You touch up the dull hook point and tie the lure on again. It sets solid again.")
-            : t("You thread a fresh worm on the hook. Its scent draws the fish again."),
-    );
+    if (!tinEmpty) setSoak(0);
+    if (washedOn && !tinEmpty) keepWorms(wormsRef.current - 1);
+    const rebaited = washedOn && !tinEmpty ? `${t("You thread a fresh worm on the hook. Its scent draws the fish again.")} ${t("Worms left in your tin: {worms}.", { worms: wormsRef.current })}` : "";
+    const fixed = wasFrayed
+      ? t("You cut off the frayed line and tie the lure on again. The line holds full strain.")
+      : wasTwisted
+        ? t("You cut off the twisted line and tie the lure on again. It casts clean.")
+        : wasDull
+          ? t("You touch up the dull hook point and tie the lure on again. It sets solid again.")
+          : rebaited
+            ? ""
+            : t("You thread a fresh worm on the hook. Its scent draws the fish again.");
+    setHint([fixed, rebaited, tinEmpty ? emptyTin : ""].filter(Boolean).join(" "));
   }, []);
 
   /** Toss a handful of groundbait off the bank the angler stands on: the next casts there bite sooner. */
@@ -2357,12 +2381,13 @@ export function useFishingGame(
   /** Leave a shiner, or at dusk or night a worm on the hook, out on a night line at this bank, for a later visit to check. */
   const setNightLine = () => {
     const spot = stanceRef.current;
-    // With no shiner to spare, a worm on the hook goes out instead: free, but fewer night feeders come to it.
+    // With no shiner to spare, a worm from the tin goes out instead, when one is tied on: fewer night feeders come to it.
     const shiner = liveShinerRef.current || bucketNow().length > 0;
-    if (!profile || nightLine || (!shiner && !(isLiveBait(lureRef?.current) && wormLineHour(hourRef.current))) || phaseRef.current !== "idle" || !isFishingStance(spot) || spot === "open" || nightLineKinds(spot, profile).length === 0) return;
+    if (!profile || nightLine || (!shiner && !(isLiveBait(lureRef?.current) && wormLineHour(hourRef.current) && wormsRef.current > 0)) || phaseRef.current !== "idle" || !isFishingStance(spot) || spot === "open" || nightLineKinds(spot, profile).length === 0) return;
     // A spare from the bucket goes out first, so the shiner on the hook stays for casting.
     if (bucketNow().length > 0) keepBucket(profile.userId, bucketOut());
     else if (shiner) hookShiner(null);
+    else keepWorms(wormsRef.current - 1);
     const setAt = Date.now();
     const lineSeason = nightLineSeason(season);
     keepNightLine(profile.userId, { spot, setAt, ...(shiner ? {} : { bait: "worm" as const }), ...(lineSeason ? { season: lineSeason } : {}) });
@@ -2377,7 +2402,7 @@ export function useFishingGame(
           shiner ? t("You leave the shiner out on a night line here.") : t("You leave a worm out on a night line here."),
           lineSeason === "summer" ? t("Check it once the night is out, and before that evening: in the summer heat crayfish strip the bait fast.") : t("In the winter cold the fish are slow: check it once the night is out and it has soaked twelve hours, and within four days."),
         ].join(" ");
-    setHint([left, tonight].filter(Boolean).join(" "));
+    setHint([left, tonight, shiner ? "" : t("Worms left in your tin: {worms}.", { worms: wormsRef.current })].filter(Boolean).join(" "));
   };
 
   /** Bring in the night line set at this bank: a night feeder of the bank, or an empty hook. */
@@ -2464,6 +2489,7 @@ export function useFishingGame(
     twisted,
     dulled,
     washed,
+    worms,
     retie,
     lamp,
     toggleLamp,
