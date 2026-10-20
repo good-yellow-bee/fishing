@@ -1948,7 +1948,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT461~~ | ~~News card 2026-10-20-game69 covers GT459-GT460: the winter shiner trap and the bait bucket's seasonal days~~ (#1699) | ui | S |
 | ~~GT462~~ | ~~The groundbaited swim follows the season: a swim left behind primes after three hours in summer but is eaten within a day, and after twelve hours in winter but keeps four days (six hours and two days otherwise), judged by the season when the angler comes back, like the bait bucket; the toss hint says the season's timing in summer and winter~~ (#1702) | gameplay | S |
 | ~~GT463~~ | ~~The night line follows the season: set in summer, it soaks only three hours (so a small-hours line is ready by dawn) but crayfish strip the bait within a day (still holding it till the evening after its night, whenever it went out); set in winter, it soaks twelve hours (an evening line comes in by mid-morning, not dawn) but the bait keeps four days (six hours and two days otherwise); the season is fixed when the line goes out, like the winter trap, since the line's ready time is promised then; the set-line hint names the season's timing~~ (#1706) | gameplay | S |
-| GT464 | News card 2026-10-20-game70 covers GT462-GT463: the groundbaited swim and the night line by season (#N) | ui | S |
+| GT464 | News card 2026-10-20-game70 covers GT462-GT463: the groundbaited swim and the night line by season (#1708) | ui | S |
 
 ## Risks / open questions for the owner
 
