@@ -483,14 +483,21 @@ export function useFishingGame(
     trapRef.current = profile?.userId ? loadTrap(profile.userId) : null;
     setTrapState(trapRef.current);
   }, [profile?.userId]);
-  // Re-render as the trap turns ready and then stale, so an idle shack view keeps up with it.
-  const [trapTick, setTrapTick] = useState(0);
+  // Re-render as the trap turns ready and then stale, so an idle shack view keeps up with it. Checked at
+  // least once a minute, since a sleeping computer holds its timers back.
+  const [, setTrapSeen] = useState<ReturnType<typeof trapState> | null>(null);
   useEffect(() => {
-    const next = trap && trapNextChange(trap, Date.now());
-    if (next == null) return;
-    const timer = window.setTimeout(() => setTrapTick((tick) => tick + 1), next - Date.now());
+    if (!trap) return;
+    let timer: number | undefined;
+    const check = () => {
+      const now = Date.now();
+      setTrapSeen(trapState(trap, now));
+      const next = trapNextChange(trap, now);
+      if (next !== null) timer = window.setTimeout(check, Math.min(next - now, 60_000));
+    };
+    check();
     return () => window.clearTimeout(timer);
-  }, [trap, trapTick]);
+  }, [trap]);
   /** The bucket with a fresh shiner in, or with its oldest one taken out. */
   const bucketIn = () => [...bucketNow(), Date.now()];
   const bucketOut = () => bucketNow().slice(1);
