@@ -1064,6 +1064,7 @@ export function DockPage() {
           lurkerCloseInMs={game.lurkerCloseInMs}
           follow={game.follow}
           giantBanks={giantBanks}
+          nightLineSpot={game.nightLine?.spot ?? null}
           topwater={isTopwater(lure)}
           hour={hour}
           sky={sky}
