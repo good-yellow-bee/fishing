@@ -266,8 +266,9 @@ export const ROCK_PULL = 1.2;
 /** At the net a spent fish lifts its head for NET_HEAD_MS in every NET_HEAD_EVERY_MS: the moment to net it. */
 export const NET_HEAD_EVERY_MS = 1400;
 export const NET_HEAD_MS = 600;
-/** A strike with its head down sends it off this far again. */
+/** A strike with its head down, or leaving it at the net this long, sends it off this far again. */
 export const NET_BOLT_LINE = 0.12;
+export const NET_WAIT_MS = 6000;
 
 /** Whether this fish is netted, not just reeled in: anything but a panfish masher, once past a beginner's easy fish. */
 export function netsFish(species: { challenge: string }, mercy: boolean): boolean {
@@ -448,7 +449,7 @@ export function isCloseCall(performance: FightPerformance) {
 
 /** Clean = tension never went red and the fish never nearly ran out the line. */
 export function isCleanFight(performance: FightPerformance) {
-  return performance.peakTension < RED_TENSION && performance.maxLine < RUN_OUT_LINE && !performance.slackCharge;
+  return performance.peakTension < RED_TENSION && performance.maxLine < RUN_OUT_LINE && !performance.slackCharge && !performance.netMisses;
 }
 
 type Pattern = {
@@ -607,12 +608,14 @@ export function makeFight(
     if (sim.netting) {
       // Its head comes up now and then; a strike then nets it, a strike with its head down sends it off on one short bolt.
       sim.netHead = (nowMs - netFrom) % NET_HEAD_EVERY_MS >= NET_HEAD_EVERY_MS - NET_HEAD_MS;
-      if (!pressed) return "fighting";
-      if (sim.netHead) return "landed";
+      if (pressed && sim.netHead) return "landed";
+      if (!pressed && nowMs - netFrom < NET_WAIT_MS) return "fighting";
       sim.netting = false;
       sim.netHead = false;
       sim.line = NET_BOLT_LINE;
-      performance.netMisses = (performance.netMisses ?? 0) + 1;
+      if (pressed) performance.netMisses = (performance.netMisses ?? 0) + 1;
+      // The bolt is all it has left; the next run waits its calm like any other.
+      nextAt = nowMs + range(1200, 1800);
       return "fighting";
     }
     if (nextAt === null) nextAt = nowMs + range(1200, 1800);
@@ -813,6 +816,9 @@ export function makeFight(
       if (!net) return "landed";
       sim.line = 0;
       sim.surge = 0;
+      // Whatever it was doing ends at the net.
+      for (const flag of ["jump", "roll", "lastRun", "encore", "charge", "firstRun", "tailWalk", "tearing", "sulk", "lifting", "weeded", "wrapped", "shake", "headTurned", "diving", "rocky", "turning", "darted", "downstream", "withRun"] as const) delete sim[flag];
+      tearSec = 0;
       sim.netting = true;
       sim.netHead = false;
       sim.tension = 0;

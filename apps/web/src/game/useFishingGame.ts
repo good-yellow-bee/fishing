@@ -1509,6 +1509,8 @@ export function useFishingGame(
     let wasBitten = false;
     let wasShaking = false;
     let wasLifting = false;
+    let wasNetting = false;
+    let wasNetHead = false;
     let prevSurge: SurgeState = 0;
     /** After a loss, a fish that may bite again is said to be still about. */
     // On a small lure, say a big one tempts it back sooner.
@@ -1629,7 +1631,16 @@ export function useFishingGame(
             fx.haptic("scrape");
             lastScrapeFx = now;
           }
-          if (reeling && now - lastReelFx > 90) {
+          // A fish reaching the net lets a toggled reel go, so the next press is the strike that nets it.
+          if (sim.netting && !wasNetting && settings.reelMode === "toggle") reelLatchRef.current = false;
+          // Its head coming up at the net is heard and felt, not only read on the card.
+          if (sim.netHead && !wasNetHead) {
+            fx.plop();
+            fx.haptic("nibble");
+          }
+          wasNetting = !!sim.netting;
+          wasNetHead = !!sim.netHead;
+          if (reeling && !sim.netting && now - lastReelFx > 90) {
             fx.reel();
             lastReelFx = now;
           }
