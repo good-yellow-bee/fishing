@@ -713,7 +713,7 @@ function SpotView() {
       <div className="section-head">
         <h2>{t("Fish from this water")}</h2>
       </div>
-      <FishSum catches={summed} list={`water:${spot.id}`} />
+      <FishSum catches={summed} list={`water:${spot.id}`} kindName={kindName} />
       {summed.length < catches.length ? (
         <p className="meta">{tn(catches.length - summed.length, "Also listed: {n} fish from the sample week or the game.", "Also listed: {n} fish from the sample week or the game.")}</p>
       ) : null}

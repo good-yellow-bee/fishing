@@ -29,7 +29,8 @@ const waterTemp = (value: number) => num(Math.round(value * 10) / 10 || 0);
  * and units. Polish spreadsheets split on semicolons and write decimal commas,
  * so a Polish reader gets those; English gets commas and points.
  */
-export function catchesCsv(book: Logbook): string {
+/** `names` names kinds and lures as a larger book does, for a sheet of some of its fish (an outing's, a water's). */
+export function catchesCsv(book: Logbook, names?: { kindName: (species: string) => string; lureName: (lure: string) => string }): string {
   const separator = getLang() === "pl" ? ";" : ",";
   const metric = getUnits() === "metric";
   const header = [
@@ -50,8 +51,8 @@ export function catchesCsv(book: Logbook): string {
     t("Note"),
   ];
   // One kind written two ways is one kind, under the name the book gives it most.
-  const kindName = kindNames(book.catches);
-  const lureName = lureNames(book.catches);
+  const kindName = names?.kindName ?? kindNames(book.catches);
+  const lureName = names?.lureName ?? lureNames(book.catches);
   const rows = catchesNewestFirst(book).map((entry) => {
     const at = new Date(entry.caughtAt);
     const { weather } = entry;

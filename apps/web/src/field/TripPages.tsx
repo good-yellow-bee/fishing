@@ -526,13 +526,13 @@ function TripView() {
           {t("Fish on this outing")}
         </h2>
       </div>
-      <FishSum catches={catches} list={`trip:${trip.id}`} />
+      <FishSum catches={catches} list={`trip:${trip.id}`} kindName={bookKindName(book.catches)} />
       {/* Kept on the water, from the outing's day on: the fish that got away and the strikes that missed. */}
       {/* Not on the sample week's made-up outings beside the angler's own: a tap there would change a story, not a day. */}
       {trip.date <= today && !play && !(isSampleOuting(trip) && !isSampleOnly(book)) ? <TripCounts trip={trip} landed={catches.length} /> : null}
       {/* Out there now: how long it has been quiet, to help decide when to move. */}
       {/* An evening outing still going in the small hours counts too; a fish over 12 hours old says nothing. */}
-      {catches[0] && (trip.date === today || (trip.date === shiftDate(new Date(), -1) && new Date().getHours() < LATE_NIGHT_UNTIL)) ? (
+      {catches[0] && (trip.date === today || (trip.date < today && outNow(book, trip))) ? (
         <SinceLast caughtAt={catches[0].caughtAt} />
       ) : null}
       {catches.length > 1 ? (
@@ -596,7 +596,7 @@ function TripView() {
       {lastHere?.note.trim() && trip.date >= today ? <p className="meta last-note">{t("Last time you wrote: “{note}”", { note: lastHere.note.trim() })}</p> : null}
       {/* A game day's kinds open its own fish there, not the kind's page of the angler's own. */}
       {/* Each kind opens this outing's fish of it, as the lure chips do; its own page is one tap away on each fish. */}
-      <SpeciesChips catches={play || !spot ? catches : catches.filter((entry) => entry.spotId === spot.id)} outing={trip} water={play || !spot ? undefined : plainName(spot.name)} />
+      <SpeciesChips catches={play || !spot ? catches : catches.filter((entry) => entry.spotId === spot.id)} outing={trip} water={play || !spot ? undefined : plainName(spot.name)} kindName={bookKindName(book.catches)} />
       {newKinds.length > 0 ? (
         <p className="meta new-kinds">
           {t("First time at this water:")}{" "}
@@ -608,7 +608,7 @@ function TripView() {
           ))}
         </p>
       ) : null}
-      <LureChips catches={spot ? catches.filter((entry) => entry.spotId === spot.id) : catches} outing={trip} water={spot ? plainName(spot.name) : undefined} />
+      <LureChips catches={spot ? catches.filter((entry) => entry.spotId === spot.id) : catches} outing={trip} water={spot ? plainName(spot.name) : undefined} lureName={bookLureName(book.catches)} />
       <FishCsv catches={catches} name={`${trip.date} ${outingName(trip, book.spots)}`} />
       {loose.length > 0 ? (
         <p className="meta loose-fish" role="status">
@@ -894,7 +894,9 @@ function TripForm() {
         );
   const peak = spotId && spotId !== PLAY_LAKE_ID ? peakTime(countedFish(catchesForSpot(book, spotId))) : null;
   // A second outing on the same water and day is usually a slip; say which one is already there.
-  const sameDay = countedBook(book).trips.find((trip) => trip.spotId === spotId && trip.date === date && trip.id !== existing?.id);
+  const sameDay = countedBook(book)
+    .trips.filter((trip) => trip.spotId === spotId && trip.date === date && trip.id !== existing?.id)
+    .sort(newestOutingFirst(book));
   // What this water gave around the same date in earlier years, for an outing being planned.
   const pastWeek = useMemo(() => {
     const [y, m, d] = date.split("-").map(Number);
@@ -1084,9 +1086,15 @@ function TripForm() {
               {sameTimeText(pastWeek, bookKindName(book.catches), bookLureName(book.catches))}
             </p>
           ) : null}
-          {sameDay ? (
+          {sameDay.length > 0 ? (
             <p className="wide form-note" role="status">
-              {t("You already have an outing on this water that day:")} <Link to={`/trips/${sameDay.id}`}>{outingName(sameDay, book.spots)}</Link>
+              {tn(sameDay.length, "You already have an outing on this water that day:", "You already have {n} outings on this water that day:")}{" "}
+              {sameDay.map((trip, index) => (
+                <Fragment key={trip.id}>
+                  {index > 0 ? ", " : null}
+                  <Link to={`/trips/${trip.id}`}>{outingName(trip, book.spots)}</Link>
+                </Fragment>
+              ))}
             </p>
           ) : null}
           {existing && ownFish.length > 0 && spotId !== existing.spotId ? (
