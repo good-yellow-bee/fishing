@@ -1829,6 +1829,8 @@ function CatchView() {
           ) : (
             <time dateTime={entry.caughtAt}>{formatClock(entry.caughtAt)}</time>
           )}
+          {/* A small-hours fish says whose night it counts on, the day its day link and the calendar open. */}
+          {caughtDay !== localDate(new Date(entry.caughtAt)) ? ` · ${t("night of {day}", { day: formatDay(caughtDay) })}` : null}
           {entry.released ? (
             <>
               {" · "}
