@@ -80,6 +80,7 @@ import { bestFishDay, bookFishDay } from "./tripMonths";
 import { daysBetween, likelyWater, spotsByLastFish } from "./spotOrder";
 import { notesHere } from "./outingNotes";
 import { useStepKeys } from "./stepKeys";
+import { newestOutingFirst } from "./catchNeighbors";
 
 /** The moon an outing fishes under: that day's evening, as the lake's forecast reads it. */
 function tripNight(date: string) {
@@ -170,9 +171,9 @@ export function planText(book: Logbook, trip: Trip, tackleItems: TackleItem[]): 
 export function saveOutingIcs(book: Logbook, trip: Trip, tackleItems: TackleItem[], today: string) {
   const spot = spotById(book, trip.spotId);
   // An untitled outing goes by its water's name, as its heading does.
-  const named = { ...trip, title: outingName(trip, book.spots) };
+  const named = { ...trip, title: plainName(outingName(trip, book.spots)) };
   const alarm = trip.date > today ? t("Pack for {outing} tomorrow", { outing: named.title }) : undefined;
-  downloadFile(tripIcs(named, spot?.name ?? null, new Date(), spot?.place, calendarNotes(book, trip, tackleItems), alarm), "text/calendar;charset=utf-8", tripIcsName(named));
+  downloadFile(tripIcs(named, spot ? plainName(spot.name) : null, new Date(), spot?.place, calendarNotes(book, trip, tackleItems), alarm), "text/calendar;charset=utf-8", tripIcsName(named));
 }
 
 /** Trips' two lists: last evening's outings still going lead Coming up, as on Home; the rest of yesterday is Recent. */
@@ -184,7 +185,7 @@ export function tripLists(book: Logbook, now = new Date()): { upcoming: Trip[]; 
   // Today's round of the game too, as Coming up leaves it out; not the sample week's plans once their day has passed.
   const recent = [
     ...book.trips.filter((trip) => trip.date === today && !offPlayLake(trip)),
-    ...recentTrips(book, today).filter((trip) => !going.has(trip.id) && !isSamplePlan(book, trip)),
+    ...recentTrips(book, today).filter((trip) => !going.has(trip.id) && !isSamplePlan(book, trip)).sort(newestOutingFirst(book)),
   ];
   return { upcoming, recent };
 }

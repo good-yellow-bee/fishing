@@ -145,13 +145,16 @@ export function HomePage() {
   // In the small hours, last evening's outing is still the one out on the water: it stays first, with its log link.
   // Only one still going, with no fish yet or one in the last twelve hours; a morning plan for today doesn't end a
   // session with a fish this past hour, though one that has a fish of its own does, as does any plan for one still blank.
-  const lateOuting = lateOutings(book, now)[0];
-  const upcoming = [...(lateOuting ? [lateOuting] : []), ...upcomingRealTrips(book, today)];
+  // Every one still going, as Trips lists them; the first leads Next.
+  const late = lateOutings(book, now);
+  const lateOuting = late[0];
+  const lateIds = new Set(late.map((trip) => trip.id));
+  const upcoming = [...late, ...upcomingRealTrips(book, today)];
   // Just back from the water, not from a round of the game, nor the sample week's plans once their day has passed.
   // Last evening's outing still on the water shows once, among what's coming up.
   // Newest first, a day's dusk before its dawn, as Trips lists them.
   const recent = countedOwn.trips
-    .filter((trip) => trip.date < today && offPlayLake(trip) && trip.id !== lateOuting?.id && !isSamplePlan(book, trip))
+    .filter((trip) => trip.date < today && offPlayLake(trip) && !lateIds.has(trip.id) && !isSamplePlan(book, trip))
     .sort(newestOutingFirst(book))
     .slice(0, 3);
   // Each outing's fish with those logged loose that day on its water, as the Trips page counts them.
@@ -343,7 +346,7 @@ export function HomePage() {
               {comparable ? `\u00a0· ${t("{n} by this date last year", { n: lastYearByNow })}` : null}
               {/* Where this year's pace ends it, against the goal, as the goal on Bests says it. */}
               {/* Behind it, what a week now needs to catch up: "on pace for 8" says the year is short, not what to do. */}
-              {pace ? `\u00a0· ${pace.ahead < 0 ? t("{left} to go, about {n} a week", { left: pace.left, n: pace.perWeek }) : t("on pace for {n}", { n: pace.pace })}` : null}
+              {pace ? `\u00a0· ${pace.ahead < 0 ? (pace.daysLeft < 7 ? tn(pace.daysLeft, "{left} to go, {n} day left", "{left} to go, {n} days left", { left: pace.left }) : t("{left} to go, about {n} a week", { left: pace.left, n: pace.perWeek })) : t("on pace for {n}", { n: pace.pace })}` : null}
               {/* A round number a few fish off: the next one worth a cheer. */}
               {nextMark ? `\u00a0· ${t("{n} more to {mark}", { n: nextMark.left, mark: nextMark.mark })}` : null}
             </small>

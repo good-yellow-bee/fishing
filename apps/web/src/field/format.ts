@@ -1,6 +1,6 @@
 import { SPOT_LABELS } from "@stillwater/shared";
 import { getLang, locale, t, tn } from "../i18n";
-import { outingDay } from "./tripDates";
+import { outingDay, plainName, sameName } from "./tripDates";
 
 /** Formatters per language, built on first use so a language change takes effect. */
 const formats = new Map<string, { format(date: Date): string }>();
@@ -36,7 +36,10 @@ function otherYear(date: Date): boolean {
  * draft is named), else "Outing", so a line never opens on a comma.
  */
 export function outingName(trip: { title: string; spotId: string }, spots: readonly { id: string; name: string }[] = []): string {
-  return trip.title.trim() || spots.find((spot) => spot.id === trip.spotId)?.name.trim() || t("Outing");
+  const water = spots.find((spot) => spot.id === trip.spotId)?.name;
+  // An untitled outing reads as its water is named now ("home lake " was saved for "Home Lake").
+  if (water && trip.title.trim() && sameName(trip.title, water)) return plainName(water);
+  return trip.title.trim() || water?.trim() || t("Outing");
 }
 
 /** The shown name of the outing with this id, or null when the book has none such. */

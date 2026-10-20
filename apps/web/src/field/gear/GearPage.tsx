@@ -43,6 +43,7 @@ import { outingFish } from "../outingFish";
 import { stillGoing } from "../tripDates";
 import { focusPageHeading } from "../pageFocus";
 import { onPiece } from "../pieceTally";
+import { newestOutingFirst } from "../catchNeighbors";
 
 function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
   const { book } = useLogbook();
@@ -516,7 +517,7 @@ export function GearPage() {
   // Real days out: a game day has nothing in the bag.
   // And not the sample week's once the angler has outings of their own, as Coming up and the record leave them out.
   const counted = countedBook(book);
-  const recent = recentTrips(counted, today).filter((trip) => offPlayLake(trip) && !going.includes(trip));
+  const recent = recentTrips(counted, today).filter((trip) => offPlayLake(trip) && !going.includes(trip)).sort(newestOutingFirst(counted));
   // Each outing's fish with those logged loose that day on its water, as Trips and Home count them.
   const fishOn = outingFish(book);
 
