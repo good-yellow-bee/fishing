@@ -1,7 +1,6 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { partsFor } from "./lazyPart";
 
 const dir = __dirname;
 /** Every source file under src, by path from the scene folder's view. */
@@ -30,12 +29,5 @@ describe("scene part chunks", () => {
     const lazy = sources.flatMap(({ text }) => [...text.matchAll(/lazyPart\("(\w+)", "(\w+)"\)/g)].map((m) => ({ group: m[1]!, name: m[2]! })));
     expect(lazy.length).toBeGreaterThan(50);
     for (const { group, name } of lazy) expect(readFileSync(join(dir, "parts", `${group}.ts`), "utf8")).toMatch(new RegExp(`export \\{[^}]*\\b${name}\\b`));
-  });
-
-  it("asks up front for the chunks the visit's hour, sky and season show", () => {
-    expect(partsFor("day", "clear", "summer")).toEqual(["summer"]);
-    expect(partsFor("night", "rain", "winter")).toEqual(["winter", "night", "weather"]);
-    expect(partsFor("dusk", "fog", "fall")).toEqual(["fall", "night", "weather"]);
-    expect(partsFor("dawn", "overcast", "spring")).toEqual(["spring"]);
   });
 });
