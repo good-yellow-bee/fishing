@@ -442,6 +442,22 @@ describe("useFishingGame live shiner", () => {
     }
   });
 
+  it.each([
+    ["summer", "Check it once the night is out, and before that evening: in the summer heat crayfish strip the bait fast."],
+    ["winter", "In the winter cold the fish are slow: check it once the night is out and it has soaked twelve hours, and within four days."],
+  ] as const)("keeps the season a night line goes out in and says its timing: %s", (season, said) => {
+    const strong = { ...profile, strength: 10, accuracy: 10 };
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    mount(DOCK_BUBBLES.at, strong, "day", false, undefined, undefined, undefined, season);
+    act(() => frames.at(-1)!(now));
+    const press = (name: string) => act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === name) as HTMLButtonElement).click());
+    press("buy shiner");
+    press("set night line");
+    expect(hint()).toMatch(new RegExp(`^You leave the shiner out on a night line here\\. ${said.replace(/\./g, "\\.")}`));
+    expect(JSON.parse(kept.get(nightLineKey(strong.userId))!).season).toBe(season);
+  });
+
   it("shows the night line turn ready, then stale, while the angler waits on the bank", () => {
     // Set in the small hours, off the lake's three-minute marks, so nothing else re-renders at its turns.
     const setAt = new Date(2026, 9, 21, 1, 0, 7).getTime();

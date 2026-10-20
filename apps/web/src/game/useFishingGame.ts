@@ -68,7 +68,7 @@ import { BUCKET_SIZE, liveShiners, loadBucket, saveBucket } from "./baitBucket";
 import { loadSwim, saveSwim, swimNow } from "./swim";
 import { loadTrap, saveTrap, trapCatch, trapIsCold, trapNextChange, trapState, type Trap } from "./minnowTrap";
 import { castForFoe, foeGone, isOldFoe, loadOldFoe, saveOldFoe } from "./oldFoe";
-import { loadNightLine, nightLineCatch, nightLineKinds, nightLineNextChange, nightLineState, nightSkyFor, saveNightLine, wormLineHour, type NightLine } from "./nightLine";
+import { loadNightLine, nightLineCatch, nightLineKinds, nightLineNextChange, nightLineSeason, nightLineState, nightSkyFor, saveNightLine, wormLineHour, type NightLine } from "./nightLine";
 import { markShy, loadGiantShy, rollGiantShy, saveGiantShy, shyOf, type GiantShy } from "./giantShy";
 import { AGAIN_CASTS, backAgain, castForGotAway, gotAwayAfterDrop, PATIENT_DROP_RANK, gotAwayAfterLoss, type GotAway } from "./gotAway";
 import { LINE_SNAP, LINE_WAIT, type LineWeight } from "./lineWeight";
@@ -2364,11 +2364,20 @@ export function useFishingGame(
     if (bucketNow().length > 0) keepBucket(profile.userId, bucketOut());
     else if (shiner) hookShiner(null);
     const setAt = Date.now();
-    keepNightLine(profile.userId, { spot, setAt, ...(shiner ? {} : { bait: "worm" as const }) });
+    const lineSeason = nightLineSeason(season);
+    keepNightLine(profile.userId, { spot, setAt, ...(shiner ? {} : { bait: "worm" as const }), ...(lineSeason ? { season: lineSeason } : {}) });
     // The forecast tells the night's sky, and the sky tells how likely the line is to hold a fish.
     const sky = nightSkyFor(setAt);
     const tonight = sky === "rain" ? t("Rain tonight: the night feeders will be roaming.") : sky === "clear" ? t("A clear night: the feeders keep close to cover, so the line may come in empty.") : "";
-    setHint([shiner ? t("You leave the shiner out on a night line here. Come back to check it once the night is out, and within two days.") : t("You leave a worm out on a night line here. Come back to check it once the night is out, and within two days."), tonight].filter(Boolean).join(" "));
+    const left = !lineSeason
+      ? shiner
+        ? t("You leave the shiner out on a night line here. Come back to check it once the night is out, and within two days.")
+        : t("You leave a worm out on a night line here. Come back to check it once the night is out, and within two days.")
+      : [
+          shiner ? t("You leave the shiner out on a night line here.") : t("You leave a worm out on a night line here."),
+          lineSeason === "summer" ? t("Check it once the night is out, and before that evening: in the summer heat crayfish strip the bait fast.") : t("In the winter cold the fish are slow: check it once the night is out and it has soaked twelve hours, and within four days."),
+        ].join(" ");
+    setHint([left, tonight].filter(Boolean).join(" "));
   };
 
   /** Bring in the night line set at this bank: a night feeder of the bank, or an empty hook. */
