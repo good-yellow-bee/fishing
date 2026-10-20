@@ -1,5 +1,6 @@
 import {
   localDate,
+  type Derby,
   type Rumor,
   type WeeklyChallenge,
   type BoardView,
@@ -109,6 +110,18 @@ export function getBoard(period: BoardPeriod = "all") {
 
 export function getLodgeTracks() {
   return request<{ tracks: LodgeTrack[] }>("/api/lodge/recent").then((body) => body.tracks);
+}
+
+export type DerbyBoard = {
+  derby: Derby;
+  running: boolean;
+  entries: { rank: number; userId: string; displayName: string; weight: number }[];
+  you: { rank: number; weight: number } | null;
+  lastChampion: { fishId: string; displayName: string; weight: number } | null;
+};
+
+export function getDerby() {
+  return request<DerbyBoard>("/api/board/derby");
 }
 
 export function getSpeciesRecords() {

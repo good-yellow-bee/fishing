@@ -1,9 +1,9 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { Hono } from "hono";
-import { weekStart, type BoardView, type SpeciesRecord } from "@stillwater/shared";
+import { derbyOn, pastDerbies, weekStart, type BoardView, type SpeciesRecord } from "@stillwater/shared";
 
 const testDir = mkdtempSync(join(tmpdir(), "stillwater-board-"));
 process.env.STILLWATER_DB_PATH = join(testDir, "stillwater.sqlite");
@@ -94,5 +94,38 @@ describe("GET /board/records", () => {
     expect(bySpecies.pike).toMatchObject({ weight: 12.3, userId: "mara", holder: "Mara" });
     expect(bySpecies.perch).toMatchObject({ weight: 0.5, userId: "mara" });
     expect(records).toHaveLength(2);
+  });
+});
+
+describe("GET /board/derby", () => {
+  const saturday = new Date(Date.UTC(2026, 10, 7, 15));
+  afterEach(() => vi.useRealTimers());
+
+  it("ranks the heaviest of the weekend's derby fish, puts the angler in it, and names last weekend's champion", async () => {
+    vi.useFakeTimers({ toFake: ["Date"], now: saturday });
+    const derby = derbyOn(saturday)!;
+    const last = pastDerbies(new Date(saturday.getTime() - 8 * 86_400_000), saturday)[0]!;
+    landed("mara", derby.fishId, 3, 1, "2026-11-07T12:00:00.000Z");
+    landed("ash", derby.fishId, 3, 1, "2026-11-07T10:00:00.000Z");
+    landed("ash", derby.fishId, 1, 1, "2026-11-07T11:00:00.000Z");
+    landed("idle", derby.fishId, 9, 1, "2026-11-06T10:00:00.000Z");
+    landed("mara", last.fishId, 4, 1, "2026-11-01T10:00:00.000Z");
+    // A tie at 3 lb: Ash's came first, though Mara's first derby fish of any size came earlier still.
+    landed("mara", derby.fishId, 0.5, 1, "2026-11-07T08:00:00.000Z");
+    const body = await get<{ derby: { fishId: string }; running: boolean; entries: { userId: string; weight: number }[]; you: { rank: number; weight: number } | null; lastChampion: { displayName: string } | null }>("/board/derby");
+    expect(body.running).toBe(true);
+    expect(body.derby.fishId).toBe(derby.fishId);
+    expect(body.entries.map((row) => [row.userId, row.weight])).toEqual([["ash", 3], ["mara", 3]]);
+    expect(body.you).toEqual({ rank: 1, weight: 3 });
+    expect(body.lastChampion?.displayName).toBe("Mara");
+  });
+
+  it("counts the derbies an angler held the top spot of when they ended", async () => {
+    const last = pastDerbies(new Date(saturday.getTime() - 8 * 86_400_000), saturday)[0]!;
+    landed("mara", last.fishId, 4, 1, "2026-11-01T10:00:00.000Z");
+    landed("ash", last.fishId, 3, 1, "2026-11-01T09:00:00.000Z");
+    const { countDerbyWins } = await import("../db.ts");
+    expect(countDerbyWins("mara", [last])).toBe(1);
+    expect(countDerbyWins("ash", [last])).toBe(0);
   });
 });

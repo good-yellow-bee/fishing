@@ -21,6 +21,7 @@ export * from "./weeklyFish.ts";
 export * from "./mastery.ts";
 export * from "./weeklyChallenges.ts";
 export * from "./legendHunt.ts";
+export * from "./derby.ts";
 export * from "./golden.ts";
 export * from "./streak.ts";
 export * from "./snow.ts";

@@ -93,6 +93,7 @@ db.exec(`
   );
 
   CREATE INDEX IF NOT EXISTS catch_user_created ON catch (user_id, created_at DESC);
+  CREATE INDEX IF NOT EXISTS catch_species_created ON catch (species_id, created_at);
 
   CREATE TABLE IF NOT EXISTS daily_request_claim (
     user_id TEXT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
@@ -239,6 +240,29 @@ export function listCatchDays(userId: string): string[] {
     .prepare(`SELECT DISTINCT day FROM catch WHERE user_id = ? AND day IS NOT NULL ORDER BY day`)
     .all(userId) as { day: string }[];
   return rows.map((row) => row.day);
+}
+
+/** The heaviest of a derby's fish each angler landed in its window, heaviest first; of equal fish, the one landed first wins. */
+export function listDerbyEntries(fishId: string, from: string, to: string, limit: number) {
+  return db
+    .prepare(
+      `SELECT userId, displayName, weight, landedAt FROM (
+         SELECT c.user_id as userId, p.display_name as displayName, c.weight as weight, c.created_at as landedAt,
+                ROW_NUMBER() OVER (PARTITION BY c.user_id ORDER BY c.weight DESC, c.created_at ASC) as nth
+         FROM catch c JOIN profile p ON p.user_id = c.user_id
+         WHERE c.species_id = ? AND c.created_at >= ? AND c.created_at < ?
+       ) WHERE nth = 1 ORDER BY weight DESC, landedAt ASC LIMIT ?`,
+    )
+    .all(fishId, from, to, limit) as { userId: string; displayName: string; weight: number; landedAt: string }[];
+}
+
+/** How many ended derbies this angler held the top spot of, back to their first catch. */
+export function countDerbyWins(userId: string, derbies: readonly { fishId: string; from: string; to: string }[]): number {
+  return derbies.filter((derby) => listDerbyEntries(derby.fishId, derby.from, derby.to, 1)[0]?.userId === userId).length;
+}
+
+export function firstCatchAt(userId: string): string | null {
+  return (db.prepare(`SELECT MIN(created_at) as at FROM catch WHERE user_id = ?`).get(userId) as { at: string | null }).at;
 }
 
 /** The whole history grouped into badge facts; `listCatches` stops at 20, so badges can't be read from it. */
