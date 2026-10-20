@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { CatchEntry, Logbook } from "@stillwater/shared";
 import { catchBadge } from "./catchBadge";
 import { largestFirst } from "./largestFirst";
+import { milestoneOf } from "./milestones";
 import { speciesCatches } from "./suggestions";
 
 const fish = (id: string, species: string, measure: CatchEntry["measure"], extra: Partial<CatchEntry> = {}): CatchEntry => ({ id, species, measure, lure: "Jig", spotId: "own", tripId: null, caughtAt: "2026-08-20T08:00:00.000Z", note: "", weather: null, ...extra });
@@ -21,5 +22,14 @@ describe("round 107: a kind however it was typed, on the catch pages", () => {
     const pair = (id: string, inches: number, pounds: number) => fish(id, "Pike", { kind: "length", inches }, { alsoMeasure: { kind: "weight", pounds } });
     const catches = [pair("p1", 20, 2), pair("p2", 30, 7), fish("long", "pikes", { kind: "length", inches: 34 }), fish("heavy", "Perch", { kind: "weight", pounds: 3 })];
     expect(largestFirst(catches).map((entry) => entry.id)[0]).toBe("long");
+  });
+});
+
+describe("round 107: a kind's first fish", () => {
+  it("is not a later fish typed in the plural", () => {
+    const at = (day: string) => `2026-08-${day}T08:00:00.000Z`;
+    const catches = [fish("a", "Perch", { kind: "length", inches: 9 }, { caughtAt: at("01") }), fish("b", "Perch", { kind: "length", inches: 9 }, { caughtAt: at("02") }), fish("c", "Perches", { kind: "length", inches: 9 }, { caughtAt: at("03") })];
+    const book: Logbook = { spots: [], trips: [], catches };
+    expect(milestoneOf(book, catches[2]!)).not.toEqual({ of: "kind", n: 1 });
   });
 });

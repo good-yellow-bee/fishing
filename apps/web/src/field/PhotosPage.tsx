@@ -9,7 +9,7 @@ import { formatClock, formatDay } from "./format";
 import { useLogbook } from "./LogbookState";
 import { catchPage, useShowMore } from "./PagedCatches";
 import { bookFishDay, monthName } from "./tripMonths";
-import { speciesCounts, kindKey } from "./speciesLink";
+import { kindKey, kindNames, speciesCounts } from "./speciesLink";
 import { FROM_LIST } from "./leaveDeleted";
 import { catchLink } from "./catchList";
 import { FIND_PARAM, exactTerm } from "./findLinks";
@@ -104,6 +104,8 @@ export function PhotosPage() {
     );
   const pictured = catchesWithPhotos(catchesNewestFirst(book), (id) => photoFor(id) !== null);
   const kinds = speciesCounts(pictured);
+  // A kind as the book writes it most, in the reader's language: one name on chips, cards and links.
+  const kindName = kindNames(book.catches);
   // A kind picked that has since lost its last photo shows them all again.
   // An older link's "perches" picks the same kind as "perch".
   const picked = kind && kinds.some((row) => kindKey(row.species) === kindKey(kind)) ? kindKey(kind) : null;
@@ -194,7 +196,7 @@ export function PhotosPage() {
             <span key={kind}>
               {index > 0 ? " · " : ""}
               <Link to={catchLink(entry.id)} state={FROM_LIST}>
-                {t(kind === "weight" ? "Your heaviest fish has no photo: {fish}" : "Your longest fish has no photo: {fish}", { fish: `${t(entry.species)}, ${measuresText(entry)}` })}
+                {t(kind === "weight" ? "Your heaviest fish has no photo: {fish}" : "Your longest fish has no photo: {fish}", { fish: `${kindName(entry.species)}, ${measuresText(entry)}` })}
               </Link>
             </span>
           ))}
@@ -212,7 +214,7 @@ export function PhotosPage() {
             const on = picked === kindKey(row.species);
             return count > 0 || on ? (
               <button key={row.species} type="button" className="text-button" aria-pressed={on} onClick={() => setKind(kindKey(row.species))}>
-                {t(row.species)} ({count})
+                {kindName(row.species)} ({count})
               </button>
             ) : null;
           })}
@@ -271,10 +273,10 @@ export function PhotosPage() {
                     <li key={entry.id}>
                       {/* Stepping on from the fish goes through the photos shown here, not the whole book. */}
                       {/* The water picked too, when it has a name to search by. */}
-                      <Link to={catchLink(entry.id, `catches${largest ? "-largest" : ""}:${picked ? `${exactTerm("species", t(entry.species))} + ` : ""}${pickedWater && spotById(book, pickedWater) ? `${exactTerm("water", spotById(book, pickedWater)!.name)} + ` : ""}${pickedYear ? `${pickedYear} + ` : ""}photo`)} state={FROM_LIST}>
+                      <Link to={catchLink(entry.id, `catches${largest ? "-largest" : ""}:${picked ? `${exactTerm("species", kindName(entry.species))} + ` : ""}${pickedWater && spotById(book, pickedWater) ? `${exactTerm("water", spotById(book, pickedWater)!.name)} + ` : ""}${pickedYear ? `${pickedYear} + ` : ""}photo`)} state={FROM_LIST}>
                         <img src={photoFor(entry.id)!} alt="" loading="lazy" />
                         <span className="photo-caption">
-                          <strong>{t(entry.species)}</strong>
+                          <strong>{kindName(entry.species)}</strong>
                           <small>
                             {/* A night's small-hours fish says its clock time, as the catch cards do. */}
                             {size} · {bookFishDay(book, entry) === localDate(new Date(entry.caughtAt)) ? formatDay(bookFishDay(book, entry)) : formatClock(entry.caughtAt)}

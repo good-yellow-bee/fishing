@@ -35,7 +35,7 @@ import { catchLink, type ListKey } from "./catchList";
 import { largestFirst } from "./largestFirst";
 import { MatchOrder, useLargestOrder } from "./MatchOrder";
 import { spreadRows } from "./spreadRows";
-import { outingDay } from "./tripDates";
+import { outingDay, plainName } from "./tripDates";
 
 /** One kind of fish across the whole book: how many, how big, on what, and where. */
 /** How many of the kind's newest photos show here; the rest are a search away. */
@@ -376,7 +376,7 @@ function NewWaters({ catches, name, waters }: { catches: readonly CatchEntry[]; 
         {found.map((water, index) => (
           <Fragment key={water.spotId}>
             {index > 0 ? ", " : null}
-            <Link to={findWithLink(exactTerm("species", t(name)), exactTerm("water", water.name!))}>{water.name}</Link>
+            <Link to={findWithLink(exactTerm("species", t(name)), exactTerm("water", water.name!))}>{plainName(water.name!)}</Link>
           </Fragment>
         ))}
       </span>
