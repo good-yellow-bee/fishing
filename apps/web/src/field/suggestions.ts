@@ -2,6 +2,7 @@ import { catchesNewestFirst, localDate, lureTally, measureOf, personalBests, typ
 import { isSampleCatch, isSampleOuting } from "./bookCopy";
 import { PLAY_LAKE_ID } from "./playLake";
 import { countedFish, ownFish } from "./milestones";
+import { kindKey } from "./speciesLink";
 
 /**
  * Names for a form's suggestion list: the player's own first, most used on
@@ -170,8 +171,9 @@ export function speciesCatches(
 ): CatchEntry[] {
   const want = typed.trim().toLowerCase();
   if (!want) return [];
+  // A kind however it was typed ("perches" for the book's "Perch"), or as it reads in the player's language.
   return book.catches.filter(
-    (entry) => entry.id !== skipId && (entry.species.toLowerCase() === want || shown(entry.species).toLowerCase() === want),
+    (entry) => entry.id !== skipId && (kindKey(entry.species) === kindKey(want) || shown(entry.species).toLowerCase() === want),
   );
 }
 

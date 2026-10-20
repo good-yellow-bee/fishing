@@ -1,6 +1,7 @@
 import type { CatchEntry, Logbook } from "@stillwater/shared";
 import { isSampleCatch, isSampleOuting } from "./bookCopy";
 import { PLAY_LAKE_ID } from "./playLake";
+import { kindKey } from "./speciesLink";
 
 /** A fish the angler caught: not the sample week, not the game. */
 export const ownFish = (entry: CatchEntry) => !isSampleCatch(entry.id) && entry.spotId !== PLAY_LAKE_ID;
@@ -57,8 +58,8 @@ export function milestoneOf(book: Logbook, entry: CatchEntry): Milestone | null 
   const before = (other: CatchEntry) => byTime(other, entry) < 0;
   const inBook = own.filter(before).length + 1;
   if (BOOK_MARKS.includes(inBook)) return { of: "book", n: inBook };
-  const kind = entry.species.trim().toLowerCase();
-  const same = own.filter((other) => other.species.trim().toLowerCase() === kind);
+  const kind = kindKey(entry.species);
+  const same = own.filter((other) => kindKey(other.species) === kind);
   const inKind = same.filter(before).length + 1;
   // A lone fish of its kind is first by default: worth saying only once another has followed it.
   if (inKind === 1 && same.length > 1) return { of: "kind", n: 1 };

@@ -34,7 +34,9 @@ import { dateWords, monthWord } from "./dateWords";
 import { isSampleCatch } from "./bookCopy";
 import { offPlayLake } from "./playLake";
 import { bookSpelling, pieceName, shownPieceKey } from "./gear/pieceKey";
-import { kindKey } from "./speciesLink";
+import { kindKey, mostWritten } from "./speciesLink";
+import { lureNames } from "./pieceTally";
+import { plainName } from "./tripDates";
 
 /** A book name as the Polish UI shows it, or itself when Polish has no line for it. */
 function inPolish(name: string): string {
@@ -960,7 +962,7 @@ export function CatchSearch() {
           ) : null}
           {matches.length > 0 ? (
             // The angler's own fish, as the count above sums them: a pasted copy doesn't credit them with the sample's.
-            <CopySummary text={() => searchSummary(searchParts(book, settled), mine.length > 0 ? mine : matches, (id) => spotById(book, id)?.name ?? null, largest)} file="stillwater-search.txt" />
+            <CopySummary text={() => searchSummary(searchParts(book, settled), mine.length > 0 ? mine : matches, (id) => { const name = spotById(book, id)?.name; return name === undefined ? null : plainName(name); }, largest)} file="stillwater-search.txt" />
           ) : null}
           {matches.length > 1 ? (
             // "Which was my biggest pike at Cedar": the same matches, largest first.
@@ -1037,7 +1039,7 @@ function MatchSplits({ matches, all, search, largest }: { matches: readonly Catc
     spelled.set(key, forms);
   }
   const kinds = [...spelled.values()]
-    .map((forms): [string, number] => [[...forms].reduce((best, row) => (row[1] > best[1] ? row : best))[0], [...forms.values()].reduce((sum, n) => sum + n, 0)])
+    .map((forms): [string, number] => [mostWritten(forms), [...forms.values()].reduce((sum, n) => sum + n, 0)])
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
   const years = tally((entry) => bookFishDay(book, entry).slice(0, 4)).sort((a, b) => b[0].localeCompare(a[0]));
   // One kind found: each year's biggest beside its count, by the measure most of them were taken in, so "are my pike
@@ -1115,7 +1117,8 @@ function TopLure({ catches }: { catches: readonly CatchEntry[] }) {
     return Number.isNaN(at.getTime()) ? null : biteTimeOf(at.getHours());
   });
   const water = leader(catches, (entry) => entry.spotId);
-  const lureName = lure ? pieceName(catches.find((entry) => lureKey(entry) === lure.value)!.lure) : "";
+  // Under the spelling most of its fish carry, not the first one found.
+  const lureName = lure ? lureNames(catches)(catches.find((entry) => lureKey(entry) === lure.value)!.lure) : "";
   const lines = [
     lure ? t("Most on {lure}.", { lure: `${lureName} (${lure.count})` }) : null,
     // Polish writes the part of the day in lower case inside a sentence: "Najczęściej o tej porze: świt (2)."
