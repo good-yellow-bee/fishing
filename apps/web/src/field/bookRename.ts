@@ -26,7 +26,8 @@ export function renameInBook(book: Logbook, field: NameField, from: string, type
     ...(field === "species" ? FISH.map((fish) => fish.name) : []),
   ];
   const want = clean.toLowerCase();
-  const name = others.find((other) => other.trim().toLowerCase() === want || t(other).toLowerCase() === want) ?? clean;
+  // As typed when the book already writes it so: "Perch" stays "Perch" beside a stray "perch".
+  const name = others.includes(clean) ? clean : (others.find((other) => other.trim().toLowerCase() === want || t(other).toLowerCase() === want) ?? clean);
   let count = 0;
   const catches = book.catches.map((entry) => {
     if (keyOf(nameOf(entry)) !== key) return entry;

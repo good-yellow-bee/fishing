@@ -1,4 +1,5 @@
 import { foldText, type CatchEntry } from "@stillwater/shared";
+import { speciesCounts } from "../speciesLink";
 
 export type KindPair = { shown: string; from: string; into: string; fromCount: number; intoCount: number };
 
@@ -8,17 +9,12 @@ export type KindPair = { shown: string; from: string; into: string; fromCount: n
  */
 /** `same` is how two names are told to be one kind (by default as they show); `show` is what the line calls it. */
 export function kindPairs(catches: readonly CatchEntry[], show: (name: string) => string, same: (name: string) => string = show): KindPair[] {
-  const counts = new Map<string, { name: string; count: number }>();
-  for (const entry of catches) {
-    const key = entry.species.trim().toLowerCase();
-    const row = counts.get(key);
-    if (row) row.count += 1;
-    else counts.set(key, { name: entry.species.trim(), count: 1 });
-  }
+  // A kind however it was typed ("Perch", "perch ", "Perches") is one name already, under the spelling most of its fish
+  // carry: joining it would rewrite the very fish the list names it by.
   const byShown = new Map<string, { name: string; count: number }[]>();
-  for (const row of counts.values()) {
-    const key = foldText(same(row.name));
-    byShown.set(key, [...(byShown.get(key) ?? []), row]);
+  for (const { species: name, count } of speciesCounts(catches)) {
+    const key = foldText(same(name));
+    byShown.set(key, [...(byShown.get(key) ?? []), { name, count }]);
   }
   const pairs: KindPair[] = [];
   for (const rows of byShown.values()) {

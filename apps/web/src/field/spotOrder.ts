@@ -15,6 +15,17 @@ export function twinName(a: string, b: string): boolean {
   return foldName(a) === foldName(b);
 }
 
+/** Waters' fish counts with twin waters as one, as a search reads them: most first, each under its busier twin's name. */
+export function twinsTogether(rows: readonly { name: string | null; count: number }[]): { name: string; count: number }[] {
+  const twins = new Map<string, { name: string; count: number }>();
+  for (const row of [...rows].sort((a, b) => b.count - a.count)) {
+    if (!row.name) continue;
+    const was = twins.get(foldName(row.name));
+    twins.set(foldName(row.name), { name: was?.name ?? row.name, count: (was?.count ?? 0) + row.count });
+  }
+  return [...twins.values()].sort((a, b) => b.count - a.count);
+}
+
 /** `lastFishDay`: the day the newest fish counts on, a night session's small hours on its outing's, as the calendar has it. */
 export type SpotRow = { spot: Spot; fishCount: number; lastFishAt: string | null; lastFishDay: string | null };
 

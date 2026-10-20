@@ -1,4 +1,4 @@
-import { foldText, type Logbook } from "@stillwater/shared";
+import { type Logbook } from "@stillwater/shared";
 import { Link } from "react-router-dom";
 import { locale, t, tn, useT } from "../../i18n";
 import { CopySummary } from "../CopySummary";
@@ -9,10 +9,11 @@ import { seasonRecap } from "./seasonRecap";
 import { newWatersThisYear } from "./notYet";
 import { bestFishDay, bookFishDay } from "../tripMonths";
 import { formatDay } from "../format";
-import { kindNames } from "../speciesLink";
+import { kindNames, mostWritten } from "../speciesLink";
 import { bookLureName, pieceTally } from "../pieceTally";
 import { countedFish } from "../milestones";
 import { plainName } from "../tripDates";
+import { foldName } from "../spotOrder";
 
 /** "42, 8 more than 2025": a season's count against the one before, when the one before had any. */
 function against(count: number, before: number, year: string): string {
@@ -29,7 +30,7 @@ function seasonFirsts(book: Logbook, year: string, today: string) {
   const top = bestFishDay({ ...book, catches: book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${year}-`)) });
   const bestDay = top && top.count > 1 ? [t("Best day: {day} · {fish}", { day: formatDay(top.date), fish: tn(top.count, "{n} fish", "{n} fish") })] : [];
   // The waters that gave their first fish that season.
-  const newWaters = newWatersThisYear(book.catches, new Date(Number(year), 6, 1), (entry) => bookFishDay(book, entry)).flatMap((id) => book.spots.filter((spot) => spot.id === id).map((spot) => plainName(spot.name)));
+  const newWaters = newWatersThisYear(book.catches, new Date(Number(year), 6, 1), (entry) => bookFishDay(book, entry), (id) => foldName(book.spots.find((spot) => spot.id === id)?.name ?? id)).flatMap((id) => book.spots.filter((spot) => spot.id === id).map((spot) => plainName(spot.name)));
   const recap = seasonRecap(book, year, today);
   const firsts = [
     ...bestDay,
@@ -103,15 +104,16 @@ export function SeasonRecapBox({
   const lureLine = topLure ? t("Best lure: {lure} ({count})", { lure: bookLureName(book.catches)(topLure.lure), count: topLure.count }) : null;
   // And the water it was won on, once one clearly led: the "where" beside the "on what". Waters that read the same are
   // one, as the search its link opens takes them; the game's lake and the sample week are left out, as there.
-  const byWater = new Map<string, { name: string; count: number }>();
+  // Named as most of its fish were logged, as Gear's lure record names a water.
+  const byWater = new Map<string, Map<string, number>>();
   for (const entry of countedFish(book.catches)) {
     const spotName = book.spots.find((spot) => spot.id === entry.spotId)?.name;
     if (!spotName || !bookFishDay(book, entry).startsWith(`${year}-`)) continue;
-    const name = plainName(spotName);
-    const key = foldText(name).toLowerCase();
-    byWater.set(key, { name: byWater.get(key)?.name ?? name, count: (byWater.get(key)?.count ?? 0) + 1 });
+    const names = byWater.get(foldName(spotName)) ?? new Map<string, number>();
+    names.set(plainName(spotName), (names.get(plainName(spotName)) ?? 0) + 1);
+    byWater.set(foldName(spotName), names);
   }
-  const [water, nextWater] = [...byWater.values()].sort((a, b) => b.count - a.count);
+  const [water, nextWater] = [...byWater.values()].map((names) => ({ name: mostWritten(names), count: [...names.values()].reduce((sum, n) => sum + n, 0) })).sort((a, b) => b.count - a.count);
   const topWater = water && water.count >= 2 && water.count > (nextWater?.count ?? 0) ? water : null;
   const waterLine = topWater ? t("Best water: {water} ({count})", { water: topWater.name, count: topWater.count }) : null;
   const lines = [
