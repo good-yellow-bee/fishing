@@ -2,7 +2,7 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { canLand, DOCK_STAND_X, DOCK_STAND_Z, FISH, type Giant, type LodgeLost, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind, type SpotId } from "@stillwater/shared";
+import { canLand, localDate, DOCK_STAND_X, DOCK_STAND_Z, FISH, type Giant, type LodgeLost, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind, type SpotId } from "@stillwater/shared";
 import { floodedInlet, makeFight, springRunTireMul, SPRING_RUN_TIRE, currentTireMul, CURRENT_FIGHTER_TIRE, type FightOutcome, type FightPerformance, type FightSim } from "./fight";
 import { FRENZY_SLOT_MS, HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt, slotFrenzy } from "./hotspot";
 import { bedRaider, COLD_WORK_GAP_MS, LONG_CAST_SOLID, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, castIntoSpooked, isSkipCast, castOnFreshWater, TWIST_CASTS, twistAfterCast, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, PRESSURE_CASTS, GROUNDBAIT_CASTS, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WARMING_WAIT, COOLING_WAIT, waterSwingWaitMul, anchorSplashWaitMul, ANCHOR_SPLASH_WAIT, LAMP_WINDOW } from "./logic";
@@ -119,6 +119,7 @@ vi.mock("./fight", async (importOriginal) => {
 import { updateSettings } from "./settings";
 import { giantShyKey } from "./giantShy";
 import { NIGHT_LINE_STALE_MS, nightLineKey, nightLineReadyAt, nightLineState } from "./nightLine";
+import { wormsDug, wormTinKey } from "./wormTin";
 import { BUCKET_COLD_LIFE_MS, BUCKET_HOT_LIFE_MS, BUCKET_LIFE_MS, baitBucketKey } from "./baitBucket";
 import { TRAP_COLD_SOAK_MS, TRAP_SOAK_MS, TRAP_STALE_MS, trapKey, trapState } from "./minnowTrap";
 import { bagKey, shinerKey } from "./groundbaitBag";
@@ -215,6 +216,7 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <i data-testid="twisted">{String(game.twisted)}</i>
       <i data-testid="dulled">{String(game.dulled)}</i>
       <i data-testid="washed">{String(game.washed)}</i>
+      <i data-testid="worms">{game.worms}</i>
       <i data-testid="fished-hard">{game.fishedHard.join(",")}</i>
       <i data-testid="groundbait">{game.handfuls}|{game.groundbait ? `${game.groundbait.spot}:${game.groundbait.casts}` : ""}</i>
       <p data-testid="hint">{game.hint}</p>
@@ -476,22 +478,27 @@ describe("useFishingGame live shiner", () => {
     expect(state()).toBe("stale");
   });
 
-  it("leaves a worm out on a night line when there is no shiner to spare", () => {
+  it("leaves a worm from the tin out on a night line when there is no shiner to spare", () => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
     const strong = { ...profile, strength: 10, accuracy: 10 };
     mount(DOCK_BUBBLES.at, strong, "dusk", false, "Nightcrawler");
     const press = (name: string) => act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === name) as HTMLButtonElement).click());
-    try {
-      act(() => frames.at(-1)!(now));
-      press("set night line");
-      expect(container!.querySelector("[data-testid=night-line]")?.textContent).toBe("dock");
-      expect(hint()).toMatch(/^You leave a worm out on a night line here\./);
-    } finally {
-      try {
-        localStorage.removeItem(nightLineKey(strong.userId));
-      } catch {
-        // No store in this run, so nothing was kept.
-      }
-    }
+    act(() => frames.at(-1)!(now));
+    press("set night line");
+    expect(container!.querySelector("[data-testid=night-line]")?.textContent).toBe("dock");
+    const left = wormsDug(new Date(DOCK_BUBBLES.at)) - 1;
+    expect(hint()).toMatch(new RegExp(`^You leave a worm out on a night line here\\..* Worms left in your tin: ${left}\\.$`));
+    expect(container!.querySelector("[data-testid=worms]")?.textContent).toBe(String(left));
+  });
+
+  it("sets no worm night line with the worm tin empty", () => {
+    const kept = new Map<string, string>([[wormTinKey("test"), JSON.stringify({ worms: 0, day: localDate(new Date(DOCK_BUBBLES.at)) })]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    mount(DOCK_BUBBLES.at, { ...profile, strength: 10, accuracy: 10 }, "dusk", false, "Nightcrawler");
+    act(() => frames.at(-1)!(now));
+    act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === "set night line") as HTMLButtonElement).click());
+    expect(container!.querySelector("[data-testid=night-line]")?.textContent).toBe("");
   });
 
   it("baits the shiner trap with a handful, and lifted later its shiners go in the bucket", () => {
@@ -758,7 +765,9 @@ describe("useFishingGame frayed line", () => {
     expect(phase()).toBe("waiting:none");
   });
 
-  it("washes a worm out after many casts without a fish, slows the bite on it, and draws again once rebaited", () => {
+  it("washes a worm out after many casts without a fish, slows the bite on it, and draws again once rebaited from the tin", () => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
     const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Nightcrawler");
     const washed = () => container!.querySelector("[data-testid=washed]")?.textContent;
     expect(washed()).toBe("false");
@@ -776,9 +785,24 @@ describe("useFishingGame frayed line", () => {
     dismiss();
     retie();
     expect(washed()).toBe("false");
-    expect(hint()).toBe("You thread a fresh worm on the hook. Its scent draws the fish again.");
+    const left = wormsDug(new Date(DOCK_BUBBLES.at)) - 1;
+    expect(hint()).toBe(`You thread a fresh worm on the hook. Its scent draws the fish again. Worms left in your tin: ${left}.`);
+    expect(container!.querySelector("[data-testid=worms]")?.textContent).toBe(String(left));
     cast(surface);
     expect(hint()).not.toContain("lost its scent");
+  });
+
+  it("keeps the washed-out worm on when the tin is empty", () => {
+    const kept = new Map<string, string>([[wormTinKey("test"), JSON.stringify({ worms: 0, day: localDate(new Date(DOCK_BUBBLES.at)) })]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Nightcrawler");
+    vi.mocked(soakAfterCast).mockReturnValueOnce(WORM_SOAK_CASTS);
+    step.mockReturnValueOnce("escaped");
+    castAndFight(surface, 1);
+    dismiss();
+    retie();
+    expect(container!.querySelector("[data-testid=washed]")?.textContent).toBe("true");
+    expect(hint()).toBe("Your worm tin is empty, so the washed-out worm stays on. More worms are dug each day.");
   });
 
   it("puts a fresh worm on after a landed fish", () => {
