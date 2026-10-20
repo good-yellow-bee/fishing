@@ -1926,7 +1926,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT449~~ | ~~News card 2026-10-20-game65 covers GT447-GT448: the worm night line and the chip's foe and lost trophy~~ (#1675) | ui | S |
 | ~~GT450~~ | ~~Spare shiners keep three days in the bait bucket: each keeps the time it went in, the oldest goes out first, and ones past three days have died by the next visit, which says so~~ (#1676) | gameplay | S |
 | ~~GT451~~ | ~~A trophy that broke a line before (the angler's old foe or another angler's lost one) knows the hook: its first run doesn't tire it, and the fight card says so~~ (#1677) | gameplay | S |
-| ~~GT452~~ | ~~News card 2026-10-20-game66 covers GT450-GT451: bucket shiners' three days and hook-wise trophies~~ (#PR) | ui | S |
+| ~~GT452~~ | ~~News card 2026-10-20-game66 covers GT450-GT451: bucket shiners' three days and hook-wise trophies~~ (#1678) | ui | S |
 
 ## Risks / open questions for the owner
 
