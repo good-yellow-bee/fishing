@@ -513,6 +513,7 @@ function TripView() {
       suggest={packingTips(book, trip, today)}
       caught={catchesForTrip(book, trip.id)}
       trips={book.trips}
+        catches={book.catches}
       spots={book.spots}
     />
   );

@@ -1,4 +1,5 @@
 import { foldText, type Spot } from "@stillwater/shared";
+import { plainName } from "./tripDates";
 
 const escape = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
@@ -9,7 +10,7 @@ const decimal = (value: number) => String(Number(value.toFixed(6)) || 0);
 export function gpxFor(spots: readonly Spot[]): string {
   const points = spots.flatMap((spot) =>
     spot.place
-      ? [`  <wpt lat="${decimal(spot.place.lat)}" lon="${decimal(spot.place.lng)}">\n    <name>${escape(spot.name.trim())}</name>${spot.notes.trim() ? `\n    <desc>${escape(spot.notes.trim())}</desc>` : ""}\n  </wpt>`]
+      ? [`  <wpt lat="${decimal(spot.place.lat)}" lon="${decimal(spot.place.lng)}">\n    <name>${escape(plainName(spot.name))}</name>${spot.notes.trim() ? `\n    <desc>${escape(spot.notes.trim())}</desc>` : ""}\n  </wpt>`]
       : [],
   );
   return `<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="Stillwater" xmlns="http://www.topografix.com/GPX/1/1">\n${points.join("\n")}\n</gpx>\n`;
