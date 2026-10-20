@@ -8,3 +8,5 @@ export { RainCurtain } from "../RainCurtain";
 export { Lightning } from "../Lightning";
 export { DockRain } from "../DockRain";
 export { Puddles } from "../Puddles";
+export { BrollyFisher } from "../BrollyFisher";
+export { FogAngler } from "../FogAngler";

@@ -18,3 +18,4 @@ export { Starlings } from "../Starlings";
 export { Stars } from "../Stars";
 export { MoonRoad } from "../MoonRoad";
 export { Aurora } from "../Aurora";
+export { NightAngler } from "../NightAngler";
