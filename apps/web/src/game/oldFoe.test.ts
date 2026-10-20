@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { castForFoe, FOE_DAYS, FOE_ODDS, foeGone, isOldFoe } from "./oldFoe";
+import { castForFoe, FOE_DAYS, FOE_ODDS, foeAbout, foeGone, isOldFoe } from "./oldFoe";
 
 const at = (day: number, hour = 12) => new Date(2026, 9, day, hour).getTime();
 const foe = { species: "pike", weight: 19, spot: "reeds" as const, at: at(20, 18), lure: "Mepps spinner" };
@@ -22,5 +22,12 @@ describe("the old foe", () => {
     expect(isOldFoe(foe, { species: { id: "pike" }, weight: 19 })).toBe(true);
     expect(isOldFoe(foe, { species: { id: "pike" }, weight: 18.5 })).toBe(false);
     expect(isOldFoe(null, { species: { id: "pike" }, weight: 19 })).toBe(false);
+  });
+
+  it("is about its bank from the next day, within its days", () => {
+    expect(foeAbout(foe, "reeds", at(20, 21))).toBe(false);
+    expect(foeAbout(foe, "reeds", at(21))).toBe(true);
+    expect(foeAbout(foe, "dock", at(21))).toBe(false);
+    expect(foeAbout(foe, "reeds", at(20 + FOE_DAYS, 19))).toBe(false);
   });
 });
