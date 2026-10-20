@@ -1935,7 +1935,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT455~~ | ~~News card 2026-10-20-game67 covers GT453-GT454: the shiner trap and the heavy drag's toll on the arm~~ (#1683) | ui | S |
 | ~~GT456~~ | ~~The arm's fatigue is tuned to the fights there are: measured fights reel 6-13 s, so the arm now tires past 9 s of reeling (2% a second, floor 70%, resting at the net), which a weak angler meets on the big bottom fish and a strong one not at all~~ (#1686) | gameplay | S |
 | ~~GT457~~ | ~~The free handful of groundbait comes once a day, not with every visit: the bag keeps its day, a day's first visit tops it up to one handful, and a reload no longer refills one spent~~ (#1688) | gameplay | S |
-| GT458 | News card game68 covers GT456-GT457 | ui | S |
+| ~~GT458~~ | ~~News card 2026-10-20-game68 covers GT456-GT457: the arm tiring in long fights and the once-a-day free handful of groundbait~~ (#PR) | ui | S |
 
 ## Risks / open questions for the owner
 
