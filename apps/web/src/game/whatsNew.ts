@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-field74";
+export const NEWS_ID = "2026-10-20-scene69";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "From the shack you can now see the shiner trap in the shallows below it, and once it is ready a shiner flips in the cage now and then. And while you wait at the shack, the trap turns ready the moment its soak ends, even if you touch nothing.",
   "On a kind's page, a water spelled two ways says how often its outings took the kind, as other waters do, and the water lists on the catch and outing forms tell two such waters apart by their fish. A water's outings now count those with only a lost fish or a missed strike, as Trips does.",
   "Groundbait left on a bank from an earlier visit, once it has the feeders gathered there, now shows them: little rings dimple the water over its cloud while it lasts. And the hedgerows on the upper hills now run on as continuous hedges instead of dotted lines of bushes.",
   "Your arm now tires sooner in a long fight: past nine seconds of reeling it slows bit by bit, and it rests while the fish waits at the net, so a big catfish or burbot can wear down a weak arm. And the free handful of groundbait now comes once a day: a reload no longer gives back one you spent.",
@@ -21,7 +22,6 @@ export const NEWS_ITEMS: readonly string[] = [
   "The lake opens more smoothly on a phone: it prepares its shading before the first frame instead of stalling as it draws each thing for the first time, the hedgerows no longer hitch as the evening falls, and the windsock, the rod bell and the damselflies are drawn in the same simple style as the rest.",
   "Hedgerows now part the upper hills into fields, as a phone held upright sees them above the farm, green through spring and summer, turning in the fall and bare over the winter snow. And at night the moon road and the lights mirrored on the lake shimmer softly instead of lying in hard bars.",
   "Two outings on one water and day now show when each one's fish came, so a dawn and a dusk tell apart on Trips. The outing search finds those “with a note” and those left “untitled”, and an outing's page names kinds and lures as the rest of the book does.",
-  "The lake asks a little less of your phone again: shadows are redrawn at most thirty times a second, the shore's foam does less work each frame, and the anglers you only see in rain or fog and the deer, moose and hare of dawn and dusk now load only when they come out.",
   "A water's page names kinds and lures as the rest of the book does, and each of its counts opens just the fish it counted. Its copied summary adds the next outing there and the fish lost or missed.",
   "On Bests, a season names the water it was won on beside its best lure, each opening its fish, and a kind's Last fish opens that fish. A kind's page and its catch cards name it as Bests does.",
   "On the Map, a water you are out on now offers Log a catch for that outing, and a list's Works on this water tips say how many fish each lure took there.",
