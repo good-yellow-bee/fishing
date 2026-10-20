@@ -2,7 +2,7 @@ import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Database from "better-sqlite3";
-import { BAG_SIZE, fishById, TAG_RETURN_BONUS, TAGGABLE_IDS, isLakeHour, isTrophyWeight, TROPHY_RELEASE_BONUS, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type LodgeRelease, type LodgeTrack, type SpeciesRecord, type SpotId } from "@stillwater/shared";
+import { BAG_SIZE, fishById, TAG_RETURN_BONUS, TAGGABLE_IDS, isLakeHour, isTrophyWeight, TROPHY_RELEASE_BONUS, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type LodgeRelease, type LodgeTrack, type TagReturn, type SpeciesRecord, type SpotId } from "@stillwater/shared";
 
 const dir = dirname(fileURLToPath(import.meta.url));
 export const dataDir = join(dir, "../data");
@@ -295,6 +295,17 @@ const LODGE_RELEASE_SELECT = `SELECT c.id as catchId, c.species_id as speciesId,
 /** Fish other anglers let go in a window and nobody has landed again, newest first. */
 export function listLodgeReleases(userId: string, from: string, before: string, limit: number): LodgeRelease[] {
   return db.prepare(`${LODGE_RELEASE_SELECT} ORDER BY c.created_at DESC LIMIT ?`).all(userId, from, before, ...TAGGABLE_IDS, limit) as LodgeRelease[];
+}
+
+/** The angler's let-go fish other anglers landed again since `since`, newest first. */
+export function listTagReturns(userId: string, since: string, limit: number): TagReturn[] {
+  return db
+    .prepare(
+      `SELECT again.id as catchId, again.species_id as speciesId, again.weight as weight, orig.weight as was, p.display_name as by, again.created_at as at
+       FROM catch again JOIN catch orig ON orig.id = again.tagged_from JOIN profile p ON p.user_id = again.user_id
+       WHERE again.created_at >= ? AND again.tagged_from IS NOT NULL AND orig.user_id = ? ORDER BY again.created_at DESC LIMIT ?`,
+    )
+    .all(since, userId, limit) as TagReturn[];
 }
 
 /** One of those let-go fish, by its catch's id, if it is still in the lake for this angler. */

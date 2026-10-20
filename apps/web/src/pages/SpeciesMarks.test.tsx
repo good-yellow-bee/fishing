@@ -63,7 +63,7 @@ describe("species marks on the lodge pages", () => {
       speciesStats: [],
       badges: [],
       longestStreak: 0,
-      recentDays: [], todayBag: { day: "", weights: [] },
+      recentDays: [], todayBag: { day: "", weights: [] }, tagReturns: [],
     };
     vi.mocked(getMe).mockResolvedValue(me);
     await act(async () => {
@@ -93,7 +93,7 @@ describe("species marks on the lodge pages", () => {
       speciesStats: [],
       badges: [],
       longestStreak: 0,
-      recentDays: [], todayBag: { day: "", weights: [] },
+      recentDays: [], todayBag: { day: "", weights: [] }, tagReturns: [],
     });
     await act(async () => {
       root.render(<MemoryRouter><LogPage /></MemoryRouter>);
