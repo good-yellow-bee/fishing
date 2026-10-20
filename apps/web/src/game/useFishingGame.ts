@@ -66,7 +66,7 @@ import { castSnags, onRockEdge, onShoreIce, ROCK_EDGE_WAIT, SNAG_AT_MS, SNAG_TAP
 import { FLUTTER_SEC, flutterGrabberFor, flutterTip, followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { BUCKET_SIZE, liveShiners, loadBucket, saveBucket } from "./baitBucket";
 import { loadSwim, saveSwim, swimNow } from "./swim";
-import { loadTrap, saveTrap, trapCatch, trapIsCold, trapState, type Trap } from "./minnowTrap";
+import { loadTrap, saveTrap, trapCatch, trapIsCold, trapNextChange, trapState, type Trap } from "./minnowTrap";
 import { castForFoe, foeGone, isOldFoe, loadOldFoe, saveOldFoe } from "./oldFoe";
 import { loadNightLine, nightLineCatch, nightLineKinds, nightLineState, nightSkyFor, saveNightLine, wormLineHour, type NightLine } from "./nightLine";
 import { markShy, loadGiantShy, rollGiantShy, saveGiantShy, shyOf, type GiantShy } from "./giantShy";
@@ -483,6 +483,21 @@ export function useFishingGame(
     trapRef.current = profile?.userId ? loadTrap(profile.userId) : null;
     setTrapState(trapRef.current);
   }, [profile?.userId]);
+  // Re-render as the trap turns ready and then stale, so an idle shack view keeps up with it. Checked at
+  // least once a minute, since a sleeping computer holds its timers back.
+  const [, setTrapSeen] = useState<ReturnType<typeof trapState> | null>(null);
+  useEffect(() => {
+    if (!trap) return;
+    let timer: number | undefined;
+    const check = () => {
+      const now = Date.now();
+      setTrapSeen(trapState(trap, now));
+      const next = trapNextChange(trap, now);
+      if (next !== null) timer = window.setTimeout(check, Math.min(next - now, 60_000));
+    };
+    check();
+    return () => window.clearTimeout(timer);
+  }, [trap]);
   /** The bucket with a fresh shiner in, or with its oldest one taken out. */
   const bucketIn = () => [...bucketNow(), Date.now()];
   const bucketOut = () => bucketNow().slice(1);

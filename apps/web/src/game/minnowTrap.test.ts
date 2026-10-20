@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { TRAP_COLD_MAX, TRAP_COLD_SOAK_MS, TRAP_MAX, TRAP_SOAK_MS, TRAP_STALE_MS, trapCatch, trapIsCold, trapState } from "./minnowTrap";
+import { TRAP_COLD_MAX, TRAP_COLD_SOAK_MS, TRAP_MAX, TRAP_SOAK_MS, TRAP_STALE_MS, trapCatch, trapIsCold, trapNextChange, trapState } from "./minnowTrap";
 
 describe("the shiner trap", () => {
   const trap = { setAt: 0 };
@@ -25,5 +25,17 @@ describe("the shiner trap", () => {
     expect(trapState(cold, TRAP_COLD_SOAK_MS)).toBe("ready");
     expect(trapState(cold, TRAP_STALE_MS + 1)).toBe("stale");
     expect(trapCatch(cold, TRAP_COLD_SOAK_MS, () => 0.99)).toBe(TRAP_COLD_MAX);
+  });
+
+  it("knows when its state next changes: as it turns ready, then stale, then never", () => {
+    for (const set of [trap, { setAt: 0, cold: true } as const]) {
+      const ready = trapNextChange(set, 0)!;
+      expect(trapState(set, ready - 1)).toBe("soaking");
+      expect(trapState(set, ready)).toBe("ready");
+      const stale = trapNextChange(set, ready)!;
+      expect(trapState(set, stale - 1)).toBe("ready");
+      expect(trapState(set, stale)).toBe("stale");
+      expect(trapNextChange(set, stale)).toBeNull();
+    }
   });
 });

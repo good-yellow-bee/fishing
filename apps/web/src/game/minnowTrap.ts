@@ -34,9 +34,18 @@ export function trapIsCold(season: LakeSeason | undefined) {
   return season === "winter";
 }
 
+const soakMs = (trap: Trap) => (trap.cold ? TRAP_COLD_SOAK_MS : TRAP_SOAK_MS);
+
 export function trapState(trap: Trap, now: number): "soaking" | "ready" | "stale" {
   const age = now - trap.setAt;
-  return age < (trap.cold ? TRAP_COLD_SOAK_MS : TRAP_SOAK_MS) ? "soaking" : age > TRAP_STALE_MS ? "stale" : "ready";
+  return age < soakMs(trap) ? "soaking" : age > TRAP_STALE_MS ? "stale" : "ready";
+}
+
+/** When trapState next changes: its soak ends, then it goes stale; null once it has. */
+export function trapNextChange(trap: Trap, now: number): number | null {
+  const ready = trap.setAt + soakMs(trap);
+  const stale = trap.setAt + TRAP_STALE_MS + 1;
+  return now < ready ? ready : now < stale ? stale : null;
 }
 
 /** The shiners a trap lifted in time holds: one to its most (TRAP_MAX, or TRAP_COLD_MAX in cold water); none once it has sat too long. */
