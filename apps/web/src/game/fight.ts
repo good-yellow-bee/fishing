@@ -11,6 +11,12 @@ export type SurgeState = 0 | 1 | 2; // 0 calm, 1 warning (telegraph), 2 surging
  * `turning`: the angler is pulling the rod against the run, so it is cut short.
  */
 export type FightSim = {
+  /** A slippery fish on a slack line, slithering toward slipping the hook. */
+  slipping?: boolean;
+  /** It slipped the hook on a slack line. */
+  slipped?: boolean;
+  /** A net-shy fish that saw the net and bolted. */
+  shyBolt?: boolean;
   /** The spent fish lies at the net; a fresh strike as its head comes up nets it. */
   netting?: boolean;
   /** Its head is up at the net, the moment to net it. */
@@ -266,6 +272,19 @@ export const ROCK_PULL = 1.2;
 /** At the net a spent fish lifts its head for NET_HEAD_MS in every NET_HEAD_EVERY_MS: the moment to net it. */
 export const NET_HEAD_EVERY_MS = 1400;
 export const NET_HEAD_MS = 600;
+/** Carp see the net and bolt the first time they're brought to it, this long after they reach it. */
+export const NET_SHY: ReadonlySet<string> = new Set(["carp"]);
+export const NET_SHY_MS = 1500;
+/** A catfish thrashes at the net, lifting its head only this long at a time. */
+export const THRASHERS: ReadonlySet<string> = new Set(["catfish"]);
+export const THRASH_HEAD_MS = 400;
+/** A burbot slithers off the hook once the line has lain slack this long, added up over its calms between runs. */
+export const SLIPPERS: ReadonlySet<string> = new Set(["burbot"]);
+export const SLIP_SEC = 0.6;
+/** A bluegill's tight circles twist the line this many casts' worth toward a tangle. */
+export const LINE_SPINNERS: ReadonlySet<string> = new Set(["bluegill"]);
+export const SPIN_TWIST = 4;
+
 /** A strike with its head down, or leaving it at the net this long, sends it off this far again. */
 export const NET_BOLT_LINE = 0.12;
 export const NET_WAIT_MS = 6000;
@@ -608,17 +627,34 @@ export function makeFight(
 
   let netFrom = 0;
   let wasReeling = false;
+  const netShy = NET_SHY.has(species.id);
+  let shyDone = false;
+  const headMs = THRASHERS.has(species.id) ? THRASH_HEAD_MS : NET_HEAD_MS;
+  const slipper = SLIPPERS.has(species.id);
+  let slipSec = 0;
   const step = (nowMs: number, dtSec: number, reeling: boolean, steer: Steer = 0): FightOutcome => {
     const pressed = reeling && !wasReeling;
     wasReeling = reeling;
     if (sim.netting) {
       // Its head comes up now and then; a strike then nets it, a strike with its head down sends it off on one short bolt.
-      sim.netHead = (nowMs - netFrom) % NET_HEAD_EVERY_MS >= NET_HEAD_EVERY_MS - NET_HEAD_MS;
+      sim.netHead = (nowMs - netFrom) % NET_HEAD_EVERY_MS >= NET_HEAD_EVERY_MS - headMs;
       if (pressed && sim.netHead) return "landed";
+      if (netShy && !shyDone && nowMs - netFrom >= NET_SHY_MS) {
+        // It sees the net and bolts once; no miss, but it has to be brought back.
+        shyDone = true;
+        sim.shyBolt = true;
+        sim.netting = false;
+        sim.netHead = false;
+        sim.line = NET_BOLT_LINE;
+        nextAt = nowMs + range(1200, 1800);
+        return "fighting";
+      }
       if (!pressed && nowMs - netFrom < NET_WAIT_MS) return "fighting";
       sim.netting = false;
       sim.netHead = false;
       sim.line = NET_BOLT_LINE;
+      // Its first sight of the net is spent, however it ended.
+      shyDone = true;
       if (pressed) performance.netMisses = (performance.netMisses ?? 0) + 1;
       // The bolt is all it has left; the next run waits its calm like any other.
       nextAt = nowMs + range(1200, 1800);
@@ -818,6 +854,20 @@ export function makeFight(
 
     // Slack through a charge costs the clean bonus, and lets a light hook drop out of its mouth.
     if (charging && !reeling) chargeSlack += dtSec;
+    // A slippery fish slithers off a slack line in a plain calm between runs: not before its first run, nor while it
+    // sulks, shakes, sits in the weeds or round a piling, when the card tells the angler to ease off.
+    if (slipper) {
+      const slackCalm = completedSurges > 0 && sim.surge === 0 && !reeling && sim.tension < 0.1 && !sim.sulk && !sim.shake && !sim.weeded && !sim.wrapped;
+      // Slack adds up over its short calms; reeling winds it back twice as fast.
+      slipSec = slackCalm ? slipSec + dtSec : reeling ? Math.max(0, slipSec - 2 * dtSec) : slipSec;
+      sim.slipping = slipSec >= SLIP_SEC / 3;
+      if (slipSec >= SLIP_SEC) {
+        sim.slipped = true;
+        return "escaped";
+      }
+    }
+    // Once a net-shy fish is reeled most of the way back, its bolt is done with.
+    if (sim.shyBolt && sim.line < NET_BOLT_LINE / 2) sim.shyBolt = false;
     if (sim.line <= 0) {
       if (!net) return "landed";
       sim.line = 0;

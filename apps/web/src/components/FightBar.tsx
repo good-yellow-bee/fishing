@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import { CLEAN_RUN_FROM } from "@stillwater/shared";
-import { canTurnRuns, ESCAPE_LINE, FRAYED_SNAP, fightLines, isCleanFight, jumpLines, RED_TENSION, SHORT_LINE, SOFT_MOUTHS, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone } from "../game/fight";
+import { canTurnRuns, ESCAPE_LINE, FRAYED_SNAP, fightLines, isCleanFight, jumpLines, RED_TENSION, SHORT_LINE, SOFT_MOUTHS, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone, NET_BOLT_LINE } from "../game/fight";
 import { habitLines } from "../game/habitLines";
 import { useSettings } from "../game/settings";
 import type { Fight } from "../game/useFishingGame";
@@ -84,7 +84,11 @@ export function FightBar({ fight, sim, performance, best = null, note = null, cl
         }
         // Written only on a change, so the live region speaks each new call once.
         const call =
-          state.netting
+          state.slipping
+            ? t("KEEP IT TIGHT — it's slithering off the hook!")
+            : state.shyBolt && !state.netting && state.surge === 0 && state.line > NET_BOLT_LINE / 2
+            ? t("It saw the net and bolted — bring it back!")
+            : state.netting
             ? state.netHead
               ? t("NOW — net it!")
               : t("At the net — let go, then strike as its head comes up!")
