@@ -53,6 +53,16 @@ describe("fish let go from the lake", () => {
     expect(back.fish).toEqual({ species: pike, weight: grownWeight(pike, 6, 7), was: 6, at: day(4, 9) });
     expect(back.next).toEqual([]);
   });
+
+  it("remembers the lure a fish was caught on, and it won't take that lure again, though another one may", () => {
+    rememberReleased(pike, 6, "reeds", day(4, 9), "Mepps spinner");
+    const list = loadReleased();
+    expect(list[0]?.lure).toBe("Mepps spinner");
+    expect(castForReleased(list, "reeds", day(11), 0, "Mepps spinner").fish).toBeNull();
+    expect(castForReleased(list, "reeds", day(11), 0, "Silver spoon").fish?.species).toBe(pike);
+    // One let go before lures were remembered shies from none.
+    expect(castForReleased([{ species: "pike", weight: 6, spot: "reeds", at: day(4, 9) }], "reeds", day(11), 0, "Mepps spinner").fish?.species).toBe(pike);
+  });
 });
 
 describe("fish other anglers let go", () => {

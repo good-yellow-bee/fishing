@@ -198,7 +198,7 @@ export function lostTrophy(species: FishSpecies, weight: number) {
 export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; lightHook?: boolean; turnedRuns: number; cleanRun?: number; closeCall?: boolean; fightSec?: number; bowedLeaps?: number; easedShakes?: number; followedDarts?: number; encore?: boolean; secondWind?: boolean; secondTake?: boolean; grabbed?: string; gotAway?: boolean; followedIn?: boolean; recaught?: boolean; clearOf?: "weeds" | "rocks" | "pilings" | "log" | "current" };
 
 export type Outcome =
-  | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes; note?: string; tag?: { id: string; by: string }; giant?: string; hour?: LakeHour }
+  | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes; note?: string; tag?: { id: string; by: string }; giant?: string; hour?: LakeHour; lure?: string }
   | { kind: "broke"; message: string }
   | { kind: "miss"; message: string; fish?: { species: FishSpecies; weight: number } }
   | { kind: "error"; message: string };
@@ -1163,7 +1163,7 @@ export function useFishingGame(
     followedRef.current = !!lost.again?.follow;
     droppedRef.current = !!lost.again?.dropped;
     // A fish let go at this bank on an earlier day may come back to the line, a little heavier; a beginner's first fish stays an easy one.
-    const released = lost.again || mercyNow ? null : castForReleased(loadReleased(), spotRef.current, Date.now(), Math.random());
+    const released = lost.again || mercyNow ? null : castForReleased(loadReleased(), spotRef.current, Date.now(), Math.random(), lureRef?.current);
     if (released?.fish) saveReleased(released.next);
     // Failing that, one another angler let go here may come up, carrying their tag.
     const tagged = released && !released.fish && lodgeReleasedRef.current.length > 0 ? castForLodgeTag(lodgeReleasedRef.current, spotRef.current, Date.now(), Math.random(), takenTags(landedTagsRef.current, gotAwayRef.current), current) : null;
@@ -1964,6 +1964,7 @@ export function useFishingGame(
               ...(landedNote ? { note: landedNote } : {}),
               ...(recaught?.tag ? { tag: recaught.tag } : {}),
               ...(recaught?.giant ? { giant: recaught.giant } : {}),
+              ...(lureRef?.current ? { lure: lureRef.current } : {}),
               notes: {
                 perfectCast: castPerfectRef.current,
                 hookedSolid: hookedSolidRef.current,

@@ -2933,13 +2933,18 @@ describe("useFishingGame groundbait", () => {
     expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toBe("Common carp: it came in to feed on the groundbait.");
   });
 
+  it("casts the tied lure at the bank's let-go fish, so one shy of it stays down", () => {
+    cast(mount(DOCK_BUBBLES.at, profile, "day", false, "Mepps spinner"));
+    expect(castForReleased).toHaveBeenLastCalledWith([], "dock", expect.any(Number), expect.any(Number), "Mepps spinner");
+  });
+
   it("brings back a fish let go here on an earlier day, grown, and says so on the card", () => {
     const surface = mount();
     const pike = FISH.find((fish) => fish.id === "pike")!;
     const at = new Date(2026, 9, 4, 12).getTime();
     vi.mocked(castForReleased).mockReturnValueOnce({ fish: { species: pike, weight: 6.5, was: 6, at }, next: [] });
     cast(surface);
-    expect(castForReleased).toHaveBeenCalledWith([], "dock", expect.any(Number), expect.any(Number));
+    expect(castForReleased).toHaveBeenCalledWith([], "dock", expect.any(Number), expect.any(Number), undefined);
     expect(container!.querySelector("[data-testid=bite]")?.textContent).toMatch(/^pike\|6\.5/);
     step.mockReturnValueOnce("landed");
     act(() => vi.advanceTimersByTime(2_201));

@@ -1894,6 +1894,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT424~~ | ~~Giant hunter badge: be first to land three of the lake's weekly giants (counted from the giants table, as derby wins are)~~ (#1637) | gameplay | S |
 | ~~GT425~~ | ~~News card 2026-10-20-game57 covers GT423-GT424: the night line and the Giant hunter badge~~ (#1638) | ui | S |
 | ~~GT426~~ | ~~A night line reads the sky over its night (the forecast's evening sky): rain 85%, overcast 75%, fog 70%, clear 55% to hold a fish, and setting it says when the night is wet or clear; a line comes in only once its night is out~~ (#1640) | gameplay | S |
+| ~~GT427~~ | ~~A fish let go remembers the lure it was caught on: back at its bank on a later day it won't take that lure again, though another may bring it up; the release stamp says so~~ (#1644) | gameplay | S |
+| GT428 | News card game58 covers GT426-GT427 | ui | S |
 
 ## Risks / open questions for the owner
 
