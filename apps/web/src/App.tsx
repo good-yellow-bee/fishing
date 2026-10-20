@@ -24,6 +24,8 @@ import { RegisterPage } from "./pages/Register";
 // sign-in and the field log open without waiting for the 3D bundle.
 const loadDock = () => import("./pages/Dock");
 const DockPage = lazy(() => loadDock().then((module) => ({ default: module.DockPage })));
+// Opened straight at the lake, its code downloads while the sign-in check is still out, not after it.
+if (window.location.pathname === "/play") void loadDock().catch(() => undefined);
 const LogPage = lazy(() => import("./pages/Log").then((module) => ({ default: module.LogPage })));
 const BoardPage = lazy(() => import("./pages/Board").then((module) => ({ default: module.BoardPage })));
 const loadMap = () => import("./field/map/SpotMapPage");
