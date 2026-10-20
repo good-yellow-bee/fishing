@@ -552,6 +552,12 @@ function TripView() {
           {trip.date >= today && daysBetween(lastHere.date, today) >= 2 ? ` · ${tn(daysBetween(lastHere.date, today), "{n} day ago", "{n} days ago")}` : null}
         </p>
       ) : null}
+      {/* Every outing on this water, listed on the water's own page: how it has done, outing by outing. */}
+      {spot && !play && tripsHere.length >= 3 ? (
+        <p className="meta all-here">
+          <Link to={`/spots/${spot.id}#outings`}>{t("Every outing on this water")}</Link>
+        </p>
+      ) : null}
       {/* A dawn and a dusk on one water and day: each says the other, with what it gave. */}
       {sameDayHere.length > 0 ? (
         <p className="meta same-day-here">

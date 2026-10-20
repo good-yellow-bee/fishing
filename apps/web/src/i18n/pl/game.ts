@@ -902,6 +902,8 @@ export const PL_GAME: PlBook = {
     "W szare, pochmurne dni w chmurach co jakiś czas otwiera się prześwit i przez jezioro przesuwa się plama słońca, a w dół ukośnie schodzą do niej blade promienie. W wietrzne zimowe dni wiatr zrywa śnieg ze wzgórz za drugim brzegiem i niesie go wzdłuż nich długimi białymi smugami.",
   "On winter days snow lies white on the hills behind the lake, and two children take turns sledging down a run between the far trees, rushing down in a spray of snow and trudging back up pulling their sleds.":
     "W zimowe dni na wzgórzach za jeziorem leży biały śnieg, a dwoje dzieci na zmianę zjeżdża na sankach po torze między drzewami na drugim brzegu, pędząc w obłoku śniegu i wspinając się z powrotem z sankami na sznurku.",
+  "An outing's page opens every outing on its water in one tap, and a copied outing says how many of the fish hooked were landed.":
+    "Strona wyprawy jednym dotknięciem otwiera wszystkie wyprawy na tym łowisku, a skopiowana wyprawa podaje, ile z zaciętych ryb wyholowano.",
   "On Waters, a water's card says Out now while you are fishing it, and a water's page says when its first fish came. A kind typed two ways, such as Perch and Perches, is one kind on every page, chip and record.":
     "W łowiskach karta łowiska mówi „Teraz na wodzie”, gdy na nim łowisz, a strona łowiska podaje, kiedy złowiono tam pierwszą rybę. Gatunek wpisany na dwa sposoby, np. Perch i Perches, jest jednym gatunkiem na każdej stronie, chipie i w rekordach.",
   "On Bests, the longest and heaviest tiles say how long a record has stood, and the month-by-month table names the best month the book has ever had. Not yet this year counts a kind once however it was typed, in your language's order.":

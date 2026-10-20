@@ -2403,3 +2403,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR576~~ | ~~Round 105 waters fixes: a kind however it was typed is one chip and one page, a lure named the same whatever the order of its fish, the day's later outing last fished, water names with stray spaces~~ (#1467) | field | S |
 | ~~BR577~~ | ~~Round 105 waters ideas: Out now on a water's card, the first fish here on a water's page~~ (#1471) | field | S |
 | ~~BR578~~ | ~~Round 106 trips fixes: a loose fish offered only to the nearer of a day's outings, an outing's fish line counts a kind once, an untitled outing on a water with stray spaces names it once~~ (#1476) | field | S |
+| ~~BR579~~ | ~~Round 106 trips ideas: every outing on the water from an outing's page, landed of hooked in a copied outing~~ (#1479) | field | S |
