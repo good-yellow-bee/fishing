@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { makeStreakTexture } from "./glintStreak";
 import { MOON_ROAD_BANDS, MOON_ROAD_GLINTS, moonRoadGlints, type RoadGlint } from "./moonDisc";
 import { MOON_ROAD_FAR, MOON_ROAD_NEAR, ROAD_RELAY, roadBands, roadFrom } from "./glintRoad";
 import { mirrorStale } from "./mirrorImage";
@@ -15,13 +16,24 @@ const GLINT_COLOR = "#e6eefb";
 export function MoonRoad({ discPos, strength }: { discPos: Vec3; strength: number }) {
   const still = useReducedMotion();
   const geometry = useMemo(() => new THREE.PlaneGeometry(1.8, 0.32), []);
+  // Each glint a feathered streak rather than a hard-edged bar.
+  const fade = useMemo(makeStreakTexture, []);
   const materials = useMemo(
     () =>
       Array.from(
         { length: MOON_ROAD_BANDS },
-        () => new THREE.MeshBasicMaterial({ color: GLINT_COLOR, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }),
+        () =>
+          new THREE.MeshBasicMaterial({
+            color: GLINT_COLOR,
+            map: fade,
+            transparent: true,
+            opacity: 0,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+            toneMapped: false,
+          }),
       ),
-    [],
+    [fade],
   );
   const [dx, , dz] = discPos;
   // Laid from the eye, so the road runs toward the moon from whichever bank you stand on.
@@ -34,9 +46,10 @@ export function MoonRoad({ discPos, strength }: { discPos: Vec3; strength: numbe
   useEffect(
     () => () => {
       geometry.dispose();
+      fade.dispose();
       materials.forEach((material) => material.dispose());
     },
-    [geometry, materials],
+    [geometry, fade, materials],
   );
   useFrame((state) => {
     const t = state.clock.elapsedTime;
