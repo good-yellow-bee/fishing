@@ -1902,6 +1902,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT429~~ | ~~Bait bucket: up to three spare live shiners kept per angler beside the one on the hook; the shack sells into it while a shiner is on, a landed shiner can go in it, a night line takes from it first, and the shack hooks one from it~~ (#1646) | gameplay | M |
 | ~~GT430~~ | ~~The groundbait bag and the shiner on the hook are kept per angler, as the bucket and night line are; the old browser-wide ones go to the first angler who loads~~ (#1648) | gameplay | S |
 | ~~GT431~~ | ~~News card 2026-10-20-game59 covers GT429: the bait bucket~~ (#1652) | ui | S |
+| ~~GT432~~ | ~~The old foe: a trophy that breaks off is remembered per angler at its bank for three days; on a later day a cast there may bring it back (8%), and landing it says it still had your lure in its jaw~~ (#PR) | gameplay | M |
 
 ## Risks / open questions for the owner
 

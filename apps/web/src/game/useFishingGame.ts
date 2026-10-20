@@ -63,6 +63,7 @@ import { FAR_ROCK_WAIT, tightToFarRock } from "./farRock";
 import { castSnags, onRockEdge, onShoreIce, ROCK_EDGE_WAIT, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { FLUTTER_SEC, flutterGrabberFor, flutterTip, followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { BUCKET_SIZE, loadBucket, saveBucket } from "./baitBucket";
+import { castForFoe, loadOldFoe, saveOldFoe } from "./oldFoe";
 import { loadNightLine, nightLineCatch, nightLineKinds, nightLineState, nightSkyFor, saveNightLine, type NightLine } from "./nightLine";
 import { markShy, loadGiantShy, rollGiantShy, saveGiantShy, shyOf, type GiantShy } from "./giantShy";
 import { AGAIN_CASTS, backAgain, castForGotAway, gotAwayAfterDrop, PATIENT_DROP_RANK, gotAwayAfterLoss, type GotAway } from "./gotAway";
@@ -869,7 +870,7 @@ export function useFishingGame(
       // A late strike only just catches, so the hook can pull out like a soft mouth's.
       runtime.sim.lightHook = lightHook;
       const line = fightLines(species.challenge)[0];
-      const again = !strike ? "" : againRef.current ? `${followedRef.current ? t("It's the one that followed your fish in!") : droppedRef.current ? t("It's the one that dropped your bait!") : t("It's the one that got away!")} ` : recaughtRef.current ? `${recaughtRef.current.giant ? t("It's {name}, the bank's giant!", { name: t(recaughtRef.current.giant) }) : recaughtRef.current.tag ? t("It's a fish {name} let go!", { name: recaughtRef.current.tag.by }) : t("It's a fish you let go here before!")} ` : shinerTakenRef.current ? `${t("It took the live shiner!")} ` : "";
+      const again = !strike ? "" : againRef.current ? `${followedRef.current ? t("It's the one that followed your fish in!") : droppedRef.current ? t("It's the one that dropped your bait!") : t("It's the one that got away!")} ` : recaughtRef.current ? `${recaughtRef.current.foe ? t("It's the trophy that broke you off!") : recaughtRef.current.giant ? t("It's {name}, the bank's giant!", { name: t(recaughtRef.current.giant) }) : recaughtRef.current.tag ? t("It's a fish {name} let go!", { name: recaughtRef.current.tag.by }) : t("It's a fish you let go here before!")} ` : shinerTakenRef.current ? `${t("It took the live shiner!")} ` : "";
       // A trophy-sized fish is felt on the rod the moment it's hooked.
       const heavy = isTrophyWeight(species, weight) ? `${t("It feels heavy — could be a trophy!")} ${t("A fish this big makes a long first run.")} ` : "";
       // Cold water makes a fish sluggish, and the angler feels it at once.
@@ -1205,7 +1206,9 @@ export function useFishingGame(
     const giant = bankGiant && !lureShy(bankGiant.name) ? bankGiant : undefined;
     const giantKind = giant ? FISH.find((fish) => fish.id === giant.speciesId) : undefined;
     const giantUp = giant && giantKind && canLand(current, giantKind) && Math.random() < GIANT_ODDS ? { species: giantKind, weight: giant.weight, was: giant.weight, at: Date.now(), giant: giant.name } : null;
-    recaughtRef.current = (lost.again ? backAgain(lost.again, openGiantsRef.current) : undefined) ?? released?.fish ?? tagged ?? giantUp;
+    // Failing all those, the trophy that broke off here on an earlier day may be back.
+    const foe = !lost.again && !mercyNow && !released?.fish && !tagged && !giantUp ? castForFoe(loadOldFoe(current.userId), spotRef.current, Date.now(), Math.random()) : null;
+    recaughtRef.current = (lost.again ? backAgain(lost.again, openGiantsRef.current) : undefined) ?? released?.fish ?? tagged ?? giantUp ?? (foe && canLand(current, foe.species) ? foe : null);
     // Over the groundbait the feeders crowd in, so some bites are theirs; a beginner's first fish stays an easy one.
     const feeder = bait.baited && !mercyNow ? groundbaitFeeder(spotRef.current, lureRef?.current, short, hour) : null;
     const hunter = shiner && !lost.again && !recaughtRef.current && !mercyNow ? shinerHunter(spotRef.current, current, hour, Math.random, lively) : null;
@@ -1795,6 +1798,14 @@ export function useFishingGame(
     // On a small lure, say a big one tempts it back sooner.
     const tempt = () => (lureRef && !favorsLargeFish(lureRef.current) ? ` ${t("A big lure tempts it back sooner.")}` : "");
     const stillAbout = () => (gotAwayRef.current ? ` ${t("It's still about: cast here again.")}${tempt()}` : "");
+    // A trophy that breaks off is remembered at its bank for the days to come; a giant or a let-go fish is already its own story.
+    const foeLost = (current: { species: FishSpecies; weight: number }) => {
+      const userId = anglerIdRef.current;
+      const recaught = recaughtRef.current;
+      if (!userId || !isTrophyWeight(current.species, current.weight) || current.species.rarity === "legendary" || (recaught && !recaught.foe)) return "";
+      saveOldFoe(userId, { species: current.species.id, weight: current.weight, spot: spotRef.current, at: Date.now(), ...(lureRef?.current ? { lure: lureRef.current } : {}) });
+      return ` ${t("It will be about this bank in the days to come.")}`;
+    };
     // A giant that breaks free learns the lure it was hooked on.
     const giantLost = () => {
       const giant = recaughtRef.current?.giant;
@@ -1974,8 +1985,13 @@ export function useFishingGame(
             setSoak(0);
             const recaught = recaughtRef.current;
             if (recaught?.tag) landedTagsRef.current.add(recaught.tag.id);
+            if (recaught?.foe && anglerIdRef.current) saveOldFoe(anglerIdRef.current, null);
             const back = !recaught
               ? ""
+              : recaught.foe
+                ? recaught.foe.lure
+                  ? t("{fish}: the trophy that broke you off here on {date}, still with your {lure} in its jaw.", { fish: t(current.species.name), date: new Date(recaught.at).toLocaleDateString(locale(), { month: "long", day: "numeric" }), lure: t(recaught.foe.lure) })
+                  : t("{fish}: the trophy that broke you off here on {date}.", { fish: t(current.species.name), date: new Date(recaught.at).toLocaleDateString(locale(), { month: "long", day: "numeric" }) })
               : recaught.giant
                 ? t("{fish}: you landed {name}, this week's giant of the bank!", { fish: t(current.species.name), name: t(recaught.giant) })
               : recaught.tag
@@ -2029,7 +2045,7 @@ export function useFishingGame(
             spookRef.current = spotRef.current;
             schoolRef.current = null;
             gotAwayRef.current = gotAwayAfterLoss(current.species, current.weight, spotRef.current, recaughtRef.current);
-            const trophy = lostTrophy(current.species, current.weight) + giantLost();
+            const trophy = lostTrophy(current.species, current.weight) + giantLost() + foeLost(current);
             // How close it came, so a break near the net reads as nearly there rather than as a wasted fight.
             const reeledIn = Math.round((1 - sim.line) * 100);
             // A break gives the angler a fresh knot to tie on, so the line is sound again.
@@ -2051,7 +2067,7 @@ export function useFishingGame(
             schoolRef.current = null;
             gotAwayRef.current = gotAwayAfterLoss(current.species, current.weight, spotRef.current, recaughtRef.current);
             const frays = runtime.performance.scuffed || runtime.performance.bitten;
-            const trophy = lostTrophy(current.species, current.weight) + giantLost() + (frays && !frayedRef.current ? ` ${scuffNote(current.water, !runtime.performance.scuffed, current.farRock)}` : "");
+            const trophy = lostTrophy(current.species, current.weight) + giantLost() + foeLost(current) + (frays && !frayedRef.current ? ` ${scuffNote(current.water, !runtime.performance.scuffed, current.farRock)}` : "");
             if (frays) markFrayed(true);
             if (sim.tornOut && sim.lightHook && !SOFT_MOUTHS.has(current.species.id)) {
               setOutcome({ kind: "broke", message: t("The light hook pulled out of the {fish}.", { fish: t(current.species.name) }) + trophy });

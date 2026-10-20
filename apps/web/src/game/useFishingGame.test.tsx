@@ -121,6 +121,7 @@ import { giantShyKey } from "./giantShy";
 import { nightLineKey, nightLineReadyAt } from "./nightLine";
 import { baitBucketKey } from "./baitBucket";
 import { bagKey, shinerKey } from "./groundbaitBag";
+import { oldFoeKey } from "./oldFoe";
 import { carriesBait, FALSE_STRIKE_MS, FIGURE_EIGHT_ODDS, FIGURE_TURN_MS, FIGURE_WINDOW_MS, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TIRE_REASONS, TOPWATER_POPS, useFishingGame, WAIT_REASONS } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
@@ -1053,14 +1054,17 @@ describe("useFishingGame lost fight", () => {
     expect(hint()).not.toContain("It hunts by smell in the murky rain water");
   });
 
-  it("says a lost trophy-sized fish looked like a trophy", () => {
-    const surface = mount();
+  it("says a lost trophy-sized fish looked like a trophy, and keeps it about the bank for the days to come", () => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Pheasant tails");
     const message = () => container!.querySelector("[data-testid=broke]")?.textContent;
     const pike = FISH.find((fish) => fish.id === "pike")!;
     vi.mocked(castForGotAway).mockReturnValueOnce({ again: { spot: "dock", species: pike, weight: pike.maxWeight, casts: 1 }, next: null });
     step.mockReturnValueOnce("escaped");
     castAndFight(surface, 1);
-    expect(message()).toMatch(/threw the hook\. It looked like a trophy\.$/);
+    expect(message()).toMatch(/threw the hook\. It looked like a trophy\. It will be about this bank in the days to come\.$/);
+    expect(JSON.parse(kept.get(oldFoeKey(profile.userId))!)).toMatchObject({ species: "pike", weight: pike.maxWeight, spot: "dock", lure: "Pheasant tails" });
   });
 
   it("says a light hook dropped out of the slack line when a charge was left slack", () => {
