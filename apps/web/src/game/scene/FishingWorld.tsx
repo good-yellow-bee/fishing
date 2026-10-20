@@ -342,11 +342,13 @@ function isAiming(phase: ScenePhase) {
   return phase === "idle" || phase === "casting";
 }
 
-/** Gives the shadow casters depth materials of their own kind, checking about once a second for ones that came out since (shadowDepth.ts). */
+/** Gives the shadow casters depth materials of their own kind, checking once a second for ones that came out or changed since (shadowDepth.ts). */
 function ShadowDepths() {
-  const frames = useRef(0);
-  useFrame(({ scene }) => {
-    if (frames.current++ % 60 === 0) assignShadowDepths(scene);
+  const next = useRef(0);
+  useFrame(({ scene, gl, clock }) => {
+    if (!gl.shadowMap.enabled || clock.elapsedTime < next.current) return;
+    next.current = clock.elapsedTime + 1;
+    assignShadowDepths(scene);
   });
   return null;
 }
