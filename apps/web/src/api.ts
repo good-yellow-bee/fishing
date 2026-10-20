@@ -6,6 +6,7 @@ import {
   type BoardView,
   type BadgeProgress,
   type BoardPeriod,
+  type LodgeRelease,
   type LodgeTrack,
   type SpeciesRecord,
   type CatchRecord,
@@ -108,6 +109,10 @@ export function releaseCatch(requestId: string) {
 
 export function getBoard(period: BoardPeriod = "all") {
   return request<BoardView>(period === "all" ? "/api/board" : `/api/board?period=${period}`);
+}
+
+export function getLodgeReleased() {
+  return request<{ released: LodgeRelease[] }>("/api/lodge/released").then((body) => body.released);
 }
 
 export function getLodgeTracks() {

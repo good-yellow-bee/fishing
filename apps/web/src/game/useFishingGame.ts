@@ -22,6 +22,7 @@ import {
   type FishSpecies,
   type LakeHour,
   type LakeSeason,
+  type LodgeRelease,
   type Profile,
   type Sky,
   type SpotId,
@@ -56,7 +57,7 @@ import { FAR_ROCK_WAIT, tightToFarRock } from "./farRock";
 import { castSnags, onRockEdge, onShoreIce, ROCK_EDGE_WAIT, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { FLUTTER_SEC, flutterGrabberFor, flutterTip, followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { AGAIN_CASTS, castForGotAway, gotAwayAfterDrop, PATIENT_DROP_RANK, gotAwayAfterLoss, type GotAway } from "./gotAway";
-import { castForReleased, loadReleased, saveReleased, type Recaught } from "./releasedFish";
+import { castForLodgeTag, castForReleased, loadReleased, saveReleased, type Recaught } from "./releasedFish";
 import { weightText } from "../i18n/content";
 import { FRENZY_SLOT_MS, frenzyOn, HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, slotFrenzy, type Hotspot } from "./hotspot";
 import { loadBag, loadShiner, saveBag, saveShiner, type HookedShiner } from "./groundbaitBag";
@@ -169,7 +170,7 @@ export function lostTrophy(species: FishSpecies, weight: number) {
 export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; lightHook?: boolean; turnedRuns: number; cleanRun?: number; closeCall?: boolean; fightSec?: number; bowedLeaps?: number; easedShakes?: number; followedDarts?: number; encore?: boolean; secondTake?: boolean; grabbed?: string; gotAway?: boolean; followedIn?: boolean; recaught?: boolean; clearOf?: "weeds" | "rocks" | "pilings" | "current" };
 
 export type Outcome =
-  | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes; note?: string }
+  | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes; note?: string; tag?: { id: string; by: string } }
   | { kind: "broke"; message: string }
   | { kind: "miss"; message: string; fish?: { species: FishSpecies; weight: number } }
   | { kind: "error"; message: string };
@@ -317,9 +318,15 @@ export function useFishingGame(
   windDrift?: { x: number; z: number },
   /** The legend a solved hunt has drawn to its bank this week, or null. */
   legend: { legendId: string; spot: SpotId } | null = null,
+  /** Fish other anglers let go on earlier days, still in the lake for a cast to find. */
+  lodgeReleased: readonly LodgeRelease[] = [],
 ) {
   const legendRef = useRef(legend);
   legendRef.current = legend;
+  const lodgeReleasedRef = useRef(lodgeReleased);
+  lodgeReleasedRef.current = lodgeReleased;
+  /** Other anglers' let-go fish landed this visit, out of the lake till the list is read again. */
+  const landedTagsRef = useRef(new Set<string>());
   const risingRef = useRef(rising);
   risingRef.current = rising;
   const windRef = useRef(wind);
@@ -688,7 +695,7 @@ export function useFishingGame(
       // A late strike only just catches, so the hook can pull out like a soft mouth's.
       runtime.sim.lightHook = lightHook;
       const line = fightLines(species.challenge)[0];
-      const again = !strike ? "" : againRef.current ? `${followedRef.current ? t("It's the one that followed your fish in!") : droppedRef.current ? t("It's the one that dropped your bait!") : t("It's the one that got away!")} ` : recaughtRef.current ? `${t("It's a fish you let go here before!")} ` : shinerTakenRef.current ? `${t("It took the live shiner!")} ` : "";
+      const again = !strike ? "" : againRef.current ? `${followedRef.current ? t("It's the one that followed your fish in!") : droppedRef.current ? t("It's the one that dropped your bait!") : t("It's the one that got away!")} ` : recaughtRef.current ? `${recaughtRef.current.tag ? t("It's a fish {name} let go!", { name: recaughtRef.current.tag.by }) : t("It's a fish you let go here before!")} ` : shinerTakenRef.current ? `${t("It took the live shiner!")} ` : "";
       // A trophy-sized fish is felt on the rod the moment it's hooked.
       const heavy = isTrophyWeight(species, weight) ? `${t("It feels heavy — could be a trophy!")} ${t("A fish this big makes a long first run.")} ` : "";
       // Cold water makes a fish sluggish, and the angler feels it at once.
@@ -996,7 +1003,9 @@ export function useFishingGame(
     // A fish let go at this bank on an earlier day may come back to the line, a little heavier; a beginner's first fish stays an easy one.
     const released = lost.again || mercyNow ? null : castForReleased(loadReleased(), spotRef.current, Date.now(), Math.random());
     if (released?.fish) saveReleased(released.next);
-    recaughtRef.current = released?.fish ?? null;
+    // Failing that, one another angler let go here may come up, carrying their tag.
+    const tagged = released && !released.fish && lodgeReleasedRef.current.length > 0 ? castForLodgeTag(lodgeReleasedRef.current, spotRef.current, Date.now(), Math.random(), landedTagsRef.current, current) : null;
+    recaughtRef.current = released?.fish ?? tagged;
     // Over the groundbait the feeders crowd in, so some bites are theirs; a beginner's first fish stays an easy one.
     const feeder = bait.baited && !mercyNow ? groundbaitFeeder(spotRef.current, lureRef?.current, short, hour) : null;
     const hunter = shiner && !lost.again && !recaughtRef.current && !mercyNow ? shinerHunter(spotRef.current, current, hour, Math.random, lively) : null;
@@ -1684,8 +1693,11 @@ export function useFishingGame(
             // The fish took the worm, so a fresh one goes on.
             setSoak(0);
             const recaught = recaughtRef.current;
+            if (recaught?.tag) landedTagsRef.current.add(recaught.tag.id);
             const back = !recaught
               ? ""
+              : recaught.tag
+                ? t("{fish}: {name} let this one go here on {date} at {was}, and now it's yours.", { fish: t(current.species.name), name: recaught.tag.by, date: new Date(recaught.at).toLocaleDateString(locale(), { month: "long", day: "numeric" }), was: weightText(recaught.was) })
               : recaught.weight > recaught.was
                 ? t("{fish}: you let this one go here on {date}, and it has put on {gain} since.", { fish: t(current.species.name), date: new Date(recaught.at).toLocaleDateString(locale(), { month: "long", day: "numeric" }), gain: weightText(recaught.weight - recaught.was) })
                 : t("{fish}: you let this one go here on {date}, and it's back on your line.", { fish: t(current.species.name), date: new Date(recaught.at).toLocaleDateString(locale(), { month: "long", day: "numeric" }) });
@@ -1698,6 +1710,7 @@ export function useFishingGame(
               spot: spotRef.current,
               clean,
               ...(landedNote ? { note: landedNote } : {}),
+              ...(recaught?.tag ? { tag: recaught.tag } : {}),
               notes: {
                 perfectCast: castPerfectRef.current,
                 hookedSolid: hookedSolidRef.current,
