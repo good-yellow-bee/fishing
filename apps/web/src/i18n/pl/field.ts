@@ -771,7 +771,7 @@ export const PL_FIELD: PlBook = {
   "By year:": "Według roku:",
   "By water:": "Według łowiska:",
   "By lure:": "Według przynęty:",
-  "night of {day}": "noc z {day}",
+  "night of {day}": "noc: {day}",
   "Pack the {n} best for {outing}": "Spakuj {n} najlepsze na: {outing}",
   "Packed: {lures}.": "Spakowano: {lures}.",
   "about {distance}": "około {distance}",

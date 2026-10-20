@@ -35,7 +35,7 @@ import { isSampleCatch } from "./bookCopy";
 import { offPlayLake } from "./playLake";
 import { bookSpelling, shownPieceKey } from "./gear/pieceKey";
 import { bookKindName, kindKey, mostWritten } from "./speciesLink";
-import { bookLureName, onPiece, pieceTally } from "./pieceTally";
+import { bookLureName, pieceTally } from "./pieceTally";
 import { plainName } from "./tripDates";
 
 /** A book name as the Polish UI shows it, or itself when Polish has no line for it. */
@@ -1046,6 +1046,9 @@ function MatchSplits({ matches, all, search, largest, counted }: { matches: read
   const kindName = bookKindName(book.catches);
   const lureName = bookLureName(book.catches);
   const lures = pieceTally(matches, Infinity).map((row): [string, number] => [row.lure, row.count]);
+  // Each fish's piece worked out once, not once for every lure row.
+  const pieceOf = new Map(all.map((entry) => [entry, entry.lure.trim() ? shownPieceKey(entry.lure.trim()) : ""]));
+  const pieceOfLure = new Map(lures.map(([lure]) => [lure, shownPieceKey(lure.trim())]));
   const years = tally((entry) => bookFishDay(book, entry).slice(0, 4)).sort((a, b) => b[0].localeCompare(a[0]));
   // Waters by name, most fish first: the water search opens a name, so two waters read the same are one row.
   const nameOf = new Map(book.spots.map((spot) => [spot.id, plainName(spot.name)]));
@@ -1096,7 +1099,7 @@ function MatchSplits({ matches, all, search, largest, counted }: { matches: read
       {/* Where it came from: "pike" answers "where" in one tap, each water narrowing the search. */}
       {line(t("By water:"), waters, (key) => exactTerm("water", shownWater.get(key)!), (key) => shownWater.get(key)!, (entry, key) => waterKey(entry) === key)}
       {/* What it was taken on, each lure however written one entry, named as the book writes it. */}
-      {line(t("By lure:"), lures, (lure) => exactTerm("lure", lureName(lure)), (lure) => lureName(lure), (entry, lure) => onPiece(entry, lure))}
+      {line(t("By lure:"), lures, (lure) => exactTerm("lure", lureName(lure)), (lure) => lureName(lure), (entry, lure) => pieceOf.get(entry) === pieceOfLure.get(lure))}
     </>
   );
 }
