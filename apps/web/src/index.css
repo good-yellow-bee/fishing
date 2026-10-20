@@ -2492,19 +2492,16 @@ html[data-input="pad"] .fight-bar .on-pad {
   }
 }
 
-/* On a touch screen the card keeps to what a fight is read from: the thumb button already says Reel and the status line
-   when to let go, so the hold-and-release line goes (the first-fight coach still says it), and the drag's explanation is
-   for a screen reader (its knob stays). Larger text, or a phone under 760 px tall, drops the clean-fight line, and under
-   700 px the fish's habits too (the water's own warnings stay): the card has the top of the screen, above the water. */
+/* On a touch screen the card keeps to what a fight is read from, to fit above the water: the thumb button already says
+   Reel and the status line when to let go, so the hold-and-release line goes (the first-fight coach still says it); the
+   drag's explanation is for a screen reader (its knob stays); the clean-fight line waits for the catch card; and with
+   the steering buttons on screen their standing instruction goes after a first fight (a run's own call still comes),
+   and so do the fish's habits, as with larger text or a phone under 700 px tall. The water's own warnings stay. */
 @media (pointer: coarse) and (max-width: 800px) and (min-height: 501px) {
-  .fight-bar .fight-controls,
-  html[data-text-size] .fight-bar :is(.fight-clean, .fight-habit) {
-    display: none;
-  }
-}
-
-@media (pointer: coarse) and (max-width: 800px) and (min-height: 501px) and (max-height: 760px) {
-  .fight-bar .fight-clean {
+  .fight-bar :is(.fight-controls, .fight-clean),
+  .scene-wrap:has(.steer-buttons) .fight-bar .fight-habit,
+  .scene-wrap:has(.steer-buttons):not([data-walkthrough="1"]) .fight-bar .fight-steer[data-call="calm"],
+  html[data-text-size] .fight-bar .fight-habit {
     display: none;
   }
 }
@@ -3901,13 +3898,16 @@ html[data-contrast="high"] .sound-captions li {
   }
 
   /* Held sideways the fight fills the middle of the screen (from about 30% to 60% of its width): the card takes the
-     side away from the Reel button, under the header and above the steering buttons in the corner. */
+     side away from the Reel button, above the steering buttons in that corner, and the header steps aside for it. */
   .fight-bar {
-    top: calc(var(--hud-bottom, 52px) + 8px);
-    bottom: auto;
+    bottom: calc(96px + env(safe-area-inset-bottom));
     left: 8px;
     width: min(320px, calc(32vw / var(--text-zoom, 1)));
     transform: none;
+  }
+
+  .hud:has(+ .scene-wrap[data-phase="fight"]) {
+    visibility: hidden;
   }
 
   html[data-hand="left"] .fight-bar {
@@ -3916,7 +3916,8 @@ html[data-contrast="high"] .sound-captions li {
   }
 
   /* And keeps to what a fight is read from, as on an upright phone, to fit the height. */
-  .fight-bar :is(.fight-controls, .fight-clean, .fight-habit) {
+  .fight-bar :is(.fight-controls, .fight-clean, .fight-habit),
+  .scene-wrap:has(.steer-buttons):not([data-walkthrough="1"]) .fight-bar .fight-steer[data-call="calm"] {
     display: none;
   }
 }
