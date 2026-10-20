@@ -1,4 +1,4 @@
-import { isTrophyWeight, type ChallengeId, type FishSpecies } from "@stillwater/shared";
+import { isTrophyWeight, offItsNest, type ChallengeId, type FishSpecies } from "@stillwater/shared";
 import { t } from "../i18n";
 import { BED_RAIDERS, difficulty01 } from "./logic";
 import type { Drag } from "./drag";
@@ -423,16 +423,12 @@ export const SUMMER_STRENGTH_TIRE = 0.85;
 export function summerStrengthTireMul(season: string | undefined, speciesId: string) {
   return season === "summer" && WARM_LOVERS.has(speciesId) ? SUMMER_STRENGTH_TIRE : 1;
 }
-/** Nest guarders: in spring they guard a nest in the shallows and fight hard for it. A bluegill fans its nest in the same shallows and chases off anything that comes near. */
-export const NEST_GUARDERS: ReadonlySet<string> = new Set(["largemouth-bass", "smallmouth-bass", "bluegill"]);
-/** The shallow spots where a nest guarder makes its nest. */
-export const NEST_SPOTS: ReadonlySet<string> = new Set(["reeds", "dock"]);
 /** In spring a nest guarder hooked by its nest tires only this fast on a run or against the reel. */
 export const NEST_TIRE = 0.85;
 
 /** How guarding a nest slows a fish's tiring: slower in spring for a nest guarder hooked in the shallows, else 1. */
 export function nestTireMul(season: string | undefined, speciesId: string, spot: string) {
-  return season === "spring" && NEST_GUARDERS.has(speciesId) && NEST_SPOTS.has(spot) ? NEST_TIRE : 1;
+  return offItsNest(speciesId, spot, season) ? NEST_TIRE : 1;
 }
 /** Night hunters: after dark they're out feeding at full strength. */
 export const NIGHT_HUNTERS: ReadonlySet<string> = new Set(["catfish", "burbot"]);

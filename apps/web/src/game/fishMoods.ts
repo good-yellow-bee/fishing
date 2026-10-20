@@ -1,4 +1,5 @@
-import { COLD_LOVERS, COLDWATER, CURRENT_FIGHTERS, EARLY_SPAWNERS, FALL_FEEDERS, FALL_RUNNERS, NEST_GUARDERS, NIGHT_HUNTERS, SCENT_HUNTERS, SPRING_RUNNERS, TWILIGHT_HUNTERS, WARM_LOVERS } from "./fight";
+import { NEST_GUARDERS } from "@stillwater/shared";
+import { COLD_LOVERS, COLDWATER, CURRENT_FIGHTERS, EARLY_SPAWNERS, FALL_FEEDERS, FALL_RUNNERS, NIGHT_HUNTERS, SCENT_HUNTERS, SPRING_RUNNERS, TWILIGHT_HUNTERS, WARM_LOVERS } from "./fight";
 import { t } from "../i18n";
 
 /** When a kind of fish fights hard (tires slower than others would), from its season, hour, sky and spot habits, for the field guide. */

@@ -1,7 +1,7 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { Hono } from "hono";
 import { catchPoints, CLEAN_RUN_BONUS, DAY_RUN_BONUS, fishById, GOLDEN_BONUS, GROUNDBAIT_PRICE, isGolden, LODGE_RECORD_BONUS, MASTER_BONUS, PB_BONUS, SHINER_PRICE, GIANT_BONUS, giantAt, TAG_FINDER_BONUS, TAG_RETURN_BONUS, weeklyBonus } from "@stillwater/shared";
 
@@ -288,6 +288,25 @@ describe("POST /catches", () => {
     const after = getProfile(user.id)!;
     expect(after.points).toBe(before.points + TROPHY_RELEASE_BONUS);
     expect(after.lifetime_points).toBe(before.lifetime_points + TROPHY_RELEASE_BONUS);
+  });
+
+  it("pays a nest guarder's release bonus for one saved off its spring nest, by the server's season, not the client's", async () => {
+    const { NEST_RELEASE_BONUS } = await import("@stillwater/shared");
+    db.prepare(`UPDATE profile SET strength = 10, accuracy = 10 WHERE user_id = ?`).run(user.id);
+    const release = (id: string) => app.request(`http://test/catches/${id}/release`, { method: "POST" });
+    vi.useFakeTimers({ toFake: ["Date"] });
+    try {
+      vi.setSystemTime(new Date(2026, 3, 20, 12));
+      await post({ requestId, speciesId: "smallmouth-bass", weight: 3.5, spot: "dock", season: "spring" });
+      expect(await (await release(requestId)).json()).toMatchObject({ released: true, bonus: NEST_RELEASE_BONUS });
+      // Saved in the fall, a catch that says spring pays nothing extra.
+      vi.setSystemTime(new Date(2026, 9, 20, 12));
+      const fall = "6a5b4c3d-2e1f-4a0b-9c8d-7e6f5a4b3c2d";
+      await post({ requestId: fall, speciesId: "smallmouth-bass", weight: 3.5, spot: "dock", season: "spring" });
+      expect(await (await release(fall)).json()).toMatchObject({ released: true, bonus: 0 });
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("refuses to release a catch that is not saved, or a malformed ID", async () => {

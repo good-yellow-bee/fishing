@@ -1905,6 +1905,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT430~~ | ~~The groundbait bag and the shiner on the hook are kept per angler, as the bucket and night line are; the old browser-wide ones go to the first angler who loads~~ (#1648) | gameplay | S |
 | ~~GT431~~ | ~~News card 2026-10-20-game59 covers GT429: the bait bucket~~ (#1652) | ui | S |
 | ~~GT432~~ | ~~The old foe: a trophy that breaks off is remembered per angler at its bank for three days; on a later day a cast there may bring it back (8%), and landing it says it still had your lure in its jaw~~ (#1655) | gameplay | M |
+| ~~GT433~~ | ~~A nest guarder hooked off its spring nest (a bass at the Reeds or the Dock) pays 15 points more when let go, on top of any trophy bonus; the server pays it from the catch's season and bank, and the card shows it~~ (#1657) | gameplay | S |
+| GT434 | News card game60 covers GT432-GT433 | ui | S |
 
 ## Risks / open questions for the owner
 

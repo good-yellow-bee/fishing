@@ -59,12 +59,14 @@ import {
   moonLight,
   moonName,
   moonPhase,
-  isTrophyWeight,
   showsSolidMark,
   skyBlurb,
   skyLabel,
   weatherFromSearch,
+  releaseBonus,
+  NEST_RELEASE_BONUS,
   TROPHY_RELEASE_BONUS,
+  backToItsNest,
   type CatchSubmission,
   type LakeHour,
   type LakeSeason,
@@ -721,8 +723,13 @@ export function DockPage() {
   const [releasedId, setReleasedId] = useState<string | null>(null);
   const [releasing, setReleasing] = useState(false);
   const [releaseError, setReleaseError] = useState(false);
-  const [releaseBonus, setReleaseBonus] = useState(0);
+  const [paidReleaseBonus, setPaidReleaseBonus] = useState(0);
   const landedReleased = game.outcome?.kind === "landed" && releasedId === game.outcome.id;
+  // What letting the landed fish go would pay, and whether it goes back to its nest.
+  const releaseOffer =
+    game.outcome?.kind === "landed"
+      ? { bonus: releaseBonus(game.outcome.species, game.outcome.weight, game.outcome.spot, season), nest: backToItsNest(game.outcome.species, game.outcome.weight, game.outcome.spot, season) }
+      : { bonus: 0, nest: false };
   // Release gives way to "Released back into the lake": the note takes focus so a screen reader reads it and the keyboard
   // stays on the card. Space still casts again from it.
   const releasedNote = useRef<HTMLParagraphElement>(null);
@@ -741,7 +748,7 @@ export function DockPage() {
       // A catch still in the queue goes up first, so the server has it to let go.
       await catchSync.sync();
       const { bonus } = await releaseCatch(outcome.id);
-      setReleaseBonus(bonus);
+      setPaidReleaseBonus(bonus);
       setReleasedId(outcome.id);
       // The lake remembers the fish, so it may bite again at this bank another day, a little heavier.
       rememberReleased(outcome.species, outcome.weight, outcome.spot, Date.now(), outcome.lure);
@@ -1462,9 +1469,14 @@ export function DockPage() {
               )}
               {landedReleased ? (
                 <p className="catch-stamp released" ref={releasedNote} tabIndex={-1}>
-                  {releaseBonus > 0
-                    ? t("Released back into the lake · +{bonus} pts for letting a trophy go", { bonus: releaseBonus })
-                    : t("Released back into the lake")}
+                  {/* Named by what the server paid: a trophy, a guarder back to its nest, or both. */}
+                  {paidReleaseBonus === TROPHY_RELEASE_BONUS + NEST_RELEASE_BONUS
+                    ? t("Released back to its nest · +{bonus} pts for a trophy guarder", { bonus: paidReleaseBonus })
+                    : paidReleaseBonus === NEST_RELEASE_BONUS
+                      ? t("Released back to its nest · +{bonus} pts", { bonus: paidReleaseBonus })
+                      : paidReleaseBonus > 0
+                        ? t("Released back into the lake · +{bonus} pts for letting a trophy go", { bonus: paidReleaseBonus })
+                        : t("Released back into the lake")}
                   {/* A fish the lake remembers shies from the lure it was caught on. */}
                   {game.outcome.lure && remembersReleased(game.outcome.species) && ` · ${t("it will shy from the {lure} now", { lure: t(game.outcome.lure) })}`}
                 </p>
@@ -1472,9 +1484,11 @@ export function DockPage() {
                 <button className="panel-btn" type="button" onClick={() => void releaseFish()} aria-disabled={releasing || undefined}>
                   {releasing
                     ? t("Releasing…")
-                    : isTrophyWeight(game.outcome.species, game.outcome.weight)
-                      ? t("Release · +{bonus} pts", { bonus: TROPHY_RELEASE_BONUS })
-                      : t("Release")}
+                    : releaseOffer.nest
+                      ? t("Release to its nest · +{bonus} pts", { bonus: releaseOffer.bonus })
+                      : releaseOffer.bonus > 0
+                        ? t("Release · +{bonus} pts", { bonus: releaseOffer.bonus })
+                        : t("Release")}
                 </button>
               )}
               {releaseError && (
