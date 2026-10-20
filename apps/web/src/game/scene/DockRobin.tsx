@@ -3,9 +3,8 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
-import { inLake, onDockPlanks } from "@stillwater/shared";
 import { anglerPose } from "./pose";
-import { aboard } from "./boat";
+import { anglerAshore } from "./bankAngler";
 import { hopAt, hopStart, hopStep, type HopState } from "./robinHop";
 import type { ScenePhase } from "./types";
 import { robinAt, robinVisitIndex, type RobinPose } from "./robinVisit";
@@ -128,7 +127,7 @@ export function GroundRobin({ phase }: { phase: ScenePhase }) {
   const lastPhase = useRef(phase);
   const poseAt = useCallback(
     (time: number) => {
-      const ashore = !aboard() && !onDockPlanks(anglerPose.x, anglerPose.z) && !inLake(anglerPose.x, anglerPose.z);
+      const ashore = anglerAshore();
       const struck = phase === "fight" && lastPhase.current !== "fight";
       lastPhase.current = phase;
       const world = { dockRobinHere: robinAt(time).here && !sharedVisits.has(robinVisitIndex(time)), struck, still };

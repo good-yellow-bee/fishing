@@ -1,21 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { CURL_SEC, FIRST_SEC, GAP_SEC, WALK_SEC, hedgehogAt, hedgehogOut, hedgehogPath, hedgehogStart, hedgehogStep, type HedgehogState } from "./hedgehogWalk";
+import { CURL_SEC, FIRST_SEC, GAP_SEC, PASS_SEC, hedgehogAt, hedgehogOut, hedgehogPath, hedgehogStart, hedgehogStep, type HedgehogState } from "./hedgehogWalk";
 import type { Angler } from "./robinHop";
 
 const STEP = 1 / 30;
 const standing: Angler = { x: -13.6, y: 0, z: 10.7, yaw: Math.PI, moving: false };
 const dry = () => 0;
 
-function run(until: number, struckAt: number[] = [], settled = () => true, ground: (x: number, z: number) => number | null = dry) {
+function run(until: number, fuss: (t: number) => boolean = () => false, settled = () => true, ground: (x: number, z: number) => number | null = dry) {
   let state: HedgehogState = hedgehogStart(0);
   const frames: { t: number; state: HedgehogState; pose: ReturnType<typeof hedgehogAt> }[] = [];
   for (let t = 0; t <= until; t += STEP) {
-    const struck = struckAt.some((s) => Math.abs(t - s) < STEP / 2);
-    state = hedgehogStep(state, t, standing, settled(), struck, ground);
-    frames.push({ t, state, pose: hedgehogAt(state, t) });
+    state = hedgehogStep(state, t, STEP, standing, settled(), fuss(t), ground);
+    frames.push({ t, state, pose: hedgehogAt(state, t, false, ground) });
   }
   return frames;
 }
+
+const leftAt = (fs: ReturnType<typeof run>) => fs.find((f, i) => f.state.mode === "away" && fs[i - 1]?.state.mode === "walking")!.t;
 
 describe("hedgehog on the bank", () => {
   it("comes out on dry evenings and nights from spring to fall", () => {
@@ -26,12 +27,13 @@ describe("hedgehog on the bank", () => {
     expect(hedgehogOut("night", "clear", "winter")).toBe(false);
   });
 
-  it("snuffles past behind the angler from side to side, stopping to sniff, without jumps", () => {
-    const frames = run(FIRST_SEC + WALK_SEC + 10);
+  it("snuffles past behind the angler from side to side, stopping to sniff, growing in and out at the ends, without jumps", () => {
+    const frames = run(FIRST_SEC + PASS_SEC + 10);
     const seen = frames.filter((f) => f.pose.here);
-    expect(seen.length * STEP).toBeGreaterThan(WALK_SEC);
+    expect(seen.length * STEP).toBeGreaterThan(PASS_SEC - 1);
     expect(seen.some((f) => f.pose.sniff > 0.5)).toBe(true);
-    // Behind the angler: the far side from the water they face.
+    expect(seen[0]!.pose.show).toBeLessThan(0.1);
+    expect(seen[Math.floor(seen.length / 2)]!.pose.show).toBe(1);
     for (const f of seen) {
       const back = -((f.pose.x - standing.x) * Math.sin(standing.yaw) + (f.pose.z - standing.z) * Math.cos(standing.yaw));
       expect(back).toBeGreaterThan(0.5);
@@ -40,32 +42,37 @@ describe("hedgehog on the bank", () => {
     expect(frames[frames.length - 1]!.state.mode).toBe("away");
   });
 
-  it("curls into a ball at a strike, stays put while curled, then trundles on; a second strike while curled changes nothing", () => {
-    const strike = FIRST_SEC + 3;
-    const frames = run(FIRST_SEC + WALK_SEC + CURL_SEC + 15, [strike, strike + 1]);
+  it("curls up at a fuss and stays put until a while after it ends, then trundles on", () => {
+    const from = FIRST_SEC + 3;
+    const frames = run(FIRST_SEC + PASS_SEC + 20, (t) => t > from && t < from + 4);
     const at = (t: number) => frames.find((f) => f.t >= t)!.pose;
-    expect(at(strike + 0.5).curl).toBeGreaterThan(0.9);
-    expect(Math.hypot(at(strike + 4).x - at(strike + 0.5).x, at(strike + 4).z - at(strike + 0.5).z)).toBeLessThan(0.01);
-    expect(at(strike + CURL_SEC + 2).curl).toBe(0);
-    expect(at(strike + CURL_SEC + 3).trot).toBe(1);
-    // Its walk took that much longer.
-    const plain = run(FIRST_SEC + WALK_SEC + 15);
-    const leftAt = (fs: typeof frames) => fs.find((f, i) => f.state.mode === "away" && fs[i - 1]?.state.mode === "walking")!.t;
-    expect(leftAt(frames) - leftAt(plain)).toBeGreaterThan(CURL_SEC);
+    expect(at(from + 0.5).curl).toBeGreaterThan(0.9);
+    expect(at(from + 4 + CURL_SEC - 0.5).curl).toBeGreaterThan(0.9);
+    expect(Math.hypot(at(from + 6).x - at(from + 0.5).x, at(from + 6).z - at(from + 0.5).z)).toBeLessThan(0.01);
+    expect(at(from + 4 + CURL_SEC + 2).curl).toBe(0);
+    expect(leftAt(frames) - leftAt(run(FIRST_SEC + PASS_SEC + 20))).toBeGreaterThan(4 + CURL_SEC - 0.5);
   });
 
-  it("only walks a bank that is dry all along, and only to an angler settled ashore", () => {
+  it("waits for a fuss already going on to be over before it sets off", () => {
+    const frames = run(FIRST_SEC + 12, (t) => t < FIRST_SEC + 6);
+    expect(frames.find((f) => f.pose.here)!.t).toBeGreaterThanOrEqual(FIRST_SEC + 6);
+  });
+
+  it("only walks a bank that is dry all along, at its height, and only to an angler settled ashore", () => {
     expect(hedgehogPath(standing, () => null)).toBeNull();
-    expect(run(60, [], () => true, () => null).every((f) => !f.pose.here)).toBe(true);
-    expect(run(60, [], () => false).every((f) => !f.pose.here)).toBe(true);
-    const frames = run(FIRST_SEC + WALK_SEC + GAP_SEC + 30);
-    const walks = frames.filter((f, i) => f.state.mode === "walking" && frames[i - 1]?.state.mode !== "walking");
-    expect(walks).toHaveLength(2);
+    // A thin strip of water anywhere along its way keeps it from coming.
+    expect(hedgehogPath(standing, (x, z) => (Math.abs(x - standing.x) < 0.12 && z > standing.z ? null : 0))).toBeNull();
+    expect(run(60, () => false, () => true, () => null).every((f) => !f.pose.here)).toBe(true);
+    expect(run(60, () => false, () => false).every((f) => !f.pose.here)).toBe(true);
+    const boards = run(FIRST_SEC + 5, () => false, () => true, () => 0.047);
+    expect(boards.find((f) => f.pose.here)!.pose.y).toBe(0.047);
+    const frames = run(FIRST_SEC + PASS_SEC + GAP_SEC + 30);
+    expect(frames.filter((f, i) => f.state.mode === "walking" && frames[i - 1]?.state.mode !== "walking")).toHaveLength(2);
   });
 
   it("stands still where it comes in with reduced motion", () => {
     let state: HedgehogState = hedgehogStart(0);
-    for (let t = 0; t < FIRST_SEC + 1; t += STEP) state = hedgehogStep(state, t, standing, true, false, dry);
-    expect(hedgehogAt(state, 10, true)).toEqual(hedgehogAt(state, 14, true));
+    for (let t = 0; t < FIRST_SEC + 1; t += STEP) state = hedgehogStep(state, t, STEP, standing, true, false, dry);
+    expect(hedgehogAt(state, 10, true, dry)).toEqual(hedgehogAt(state, 14, true, dry));
   });
 });

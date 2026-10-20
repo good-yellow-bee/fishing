@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { inLake, onDockPlanks } from "@stillwater/shared";
-import { aboard } from "./boat";
+import { anglerAshore } from "./bankAngler";
 import { hedgehogAt, hedgehogStart, hedgehogStep, type HedgehogState } from "./hedgehogWalk";
 import { mergePainted } from "./mergeParts";
 import { anglerPose } from "./pose";
@@ -51,7 +50,7 @@ export function hedgehogFaceShape() {
   ]);
 }
 
-/** A hedgehog snuffling past behind the angler on the bank on dry evenings and nights (hedgehogWalk.ts). */
+/** A hedgehog snuffling past behind the angler on the bank on dry evenings and nights, curling up at any fuss (hedgehogWalk.ts). */
 export function BankHedgehog({ phase }: { phase: ScenePhase }) {
   const still = useReducedMotion();
   const root = useRef<THREE.Group>(null);
@@ -66,32 +65,35 @@ export function BankHedgehog({ phase }: { phase: ScenePhase }) {
     [shapes, material],
   );
   const state = useRef<HedgehogState | null>(null);
-  const lastPhase = useRef(phase);
-  useFrame(({ clock }) => {
+  const scaled = useRef<THREE.Group>(null);
+  useFrame(({ clock }, delta) => {
     const time = clock.elapsedTime;
-    const ashore = !aboard() && !onDockPlanks(anglerPose.x, anglerPose.z) && !inLake(anglerPose.x, anglerPose.z);
-    const struck = phase === "fight" && lastPhase.current !== "fight";
-    lastPhase.current = phase;
-    state.current = hedgehogStep(state.current ?? hedgehogStart(time), time, anglerPose, ashore, struck);
+    // A strike, a fish on, or the angler walking past: something to curl up at.
+    const fuss = phase === "hookset" || phase === "fight" || anglerPose.moving;
+    state.current = hedgehogStep(state.current ?? hedgehogStart(time), time, Math.min(delta, 0.1), anglerPose, anglerAshore(), fuss);
     const pose = hedgehogAt(state.current, time, still);
     const animal = root.current;
     if (!animal) return;
     animal.visible = pose.here;
     if (!pose.here) return;
-    // A little bob as it trots on its short legs.
-    animal.position.set(pose.x, pose.y + pose.trot * 0.004 * Math.abs(Math.sin(time * 14)), pose.z);
+    animal.position.set(pose.x, pose.y, pose.z);
     animal.rotation.y = pose.yaw;
+    // It grows into view at the ends of its way, and bobs on its short legs as it trots.
+    if (scaled.current) {
+      scaled.current.scale.setScalar(SCALE * pose.show);
+      scaled.current.position.y = pose.trot * 0.004 * SCALE * Math.abs(Math.sin(pose.stride * 14));
+    }
     // Curled up, the back closes into a ball over its tucked-in face.
     if (back.current) back.current.scale.set(1 + pose.curl * 0.1, 1 + pose.curl * 0.45, 1 - pose.curl * 0.25);
     if (face.current) {
       face.current.visible = pose.curl < 0.5;
-      face.current.rotation.x = pose.sniff * 0.25 * Math.sin(time * 18);
+      face.current.rotation.x = still ? 0 : pose.sniff * 0.25 * Math.sin(time * 18);
     }
   });
   useSkinnedFigure(root, material);
   return (
     <group ref={root} name="bank-hedgehog" visible={false}>
-      <group scale={SCALE}>
+      <group ref={scaled} scale={SCALE}>
         <group ref={back}>
           <mesh geometry={shapes.back} material={material} castShadow />
         </group>
