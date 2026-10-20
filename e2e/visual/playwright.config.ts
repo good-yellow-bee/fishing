@@ -30,6 +30,8 @@ export default defineConfig({
     deviceScaleFactor: 1,
     timezoneId: "UTC",
     locale: "en-US",
+    // The app's service worker would cache between tests and fetch past page.route.
+    serviceWorkers: "block",
     launchOptions: { args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] },
   },
   webServer: {
