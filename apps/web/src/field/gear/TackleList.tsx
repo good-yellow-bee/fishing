@@ -1,4 +1,4 @@
-import { useId, useRef, useState, type FormEvent } from "react";
+import { useId, useMemo, useRef, useState, type FormEvent } from "react";
 import { isLureLabel, localDate, itemsForTrip, lureClass, packedCount, type CatchEntry, type Spot, type TackleItem, type Trip } from "@stillwater/shared";
 import { useT } from "../../i18n";
 import { fishCountLabel, formatDay, messageText, outingName } from "../format";
@@ -7,28 +7,29 @@ import { packingText } from "./packingText";
 import { CopySummary } from "../CopySummary";
 import { pieceKey, pieceName, shownPieceKey } from "./pieceKey";
 import { isSampleOuting, isSampleTrip } from "../bookCopy";
-import { LATE_NIGHT_UNTIL } from "../suggestions";
+import { newestOutingFirst } from "../catchNeighbors";
+import { outingDay, stillGoing } from "../tripDates";
 import "./gear.css";
 
 /**
  * The outing whose bag this one most likely repeats: the latest with a list, on or before this one's day when there is
  * one, and on the same water ahead of any other.
  */
-export function lastPackedTrip(trips: readonly Trip[], items: readonly TackleItem[], tripId: string): Trip | null {
+export function lastPackedTrip(trips: readonly Trip[], items: readonly TackleItem[], tripId: string, order?: (a: Trip, b: Trip) => number): Trip | null {
   const self = trips.find((trip) => trip.id === tripId);
   const day = self?.date ?? "9999-12-31";
-  const others = packedTrips(trips, items, tripId);
+  const others = packedTrips(trips, items, tripId, order);
   const pick = (from: readonly Trip[]) => from.find((trip) => trip.date <= day) ?? from[0] ?? null;
   return pick(others.filter((trip) => trip.spotId === self?.spotId)) ?? pick(others);
 }
 
-/** Every other outing with a list to copy, newest first. */
-export function packedTrips(trips: readonly Trip[], items: readonly TackleItem[], tripId: string): Trip[] {
+/** Every other outing with a list to copy, newest first; `order` puts a day's dusk before its dawn (newestOutingFirst). */
+export function packedTrips(trips: readonly Trip[], items: readonly TackleItem[], tripId: string, order: (a: Trip, b: Trip) => number = (a, b) => b.date.localeCompare(a.date)): Trip[] {
   const listed = new Set(items.map((item) => item.tripId));
   // The sample week's made-up bags only for one of its own outings.
   const self = trips.find((trip) => trip.id === tripId);
   const sample = self ? isSampleOuting(self) : isSampleTrip(tripId);
-  return trips.filter((trip) => trip.id !== tripId && listed.has(trip.id) && (sample || !isSampleOuting(trip))).sort((a, b) => b.date.localeCompare(a.date));
+  return trips.filter((trip) => trip.id !== tripId && listed.has(trip.id) && (sample || !isSampleOuting(trip))).sort(order);
 }
 
 /** `name` tells screen readers which list this is where several sit on one page; it defaults to the heading. */
@@ -43,6 +44,7 @@ export function TackleList({
   caught = [],
   trips = [],
   spots = [],
+  catches,
 }: {
   tripId: string;
   heading?: string;
@@ -52,15 +54,19 @@ export function TackleList({
   trips?: readonly Trip[];
   /** The book's waters, so an untitled outing goes by its water's name. */
   spots?: readonly Spot[];
+  /** The book's fish, which order a day's outings and say whether last night's is still going. */
+  catches?: readonly CatchEntry[];
 }) {
   const t = useT();
   const { items, toggle, add, remove, unpackTrip, copyTrip, unsavedTrip, updateTackle } = useTackle();
+  const book = useMemo(() => ({ spots: [...spots], trips: [...trips], catches: [...(catches ?? [])] }), [spots, trips, catches]);
   // The last Unpack all or ×, with its way back, until the list changes another way.
   const [taken, setTaken] = useState<{ text: string; undo: (current: TackleItem[]) => TackleItem[] } | null>(null);
   const rows = itemsForTrip(items, tripId);
-  const lastBag = rows.length === 0 ? lastPackedTrip(trips, items, tripId) : null;
+  const newest = newestOutingFirst(book);
+  const lastBag = rows.length === 0 ? lastPackedTrip(trips, items, tripId, newest) : null;
   // Beyond the likeliest bag, any other outing's: a pike trip's list for this pike trip, a month on.
-  const otherBags = lastBag ? packedTrips(trips, items, tripId).filter((trip) => trip.id !== lastBag.id) : [];
+  const otherBags = lastBag ? packedTrips(trips, items, tripId, newest).filter((trip) => trip.id !== lastBag.id) : [];
   const [copyFrom, setCopyFrom] = useState("");
   const packed = packedCount(rows);
   // Pieces compare as they read: "Rosówka" typed on a Polish list is the stored "Nightcrawler" of the tips and the fish.
@@ -77,10 +83,10 @@ export function TackleList({
   const took = new Map<string, number>();
   for (const entry of caught) took.set(readKey(entry.lure), (took.get(readKey(entry.lure)) ?? 0) + 1);
   const outing = trips.find((row) => row.id === tripId);
-  // Done once its day is over: in the small hours, last night's outing is still going.
-  const now = new Date();
-  const doneBefore = now.getHours() < LATE_NIGHT_UNTIL ? localDate(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 12)) : localDate(now);
-  const idle = outing && caught.length > 0 && outing.date < doneBefore ? rows.filter((item) => item.packed && isLureLabel(item.label) && !took.has(readKey(item.label))) : [];
+  // Done once its day is over, unless it is last night's still going in the small hours (as the lure record takes it).
+  // Without the book's fish to tell, done once the outing's day (last night's in the small hours) is over.
+  const done = outing && (catches ? outing.date < localDate(new Date()) && !stillGoing(book, outing) : outing.date < outingDay(localDate(new Date())));
+  const idle = outing && caught.length > 0 && done ? rows.filter((item) => item.packed && isLureLabel(item.label) && !took.has(readKey(item.label))) : [];
   const [label, setLabel] = useState("");
   const [error, setError] = useState("");
   // While packing, the pieces already in the bag can step aside.

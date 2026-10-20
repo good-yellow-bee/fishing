@@ -1,6 +1,6 @@
 import { localDate, type CatchEntry } from "@stillwater/shared";
 import { countedFish } from "../milestones";
-import { kindKey } from "../speciesLink";
+import { kindKey, mostWritten } from "../speciesLink";
 import { locale } from "../../i18n";
 
 /**
@@ -33,7 +33,7 @@ export function notYetThisYear(
   }
   return [...lastYear.entries()]
     .filter(([kind]) => !thisYear.has(kind))
-    .map(([, spellings]) => [...spellings].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]![0])
+    .map(([, spellings]) => mostWritten(spellings))
     .sort((a, b) => a.localeCompare(b));
 }
 

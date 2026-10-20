@@ -73,7 +73,7 @@ import { pieceTally } from "./pieceTally";
 import { WaterOptions } from "./WaterOptions";
 import { kindKey, kindNames, speciesCounts, speciesLink } from "./speciesLink";
 import { pieceName } from "./gear/pieceKey";
-import { datePicks, lateOutings, outingDay, ownTitle, pastTitles, plainName, sameName, stillGoing } from "./tripDates";
+import { datePicks, lateOutings, outingDay, outNow, ownTitle, pastTitles, plainName, sameName, underWay } from "./tripDates";
 import "./search.css";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 import { bestFishDay, bookFishDay } from "./tripMonths";
@@ -483,7 +483,7 @@ function TripView() {
   const tripsHere = trip.spotId === PLAY_LAKE_ID ? tripsForSpot(book, trip.spotId) : ownTrips;
   const best = bestOutingHere(tripsHere, fishHere, trip.id, fishedBy);
   // Its day come, a fish lost or a strike missed is an outing under way, as a landed fish is.
-  const fished = trip.date < fishedBy || (trip.date <= today && (catches.length > 0 || !!trip.lost || !!trip.missed));
+  const fished = trip.date < fishedBy || (trip.date <= today && underWay(book, trip));
   const meanHere = fished && trip.spotId !== PLAY_LAKE_ID && ownTrips.some((other) => other.id === trip.id) ? outingMean(ownTrips, fishHere, fishedBy, trip.id) : null;
   // The day's largest against the water's, from the fish counted for it: the angler's own once it has any.
   const countedHere = countedFish(catchesForSpot(book, trip.spotId));
@@ -513,6 +513,7 @@ function TripView() {
       suggest={packingTips(book, trip, today)}
       caught={catchesForTrip(book, trip.id)}
       trips={book.trips}
+        catches={book.catches}
       spots={book.spots}
     />
   );
@@ -689,7 +690,7 @@ function TripView() {
         <p className="eyebrow">
           <Link to="/trips">{t("Trips")}</Link>
           {" · "}
-          {tripWhen(trip.date, today, tomorrow, stillGoing(book, trip))}
+          {tripWhen(trip.date, today, tomorrow, outNow(book, trip))}
           {daysAheadLabel(trip.date, today) ? ` · ${daysAheadLabel(trip.date, today)}` : null}
         </p>
         {/* The tab tells untitled outings on one water apart by their day. */}
