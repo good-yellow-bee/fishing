@@ -472,9 +472,13 @@ export function fightWind(wind: string | undefined): FightWind | undefined {
 /**
  * Cover a fish was hooked tight to, on top of the spot's water: `farRock` from the boat by the far rock (unturned runs
  * drag the line over it), `weedBall` through a duckweed mat (a ball of weed slows the reel till the first run), `edge`
- * along the point's rock edge (runs dive off the ledge as at the drop-off, clear of the shallow rocks).
+ * along the point's rock edge (runs dive off the ledge as at the drop-off, clear of the shallow rocks), `bed` over the
+ * sunfish beds (a nest guarder's runs come short and quick).
  */
-export type FightCover = { farRock?: boolean; weedBall?: boolean; edge?: boolean };
+export type FightCover = { farRock?: boolean; weedBall?: boolean; edge?: boolean; bed?: boolean };
+/** A nest guarder hooked over the sunfish beds won't leave them: its runs last this share as long, and the calms between them too. */
+export const BED_GUARD_RUN = 0.5;
+export const BED_GUARD_CALM = 0.5;
 export type FightWater = "open" | "weeds" | "current" | "deep" | "rocks" | "boat" | "pilings" | "log";
 /** Water where an unturned run wraps the line round wood: the dock's pilings, or the half-sunk log a fish was hooked tight to. */
 export function wrapsLine(water: FightWater | undefined): water is "pilings" | "log" {
@@ -595,7 +599,8 @@ export function makeFight(
   /** What the fish was hooked by, on top of the spot's water. */
   cover: FightCover = {},
 ): FightRuntime {
-  const { farRock = false, weedBall = false, edge = false } = cover;
+  const { farRock = false, weedBall = false, edge = false, bed = false } = cover;
+  const bedGuard = bed && NEST_GUARDERS.has(species.id);
   const weedy = water === "weeds";
   // Hooked along the rock edge, past the shallow rocks, the fish dives off the ledge rather than dragging the line over them.
   const rockWater = (water === "rocks" && !edge) || farRock;
@@ -750,7 +755,7 @@ export function makeFight(
         sim.surge = 2;
         runDrag = drag;
         if (sim.secondWind) performance.secondWind = true;
-        nextAt = nowMs + (sim.jump ? JUMP_MS * (sim.tailWalk ? TAIL_WALK : 1) : sim.roll ? ROLL_MS : range(pattern.surgeMin, pattern.surgeMax) * (sim.firstRun ? FIRST_RUN_LONGER : 1));
+        nextAt = nowMs + (sim.jump ? JUMP_MS * (sim.tailWalk ? TAIL_WALK : 1) : sim.roll ? ROLL_MS : range(pattern.surgeMin, pattern.surgeMax) * (sim.firstRun ? FIRST_RUN_LONGER : 1) * (bedGuard ? BED_GUARD_RUN : 1));
         // Starter head shakes skip this: their 220 ms warning is about one reaction time.
         if (reeling && species.challenge !== "mash" && !sim.charge) sim.tension = Math.max(sim.tension, RED_TENSION);
         graceUntil = nowMs + RUN_GRACE_MS;
@@ -807,7 +812,7 @@ export function makeFight(
           slackSec = 0;
         }
         const double = species.challenge === "sequence" && completedSurges % 2 === 1;
-        nextAt = nowMs + (double ? range(160, 280) : range(pattern.calmMin, pattern.calmMax) * (1 + worn() * (SPENT_CALM - 1)));
+        nextAt = nowMs + (double ? range(160, 280) : range(pattern.calmMin, pattern.calmMax) * (1 + worn() * (SPENT_CALM - 1)) * (bedGuard ? BED_GUARD_CALM : 1));
         // A walleye with fight left shakes its head partway through the calm.
         shakeAt = headShaker && !double && !sim.sulk && sim.stamina > SPENT_STAMINA ? nowMs + (nextAt - nowMs) * 0.4 : Infinity;
         // A bass buried in cover doesn't run again till it comes out.

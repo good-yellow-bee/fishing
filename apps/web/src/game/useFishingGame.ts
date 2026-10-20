@@ -32,7 +32,7 @@ import {
   legendaryCanBite,
 } from "@stillwater/shared";
 import { locale, t } from "../i18n";
-import { fightLines, liftsStickerInOne, LINE_SPINNERS, netsFish, SPIN_TWIST, TOOTHY, fightWater, fightWind, isCleanFight, isCloseCall, LEAPERS, makeFight, seasonTireMul, thrivesInCold, floodedInlet, warmTireMul, rainCooled, deepCooled, runTireMul, nestTireMul, nightTireMul, spentTireMul, twilightTireMul, springRunTireMul, currentTireMul, fallFeedTireMul, rainHunterTireMul, summerStrengthTireMul, SOFT_MOUTHS, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type FightWater, type FightWind, type Steer, type SurgeState } from "./fight";
+import { fightLines, liftsStickerInOne, NEST_GUARDERS, LINE_SPINNERS, netsFish, SPIN_TWIST, TOOTHY, fightWater, fightWind, isCleanFight, isCloseCall, LEAPERS, makeFight, seasonTireMul, thrivesInCold, floodedInlet, warmTireMul, rainCooled, deepCooled, runTireMul, nestTireMul, nightTireMul, spentTireMul, twilightTireMul, springRunTireMul, currentTireMul, fallFeedTireMul, rainHunterTireMul, summerStrengthTireMul, SOFT_MOUTHS, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type FightWater, type FightWind, type Steer, type SurgeState } from "./fight";
 import { boat } from "./scene/boat";
 import { fightInput } from "./scene/fightMotion";
 import { settings } from "./settings";
@@ -161,6 +161,8 @@ export type Fight = {
   weedBall?: boolean;
   /** Hooked along the point's rock edge, so its runs dive off the ledge. */
   edge?: boolean;
+  /** A nest guarder hooked over the sunfish beds, so its runs come short and quick. */
+  bed?: boolean;
   /** A breezy or strong day, when the wind bellies a slack line. */
   windy?: FightWind;
   /** A catfish or sturgeon the angler's Strength lifts off the bottom in one pump. */
@@ -689,7 +691,9 @@ export function useFishingGame(
     const weedBall = castWeedRef.current !== null;
     // One hooked along the point's rock edge dives off the ledge, clear of the shallow rocks.
     const edge = castEdgeRef.current && water === "rocks";
-    const next = { species, weight, underpowered, water, windy, lightHook, pads, farRock, weedBall, edge, strongLift: liftsStickerInOne(species.id, current.strength) };
+    // A nest guarder hooked over the sunfish beds won't leave them.
+    const bed = castBedRef.current && NEST_GUARDERS.has(species.id);
+    const next = { species, weight, underpowered, water, windy, lightHook, pads, farRock, weedBall, edge, bed, strongLift: liftsStickerInOne(species.id, current.strength) };
     fightRef.current = next;
     setFight(next);
     setPhaseBoth("fight");
@@ -702,7 +706,7 @@ export function useFishingGame(
         resetToIdle(current.strength < species.minStrength ? t("Line parted. Spend points on Strength.") : t("Line parted. Spend points on Accuracy."));
       }, 1400);
     } else {
-      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)) * seasonTireMul(season, species.id) * warmTireMul(season, species.id, sky, spotRef.current) * runTireMul(season, species.id) * nestTireMul(season, species.id, spotRef.current) * nightTireMul(hourRef.current, species.id) * spentTireMul(season, species.id) * twilightTireMul(hourRef.current, species.id) * springRunTireMul(season, species.id, spotRef.current) * currentTireMul(species.id, spotRef.current) * fallFeedTireMul(season, species.id) * rainHunterTireMul(sky, species.id) * summerStrengthTireMul(season, species.id), water, windy, isTopwater(lureRef?.current), hasTrebles(lureRef?.current) || deep, seasonTireMul(season, species.id) > 1, isTrophyWeight(species, weight), floodedInlet(spotRef.current, season, sky), frayedRef.current, deep, lineSnapForLevel(anglerLevel(current.lifetimePoints)), turnCutMulForLevel(anglerLevel(current.lifetimePoints)), netsFish(species, mercyRef.current), { farRock, weedBall, edge });
+      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)) * seasonTireMul(season, species.id) * warmTireMul(season, species.id, sky, spotRef.current) * runTireMul(season, species.id) * nestTireMul(season, species.id, spotRef.current) * nightTireMul(hourRef.current, species.id) * spentTireMul(season, species.id) * twilightTireMul(hourRef.current, species.id) * springRunTireMul(season, species.id, spotRef.current) * currentTireMul(species.id, spotRef.current) * fallFeedTireMul(season, species.id) * rainHunterTireMul(sky, species.id) * summerStrengthTireMul(season, species.id), water, windy, isTopwater(lureRef?.current), hasTrebles(lureRef?.current) || deep, seasonTireMul(season, species.id) > 1, isTrophyWeight(species, weight), floodedInlet(spotRef.current, season, sky), frayedRef.current, deep, lineSnapForLevel(anglerLevel(current.lifetimePoints)), turnCutMulForLevel(anglerLevel(current.lifetimePoints)), netsFish(species, mercyRef.current), { farRock, weedBall, edge, bed });
       runtimeRef.current = runtime;
       simRef.current = runtime.sim;
       performanceRef.current = runtime.performance;
@@ -1636,6 +1640,7 @@ export function useFishingGame(
             castLogRef.current = false;
             castWeedRef.current = null;
             castEdgeRef.current = false;
+            castBedRef.current = false;
             beginFight(taken.species, taken.weight, grab.profile);
             // The pike is where the shiner was, not back at the far end of the line.
             if (runtimeRef.current) runtimeRef.current.sim.line = sim.line;
