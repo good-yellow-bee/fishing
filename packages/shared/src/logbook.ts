@@ -800,8 +800,11 @@ export function withoutTrip(book: Logbook, id: string): Logbook {
   };
 }
 
+/** The game's own lake in the field log, where every fish landed in the game goes. */
+export const PLAY_LAKE_ID = "spot-stillwater";
+
 const PLAY_LAKE: Spot = {
-  id: "spot-stillwater",
+  id: PLAY_LAKE_ID,
   name: "Stillwater",
   waterType: "lake",
   notes: "",

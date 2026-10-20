@@ -320,7 +320,11 @@ export function useFishingGame(
   legend: { legendId: string; spot: SpotId } | null = null,
   /** Fish other anglers let go on earlier days, still in the lake for a cast to find. */
   lodgeReleased: readonly LodgeRelease[] = [],
+  /** Lures that have taken enough fish in the field log to be lucky: their hook sets a little more solid. */
+  luckyLures: ReadonlySet<string> = new Set(),
 ) {
+  const luckyLuresRef = useRef(luckyLures);
+  luckyLuresRef.current = luckyLures;
   const legendRef = useRef(legend);
   legendRef.current = legend;
   const lodgeReleasedRef = useRef(lodgeReleased);
@@ -769,7 +773,7 @@ export function useFishingGame(
     if (!bitten) return;
     window.clearTimeout(timers.current.hook);
     const { at, ms } = biteWindowRef.current;
-    const strike = { elapsedMs: Math.max(0, performance.now() - at), solidMs: solidStrikeMs(ms, fightWind(windRef.current), lureRef?.current, dullRef.current, castLongRef.current, anglerLevel(profile.lifetimePoints)), windowMs: ms };
+    const strike = { elapsedMs: Math.max(0, performance.now() - at), solidMs: solidStrikeMs(ms, fightWind(windRef.current), lureRef?.current, dullRef.current, castLongRef.current, anglerLevel(profile.lifetimePoints), luckyLuresRef.current.has(lureRef?.current ?? "")), windowMs: ms };
     fx.splash();
     fx.haptic("strike");
     beginFight(bitten.species, bitten.weight, profile, strike);
