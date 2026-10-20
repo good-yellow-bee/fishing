@@ -62,6 +62,7 @@ import { DUCKWEED_FOUL_WAIT, DUCKWEED_TOPWATER_WAIT, duckweedCast, inDuckweed } 
 import { FAR_ROCK_WAIT, tightToFarRock } from "./farRock";
 import { castSnags, onRockEdge, onShoreIce, ROCK_EDGE_WAIT, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { FLUTTER_SEC, flutterGrabberFor, flutterTip, followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
+import { BUCKET_SIZE, loadBucket, saveBucket } from "./baitBucket";
 import { loadNightLine, nightLineCatch, nightLineKinds, nightLineState, nightSkyFor, saveNightLine, type NightLine } from "./nightLine";
 import { markShy, loadGiantShy, rollGiantShy, saveGiantShy, shyOf, type GiantShy } from "./giantShy";
 import { AGAIN_CASTS, backAgain, castForGotAway, gotAwayAfterDrop, PATIENT_DROP_RANK, gotAwayAfterLoss, type GotAway } from "./gotAway";
@@ -428,6 +429,15 @@ export function useFishingGame(
   const keepNightLine = (userId: string, line: NightLine | null) => {
     saveNightLine(userId, line);
     setNightLineOut(line);
+  };
+  /** Spare live shiners in the angler's bait bucket, read from the browser once per angler. */
+  const [bucket, setBucket] = useState(0);
+  useEffect(() => {
+    setBucket(profile?.userId ? loadBucket(profile.userId) : 0);
+  }, [profile?.userId]);
+  const keepBucket = (userId: string, count: number) => {
+    saveBucket(userId, count);
+    setBucket(count);
   };
   const legendRef = useRef(legend);
   legendRef.current = legend;
@@ -2139,18 +2149,33 @@ export function useFishingGame(
   /** A handful bought at the shack goes in the bag, which carries no more than GROUNDBAIT_CARRY. */
   const addHandful = useCallback(() => setHandfuls((left) => Math.min(GROUNDBAIT_CARRY, left + 1)), []);
 
-  /** A live shiner bought at the shack goes on the hook for the next cast, unless one is on it already. */
+  /** A live shiner bought at the shack goes on the hook for the next cast, or, with one on it already, into the bait bucket. */
   const addShiner = () => {
-    if (liveShinerRef.current) return;
+    if (!liveShinerRef.current) {
+      hookShiner("live");
+      setHint(t("You hook the shop's shiner on as live bait. Cast it out to the hunters."));
+      return;
+    }
+    if (!profile || bucket >= BUCKET_SIZE) return;
+    keepBucket(profile.userId, bucket + 1);
+    setHint(t("The shiner goes in your bait bucket: {n} of {max}.", { n: bucket + 1, max: BUCKET_SIZE }));
+  };
+
+  /** Hook a spare shiner from the bait bucket. */
+  const hookFromBucket = () => {
+    if (!profile || liveShinerRef.current || bucket === 0) return;
+    keepBucket(profile.userId, bucket - 1);
     hookShiner("live");
-    setHint(t("You hook the shop's shiner on as live bait. Cast it out to the hunters."));
+    setHint(t("You hook a shiner from your bucket on as live bait. Cast it out to the hunters."));
   };
 
   /** Leave the shiner on the hook out on a night line at this bank, for a later visit to check. */
   const setNightLine = () => {
     const spot = stanceRef.current;
-    if (!profile || nightLine || !liveShinerRef.current || phaseRef.current !== "idle" || !isFishingStance(spot) || spot === "open" || nightLineKinds(spot, profile).length === 0) return;
-    hookShiner(null);
+    if (!profile || nightLine || (!liveShinerRef.current && bucket === 0) || phaseRef.current !== "idle" || !isFishingStance(spot) || spot === "open" || nightLineKinds(spot, profile).length === 0) return;
+    // A spare from the bucket goes out first, so the shiner on the hook stays for casting.
+    if (bucket > 0) keepBucket(profile.userId, bucket - 1);
+    else hookShiner(null);
     const setAt = Date.now();
     keepNightLine(profile.userId, { spot, setAt });
     // The forecast tells the night's sky, and the sky tells how likely the line is to hold a fish.
@@ -2190,6 +2215,14 @@ export function useFishingGame(
   /** Hook the landed golden shiner back on as live bait, so the next cast carries it out to the bank's hunters. */
   const baitShiner = () => {
     if (outcome?.kind !== "landed" || !canBaitShiner(outcome.species.id)) return;
+    // With a shiner on the hook already, the landed one goes in the bucket to keep.
+    if (liveShinerRef.current) {
+      if (!profile || bucket >= BUCKET_SIZE) return;
+      keepBucket(profile.userId, bucket + 1);
+      setOutcome(null);
+      resetToIdle(t("The shiner goes in your bait bucket: {n} of {max}.", { n: bucket + 1, max: BUCKET_SIZE }));
+      return;
+    }
     // Landed clean, it isn't worn out, so it swims hard on the hook.
     hookShiner(outcome.clean ? "lively" : "live");
     setOutcome(null);
@@ -2216,6 +2249,8 @@ export function useFishingGame(
     fishedHard,
     giantShy,
     nightLine,
+    bucket,
+    hookFromBucket,
     setNightLine,
     checkNightLine,
     throwGroundbait,

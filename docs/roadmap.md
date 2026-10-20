@@ -1896,6 +1896,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT426~~ | ~~A night line reads the sky over its night (the forecast's evening sky): rain 85%, overcast 75%, fog 70%, clear 55% to hold a fish, and setting it says when the night is wet or clear; a line comes in only once its night is out~~ (#1640) | gameplay | S |
 | ~~GT427~~ | ~~A fish let go remembers the lure it was caught on: back at its bank on a later day it won't take that lure again, though another may bring it up; the release stamp says so~~ (#1644) | gameplay | S |
 | ~~GT428~~ | ~~News card 2026-10-20-game58 covers GT426-GT427: the night line's night and sky, and released fish that shy from their lure~~ (#1645) | ui | S |
+| ~~GT429~~ | ~~Bait bucket: up to three spare live shiners kept per angler beside the one on the hook; the shack sells into it while a shiner is on, a landed shiner can go in it, a night line takes from it first, and the shack hooks one from it~~ (#PR) | gameplay | M |
 
 ## Risks / open questions for the owner
 
