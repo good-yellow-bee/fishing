@@ -205,6 +205,8 @@ type Timers = {
   snap?: number;
   nibbles?: number[];
   snag?: number;
+  /** A following pike's turn and its leaving, while the angler figure-eights the lure. */
+  figure?: number[];
   /** Cancels a bite held back while the page is hidden. */
   shown?: () => void;
 };
@@ -260,6 +262,20 @@ export function isSpoon(lure: string | undefined) {
 /** Whether the lure is a streamer, which a missed pike chases down for one more hit. */
 export function isStreamer(lure: string | undefined) {
   return lure !== undefined && lure.trim() !== "" && lureClass(lure).id === "streamer";
+}
+
+/** The pike family follows a flashing lure to the bank and may turn away; a figure-eight as it turns makes it strike. */
+export const FIGURE_EIGHTERS: ReadonlySet<string> = new Set(["pike", "tiger-muskie", "ghost-pike"]);
+/** Chance a pike-family fish on a spinner, spoon or streamer follows instead of taking, how long before it turns, and how long the turn lasts. */
+export const FIGURE_EIGHT_ODDS = 0.3;
+export const FIGURE_TURN_MS = 900;
+export const FIGURE_WINDOW_MS = 550;
+
+/** Whether a lure draws a following fish to the bank: the flashing lures a pike chases. */
+export function drawsFollow(lure: string | undefined) {
+  if (lure === undefined || !lure.trim()) return false;
+  const kind = lureClass(lure).id;
+  return kind === "spinner" || kind === "spoon" || kind === "streamer";
 }
 
 /** Whether the lure is a crankbait, which a tap pauses so it floats up in front of a following fish. */
@@ -492,6 +508,15 @@ export function useFishingGame(
     falseStrikeAtRef.current = performance.now();
     return true;
   };
+  /** A pike-family fish following the lure to the bank: when it turns, when it leaves, and its take if the angler times the figure-eight. */
+  const figureRef = useRef<{ turnAt: number; endAt: number; take: () => void; fish: { species: FishSpecies; weight: number } } | null>(null);
+  /** A follower that turned away without taking: like a dropped fish, it stays about for a cast straight back. */
+  const turnAway = (figure: { fish: { species: FishSpecies; weight: number } }, message = t("It turned away and sank back into the deep."), hint = t("A follower turns away unless you figure-eight the lure as it turns. Cast again.")) => {
+    figureRef.current = null;
+    setOutcome({ kind: "miss", message, fish: figure.fish });
+    if (!gotAwayRef.current) gotAwayRef.current = gotAwayAfterDrop(figure.fish.species, figure.fish.weight, spotRef.current, recaughtRef.current);
+    resetToIdle(hint, "result");
+  };
   const popRef = useRef<{ dueAt: number; take: () => void; pops: number; work: "pop" | "hop" | "lift" | "strip" | "pause" | "twitch"; taps: number; lastAt: number; season: LakeSeason | undefined } | null>(null);
   /** Clean fights landed in a row this session; a dirty landing or a lost fish starts it again. */
   const cleanRunRef = useRef(0);
@@ -640,6 +665,8 @@ export function useFishingGame(
     window.clearTimeout(timers.current.hook);
     window.clearTimeout(timers.current.snap);
     timers.current.nibbles?.forEach((id) => window.clearTimeout(id));
+    timers.current.figure?.forEach((id) => window.clearTimeout(id));
+    figureRef.current = null;
     window.clearTimeout(timers.current.snag);
     timers.current.shown?.();
     timers.current = {};
@@ -1133,6 +1160,7 @@ export function useFishingGame(
     const stolen = carriesBait(lureRef?.current) && stealsBait(species.id, nibbles.length);
     const arm = () => {
       let secondTake = false;
+      let followed = false;
       const nibbleTimers: number[] = [];
       timers.current.nibbles = nibbleTimers;
       const nibbleAt = (at: number, ms: number) => {
@@ -1169,6 +1197,46 @@ export function useFishingGame(
           resetToIdle(t("Little fish steal bait. Cast again."), "result");
           return;
         }
+        // A pike on a flashing lure may follow it to the bank instead of taking: the angler figure-eights it as it turns.
+        if (!followed && !secondTake && !mercyNow && FIGURE_EIGHTERS.has(species.id) && drawsFollow(lureRef?.current) && Math.random() < FIGURE_EIGHT_ODDS) {
+          followed = true;
+          const startFollow = () => {
+            if (phaseRef.current !== "waiting") return;
+            // Not turning yet: a tap now is too soon.
+            figureRef.current = { turnAt: Infinity, endAt: Infinity, take: takeBait, fish: bitten };
+            setHint(t("{fish} followed it to the bank! Figure-eight: tap as it turns…", { fish: t(species.name) }));
+            fx.nibble();
+            fx.haptic("nibble");
+            timers.current.figure = [
+              window.setTimeout(() => {
+                const figure = figureRef.current;
+                if (!figure || phaseRef.current !== "waiting") return;
+                // Out of sight, it waits: the follow starts over when the angler is back.
+                if (document.visibilityState === "hidden") {
+                  figureRef.current = null;
+                  timers.current.shown = whenShown(startFollow, document, 0);
+                  return;
+                }
+                // The window runs from the call the angler sees, whatever the frame rate.
+                figure.turnAt = performance.now();
+                figure.endAt = figure.turnAt + FIGURE_WINDOW_MS;
+                setHint(t("NOW — it's turning!"));
+                fx.plop();
+                fx.haptic("bite");
+                timers.current.figure?.push(
+                  window.setTimeout(() => {
+                    if (figureRef.current !== figure || phaseRef.current !== "waiting") return;
+                    turnAway(figure);
+                  }, FIGURE_WINDOW_MS),
+                );
+              }, FIGURE_TURN_MS),
+            ];
+          };
+          startFollow();
+          return;
+        }
+        // A fish taking for real ends any follow.
+        figureRef.current = null;
         fx.bite();
         if (hour === "night") fx.rodBell("ring");
         fx.haptic("bite");
@@ -1391,6 +1459,20 @@ export function useFishingGame(
         setTheHook();
         break;
       case "waiting": {
+        const figure = figureRef.current;
+        if (figure) {
+          figureRef.current = null;
+          timers.current.figure?.forEach((id) => window.clearTimeout(id));
+          const now = performance.now();
+          if (now >= figure.turnAt && now <= figure.endAt) {
+            fx.reel();
+            figure.take();
+            setHint(t("It turned on the figure-eight and hit! Strike!"));
+          } else {
+            turnAway(figure, t("Too soon: it saw the rod move and sank away."), t("Wait for it to turn, then figure-eight. Cast again."));
+          }
+          break;
+        }
         const snag = snagRef.current;
         const pop = popRef.current;
         if (!snag && pop) {

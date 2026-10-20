@@ -1870,6 +1870,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT412~~ | ~~The landed card's bonus stamps follow what the server paid: once the catch is saved, the golden, fish-of-the-week, clean-run, personal-best, lodge-record, day-run, mastery and tag stamps show only the bonuses the server applied (it now saves them with the catch)~~ (#1607) | gameplay | M |
 | ~~GT413~~ | ~~A crowded bank: each day another angler fishes one bank (never the day's hot bank), so the angler's first six casts there bite 1.15x slower unless groundbait brings the fish on; the stance chip and the wait hint say so, and a new angler is spared~~ (#1610) | gameplay | S |
 | ~~GT414~~ | ~~News card 2026-10-20-game53 covers GT412 and GT413: bonus stamps that follow what the server paid, and a crowded bank each day~~ (#1612) | ui | S |
+| ~~GT415~~ | ~~Figure-eight: a pike, tiger muskie or ghost pike on a spinner, spoon or streamer may follow the lure to the bank instead of taking (3 in 10); a tap as it turns (after 0.9 s, within about half a second) makes it hit, a tap too soon or none at all sends it away; a new angler is spared~~ (#1614) | gameplay | M |
+| GT416 | News card game54 covers GT415 | ui | S |
 
 ## Risks / open questions for the owner
 
