@@ -527,9 +527,12 @@ describe("useFishingGame live shiner", () => {
     const bait = () => container!.querySelector("[data-testid=groundbait]")?.textContent?.split("|")[1];
     act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === "groundbait") as HTMLButtonElement).click());
     expect(bait()).toBe(`dock:${GROUNDBAIT_CASTS}`);
+    const thrown = JSON.parse(kept.get(swimKey(profile.userId))!);
+    expect(thrown).toMatchObject({ spot: "dock", casts: GROUNDBAIT_CASTS });
+    // A cast there uses one, and the swim keeps what is left and when it went in.
+    cast(container!.querySelector<HTMLDivElement>("[data-stance]")!);
     const swim = JSON.parse(kept.get(swimKey(profile.userId))!);
-    expect(swim).toMatchObject({ spot: "dock", casts: GROUNDBAIT_CASTS });
-    // A cast there uses one, and the swim keeps what is left.
+    expect(swim).toEqual({ ...thrown, casts: GROUNDBAIT_CASTS - 1 });
     kept.set(swimKey(profile.userId), JSON.stringify({ ...swim, casts: 1, at: Date.now() - SWIM_PRIMED_MS - 60_000 }));
     act(() => root!.unmount());
     root = null;

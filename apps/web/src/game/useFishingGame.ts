@@ -698,23 +698,24 @@ export function useFishingGame(
     setLivelyShiner(kept === "lively");
   }, [profile?.userId]);
   const [groundbait, setGroundbait] = useState<Groundbait | null>(null);
-  /** When the swim's handful went in, kept with it for the next visit. */
-  const swimAtRef = useRef(0);
-  const keepGroundbait = (next: Groundbait | null, thrownAt = swimAtRef.current) => {
+  /** When the swim's handful went in, and whether it has primed once, kept with it for the next visit. */
+  const swimRef = useRef<{ at: number; primed: boolean }>({ at: 0, primed: false });
+  const keepGroundbait = (next: Groundbait | null, thrown?: number) => {
+    if (thrown !== undefined) swimRef.current = { at: thrown, primed: false };
     groundbaitRef.current = next;
-    swimAtRef.current = thrownAt;
     setGroundbait(next);
-    if (anglerIdRef.current) saveSwim(anglerIdRef.current, next ? { ...next, at: thrownAt } : null);
+    if (anglerIdRef.current) saveSwim(anglerIdRef.current, next ? { ...next, at: swimRef.current.at, ...(swimRef.current.primed ? { primed: true } : {}) } : null);
   };
-  // The angler's swim from an earlier visit, read when they sign in: left overnight, the feeders have gathered over it.
+  // The angler's swim from an earlier visit, read when they sign in: left overnight, the feeders have gathered over it, once.
   useEffect(() => {
     const swim = profile?.userId ? loadSwim(profile.userId) : null;
     const now = swimNow(swim, Date.now());
     groundbaitRef.current = now ? { spot: now.spot, casts: now.casts } : null;
-    swimAtRef.current = now?.primed ? Date.now() : (swim?.at ?? 0);
+    swimRef.current = { at: now?.at ?? 0, primed: !!now?.primed };
     setGroundbait(groundbaitRef.current);
-    if (now?.primed && profile?.userId) {
-      saveSwim(profile.userId, { spot: now.spot, casts: now.casts, at: swimAtRef.current });
+    if (profile?.userId && swim && !now) saveSwim(profile.userId, null);
+    if (now?.primedNow && profile?.userId) {
+      saveSwim(profile.userId, { spot: now.spot, casts: now.casts, at: now.at, primed: true });
       setHint(t("The groundbait you left at the {bank} has the feeders gathered there: {casts} casts of it.", { bank: t(SPOT_LABELS[now.spot]), casts: now.casts }));
     }
   }, [profile?.userId]);
@@ -1018,7 +1019,7 @@ export function useFishingGame(
     spookRef.current = null;
     const bait = castOverGroundbait(groundbaitRef.current, spotRef.current);
     castBaitedRef.current = bait.baited;
-    keepGroundbait(bait.next);
+    if (bait.baited) keepGroundbait(bait.next);
     const schoolFish = school.schoolId ? FISH.find((fish) => fish.id === school.schoolId) : undefined;
     setSchooled(!!schoolFish);
     if (schoolFish) waitHintRef.current = `${t("Into the school.")} ${waitHintRef.current}`;
