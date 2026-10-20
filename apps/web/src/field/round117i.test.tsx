@@ -13,8 +13,8 @@ describe("round 117 ideas: a kind's twin waters say how often their outings took
   it("sums the twins' outings before asking for two", () => {
     const book: Logbook = { spots: [water("a", "Home Lake"), water("b", "home  lake")], trips: [trip("t1", "a"), trip("t2", "b", "2026-10-05")], catches: [fish("1", "a", "t1")] };
     const rateAt = kindRates(book, book.catches, "2026-10-19");
-    // Each water alone had one outing, too few to say; together they had two.
-    expect(rateAt(["a"])).toBeNull();
+    // The kind's rows only name the twin that gave it: the blank twin's outing counts too, making two.
+    expect(rateAt(["a"])).toEqual({ count: 1, total: 2 });
     expect(rateAt(["a", "b"])).toEqual({ count: 1, total: 2 });
   });
 });

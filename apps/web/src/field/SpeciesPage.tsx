@@ -121,12 +121,16 @@ export function kindRates(book: Logbook, catches: readonly CatchEntry[], today: 
     if (took.has(trip.id)) rate.count += 1;
     rates.set(trip.spotId, rate);
   }
+  const keys = waterKeys(book);
+  // Every twin of the waters asked, the ones that never gave the kind too: their outings count, blank as they were.
   // Summed before the check, so twins with one outing each still make two.
   return (spotIds) => {
+    const names = new Set(spotIds.map((spotId) => keys.get(spotId)).filter(Boolean));
     const rate = { count: 0, total: 0 };
-    for (const spotId of spotIds) {
-      rate.count += rates.get(spotId)?.count ?? 0;
-      rate.total += rates.get(spotId)?.total ?? 0;
+    for (const [spotId, each] of rates) {
+      if (!spotIds.includes(spotId) && !names.has(keys.get(spotId))) continue;
+      rate.count += each.count;
+      rate.total += each.total;
     }
     return rate.total > 1 && rate.count > 0 ? rate : null;
   };
