@@ -469,6 +469,12 @@ export type FightWind = keyof typeof WIND_SLACK;
 export function fightWind(wind: string | undefined): FightWind | undefined {
   return wind === "breezy" || wind === "strong" ? wind : undefined;
 }
+/**
+ * Cover a fish was hooked tight to, on top of the spot's water: `farRock` from the boat by the far rock (unturned runs
+ * drag the line over it), `weedBall` through a duckweed mat (a ball of weed slows the reel till the first run), `edge`
+ * along the point's rock edge (runs dive off the ledge as at the drop-off, clear of the shallow rocks).
+ */
+export type FightCover = { farRock?: boolean; weedBall?: boolean; edge?: boolean };
 export type FightWater = "open" | "weeds" | "current" | "deep" | "rocks" | "boat" | "pilings" | "log";
 /** Water where an unturned run wraps the line round wood: the dock's pilings, or the half-sunk log a fish was hooked tight to. */
 export function wrapsLine(water: FightWater | undefined): water is "pilings" | "log" {
@@ -586,14 +592,14 @@ export function makeFight(
   turnCut = 1,
   /** The spent fish must be netted with a fresh strike as its head comes up, rather than landing as the line comes in. */
   net = false,
-  /** Hooked from the boat tight to the far rock: an unturned run drags the line over the rock as off the point. */
-  farRock = false,
-  /** Hooked through a duckweed mat: a ball of weed rides the line until the first run strips it. */
-  weedBall = false,
+  /** What the fish was hooked by, on top of the spot's water. */
+  cover: FightCover = {},
 ): FightRuntime {
+  const { farRock = false, weedBall = false, edge = false } = cover;
   const weedy = water === "weeds";
-  const rockWater = water === "rocks" || farRock;
-  const deepRuns = water === "deep" || (DIVERS.has(species.id) && (water === "open" || water === "boat"));
+  // Hooked along the rock edge, past the shallow rocks, the fish dives off the ledge rather than dragging the line over them.
+  const rockWater = (water === "rocks" && !edge) || farRock;
+  const deepRuns = water === "deep" || edge || (DIVERS.has(species.id) && (water === "open" || water === "boat"));
   const pattern = PATTERNS[species.challenge];
   const t = difficulty01(species, weight);
   const reelRate = Math.max(0.07, 0.14 + strength * 0.005 - t * 0.02);
