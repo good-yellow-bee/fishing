@@ -49,11 +49,13 @@ export async function prepare(page: Page, { lang = "en" }: ShotOptions = {}) {
 export async function openLake(page: Page, query: string, { frames = 4, ...options }: ShotOptions & { frames?: number } = {}) {
   await prepare(page, options);
   await page.goto(`/play${query}`);
-  await page.locator(".scene-wrap canvas").waitFor({ timeout: 90_000 });
-  // Scene parts out at the start hold the reveal until they are in, so once the network settles the lake is whole.
+  // Set once the scene's models are in and its shaders compiled (FishingWorld Precompile).
+  await page.locator(".scene-wrap canvas[data-ready]").waitFor({ timeout: 90_000 });
+  // The game's start-up timers (the angler taking up the rod, the first hints) run on the real clock: let them fire.
+  await page.waitForTimeout(6000);
   await page.waitForLoadState("networkidle");
   await page.evaluate(() => new Promise<void>((resolve) => {
-    let left = 12;
+    let left = 4;
     const tick = () => (--left <= 0 ? resolve() : requestAnimationFrame(tick));
     requestAnimationFrame(tick);
   }));

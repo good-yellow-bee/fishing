@@ -2289,7 +2289,11 @@ function HoldFrames({ onReady }: { onReady: () => void }) {
         return program ? !program.isReady() : false;
       });
       if (compiling && performance.now() - started < PRECOMPILE_MAX_MS) timer = window.setTimeout(check, 10);
-      else onReady();
+      else {
+        // The lake is loaded and ready to draw; the visual tests wait for this (e2e/visual).
+        gl.domElement.dataset.ready = "true";
+        onReady();
+      }
     };
     check();
     return () => window.clearTimeout(timer);
