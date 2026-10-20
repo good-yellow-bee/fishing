@@ -5,12 +5,13 @@ import type { LakeHour, LakeSeason, Sky } from "@stillwater/shared";
 export const DEFAULT_SEASON: LakeSeason = "summer";
 
 /**
- * Scene parts seen only at night, in one season or in wet weather live in their own chunks (parts/*), so a
- * first visit downloads only what its hour, season and weather show. Parts out when the scene first appears
+ * Scene parts seen only by day, at night, in one season or in wet weather live in their own chunks (parts/*), so
+ * a first visit downloads only what its hour, season and weather show. Parts out when the scene first appears
  * hold its reveal until their chunk is in (like the models), so nothing pops in; a part that comes out later
- * draws once its chunk arrives, and the chunks a visit may turn to (the weather, the night) are fetched ahead.
+ * draws once its chunk arrives, and the chunks a visit may turn to (the weather, the night, the day) are fetched ahead.
  */
 const GROUPS = {
+  day: () => import("./parts/day"),
   night: () => import("./parts/night"),
   winter: () => import("./parts/winter"),
   spring: () => import("./parts/spring"),
@@ -69,14 +70,17 @@ export function lazyPart<G extends PartGroup, N extends keyof Parts<G> & string>
   return Part;
 }
 
-/** Marks the scene shown from its commit (later parts then draw when their chunk arrives instead of holding it back), and fetches the chunks a visit may turn to: the wet-weather one (the sky can turn any time) and the night one. Unmounting it puts the hold back for the next scene. */
+/**
+ * Marks the scene shown from its commit (later parts then draw when their chunk arrives instead of holding it
+ * back), and fetches the chunks a visit may turn to: the wet-weather one (the sky can turn any time), the night's
+ * and the day's (the hour turns). Unmounting it puts the hold back for the next scene.
+ */
 export function useSceneParts() {
   useLayoutEffect(() => {
     shown = true;
     // After the first moments' downloads.
     const timer = window.setTimeout(() => {
-      void loadParts("weather");
-      void loadParts("night");
+      for (const group of ["weather", "night", "day"] as const) void loadParts(group);
     }, 4000);
     return () => {
       shown = false;
@@ -87,12 +91,14 @@ export function useSceneParts() {
 
 /**
  * The chunks a scene at this hour, sky and season shows parts from (partsFor.test.ts checks this both ways against
- * every part's own rule): its season's (summer's are all out on dry days only), the night's from dusk (but not
- * a snowy winter dusk), and the wet-weather one in rain (winter's rain falls as snow, which the winter chunk draws).
+ * every part's own rule): its season's (summer's are all out on dry days only), the day's at dawn and by day, the
+ * night's from dusk (but not a snowy winter dusk), and the wet-weather one in rain (winter's rain falls as snow,
+ * which the winter chunk draws).
  */
 export function partsFor(hour: LakeHour, sky: Sky, season: LakeSeason): PartGroup[] {
   const daytime = hour === "dawn" || hour === "day";
   const groups: PartGroup[] = season !== "summer" || (daytime && sky !== "rain") ? [season] : [];
+  if (daytime) groups.push("day");
   if (!daytime && !(hour === "dusk" && season === "winter" && sky === "rain")) groups.push("night");
   if (sky === "rain" && season !== "winter") groups.push("weather");
   return groups;

@@ -1,0 +1,27 @@
+// The scene parts only seen at dawn and by day: one chunk, loaded when they come out (lazyPart.tsx).
+export { Canoeist } from "../Canoeist";
+export { Cows } from "../Cows";
+export { DewGrass } from "../DewGrass";
+export { DewWeb } from "../DewWeb";
+export { Dinghy } from "../Dinghy";
+export { DockDog } from "../DockDog";
+export { DogWalker } from "../DogWalker";
+export { GrassSnake } from "../GrassSnake";
+export { HotAirBalloon } from "../HotAirBalloon";
+export { Kite } from "../Kite";
+export { LakeSmoke } from "../LakeSmoke";
+export { Osprey } from "../Osprey";
+export { Painter } from "../Painter";
+export { PaperBoat } from "../PaperBoat";
+export { Paraglider } from "../Paraglider";
+export { RopeSwallows } from "../RopeSwallows";
+export { Sandpipers } from "../Sandpipers";
+export { Sculler } from "../Sculler";
+export { Sheep } from "../Sheep";
+export { Squirrels } from "../Squirrels";
+export { StoneSkimmer } from "../StoneSkimmer";
+export { SunBreak } from "../SunBreak";
+export { Swans } from "../Swans";
+export { ValleyMist } from "../ValleyMist";
+export { Woodcutter } from "../Woodcutter";
+export { Woodpecker } from "../Woodpecker";
