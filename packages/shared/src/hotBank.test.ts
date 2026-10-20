@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { HOT_BANKS, hotBankForDay } from "./hotBank.ts";
+import { crowdedBankForDay, HOT_BANKS, hotBankForDay } from "./hotBank.ts";
 
 describe("hotBankForDay", () => {
   it("names one bank per local day, the same all day", () => {
@@ -18,5 +18,20 @@ describe("hotBankForDay", () => {
       previous = bank;
     }
     expect(seen.size).toBe(HOT_BANKS.length);
+  });
+});
+
+describe("crowdedBankForDay", () => {
+  it("names one bank a day, never the hot one, and moves across the banks over a month", () => {
+    const seen = new Set<string>();
+    for (let day = 1; day <= 30; day++) {
+      const date = new Date(2026, 9, day, 12);
+      const crowded = crowdedBankForDay(date);
+      expect(HOT_BANKS).toContain(crowded);
+      expect(crowded).not.toBe(hotBankForDay(date));
+      expect(crowdedBankForDay(new Date(2026, 9, day, 6))).toBe(crowded);
+      seen.add(crowded);
+    }
+    expect(seen.size).toBeGreaterThan(2);
   });
 });

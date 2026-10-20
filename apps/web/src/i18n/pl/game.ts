@@ -162,6 +162,8 @@ export const PL_GAME: PlBook = {
   "Lodge record · was {weight} ({holder})": "Rekord przystani · było {weight} ({holder})",
   "Lodge record · 1.5× points": "Rekord przystani · 1,5× punktów",
   "First fish of a run of days · 1.5× points": "Pierwsza ryba w serii dni · 1,5× punktów",
+  "Another angler has been fishing this bank today, so its fish are wary for your first casts.": "Dziś łowi tu ktoś inny, więc ryby są płochliwe przy twoich pierwszych rzutach.",
+  "another angler here today": "dziś łowi tu ktoś inny",
   "Drag: light": "Hamulec: lekki",
   "Drag: normal": "Hamulec: zwykły",
   "Drag: heavy": "Hamulec: mocny",
