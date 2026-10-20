@@ -3,7 +3,8 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { lastSplash } from "./duckFlush";
 import { mergePainted } from "./mergeParts";
-import { CORMORANT_ROCK, cormorantPose, cormorantStartle } from "./cormorantPerch";
+import { ANCHOR, boat } from "./boat";
+import { BOAT_SHY_M, CORMORANT_ROCK, cormorantAway, cormorantPose, cormorantStartle, shyBlend } from "./cormorantPerch";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
 import { useSkinnedFigure } from "./skinFigure";
@@ -45,6 +46,7 @@ export function Cormorant() {
   const body = useRef<THREE.Group>(null);
   const wings = useRef<(THREE.Group | null)[]>([null, null]);
   const shift = useRef(0);
+  const away = useRef(0);
   const spread = useRef(0);
   const shapes = useMemo(cormorantShapes, []);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
@@ -59,7 +61,10 @@ export function Cormorant() {
     if (!group) return;
     const time = clock.elapsedTime;
     shift.current = cormorantStartle(time, shift.current, lastSplash);
-    const pose = cormorantPose(time + shift.current);
+    // A boat lying at anchor near its rock keeps it off, fishing out on the far side; it comes back once the boat leaves.
+    const shy = boat.mode === "anchored" && Math.hypot(ANCHOR.x - CORMORANT_ROCK.x, ANCHOR.z - CORMORANT_ROCK.z) < BOAT_SHY_M ? 1 : 0;
+    away.current += (shy - away.current) * (1 - Math.exp(-0.5 * Math.min(delta, 0.1)));
+    const pose = shyBlend(cormorantPose(time + shift.current), cormorantAway(time, ANCHOR), away.current < 0.002 ? 0 : away.current > 0.998 ? 1 : away.current);
     const surface = pose.swimming ? waterHeight(pose.x, pose.z, time) : 0;
     group.visible = pose.under < 1;
     group.position.set(pose.x, pose.y + surface - (pose.swimming ? 0.18 : 0) - pose.under * 0.4, pose.z);

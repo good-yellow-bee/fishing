@@ -58,6 +58,15 @@ function swimAt(into: number) {
   };
 }
 
+/** How far under it is `into` a fishing spell: up on the water, then down for a dive, every so often. */
+function diveAt(into: number) {
+  const dive = into % DIVE_EVERY;
+  const downAt = DIVE_EVERY - UNDER_SEC;
+  if (dive < downAt) return 0;
+  const k = dive - downAt;
+  return k < 0.4 ? k / 0.4 : k > UNDER_SEC - 0.4 ? (UNDER_SEC - k) / 0.4 : 1;
+}
+
 export function cormorantPose(time: number): CormorantPose {
   const t = ((time % CORMORANT_CYCLE) + CORMORANT_CYCLE) % CORMORANT_CYCLE;
   // Faces the dock as it dries, the way a bird turns its wings to the sun.
@@ -87,13 +96,7 @@ export function cormorantPose(time: number): CormorantPose {
   const fishing = hop - HOP_SEC;
   if (fishing < FISH_SEC) {
     const at = swimAt(fishing);
-    const dive = fishing % DIVE_EVERY;
-    const downAt = DIVE_EVERY - UNDER_SEC;
-    let under = 0;
-    if (dive >= downAt) {
-      const k = dive - downAt;
-      under = k < 0.4 ? k / 0.4 : k > UNDER_SEC - 0.4 ? (UNDER_SEC - k) / 0.4 : 1;
-    }
+    let under = diveAt(fishing);
     // Always comes up for the last stretch, ready to climb out.
     if (fishing > FISH_SEC - 2) under = 0;
     return { x: at.x, y: 0, z: at.z, yaw: at.yaw, spread: 0, under, swimming: true };
@@ -128,4 +131,44 @@ export function cormorantStartle(time: number, shift: number, splash: Splash) {
   const t = (((time + shift) % CORMORANT_CYCLE) + CORMORANT_CYCLE) % CORMORANT_CYCLE;
   if (t >= DRY_SEC + FOLD_SEC) return shift;
   return shift + (DRY_SEC + FOLD_SEC - t);
+}
+
+/** A boat at anchor this near the rock keeps it off: it fishes out on the far side instead, this far past the rock, in a loop this wide. */
+export const BOAT_SHY_M = 6;
+const AWAY_M = 3.6;
+const AWAY_LOOP = 1.3;
+
+/** Fishing out past the rock on the far side from `from`, diving now and then. */
+export function cormorantAway(time: number, from: { x: number; z: number }): CormorantPose {
+  const dx = CORMORANT_ROCK.x - from.x;
+  const dz = CORMORANT_ROCK.z - from.z;
+  const length = Math.hypot(dx, dz) || 1;
+  const cx = CORMORANT_ROCK.x + (dx / length) * AWAY_M;
+  const cz = CORMORANT_ROCK.z + (dz / length) * AWAY_M;
+  const angle = time * 0.12;
+  return {
+    x: cx + Math.cos(angle) * AWAY_LOOP,
+    y: 0,
+    z: cz + Math.sin(angle) * AWAY_LOOP,
+    yaw: Math.atan2(-Math.sin(angle), Math.cos(angle)),
+    spread: 0,
+    under: diveAt(time),
+    swimming: true,
+  };
+}
+
+/** Its pose `away` of the way (0 to 1) from where it would be (`near`) to out on the far side (`far`): off the rock in a hop, wings folding, only diving once it is out there. */
+export function shyBlend(near: CormorantPose, far: CormorantPose, away: number): CormorantPose {
+  if (away <= 0) return near;
+  if (away >= 1) return far;
+  const k = away * away * (3 - 2 * away);
+  return {
+    x: near.x + (far.x - near.x) * k,
+    y: near.y * (1 - k) + Math.sin(k * Math.PI) * (near.swimming ? 0 : 0.3),
+    z: near.z + (far.z - near.z) * k,
+    yaw: near.yaw + Math.atan2(Math.sin(far.yaw - near.yaw), Math.cos(far.yaw - near.yaw)) * k,
+    spread: near.spread * (1 - k) + Math.sin(k * Math.PI) * 0.4,
+    under: near.under * (1 - k) + far.under * Math.max(0, (k - 0.8) / 0.2),
+    swimming: near.swimming || k > 0.5,
+  };
 }

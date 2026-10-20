@@ -1,7 +1,10 @@
-import { LAKE_CENTER_Z, LAKE_RX, LAKE_RZ } from "@stillwater/shared";
+import { inLake, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ } from "@stillwater/shared";
 import { describe, expect, it } from "vitest";
 import {
+  BOAT_SHY_M,
   CLIMB_SEC,
+  cormorantAway,
+  shyBlend,
   CORMORANT_CYCLE,
   CORMORANT_ROCK,
   DRY_SEC,
@@ -73,5 +76,29 @@ describe("cormorant", () => {
     // Already in the water: nothing changes.
     const fishing = DRY_SEC + FOLD_SEC + HOP_SEC + 3;
     expect(cormorantStartle(fishing, 0, { ...near, at: fishing })).toBe(0);
+  });
+
+  it("keeps off a boat at anchor nearby, fishing out on the far side, and slips there from the rock without a jump", () => {
+    const anchor = { x: 4, z: -6.2 };
+    expect(Math.hypot(anchor.x - CORMORANT_ROCK.x, anchor.z - CORMORANT_ROCK.z)).toBeLessThan(BOAT_SHY_M);
+    for (let t = 0; t < 120; t += 0.5) {
+      const away = cormorantAway(t, anchor);
+      expect(Math.hypot(away.x - anchor.x, away.z - anchor.z)).toBeGreaterThan(Math.hypot(CORMORANT_ROCK.x - anchor.x, CORMORANT_ROCK.z - anchor.z) + 1.5);
+      expect(away.swimming).toBe(true);
+      expect(inLake(away.x, away.z)).toBe(true);
+    }
+    expect([...Array(60)].some((_, i) => cormorantAway(i, anchor).under === 1)).toBe(true);
+    // From standing on the rock, every step of the way is small.
+    const near = cormorantPose(5);
+    const far = cormorantAway(5, anchor);
+    expect(shyBlend(near, far, 0)).toEqual(near);
+    expect(shyBlend(near, far, 1)).toEqual(far);
+    for (let w = 0; w < 1; w += 0.02) {
+      const a = shyBlend(near, far, w);
+      const b = shyBlend(near, far, w + 0.02);
+      expect(Math.hypot(b.x - a.x, b.z - a.z)).toBeLessThan(0.25);
+      // Not diving until it is out there.
+      if (w < 0.6) expect(a.under).toBe(0);
+    }
   });
 });
