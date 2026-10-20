@@ -9,7 +9,7 @@ import { formatClock, formatDay } from "./format";
 import { useLogbook } from "./LogbookState";
 import { catchPage, useShowMore } from "./PagedCatches";
 import { bookFishDay, monthName } from "./tripMonths";
-import { kindKey, speciesCounts } from "./speciesLink";
+import { bookKindName, kindKey, speciesCounts } from "./speciesLink";
 import { FROM_LIST } from "./leaveDeleted";
 import { catchLink } from "./catchList";
 import { FIND_PARAM, exactTerm } from "./findLinks";
@@ -18,7 +18,6 @@ import { MatchOrder, useLargestOrder } from "./MatchOrder";
 import { largestFirst } from "./largestFirst";
 import { countedFish, ownFish } from "./milestones";
 import { hasSampleFish, isSampleCatch } from "./bookCopy";
-import { bookKindName } from "./speciesLink";
 import { plainName } from "./tripDates";
 
 /** The photos' stored length, as JSON.stringify would give it, without building a copy of every picture to count it. */
@@ -115,7 +114,8 @@ export function PhotosPage() {
   // The waters with photos, most pictured first; a water picked that has none left shows them all again.
   // Waters that read the same are one chip, as the search its photos step through takes them, under the one of them
   // with the most photos.
-  const waterKey = (spotId: string) => foldText(plainName(spotById(book, spotId)?.name ?? "")).toLowerCase() || spotId;
+  const keyOf = new Map(book.spots.map((spot) => [spot.id, foldText(spot.name)]));
+  const waterKey = (spotId: string) => keyOf.get(spotId) || spotId;
   const perSpot = new Map<string, number>();
   for (const entry of pictured) perSpot.set(entry.spotId, (perSpot.get(entry.spotId) ?? 0) + 1);
   const firstId = new Map<string, string>();
@@ -128,7 +128,8 @@ export function PhotosPage() {
   const waters = [...perWater]
     .map(([id, count]) => ({ id, name: plainName(spotById(book, id)?.name ?? t("Unknown water")), count }))
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
-  const pickedWater = water && waters.some((row) => row.id === water) ? water : null;
+  // A link to any of the same-named waters picks their chip, whichever of them leads it now.
+  const pickedWater = water && perSpot.has(water) ? (firstId.get(waterKey(water)) ?? null) : null;
   const ofWater = pickedWater ? ofKind.filter((entry) => waterKey(entry.spotId) === waterKey(pickedWater)) : ofKind;
   // One season at a time too, once the photos span more than one: a night's small hours count on its outing's day.
   const yearOf = (entry: CatchEntry) => bookFishDay(book, entry).slice(0, 4);

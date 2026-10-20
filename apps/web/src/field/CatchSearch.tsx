@@ -1130,11 +1130,12 @@ function TopLure({ catches }: { catches: readonly CatchEntry[] }) {
     return Number.isNaN(at.getTime()) ? null : biteTimeOf(at.getHours());
   });
   // Waters that read the same are one, as "By water" and the search take them.
+  const shownWater = new Map(book.spots.map((spot) => [foldText(spot.name), plainName(spot.name)]));
   const water = leader(catches, (entry) => {
     const name = spotById(book, entry.spotId)?.name;
-    return name ? foldText(plainName(name)).toLowerCase() : null;
+    return name ? foldText(name) : null;
   });
-  const waterName = water ? plainName(spotById(book, catches.find((entry) => foldText(plainName(spotById(book, entry.spotId)?.name ?? "")).toLowerCase() === water.value)!.spotId)!.name) : "";
+  const waterName = water ? (shownWater.get(water.value) ?? "") : "";
   // As the book writes the lure most, as Gear and the catch cards name it.
   const lureName = lure ? bookLureName(book.catches)(catches.find((entry) => lureKey(entry) === lure.value)!.lure) : "";
   const lines = [

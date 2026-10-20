@@ -9,3 +9,14 @@ describe("round 113: a sheet of some of the book's fish", () => {
     expect(csv).toContain("2026-10-10");
   });
 });
+
+import { recordHere } from "./RecordHere";
+
+describe("round 113: an outing's largest", () => {
+  it("goes by weight first, as the outing's own Largest names it", () => {
+    const f = (id: string, measure: CatchEntry["measure"]): CatchEntry => ({ id, species: "Perch", measure, lure: "Jig", spotId: "a", tripId: "t", caughtAt: "2026-10-12T08:00:00.000Z", note: "", weather: null });
+    const day = [f("zander", { kind: "length", inches: 20 }), f("perch", { kind: "weight", pounds: 0.6 })];
+    const water = [...day, f("old", { kind: "weight", pounds: 2 }), f("old2", { kind: "length", inches: 30 })];
+    expect(recordHere(day, water)?.largest.id).toBe("perch");
+  });
+});

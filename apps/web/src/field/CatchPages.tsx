@@ -187,7 +187,11 @@ function bookName(typed: string, names: readonly string[], keyOf?: (name: string
   const clean = typed.trim().toLowerCase();
   // The first name of the same kind or piece, however typed ("perches" is filed as the book's "Perch"), else one that
   // reads as typed in the player's language ("Okoń").
-  return (keyOf && clean ? names.find((name) => keyOf(name) === keyOf(clean)) : undefined) ?? names.find((name) => t(name).toLowerCase() === clean) ?? typed;
+  return (
+    (keyOf && clean ? names.find((name) => keyOf(name) === keyOf(clean)) : undefined) ??
+    names.find((name) => t(name).toLowerCase() === clean || t(bookSpelling(name)).toLowerCase() === clean) ??
+    typed
+  );
 }
 
 /** Whether what was typed is a pick, however written: "perches" presses the "Perch" chip, "spinners" the "Spinner". */
@@ -334,14 +338,16 @@ function CatchForm() {
   const [presetSpot] = useState(() => existing?.spotId ?? justAdded ?? presetTrip?.spotId ?? linkedSpot ?? likelyWater(book, localDate(new Date()), new Date().getHours() < LATE_NIGHT_UNTIL));
 
   const asked = params.get("kind");
-  // A stored "perch " reads as the kinds list names it: "Okoń" in Polish.
-  const [species, setSpecies] = useState(existing ? pieceName(existing.species) : t(params.get("species") ?? ""));
   // A kind typed as it reads ("Okoń") finds the book's fish however they were written ("perch ", "Perches").
   const shownKind = (name: string) => t(bookSpelling(name));
+  // A stored "perch " reads as the catch page names it: "Okoń" in Polish. Left as it reads, it saves as stored.
+  const shownSpecies = existing ? bookKindName(book.catches)(existing.species) : null;
+  const shownLure = existing ? bookLureName(book.catches)(existing.lure) : null;
+  const [species, setSpecies] = useState(shownSpecies ?? t(params.get("species") ?? ""));
   const bestSoFar = speciesBestSoFar(book, species, shownKind, existing?.id);
   // Starting values that look through the whole book are worked out once, not on every keystroke.
   const [measureKind, setMeasureKind] = useState<CatchDraft["measureKind"]>(
-    () => existing?.measure.kind ?? (asked === "weight" || asked === "length" ? asked : (kindMeasure(book, t(params.get("species") ?? ""), t) ?? lastMeasureKind(book))),
+    () => existing?.measure.kind ?? (asked === "weight" || asked === "length" ? asked : (kindMeasure(book, t(params.get("species") ?? ""), shownKind) ?? lastMeasureKind(book))),
   );
   // The form reads and writes in the units the player picked; the book keeps imperial.
   const units = getUnits();
@@ -393,7 +399,7 @@ function CatchForm() {
     if (kind) setMeasureKind(kind);
     // Only a change of kind moves it, not a change of the size or the book.
   }, [species]);
-  const [lure, setLure] = useState(() => (existing ? pieceName(existing.lure) : t(params.get("lure") ?? tripLure(book, presetTrip?.id))));
+  const [lure, setLure] = useState(() => shownLure ?? t(params.get("lure") ?? tripLure(book, presetTrip?.id)));
   const [spotId, setSpotId] = useState(presetSpot);
   // The kind's biggest at the water picked, once it differs from the biggest anywhere.
   // Sample fish only when the best anywhere is one too (a book still all samples for this kind).
@@ -485,7 +491,10 @@ function CatchForm() {
   const speciesNames = [...(existing ? [existing.species] : []), ...bookKinds, ...book.catches.map((entry) => entry.species), ...SPECIES];
   const lureNames = [...(existing ? [existing.lure] : []), ...bookPieces, ...bookLures(book), ...BAITS];
   // Kept under the book's names too, so a draft picked up after a switch of language reads, and saves, as the same fish.
-  const keptNames = () => ({ species: bookName(species, speciesNames, kindKey), lure: bookName(lure, lureNames, pieceKey) });
+  const keptNames = () => ({
+    species: existing && species === shownSpecies ? existing.species : bookName(species, speciesNames, kindKey),
+    lure: existing && lure === shownLure ? existing.lure : bookName(lure, lureNames, pieceKey),
+  });
 
   // What the form opened with (presets from a trip or Log another), so untouched presets aren't kept.
   const opened = useRef<string | null>(null);
@@ -603,7 +612,7 @@ function CatchForm() {
   // One-tap picks: the kinds this water gives, and once a kind is typed, the lures that took it here.
   const hereSpecies = useMemo(() => waterSpecies(hereCatches).map((name) => t(name)), [hereCatches, lang]);
   const kindLures = useMemo(
-    () => speciesLures(hereCatches.map((entry) => ({ ...entry, species: t(entry.species) })), species).map((name) => t(name)),
+    () => speciesLures(hereCatches.map((entry) => ({ ...entry, species: shownKind(entry.species) })), species).map((name) => t(name)),
     [hereCatches, species, lang],
   );
   const lurePicks = kindLures.length > 0 ? kindLures : hereLures;
@@ -642,7 +651,7 @@ function CatchForm() {
     [spotTrips, lang],
   );
   const onlySampleWaters = !existing && book.spots.every((spot) => spot.id === PLAY_LAKE_ID || isSampleSpot(spot.id));
-  const heading = existing ? t(existing.species) : presetTrip ? outingName(presetTrip, book.spots) : t("Log a catch");
+  const heading = existing ? shownSpecies! : presetTrip ? outingName(presetTrip, book.spots) : t("Log a catch");
 
   const onSpot = (nextSpot: string) => {
     spotTouched.current = true;
