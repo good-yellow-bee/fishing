@@ -1,3 +1,4 @@
+import { BOAT_RUN, STRONG_WIND_BOAT_RUN } from "../fight";
 import { DOCK_STAND_X, DOCK_STAND_Z, OPEN_PAD } from "@stillwater/shared";
 
 /**
@@ -34,12 +35,15 @@ export const boat = {
 /** How far the hull swings round toward a run at anchor, in radians. */
 export const BOAT_SWING = 0.22;
 
+/** A strong wind holds the hull back on its anchor line: it swings this share as far, the share of a run it no longer takes up (fight.ts). */
+export const STRONG_WIND_SWING = (1 - STRONG_WIND_BOAT_RUN) / (1 - BOAT_RUN);
+
 /**
  * Where a fight swings the anchored hull: toward the fish on a run, back square between runs.
  * runSide is the scene's lateral lead sign, where positive is the angler's right, which turns the bow to a lower yaw.
  */
-export function boatSwingTarget(surge: 0 | 1 | 2, runSide: number, jump = false) {
-  return surge === 2 && !jump ? -BOAT_SWING * Math.max(-1, Math.min(1, runSide)) : 0;
+export function boatSwingTarget(surge: 0 | 1 | 2, runSide: number, jump = false, strongWind = false) {
+  return surge === 2 && !jump ? -BOAT_SWING * (strongWind ? STRONG_WIND_SWING : 1) * Math.max(-1, Math.min(1, runSide)) : 0;
 }
 
 const listeners = new Set<() => void>();

@@ -21,6 +21,7 @@ import {
   type Sky,
   type SpotId,
   type StanceId,
+  type Wind,
 } from "@stillwater/shared";
 import { JUMP_MS, ROLL_MS, SHAKE_MS, type FightSim } from "../fight";
 import { fx } from "../fx";
@@ -187,7 +188,7 @@ type Props = {
   /** The real moon's phase for the night sky, 0 new to 0.5 full. */
   moon?: number;
   /** The day's wind as a downwind drift on a sitting float, meters a second. */
-  wind?: { x: number; z: number };
+  wind?: { x: number; z: number; wind?: Wind };
   hotspot: Hotspot | null;
   /** The groundbait tossed off a bank, while it still feeds the fish there. */
   groundbait?: Groundbait | null;
@@ -696,7 +697,7 @@ function WaterAim({ phase, aim, level, powerRef, accuracy }: WaterAimProps) {
   );
 }
 
-function FightMotion({ phase, sim, ambush, light, lift, run }: { phase: ScenePhase; sim: SimRef; ambush: boolean; light: boolean; lift: boolean; run: boolean }) {
+function FightMotion({ phase, sim, ambush, light, lift, run, strongWind }: { phase: ScenePhase; sim: SimRef; ambush: boolean; light: boolean; lift: boolean; run: boolean; strongWind: boolean }) {
   const prevPhase = useRef(phase);
   const prevSurge = useRef(0);
   const biteAt = useRef(-1);
@@ -785,8 +786,8 @@ function FightMotion({ phase, sim, ambush, light, lift, run }: { phase: ScenePha
       fightView.plunge = phase === "hookset" ? bobberPlunge(fightView.biteAge, -1, 0) * (light ? LIGHT_PLUNGE : lift ? -LIFT_RISE : run ? RUN_PLUNGE : 1) : 0;
     }
 
-    // At anchor the boat swings to follow a run (that is why a run takes less line out here), then settles back.
-    const swingTarget = live && boat.mode === "anchored" ? boatSwingTarget(surge, runSide.current, sim.current?.jump === true || sim.current?.roll === true) : 0;
+    // At anchor the boat swings to follow a run (that is why a run takes less line out here), less in a strong wind, then settles back.
+    const swingTarget = live && boat.mode === "anchored" ? boatSwingTarget(surge, runSide.current, sim.current?.jump === true || sim.current?.roll === true, strongWind) : 0;
     boat.swing += (swingTarget - boat.swing) * (1 - Math.exp(-(swingTarget === 0 ? 0.9 : 2.5) * dt));
 
     if (phase === "fight" && fightView.leapAge >= 0) {
@@ -2187,7 +2188,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
   return (
     <>
       <PlayerMove phase={phase} />
-      <FightMotion phase={phase} sim={sim} ambush={take === "ambush"} light={take === "light"} lift={take === "lift"} run={take === "run"} />
+      <FightMotion phase={phase} sim={sim} ambush={take === "ambush"} light={take === "light"} lift={take === "lift"} run={take === "run"} strongWind={wind?.wind === "strong"} />
       <CameraRig phase={phase} sim={sim} />
       <Tone hour={hour} />
       <FrameWatch />
