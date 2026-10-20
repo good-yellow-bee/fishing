@@ -47,9 +47,15 @@ describe("daily requests client", () => {
 });
 
 describe("the lake's early profile", () => {
-  it("serves the first getMe from the early request, and asks again after a refusal", async () => {
-    const { prefetchMe, getMe } = await import("./api");
-    const me = { profile: { userId: "u1" } };
+  const me = { profile: { userId: "u1" } };
+  const fresh = async () => {
+    vi.resetModules();
+    return import("./api");
+  };
+  afterEach(() => vi.useRealTimers());
+
+  it("serves the next getMe from the early request, then asks the server again", async () => {
+    const { prefetchMe, getMe } = await fresh();
     const fetchMock = vi.fn(async () => new Response(JSON.stringify(me)));
     vi.stubGlobal("fetch", fetchMock);
     prefetchMe();
@@ -57,10 +63,31 @@ describe("the lake's early profile", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     await getMe();
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
 
+  it("asks again after a signed-out answer, but lets any other failure stand", async () => {
+    const { prefetchMe, getMe } = await fresh();
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify(me)));
+    vi.stubGlobal("fetch", fetchMock);
     fetchMock.mockImplementationOnce(async () => new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 }));
     prefetchMe();
     expect(await getMe()).toEqual(me);
-    expect(fetchMock).toHaveBeenCalledTimes(4);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    fetchMock.mockImplementationOnce(async () => new Response(JSON.stringify({ error: "down" }), { status: 503 }));
+    prefetchMe();
+    await expect(getMe()).rejects.toThrow("down");
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
+  it("drops an early answer nothing read within 30 s", async () => {
+    vi.useFakeTimers();
+    const { prefetchMe, getMe } = await fresh();
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify(me)));
+    vi.stubGlobal("fetch", fetchMock);
+    prefetchMe();
+    vi.advanceTimersByTime(31_000);
+    await getMe();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });
