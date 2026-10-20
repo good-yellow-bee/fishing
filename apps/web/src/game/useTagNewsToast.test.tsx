@@ -78,3 +78,31 @@ describe("useTagNewsToast", () => {
     vi.restoreAllMocks();
   });
 });
+
+describe("news of a lost trophy someone landed", () => {
+  it("is told once per angler, reading what they were told when they sign in", async () => {
+    const { useNewsToast, lostNewsKey, TAG_NEWS_TOAST_MS } = await import("./useTagNewsToast");
+    const kept = new Map<string, string>([[lostNewsKey("ash"), JSON.stringify(["l1"])]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+    vi.useFakeTimers();
+    const items = [{ id: "l1", by: "Mara" }, { id: "l2", by: "Kit" }];
+    const seen: { shown: { id: string; by: string } | null } = { shown: null };
+    function Probe({ user }: { user: string }) {
+      seen.shown = useNewsToast(items, true, (one) => one.id, lostNewsKey(user));
+      return null;
+    }
+    const root = createRoot(document.createElement("div"));
+    try {
+      act(() => root.render(<Probe user="" />));
+      act(() => root.render(<Probe user="ash" />));
+      expect(seen.shown?.id).toBe("l2");
+      act(() => vi.advanceTimersByTime(TAG_NEWS_TOAST_MS));
+      expect(JSON.parse(kept.get(lostNewsKey("ash"))!)).toContain("l2");
+    } finally {
+      act(() => root.unmount());
+      vi.useRealTimers();
+      vi.unstubAllGlobals();
+    }
+  });
+});

@@ -381,7 +381,12 @@ export function countReportedLost(userId: string, since: string): number {
 
 /** The angler's own lost trophies since `since` that someone else has landed. */
 export function listMineFound(userId: string, since: string): LostFound[] {
-  return db.prepare(`SELECT species_id as speciesId, weight, spot FROM lost_fish WHERE user_id = ? AND found_by IS NOT NULL AND lost_at >= ?`).all(userId, since) as LostFound[];
+  return db
+    .prepare(
+      `SELECT l.id, l.species_id as speciesId, l.weight, l.spot, p.display_name as by, l.found_at as at FROM lost_fish l JOIN profile p ON p.user_id = l.found_by
+       WHERE l.user_id = ? AND l.found_by IS NOT NULL AND l.found_by != l.user_id AND l.lost_at >= ? ORDER BY l.found_at DESC`,
+    )
+    .all(userId, since) as LostFound[];
 }
 
 /** Claims a lost trophy for the catch that landed it, and pays a finder who isn't the angler who lost it, together or neither; false when nothing was paid. The angler landing their own lost trophy only closes it. */

@@ -11,8 +11,8 @@ export const LOST_DAYS = 7;
 
 /** A trophy another angler lost: its report, kind, weight, bank, when, and who lost it. Its lure stays the angler's own, as tackle names are theirs to write. */
 export type LodgeLost = { id: string; speciesId: string; weight: number; spot: SpotId; at: string; by: string };
-/** One of the angler's own lost trophies that someone else has since landed. */
-export type LostFound = { speciesId: string; weight: number; spot: SpotId };
+/** One of the angler's own lost trophies that someone else has since landed: its report, kind, weight, bank, who landed it and when. */
+export type LostFound = { id: string; speciesId: string; weight: number; spot: SpotId; by: string; at: string };
 
 /** Only a trophy the lodge would remember is reported lost: no small common fish, no legend. */
 export function reportsLost(species: FishSpecies | undefined, weight: number): species is FishSpecies {

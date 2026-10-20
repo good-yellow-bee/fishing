@@ -26,6 +26,7 @@ import {
   TAG_FINDER_BONUS,
   LOST_FINDER_BONUS,
   type LodgeLost,
+  type LostFound,
   GIANT_BONUS,
   TAG_RETURN_BONUS,
   fishById,
@@ -109,7 +110,7 @@ import { saveLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { canBaitShiner, GROUNDBAIT_CASTS, hookWindowMs, isMercy, lampLit, longShadowWaitMul, solidStrikeMs } from "../game/logic";
 import { useBadgeToast } from "../game/useBadgeToast";
-import { useTagNewsToast } from "../game/useTagNewsToast";
+import { lostNewsKey, useNewsToast, useTagNewsToast } from "../game/useTagNewsToast";
 import { bookSeasonNote, bookSessionTitle, loadSession, saveSession, sessionTitle, startSession, withSessionFish, type SessionDraft } from "../game/session";
 import { TripRecap } from "../components/TripRecap";
 import { useLodgeTracks } from "../game/useLodgeTracks";
@@ -190,6 +191,9 @@ const EFFECTS_NOTICE_MS = 5000;
 /** The walk signs' line button, naming the line on the reel. */
 const LINE_WORD: Record<LineWeight, string> = { light: "Line: light", standard: "Line: standard", heavy: "Line: heavy" };
 const LINE_SHORT: Record<LineWeight, string> = { light: "Thin", standard: "Line", heavy: "Thick" };
+
+/** A lost trophy's news is told once by its report's id. */
+const lostNewsId = (one: LostFound) => one.id;
 
 export function DockPage() {
   useT();
@@ -321,6 +325,7 @@ export function DockPage() {
   const openGiants = useMemo(() => giants.filter((giant) => !giant.landedBy), [giants]);
   // Other anglers' lost trophies, read like the giants; one of the angler's own that someone landed is no foe of theirs any more.
   const [lodgeLost, setLodgeLost] = useState<LodgeLost[]>([]);
+  const [lostFound, setLostFound] = useState<LostFound[]>([]);
   useEffect(() => {
     if (!angler) return;
     let live = true;
@@ -328,6 +333,7 @@ export function DockPage() {
       .then(({ lost, mineFound }) => {
         if (!live) return;
         setLodgeLost(lost);
+        setLostFound(mineFound);
         const foe = loadOldFoe(angler);
         if (foe && mineFound.some((found) => found.spot === foe.spot && isOldFoe(foe, { species: { id: found.speciesId }, weight: found.weight }))) saveOldFoe(angler, null);
       })
@@ -692,8 +698,10 @@ export function DockPage() {
   // A level-up has the floor first; the badge waits its turn behind it.
   const shownBadges = useBadgeToast(me?.badges, bankClear && !shownLevel);
   const shownTag = useTagNewsToast(me?.tagReturns, bankClear && !shownLevel && !shownBadges);
+  // Told once, as a tag's return is, when another angler landed a trophy that broke this angler's line.
+  const shownLost = useNewsToast(lostFound, bankClear && !shownLevel && !shownBadges && !shownTag, lostNewsId, lostNewsKey(userId ?? ""));
   // The effects notice waits its turn too, behind both: in a fight it covered the tension bar and the let-go cue.
-  const effectsNotice = useEffectsNotice(steppedDownAt, !bankClear || !!shownLevel || !!shownBadges || !!shownTag, EFFECTS_NOTICE_MS);
+  const effectsNotice = useEffectsNotice(steppedDownAt, !bankClear || !!shownLevel || !!shownBadges || !!shownTag || !!shownLost, EFFECTS_NOTICE_MS);
 
   // Watch the clock; a new lake hour or sky waits for a calm moment so it never lands mid-strike or mid-fight.
   // One change at a time: the hour goes first and the sky follows on a later check.
@@ -1623,6 +1631,13 @@ export function DockPage() {
               <span className="eyebrow">{t("Your tag came back")}</span>
               <h2>{t("{name} landed your {fish}", { name: shownTag.by, fish: t(fishById(shownTag.speciesId)?.name ?? shownTag.speciesId).toLowerCase() })}</h2>
               <p>{t("You let it go at {was}; it came back at {weight} · +{points} pts", { was: weightText(shownTag.was), weight: weightText(shownTag.weight), points: TAG_RETURN_BONUS })}</p>
+            </div>
+          )}
+          {shownLost && (
+            <div className="toast level-toast badge-toast">
+              <span className="eyebrow">{t("Your lost trophy was found")}</span>
+              <h2>{t("{name} landed the {fish} that broke your line", { name: shownLost.by, fish: t(fishById(shownLost.speciesId)?.name ?? shownLost.speciesId).toLowerCase() })}</h2>
+              <p>{t("{weight} at the {bank}", { weight: weightText(shownLost.weight), bank: t(SPOT_LABELS[shownLost.spot]) })}</p>
             </div>
           )}
         </div>

@@ -1911,6 +1911,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT435~~ | ~~The lodge's lost trophies: a trophy that breaks an angler's line is filed with the lodge for a week; another angler's cast at that bank may bring it up (5%), naming who lost it, and the first to land it is paid 30 by the server; the angler who lost it stops meeting it as their old foe once someone lands it~~ (#1660) | gameplay | M |
 | ~~GT436~~ | ~~The shack's chalk board names each wet night (rain or overcast over the evening) as a good one to leave a night line out~~ (#1661) | gameplay | S |
 | ~~GT437~~ | ~~News card 2026-10-20-game61 covers GT435-GT436: the lodge's lost trophies and the chalk board's night-line nights~~ (#1662) | ui | S |
+| ~~GT438~~ | ~~An angler is told, once, when another angler landed a trophy that broke their line: who, the kind, its weight and bank, in the same toast as a tag's return~~ (#1663) | gameplay | S |
 
 ## Risks / open questions for the owner
 
