@@ -154,6 +154,8 @@ export type Fight = {
   water?: FightWater;
   /** Hooked tight to the lily pads, so it dives for the pad stems like a fish in the reeds' weeds. */
   pads?: boolean;
+  /** Hooked from the boat tight to the far rock, so an unturned run drags the line over the rock. */
+  farRock?: boolean;
   /** A breezy or strong day, when the wind bellies a slack line. */
   windy?: FightWind;
   /** A catfish or sturgeon the angler's Strength lifts off the bottom in one pump. */
@@ -281,8 +283,9 @@ export const SECOND_TAKE_NIBBLE_MS = 300;
 export const FOLLOW_MS = 1200;
 
 /** Said once, when a fight first frays the line: what did it, and what to do. */
-function scuffNote(water: FightWater | undefined, teeth = false) {
+function scuffNote(water: FightWater | undefined, teeth = false, farRock = false) {
   if (teeth) return t("Its teeth frayed your line: it snaps sooner until you retie it.");
+  if (farRock) return t("The far rock frayed your line: it snaps sooner until you retie it.");
   if (water === "log") return t("Rubbing round the sunken log frayed your line: it snaps sooner until you retie it.");
   return water === "pilings"
     ? t("Rubbing round the piling frayed your line: it snaps sooner until you retie it.")
@@ -672,7 +675,9 @@ export function useFishingGame(
     const pads = castPadsRef.current;
     const water: FightWater = pads ? "weeds" : castLogRef.current && spotRef.current !== "open" ? "log" : fightWater(spotRef.current);
     const windy = fightWind(windRef.current);
-    const next = { species, weight, underpowered, water, windy, lightHook, pads, strongLift: liftsStickerInOne(species.id, current.strength) };
+    // One hooked tight to the far rock from the boat runs round the rock, dragging the line over it unless turned.
+    const farRock = castFarRockRef.current && water === "boat";
+    const next = { species, weight, underpowered, water, windy, lightHook, pads, farRock, strongLift: liftsStickerInOne(species.id, current.strength) };
     fightRef.current = next;
     setFight(next);
     setPhaseBoth("fight");
@@ -685,7 +690,7 @@ export function useFishingGame(
         resetToIdle(current.strength < species.minStrength ? t("Line parted. Spend points on Strength.") : t("Line parted. Spend points on Accuracy."));
       }, 1400);
     } else {
-      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)) * seasonTireMul(season, species.id) * warmTireMul(season, species.id, sky, spotRef.current) * runTireMul(season, species.id) * nestTireMul(season, species.id, spotRef.current) * nightTireMul(hourRef.current, species.id) * spentTireMul(season, species.id) * twilightTireMul(hourRef.current, species.id) * springRunTireMul(season, species.id, spotRef.current) * currentTireMul(species.id, spotRef.current) * fallFeedTireMul(season, species.id) * rainHunterTireMul(sky, species.id) * summerStrengthTireMul(season, species.id), water, windy, isTopwater(lureRef?.current), hasTrebles(lureRef?.current) || deep, seasonTireMul(season, species.id) > 1, isTrophyWeight(species, weight), floodedInlet(spotRef.current, season, sky), frayedRef.current, deep, lineSnapForLevel(anglerLevel(current.lifetimePoints)), turnCutMulForLevel(anglerLevel(current.lifetimePoints)), netsFish(species, mercyRef.current));
+      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)) * seasonTireMul(season, species.id) * warmTireMul(season, species.id, sky, spotRef.current) * runTireMul(season, species.id) * nestTireMul(season, species.id, spotRef.current) * nightTireMul(hourRef.current, species.id) * spentTireMul(season, species.id) * twilightTireMul(hourRef.current, species.id) * springRunTireMul(season, species.id, spotRef.current) * currentTireMul(species.id, spotRef.current) * fallFeedTireMul(season, species.id) * rainHunterTireMul(sky, species.id) * summerStrengthTireMul(season, species.id), water, windy, isTopwater(lureRef?.current), hasTrebles(lureRef?.current) || deep, seasonTireMul(season, species.id) > 1, isTrophyWeight(species, weight), floodedInlet(spotRef.current, season, sky), frayedRef.current, deep, lineSnapForLevel(anglerLevel(current.lifetimePoints)), turnCutMulForLevel(anglerLevel(current.lifetimePoints)), netsFish(species, mercyRef.current), farRock);
       runtimeRef.current = runtime;
       simRef.current = runtime.sim;
       performanceRef.current = runtime.performance;
@@ -1608,6 +1613,9 @@ export function useFishingGame(
             fx.splash();
             fx.haptic("strike");
             prevSurge = 0;
+            // The hunter takes it by the boat or bank, away from any rock or log the lure landed by.
+            castFarRockRef.current = false;
+            castLogRef.current = false;
             beginFight(taken.species, taken.weight, grab.profile);
             // The pike is where the shiner was, not back at the far end of the line.
             if (runtimeRef.current) runtimeRef.current.sim.line = sim.line;
@@ -1701,7 +1709,7 @@ export function useFishingGame(
             // The landed card covers the hint, so what the bank holds now rides on the card too.
             const fed = fedRef.current ? t("{fish}: it came in to feed on the groundbait.", { fish: t(current.species.name) }) : "";
             const frays = runtime.performance.scuffed || runtime.performance.bitten;
-            const scuffed = frays && !frayedRef.current ? scuffNote(current.water, !runtime.performance.scuffed) : "";
+            const scuffed = frays && !frayedRef.current ? scuffNote(current.water, !runtime.performance.scuffed, current.farRock) : "";
             if (frays) markFrayed(true);
             // The fish took the worm, so a fresh one goes on.
             setSoak(0);
@@ -1778,7 +1786,7 @@ export function useFishingGame(
             schoolRef.current = null;
             gotAwayRef.current = gotAwayAfterLoss(current.species, current.weight, spotRef.current, recaughtRef.current);
             const frays = runtime.performance.scuffed || runtime.performance.bitten;
-            const trophy = lostTrophy(current.species, current.weight) + (frays && !frayedRef.current ? ` ${scuffNote(current.water, !runtime.performance.scuffed)}` : "");
+            const trophy = lostTrophy(current.species, current.weight) + (frays && !frayedRef.current ? ` ${scuffNote(current.water, !runtime.performance.scuffed, current.farRock)}` : "");
             if (frays) markFrayed(true);
             if (sim.tornOut && sim.lightHook && !SOFT_MOUTHS.has(current.species.id)) {
               setOutcome({ kind: "broke", message: t("The light hook pulled out of the {fish}.", { fish: t(current.species.name) }) + trophy });

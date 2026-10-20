@@ -81,7 +81,7 @@ import { findWithLink } from "./findLinks";
 import { savedState, sayAfterBack } from "./SavedNote";
 import { CopySummary } from "./CopySummary";
 import { catchSummary } from "./summaries";
-import { biggestOnOuting, biggestSince, forItsLength, longGap, sizeRank } from "./sizeRank";
+import { biggestOnOuting, biggestSince, shortOfBest, forItsLength, longGap, sizeRank } from "./sizeRank";
 import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "./playLake";
 import { sameDayBefore } from "./sameDayBefore";
 import { countedSearch } from "./countedSearch";
@@ -1676,6 +1676,8 @@ function CatchView() {
   const rank = isCounted ? sizeRank(counted, entry) : null;
   // A game or sample fish among the angler's own has no place in their run of sizes.
   const since = badge || !isCounted ? null : biggestSince(counted, entry);
+  // Close to the kind's best, within a tenth: how near it came, opening the best.
+  const nearBest = badge || !isCounted ? null : shortOfBest(counted, entry);
   // Measured and weighed: a fat fish or a thin one, against the angler's own others of its kind.
   const build = isCounted ? forItsLength(counted, entry) : null;
   // Back after a long spell without one, opening the one before.
@@ -1844,6 +1846,13 @@ function CatchView() {
         {build ? (
           <p className="meta for-its-length">
             {t(build.heavy ? "Heavy for its length: about {size} is usual." : "Light for its length: about {size} is usual.", { size: measureText({ kind: "weight", pounds: build.usual }) })}
+          </p>
+        ) : null}
+        {nearBest ? (
+          <p className="meta near-best">
+            <Link to={`/catches/${nearBest.best.id}`}>
+              {t(nearBest.short.kind === "length" ? "{size} short of your longest {species}" : "{size} short of your heaviest {species}", { size: measureText(nearBest.short), species: kindName(entry.species) })}
+            </Link>
           </p>
         ) : null}
         {since ? (
