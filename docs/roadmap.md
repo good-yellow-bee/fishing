@@ -1402,6 +1402,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC221~~ | ~~Fewer draws: the washing line and its washing, the coots and the squirrels each bake into one skinned mesh (the dog's way), so each is one draw while it moves as before; up to 6 fewer draws while they are out, no visible change~~ (#1501) | scene | S |
 | ~~SC222~~ | ~~The robin at your feet: fishing from the bank by day (Reeds, Drop-off, Point or anywhere ashore off the dock), now and then the robin flies in and lands by the angler's feet, hops about pecking and cocking its head, and flies off, at once if you walk away (every creature so far stayed in the dock's frame)~~ (#1504) | scene | S |
 | ~~SC223~~ | ~~News card scene51 covers SC222 and the render-perf cuts SC214 to SC221~~ (#1504) | scene | S |
+| ~~SC224~~ | ~~Hedgehog on the bank: on dry evenings and nights from spring to fall, while the angler fishes ashore, now and then a hedgehog snuffles past behind them from side to side, stopping to sniff; any fuss (a strike, a fish on, the angler walking past) curls it into a ball until a while after it is over, then it uncurls and trundles on~~ (#1506) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 

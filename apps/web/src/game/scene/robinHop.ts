@@ -17,6 +17,14 @@ export function robinGround(x: number, z: number): number | null {
   return board ? BANK_TOP + (board.kind === "stand" ? BANK_STAND_LIFT : 0) : 0;
 }
 
+/** A point `side` metres to the angler's left (negative: right) and `ahead` metres in front, on dry land at its ground height; null on the water. */
+export function besideAngler(angler: Angler, side: number, ahead: number, ground: (x: number, z: number) => number | null = robinGround) {
+  const x = angler.x + side * Math.cos(angler.yaw) + ahead * Math.sin(angler.yaw);
+  const z = angler.z - side * Math.sin(angler.yaw) + ahead * Math.cos(angler.yaw);
+  const y = ground(x, z);
+  return y === null ? null : { x, y, z };
+}
+
 /** Where the angler stands and faces, and whether they are walking, as the robin sees them. */
 export type Angler = { x: number; y: number; z: number; yaw: number; moving: boolean };
 
@@ -59,14 +67,12 @@ export function hopStep(state: HopState, time: number, angler: Angler, settled: 
   const ground = world.ground ?? robinGround;
   switch (state.mode) {
     case "away": {
-      if (!settled || angler.moving) return { mode: "away", nextAt: Math.max(state.nextAt, time + FIRST_SEC) };
+      if (!settled || angler.moving) return state.nextAt >= time + FIRST_SEC ? state : { mode: "away", nextAt: time + FIRST_SEC };
       if (time < state.nextAt || world.dockRobinHere) return state;
       // Its spot at the angler's side, on dry land: their left, or their right if the left is the water.
       for (const side of [1, -1]) {
-        const x = angler.x + side * Math.cos(angler.yaw) * BESIDE.side + Math.sin(angler.yaw) * BESIDE.ahead;
-        const z = angler.z - side * Math.sin(angler.yaw) * BESIDE.side + Math.cos(angler.yaw) * BESIDE.ahead;
-        const y = ground(x, z);
-        if (y !== null) return { mode: "visiting", since: time, x, y, z, yaw: angler.yaw };
+        const spot = besideAngler(angler, side * BESIDE.side, BESIDE.ahead, ground);
+        if (spot) return { mode: "visiting", since: time, ...spot, yaw: angler.yaw };
       }
       return { mode: "away", nextAt: time + HOP_GAP_SEC };
     }
