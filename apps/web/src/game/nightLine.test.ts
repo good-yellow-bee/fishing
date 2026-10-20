@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { skyAt, type Sky } from "@stillwater/shared";
-import { loadNightLine, saveNightLine, wormLineHour, NIGHT_LINE_ODDS, NIGHT_LINE_SOAK_MS, WORM_LINE_ODDS, NIGHT_LINE_STALE_MS, nightLineCatch, nightLineKinds, nightLineReadyAt, nightLineState, nightSkyFor } from "./nightLine";
+import { loadNightLine, saveNightLine, wormLineHour, NIGHT_LINE_ODDS, NIGHT_LINE_SOAK_MS, WORM_LINE_ODDS, NIGHT_LINE_STALE_MS, nightLineCatch, nightLineKinds, nightLineNextChange, nightLineReadyAt, nightLineState, nightSkyFor } from "./nightLine";
 
 const strong = { strength: 10, accuracy: 10, patience: 5 };
 const at = (day: number, hour: number) => new Date(2026, 9, day, hour).getTime();
@@ -17,6 +17,19 @@ describe("a night line", () => {
     expect(nightLineState(line, ready - 1)).toBe("soaking");
     expect(nightLineState(line, ready)).toBe("ready");
     expect(nightLineState(line, line.setAt + NIGHT_LINE_STALE_MS + 1)).toBe("stale");
+  });
+
+  it("knows when its state next changes: as it turns ready, then stale, then never", () => {
+    for (const setAt of [at(20, 20), at(21, 2)]) {
+      const set = { spot: "dropoff" as const, setAt };
+      const turnsReady = nightLineNextChange(set, setAt)!;
+      expect(nightLineState(set, turnsReady - 1)).toBe("soaking");
+      expect(nightLineState(set, turnsReady)).toBe("ready");
+      const turnsStale = nightLineNextChange(set, turnsReady)!;
+      expect(nightLineState(set, turnsStale - 1)).toBe("ready");
+      expect(nightLineState(set, turnsStale)).toBe("stale");
+      expect(nightLineNextChange(set, turnsStale)).toBeNull();
+    }
   });
 
   it("holds one of the bank's night feeders the angler could land, or nothing", () => {

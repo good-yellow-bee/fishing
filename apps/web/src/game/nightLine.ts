@@ -63,6 +63,13 @@ export function nightLineState(line: NightLine, now: number): "soaking" | "ready
   return now < nightLineReadyAt(line.setAt) ? "soaking" : now - line.setAt > NIGHT_LINE_STALE_MS ? "stale" : "ready";
 }
 
+/** When a line next changes state: as it turns ready, then as it goes stale, then never again. */
+export function nightLineNextChange(line: NightLine, now: number): number | null {
+  const ready = nightLineReadyAt(line.setAt);
+  const stale = line.setAt + NIGHT_LINE_STALE_MS + 1;
+  return now < ready ? ready : now < stale ? stale : null;
+}
+
 /** The bank's night feeders the angler could land, which are what a set line catches there. */
 export function nightLineKinds(spot: SpotId, angler: Pick<Profile, "strength" | "accuracy">): FishSpecies[] {
   return FISH.filter((fish) => fish.spots.includes(spot) && fish.rarity !== "legendary" && bestHourFor(fish, spot) === "night" && canLand(angler, fish));
