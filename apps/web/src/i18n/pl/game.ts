@@ -177,6 +177,7 @@ export const PL_GAME: PlBook = {
   "{bank}: bring in your night line": "{bank}: wyciągnij swoją nocną linkę",
   "{note} · your night line is out here": "{note} · tu stoi twoja nocna linka",
   "Night line": "Nocna linka",
+  "{n} of the shiners in your bait bucket died while you were away: they keep three days.": "Część złotawców z wiaderka padła pod twoją nieobecność ({n}): żyją trzy dni.",
   "foe about": "rywal w pobliżu",
   "lost trophy": "zgubione trofeum",
   "You leave a worm out on a night line here. Come back to check it once the night is out, and within two days.": "Zostawiasz robaka na nocnej lince. Wróć ją sprawdzić, gdy minie noc, ale przed upływem dwóch dni.",

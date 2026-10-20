@@ -119,7 +119,7 @@ vi.mock("./fight", async (importOriginal) => {
 import { updateSettings } from "./settings";
 import { giantShyKey } from "./giantShy";
 import { nightLineKey, nightLineReadyAt } from "./nightLine";
-import { baitBucketKey } from "./baitBucket";
+import { BUCKET_LIFE_MS, baitBucketKey } from "./baitBucket";
 import { bagKey, shinerKey } from "./groundbaitBag";
 import { oldFoeKey } from "./oldFoe";
 import { SWIM_PRIMED_MS, swimKey } from "./swim";
@@ -453,6 +453,15 @@ describe("useFishingGame live shiner", () => {
         // No store in this run, so nothing was kept.
       }
     }
+  });
+
+  it("lets a spare shiner die after three days in the bucket, and says so on the next visit", () => {
+    const kept = new Map<string, string>([[baitBucketKey(profile.userId), JSON.stringify([DOCK_BUBBLES.at - BUCKET_LIFE_MS - 1, DOCK_BUBBLES.at - 1000])]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    mount();
+    expect(container!.querySelector("[data-testid=bucket]")?.textContent).toBe("1");
+    expect(hint()).toBe("1 of the shiners in your bait bucket died while you were away: they keep three days.");
+    expect(JSON.parse(kept.get(baitBucketKey(profile.userId))!)).toHaveLength(1);
   });
 
   it("keeps spare shiners in a bait bucket: a night line takes one from it first, and one can be hooked from it later", () => {

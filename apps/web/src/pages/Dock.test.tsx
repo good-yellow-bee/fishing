@@ -813,7 +813,7 @@ describe("the shack's bait tin", () => {
     expect(buyShiner).toHaveBeenCalledTimes(2);
     expect(note.textContent).toBe("A shiner is on your hook, so another goes in your bait bucket, which holds 1 of 3.");
     expect(localStorage.getItem(shinerKey("u1"))).toBe("live");
-    expect(localStorage.getItem(baitBucketKey("u1"))).toBe("1");
+    expect(JSON.parse(localStorage.getItem(baitBucketKey("u1"))!)).toHaveLength(1);
     localStorage.removeItem(shinerKey("u1"));
   });
 });
