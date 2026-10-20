@@ -9,7 +9,7 @@ import { BoardPage } from "./Board";
 import { LogPage } from "./Log";
 import { GOLDEN_COLOR } from "../components/FishMark";
 
-vi.mock("../api", () => ({ getBoard: vi.fn(), getDerby: vi.fn(() => new Promise(() => {})), getMe: vi.fn(), getSpeciesRecords: vi.fn() }));
+vi.mock("../api", () => ({ getBoard: vi.fn(), getDerby: vi.fn(() => new Promise(() => {})), getDayBag: vi.fn(() => new Promise(() => {})), getMe: vi.fn(), getSpeciesRecords: vi.fn() }));
 
 let root: Root;
 let container: HTMLDivElement;
@@ -63,7 +63,7 @@ describe("species marks on the lodge pages", () => {
       speciesStats: [],
       badges: [],
       longestStreak: 0,
-      recentDays: [],
+      recentDays: [], todayBag: [],
     };
     vi.mocked(getMe).mockResolvedValue(me);
     await act(async () => {
@@ -93,7 +93,7 @@ describe("species marks on the lodge pages", () => {
       speciesStats: [],
       badges: [],
       longestStreak: 0,
-      recentDays: [],
+      recentDays: [], todayBag: [],
     });
     await act(async () => {
       root.render(<MemoryRouter><LogPage /></MemoryRouter>);

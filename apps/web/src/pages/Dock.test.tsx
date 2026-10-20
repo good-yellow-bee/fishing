@@ -62,7 +62,7 @@ const me: Me = {
   speciesStats: [],
   badges: [],
   longestStreak: 0,
-  recentDays: [],
+  recentDays: [], todayBag: [],
 };
 
 // Node ships its own empty `localStorage` global, so borrow a real one.

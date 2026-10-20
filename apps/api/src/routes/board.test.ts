@@ -97,6 +97,31 @@ describe("GET /board/records", () => {
   });
 });
 
+describe("GET /board/bag", () => {
+  afterEach(() => vi.useRealTimers());
+
+  it("ranks today's bags (UTC) by their five heaviest fish, and puts the angler in it", async () => {
+    vi.useFakeTimers({ toFake: ["Date"], now: new Date(Date.UTC(2026, 10, 7, 15)) });
+    for (const weight of [1, 1, 1, 1, 1, 0.2]) landed("mara", "perch", weight, 1, "2026-11-07T09:00:00.000Z");
+    landed("ash", "pike", 4, 1, "2026-11-07T10:00:00.000Z");
+    landed("ash", "perch", 0.5, 1, "2026-11-07T11:00:00.000Z");
+    // Yesterday's and tomorrow's fish make no bag today.
+    landed("idle", "pike", 9, 1, "2026-11-06T23:59:00.000Z");
+    landed("idle", "pike", 9, 1, "2026-11-08T00:00:00.000Z");
+    const body = await get<{ day: string; entries: { userId: string; total: number; count: number }[]; you: { rank: number; total: number; count: number } | null }>("/board/bag");
+    expect(body.day).toBe("2026-11-07T00:00:00.000Z");
+    expect(body.entries.map((row) => [row.userId, row.total, row.count])).toEqual([["mara", 5, 5], ["ash", 4.5, 2]]);
+    expect(body.you).toEqual({ rank: 2, total: 4.5, count: 2 });
+  });
+
+  it("lists the angler's own bag weights, heaviest first", async () => {
+    landed("ash", "pike", 4, 1, "2026-11-07T10:00:00.000Z");
+    for (const weight of [0.1, 0.2, 0.3, 0.4, 0.5]) landed("ash", "perch", weight, 1, "2026-11-07T11:00:00.000Z");
+    const { listBagWeights } = await import("../db.ts");
+    expect(listBagWeights("ash", "2026-11-07T00:00:00.000Z", "2026-11-08T00:00:00.000Z")).toEqual([4, 0.5, 0.4, 0.3, 0.2]);
+  });
+});
+
 describe("GET /board/derby", () => {
   const saturday = new Date(Date.UTC(2026, 10, 7, 15));
   afterEach(() => vi.useRealTimers());

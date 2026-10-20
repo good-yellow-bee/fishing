@@ -2,7 +2,7 @@ import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Database from "better-sqlite3";
-import { fishById, isLakeHour, isTrophyWeight, TROPHY_RELEASE_BONUS, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type LodgeTrack, type SpeciesRecord, type SpotId } from "@stillwater/shared";
+import { BAG_SIZE, fishById, isLakeHour, isTrophyWeight, TROPHY_RELEASE_BONUS, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type LodgeTrack, type SpeciesRecord, type SpotId } from "@stillwater/shared";
 
 const dir = dirname(fileURLToPath(import.meta.url));
 export const dataDir = join(dir, "../data");
@@ -254,6 +254,28 @@ export function listDerbyEntries(fishId: string, from: string, to: string, limit
        ) WHERE nth = 1 ORDER BY weight DESC, landedAt ASC LIMIT ?`,
     )
     .all(fishId, from, to, limit) as { userId: string; displayName: string; weight: number; landedAt: string }[];
+}
+
+/** Each angler's day's bag in a window: the total of their BAG_SIZE heaviest fish, heaviest bag first; of equal bags, the one made first wins. */
+export function listDayBags(from: string, to: string, limit: number) {
+  return db
+    .prepare(
+      `SELECT userId, displayName, ROUND(SUM(weight), 2) as total, COUNT(*) as count, MAX(landedAt) as madeAt FROM (
+         SELECT c.user_id as userId, p.display_name as displayName, c.weight as weight, c.created_at as landedAt,
+                ROW_NUMBER() OVER (PARTITION BY c.user_id ORDER BY c.weight DESC, c.created_at ASC) as nth
+         FROM catch c JOIN profile p ON p.user_id = c.user_id
+         WHERE c.created_at >= ? AND c.created_at < ?
+       ) WHERE nth <= ? GROUP BY userId ORDER BY total DESC, madeAt ASC, userId ASC LIMIT ?`,
+    )
+    .all(from, to, BAG_SIZE, limit) as { userId: string; displayName: string; total: number; count: number; madeAt: string }[];
+}
+
+/** The weights of the angler's day's bag in a window, heaviest first. */
+export function listBagWeights(userId: string, from: string, to: string): number[] {
+  const rows = db
+    .prepare(`SELECT weight FROM catch WHERE user_id = ? AND created_at >= ? AND created_at < ? ORDER BY weight DESC LIMIT ?`)
+    .all(userId, from, to, BAG_SIZE) as { weight: number }[];
+  return rows.map((row) => row.weight);
 }
 
 /** How many ended derbies this angler held the top spot of, back to their first catch. */

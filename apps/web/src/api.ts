@@ -30,6 +30,8 @@ export type Me = {
   longestStreak: number;
   /** The last 60 local days with a fish, oldest first, for the current streak on this device's calendar. */
   recentDays: string[];
+  /** The weights of today's (UTC) day's bag, heaviest first. */
+  todayBag: number[];
 };
 
 export type DailyRequestRow = DailyRequest & { progress: number; claimed: boolean };
@@ -119,6 +121,16 @@ export type DerbyBoard = {
   you: { rank: number; weight: number } | null;
   lastChampion: { fishId: string; displayName: string; weight: number } | null;
 };
+
+export type DayBagBoard = {
+  day: string;
+  entries: { rank: number; userId: string; displayName: string; total: number; count: number }[];
+  you: { rank: number; total: number; count: number } | null;
+};
+
+export function getDayBag() {
+  return request<DayBagBoard>("/api/board/bag");
+}
 
 export function getDerby() {
   return request<DerbyBoard>("/api/board/derby");

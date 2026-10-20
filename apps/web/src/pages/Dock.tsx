@@ -34,6 +34,9 @@ import {
   localDate,
   weekOf,
   streakDays,
+  addToBag,
+  bagToBeat,
+  bagTotal,
   dayRunForFirstFish,
   DAY_RUN_BONUS,
   STANCE_LABELS,
@@ -356,6 +359,10 @@ export function DockPage() {
   daysRef.current = me?.recentDays ?? [];
   /** The run of days this landed fish keeps going as the day's first, from DAY_RUN_FROM; 0 when it pays no day-run bonus. */
   const dayRun = useMemo(() => (game.outcome?.kind === "landed" ? dayRunForFirstFish(daysRef.current, localDate(new Date())) : 0), [game.outcome]);
+  const bagRef = useRef(me?.todayBag ?? []);
+  bagRef.current = me?.todayBag ?? [];
+  /** Today's bag with this landed fish in it, read before the catch is saved. */
+  const dayBag = useMemo(() => (game.outcome?.kind === "landed" ? addToBag(bagRef.current, game.outcome.weight) : null), [game.outcome]);
   // Read before the catch is saved, so a new record can name the one it beat; read again after each save.
   const [records, setRecords] = useState<SpeciesRecord[] | null>(null);
   const recordsRef = useRef(records);
@@ -1244,6 +1251,13 @@ export function DockPage() {
               <p className="catch-stamp quiet">{t("Book PB {weight}", { weight: weightText(stamp.heaviest) })}</p>
             )}
             {stamp?.trophy && <p className="catch-stamp">{t("Trophy")}</p>}
+            {dayBag && (
+              <p className="catch-stamp quiet day-bag">
+                {dayBag.raisedBy > 0
+                  ? t("Day's bag {weight} in {n} fish · up {more}", { weight: weightText(bagTotal(dayBag.bag)), n: dayBag.bag.length, more: weightText(dayBag.raisedBy) })
+                  : t("Day's bag {weight} · beat {least} to raise it", { weight: weightText(bagTotal(dayBag.bag)), least: weightText(bagToBeat(dayBag.bag) ?? 0) })}
+              </p>
+            )}
             {lodge?.kind === "first" && <p className="catch-stamp">{t("First on the lodge wall")}</p>}
             {lodge?.kind === "record" && (
               <p className="catch-stamp">
