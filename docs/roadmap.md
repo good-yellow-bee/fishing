@@ -1795,6 +1795,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT374~~ | ~~Weekend derby: every Saturday and Sunday (UTC, one ranking for the whole lodge) the Board names a derby fish and ranks the heaviest of it landed that weekend; the angler who held the top spot when a weekend ended earns the Derby champion badge~~ (#1518) | gameplay | M |
 | ~~GT375~~ | ~~Second fight habits for the one-habit kinds: the bluegill's tight circles twist the line toward a tangle (Line-spinner), the carp bolts the first time it sees the net (Net-shy), the catfish lifts its head at the net only a moment (Thrasher), and the burbot slithers off a slack line (Slippery); each with its call and field-guide line~~ (#1523) | gameplay | M |
 | ~~GT376~~ | ~~News card 2026-10-20-game42 covers GT373 and GT374: the legend hunt and the weekend derby~~ (#1521) | ui | S |
+| ~~GT377~~ | ~~News card 2026-10-20-game43 covers GT375: second fight habits for bluegill, carp, catfish and burbot~~ (#1526) | ui | S |
 
 ## Risks / open questions for the owner
 
