@@ -1,5 +1,6 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { DRAGS, type Drag } from "./drag";
+import { LINE_WEIGHTS, type LineWeight } from "./lineWeight";
 import { FLOAT_COLOURS, type FloatColour } from "./scene/floatColour";
 
 /**
@@ -51,6 +52,8 @@ export type Settings = {
   lastLure: string | null;
   /** The reel's drag, kept from fight to fight until the angler turns it. */
   drag: Drag;
+  /** The line on the reel, changed between casts. */
+  line: LineWeight;
 };
 
 export const SETTINGS_KEY = "stillwater.settings.v1";
@@ -77,6 +80,7 @@ export const DEFAULT_SETTINGS: Settings = {
   floatColour: "blue",
   lastLure: null,
   drag: "normal",
+  line: "standard",
 };
 
 export const SHAKE_SCALE: Record<ShakeLevel, number> = { off: 0, soft: 0.45, full: 1 };
@@ -130,6 +134,7 @@ export function parseSettings(raw: string | null, wantsContrast = systemWantsCon
     floatColour: pick(data.floatColour, FLOAT_COLOURS, d.floatColour),
     lastLure: typeof data.lastLure === "string" && data.lastLure ? data.lastLure : null,
     drag: pick(data.drag, DRAGS, d.drag),
+    line: pick(data.line, LINE_WEIGHTS, d.line),
   };
 }
 

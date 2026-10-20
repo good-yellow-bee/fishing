@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { CLEAN_RUN_FROM } from "@stillwater/shared";
 import { canTurnRuns, ESCAPE_LINE, FRAYED_SNAP, fightLines, isCleanFight, jumpLines, RED_TENSION, SHORT_LINE, SOFT_MOUTHS, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone, NET_BOLT_LINE, LEAPERS, NET_SHY } from "../game/fight";
 import { nextDrag, type Drag } from "../game/drag";
+import { LINE_SNAP } from "../game/lineWeight";
 import { habitLines } from "../game/habitLines";
 import { updateSettings, useSettings } from "../game/settings";
 import type { Fight } from "../game/useFishingGame";
@@ -34,6 +35,8 @@ const DRAG_LINE: Record<Drag, string> = {
 
 export function FightBar({ fight, sim, performance, best = null, note = null, cleanRun = 0 }: Props) {
   const { reelMode, drag } = useSettings();
+  /** Where the line breaks on the tension bar: short of its end for a frayed or a light line. */
+  const snapMark = (sim.current?.frayed ? FRAYED_SNAP : 1) * LINE_SNAP[fight.line ?? "standard"];
   const t = useT();
   const lang = useLang();
   const card = useRef<HTMLDivElement>(null);
@@ -233,7 +236,7 @@ export function FightBar({ fight, sim, performance, best = null, note = null, cl
             <i className="tick" style={{ left: `${TIGHT_TENSION * 100}%` }} />
             <i className="tick tick-red" style={{ left: `${RED_TENSION * 100}%` }} />
             {/* A frayed line breaks here, short of the bar's end. */}
-            {sim.current?.frayed && <i className="tick tick-frayed" style={{ left: `${FRAYED_SNAP * 100}%` }} title={t("Frayed line: it snaps here")} />}
+            {snapMark < 1 && <i className="tick tick-frayed" style={{ left: `${snapMark * 100}%` }} title={sim.current?.frayed ? t("Frayed line: it snaps here") : t("Light line: it snaps here")} />}
             <i ref={peakMark} className="peak" hidden />
           </div>
           <span className="fight-label" id="fight-line-label">
@@ -292,6 +295,8 @@ export function FightBar({ fight, sim, performance, best = null, note = null, cl
           {fight.water === "current" && <p className="fight-water">{t("Inlet: the current takes line while you rest, and helps a run downstream")}</p>}
           {fight.water === "deep" && <p className="fight-water">{t("Drop-off: runs dive and pull harder, but tire the fish faster")}</p>}
           {fight.water === "rocks" && !fight.edge && <p className="fight-water">{t("Point: turn every run; reeling while it drags over the rocks frays the line")}</p>}
+          {fight.line === "light" && <p className="fight-water">{t("Light line: it snaps sooner, so keep out of the red")}</p>}
+          {fight.line === "heavy" && <p className="fight-water">{t("Heavy line: it holds more strain before it snaps")}</p>}
           {fight.rising && LEAPERS.has(fight.species.id) && <p className="fight-water">{t("Risen to the hatch: it is at the top already, so its first run is a leap — bow")}</p>}
           {fight.lantern && !NET_SHY.has(fight.species.id) && <p className="fight-water">{t("Lantern light: it will see the net in the light and bolt from it once, so be ready to bring it back")}</p>}
           {fight.fired && <p className="fight-water">{t("Fired up on the fry: its first run doesn't tire it at all")}</p>}

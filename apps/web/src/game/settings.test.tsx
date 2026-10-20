@@ -51,6 +51,12 @@ describe("settings", () => {
     expect(parseSettings(JSON.stringify({ drag: "tight" })).drag).toBe("normal");
   });
 
+  it("keeps the line on the reel, and starts it at standard", () => {
+    expect(parseSettings(null).line).toBe("standard");
+    expect(parseSettings(JSON.stringify({ line: "heavy" })).line).toBe("heavy");
+    expect(parseSettings(JSON.stringify({ line: "braid" })).line).toBe("standard");
+  });
+
   it("keeps vibration on unless it was switched off", () => {
     expect(parseSettings(null).vibration).toBe(true);
     expect(parseSettings(JSON.stringify({ vibration: false })).vibration).toBe(false);
