@@ -256,8 +256,8 @@ import { damselfliesOut } from "./damselPerch";
 import { DockSnail } from "./DockSnail";
 import { MooringLines } from "./MooringLines";
 import { poseMooringRopes } from "./mooringRope";
-import { DockMouse } from "./DockMouse";
-import { mouseOut } from "./mouseScurry";
+import { BankMouse, DockMouse } from "./DockMouse";
+import { mouseOut, snowMouseOut } from "./mouseScurry";
 import { BankToad, DockToad } from "./DockToad";
 import { toadOut } from "./toadHop";
 import { RopeSwallows } from "./RopeSwallows";
@@ -2454,6 +2454,7 @@ export const LakeWorld = memo(function LakeWorld({
       {damselfliesOut(hour, sky, season, wind) && <Damselflies />}
       {snailOut(hour, sky, season) && <DockSnail />}
       {mouseOut(hour, sky, season) && <DockMouse />}
+      {snowMouseOut(hour, season) && <BankMouse />}
       {toadOut(hour, sky, season) && <DockToad />}
       {toadOut(hour, sky, season) && <BankToad />}
       {ropeSwallowsOut(hour, sky, season) && <RopeSwallows />}
