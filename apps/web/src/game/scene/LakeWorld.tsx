@@ -199,6 +199,7 @@ import { SnowballKids } from "./SnowballKids";
 import { snowballOut } from "./snowballFight";
 import { NightAngler } from "./NightAngler";
 import { headlampOut } from "./headlampFishing";
+import { enableModelCache } from "./bitmapCache";
 import { StoneSkimmer } from "./StoneSkimmer";
 import { skimOut } from "./skimStones";
 import { Jogger } from "./Jogger";
@@ -786,7 +787,7 @@ const DUCKS: DuckProps[] = [
 
 // The scatter lists load their models as a list (one cache entry per list), so each file was fetched again after its
 // preload, and the shared colour map once per model: three's file cache hands a repeat request the bytes it already has.
-THREE.Cache.enabled = true;
+enableModelCache();
 for (const url of Object.values(MODELS)) useGLTF.preload(url);
 
 function pushDiscIndices(rings: number, segments: number, indices: number[]) {
