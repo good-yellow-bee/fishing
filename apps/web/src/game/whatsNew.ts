@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-game55";
+export const NEWS_ID = "2026-10-20-scene63";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "The lake opens more smoothly on a phone: it prepares its shading before the first frame instead of stalling as it draws each thing for the first time, the hedgerows no longer hitch as the evening falls, and the windsock, the rod bell and the damselflies are drawn in the same simple style as the rest.",
   "Every week each bank now holds a named giant, shared by the whole lodge: a big fish of a kind that lives there, which comes up only rarely. The first angler to land one is paid 200 points and named on the Board, and that giant is gone for everyone until Monday.",
   "A pike, tiger muskie or ghost pike chasing a spinner, spoon or streamer may now follow it right to the bank without taking. Wait for the call that it is turning, then tap to figure-eight the lure, and it hits; tap too soon, or not at all, and it sinks away.",
   "Hedgerows now part the upper hills into fields, as a phone held upright sees them above the farm, green through spring and summer, turning in the fall and bare over the winter snow. And at night the moon road and the lights mirrored on the lake shimmer softly instead of lying in hard bars.",
