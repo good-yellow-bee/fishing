@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-game70";
+export const NEWS_ID = "2026-10-20-scene70";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "A night line out on a bank now shows how it is doing: once a fish is on, the stick bows toward the water, the line runs taut and the white tag at its tip knocks now and then; left out too long, its line hangs slack. And while you wait on the bank, the line is ready to bring in the moment its night is out, even if you touch nothing.",
   "Groundbait left on a bank now follows the season: in the summer heat it draws the fish back after three hours but is eaten within a day, and in the winter cold it takes twelve hours but keeps four days. A night line set in summer soaks just three hours but should come in before that evening, as crayfish strip the bait; set in winter it soaks twelve hours and keeps four days.",
   "An outing's page says where it falls among the outings on its water, such as outing 4 of 12. Streaks, the weekend split and a water's best outing now count an outing with only a lost fish or a missed strike, as the average does, and last evening's blank outing reads as a past day once today's plan takes over.",
   "On a small phone held upright, the cast meter now always sits low beside the walking stick, clear of the hint over the lake. And with larger text, the note naming where you stand stops after a few rows instead of pushing the hint down onto the stick and the meter; a screen reader still hears all of it.",
@@ -23,7 +24,6 @@ export const NEWS_ITEMS: readonly string[] = [
   "On a phone you can now watch the whole fight: the fight card moves up to the top of the screen, over the far shore, and the header steps aside until the fish is in; held sideways it waits beside the action, above the steering buttons. Left-handed, the steering buttons now take the other corner from the Reel button instead of lying under it.",
   "A search's summary now splits its fish by lure too, each opening that lure's fish, and a fish caught after midnight says whose night it counts on. The catch form finds a kind typed in Polish however the book wrote it.",
   "The lake opens more smoothly on a phone: it prepares its shading before the first frame instead of stalling as it draws each thing for the first time, the hedgerows no longer hitch as the evening falls, and the windsock, the rod bell and the damselflies are drawn in the same simple style as the rest.",
-  "Hedgerows now part the upper hills into fields, as a phone held upright sees them above the farm, green through spring and summer, turning in the fall and bare over the winter snow. And at night the moon road and the lights mirrored on the lake shimmer softly instead of lying in hard bars.",
   "Two outings on one water and day now show when each one's fish came, so a dawn and a dusk tell apart on Trips. The outing search finds those “with a note” and those left “untitled”, and an outing's page names kinds and lures as the rest of the book does.",
   "A water's page names kinds and lures as the rest of the book does, and each of its counts opens just the fish it counted. Its copied summary adds the next outing there and the fish lost or missed.",
   "On Bests, a season names the water it was won on beside its best lure, each opening its fish, and a kind's Last fish opens that fish. A kind's page and its catch cards name it as Bests does.",
