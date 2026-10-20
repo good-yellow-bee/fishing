@@ -2472,7 +2472,7 @@ html[data-input="pad"] .fight-bar .on-pad {
 /* On a phone up to 640 px tall the hint, hanging under a bank chip with three notes ("Dock · giant: Iron Jaw · moon
    overhead"), reached the cast meter at any text size: the meter comes down beside the stick there too. */
 @media (max-width: 800px) and (min-height: 501px) and (max-height: 640px) {
-  .power-meter {
+  .scene-wrap .power-meter {
     bottom: calc(104px / var(--text-zoom, 1));
     width: min(160px, calc((100vw - 152px) / var(--text-zoom, 1)));
   }

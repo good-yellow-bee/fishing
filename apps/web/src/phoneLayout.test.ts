@@ -348,6 +348,6 @@ describe("a sideways phone in a fight", () => {
 describe("the cast meter on a short upright phone", () => {
   it("sits beside the walk stick at any text size, clear of a hint under a tall bank chip", () => {
     const short = css.slice(css.indexOf("@media (max-width: 800px) and (min-height: 501px) and (max-height: 640px) {"));
-    expect(/\n  \.power-meter \{([^}]*)\}/.exec(short)?.[1]).toContain("bottom: calc(104px / var(--text-zoom, 1));");
+    expect(/\n  \.scene-wrap \.power-meter \{([^}]*)\}/.exec(short)?.[1]).toContain("bottom: calc(104px / var(--text-zoom, 1));");
   });
 });
