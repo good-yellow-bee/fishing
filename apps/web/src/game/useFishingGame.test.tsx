@@ -122,6 +122,7 @@ import { nightLineKey, nightLineReadyAt } from "./nightLine";
 import { baitBucketKey } from "./baitBucket";
 import { bagKey, shinerKey } from "./groundbaitBag";
 import { oldFoeKey } from "./oldFoe";
+import { SWIM_PRIMED_MS, swimKey } from "./swim";
 import { carriesBait, FALSE_STRIKE_MS, FIGURE_EIGHT_ODDS, FIGURE_TURN_MS, FIGURE_WINDOW_MS, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TIRE_REASONS, TOPWATER_POPS, useFishingGame, WAIT_REASONS } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
@@ -517,6 +518,28 @@ describe("useFishingGame live shiner", () => {
     act(() => root!.render(<Harness />));
     expect(liveShiner()).toBe("true");
     expect(bag()).toBe("3");
+  });
+
+  it("keeps a groundbaited swim for the next visit, primed once the feeders have gathered overnight", () => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    mount();
+    const bait = () => container!.querySelector("[data-testid=groundbait]")?.textContent?.split("|")[1];
+    act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === "groundbait") as HTMLButtonElement).click());
+    expect(bait()).toBe(`dock:${GROUNDBAIT_CASTS}`);
+    const thrown = JSON.parse(kept.get(swimKey(profile.userId))!);
+    expect(thrown).toMatchObject({ spot: "dock", casts: GROUNDBAIT_CASTS });
+    // A cast there uses one, and the swim keeps what is left and when it went in.
+    cast(container!.querySelector<HTMLDivElement>("[data-stance]")!);
+    const swim = JSON.parse(kept.get(swimKey(profile.userId))!);
+    expect(swim).toEqual({ ...thrown, casts: GROUNDBAIT_CASTS - 1 });
+    kept.set(swimKey(profile.userId), JSON.stringify({ ...swim, casts: 1, at: Date.now() - SWIM_PRIMED_MS - 60_000 }));
+    act(() => root!.unmount());
+    root = null;
+    container!.remove();
+    mount();
+    expect(bait()).toBe(`dock:${GROUNDBAIT_CASTS}`);
+    expect(hint()).toMatch(/^The groundbait you left at the Dock has the feeders gathered there/);
   });
 
   it("leaves any other landed fish on the card", () => {
