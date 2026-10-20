@@ -1519,18 +1519,19 @@ html[data-input="pad"] .fight-bar .on-pad {
   }
 }
 
+/* On its own translate, so it shivers wherever a layout puts the card (centred by a transform or not). */
 @keyframes fight-shiver {
   0%,
   100% {
-    transform: translateX(-50%);
+    translate: 0;
   }
 
   25% {
-    transform: translateX(calc(-50% - 2px));
+    translate: -2px 0;
   }
 
   75% {
-    transform: translateX(calc(-50% + 2px));
+    translate: 2px 0;
   }
 }
 
@@ -2492,12 +2493,12 @@ html[data-input="pad"] .fight-bar .on-pad {
    fish's habits (the water's own warnings stay): the card has the foot of the screen, below the fish, and no more. */
 @media (pointer: coarse) and (max-width: 800px) and (min-height: 501px) {
   .fight-bar {
-    right: calc(112px / var(--text-zoom, 1));
+    right: 112px;
   }
 
   html[data-hand="left"] .fight-bar {
     right: 8px;
-    left: calc(112px / var(--text-zoom, 1));
+    left: 112px;
   }
 
   .fight-bar .fight-controls {
@@ -3918,6 +3919,11 @@ html[data-contrast="high"] .sound-captions li {
   html[data-hand="left"] .fight-bar {
     right: 8px;
     left: auto;
+  }
+
+  /* And keeps to what a fight is read from, as on an upright phone, to fit the height. */
+  .fight-bar :is(.fight-controls, .fight-clean, .fight-habit) {
+    display: none;
   }
 }
 
