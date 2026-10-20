@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DOCK_STAND_X, DOCK_STAND_Z } from "@stillwater/shared";
-import { SNOW_CAP, VISIT_EVERY_SEC, VISIT_SEC, robinAt, robinOut, robinVisit } from "./robinVisit";
+import { SNOW_CAP, VISIT_EVERY_SEC, VISIT_SEC, blackbirdOut, robinAt, robinOut, robinVisit } from "./robinVisit";
 import { DOCK_POST_CAPS } from "./snowyDock";
 
 describe("dock robin", () => {
@@ -100,5 +100,16 @@ describe("dock robin", () => {
       expect(Math.abs(Math.atan2(Math.sin(yaw - last), Math.cos(yaw - last)))).toBeLessThan(0.4);
       last = yaw;
     }
+  });
+
+  it("sends the blackbird out on the bank on wet days, when the robin keeps in", () => {
+    expect(blackbirdOut("day", "rain", "summer")).toBe(true);
+    expect(blackbirdOut("dawn", "rain", "fall")).toBe(true);
+    expect(robinOut("day", "rain", "summer")).toBe(false);
+    expect(blackbirdOut("day", "clear", "summer")).toBe(false);
+    expect(blackbirdOut("dusk", "rain", "summer")).toBe(false);
+    // Winter's rain falls as snow, and the robin is out then.
+    expect(blackbirdOut("day", "rain", "winter")).toBe(false);
+    expect(robinOut("day", "rain", "winter")).toBe(true);
   });
 });

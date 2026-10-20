@@ -11,48 +11,50 @@ import { robinAt, robinVisitIndex, type RobinPose } from "./robinVisit";
 import { toonRamp } from "./toon";
 import { useSkinnedFigure } from "./skinFigure";
 
-const BROWN = "#7a5f44";
-const BREAST = "#e0662e";
-const BELLY = "#efe6da";
 const DARK = "#22201e";
+
+/** A bird's colours and size: the robin, or the blackbird out in the rain. */
+export type BirdLook = { back: string; breast: string; belly: string; bill: string; eye: string; scale: number };
 /** Larger than life, so it reads from behind the angler. */
-const SCALE = 2.2;
+export const ROBIN: BirdLook = { back: "#7a5f44", breast: "#e0662e", belly: "#efe6da", bill: DARK, eye: DARK, scale: 2.2 };
+/** All black but its orange-yellow bill and eye ring, and a little bigger. */
+export const BLACKBIRD: BirdLook = { back: "#1d1b1c", breast: "#232022", belly: "#2b2829", bill: "#e9a41f", eye: "#e9a41f", scale: 2.6 };
 
 /** The round body and legs, the breast to the front (+z). */
-export function robinBodyShape() {
+export function robinBodyShape(look = ROBIN) {
   return mergePainted([
-    { geometry: new THREE.SphereGeometry(1, 12, 10), position: [0, 0.05, 0], scale: [0.04, 0.042, 0.05], color: BROWN },
-    { geometry: new THREE.SphereGeometry(1, 10, 8), position: [0, 0.05, 0.016], scale: [0.034, 0.036, 0.036], color: BREAST },
-    { geometry: new THREE.SphereGeometry(1, 8, 6), position: [0, 0.03, 0.012], scale: [0.03, 0.022, 0.03], color: BELLY },
+    { geometry: new THREE.SphereGeometry(1, 12, 10), position: [0, 0.05, 0], scale: [0.04, 0.042, 0.05], color: look.back },
+    { geometry: new THREE.SphereGeometry(1, 10, 8), position: [0, 0.05, 0.016], scale: [0.034, 0.036, 0.036], color: look.breast },
+    { geometry: new THREE.SphereGeometry(1, 8, 6), position: [0, 0.03, 0.012], scale: [0.03, 0.022, 0.03], color: look.belly },
     ...[-0.012, 0.012].map((x) => ({ geometry: new THREE.CylinderGeometry(0.0025, 0.0025, 0.022, 4), position: [x, 0.006, 0.004] as const, color: DARK })),
   ]);
 }
 
-/** The head with its orange face, eyes and fine bill, from the neck. */
-export function robinHeadShape() {
+/** The head with its face, eyes and fine bill, from the neck. */
+export function robinHeadShape(look = ROBIN) {
   return mergePainted([
-    { geometry: new THREE.SphereGeometry(0.026, 10, 8), position: [0, 0.012, 0], color: BROWN },
-    { geometry: new THREE.SphereGeometry(0.022, 8, 6), position: [0, 0.008, 0.008], color: BREAST },
-    ...[-1, 1].map((side) => ({ geometry: new THREE.SphereGeometry(0.005, 5, 4), position: [side * 0.017, 0.016, 0.014] as const, color: DARK })),
-    { geometry: new THREE.ConeGeometry(0.005, 0.016, 5), position: [0, 0.01, 0.032], rotation: [Math.PI / 2, 0, 0], color: DARK },
+    { geometry: new THREE.SphereGeometry(0.026, 10, 8), position: [0, 0.012, 0], color: look.back },
+    { geometry: new THREE.SphereGeometry(0.022, 8, 6), position: [0, 0.008, 0.008], color: look.breast },
+    ...[-1, 1].map((side) => ({ geometry: new THREE.SphereGeometry(0.005, 5, 4), position: [side * 0.017, 0.016, 0.014] as const, color: look.eye })),
+    { geometry: new THREE.ConeGeometry(0.005, 0.016, 5), position: [0, 0.01, 0.032], rotation: [Math.PI / 2, 0, 0], color: look.bill },
   ]);
 }
 
 /** The tail, from where it joins the body. */
-export function robinTailShape() {
-  return mergePainted([{ geometry: new THREE.BoxGeometry(0.026, 0.006, 0.05), position: [0, 0, -0.025], color: BROWN }]);
+export function robinTailShape(look = ROBIN) {
+  return mergePainted([{ geometry: new THREE.BoxGeometry(0.026, 0.006, 0.05), position: [0, 0, -0.025], color: look.back }]);
 }
 
-/** A robin's figure, posed each frame by `poseAt` (a RobinPose at the clock's time): one skinned draw and its wings. */
-function RobinBird({ name, poseAt }: { name: string; poseAt: (time: number) => RobinPose }) {
+/** A robin's (or a blackbird's) figure, posed each frame by `poseAt` (a RobinPose at the clock's time): one skinned draw and its wings. */
+function RobinBird({ name, poseAt, look = ROBIN }: { name: string; poseAt: (time: number) => RobinPose; look?: BirdLook }) {
   const bird = useRef<THREE.Group>(null);
   const head = useRef<THREE.Group>(null);
   const tail = useRef<THREE.Group>(null);
   const wings = useRef<THREE.Group>(null);
-  const shapes = useMemo(() => ({ body: robinBodyShape(), head: robinHeadShape(), tail: robinTailShape(), wing: new THREE.SphereGeometry(1, 8, 6) }), []);
+  const shapes = useMemo(() => ({ body: robinBodyShape(look), head: robinHeadShape(look), tail: robinTailShape(look), wing: new THREE.SphereGeometry(1, 8, 6) }), [look]);
   const materials = useMemo(
-    () => ({ painted: new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), wing: new THREE.MeshToonMaterial({ color: BROWN, gradientMap: toonRamp() }) }),
-    [],
+    () => ({ painted: new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), wing: new THREE.MeshToonMaterial({ color: look.back, gradientMap: toonRamp() }) }),
+    [look],
   );
   useEffect(
     () => () => {
@@ -84,7 +86,7 @@ function RobinBird({ name, poseAt }: { name: string; poseAt: (time: number) => R
 
   return (
     <group ref={bird} name={name} visible={false}>
-      <group scale={SCALE}>
+      <group scale={look.scale}>
         <mesh geometry={shapes.body} material={materials.painted} castShadow />
         <group ref={head} position={[0, 0.088, 0.012]}>
           <mesh geometry={shapes.head} material={materials.painted} />
@@ -138,4 +140,21 @@ export function GroundRobin({ phase }: { phase: ScenePhase }) {
     [still, phase],
   );
   return <RobinBird name="ground-robin" poseAt={poseAt} />;
+}
+
+/** A blackbird out on the bank behind the angler on wet days, hopping about and tugging at worms; the robin's hops (robinHop.ts). */
+export function GroundBlackbird({ phase }: { phase: ScenePhase }) {
+  const still = useReducedMotion();
+  const state = useRef<HopState | null>(null);
+  const lastPhase = useRef(phase);
+  const poseAt = useCallback(
+    (time: number) => {
+      const struck = phase === "fight" && lastPhase.current !== "fight";
+      lastPhase.current = phase;
+      state.current = hopStep(state.current ?? hopStart(time), time, anglerPose, anglerAshore(), { dockRobinHere: false, struck, still });
+      return hopAt(state.current, time, still);
+    },
+    [still, phase],
+  );
+  return <RobinBird name="ground-blackbird" poseAt={poseAt} look={BLACKBIRD} />;
 }
