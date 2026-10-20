@@ -29,10 +29,10 @@ describe("round 86 ideas: how often a water's outings took a kind", () => {
     const trips = [trip("a", "2026-10-01"), trip("b", "2026-10-05"), trip("c", "2026-10-08"), trip("d", "2026-10-19"), trip("e", "2026-10-25"), trip("r", "2026-10-02", "river")];
     const catches = [fish("1", "Pike", local(2026, 10, 1, 9), "a"), fish("2", "Perch", local(2026, 10, 5, 9), "b"), fish("3", "Pike", local(2026, 10, 19, 8), "d"), fish("4", "Pike", local(2026, 10, 2, 9), "r", "river")];
     const book: Logbook = { spots, trips, catches };
-    const rates = kindRates(book, catches.filter((entry) => entry.species === "Pike"), "2026-10-19");
-    expect(rates.get("own-lake")).toEqual({ count: 2, total: 4 });
+    const rateAt = kindRates(book, catches.filter((entry) => entry.species === "Pike"), "2026-10-19");
+    expect(rateAt(["own-lake"])).toEqual({ count: 2, total: 4 });
     // One outing at the river says nothing about how reliable it is.
-    expect(rates.has("river")).toBe(false);
+    expect(rateAt(["river"])).toBeNull();
   });
 });
 

@@ -15,6 +15,12 @@ export function waterKeys(book: Logbook): Map<string, string> {
   return new Map(book.spots.map((spot) => [spot.id, foldName(spot.name)]));
 }
 
+/** The names two or more of these waters share, folded: a list reads those alike. */
+export function twinNamesAmong(spots: readonly Pick<Spot, "name">[]): Set<string> {
+  const names = spots.map((spot) => foldName(spot.name));
+  return new Set(names.filter((name, index) => name && names.indexOf(name) !== index));
+}
+
 /** Two waters a search can't tell apart by name. */
 export function twinName(a: string, b: string): boolean {
   return foldName(a) === foldName(b);

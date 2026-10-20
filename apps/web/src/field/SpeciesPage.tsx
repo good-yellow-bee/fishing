@@ -107,10 +107,10 @@ function sizeChange(first: { year: string; size: Measure }, last: { year: string
 }
 
 /**
- * Per water, how many of its past outings took a fish of the kind, against all its outings had ("on 2 of 5 outings"),
- * once the water had two. `book` is the counted book, so the sample week's and the game's outings stay out.
+ * For a water and its twins, how many of their past outings took a fish of the kind, against all they had ("on 2 of 5
+ * outings"), once they had two. `book` is the counted book, so the sample week's and the game's outings stay out.
  */
-export function kindRates(book: Logbook, catches: readonly CatchEntry[], today: string): Map<string, { count: number; total: number }> {
+export function kindRates(book: Logbook, catches: readonly CatchEntry[], today: string): (spotIds: readonly string[]) => { count: number; total: number } | null {
   const fished = new Set(book.catches.flatMap((entry) => (entry.tripId ? [entry.tripId] : [])));
   const took = new Set(catches.flatMap((entry) => (entry.tripId ? [entry.tripId] : [])));
   const rates = new Map<string, { count: number; total: number }>();
@@ -121,7 +121,15 @@ export function kindRates(book: Logbook, catches: readonly CatchEntry[], today: 
     if (took.has(trip.id)) rate.count += 1;
     rates.set(trip.spotId, rate);
   }
-  return new Map([...rates].filter(([, rate]) => rate.total > 1 && rate.count > 0));
+  // Summed before the check, so twins with one outing each still make two.
+  return (spotIds) => {
+    const rate = { count: 0, total: 0 };
+    for (const spotId of spotIds) {
+      rate.count += rates.get(spotId)?.count ?? 0;
+      rate.total += rates.get(spotId)?.total ?? 0;
+    }
+    return rate.total > 1 && rate.count > 0 ? rate : null;
+  };
 }
 
 export function SpeciesPage() {
@@ -164,7 +172,7 @@ function SpeciesView() {
   const counted = new Set(own.catches.map((entry) => entry.id));
   const notCounted = !catches.some((entry) => counted.has(entry.id));
   const waters = speciesWaters(book, catches);
-  const rates = kindRates(own, catches, localDate(new Date()));
+  const rateAt = kindRates(own, catches, localDate(new Date()));
   /** Only worth a chart once the kind has come in more than one season. */
   const seasons = seasonTally({ ...book, catches });
   // By the day a fish counts on, as the year search each bar opens reads it.
@@ -218,7 +226,7 @@ function SpeciesView() {
               {/* The count opens just those fish, through the catch search. */}
               {water.name ? <Link to={findWithLink(kindTerm, exactTerm("water", plainName(water.name)))}>{fishCountLabel(water.count)}</Link> : fishCountLabel(water.count)}
               {/* How often an outing there took one: where the kind is reliable, not just where it came once. */}
-              {water.spotIds.length === 1 && rates.has(water.spotId) ? `\u00a0· ${t("on {count} of {total} outings", rates.get(water.spotId)!)}` : ""}
+              {rateAt(water.spotIds) ? `\u00a0· ${t("on {count} of {total} outings", rateAt(water.spotIds)!)}` : ""}
               {/* Beside each water, its biggest of the kind, once there is more than one water to set side by side. */}
               {waters.length > 1 ? (
                 <>

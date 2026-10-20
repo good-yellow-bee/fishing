@@ -1,9 +1,9 @@
 import type { Logbook, Spot } from "@stillwater/shared";
-import { locale, t } from "../i18n";
+import { locale, t, tn } from "../i18n";
 import { isSampleSpot, ownWatersFirst } from "./bookCopy";
 import { countedFish } from "./milestones";
 import { PLAY_LAKE_ID } from "./playLake";
-import { spotsByLastFish } from "./spotOrder";
+import { foldName, spotsByLastFish, twinNamesAmong } from "./spotOrder";
 import { plainName } from "./tripDates";
 
 /** Past this many of the angler's own waters, a picker opens with the ones fished lately. */
@@ -25,9 +25,12 @@ export function WaterOptions({ book, spots }: { book: Logbook; spots: readonly S
           .slice(0, LATELY)
           .map((row) => row.spot)
       : [];
+  // Two waters of one name read alike in the list: each says how many fish it holds, as the merge box's list does.
+  const twinNames = twinNamesAmong(spots);
+  const fishAt = (id: string) => book.catches.filter((entry) => entry.spotId === id).length;
   const option = (spot: Spot) => (
     <option key={spot.id} value={spot.id}>
-      {plainName(spot.name)}
+      {twinNames.has(foldName(spot.name)) ? `${plainName(spot.name)} · ${tn(fishAt(spot.id), "{n} fish", "{n} fish")}` : plainName(spot.name)}
     </option>
   );
   if (lately.length === 0) return <>{ordered.map(option)}</>;
