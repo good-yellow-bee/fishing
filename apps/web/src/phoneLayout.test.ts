@@ -320,3 +320,10 @@ describe("the fight card's drag line", () => {
     expect(bar).toContain('<span className="fight-drag-line">{t(DRAG_LINE[drag])}</span>');
   });
 });
+
+describe("a sideways phone in a fight", () => {
+  it("steps the bank chip aside at any text size", () => {
+    const sideways = css.slice(css.lastIndexOf("@media (pointer: coarse) and (max-height: 500px) {"));
+    expect(/\n  \.scene-wrap\[data-phase="fight"\] \.stance-chip \{([^}]*)\}/.exec(sideways)?.[1]).toContain("display: none;");
+  });
+});
