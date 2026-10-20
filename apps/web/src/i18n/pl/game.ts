@@ -128,8 +128,6 @@ export const PL_GAME: PlBook = {
   "{n} fish in clean fights": "{n} ryb w czystych holach",
   "This week's challenges": "Wyzwania tygodnia",
   "Goals run Monday to Sunday.": "Wyzwania trwają od poniedziałku do niedzieli.",
-  "Every kind of fish now climbs mastery tiers as you land it, Known at 5, Skilled at 15 and Master at 40: the field guide shows how far you are, and a mastered kind pays 1.1× points. And the shack board adds three challenges that run all week, Monday to Sunday, for bigger rewards.":
-    "Każdy gatunek ryby wspina się teraz po poziomach opanowania, gdy go łowisz: Znajomość przy 5, Wprawa przy 15 i Mistrzostwo przy 40. Atlas ryb pokazuje, jak daleko to zaszło, a opanowany gatunek daje 1,1× punktów. A tablica w szopie dodaje trzy wyzwania na cały tydzień, od poniedziałku do niedzieli, z większymi nagrodami.",
   "Into the frenzy! The baitfish boil and the hunters are slashing through them.": "W sam środek żerowania! Drobnica się kotłuje, a drapieżniki tną przez nią.",
   "A feeding frenzy at the {bank}: baitfish boil over the bubbles. Cast into them!": "Żerowanie! Łowisko: {bank}. Drobnica kotłuje się nad bąblami. Rzuć w nie!",
   "The frenzy at the {bank} is over.": "Koniec żerowania. Łowisko: {bank}.",
@@ -144,6 +142,8 @@ export const PL_GAME: PlBook = {
   "Not yet": "Jeszcze nie",
   "All three found: the {legend} bites far more often at the {bank} for the rest of the week.": "Wszystkie trzy znalezione: {legend} bierze dużo częściej na łowisku {bank} do końca tygodnia.",
   "The {fish} your hunt tracked down haunts this water.": "{fish}, którego wytropiono, krąży po tej wodzie.",
+  "Each week the shack's weekly board carries a rumor of a legend, the tiger muskie, the sturgeon or the ghost pike, with three clues to find in your catches; find all three and that legend bites far more often at its bank for the rest of the week. And every weekend the lodge board runs a derby for the heaviest of one fish: hold the top spot when Sunday ends (UTC) to earn the Derby champion badge.":
+    "Co tydzień tablica w szopie niesie wieść o legendzie: tygrysim szczupaku, jesiotrze jeziorowym albo szczupaku widmie, z trzema tropami do znalezienia w twoich połowach. Znajdź wszystkie trzy, a legenda do końca tygodnia bierze dużo częściej na swoim łowisku. A w każdy weekend tablica przystani prowadzi zawody na najcięższą rybę jednego gatunku: bądź na pierwszym miejscu, gdy kończy się niedziela (UTC), by zdobyć odznakę Zwycięstwo w zawodach.",
   "Tight to the lily pads, where the bass and pike wait in ambush.": "Tuż przy liściach grzybieni, gdzie w zasadzce czekają bassy i szczupaki.",
   "Tight to the far rock, where the walleye hold in its shadow.": "Tuż przy dalekiej skale, gdzie w jej cieniu trzymają się sandacze.",
   "Along the rock edge, where the point drops off and the bass hold.": "Wzdłuż skalnej krawędzi, gdzie cypel opada w głąb i trzymają się bassy.",
