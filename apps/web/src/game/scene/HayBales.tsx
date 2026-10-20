@@ -3,7 +3,7 @@ import * as THREE from "three";
 import type { LakeHour, LakeSeason } from "@stillwater/shared";
 import { BALE_LENGTH, BALE_RADIUS, fieldPoint, hayBales } from "./hayField";
 import { mergePainted } from "./mergeParts";
-import { toonRamp } from "./toon";
+import { toonRamp, useInstancedTwin } from "./toon";
 
 const SIDE = "#c9a650";
 const END = "#e0c77e";
@@ -68,6 +68,7 @@ export function HayBales({ season, hour }: { season: LakeSeason; hour: LakeHour 
   const shape = useMemo(() => baleShape(), []);
   const fields = useMemo(() => fieldsShape(season === "fall" ? "fall" : "summer", hour), [season, hour]);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
+  const instanced = useInstancedTwin(material);
   useEffect(
     () => () => {
       shape.dispose();
@@ -92,7 +93,7 @@ export function HayBales({ season, hour }: { season: LakeSeason; hour: LakeHour 
   return (
     <group name="hay-fields">
       <mesh geometry={fields} material={material} />
-      <instancedMesh ref={mesh} args={[shape, material, bales.length]} />
+      <instancedMesh ref={mesh} args={[shape, instanced, bales.length]} />
     </group>
   );
 }

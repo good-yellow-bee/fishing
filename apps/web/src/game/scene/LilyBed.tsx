@@ -51,7 +51,8 @@ export function LilyBed({ lilies, season, open }: { lilies: readonly LilyAt[]; s
         const parts: { mesh: THREE.InstancedMesh; local: THREE.Matrix4 }[] = [];
         root.traverse((obj) => {
           if (!(obj instanceof THREE.Mesh) || !obj.visible) return;
-          const mesh = new THREE.InstancedMesh(obj.geometry, obj.material, members.length);
+          // Its own copy of the material: the plain pads share the original, and one material drawn both ways makes three re-pick its shader each frame (toon.ts useInstancedTwin).
+          const mesh = new THREE.InstancedMesh(obj.geometry, (obj.material as THREE.Material).clone(), members.length);
           mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
           mesh.frustumCulled = false;
           parts.push({ mesh, local: obj.matrixWorld.clone() });
@@ -63,7 +64,10 @@ export function LilyBed({ lilies, season, open }: { lilies: readonly LilyAt[]; s
   useEffect(
     () => () =>
       kinds.forEach(({ root, parts }) => {
-        parts.forEach(({ mesh }) => mesh.dispose());
+        parts.forEach(({ mesh }) => {
+          (mesh.material as THREE.Material).dispose();
+          mesh.dispose();
+        });
         releaseToonCopy(root);
       }),
     [kinds],

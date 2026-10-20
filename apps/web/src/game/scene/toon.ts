@@ -1,3 +1,4 @@
+import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 
 let ramp: THREE.DataTexture | undefined;
@@ -127,4 +128,15 @@ export function releaseSharedMaterials(root: THREE.Object3D) {
 /** How many distinct shared materials are live; for tests. */
 export function sharedMaterialCount() {
   return sharedMaterials.size;
+}
+
+/**
+ * A copy of `material` for an instanced mesh that shares it with plain or skinned ones. One material drawn both
+ * ways makes three rebuild its shader choice every time the two take turns, every frame; the copy keeps each
+ * kind on its own. Only for materials that never change after they are made.
+ */
+export function useInstancedTwin<M extends THREE.Material>(material: M): M {
+  const twin = useMemo(() => material.clone() as M, [material]);
+  useEffect(() => () => twin.dispose(), [twin]);
+  return twin;
 }
