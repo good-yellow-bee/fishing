@@ -120,6 +120,7 @@ import { updateSettings } from "./settings";
 import { giantShyKey } from "./giantShy";
 import { nightLineKey, nightLineReadyAt } from "./nightLine";
 import { baitBucketKey } from "./baitBucket";
+import { shinerKey } from "./groundbaitBag";
 import { carriesBait, FALSE_STRIKE_MS, FIGURE_EIGHT_ODDS, FIGURE_TURN_MS, FIGURE_WINDOW_MS, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TIRE_REASONS, TOPWATER_POPS, useFishingGame, WAIT_REASONS } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
@@ -489,12 +490,14 @@ describe("useFishingGame live shiner", () => {
     cast(surface);
     expect(liveShiner()).toBe("false");
     expect(hint()).toMatch(/^The live shiner swims down off the hook/);
+    // The browser-wide shiner from before anglers had their own hook went to this angler, and out on the cast.
     expect(kept.has("stillwater.shiner.v1")).toBe(false);
+    expect(kept.has(shinerKey(profile.userId))).toBe(false);
     act(() => vi.advanceTimersByTime(60_000));
     const buy = () => act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === "buy shiner") as HTMLButtonElement).click());
     buy();
     expect(liveShiner()).toBe("true");
-    expect(kept.get("stillwater.shiner.v1")).toBe("live");
+    expect(kept.get(shinerKey(profile.userId))).toBe("live");
   });
 
   it("leaves any other landed fish on the card", () => {

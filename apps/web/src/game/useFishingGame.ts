@@ -621,8 +621,14 @@ export function useFishingGame(
   const [schooled, setSchooled] = useState(false);
   // Handfuls left in the bag this visit, and the bank the last one still feeds, so the page can offer and show it.
   // A handful comes free with each visit; ones bought at the shack stay in the bag across a reload.
-  const [handfuls, setHandfuls] = useState(() => Math.max(GROUNDBAIT_HANDFULS, loadBag()));
-  useEffect(() => saveBag(handfuls), [handfuls]);
+  const [handfuls, setHandfuls] = useState(() => Math.max(GROUNDBAIT_HANDFULS, profile ? loadBag(profile.userId) : 0));
+  // Each angler's own bag, read when they sign in; a handful thrown or bought is kept for them.
+  useEffect(() => {
+    if (profile?.userId) setHandfuls(Math.max(GROUNDBAIT_HANDFULS, loadBag(profile.userId)));
+  }, [profile?.userId]);
+  useEffect(() => {
+    if (profile?.userId) saveBag(profile.userId, handfuls);
+  }, [handfuls]);
   /** The line came out of a fight over the rocks or round a piling frayed, and snaps sooner until retied. */
   const frayedRef = useRef(false);
   const [frayed, setFrayed] = useState(false);
@@ -654,7 +660,7 @@ export function useFishingGame(
   /** This cast went out on a washed-out worm, so its bite comes slower. */
   const castWashedRef = useRef(false);
   /** A shiner left on the hook before a reload, landed or bought. */
-  const [keptShiner] = useState(loadShiner);
+  const [keptShiner] = useState(() => (profile ? loadShiner(profile.userId) : null));
   /** A landed golden shiner hooked back on as live bait, or one bought at the shack, for the next cast. */
   const liveShinerRef = useRef(keptShiner !== null);
   /** The shiner on the hook was landed in a clean fight, so it swims hard and draws more of the hunters. */
@@ -666,8 +672,17 @@ export function useFishingGame(
     livelyShinerRef.current = next === "lively";
     setLiveShiner(next !== null);
     setLivelyShiner(next === "lively");
-    saveShiner(next);
+    if (anglerIdRef.current) saveShiner(anglerIdRef.current, next);
   };
+  // The angler's own hook, read when they sign in.
+  useEffect(() => {
+    if (!profile?.userId) return;
+    const kept = loadShiner(profile.userId);
+    liveShinerRef.current = kept !== null;
+    livelyShinerRef.current = kept === "lively";
+    setLiveShiner(kept !== null);
+    setLivelyShiner(kept === "lively");
+  }, [profile?.userId]);
   const [groundbait, setGroundbait] = useState<Groundbait | null>(null);
   /** The bank whose next cast meets wary fish, for the stance chip to say so before the cast. */
   const [fishedHard, setFishedHard] = useState<readonly SpotId[]>([]);
