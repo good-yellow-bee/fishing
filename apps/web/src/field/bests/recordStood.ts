@@ -8,5 +8,6 @@ export function recordStood(day: string, today: string): string {
   if (days < 365) return tn(days, "{n} day ago", "{n} days ago");
   // Whole calendar years, as a birthday counts them: May 1 2025 is two years back on May 1 2027.
   const years = Number(today.slice(0, 4)) - Number(day.slice(0, 4)) - (today.slice(5) < day.slice(5) ? 1 : 0);
-  return tn(Math.max(1, years), "{n} year ago", "{n} years ago");
+  // A leap year's 365 days short of a calendar year still read in days.
+  return years < 1 ? tn(days, "{n} day ago", "{n} days ago") : tn(years, "{n} year ago", "{n} years ago");
 }

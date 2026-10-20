@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { getLang, loadPolish, polishBook, t, useT } from "../../i18n";
+import { loadPolish, polishBook, t, useT } from "../../i18n";
 import { useLogbook } from "../LogbookState";
 import { renameInBook } from "../bookRename";
 import { countedFish } from "../milestones";
@@ -25,11 +25,10 @@ export function SameKinds() {
   }, []);
   const box = useRef<HTMLElement>(null);
   // The fish the counts below hold: a sample fish under the other name is no slip of the angler's.
-  // Named as the kinds list names it: in English the book's most-written spelling, the same before and after the Polish
-  // book lands; in Polish the dictionary's.
+  // Named as the kinds list names it (kindNames): the same in English before and after the Polish book lands.
   const own = countedFish(storedBook.catches);
   const kindName = kindNames(own);
-  const pairs = kindPairs(own, (name) => (getLang() === "pl" ? t(bookSpelling(name)) : kindName(name)), inPolish);
+  const pairs = kindPairs(own, kindName, inPolish);
   if (pairs.length === 0) return null;
   return (
     <section ref={box} className="same-kinds" aria-label={t("Same kind, two names")}>
