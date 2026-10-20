@@ -188,6 +188,8 @@ type Props = {
   moon?: number;
   /** The day's wind as a downwind drift on a sitting float, meters a second. */
   wind?: { x: number; z: number };
+  /** How far the anchored hull swings toward a run, as a share of its full swing (fight.ts boatSwingShare). */
+  boatSwing?: number;
   hotspot: Hotspot | null;
   /** The groundbait tossed off a bank, while it still feeds the fish there. */
   groundbait?: Groundbait | null;
@@ -696,7 +698,7 @@ function WaterAim({ phase, aim, level, powerRef, accuracy }: WaterAimProps) {
   );
 }
 
-function FightMotion({ phase, sim, ambush, light, lift, run }: { phase: ScenePhase; sim: SimRef; ambush: boolean; light: boolean; lift: boolean; run: boolean }) {
+function FightMotion({ phase, sim, ambush, light, lift, run, boatSwing }: { phase: ScenePhase; sim: SimRef; ambush: boolean; light: boolean; lift: boolean; run: boolean; boatSwing: number }) {
   const prevPhase = useRef(phase);
   const prevSurge = useRef(0);
   const biteAt = useRef(-1);
@@ -785,8 +787,8 @@ function FightMotion({ phase, sim, ambush, light, lift, run }: { phase: ScenePha
       fightView.plunge = phase === "hookset" ? bobberPlunge(fightView.biteAge, -1, 0) * (light ? LIGHT_PLUNGE : lift ? -LIFT_RISE : run ? RUN_PLUNGE : 1) : 0;
     }
 
-    // At anchor the boat swings to follow a run (that is why a run takes less line out here), then settles back.
-    const swingTarget = live && boat.mode === "anchored" ? boatSwingTarget(surge, runSide.current, sim.current?.jump === true || sim.current?.roll === true) : 0;
+    // At anchor the boat swings to follow a run (that is why a run takes less line out here), less in a strong wind, then settles back.
+    const swingTarget = live && boat.mode === "anchored" ? boatSwingTarget(surge, runSide.current, sim.current?.jump === true || sim.current?.roll === true, boatSwing) : 0;
     boat.swing += (swingTarget - boat.swing) * (1 - Math.exp(-(swingTarget === 0 ? 0.9 : 2.5) * dt));
 
     if (phase === "fight" && fightView.leapAge >= 0) {
@@ -2163,7 +2165,7 @@ function Tone({ hour }: { hour: LakeHour }) {
   return null;
 }
 
-function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, topwater = false, hour, sky, season = "summer", species, weight, golden = false, released = false, moon, wind, hotspot, groundbait = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
+function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, topwater = false, hour, sky, season = "summer", species, weight, golden = false, released = false, moon, wind, boatSwing = 0, hotspot, groundbait = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
   // How this fish takes the bait: a topwater lure makes every take a hit at the top.
   const take = species !== null ? takeStyle(species.id, topwater) : null;
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
@@ -2187,7 +2189,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
   return (
     <>
       <PlayerMove phase={phase} />
-      <FightMotion phase={phase} sim={sim} ambush={take === "ambush"} light={take === "light"} lift={take === "lift"} run={take === "run"} />
+      <FightMotion phase={phase} sim={sim} ambush={take === "ambush"} light={take === "light"} lift={take === "lift"} run={take === "run"} boatSwing={boatSwing} />
       <CameraRig phase={phase} sim={sim} />
       <Tone hour={hour} />
       <FrameWatch />

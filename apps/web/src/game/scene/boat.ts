@@ -36,10 +36,10 @@ export const BOAT_SWING = 0.22;
 
 /**
  * Where a fight swings the anchored hull: toward the fish on a run, back square between runs.
- * runSide is the scene's lateral lead sign, where positive is the angler's right, which turns the bow to a lower yaw.
+ * `share` scales it (fight.ts boatSwingShare). runSide is the scene's lateral lead sign, where positive is the angler's right, which turns the bow to a lower yaw.
  */
-export function boatSwingTarget(surge: 0 | 1 | 2, runSide: number, jump = false) {
-  return surge === 2 && !jump ? -BOAT_SWING * Math.max(-1, Math.min(1, runSide)) : 0;
+export function boatSwingTarget(surge: 0 | 1 | 2, runSide: number, jump = false, share = 1) {
+  return surge === 2 && !jump ? -BOAT_SWING * share * Math.max(-1, Math.min(1, runSide)) : 0;
 }
 
 const listeners = new Set<() => void>();
