@@ -88,6 +88,8 @@ import { LurkerShadow } from "./LurkerShadow";
 import { FollowShadow } from "./FollowShadow";
 import { GiantSwirl } from "./GiantSwirl";
 import { NightLineStake } from "./NightLineStake";
+import { ShinerTrap } from "./ShinerTrap";
+import type { trapState } from "../minnowTrap";
 import { BaitBucket } from "./BaitBucket";
 import { weedClumpShape } from "./weedClump";
 import { fishSize, landedScale } from "./fishSize";
@@ -216,6 +218,8 @@ type Props = {
   groundbait?: Groundbait | null;
   /** That groundbait was left on an earlier visit and the feeders have gathered over it. */
   groundbaitPrimed?: boolean;
+  /** The shiner trap by the shack while it is set (minnowTrap.ts trapState), or null when it is not. */
+  shinerTrap?: ReturnType<typeof trapState> | null;
   /** An evening rise is on: rings dimple the water in reach of the bank. */
   rising?: boolean;
   /** A thunderstorm: the sky flashes now and then and thunder follows. */
@@ -2326,7 +2330,7 @@ function Tone({ hour }: { hour: LakeHour }) {
 
 const NO_BANKS: readonly SpotId[] = [];
 
-function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, follow = null, giantBanks = NO_BANKS, nightLineSpot = null, baitBucket = 0, topwater = false, hour, sky, season = DEFAULT_SEASON, species, weight, golden = false, released = false, moon, wind, boatSwing = 0, headlamp = false, hotspot, groundbait = null, groundbaitPrimed = false, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
+function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, follow = null, giantBanks = NO_BANKS, nightLineSpot = null, baitBucket = 0, topwater = false, hour, sky, season = DEFAULT_SEASON, species, weight, golden = false, released = false, moon, wind, boatSwing = 0, headlamp = false, hotspot, groundbait = null, groundbaitPrimed = false, shinerTrap = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
   // How this fish takes the bait: a topwater lure makes every take a hit at the top.
   const take = species !== null ? takeStyle(species.id, topwater) : null;
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
@@ -2403,6 +2407,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       <GiantSwirl banks={giantBanks} />
       {nightLineSpot && <NightLineStake bank={nightLineSpot} />}
       <BaitBucket count={baitBucket} />
+      {shinerTrap && <ShinerTrap ready={shinerTrap === "ready"} />}
       {species && <FishShadow level={level} phase={phase} weight={weight} bobber={bobberWorld} speciesId={species.id} />}
       <StrikeSplash phase={phase} roll={take === "roll" || (species !== null && topwater)} />
       <CaughtFish

@@ -22,10 +22,13 @@ export function stakeAt(bank: SpotId): Stake | null {
   if (!stand) return null;
   const home = Math.atan2(-(stand.z - LAKE_CENTER_Z) / LAKE_RZ, stand.x / LAKE_RX);
   const radius = Math.hypot(LAKE_RX * Math.cos(home), LAKE_RZ * Math.sin(home));
-  const angle = home + (ALONG[bank] ?? 0) / radius;
+  return bankStake(home + (ALONG[bank] ?? 0) / radius, BACK);
+}
+
+/** A stake `back` inland of the waterline at `angle` round the lake; unturned it leans out along +z, turned toward the lake's middle. */
+export function bankStake(angle: number, back: number): Stake {
   const edge = lakeEdge(angle);
-  const x = Math.cos(angle) * (LAKE_RX * edge + BACK);
-  const z = LAKE_CENTER_Z - Math.sin(angle) * (LAKE_RZ * edge + BACK);
-  // Unturned it leans out along +z; turn it to lean toward the lake's middle.
+  const x = Math.cos(angle) * (LAKE_RX * edge + back);
+  const z = LAKE_CENTER_Z - Math.sin(angle) * (LAKE_RZ * edge + back);
   return { x, y: 0, z, yaw: Math.atan2(-x, LAKE_CENTER_Z - z) };
 }
