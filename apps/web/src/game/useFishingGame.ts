@@ -66,7 +66,7 @@ import { castSnags, onRockEdge, onShoreIce, ROCK_EDGE_WAIT, SNAG_AT_MS, SNAG_TAP
 import { FLUTTER_SEC, flutterGrabberFor, flutterTip, followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { BUCKET_SIZE, liveShiners, loadBucket, saveBucket } from "./baitBucket";
 import { loadSwim, saveSwim, swimNow } from "./swim";
-import { loadTrap, saveTrap, trapCatch, trapState, type Trap } from "./minnowTrap";
+import { loadTrap, saveTrap, trapCatch, trapIsCold, trapState, type Trap } from "./minnowTrap";
 import { castForFoe, foeGone, isOldFoe, loadOldFoe, saveOldFoe } from "./oldFoe";
 import { loadNightLine, nightLineCatch, nightLineKinds, nightLineState, nightSkyFor, saveNightLine, wormLineHour, type NightLine } from "./nightLine";
 import { markShy, loadGiantShy, rollGiantShy, saveGiantShy, shyOf, type GiantShy } from "./giantShy";
@@ -2284,8 +2284,13 @@ export function useFishingGame(
   const setTrap = () => {
     if (!profile || trapRef.current || handfulsRef.current <= 0 || phaseRef.current !== "idle") return;
     keepHandfuls(handfulsRef.current - 1);
-    keepTrap(profile.userId, { setAt: Date.now() });
-    setHint(t("You bait the shiner trap with a handful of groundbait and sink it by the shack. Lift it after six hours, within three days."));
+    const cold = trapIsCold(season);
+    keepTrap(profile.userId, { setAt: Date.now(), ...(cold ? { cold } : {}) });
+    setHint(
+      cold
+        ? t("You bait the shiner trap with a handful of groundbait and sink it by the shack. The water is cold and the shiners slow: lift it after twelve hours, within three days, for one.")
+        : t("You bait the shiner trap with a handful of groundbait and sink it by the shack. Lift it after six hours, within three days."),
+    );
   };
 
   /** Lift the shiner trap: the shiners in it go in the bait bucket, as many as it holds room for, and the rest go back. */

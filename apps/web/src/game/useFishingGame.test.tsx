@@ -120,7 +120,7 @@ import { updateSettings } from "./settings";
 import { giantShyKey } from "./giantShy";
 import { nightLineKey, nightLineReadyAt } from "./nightLine";
 import { BUCKET_LIFE_MS, baitBucketKey } from "./baitBucket";
-import { TRAP_SOAK_MS } from "./minnowTrap";
+import { TRAP_COLD_SOAK_MS, TRAP_SOAK_MS, trapKey } from "./minnowTrap";
 import { bagKey, shinerKey } from "./groundbaitBag";
 import { oldFoeKey } from "./oldFoe";
 import { SWIM_PRIMED_MS, swimKey } from "./swim";
@@ -476,6 +476,22 @@ describe("useFishingGame live shiner", () => {
     // Math.random is pinned to 0 here, so the trap holds one.
     expect(container!.querySelector("[data-testid=bucket]")?.textContent).toBe("1");
     expect(hint()).toBe("Shiners in the trap: 1, all into your bait bucket.");
+  });
+
+  it("baits the shiner trap in winter's cold water: it soaks twelve hours, and the hint says so", () => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, undefined, "winter");
+    const press = (name: string) => act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === name) as HTMLButtonElement).click());
+    press("set trap");
+    expect(hint()).toMatch(/The water is cold and the shiners slow: lift it after twelve hours/);
+    expect(JSON.parse(kept.get(trapKey(profile.userId))!)).toEqual({ setAt: DOCK_BUBBLES.at, cold: true });
+    vi.setSystemTime(DOCK_BUBBLES.at + TRAP_SOAK_MS);
+    press("lift trap");
+    expect(container!.querySelector("[data-testid=bucket]")?.textContent).toBe("0");
+    vi.setSystemTime(DOCK_BUBBLES.at + TRAP_COLD_SOAK_MS);
+    press("lift trap");
+    expect(container!.querySelector("[data-testid=bucket]")?.textContent).toBe("1");
   });
 
   it("lets a spare shiner die after three days in the bucket, and says so on the next visit", () => {
