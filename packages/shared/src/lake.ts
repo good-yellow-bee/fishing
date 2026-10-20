@@ -109,7 +109,7 @@ export function lakeEdge(angle: number) {
 export function inLake(x: number, z: number) {
   const nx = x / LAKE_RX;
   const nz = (z - LAKE_CENTER_Z) / LAKE_RZ;
-  return Math.hypot(nx, nz) <= lakeEdge(Math.atan2(nz, nx)) * 0.96;
+  return Math.sqrt(nx * nx + nz * nz) <= lakeEdge(Math.atan2(nz, nx)) * 0.96;
 }
 
 export function spotAt(x: number, z: number): SpotId | null {

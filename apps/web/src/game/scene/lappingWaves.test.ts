@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { LAP_SEC, foamOpacity, onshore, shoreOutward, washAt } from "./lappingWaves";
+import { LAP_SEC, foamOpacity, onshore, shoreOutward, washAt, washFrom } from "./lappingWaves";
 
 const NORTH_WIND = { x: 0, z: -0.13 };
 
@@ -38,5 +38,11 @@ describe("lapping waves", () => {
   it("dims the foam at night and leaves it under the ice in winter", () => {
     expect(foamOpacity("night", "summer")).toBeLessThan(foamOpacity("day", "summer"));
     expect(foamOpacity("day", "winter")).toBe(0);
+  });
+  it("gives the same wash from a bank's known blow as from the wind", () => {
+    const out = { reach: 0, thickness: 0 };
+    for (const [angle, time, still] of [[1, 0.7, false], [2.4, 5.1, false], [4, 2, true]] as const) {
+      expect(washFrom(onshore(angle, NORTH_WIND), angle, time, still, out)).toEqual(washAt(angle, NORTH_WIND, time, still));
+    }
   });
 });
