@@ -97,7 +97,7 @@ import { bestPounds } from "../game/bestWeight";
 import { hookNoteMs } from "../game/hookNote";
 import { bookForPlay, markReleasedInBook, saveLandedCatch, saveLandedPhoto } from "../field/keepCatch";
 import { LURE_TIER_WORD, lureCatchCount, lureTier, lureTierReachedBy } from "../game/lureSeasoning";
-import { rememberReleased } from "../game/releasedFish";
+import { rememberReleased, remembersReleased } from "../game/releasedFish";
 import { readTackle } from "../field/gear/storage";
 import { useEffectsSteppedDown } from "../game/frameWatch";
 import { useEffectsNotice } from "../game/effectsNotice";
@@ -1463,8 +1463,8 @@ export function DockPage() {
                   {releaseBonus > 0
                     ? t("Released back into the lake · +{bonus} pts for letting a trophy go", { bonus: releaseBonus })
                     : t("Released back into the lake")}
-                  {/* The lake remembers all but its small common fish, and a remembered one shies from the lure it was caught on. */}
-                  {game.outcome.lure && game.outcome.species.rarity !== "common" && ` · ${t("it will shy from the {lure} now", { lure: t(game.outcome.lure) })}`}
+                  {/* A fish the lake remembers shies from the lure it was caught on. */}
+                  {game.outcome.lure && remembersReleased(game.outcome.species) && ` · ${t("it will shy from the {lure} now", { lure: t(game.outcome.lure) })}`}
                 </p>
               ) : (
                 <button className="panel-btn" type="button" onClick={() => void releaseFish()} aria-disabled={releasing || undefined}>

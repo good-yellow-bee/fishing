@@ -2933,6 +2933,11 @@ describe("useFishingGame groundbait", () => {
     expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toBe("Common carp: it came in to feed on the groundbait.");
   });
 
+  it("casts the tied lure at the bank's let-go fish, so one shy of it stays down", () => {
+    cast(mount(DOCK_BUBBLES.at, profile, "day", false, "Mepps spinner"));
+    expect(castForReleased).toHaveBeenLastCalledWith([], "dock", expect.any(Number), expect.any(Number), "Mepps spinner");
+  });
+
   it("brings back a fish let go here on an earlier day, grown, and says so on the card", () => {
     const surface = mount();
     const pike = FISH.find((fish) => fish.id === "pike")!;

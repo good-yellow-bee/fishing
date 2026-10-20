@@ -41,9 +41,14 @@ export function saveReleased(list: readonly ReleasedFish[]) {
   }
 }
 
-/** Remember a fish let go from the card; small common fish are never remembered, as with the one that got away. */
+/** Whether the lake remembers a fish let go; small common fish are never remembered, as with the one that got away. */
+export function remembersReleased(species: FishSpecies): boolean {
+  return species.rarity !== "common";
+}
+
+/** Remember a fish let go from the card. */
 export function rememberReleased(species: FishSpecies, weight: number, spot: SpotId, now = Date.now(), lure?: string) {
-  if (species.rarity === "common") return;
+  if (!remembersReleased(species)) return;
   saveReleased([{ species: species.id, weight, spot, at: now, ...(lure ? { lure } : {}) }, ...loadReleased()]);
 }
 
