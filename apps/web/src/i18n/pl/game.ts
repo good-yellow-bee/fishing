@@ -178,7 +178,7 @@ export const PL_GAME: PlBook = {
   "{note} · your night line is out here": "{note} · tu stoi twoja nocna linka",
   "Night line": "Nocna linka",
   "Your lost trophy was found": "Twoje zgubione trofeum się znalazło",
-  "{name} landed the {fish} that broke your line": "{name}: wylądowany {fish}, który zerwał ci żyłkę",
+  "{name} landed the {fish} that broke your line": "Trofeum, które zerwało ci żyłkę ({fish}), złowione przez: {name}",
   "{weight} at the {bank}": "{weight}, łowisko: {bank}",
   "A wet night: a good one to leave a night line out.": "Mokra noc: dobra, by zostawić nocną linkę.",
   "It's the trophy {name} lost!": "To trofeum, które zerwało się osobie {name}!",

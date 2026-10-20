@@ -93,12 +93,16 @@ describe("news of a lost trophy someone landed", () => {
       return null;
     }
     const root = createRoot(document.createElement("div"));
-    act(() => root.render(<Probe user="" />));
-    act(() => root.render(<Probe user="ash" />));
-    expect(seen.shown?.id).toBe("l2");
-    act(() => vi.advanceTimersByTime(TAG_NEWS_TOAST_MS));
-    expect(JSON.parse(kept.get(lostNewsKey("ash"))!)).toContain("l2");
-    act(() => root.unmount());
-    vi.useRealTimers();
+    try {
+      act(() => root.render(<Probe user="" />));
+      act(() => root.render(<Probe user="ash" />));
+      expect(seen.shown?.id).toBe("l2");
+      act(() => vi.advanceTimersByTime(TAG_NEWS_TOAST_MS));
+      expect(JSON.parse(kept.get(lostNewsKey("ash"))!)).toContain("l2");
+    } finally {
+      act(() => root.unmount());
+      vi.useRealTimers();
+      vi.unstubAllGlobals();
+    }
   });
 });

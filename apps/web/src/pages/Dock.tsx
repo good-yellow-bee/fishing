@@ -192,6 +192,9 @@ const EFFECTS_NOTICE_MS = 5000;
 const LINE_WORD: Record<LineWeight, string> = { light: "Line: light", standard: "Line: standard", heavy: "Line: heavy" };
 const LINE_SHORT: Record<LineWeight, string> = { light: "Thin", standard: "Line", heavy: "Thick" };
 
+/** A lost trophy's news is told once by its report's id. */
+const lostNewsId = (one: LostFound) => one.id;
+
 export function DockPage() {
   useT();
   usePageTitle(`${t("On the lake")} · Stillwater`);
@@ -696,7 +699,7 @@ export function DockPage() {
   const shownBadges = useBadgeToast(me?.badges, bankClear && !shownLevel);
   const shownTag = useTagNewsToast(me?.tagReturns, bankClear && !shownLevel && !shownBadges);
   // Told once, as a tag's return is, when another angler landed a trophy that broke this angler's line.
-  const shownLost = useNewsToast(lostFound, bankClear && !shownLevel && !shownBadges && !shownTag, (one) => one.id, lostNewsKey(userId ?? ""));
+  const shownLost = useNewsToast(lostFound, bankClear && !shownLevel && !shownBadges && !shownTag, lostNewsId, lostNewsKey(userId ?? ""));
   // The effects notice waits its turn too, behind both: in a fight it covered the tension bar and the let-go cue.
   const effectsNotice = useEffectsNotice(steppedDownAt, !bankClear || !!shownLevel || !!shownBadges || !!shownTag || !!shownLost, EFFECTS_NOTICE_MS);
 
@@ -1630,7 +1633,7 @@ export function DockPage() {
               <p>{t("You let it go at {was}; it came back at {weight} · +{points} pts", { was: weightText(shownTag.was), weight: weightText(shownTag.weight), points: TAG_RETURN_BONUS })}</p>
             </div>
           )}
-          {shownLost && !shownTag && !shownLevel && !shownBadges && (
+          {shownLost && (
             <div className="toast level-toast badge-toast">
               <span className="eyebrow">{t("Your lost trophy was found")}</span>
               <h2>{t("{name} landed the {fish} that broke your line", { name: shownLost.by, fish: t(fishById(shownLost.speciesId)?.name ?? shownLost.speciesId).toLowerCase() })}</h2>

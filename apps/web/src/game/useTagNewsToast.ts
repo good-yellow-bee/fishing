@@ -49,7 +49,7 @@ export function useNewsToast<T>(items: readonly T[] | undefined, bankClear: bool
       setShown(null);
     }, TAG_NEWS_TOAST_MS);
     return () => window.clearTimeout(timer);
-  }, [shown, bankClear]);
+  }, [shown, bankClear, key]);
 
   return bankClear ? shown : null;
 }
