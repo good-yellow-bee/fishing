@@ -195,6 +195,7 @@ export function SpotsPage() {
   };
   const [ownFishAt, allFishAt] = [fishAt(countedCatches), fishAt(book.catches)];
   const kindName = bookKindName(book.catches);
+  const lureName = bookLureName(book.catches);
   const fishedHere = (id: string) => {
     const own = ownHere(id);
     const trips = own ? ownTrips(id) : tripsForSpot(book, id);
@@ -366,7 +367,7 @@ export function SpotsPage() {
                   biggest={biggestAt(ownHere(row.spot.id) ? countedCatches : book.catches, row.spot.id)}
                   waterTemp={recentTemp(ownHere(row.spot.id) ? countedCatches : book.catches, row.spot.id, today, (entry) => bookFishDay(book, entry))}
                   kindName={kindName}
-                  lureName={bookLureName(book.catches)}
+                  lureName={lureName}
                   outNow={outNowName(row.spot.id)}
                 />
               ))}
@@ -475,6 +476,7 @@ function SpotView() {
   // Its links open the fish its counts count: the sample week's beside the angler's own left out, as here.
   // Kinds named as the book writes them most, as Bests and the catch cards name them, not as this water's few fish do.
   const kindName = bookKindName(book.catches);
+  const lureName = bookLureName(book.catches);
   const here = summed.length < catches.length ? `${exactTerm("water", plainName(spot.name))} -${t("sample|search word")}` : exactTerm("water", plainName(spot.name));
   // A search finds a water by its name, so while another shares it, this page's links open both waters' fish.
   const twin = book.spots.find((other) => other.id !== spot.id && twinName(other.name, spot.name));
@@ -567,7 +569,7 @@ function SpotView() {
         {/* When it was last fished, by its last outing or fish: how long it has rested. */}
         {lastHere ? (
           <p className="meta last-here">
-            <LastHereLine rest={restHere} day={lastHere} trip={lastHereTrip} fish={fishOn} catches={catches} lureName={bookLureName(book.catches)} />
+            <LastHereLine rest={restHere} day={lastHere} trip={lastHereTrip} fish={fishOn} catches={catches} lureName={lureName} />
           </p>
         ) : null}
         {/* How long the angler has known this water: its first fish, once another fish day has followed it. */}
@@ -638,7 +640,7 @@ function SpotView() {
             spotSummary(spot, fishedOutings, summed, average, top ? { trip: top, fish: fishOn(top.id) } : null, lastHereText, {
               hooks: hooks ? hookText(hooks) : null,
               next: nextHere ? t("Next outing here: {when}", { when: tripWhen(nextHere.date, today, tomorrow) }) : null,
-              lureName: bookLureName(book.catches),
+              lureName,
             })
           }
           file="stillwater-water.txt"

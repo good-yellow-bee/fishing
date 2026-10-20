@@ -2,6 +2,7 @@ import type { CatchEntry, LureTally } from "@stillwater/shared";
 import { pieceName, shownPieceKey } from "./gear/pieceKey";
 import { mostWritten } from "./speciesLink";
 import { countedFish } from "./milestones";
+import { getLang } from "../i18n";
 
 /**
  * The lures that took the most fish, most first, grouped as the exact lure search and Gear group them: "Spinnerbait"
@@ -36,12 +37,18 @@ export function lureNames(catches: readonly CatchEntry[]): (lure: string) => str
   return (lure) => (lure.trim() ? pieceName(spelled.get(shownPieceKey(lure.trim())) ?? lure) : "");
 }
 
-const lureNameCache = new WeakMap<readonly CatchEntry[], (lure: string) => string>();
+const lureNameCache = new WeakMap<readonly CatchEntry[], { lang: string; name: (lure: string) => string }>();
 
-/** lureNames for a book's own fish, kept while the book stays the same: a lure named as Gear and Bests name it. */
+/**
+ * lureNames for a book's own fish, kept while the book and the language stay the same (its spellings are grouped by
+ * the reader's words): a lure named as Gear and Bests name it.
+ */
 export function bookLureName(catches: readonly CatchEntry[]): (lure: string) => string {
-  let name = lureNameCache.get(catches);
-  if (!name) lureNameCache.set(catches, (name = lureNames(countedFish(catches))));
+  const lang = getLang();
+  const known = lureNameCache.get(catches);
+  if (known?.lang === lang) return known.name;
+  const name = lureNames(countedFish(catches));
+  lureNameCache.set(catches, { lang, name });
   return name;
 }
 

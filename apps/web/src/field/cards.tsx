@@ -23,7 +23,6 @@ import { catchLink, type ListKey } from "./catchList";
 import { FROM_LIST } from "./leaveDeleted";
 import { isPlanned } from "./TripMonthHead";
 import { outingDay, outNow, plainName, sameName } from "./tripDates";
-import { pieceName } from "./gear/pieceKey";
 import { bookFishDay } from "./tripMonths";
 import { bookKindName } from "./speciesLink";
 import { bookLureName } from "./pieceTally";
@@ -52,6 +51,7 @@ export const CatchCard = memo(function CatchCard({
   const { book, photoFor } = useLogbook();
   const photo = photoFor(entry.id);
   const badge = catchBadge(book, entry);
+  const lure = bookLureName(book.catches)(entry.lure);
   return (
     <article className={photo ? "catch-card has-photo" : "catch-card"}>
       {photo ? <img className="catch-thumb" src={photo} alt="" /> : null}
@@ -64,7 +64,7 @@ export const CatchCard = memo(function CatchCard({
         </Head>
         <p className="meta">
           {/* Every fish taken on this lure, as on the catch page. */}
-          <Link to={findLink(exactTerm("lure", bookLureName(book.catches)(entry.lure)))}>{bookLureName(book.catches)(entry.lure)}</Link>
+          <Link to={findLink(exactTerm("lure", lure))}>{lure}</Link>
           <span aria-hidden="true">·</span>
           {spotName !== null ? (
             <>
@@ -162,7 +162,7 @@ export function SpotCard({
   waterTemp = null,
   biggest = null,
   kindName = (species: string) => species,
-  lureName = pieceName,
+  lureName,
   outNow = null,
 }: {
   spot: Spot;
@@ -182,7 +182,7 @@ export function SpotCard({
   /** How the book names a kind, for its best fish. */
   kindName?: (species: string) => string;
   /** How the book names a lure, for its best lure. */
-  lureName?: (lure: string) => string;
+  lureName: (lure: string) => string;
   /** The outing the angler is out on there now, by name. */
   outNow?: string | null;
 }) {
