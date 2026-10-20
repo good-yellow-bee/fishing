@@ -26,6 +26,7 @@ export * from "./bankStock.ts";
 export * from "./derby.ts";
 export * from "./slams.ts";
 export * from "./studies.ts";
+export * from "./giants.ts";
 export * from "./lodgeTags.ts";
 export * from "./golden.ts";
 export * from "./streak.ts";

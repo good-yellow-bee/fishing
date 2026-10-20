@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { DAMSELS, damselAt } from "./damselPerch";
 import { mergeParts, mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
+import { toonRamp } from "./toon";
 
 const BLUE = "#2b8ee8";
 const BAND = "#14202c";
@@ -42,7 +43,7 @@ export function Damselflies() {
   const bodies = useRef<THREE.InstancedMesh>(null);
   const wings = useRef<THREE.InstancedMesh>(null);
   const shapes = useMemo(() => ({ body: damselBodyShape(), wing: damselWingShape() }), []);
-  const body = useMemo(() => new THREE.MeshStandardMaterial({ color: "#ffffff", vertexColors: true, roughness: 0.35, metalness: 0.2 }), []);
+  const body = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
   const glass = useMemo(() => new THREE.MeshBasicMaterial({ color: "#e8f2f8", transparent: true, opacity: 0.45, side: THREE.DoubleSide, forceSinglePass: true, depthWrite: false }), []);
   useEffect(
     () => () => {

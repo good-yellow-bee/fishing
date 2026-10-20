@@ -21,6 +21,7 @@ vi.mock("../api", async (importOriginal) => ({
   getLodgeTracks: vi.fn(async () => []),
   getLodgeReleased: vi.fn(async () => []),
   getBankWeek: vi.fn(async () => ({})),
+  getGiants: vi.fn(async () => []),
   recordCatch: vi.fn(),
   releaseCatch: vi.fn(),
   buyGroundbait: vi.fn(),

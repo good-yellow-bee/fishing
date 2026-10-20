@@ -1,6 +1,6 @@
 import { Hono } from "hono";
-import { BANK_STOCK_DAYS, tagWindow, TRACK_LIMIT, TRACK_WINDOW_MS, type LodgeTrack } from "@stillwater/shared";
-import { listBankCounts, listLodgeReleases, listRecentLodgeCatches } from "../db.ts";
+import { BANK_STOCK_DAYS, giantsForWeek, giantWeek, tagWindow, TRACK_LIMIT, TRACK_WINDOW_MS, type LodgeTrack } from "@stillwater/shared";
+import { listBankCounts, listGiantsLanded, listLodgeReleases, listRecentLodgeCatches } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
 export const lodgeRoutes = new Hono();
@@ -38,4 +38,15 @@ lodgeRoutes.get("/lodge/bank-week", (c) => {
   const user = c.get("user") as SessionUser;
   const since = new Date(Date.now() - BANK_STOCK_DAYS * 86_400_000).toISOString();
   return c.json({ counts: Object.fromEntries(listBankCounts(user.id, since).map((row) => [row.spot, row.count])) });
+});
+
+/** The week's giants, one per bank, and who landed each, if anyone has. */
+lodgeRoutes.get("/lodge/giants", (c) => {
+  const landed = new Map(listGiantsLanded(giantWeek()).map((row) => [row.spot, row]));
+  return c.json({
+    giants: giantsForWeek().map((giant) => {
+      const by = landed.get(giant.spot);
+      return { ...giant, landedBy: by?.displayName ?? null, landedAt: by?.landedAt ?? null };
+    }),
+  });
 });

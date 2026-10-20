@@ -171,6 +171,19 @@ export const PL_GAME: PlBook = {
   "It turned on the figure-eight and hit! Strike!": "Zawróciła na ósemce i uderzyła! Zacinaj!",
   "Too soon: it saw the rod move and sank away.": "Za wcześnie: zobaczyła ruch wędki i zeszła w dół.",
   "Wait for it to turn, then figure-eight. Cast again.": "Poczekaj, aż zawróci, wtedy zrób ósemkę. Rzuć jeszcze raz.",
+  "It's {name}, the bank's giant!": "To {name}, olbrzym tego łowiska!",
+  "{fish}: you landed {name}, this week's giant of the bank!": "{fish}: złowiony {name}, olbrzym tego łowiska w tym tygodniu!",
+  "{name}, the bank's giant · +{points} pts": "{name}, olbrzym łowiska · +{points} pkt",
+  "Old Moss": "Stary Mech",
+  "Iron Jaw": "Żelazna Szczęka",
+  "Grandmother": "Babcia",
+  "The Captain": "Kapitan",
+  "Tarnish": "Patyna",
+  "Old Gold": "Stare Złoto",
+  "Scarback": "Bliznogrzbiet",
+  "The Widow": "Wdowa",
+  "Ledger": "Kronikarz",
+  "Kingpost": "Królewski Pal",
   "Drag: light": "Hamulec: lekki",
   "Drag: normal": "Hamulec: zwykły",
   "Drag: heavy": "Hamulec: mocny",
@@ -206,8 +219,10 @@ export const PL_GAME: PlBook = {
   "Not yet": "Jeszcze nie",
   "All three found: the {legend} bites far more often at the {bank} for the rest of the week.": "Wszystkie trzy znalezione: {legend} bierze dużo częściej na łowisku {bank} do końca tygodnia.",
   "The {fish} your hunt tracked down haunts this water.": "{fish}, którego wytropiono, krąży po tej wodzie.",
-  "Each kind you have landed now has three studies in the field guide on your catch log: land it at every bank it lives at, at three of the lake's four hours, and at trophy weight. Finish all three to claim 100 points once and mark the kind Studied.":
-    "Każdy złowiony gatunek ma teraz w atlasie ryb w dzienniku połowów trzy badania: złów go na każdym łowisku, na którym żyje, o trzech z czterech pór dnia i w wadze trofeum. Ukończ wszystkie trzy, by raz odebrać 100 punktów i oznaczyć gatunek jako zbadany.",
+  "A pike, tiger muskie or ghost pike chasing a spinner, spoon or streamer may now follow it right to the bank without taking. Wait for the call that it is turning, then tap to figure-eight the lure, and it hits; tap too soon, or not at all, and it sinks away.":
+    "Szczupak, tygrysi szczupak albo szczupak widmo goniący błystkę obrotową, wahadłówkę lub streamer może teraz odprowadzić ją aż do brzegu bez brania. Poczekaj na sygnał, że zawraca, i stuknij, by zrobić ósemkę przynętą, a uderzy; stuknij za wcześnie albo wcale, a zejdzie w głębinę.",
+  "Hedgerows now part the upper hills into fields, as a phone held upright sees them above the farm, green through spring and summer, turning in the fall and bare over the winter snow. And at night the moon road and the lights mirrored on the lake shimmer softly instead of lying in hard bars.":
+    "Żywopłoty dzielą teraz górne zbocza wzgórz na pola, widoczne nad farmą na telefonie trzymanym pionowo: zielone wiosną i latem, przebarwione jesienią i nagie na zimowym śniegu. A nocą księżycowa ścieżka i światła odbite w jeziorze migoczą łagodnie zamiast leżeć twardymi pasami.",
   "The lake asks a little less of your phone again: shadows are redrawn at most thirty times a second, the shore's foam does less work each frame, and the anglers you only see in rain or fog and the deer, moose and hare of dawn and dusk now load only when they come out.":
     "Jezioro znów trochę mniej obciąża twój telefon: cienie odświeżają się najwyżej trzydzieści razy na sekundę, piana przy brzegu wymaga mniej pracy w każdej klatce, a wędkarze widoczni tylko w deszczu lub mgle oraz jelenie, łosie i zające o świcie i zmierzchu wczytują się dopiero, gdy się pojawiają.",
   "If the lake runs slowly on your phone, it now also turns shadows off and draws a lighter picture from your next visit, besides lighter effects, and says so; Settings can turn each back. And the moving water costs less of every frame, so the lake runs a little smoother everywhere.":
@@ -216,8 +231,8 @@ export const PL_GAME: PlBook = {
     "Na telefonie trzymanym pionowo widok unosi się teraz podczas holu, więc walkę z rybą widać nad kartą holu, a nie za nią. A przy ograniczonym ruchu migotanie dna jeziora zwalnia, a twoja łódka już się nie kołysze.",
   "Out on the boat, the cormorant no longer dries its wings right beside you: it slips off its rock and fishes out on the far side while you are at anchor. And at the bank stands the lantern post now stands beside you instead of in front of the camera.":
     "Na łódce kormoran nie suszy już skrzydeł tuż obok ciebie: gdy stoisz na kotwicy, zsuwa się ze swojego kamienia i łowi po drugiej stronie. A na stanowiskach na brzegu słupek z latarnią stoi teraz obok ciebie, a nie przed kamerą.",
-  "Each day another angler fishes one of the banks: your first casts there meet wary fish, unless you bring groundbait, and the bank chip says who is about. And the landed card's bonus stamps now show what the lodge actually paid once your catch is saved.":
-    "Każdego dnia na jednym z łowisk łowi ktoś inny: twoje pierwsze rzuty trafiają tam na płochliwe ryby, chyba że przyniesiesz zanętę, a etykieta łowiska o tym mówi. A znaczki premii na karcie złowionej ryby pokazują teraz, co przystań naprawdę zapłaciła, gdy połów zostanie zapisany.",
+  "Every week each bank now holds a named giant, shared by the whole lodge: a big fish of a kind that lives there, which comes up only rarely. The first angler to land one is paid 200 points and named on the Board, and that giant is gone for everyone until Monday.":
+    "Co tydzień każde łowisko kryje teraz nazwanego olbrzyma, wspólnego dla całej przystani: dużą rybę gatunku, który tam żyje, pokazującą się tylko z rzadka. Pierwsza osoba, która go złowi, dostaje 200 punktów i trafia na tablicę, a olbrzym znika dla wszystkich aż do poniedziałku.",
   "Tight to the lily pads, where the bass and pike wait in ambush.": "Tuż przy liściach grzybieni, gdzie w zasadzce czekają bassy i szczupaki.",
   "Tight to the far rock, where the walleye hold in its shadow.": "Tuż przy dalekiej skale, gdzie w jej cieniu trzymają się sandacze.",
   "Along the rock edge, where the point drops off and the bass hold.": "Wzdłuż skalnej krawędzi, gdzie cypel opada w głąb i trzymają się bassy.",

@@ -1452,6 +1452,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | SC261 | News card scene61 covers SC258 to SC260: shadows redrawn at 30 a second, lighter shore foam, and more scene parts loading only when they come out | scene | S |
 | SC262 | Soft light on night water: the moon road and the far bank's lit windows, campfire and lantern mirrored on the lake were flat, hard-edged bars (the moon road read like a zebra crossing); each glint now fades along its length and softens at its edges, a shimmer of light on ripples (glintStreak.ts) | scene | S |
 | SC263 | Hedgerows on the upper hills: an upright phone sees the hills' face well above the farm, where it was bare green slope; four hedgerows now run along it with gaps for gates, short hedges between them parting it into fields and the odd hedgerow tree, fresh green in spring, deep in summer, turning in the fall and bare twigs over the snow in winter, dimmed at night (one draw; a wide screen sees only their lowest edge) | scene | S |
+| SC264 | News card scene62 covers SC262 and SC263: soft light on night water and hedgerows on the upper hills | scene | S |
+| SC265 | Hedgerows without a hitch: the hill hedges rebuilt all ~420 bushes as separate shapes and merged them at every hour and season change, about 18 ms on a fast desktop and several frames on a phone at dusk and nightfall; now laid out once from one shared shape (1.3 ms) and only repainted when the hour or season turns (0.5 ms), and the slope lookup skips triangles facing away (layout 14 to 4 ms, once per visit) | scene | S |
+| SC266 | Every scene part toon-shaded: the windsock, the rod bell and the damselflies still used the realistic (PBR) material, each kind one more and the heaviest shader program for a phone to compile; they now use the lake's toon material like everything else (shader programs on a summer day 47 to 44, night 53 to 52; looks unchanged) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1871,7 +1874,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT413~~ | ~~A crowded bank: each day another angler fishes one bank (never the day's hot bank), so the angler's first six casts there bite 1.15x slower unless groundbait brings the fish on; the stance chip and the wait hint say so, and a new angler is spared~~ (#1610) | gameplay | S |
 | ~~GT414~~ | ~~News card 2026-10-20-game53 covers GT412 and GT413: bonus stamps that follow what the server paid, and a crowded bank each day~~ (#1612) | ui | S |
 | ~~GT415~~ | ~~Figure-eight: a pike, tiger muskie or ghost pike on a spinner, spoon or streamer may follow the lure to the bank instead of taking (3 in 10); a tap as it turns (after 0.9 s, within about half a second) makes it hit, a tap too soon or none at all sends it away; a new angler is spared~~ (#1614) | gameplay | M |
-| GT416 | News card game54 covers GT415 | ui | S |
+| ~~GT416~~ | ~~News card 2026-10-20-game54 covers GT415: the figure-eight~~ (#1617) | ui | S |
+| ~~GT417~~ | ~~The lake's giants: each week (from Monday 00:00 UTC) every bank holds one named giant, a big fish of a kind that lives there, shared by the whole lodge; a cast there rarely brings it up (about 1 in 80, if the angler's line can hold it), the first angler to land it is paid 200 points and named on the Board, and it is gone for everyone till next week~~ (#1619) | gameplay | M |
+| ~~GT418~~ | ~~News card 2026-10-20-game55 covers GT417: the lake's giants~~ (#1622) | ui | S |
 
 ## Risks / open questions for the owner
 

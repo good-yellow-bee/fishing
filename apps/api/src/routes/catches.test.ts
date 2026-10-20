@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { Hono } from "hono";
-import { catchPoints, CLEAN_RUN_BONUS, DAY_RUN_BONUS, fishById, GOLDEN_BONUS, GROUNDBAIT_PRICE, isGolden, LODGE_RECORD_BONUS, MASTER_BONUS, PB_BONUS, SHINER_PRICE, TAG_FINDER_BONUS, TAG_RETURN_BONUS, weeklyBonus } from "@stillwater/shared";
+import { catchPoints, CLEAN_RUN_BONUS, DAY_RUN_BONUS, fishById, GOLDEN_BONUS, GROUNDBAIT_PRICE, isGolden, LODGE_RECORD_BONUS, MASTER_BONUS, PB_BONUS, SHINER_PRICE, GIANT_BONUS, giantAt, TAG_FINDER_BONUS, TAG_RETURN_BONUS, weeklyBonus } from "@stillwater/shared";
 
 const testDir = mkdtempSync(join(tmpdir(), "stillwater-api-"));
 process.env.STILLWATER_DB_PATH = join(testDir, "stillwater.sqlite");
@@ -31,7 +31,7 @@ beforeAll(async () => {
 });
 
 beforeEach(() => {
-  db.exec(`DELETE FROM catch; DELETE FROM profile; DELETE FROM "user";`);
+  db.exec(`DELETE FROM giant_landed; DELETE FROM catch; DELETE FROM profile; DELETE FROM "user";`);
   db.prepare(
     `INSERT INTO "user" (id, name, email, emailVerified, createdAt, updatedAt) VALUES (?, ?, ?, 0, ?, ?)`,
   ).run(user.id, user.name, user.email, new Date().toISOString(), new Date().toISOString());
@@ -351,6 +351,24 @@ describe("POST /catches", () => {
       expect(points("other")).toBe(0);
       expect((await post({ requestId, speciesId: "smallmouth-bass", weight: 2.2, spot: "dock", taggedFrom: "not-an-id" })).status).toBe(400);
     });
+  });
+
+  it("pays the week's giant to the first angler who lands it, and a plain catch after", async () => {
+    db.prepare(`UPDATE profile SET strength = 10, accuracy = 10, lifetime_points = 0 WHERE user_id = ?`).run(user.id);
+    const giant = giantAt("dock")!;
+    const first = await post({ requestId, speciesId: giant.speciesId, weight: giant.weight, spot: "dock", giant: true });
+    const firstBody = (await first.json()) as { points: number };
+    const again = await post({ requestId: "4d3e2f1a-6b7c-4d8e-9f0a-1b2c3d4e5f60", speciesId: giant.speciesId, weight: giant.weight, spot: "dock", giant: true });
+    const againBody = (await again.json()) as { points: number };
+    expect(firstBody.points - againBody.points).toBeGreaterThanOrEqual(GIANT_BONUS - 1);
+    const bonuses = (id: string) => (db.prepare(`SELECT bonuses FROM catch WHERE request_id = ?`).get(id) as { bonuses: string }).bonuses.split(",");
+    expect(bonuses(requestId)).toContain("giant");
+    expect(bonuses("4d3e2f1a-6b7c-4d8e-9f0a-1b2c3d4e5f60")).not.toContain("giant");
+    // A wrong weight claims nothing.
+    db.exec(`DELETE FROM giant_landed`);
+    const off = await post({ requestId: "5e4f3a2b-7c8d-4e9f-8a1b-2c3d4e5f6a70", speciesId: giant.speciesId, weight: Math.max(0.1, giant.weight - 0.5), spot: "dock", giant: true });
+    expect(off.status).toBe(200);
+    expect((db.prepare(`SELECT COUNT(*) as n FROM giant_landed`).get() as { n: number }).n).toBe(0);
   });
 
   it("limits successful catch submissions per minute", async () => {
