@@ -12,7 +12,7 @@ import { sessionKey, startSession } from "../game/session";
 import type { Outcome } from "../game/useFishingGame";
 
 const scene = vi.fn<(props: { hour: LakeHour; sky: Sky; species?: FishSpecies | null; weight?: number; tracks?: readonly LodgeTrack[]; released?: boolean }) => void>();
-const landed = vi.hoisted(() => ({ outcome: null as Outcome | null, fishedHard: null as SpotId[] | null, waiting: null as { hint: string; more: string[] } | null }));
+const landed = vi.hoisted(() => ({ outcome: null as Outcome | null, fishedHard: null as SpotId[] | null, waiting: null as { hint: string; more: string[] } | null, bite: null as string | null }));
 
 vi.mock("../api", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../api")>()),
@@ -32,7 +32,7 @@ vi.mock("../game/useFishingGame", async (importOriginal) => {
     ...real,
     useFishingGame: (...args: Parameters<typeof real.useFishingGame>) => {
       const game = real.useFishingGame(...args);
-      return { ...game, ...(landed.outcome ? { outcome: landed.outcome } : {}), ...(landed.fishedHard ? { fishedHard: landed.fishedHard } : {}), ...(landed.waiting ? { phase: "waiting" as const, hint: landed.waiting.hint, moreReasons: landed.waiting.more } : {}) };
+      return { ...game, ...(landed.outcome ? { outcome: landed.outcome } : {}), ...(landed.fishedHard ? { fishedHard: landed.fishedHard } : {}), ...(landed.waiting ? { phase: "waiting" as const, hint: landed.waiting.hint, moreReasons: landed.waiting.more } : {}), ...(landed.bite ? { phase: "hookset" as const, hint: landed.bite } : {}) };
     },
   };
 });
@@ -89,6 +89,7 @@ afterEach(() => {
   landed.outcome = null;
   landed.fishedHard = null;
   landed.waiting = null;
+  landed.bite = null;
   browser.window.localStorage.clear();
   scene.mockClear();
   vi.mocked(fx.ambient.setConditions).mockClear();
@@ -165,6 +166,16 @@ describe("dock weather", () => {
     const summer = await openDock("/?hour=day&sky=clear&season=summer");
     const summerSigns = [...summer.querySelectorAll(".walk-signs button")].filter((button) => button.querySelector(".sign-now")).map((button) => button.textContent);
     expect(summerSigns).toEqual(["Dock •"]);
+  });
+
+  it("says the call to strike at once, not after a long hint still being read", async () => {
+    landed.bite = "It's gulping it down — strike!";
+    const page = await openDock("/?hour=day&sky=clear");
+    const hint = page.querySelector(".hint")!;
+    expect(hint.getAttribute("aria-live")).toBe("polite");
+    const now = hint.querySelector("[aria-live=assertive]")!;
+    expect(now.textContent).toBe("It's gulping it down — strike!");
+    expect(hint.textContent).toBe("It's gulping it down — strike!");
   });
 
   it("opens a cast's left-out reasons from its hint, and steps the focus off the button", async () => {
