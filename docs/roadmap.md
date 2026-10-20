@@ -2535,4 +2535,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR596~~ | ~~Round 114 Home and exports ideas: fish times in the outings spreadsheet, a book file's game fish said apart when added~~ (#1643) | field | S |
 | ~~BR597~~ | ~~Round 115 Gear and Map fixes: Undo and merges keep packing lists right, no sample tips for own outings, lures named as the book does on the record, twin waters counted as their links open, a gave-way evening is over on Gear and the Map, GPX without control characters~~ (#1650) | field | S |
 | ~~BR598~~ | ~~Round 115 Gear and Map ideas: where each lure took most of its fish, how many fish a packed piece took on the outing's water~~ (#1653) | field | S |
-| ~~BR599~~ | ~~Round 116 Bests fixes: twin waters as one card, book-wide lure names, month outings as the trip search counts them, join prompt only for different kinds~~ | field | S |
+| ~~BR599~~ | ~~Round 116 Bests fixes: twin waters as one card, book-wide lure names, month outings as the trip search counts them, join prompt only for different kinds~~ (#1685) | field | S |
