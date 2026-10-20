@@ -96,6 +96,14 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS catch_species_created ON catch (species_id, created_at);
   CREATE INDEX IF NOT EXISTS catch_created ON catch (created_at);
 
+  CREATE TABLE IF NOT EXISTS giant_landed (
+    week TEXT NOT NULL,
+    spot TEXT NOT NULL,
+    user_id TEXT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
+    landed_at TEXT NOT NULL,
+    PRIMARY KEY (week, spot)
+  );
+
   CREATE TABLE IF NOT EXISTS study_claim (
     user_id TEXT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
     species_id TEXT NOT NULL,
@@ -311,6 +319,35 @@ export function listStudyFacts(userId: string): StudyFact[] {
   return db
     .prepare(`SELECT species_id as speciesId, spot, hour, MAX(weight) as heaviest FROM catch WHERE user_id = ? GROUP BY species_id, spot, hour`)
     .all(userId) as StudyFact[];
+}
+
+/** Claims a week's giant at a bank for the angler who landed it; false when someone landed it first. */
+export function claimGiant(week: string, spot: string, userId: string): boolean {
+  return db.prepare(`INSERT OR IGNORE INTO giant_landed (week, spot, user_id, landed_at) VALUES (?, ?, ?, ?)`).run(week, spot, userId, new Date().toISOString()).changes === 1;
+}
+
+/** Claims the giant and pays its bonus together, or neither; false when someone landed it first. */
+export function claimAndPayGiant(week: string, spot: string, userId: string, catchId: string, bonus: number): boolean {
+  return db.transaction(() => {
+    if (!claimGiant(week, spot, userId)) return false;
+    payGiant(catchId, userId, bonus);
+    return true;
+  })();
+}
+
+/** Pays a catch the giant's bonus, on the catch and the angler's points. */
+export function payGiant(catchId: string, userId: string, bonus: number) {
+  db.transaction(() => {
+    db.prepare(`UPDATE catch SET points = points + ?, bonuses = CASE WHEN bonuses IS NULL OR bonuses = '' THEN 'giant' ELSE bonuses || ',giant' END WHERE id = ?`).run(bonus, catchId);
+    db.prepare(`UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`).run(bonus, bonus, userId);
+  })();
+}
+
+/** Who landed each of a week's giants, and when. */
+export function listGiantsLanded(week: string): { spot: string; displayName: string; landedAt: string }[] {
+  return db
+    .prepare(`SELECT g.spot, p.display_name as displayName, g.landed_at as landedAt FROM giant_landed g JOIN profile p ON p.user_id = g.user_id WHERE g.week = ?`)
+    .all(week) as { spot: string; displayName: string; landedAt: string }[];
 }
 
 /** The kinds whose studies the angler has been paid for. */

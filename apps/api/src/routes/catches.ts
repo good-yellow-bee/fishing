@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { Hono } from "hono";
-import { daysBetween, fishById, isGolden, isTaggable, isLakeHour, isLakeSeason, isLocalDay, isSky, TAG_FINDER_BONUS, tagWindow, taggedWeightFits, validateCatch, SPOT_IDS, type CatchSubmission } from "@stillwater/shared";
-import { countCatches, findCatchByRequestId, findLodgeRelease, getProfile, heaviestCatch, listCatchDays, othersHeaviestCatch, recordCatch, releaseCatch, toProfile, type CatchRow } from "../db.ts";
+import { daysBetween, fishById, giantAt, GIANT_BONUS, giantWeek, isGolden, isTaggable, isLakeHour, isLakeSeason, isLocalDay, isSky, TAG_FINDER_BONUS, tagWindow, taggedWeightFits, validateCatch, SPOT_IDS, type CatchSubmission } from "@stillwater/shared";
+import { claimAndPayGiant, countCatches, findCatchByRequestId, findLodgeRelease, getProfile, heaviestCatch, listCatchDays, othersHeaviestCatch, recordCatch, releaseCatch, toProfile, type CatchRow } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
 export const catchRoutes = new Hono();
@@ -31,6 +31,7 @@ catchRoutes.post("/catches", async (c) => {
     (body.clean !== undefined && typeof body.clean !== "boolean") ||
     (body.cleanRun !== undefined && (!Number.isInteger(body.cleanRun) || body.cleanRun < 0)) ||
     (body.taggedFrom !== undefined && (typeof body.taggedFrom !== "string" || !requestIdPattern.test(body.taggedFrom))) ||
+    (body.giant !== undefined && typeof body.giant !== "boolean") ||
     (body.hour !== undefined && (typeof body.hour !== "string" || !isLakeHour(body.hour))) ||
     (body.sky !== undefined && !isSky(body.sky)) ||
     (body.season !== undefined && !isLakeSeason(body.season)) ||
@@ -86,9 +87,14 @@ catchRoutes.post("/catches", async (c) => {
     });
   }
   if (saved.kind === "rate_limited") return c.json({ error: "catch rate limit exceeded" }, 429);
+  // The week's giant pays only the first angler to land it; anyone after saves a plain catch.
+  // The giant of the week the fish was landed in, so a catch the queue posts after Monday's turn still counts.
+  const landedAt = body.day ? new Date(`${body.day}T12:00:00.000Z`) : new Date();
+  const giant = body.giant ? giantAt(body.spot, landedAt) : undefined;
+  const wonGiant = !!giant && giant.speciesId === body.speciesId && Math.abs(giant.weight - body.weight) < 0.005 && claimAndPayGiant(giantWeek(landedAt), body.spot, user.id, record.id, GIANT_BONUS);
   return c.json({
     id: record.id,
-    points: record.points,
+    points: record.points + (wonGiant ? GIANT_BONUS : 0),
     speciesId: body.speciesId,
     weight: body.weight,
   });

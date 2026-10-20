@@ -11,8 +11,8 @@ function dayNumber(date: Date) {
   return Math.round(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86_400_000);
 }
 
-/** mulberry32 over a run of days. */
-function seeded(seed: number) {
+/** mulberry32: the same seed always gives the same run of numbers. */
+export function seeded(seed: number) {
   let state = seed | 0;
   return () => {
     state = (state + 0x6d2b79f5) | 0;

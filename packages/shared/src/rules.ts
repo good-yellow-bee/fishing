@@ -82,7 +82,7 @@ function weekDayFor(day: string | undefined, at: Date): string | Date {
 }
 
 /** A bonus the server paid on a catch, so the landed card stamps only what it really paid. */
-export type BonusId = "golden" | "weekly" | "cleanRun" | "pb" | "lodgeRecord" | "dayRun" | "mastery" | "tag";
+export type BonusId = "golden" | "weekly" | "cleanRun" | "pb" | "lodgeRecord" | "dayRun" | "mastery" | "tag" | "giant";
 export type CatchOk = { ok: true; points: number; species: FishSpecies; bonuses: BonusId[] };
 export type CatchErr = { ok: false; error: string; status: 400 | 409 };
 export type CatchResult = CatchOk | CatchErr;

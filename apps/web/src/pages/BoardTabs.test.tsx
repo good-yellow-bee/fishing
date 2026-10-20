@@ -7,7 +7,7 @@ import type { BoardPeriod } from "@stillwater/shared";
 import { getBoard, getSpeciesRecords } from "../api";
 import { BoardPage } from "./Board";
 
-vi.mock("../api", () => ({ getBoard: vi.fn(), getDerby: vi.fn(() => new Promise(() => {})), getDayBag: vi.fn(() => new Promise(() => {})), getStewards: vi.fn(() => new Promise(() => {})), getSpeciesRecords: vi.fn(), errorText: (message: string) => message }));
+vi.mock("../api", () => ({ getBoard: vi.fn(), getDerby: vi.fn(() => new Promise(() => {})), getDayBag: vi.fn(() => new Promise(() => {})), getStewards: vi.fn(() => new Promise(() => {})), getGiants: vi.fn(() => new Promise(() => {})), getSpeciesRecords: vi.fn(), errorText: (message: string) => message }));
 
 let root: Root;
 let container: HTMLDivElement;

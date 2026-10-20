@@ -27,6 +27,8 @@ import {
   type LakeHour,
   type LakeSeason,
   type LodgeRelease,
+  type Giant,
+  GIANT_ODDS,
   type Profile,
   type Sky,
   type SpotId,
@@ -194,7 +196,7 @@ export function lostTrophy(species: FishSpecies, weight: number) {
 export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; lightHook?: boolean; turnedRuns: number; cleanRun?: number; closeCall?: boolean; fightSec?: number; bowedLeaps?: number; easedShakes?: number; followedDarts?: number; encore?: boolean; secondWind?: boolean; secondTake?: boolean; grabbed?: string; gotAway?: boolean; followedIn?: boolean; recaught?: boolean; clearOf?: "weeds" | "rocks" | "pilings" | "log" | "current" };
 
 export type Outcome =
-  | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes; note?: string; tag?: { id: string; by: string } }
+  | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes; note?: string; tag?: { id: string; by: string }; giant?: string }
   | { kind: "broke"; message: string }
   | { kind: "miss"; message: string; fish?: { species: FishSpecies; weight: number } }
   | { kind: "error"; message: string };
@@ -377,7 +379,11 @@ export function useFishingGame(
   luckyLures: ReadonlySet<string> = new Set(),
   /** Banks the angler has fished down this week: their fish come smaller till they rest. */
   fishedDownBanks: ReadonlySet<SpotId> = new Set(),
+  /** The week's giants no one has landed yet, one per bank. */
+  openGiants: readonly Giant[] = [],
 ) {
+  const openGiantsRef = useRef(openGiants);
+  openGiantsRef.current = openGiants;
   const fishedDownRef = useRef(fishedDownBanks);
   fishedDownRef.current = fishedDownBanks;
   const luckyLuresRef = useRef(luckyLures);
@@ -799,7 +805,7 @@ export function useFishingGame(
       // A late strike only just catches, so the hook can pull out like a soft mouth's.
       runtime.sim.lightHook = lightHook;
       const line = fightLines(species.challenge)[0];
-      const again = !strike ? "" : againRef.current ? `${followedRef.current ? t("It's the one that followed your fish in!") : droppedRef.current ? t("It's the one that dropped your bait!") : t("It's the one that got away!")} ` : recaughtRef.current ? `${recaughtRef.current.tag ? t("It's a fish {name} let go!", { name: recaughtRef.current.tag.by }) : t("It's a fish you let go here before!")} ` : shinerTakenRef.current ? `${t("It took the live shiner!")} ` : "";
+      const again = !strike ? "" : againRef.current ? `${followedRef.current ? t("It's the one that followed your fish in!") : droppedRef.current ? t("It's the one that dropped your bait!") : t("It's the one that got away!")} ` : recaughtRef.current ? `${recaughtRef.current.giant ? t("It's {name}, the bank's giant!", { name: t(recaughtRef.current.giant) }) : recaughtRef.current.tag ? t("It's a fish {name} let go!", { name: recaughtRef.current.tag.by }) : t("It's a fish you let go here before!")} ` : shinerTakenRef.current ? `${t("It took the live shiner!")} ` : "";
       // A trophy-sized fish is felt on the rod the moment it's hooked.
       const heavy = isTrophyWeight(species, weight) ? `${t("It feels heavy — could be a trophy!")} ${t("A fish this big makes a long first run.")} ` : "";
       // Cold water makes a fish sluggish, and the angler feels it at once.
@@ -1126,7 +1132,11 @@ export function useFishingGame(
     // Failing that, one another angler let go here may come up, carrying their tag.
     const tagged = released && !released.fish && lodgeReleasedRef.current.length > 0 ? castForLodgeTag(lodgeReleasedRef.current, spotRef.current, Date.now(), Math.random(), takenTags(landedTagsRef.current, gotAwayRef.current), current) : null;
     // A let-go fish that broke off or dropped the bait is still that fish when it bites again.
-    recaughtRef.current = lost.again?.back ?? released?.fish ?? tagged;
+    // Rarely, the bank's giant comes up, if no one has landed it this week and the angler's line could hold it.
+    const giant = !lost.again && !mercyNow && !released?.fish && !tagged ? openGiantsRef.current.find((one) => one.spot === spotRef.current) : undefined;
+    const giantKind = giant ? FISH.find((fish) => fish.id === giant.speciesId) : undefined;
+    const giantUp = giant && giantKind && canLand(current, giantKind) && Math.random() < GIANT_ODDS ? { species: giantKind, weight: giant.weight, was: giant.weight, at: Date.now(), giant: giant.name } : null;
+    recaughtRef.current = lost.again?.back ?? released?.fish ?? tagged ?? giantUp;
     // Over the groundbait the feeders crowd in, so some bites are theirs; a beginner's first fish stays an easy one.
     const feeder = bait.baited && !mercyNow ? groundbaitFeeder(spotRef.current, lureRef?.current, short, hour) : null;
     const hunter = shiner && !lost.again && !recaughtRef.current && !mercyNow ? shinerHunter(spotRef.current, current, hour, Math.random, lively) : null;
@@ -1883,6 +1893,8 @@ export function useFishingGame(
             if (recaught?.tag) landedTagsRef.current.add(recaught.tag.id);
             const back = !recaught
               ? ""
+              : recaught.giant
+                ? t("{fish}: you landed {name}, this week's giant of the bank!", { fish: t(current.species.name), name: t(recaught.giant) })
               : recaught.tag
                 ? t("{fish}: {name} let this one go here on {date} at {was}, and now it's yours.", { fish: t(current.species.name), name: recaught.tag.by, date: new Date(recaught.at).toLocaleDateString(locale(), { month: "long", day: "numeric" }), was: weightText(recaught.was) })
               : recaught.weight > recaught.was
@@ -1900,6 +1912,7 @@ export function useFishingGame(
               clean,
               ...(landedNote ? { note: landedNote } : {}),
               ...(recaught?.tag ? { tag: recaught.tag } : {}),
+              ...(recaught?.giant ? { giant: recaught.giant } : {}),
               notes: {
                 perfectCast: castPerfectRef.current,
                 hookedSolid: hookedSolidRef.current,

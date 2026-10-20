@@ -8,6 +8,7 @@ import {
   type BoardPeriod,
   type LodgeRelease,
   type LodgeTrack,
+  type Giant,
   type StudyProgress,
   type TagReturn,
   type SpeciesRecord,
@@ -125,6 +126,12 @@ export function getStudies() {
 
 export function claimStudy(speciesId: string) {
   return request<{ speciesId: string; points: number }>(`/api/studies/${encodeURIComponent(speciesId)}/claim`, { method: "POST" });
+}
+
+export type GiantStatus = Giant & { landedBy: string | null; landedAt: string | null };
+
+export function getGiants() {
+  return request<{ giants: GiantStatus[] }>("/api/lodge/giants").then((body) => body.giants);
 }
 
 export function getBankWeek() {
