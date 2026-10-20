@@ -36,6 +36,8 @@ export type Me = {
   todayBag: { day: string; weights: number[] };
   /** The angler's let-go fish other anglers landed again this past week, newest first. */
   tagReturns: TagReturn[];
+  /** The slam kinds the angler landed on each of the last few local days. */
+  recentSlams: { day: string; speciesId: string }[];
 };
 
 export type DailyRequestRow = DailyRequest & { progress: number; claimed: boolean };
