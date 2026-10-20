@@ -103,3 +103,22 @@ export function biggestOnOuting(outing: readonly CatchEntry[], entry: CatchEntry
   const bests = personalBests({ spots: [], trips: [], catches: [...outing] });
   return (bests.heaviest ?? bests.longest)?.id === entry.id;
 }
+
+/**
+ * How far a fish fell short of its kind's best, when it came within a tenth of it: "1.5 in short of your longest
+ * perch". Null for the best itself, a tie as it reads, or one further off.
+ */
+export function shortOfBest(kind: readonly CatchEntry[], entry: CatchEntry): { best: CatchEntry; short: Measure } | null {
+  const own = entry.measure;
+  const best = kind.reduce<{ fish: CatchEntry; size: Measure } | null>((top, other) => {
+    const size = measureOf(other, own.kind);
+    if (other.id === entry.id || !size) return top;
+    return !top || shownSize(size) > shownSize(top.size) ? { fish: other, size } : top;
+  }, null);
+  if (!best) return null;
+  const mine = shownSize(own);
+  const top = shownSize(best.size);
+  if (!(mine < top) || mine < top * 0.9) return null;
+  const short: Measure = own.kind === "length" && best.size.kind === "length" ? { kind: "length", inches: best.size.inches - own.inches } : { kind: "weight", pounds: (best.size as Extract<Measure, { kind: "weight" }>).pounds - (own as Extract<Measure, { kind: "weight" }>).pounds };
+  return { best: best.fish, short };
+}
