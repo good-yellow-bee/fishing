@@ -84,7 +84,11 @@ export function FightBar({ fight, sim, performance, best = null, note = null, cl
         }
         // Written only on a change, so the live region speaks each new call once.
         const call =
-          state.tearing
+          state.netting
+            ? state.netHead
+              ? t("NOW — net it!")
+              : t("At the net — let go, then strike as its head comes up!")
+            : state.tearing
             ? t("EASE OFF — the hook is tearing out!")
             : state.roll && state.surge === 1
             ? t("Let go now — it's going to roll!")

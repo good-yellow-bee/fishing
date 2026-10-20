@@ -428,6 +428,18 @@ describe("FightBar for screen readers", () => {
     expect(status()).toBe("It's lifting — ease off and pump once more!");
   });
 
+  it("calls the net: wait for the head, then strike", () => {
+    mount({ peakTension: 0.3, maxLine: 1 }, false, FISH.find((fish) => fish.id === "pike")!);
+    const status = () => container!.querySelector(".fight-status")!.textContent;
+    sim.current.surge = 0;
+    sim.current.netting = true;
+    frame();
+    expect(status()).toBe("At the net — let go, then strike as its head comes up!");
+    sim.current.netHead = true;
+    frame();
+    expect(status()).toBe("NOW — net it!");
+  });
+
   it("calls a walleye's head shake between runs", () => {
     mount({ peakTension: 0.3, maxLine: 1 }, false, FISH.find((fish) => fish.id === "walleye")!);
     const status = () => container!.querySelector(".fight-status")!.textContent;

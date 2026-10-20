@@ -11,6 +11,10 @@ export type SurgeState = 0 | 1 | 2; // 0 calm, 1 warning (telegraph), 2 surging
  * `turning`: the angler is pulling the rod against the run, so it is cut short.
  */
 export type FightSim = {
+  /** The spent fish lies at the net; a fresh strike as its head comes up nets it. */
+  netting?: boolean;
+  /** Its head is up at the net, the moment to net it. */
+  netHead?: boolean;
   line: number;
   tension: number;
   surge: SurgeState;
@@ -159,6 +163,8 @@ export type FightRuntime = {
 };
 
 export type FightPerformance = {
+  /** Strikes at the net with the fish's head down, each sending it off on a short bolt. */
+  netMisses?: number;
   peakTension: number;
   maxLine: number;
   /** Runs the angler cut short by pulling the rod the other way. */
@@ -257,6 +263,18 @@ export const DEEP_PULL = 1.25;
 export const DEEP_TIRE = 1.3;
 /** Off the point a run left unturned drags the line over the rocks: reeling against it loads the line this much harder. */
 export const ROCK_PULL = 1.2;
+/** At the net a spent fish lifts its head for NET_HEAD_MS in every NET_HEAD_EVERY_MS: the moment to net it. */
+export const NET_HEAD_EVERY_MS = 1400;
+export const NET_HEAD_MS = 600;
+/** A strike with its head down, or leaving it at the net this long, sends it off this far again. */
+export const NET_BOLT_LINE = 0.12;
+export const NET_WAIT_MS = 6000;
+
+/** Whether this fish is netted, not just reeled in: anything but a panfish masher, once past a beginner's easy fish. */
+export function netsFish(species: { challenge: string }, mercy: boolean): boolean {
+  return !mercy && species.challenge !== "mash";
+}
+
 /** At the dock a run left unturned wraps the line round a piling for this long: reeling wins no line meanwhile and loads it this much harder each second. */
 export const WRAP_MS = 1200;
 export const WRAP_PULL = 0.5;
@@ -431,7 +449,7 @@ export function isCloseCall(performance: FightPerformance) {
 
 /** Clean = tension never went red and the fish never nearly ran out the line. */
 export function isCleanFight(performance: FightPerformance) {
-  return performance.peakTension < RED_TENSION && performance.maxLine < RUN_OUT_LINE && !performance.slackCharge;
+  return performance.peakTension < RED_TENSION && performance.maxLine < RUN_OUT_LINE && !performance.slackCharge && !performance.netMisses;
 }
 
 type Pattern = {
@@ -509,6 +527,8 @@ export function makeFight(
   snapAt = 1,
   /** How much faster a turn cuts a run short: 1, or a quarter faster from level 16. */
   turnCut = 1,
+  /** The spent fish must be netted with a fresh strike as its head comes up, rather than landing as the line comes in. */
+  net = false,
 ): FightRuntime {
   const weedy = water === "weeds";
   const deepRuns = water === "deep" || (DIVERS.has(species.id) && (water === "open" || water === "boat"));
@@ -580,7 +600,24 @@ export function makeFight(
   let rockedThisRun = false;
   let fouled = false;
 
+  let netFrom = 0;
+  let wasReeling = false;
   const step = (nowMs: number, dtSec: number, reeling: boolean, steer: Steer = 0): FightOutcome => {
+    const pressed = reeling && !wasReeling;
+    wasReeling = reeling;
+    if (sim.netting) {
+      // Its head comes up now and then; a strike then nets it, a strike with its head down sends it off on one short bolt.
+      sim.netHead = (nowMs - netFrom) % NET_HEAD_EVERY_MS >= NET_HEAD_EVERY_MS - NET_HEAD_MS;
+      if (pressed && sim.netHead) return "landed";
+      if (!pressed && nowMs - netFrom < NET_WAIT_MS) return "fighting";
+      sim.netting = false;
+      sim.netHead = false;
+      sim.line = NET_BOLT_LINE;
+      if (pressed) performance.netMisses = (performance.netMisses ?? 0) + 1;
+      // The bolt is all it has left; the next run waits its calm like any other.
+      nextAt = nowMs + range(1200, 1800);
+      return "fighting";
+    }
     if (nextAt === null) nextAt = nowMs + range(1200, 1800);
     if (lastRunsLeft > 0 && sim.surge === 0 && sim.line > 0 && sim.line < LAST_RUN_LINE && sim.stamina > SPENT_STAMINA) {
       sim.encore = lastRunDone;
@@ -775,7 +812,19 @@ export function makeFight(
 
     // Slack through a charge costs the clean bonus, and lets a light hook drop out of its mouth.
     if (charging && !reeling) chargeSlack += dtSec;
-    if (sim.line <= 0) return "landed";
+    if (sim.line <= 0) {
+      if (!net) return "landed";
+      sim.line = 0;
+      sim.surge = 0;
+      // Whatever it was doing ends at the net.
+      for (const flag of ["jump", "roll", "lastRun", "encore", "charge", "firstRun", "tailWalk", "tearing", "sulk", "lifting", "weeded", "wrapped", "shake", "headTurned", "diving", "rocky", "turning", "darted", "downstream", "withRun"] as const) delete sim[flag];
+      tearSec = 0;
+      sim.netting = true;
+      sim.netHead = false;
+      sim.tension = 0;
+      netFrom = nowMs;
+      return "fighting";
+    }
     if (chargeSlack >= CHARGE_SLACK_SEC) {
       performance.slackCharge = true;
       if (sim.lightHook) {
