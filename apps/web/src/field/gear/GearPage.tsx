@@ -15,7 +15,7 @@ import {
 import { fishCountLabel, formatDay, outingName, tripWhen } from "../format";
 import { bookFishDay } from "../tripMonths";
 import { useLogbook } from "../LogbookState";
-import { TackleList } from "./TackleList";
+import { TackleList, tipProps } from "./TackleList";
 import { useTackle } from "./TackleState";
 import { CopySummary } from "../CopySummary";
 import { planText } from "../TripPages";
@@ -29,7 +29,7 @@ import { ChoiceRow } from "../ChoiceRow";
 import { pieceName, shownPieceKey } from "./pieceKey";
 import { inReadersOrder, notYetThisYear } from "../bests/notYet";
 import { exactTerm, findLink } from "../findLinks";
-import { packingTips } from "../waterTips";
+import { packingTipRows } from "../waterTips";
 import { nearTwinLures } from "../suggestions";
 import { renameInBook } from "../bookRename";
 import { PagedTrips } from "../PagedTrips";
@@ -69,7 +69,7 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
       <TackleList
         tripId={trip.id}
         name={t("Tackle for {trip}", { trip: outingName(trip, book.spots) })}
-        suggest={packingTips(book, trip, today)}
+        {...tipProps(packingTipRows(book, trip, today))}
         trips={book.trips} catches={book.catches}
         spots={book.spots}
         // Today's outing may already have fish, counted against the pieces as on the outing's page.
@@ -506,7 +506,7 @@ export function GearPage() {
         <TackleList
           tripId={trip.id}
           heading={t("In the bag")}
-          suggest={packingTips(book, trip, today)}
+          {...tipProps(packingTipRows(book, trip, today))}
           trips={book.trips} catches={book.catches}
           spots={book.spots}
           caught={trip.date <= today ? catchesForTrip(book, trip.id) : undefined}

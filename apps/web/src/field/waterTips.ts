@@ -133,12 +133,17 @@ function leadingSeason(catches: readonly CatchEntry[]): LakeSeason | null {
 
 /** Lures worth packing for an outing still ahead: what has worked on its water. Nothing for a past outing. */
 export function packingTips(book: Logbook, trip: Trip, today: string): string[] {
+  return packingTipRows(book, trip, today).map((row) => row.lure);
+}
+
+/** The same lures with the fish each took on the outing's water, for "+ Jig (4)". */
+export function packingTipRows(book: Logbook, trip: Trip, today: string): LureTally[] {
   // Last night's outing still listed under Coming up in the small hours keeps its tips.
   if (trip.date < today && !lateOutings(book).some((late) => late.id === trip.id)) return [];
   // The angler's own fish for their own outing, as the water's page tips: the sample week's only for its own outings.
   const here = catchesForSpot(book, trip.spotId);
   const own = !isSampleOuting(trip) && book.catches.some(ownFish);
-  return waterTips(own ? here.filter(ownFish) : countedFish(here))?.lures.map((row) => row.lure) ?? [];
+  return waterTips(own ? here.filter(ownFish) : countedFish(here))?.lures ?? [];
 }
 
 /**

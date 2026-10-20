@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-game48";
+export const NEWS_ID = "2026-10-20-field66";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "On the Map, a water you are out on now offers Log a catch for that outing. A list's Works on this water tips say how many fish each lure took there, and after midnight the Map, Gear and every Last night label follow the same rule as Home.",
   "A fish hooked along the point's rock edge now dives off the ledge instead of dragging your line over the rocks. A perch or smallmouth hooked raiding the sunfish beds bolts from the guarding sunfish, so its first run is the long one. And on a windy day a fish hooked in a foam lane lets a slack line drift out faster still.",
   "At night your headlamp now draws moths: from spring to fall a few find the beam one by one and flutter round it, and on summer nights a bat comes now and then to hawk them.",
   "With a screen reader, the call to strike is now said the moment a fish takes, not after the hint before it; in your first fight the coach no longer repeats each run over the fight card; and following Field log from the lake lands on the page's heading. On a small or sideways phone the fight card keeps clear of the Reel button.",
