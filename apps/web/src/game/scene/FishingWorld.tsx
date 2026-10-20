@@ -89,6 +89,7 @@ import { FollowShadow } from "./FollowShadow";
 import { GiantSwirl } from "./GiantSwirl";
 import { NightLineStake } from "./NightLineStake";
 import { BaitBucket } from "./BaitBucket";
+import { weedClumpShape } from "./weedClump";
 import { fishSize, landedScale } from "./fishSize";
 import {
   LAND_DRIPS,
@@ -135,7 +136,7 @@ import {
 import { markSplash } from "./duckFlush";
 import { releaseDrop, releaseEntry, releasePitch, releasePoint, releaseRing } from "./releaseMotion";
 import { bobberRingHeight, waterHeight, waterRayHit } from "./water";
-import { applyToon, disposeMaterials } from "./toon";
+import { applyToon, disposeMaterials, toonRamp } from "./toon";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
 import { aimInputs, listenForWaterAim, sameAim } from "./pointerAim";
@@ -1413,6 +1414,16 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
   restOpacity.current = look.opacity;
   const bobber = useRef<THREE.Group>(null);
   const hooked = useRef<THREE.Group>(null);
+  const weedBall = useRef<THREE.Mesh>(null);
+  const weedShape = useMemo(weedClumpShape, []);
+  const weedMaterial = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
+  useEffect(
+    () => () => {
+      weedShape.dispose();
+      weedMaterial.dispose();
+    },
+    [weedShape, weedMaterial],
+  );
   const leapStart = useRef<number | null>(null);
   const rollStart = useRef<number | null>(null);
   const shakeStart = useRef<number | null>(null);
@@ -1745,6 +1756,12 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
         fightView.localZ = g.position.z;
       }
     }
+    // A fish hooked through duckweed comes in under a ball of weed till its first run strips it (fight.ts weedBall).
+    if (weedBall.current) {
+      const ball = weedBall.current;
+      ball.visible = (phase === "hookset" || phase === "fight") && sim.current?.weedBall === true && hookedPose?.show === true;
+      if (ball.visible && hookedPose) ball.position.set(hookedPose.x, waterHeight(hookedPose.x, hookedPose.z, t) + 0.02, hookedPose.z);
+    }
     // A leap: the fish clears the water nose first, then turns over and falls back.
     const leaping = phase === "fight" && sim.current?.jump === true && sim.current.surge === 2;
     if (!leaping) leapStart.current = null;
@@ -1884,6 +1901,7 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
       {phase === "waiting" && <NibbleRings nibble={nibble} weight={weight} />}
       {phase === "result" && <MissDrips />}
       {phase === "fight" && <RetrieveSplash />}
+      <mesh ref={weedBall} geometry={weedShape} material={weedMaterial} visible={false} />
       <mesh ref={sitRing} visible={false} rotation={[-Math.PI / 2, 0, 0]} renderOrder={3}>
         <ringGeometry args={[0.4, 0.55, 32]} />
         <meshBasicMaterial color="#e7f4ee" transparent opacity={0.78} depthWrite={false} />
