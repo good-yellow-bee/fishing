@@ -190,8 +190,10 @@ type Props = {
   follow?: "follow" | "turn" | null;
   /** Banks whose giant is still out this week: now and then it rolls out on their water. */
   giantBanks?: readonly SpotId[];
-  /** The bank where the angler's night line is out, and how it stands (nightLine.ts nightLineState), if it is out. */
-  nightLine?: { spot: SpotId; state: LineState } | null;
+  /** The bank where the angler's night line is out, if it is. */
+  nightLineSpot?: SpotId | null;
+  /** How that line stands (nightLine.ts nightLineState); passed apart from the spot so the memoized world keeps primitive props. */
+  nightLineState?: LineState | null;
   /** Spare live shiners in the angler's bait bucket. */
   baitBucket?: number;
   /** A topwater lure is tied on: every fish hits it at the top, like an ambush, in a big splash. */
@@ -2331,7 +2333,7 @@ function Tone({ hour }: { hour: LakeHour }) {
 
 const NO_BANKS: readonly SpotId[] = [];
 
-function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, follow = null, giantBanks = NO_BANKS, nightLine = null, baitBucket = 0, topwater = false, hour, sky, season = DEFAULT_SEASON, species, weight, golden = false, released = false, moon, wind, boatSwing = 0, headlamp = false, hotspot, groundbait = null, groundbaitPrimed = false, shinerTrap = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
+function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, follow = null, giantBanks = NO_BANKS, nightLineSpot = null, nightLineState = null, baitBucket = 0, topwater = false, hour, sky, season = DEFAULT_SEASON, species, weight, golden = false, released = false, moon, wind, boatSwing = 0, headlamp = false, hotspot, groundbait = null, groundbaitPrimed = false, shinerTrap = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
   // How this fish takes the bait: a topwater lure makes every take a hit at the top.
   const take = species !== null ? takeStyle(species.id, topwater) : null;
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
@@ -2406,7 +2408,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       <LurkerShadow phase={phase} lurking={lurking} closeInMs={lurkerCloseInMs} bobber={bobberWorld} />
       <FollowShadow phase={phase} follow={follow} bobber={bobberWorld} rodTip={rodTip} />
       <GiantSwirl banks={giantBanks} />
-      {nightLine && <NightLineStake bank={nightLine.spot} state={nightLine.state} />}
+      {nightLineSpot && nightLineState && <NightLineStake bank={nightLineSpot} state={nightLineState} />}
       <BaitBucket count={baitBucket} />
       {shinerTrap && <ShinerTrap ready={shinerTrap === "ready"} />}
       {species && <FishShadow level={level} phase={phase} weight={weight} bobber={bobberWorld} speciesId={species.id} />}
