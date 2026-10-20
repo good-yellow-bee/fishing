@@ -36,7 +36,7 @@ import { Mayflies } from "./Mayflies";
 import { RodBell } from "./RodBell";
 import { dogOut } from "./dogMood";
 import { paperBoatOut } from "./paperDrift";
-import { BASE_FOV, fovFor } from "./cameraFov";
+import { BASE_FOV, fightLiftFor, fovFor } from "./cameraFov";
 import { PlayerHeadlamp } from "./PlayerHeadlamp";
 import { DockRobin, GroundBlackbird, GroundRobin } from "./DockRobin";
 import { hedgehogOut } from "./hedgehogWalk";
@@ -360,7 +360,7 @@ function PartsAhead() {
 }
 
 /** Opens the view up on a tall phone screen (cameraFov.ts). */
-function FitFov() {
+function FitFov({ phase }: { phase: ScenePhase }) {
   const camera = useThree((state) => state.camera) as THREE.PerspectiveCamera;
   const aspect = useThree((state) => state.size.width / state.size.height);
   // Before the next frame draws, so a turned phone never shows a frame at the old view.
@@ -368,6 +368,20 @@ function FitFov() {
     camera.fov = fovFor(aspect);
     camera.updateProjectionMatrix();
   }, [camera, aspect]);
+  // On a tall phone the view eases up while a fish is on, raising the fight above the fight card.
+  const lift = useRef(0);
+  const calm = useReducedMotion();
+  useFrame(({ size }, delta) => {
+    const target = phase === "fight" || phase === "hookset" ? fightLiftFor(size.width / size.height) : 0;
+    const next = calm ? target : lift.current + (target - lift.current) * (1 - Math.exp(-3 * Math.min(delta, 0.1)));
+    const was = lift.current;
+    lift.current = next < 1e-4 ? 0 : next;
+    if (lift.current === 0 && was === 0) return;
+    // Applied afresh each frame it is lifted, so a turned phone mid-fight never keeps the old size's offset.
+    if (lift.current === 0) camera.clearViewOffset();
+    else camera.setViewOffset(size.width, size.height, 0, lift.current * size.height, size.width, size.height);
+    camera.updateProjectionMatrix();
+  });
   return null;
 }
 
@@ -2233,7 +2247,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       <CameraRig phase={phase} sim={sim} />
       <PartsAhead />
       <ShadowDepths />
-      <FitFov />
+      <FitFov phase={phase} />
       <Tone hour={hour} />
       <FrameWatch />
       <FrameCap />
