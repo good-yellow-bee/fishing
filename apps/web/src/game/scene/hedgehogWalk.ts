@@ -88,7 +88,8 @@ function curlAt(state: Extract<HedgehogState, { mode: "walking" }>, time: number
  */
 export function hedgehogStep(state: HedgehogState, time: number, delta: number, angler: Angler, settled: boolean, fuss: boolean, ground: Ground = robinGround): HedgehogState {
   if (state.mode === "away") {
-    if (!settled || angler.moving) return state.nextAt >= time + FIRST_SEC ? state : { mode: "away", nextAt: time + FIRST_SEC };
+    // Kept off while they are unsettled; the wait is put back about once a second, not every frame.
+    if (!settled || angler.moving) return state.nextAt >= time + FIRST_SEC - 1 ? state : { mode: "away", nextAt: time + FIRST_SEC };
     // It waits for any fuss to be over before it sets off.
     if (time < state.nextAt || fuss) return state;
     const path = hedgehogPath(angler, ground);

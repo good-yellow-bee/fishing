@@ -5,9 +5,9 @@ import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { useSkinnedFigure } from "./skinFigure";
 import { anglerAshore } from "./bankAngler";
-import { bankToadAt, bankToadStart, bankToadStep, type BankToadState } from "./bankToad";
+import { BANK_TOAD_AWAY, bankToadAt, bankToadStart, bankToadStep, type BankToadState } from "./bankToad";
 import { anglerPose } from "./pose";
-import { toadAt, type ToadPose } from "./toadHop";
+import { toadAt, toadVisitIndex, type ToadPose } from "./toadHop";
 import { toonRamp } from "./toon";
 
 const SKIN = "#7a6a44";
@@ -59,7 +59,6 @@ export function toadLegShape(side: number) {
   ]);
 }
 
-/** A toad that crosses the boards behind the angler on wet evenings and nights (toadHop.ts). */
 /** A toad, posed each frame by `poseAt(time, still)`; `name` labels it in the scene. */
 function Toad({ name, poseAt }: { name: string; poseAt: (time: number, still: boolean) => ToadPose }) {
   const still = useReducedMotion();
@@ -121,15 +120,20 @@ function Toad({ name, poseAt }: { name: string; poseAt: (time: number, still: bo
   );
 }
 
-/** The toad crossing the dock's boards behind the angler on wet evenings (toadHop.ts). */
+/** The toad crossing the dock's boards behind the angler on wet evenings (toadHop.ts). It sits out a crossing that comes while the angler is ashore, where the bank toad comes to them instead. */
 export function DockToad() {
   const outAt = useRef<number | null>(null);
+  const kept = useRef(new Map<number, boolean>());
   return (
     <Toad
       name="dock-toad"
       poseAt={(time, still) => {
         outAt.current ??= time;
-        return toadAt(time - outAt.current, still);
+        const since = time - outAt.current;
+        const visit = toadVisitIndex(since);
+        if (!kept.current.has(visit)) kept.current.set(visit, !anglerAshore());
+        const pose = toadAt(since, still);
+        return still || kept.current.get(visit) ? pose : { ...pose, here: false };
       }}
     />
   );
@@ -142,8 +146,10 @@ export function BankToad() {
     <Toad
       name="bank-toad"
       poseAt={(time, still) => {
+        // With reduced motion it never comes, rather than popping up behind the angler every minute.
+        if (still) return BANK_TOAD_AWAY;
         state.current = bankToadStep(state.current ?? bankToadStart(time), time, anglerPose, anglerAshore());
-        return bankToadAt(state.current, time, still);
+        return bankToadAt(state.current, time);
       }}
     />
   );

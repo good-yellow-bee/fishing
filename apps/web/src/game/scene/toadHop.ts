@@ -97,6 +97,11 @@ export function crossingAt(into: number, way: ToadWay, still = false): ToadPose 
 
 const AWAY: ToadPose = { ...TOAD_FROM, here: false, y: TOAD_Y - UNDER, yaw: 0, kick: 0, throat: 0, blink: 0, show: 0 };
 
+/** Which crossing of the dock toad's `time` falls in (its out-time clock), so a crossing can be kept or sat out whole. */
+export function toadVisitIndex(time: number) {
+  return visitAt(time, FIRST_SEC, VISIT_EVERY_SEC).index;
+}
+
 /** The dock toad `time` seconds after it came out (so it never appears mid-crossing). `still` sits it in the middle of the boards. */
 export function toadAt(time: number, still = false): ToadPose {
   if (still) return crossingAt(0, DOCK_WAY, true);

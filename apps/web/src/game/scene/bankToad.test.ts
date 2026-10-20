@@ -12,7 +12,7 @@ function run(until: number, settled = () => true, dry: (x: number, z: number) =>
   const frames: { t: number; state: BankToadState; pose: ReturnType<typeof bankToadAt> }[] = [];
   for (let t = 0; t <= until; t += STEP) {
     state = bankToadStep(state, t, standing, settled(), dry);
-    frames.push({ t, state, pose: bankToadAt(state, t, false, dry) });
+    frames.push({ t, state, pose: bankToadAt(state, t) });
   }
   return frames;
 }
@@ -40,11 +40,5 @@ describe("toad on the bank", () => {
     expect(frames.filter((f, i) => f.state.mode === "crossing" && frames[i - 1]?.state.mode !== "crossing")).toHaveLength(2);
     expect(run(60, () => false).every((f) => !f.pose.here)).toBe(true);
     expect(run(60, () => true, () => null).every((f) => !f.pose.here)).toBe(true);
-  });
-
-  it("sits still in the middle of its way with reduced motion", () => {
-    let state: BankToadState = bankToadStart(0);
-    for (let t = 0; t < FIRST_SEC + 1; t += STEP) state = bankToadStep(state, t, standing, true, ground);
-    expect(bankToadAt(state, 12, true, ground)).toEqual(bankToadAt(state, 20, true, ground));
   });
 });
