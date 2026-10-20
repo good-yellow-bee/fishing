@@ -424,17 +424,24 @@ export function DockPage() {
   }, [game.surfaceRef, scenePhase, shopOpen, photo, lakeShown]);
   // On an upright phone the hint hangs under the bank chip, which wraps tall in its narrow column when it
   // says several things ("Dock · biting today · bites sooner now · groundbait · 5 left"): the scene keeps its height.
+  // On a touch phone it rises to clear the walking stick, never over the chip or the lure panel beside it.
   useEffect(() => {
     const wrap = game.surfaceRef.current;
     const chip = wrap?.querySelector<HTMLElement>(":scope > .stance-chip");
-    if (!wrap || !chip || typeof ResizeObserver === "undefined") return;
-    const sync = () => wrap.style.setProperty("--stance-h", `${Math.ceil(chip.offsetHeight)}px`);
+    const lurePanel = wrap?.querySelector<HTMLElement>(":scope > .lure-choice");
+    const hint = wrap?.querySelector<HTMLElement>(":scope > .hint");
+    if (!wrap || !chip || !lurePanel || !hint || typeof ResizeObserver === "undefined") return;
+    const sync = () => {
+      wrap.style.setProperty("--stance-h", `${Math.ceil(chip.offsetHeight)}px`);
+      wrap.style.setProperty("--lure-h", `${Math.ceil(lurePanel.offsetHeight)}px`);
+      wrap.style.setProperty("--hint-h", `${Math.ceil(hint.offsetHeight)}px`);
+    };
     const observer = new ResizeObserver(sync);
-    observer.observe(chip);
+    for (const el of [chip, lurePanel, hint]) observer.observe(el);
     sync();
     return () => {
       observer.disconnect();
-      wrap.style.removeProperty("--stance-h");
+      for (const name of ["--stance-h", "--lure-h", "--hint-h"]) wrap.style.removeProperty(name);
     };
   }, [game.surfaceRef, lakeShown]);
   // The landed fish's ID is its request ID, so this matches the roll the server makes.

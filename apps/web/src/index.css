@@ -2500,6 +2500,21 @@ html[data-input="pad"] .fight-bar .on-pad {
   }
 }
 
+/* On a touch phone the hint, hung under the bank chip with room to spare, came down over the walking stick (7 px of it
+   on a 320 x 568 phone with larger text and high contrast): it rises to clear the stick, closing up under the chip and
+   the lure panel but never over them. */
+@media (pointer: coarse) and (max-width: 800px) and (min-height: 501px) {
+  .scene-wrap:not([data-walkthrough="1"]) .hint {
+    top: max(
+      calc(var(--hud-bottom, 140px) + 10px + max(var(--stance-h, 0px), var(--lure-h, 80px))),
+      min(
+        calc(var(--hud-bottom, 140px) + max(90px, calc(var(--stance-h, 0px) + 16px))),
+        calc(100% - 208px / var(--text-zoom, 1) - 2px - var(--hint-h, 0px))
+      )
+    );
+  }
+}
+
 /* Under 360 px with larger text the header's links took three rows, which pushed the hint down under the walk stick
    (71 px of it on a 320 x 568 phone): its rows sit flush, each link keeping its 32 px, and the links drop their
    letter spacing, so they take two. */
