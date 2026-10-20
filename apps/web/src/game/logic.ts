@@ -764,7 +764,7 @@ export function castIntoSchool(school: School | null, spot: SpotId): { schoolId:
 export const GROUNDBAIT_CASTS = 5;
 /** Bites come this much sooner over the groundbait. */
 export const GROUNDBAIT_WAIT = 0.8;
-/** Handfuls of groundbait in the bag each visit. */
+/** The free handfuls of groundbait the bag is topped up to on a day's first visit. */
 export const GROUNDBAIT_HANDFULS = 1;
 
 export type Groundbait = { spot: SpotId; casts: number };
