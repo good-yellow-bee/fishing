@@ -17,7 +17,11 @@ export type StudyProgress = { speciesId: string; banks: { have: number; need: nu
 /** Each landed kind's studies from its facts. */
 export function studyProgress(facts: readonly StudyFact[]): StudyProgress[] {
   const byKind = new Map<string, StudyFact[]>();
-  for (const fact of facts) byKind.set(fact.speciesId, [...(byKind.get(fact.speciesId) ?? []), fact]);
+  for (const fact of facts) {
+    const rows = byKind.get(fact.speciesId) ?? [];
+    rows.push(fact);
+    byKind.set(fact.speciesId, rows);
+  }
   const out: StudyProgress[] = [];
   for (const [speciesId, rows] of byKind) {
     const species = fishById(speciesId);

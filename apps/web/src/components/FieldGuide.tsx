@@ -190,6 +190,7 @@ function GuideCard({ entry, inBook = 0, study, onClaimStudy }: { entry: GuideEnt
 export function FieldGuide({ stats, inBook, studies, onClaimStudy }: Props) {
   useT();
   const entries = fieldGuide(stats);
+  const studyOf = new Map((studies ?? []).map((study) => [study.speciesId, study]));
   const { found, total } = guideProgress(entries);
   return (
     <section className="field-guide">
@@ -204,7 +205,7 @@ export function FieldGuide({ stats, inBook, studies, onClaimStudy }: Props) {
       </p>
       <div className="guide-grid">
         {entries.map((entry) => (
-          <GuideCard key={entry.species.id} entry={entry} inBook={inBook?.(entry.species.name)} study={studies?.find((one) => one.speciesId === entry.species.id)} onClaimStudy={onClaimStudy} />
+          <GuideCard key={entry.species.id} entry={entry} inBook={inBook?.(entry.species.name)} study={studyOf.get(entry.species.id)} onClaimStudy={onClaimStudy} />
         ))}
       </div>
     </section>

@@ -33,13 +33,20 @@ export function LogPage() {
     void readStudies();
   }, []);
 
+  const [claiming, setClaiming] = useState(false);
   const onClaimStudy = async (speciesId: string) => {
+    if (claiming) return;
+    setClaiming(true);
     try {
       await claimStudy(speciesId);
       setStudyError("");
-      await Promise.all([readStudies(), getMe().then(setMe)]);
+      await getMe().then(setMe);
     } catch (err) {
-      setStudyError(err instanceof Error ? errorText(err.message) : t("claim failed"));
+      setStudyError(errorText((err as Error).message));
+    } finally {
+      // Paid or refused, the list is read again so its claim buttons match the server.
+      await readStudies();
+      setClaiming(false);
     }
   };
 
@@ -87,7 +94,7 @@ export function LogPage() {
         </ul>
       </section>
       {studyError && <p className="warn" role="alert">{studyError}</p>}
-      <FieldGuide stats={me.speciesStats} inBook={(name) => (book ? kindOnPage(book, name).length : 0)} studies={studies} onClaimStudy={onClaimStudy} />
+      <FieldGuide stats={me.speciesStats} inBook={(name) => (book ? kindOnPage(book, name).length : 0)} studies={studies} onClaimStudy={claiming ? undefined : onClaimStudy} />
       {heaviest && (
         <div className="log-summary">
           <div>
