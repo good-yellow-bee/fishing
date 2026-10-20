@@ -118,7 +118,7 @@ vi.mock("./fight", async (importOriginal) => {
 
 import { updateSettings } from "./settings";
 import { giantShyKey } from "./giantShy";
-import { NIGHT_LINE_SOAK_MS, nightLineKey } from "./nightLine";
+import { nightLineKey, nightLineReadyAt } from "./nightLine";
 import { carriesBait, FALSE_STRIKE_MS, FIGURE_EIGHT_ODDS, FIGURE_TURN_MS, FIGURE_WINDOW_MS, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TIRE_REASONS, TOPWATER_POPS, useFishingGame, WAIT_REASONS } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
@@ -407,12 +407,12 @@ describe("useFishingGame live shiner", () => {
       press("set night line");
       expect(line()).toBe("dock");
       expect(liveShiner()).toBe("false");
-      expect(hint()).toMatch(/^You leave the shiner out on a night line here\. Come back to check it after six hours, and within two days\./);
-      // Too soon, the line stays out.
-      vi.setSystemTime(DOCK_BUBBLES.at + NIGHT_LINE_SOAK_MS - 60_000);
+      expect(hint()).toMatch(/^You leave the shiner out on a night line here\. Come back to check it once the night is out, and within two days\./);
+      // Before the night is out, the line stays out.
+      vi.setSystemTime(nightLineReadyAt(DOCK_BUBBLES.at) - 60_000);
       press("check night line");
       expect(line()).toBe("dock");
-      vi.setSystemTime(DOCK_BUBBLES.at + NIGHT_LINE_SOAK_MS + 60_000);
+      vi.setSystemTime(nightLineReadyAt(DOCK_BUBBLES.at) + 60_000);
       press("check night line");
       expect(line()).toBe("");
       expect(phase()).toBe("result:landed");

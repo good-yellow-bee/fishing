@@ -184,7 +184,7 @@ export const PL_GAME: PlBook = {
   "night line ready": "nocna linka gotowa",
   "night line left too long": "nocna linka stała za długo",
   "night line out at the {bank}": "nocna linka czeka na łowisku: {bank}",
-  "You leave the shiner out on a night line here. Come back to check it after six hours, and within two days.": "Zostawiasz złotawca na nocnej lince. Wróć ją sprawdzić po sześciu godzinach, ale przed upływem dwóch dni.",
+  "You leave the shiner out on a night line here. Come back to check it once the night is out, and within two days.": "Zostawiasz złotawca na nocnej lince. Wróć ją sprawdzić, gdy minie noc, ale przed upływem dwóch dni.",
   "The night line sat out too long: the bait is long gone, and nothing is on it.": "Nocna linka stała za długo: przynęty dawno nie ma i nic na niej nie siedzi.",
   "The night line comes in empty: something stole the shiner in the dark.": "Nocna linka wraca pusta: coś ukradło złotawca w ciemności.",
   "{fish} took the shiner on your night line.": "{fish} wziął złotawca na twojej nocnej lince.",

@@ -2155,7 +2155,7 @@ export function useFishingGame(
     // The forecast tells the night's sky, and the sky tells how likely the line is to hold a fish.
     const sky = nightSkyFor(setAt);
     const tonight = sky === "rain" ? t("Rain tonight: the night feeders will be roaming.") : sky === "clear" ? t("A clear night: the feeders keep close to cover, so the line may come in empty.") : "";
-    setHint([t("You leave the shiner out on a night line here. Come back to check it after six hours, and within two days."), tonight].filter(Boolean).join(" "));
+    setHint([t("You leave the shiner out on a night line here. Come back to check it once the night is out, and within two days."), tonight].filter(Boolean).join(" "));
   };
 
   /** Bring in the night line set at this bank: a night feeder of the bank, or an empty hook. */
