@@ -69,7 +69,7 @@ Force a lake hour while developing: `http://localhost:5173/?hour=dawn` (`day`, `
 
 ## Visual tests
 
-Screenshot tests in `e2e/visual` catch the lake or the field log drawing wrong (a black boat, a missing sky). They build the client, serve it from the API in production mode on a throwaway database, and compare views of the lake (summer day, night with the headlamp, fog, rain, snow, dawn, an upright and a sideways phone) and the field log (Home in English and Polish, a catch page) against PNGs in `e2e/visual/__screenshots__`.
+Screenshot tests in `e2e/visual` catch the lake or the field log drawing wrong (a black boat, a missing sky). They build the client, serve it from the API in production mode on a throwaway database, and compare views of the lake (summer day, night with the headlamp, fog, rain, snow, dawn, an upright and a sideways phone, a fight in progress) and the field log (Home in English and Polish, a catch page) against PNGs in `e2e/visual/__screenshots__`.
 
 Each shot is the same on every run: the browser's clock is fixed (a Wednesday noon in July, UTC), `Math.random` is seeded, and the lake loads with time standing still and then draws exactly four frames. Fonts and other outside requests are blocked, the lodge's weekly answers (giants, lost trophies) are fixed, and the lake's passing hints and toasts are masked.
 
