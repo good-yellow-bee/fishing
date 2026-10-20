@@ -63,7 +63,7 @@ import { FAR_ROCK_WAIT, tightToFarRock } from "./farRock";
 import { castSnags, onRockEdge, onShoreIce, ROCK_EDGE_WAIT, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { FLUTTER_SEC, flutterGrabberFor, flutterTip, followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { BUCKET_SIZE, loadBucket, saveBucket } from "./baitBucket";
-import { castForFoe, loadOldFoe, saveOldFoe } from "./oldFoe";
+import { castForFoe, foeGone, isOldFoe, loadOldFoe, saveOldFoe } from "./oldFoe";
 import { loadNightLine, nightLineCatch, nightLineKinds, nightLineState, nightSkyFor, saveNightLine, type NightLine } from "./nightLine";
 import { markShy, loadGiantShy, rollGiantShy, saveGiantShy, shyOf, type GiantShy } from "./giantShy";
 import { AGAIN_CASTS, backAgain, castForGotAway, gotAwayAfterDrop, PATIENT_DROP_RANK, gotAwayAfterLoss, type GotAway } from "./gotAway";
@@ -1207,7 +1207,9 @@ export function useFishingGame(
     const giantKind = giant ? FISH.find((fish) => fish.id === giant.speciesId) : undefined;
     const giantUp = giant && giantKind && canLand(current, giantKind) && Math.random() < GIANT_ODDS ? { species: giantKind, weight: giant.weight, was: giant.weight, at: Date.now(), giant: giant.name } : null;
     // Failing all those, the trophy that broke off here on an earlier day may be back.
-    const foe = !lost.again && !mercyNow && !released?.fish && !tagged && !giantUp ? castForFoe(loadOldFoe(current.userId), spotRef.current, Date.now(), Math.random()) : null;
+    const storedFoe = loadOldFoe(current.userId);
+    if (storedFoe && foeGone(storedFoe, Date.now())) saveOldFoe(current.userId, null);
+    const foe = !lost.again && !mercyNow && !released?.fish && !tagged && !giantUp ? castForFoe(storedFoe, spotRef.current, Date.now(), Math.random()) : null;
     recaughtRef.current = (lost.again ? backAgain(lost.again, openGiantsRef.current) : undefined) ?? released?.fish ?? tagged ?? giantUp ?? (foe && canLand(current, foe.species) ? foe : null);
     // Over the groundbait the feeders crowd in, so some bites are theirs; a beginner's first fish stays an easy one.
     const feeder = bait.baited && !mercyNow ? groundbaitFeeder(spotRef.current, lureRef?.current, short, hour) : null;
@@ -1803,7 +1805,8 @@ export function useFishingGame(
       const userId = anglerIdRef.current;
       const recaught = recaughtRef.current;
       if (!userId || !isTrophyWeight(current.species, current.weight) || current.species.rarity === "legendary" || (recaught && !recaught.foe)) return "";
-      saveOldFoe(userId, { species: current.species.id, weight: current.weight, spot: spotRef.current, at: Date.now(), ...(lureRef?.current ? { lure: lureRef.current } : {}) });
+      // The same fish lost again keeps the day it first broke off and the lure it first carried off.
+      if (!isOldFoe(loadOldFoe(userId), current)) saveOldFoe(userId, { species: current.species.id, weight: current.weight, spot: spotRef.current, at: Date.now(), ...(lureRef?.current ? { lure: lureRef.current } : {}) });
       return ` ${t("It will be about this bank in the days to come.")}`;
     };
     // A giant that breaks free learns the lure it was hooked on.
@@ -1985,7 +1988,8 @@ export function useFishingGame(
             setSoak(0);
             const recaught = recaughtRef.current;
             if (recaught?.tag) landedTagsRef.current.add(recaught.tag.id);
-            if (recaught?.foe && anglerIdRef.current) saveOldFoe(anglerIdRef.current, null);
+            // Landed, as the foe come back or as the one that got away the same day, it is no one's foe any more.
+            if (anglerIdRef.current && (recaught?.foe || isOldFoe(loadOldFoe(anglerIdRef.current), current))) saveOldFoe(anglerIdRef.current, null);
             const back = !recaught
               ? ""
               : recaught.foe
@@ -2021,7 +2025,7 @@ export function useFishingGame(
                 grabbed: grabbedRef.current,
                 gotAway: againRef.current && !followedRef.current && !droppedRef.current,
                 followedIn: againRef.current && followedRef.current,
-                recaught: !!recaught,
+                recaught: !!recaught && !recaught.foe && !recaught.giant,
                 turnedRuns: runtime.performance.turnedRuns ?? 0,
                 cleanRun: cleanRunRef.current,
                 closeCall: isCloseCall(runtime.performance),

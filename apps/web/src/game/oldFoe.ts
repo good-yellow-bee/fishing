@@ -35,9 +35,19 @@ export function saveOldFoe(userId: string, foe: OldFoe | null) {
   }
 }
 
+/** Past its days the foe has moved off for good, and is forgotten. */
+export function foeGone(foe: OldFoe, now: number): boolean {
+  return now - foe.at > FOE_DAYS * DAY_MS;
+}
+
+/** Whether a fish is the stored foe itself. */
+export function isOldFoe(foe: OldFoe | null, fish: { species: { id: string }; weight: number }): boolean {
+  return !!foe && foe.species === fish.species.id && foe.weight === fish.weight;
+}
+
 /** Whether this cast brings the old foe up: at its bank, on a later day than it broke off, within its days, on a lucky cast. */
 export function castForFoe(foe: OldFoe | null, spot: SpotId, now: number, roll: number): Recaught | null {
-  if (!foe || foe.spot !== spot || new Date(foe.at).toDateString() === new Date(now).toDateString() || now - foe.at > FOE_DAYS * DAY_MS || roll >= FOE_ODDS) return null;
+  if (!foe || foe.spot !== spot || new Date(foe.at).toDateString() === new Date(now).toDateString() || foeGone(foe, now) || roll >= FOE_ODDS) return null;
   const species = FISH.find((fish) => fish.id === foe.species);
   return species ? { species, weight: foe.weight, was: foe.weight, at: foe.at, foe: { ...(foe.lure ? { lure: foe.lure } : {}) } } : null;
 }
