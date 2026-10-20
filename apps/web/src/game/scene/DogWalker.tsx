@@ -4,7 +4,7 @@ import * as THREE from "three";
 import { dogAt, walkerAt } from "./dogWalk";
 import { mergePainted, poseLimbs } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
-import { toonRamp } from "./toon";
+import { toonRamp, useInstancedTwin } from "./toon";
 import { useSkinnedFigure } from "./skinFigure";
 
 const JACKET = "#4f7a4a";
@@ -131,6 +131,7 @@ export function DogWalker({ rain = false }: { rain?: boolean }) {
   );
   const figure = useRef<THREE.Group>(null);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
+  const instanced = useInstancedTwin(material);
   useEffect(
     () => () => {
       [...Object.values(shapes), material].forEach((item) => item.dispose());
@@ -191,12 +192,12 @@ export function DogWalker({ rain = false }: { rain?: boolean }) {
               {rain && i === 1 && <mesh geometry={shapes.umbrella} material={material} position={[0, -0.52, 0]} rotation={[HOLD - 0.35, 0, 0]} />}
             </group>
           ))}
-          <instancedMesh ref={armMeshes} args={[shapes.arm, material, 2]} frustumCulled={false} />
+          <instancedMesh ref={armMeshes} args={[shapes.arm, instanced, 2]} frustumCulled={false} />
         </group>
         {[1, -1].map((side, i) => (
           <group key={side} ref={legs[i]} position={[side * 0.09, HIP_Y, 0]} />
         ))}
-        <instancedMesh ref={legMeshes} args={[shapes.leg, material, 2]} frustumCulled={false} />
+        <instancedMesh ref={legMeshes} args={[shapes.leg, instanced, 2]} frustumCulled={false} />
       </group>
       <group ref={dog} scale={1.25}>
         <group ref={dogBody} position={[0, DOG_HIP_Y + 0.04, 0]}>
@@ -211,7 +212,7 @@ export function DogWalker({ rain = false }: { rain?: boolean }) {
         {DOG_FEET.map(([x, z], i) => (
           <group key={i} ref={paws[i]} position={[x, DOG_HIP_Y, z]} />
         ))}
-        <instancedMesh ref={pawMeshes} args={[shapes.paw, material, 4]} frustumCulled={false} />
+        <instancedMesh ref={pawMeshes} args={[shapes.paw, instanced, 4]} frustumCulled={false} />
       </group>
     </group>
   );

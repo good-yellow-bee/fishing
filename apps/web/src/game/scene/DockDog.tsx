@@ -10,7 +10,7 @@ import { robinAt } from "./robinVisit";
 import { mergePainted, type PaintedPart } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { useSkinnedFigure } from "./skinFigure";
-import { toonRamp } from "./toon";
+import { toonRamp, useInstancedTwin } from "./toon";
 import type { ScenePhase } from "./types";
 
 const COAT = "#c8954f";
@@ -121,6 +121,7 @@ export function DockDog({ phase, robin = null, paperWind = null, winter = false,
   const flakes = useRef<THREE.InstancedMesh>(null);
   const snowMaterial = useMemo(() => new THREE.MeshToonMaterial({ color: SNOW_COLOR, gradientMap: toonRamp() }), []);
   const snowGeometry = useMemo(() => new THREE.SphereGeometry(1, 10, 6), []);
+  const snowMaterialTwin = useInstancedTwin(snowMaterial);
   const flakeAt = useMemo(() => new THREE.Object3D(), []);
   useEffect(
     () => () => {
@@ -240,7 +241,7 @@ export function DockDog({ phase, robin = null, paperWind = null, winter = false,
       {/* The flakes it throws fly free of its roll, in metres about where it lies. */}
       {winter && (
         <group position={[DOG_SPOT.x, DOG_SPOT.y, DOG_SPOT.z]} rotation={[0, DOG_YAW, 0]}>
-          <instancedMesh ref={flakes} args={[snowGeometry, snowMaterial, FLAKES]} frustumCulled={false} />
+          <instancedMesh ref={flakes} args={[snowGeometry, snowMaterialTwin, FLAKES]} frustumCulled={false} />
         </group>
       )}
     </>

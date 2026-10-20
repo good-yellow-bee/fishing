@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { mergePainted, mergeParts, poseLimbs } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
-import { toonRamp } from "./toon";
+import { toonRamp, useInstancedTwin } from "./toon";
 import { BLOCK_AT, CUTTER_AT, CUTTER_YAW, STACK_AT, chopAt } from "./woodChopping";
 import { useSkinnedFigure } from "./skinFigure";
 
@@ -130,6 +130,7 @@ export function Woodcutter() {
   );
   const figure = useRef<THREE.Group>(null);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
+  const instanced = useInstancedTwin(material);
   useEffect(
     () => () => {
       [...Object.values(shapes), material].forEach((item) => item.dispose());
@@ -174,7 +175,7 @@ export function Woodcutter() {
         {halves.map((half, i) => (
           <group key={i} ref={half} />
         ))}
-        <instancedMesh ref={halfMeshes} args={[shapes.half, material, 2]} frustumCulled={false} />
+        <instancedMesh ref={halfMeshes} args={[shapes.half, instanced, 2]} frustumCulled={false} />
       </group>
     </group>
   );

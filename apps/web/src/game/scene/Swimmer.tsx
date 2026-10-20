@@ -5,7 +5,7 @@ import { BoatWake } from "./BoatWake";
 import { mergePainted, poseLimbs } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { TOWEL_AT, swimmerAt } from "./swimLane";
-import { toonRamp } from "./toon";
+import { toonRamp, useInstancedTwin } from "./toon";
 import { waterHeight } from "./water";
 
 const SKIN = "#e2b48c";
@@ -54,6 +54,7 @@ export function Swimmer() {
   const ripple = useRef<THREE.Mesh>(null);
   const shapes = useMemo(() => ({ body: swimmerShape(), arm: swimArmShape(), towel: towelShape(), ring: new THREE.RingGeometry(0.85, 1, 24) }), []);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
+  const instanced = useInstancedTwin(material);
   const rippleMaterial = useMemo(() => new THREE.MeshBasicMaterial({ color: RIPPLE, transparent: true, depthWrite: false, opacity: 0 }), []);
   useEffect(
     () => () => {
@@ -96,7 +97,7 @@ export function Swimmer() {
           <group key={side} ref={arms[i]} position={[side * 0.12, -0.03, 0.05]} />
         ))}
         {/* Both arms in one draw, posed from the two groups above. */}
-        <instancedMesh ref={armMeshes} args={[shapes.arm, material, 2]} frustumCulled={false} />
+        <instancedMesh ref={armMeshes} args={[shapes.arm, instanced, 2]} frustumCulled={false} />
       </group>
       <mesh ref={ripple} geometry={shapes.ring} material={rippleMaterial} rotation={[-Math.PI / 2, 0, 0]} renderOrder={4} />
       <BoatWake at={course} stern={0.4} still={still} size={0.4} />

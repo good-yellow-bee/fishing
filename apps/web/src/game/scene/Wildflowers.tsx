@@ -5,7 +5,7 @@ import type { LakeSeason } from "@stillwater/shared";
 import { mergePainted } from "./mergeParts";
 import { BEE_COUNT, beeAt, flowersIn, type Flower } from "./meadowFlowers";
 import { useReducedMotion } from "./reducedMotion";
-import { toonRamp } from "./toon";
+import { toonRamp, useInstancedTwin } from "./toon";
 
 const STEM = "#5f8f45";
 const BLACK = "#1f1c18";
@@ -49,6 +49,7 @@ export function Wildflowers({ season, bees }: { season: LakeSeason; bees: boolea
   const shape = useMemo(() => (flowers.length > 0 ? flowersShape(flowers) : null), [flowers]);
   const bee = useMemo(beeShapes, []);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
+  const instanced = useInstancedTwin(material);
   const bodies = useRef<THREE.InstancedMesh>(null);
   const wings = useRef<THREE.InstancedMesh>(null);
   const scratch = useMemo(() => ({ root: new THREE.Matrix4(), wing: new THREE.Matrix4(), turn: new THREE.Euler(), quat: new THREE.Quaternion(), scale: new THREE.Vector3(BEE_SCALE, BEE_SCALE, BEE_SCALE), at: new THREE.Vector3(), hidden: new THREE.Matrix4().makeScale(0, 0, 0) }), []);
@@ -92,8 +93,8 @@ export function Wildflowers({ season, bees }: { season: LakeSeason; bees: boolea
       {bees && (
         <>
           {/* The bees roam the meadow, so they are never culled by a stale bound. */}
-          <instancedMesh ref={bodies} args={[bee.body, material, BEE_COUNT]} frustumCulled={false} />
-          <instancedMesh ref={wings} args={[bee.wing, material, BEE_COUNT * 2]} frustumCulled={false} />
+          <instancedMesh ref={bodies} args={[bee.body, instanced, BEE_COUNT]} frustumCulled={false} />
+          <instancedMesh ref={wings} args={[bee.wing, instanced, BEE_COUNT * 2]} frustumCulled={false} />
         </>
       )}
     </group>

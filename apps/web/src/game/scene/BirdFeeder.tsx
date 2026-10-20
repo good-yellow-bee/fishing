@@ -4,7 +4,7 @@ import * as THREE from "three";
 import { BIRD_COUNT, FEEDER_AT, TRAY_Y, chickadeeAt } from "./feederVisits";
 import { mergePainted, poseFromHolders } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
-import { toonRamp } from "./toon";
+import { toonRamp, useInstancedTwin } from "./toon";
 
 const WOOD = "#7a5638";
 const SEED = "#5a4632";
@@ -71,6 +71,7 @@ export function BirdFeeder({ birds }: { birds: boolean }) {
   const bird = useMemo(chickadeeShapes, []);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
   const parts = useMemo<BirdParts[]>(() => Array.from({ length: BIRD_COUNT }, () => ({ root: null, head: null, wings: [null, null] })), []);
+  const instanced = useInstancedTwin(material);
   useEffect(
     () => () => {
       [feeder, bird.body, bird.head, bird.wing, material].forEach((item) => item.dispose());
@@ -137,9 +138,9 @@ export function BirdFeeder({ birds }: { birds: boolean }) {
       {birds && (
         <>
           {/* The birds' parts, posed from the groups above: one draw each for bodies, heads and wings. */}
-          <instancedMesh ref={bodies} args={[bird.body, material, BIRD_COUNT]} frustumCulled={false} />
-          <instancedMesh ref={heads} args={[bird.head, material, BIRD_COUNT]} frustumCulled={false} />
-          <instancedMesh ref={wings} args={[bird.wing, material, BIRD_COUNT * 2]} frustumCulled={false} />
+          <instancedMesh ref={bodies} args={[bird.body, instanced, BIRD_COUNT]} frustumCulled={false} />
+          <instancedMesh ref={heads} args={[bird.head, instanced, BIRD_COUNT]} frustumCulled={false} />
+          <instancedMesh ref={wings} args={[bird.wing, instanced, BIRD_COUNT * 2]} frustumCulled={false} />
         </>
       )}
     </group>

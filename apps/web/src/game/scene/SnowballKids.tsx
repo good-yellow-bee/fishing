@@ -5,7 +5,7 @@ import { kidLimbShape, kidTorsoShape } from "./LeafPile";
 import { poseFromHolders } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { KIDS, kidAt, puffAt, snowballAt } from "./snowballFight";
-import { toonRamp } from "./toon";
+import { toonRamp, useInstancedTwin } from "./toon";
 
 /** Each child's coat, trousers and woolly hat. */
 const KITS = [
@@ -47,7 +47,9 @@ export function SnowballKids() {
     [],
   );
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
+  const instanced = useInstancedTwin(material);
   const snow = useMemo(() => new THREE.MeshToonMaterial({ color: SNOW, gradientMap: toonRamp() }), []);
+  const snowTwin = useInstancedTwin(snow);
   useEffect(
     () => () => {
       [...shapes.kits.flatMap((kit) => [kit.torso, kit.leg, kit.arm]), shapes.ball, shapes.bit, material, snow].forEach((item) => item.dispose());
@@ -130,11 +132,11 @@ export function SnowballKids() {
       </group>
       {KIDS.map((_, i) => (
         <group key={i}>
-          <instancedMesh ref={armMeshes[i]} args={[shapes.kits[i]!.arm, material, 2]} frustumCulled={false} />
-          <instancedMesh ref={legMeshes[i]} args={[shapes.kits[i]!.leg, material, 2]} frustumCulled={false} />
+          <instancedMesh ref={armMeshes[i]} args={[shapes.kits[i]!.arm, instanced, 2]} frustumCulled={false} />
+          <instancedMesh ref={legMeshes[i]} args={[shapes.kits[i]!.leg, instanced, 2]} frustumCulled={false} />
         </group>
       ))}
-      <instancedMesh ref={bitMeshes} args={[shapes.bit, snow, PUFF_BITS]} frustumCulled={false} />
+      <instancedMesh ref={bitMeshes} args={[shapes.bit, snowTwin, PUFF_BITS]} frustumCulled={false} />
     </group>
   );
 }

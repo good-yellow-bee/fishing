@@ -5,7 +5,7 @@ import type { LakeSeason } from "@stillwater/shared";
 import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { PAIR, STORK_SCALE, nestAt, storkAt, storksOut } from "./storkNest";
-import { toonRamp } from "./toon";
+import { toonRamp, useInstancedTwin } from "./toon";
 
 const STICKS = "#6e5537";
 const STICKS_TOP = "#8a6d48";
@@ -59,6 +59,7 @@ export function BarnStorks({ season }: { season: LakeSeason }) {
   const nest = useMemo(() => nestShape(season), [season]);
   const shapes = useMemo(() => ({ body: storkBodyShape(), head: storkHeadShape(), right: storkWingShape(1), left: storkWingShape(-1) }), []);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
+  const instanced = useInstancedTwin(material);
   const bodies = useRef<THREE.InstancedMesh>(null);
   const heads = useRef<THREE.InstancedMesh>(null);
   const rights = useRef<THREE.InstancedMesh>(null);
@@ -107,10 +108,10 @@ export function BarnStorks({ season }: { season: LakeSeason }) {
       {home && (
         <>
           {/* Posed by hand each frame, so they are never culled by a stale bound. */}
-          <instancedMesh ref={bodies} args={[shapes.body, material, PAIR.length]} frustumCulled={false} />
-          <instancedMesh ref={heads} args={[shapes.head, material, PAIR.length]} frustumCulled={false} />
-          <instancedMesh ref={rights} args={[shapes.right, material, PAIR.length]} frustumCulled={false} />
-          <instancedMesh ref={lefts} args={[shapes.left, material, PAIR.length]} frustumCulled={false} />
+          <instancedMesh ref={bodies} args={[shapes.body, instanced, PAIR.length]} frustumCulled={false} />
+          <instancedMesh ref={heads} args={[shapes.head, instanced, PAIR.length]} frustumCulled={false} />
+          <instancedMesh ref={rights} args={[shapes.right, instanced, PAIR.length]} frustumCulled={false} />
+          <instancedMesh ref={lefts} args={[shapes.left, instanced, PAIR.length]} frustumCulled={false} />
         </>
       )}
     </group>

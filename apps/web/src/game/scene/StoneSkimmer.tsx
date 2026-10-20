@@ -5,7 +5,7 @@ import { kidLimbShape, kidTorsoShape } from "./LeafPile";
 import { mergeParts, poseLimbs } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { MAX_SKIPS, SKIMMER_AT, SKIMMER_YAW, skimRings, skimmerAt, stoneAt } from "./skimStones";
-import { toonRamp } from "./toon";
+import { toonRamp, useInstancedTwin } from "./toon";
 import { waterHeight } from "./water";
 import { useSkinnedFigure } from "./skinFigure";
 
@@ -36,6 +36,7 @@ export function StoneSkimmer() {
   );
   const figure = useRef<THREE.Group>(null);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
+  const instanced = useInstancedTwin(material);
   const stoneMaterial = useMemo(() => new THREE.MeshToonMaterial({ color: STONE, gradientMap: toonRamp() }), []);
   const ringMaterials = useMemo(
     () => Array.from({ length: MAX_SKIPS + 1 }, () => new THREE.MeshBasicMaterial({ color: "#eef6f2", transparent: true, depthWrite: false })),
@@ -90,7 +91,7 @@ export function StoneSkimmer() {
               <group ref={throwArm} position={[-0.13, 0.32, 0]} />
               <group ref={otherArm} position={[0.13, 0.32, 0]} />
               {/* Both arms in one draw, posed from the two groups above. */}
-              <instancedMesh ref={armMeshes} args={[shapes.arm, material, 2]} frustumCulled={false} />
+              <instancedMesh ref={armMeshes} args={[shapes.arm, instanced, 2]} frustumCulled={false} />
             </group>
             <mesh geometry={shapes.legs} material={material} />
           </group>
