@@ -12,7 +12,7 @@ import { countedSearch } from "./countedSearch";
 import { RESUME_PARAM } from "./anotherCatch";
 import { hasSampleLeft, isSampleCatch, isSampleOnly, isSamplePlan, isSampleSpot, isSampleOuting, upcomingRealTrips, withoutSample } from "./bookCopy";
 import { outingFish } from "./outingFish";
-import { lateOutings, outingDay, plainName, sameName } from "./tripDates";
+import { lateOutings, outNow, outingDay, plainName, sameName } from "./tripDates";
 import { sheetOutings } from "./catchCsv";
 import { NEWS_ITEMS, markNewsSeen, newsDue, readSeenNews } from "../game/whatsNew";
 import { FIELD_NEWS } from "./fieldNews";
@@ -375,7 +375,8 @@ export function HomePage() {
           <small>
             {next ? (
               <>
-                {tripWhen(next.date, today, tomorrow)}
+                {/* Today's outing with a fish these twelve hours is the one out on the water now, as the Map says it. */}
+                {next.date === today && outNow(book, next, now) ? t("Out now") : tripWhen(next.date, today, tomorrow)}
                 {/* The water opens too, for what works there; an untitled outing already goes by its name above, so not again. */}
                 {nextSpot ? (
                   <>
@@ -412,7 +413,8 @@ export function HomePage() {
           {next && next !== lateOuting && next.date <= tomorrow ? <NextDayLine trip={next} spot={nextSpot} today={today} now={now} /> : null}
           {next ? <LastTimeLine book={book} trip={next} today={today} /> : null}
           {/* A plan still ahead goes on the phone's calendar from here, as from its own page. */}
-          {next && next.date > today && next !== lateOuting && !isSampleOuting(next) ? (
+          {/* Today's too, until it is under way: a plan made this morning for the evening is worth a reminder. */}
+          {next && next !== lateOuting && !isSampleOuting(next) && (next.date > today || (next.date === today && catchesForTrip(book, next.id).length === 0 && !next.lost && !next.missed)) ? (
             <small className="next-log">
               <button type="button" className="text-button" onClick={() => saveOutingIcs(book, next, tackleItems ?? [], today)}>
                 {t("Add to calendar")}
