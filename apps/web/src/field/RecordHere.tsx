@@ -8,15 +8,15 @@ import { formatDay } from "./format";
 type SizeHere = { largest: CatchEntry; record: CatchEntry; kind: "length" | "weight" };
 
 /**
- * An outing's largest fish against the largest its water has given, by length where the day measured one, else by
- * weight. Null without a measured fish, or while the day's fish are all the water has.
+ * An outing's largest fish against the largest its water has given, by weight where the day weighed one, else by
+ * length, as the outing's own "Largest" names it. Null without a measured fish, or while the day's fish are all the water has.
  */
 export function recordHere(day: readonly CatchEntry[], water: readonly CatchEntry[]): SizeHere | null {
   if (water.length <= day.length) return null;
   const mine = biggestOf(day);
   const all = biggestOf(water);
-  if (mine.longest && all.longest) return { largest: mine.longest, record: all.longest, kind: "length" };
   if (mine.heaviest && all.heaviest) return { largest: mine.heaviest, record: all.heaviest, kind: "weight" };
+  if (mine.longest && all.longest) return { largest: mine.longest, record: all.longest, kind: "length" };
   return null;
 }
 

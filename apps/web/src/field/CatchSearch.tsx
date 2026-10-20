@@ -33,9 +33,9 @@ import { MatchOrder, ORDER_PARAM, useLargestOrder } from "./MatchOrder";
 import { dateWords, monthWord } from "./dateWords";
 import { isSampleCatch } from "./bookCopy";
 import { offPlayLake } from "./playLake";
-import { bookSpelling, pieceName, shownPieceKey } from "./gear/pieceKey";
+import { bookSpelling, shownPieceKey } from "./gear/pieceKey";
 import { bookKindName, kindKey, mostWritten } from "./speciesLink";
-import { bookLureName, lureNames } from "./pieceTally";
+import { bookLureName } from "./pieceTally";
 import { plainName } from "./tripDates";
 
 /** A book name as the Polish UI shows it, or itself when Polish has no line for it. */
@@ -897,7 +897,7 @@ export function CatchSearch() {
           <>
             {/* Summed as /catches sums the book: the angler's own, with the sample week's and the game's said apart. */}
             {/* A search that finds only those ("sample", "game") sums what it found. */}
-            <FishSum catches={mine.length > 0 ? mine : matches} />
+            <FishSum catches={mine.length > 0 ? mine : matches} kindName={bookKindName(book.catches)} />
             <FishDays book={book} catches={mine.length > 0 ? mine : matches} />
             <TopLure catches={mine.length > 0 ? mine : matches} />
             {mine.length > 0 && mine.length < matches.length ? (
@@ -1042,6 +1042,8 @@ function MatchSplits({ matches, all, search, largest, counted }: { matches: read
   const kinds = [...spelled.values()]
     .map((forms): [string, number] => [mostWritten(forms), [...forms.values()].reduce((sum, n) => sum + n, 0)])
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  // Named as the book writes each kind most, as Bests and the kind's page name it.
+  const kindName = bookKindName(book.catches);
   const years = tally((entry) => bookFishDay(book, entry).slice(0, 4)).sort((a, b) => b[0].localeCompare(a[0]));
   // Waters by name, most fish first: the water search opens a name, so two waters read the same are one row.
   const nameOf = new Map(book.spots.map((spot) => [spot.id, plainName(spot.name)]));
@@ -1087,7 +1089,7 @@ function MatchSplits({ matches, all, search, largest, counted }: { matches: read
     ) : null;
   return (
     <>
-      {line(t("By kind:"), kinds, (species) => exactTerm("species", pieceName(species)), (species) => pieceName(species), (entry, species) => kindKey(entry.species) === kindKey(species))}
+      {line(t("By kind:"), kinds, (species) => exactTerm("species", kindName(species)), (species) => kindName(species), (entry, species) => kindKey(entry.species) === kindKey(species))}
       {line(t("By year:"), years, (year) => year, (year) => year, (entry, year) => bookFishDay(book, entry).startsWith(`${year}-`), bestIn)}
       {/* Where it came from: "pike" answers "where" in one tap, each water narrowing the search. */}
       {line(t("By water:"), waters, (key) => exactTerm("water", shownWater.get(key)!), (key) => shownWater.get(key)!, (entry, key) => waterKey(entry) === key)}
@@ -1133,8 +1135,8 @@ function TopLure({ catches }: { catches: readonly CatchEntry[] }) {
     return name ? foldText(plainName(name)).toLowerCase() : null;
   });
   const waterName = water ? plainName(spotById(book, catches.find((entry) => foldText(plainName(spotById(book, entry.spotId)?.name ?? "")).toLowerCase() === water.value)!.spotId)!.name) : "";
-  // Under the spelling most of its fish carry, not the first one found.
-  const lureName = lure ? lureNames(catches)(catches.find((entry) => lureKey(entry) === lure.value)!.lure) : "";
+  // As the book writes the lure most, as Gear and the catch cards name it.
+  const lureName = lure ? bookLureName(book.catches)(catches.find((entry) => lureKey(entry) === lure.value)!.lure) : "";
   const lines = [
     lure ? t("Most on {lure}.", { lure: `${lureName} (${lure.count})` }) : null,
     // Polish writes the part of the day in lower case inside a sentence: "Najczęściej o tej porze: świt (2)."
