@@ -214,6 +214,8 @@ type Props = {
   hotspot: Hotspot | null;
   /** The groundbait tossed off a bank, while it still feeds the fish there. */
   groundbait?: Groundbait | null;
+  /** That groundbait was left on an earlier visit and the feeders have gathered over it. */
+  groundbaitPrimed?: boolean;
   /** An evening rise is on: rings dimple the water in reach of the bank. */
   rising?: boolean;
   /** A thunderstorm: the sky flashes now and then and thunder follows. */
@@ -2324,7 +2326,7 @@ function Tone({ hour }: { hour: LakeHour }) {
 
 const NO_BANKS: readonly SpotId[] = [];
 
-function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, follow = null, giantBanks = NO_BANKS, nightLineSpot = null, baitBucket = 0, topwater = false, hour, sky, season = DEFAULT_SEASON, species, weight, golden = false, released = false, moon, wind, boatSwing = 0, headlamp = false, hotspot, groundbait = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
+function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, follow = null, giantBanks = NO_BANKS, nightLineSpot = null, baitBucket = 0, topwater = false, hour, sky, season = DEFAULT_SEASON, species, weight, golden = false, released = false, moon, wind, boatSwing = 0, headlamp = false, hotspot, groundbait = null, groundbaitPrimed = false, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
   // How this fish takes the bait: a topwater lure makes every take a hit at the top.
   const take = species !== null ? takeStyle(species.id, topwater) : null;
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
@@ -2360,7 +2362,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       <Precompile />
       <LakeWorld spot={spot} hour={hour} sky={sky} season={season} hotspot={hotspot} moon={moon} wind={wind} />
       {tracks && tracks.length > 0 && <ShoreTracks tracks={tracks} />}
-      {groundbait && <GroundbaitCloud bait={groundbait} />}
+      {groundbait && <GroundbaitCloud bait={groundbait} feeding={groundbaitPrimed} />}
       {rising && <RiseRings spot={spot} />}
       {rising && <Mayflies spot={spot} />}
       <Windsock wind={wind ?? NO_WIND} />

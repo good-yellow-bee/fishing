@@ -1141,6 +1141,7 @@ export function DockPage() {
           headlamp={lampLit(game.lamp, hour)}
           hotspot={game.hotspot}
           groundbait={game.groundbait}
+          groundbaitPrimed={game.swimPrimed}
           rising={rising}
           storm={storm}
           tracks={tracks}

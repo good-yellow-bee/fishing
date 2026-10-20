@@ -25,3 +25,20 @@ export function cloudCenter(spot: SpotId): { x: number; z: number } {
 export function cloudOpacity(casts: number): number {
   return 0.1 + 0.3 * Math.max(0, Math.min(1, casts / GROUNDBAIT_CASTS));
 }
+
+/** Feeders dimpling over a swim they have gathered at (GT442): rings at a time, each this long, and how far out over the cloud. */
+export const DIMPLES = 4;
+export const DIMPLE_SEC = 1.8;
+const DIMPLE_REACH = 0.75;
+
+/** Dimple `i` at `time`: where over the cloud's middle it rings and how far through its spread (0..1). Pure. */
+export function dimpleAt(i: number, time: number): { dx: number; dz: number; age: number } {
+  // Each ring has its own cycle length, so they never fall into step.
+  const cycle = DIMPLE_SEC + 0.7 + i * 0.53;
+  const round = Math.floor((time + i * 1.17) / cycle);
+  const age = ((time + i * 1.17) % cycle) / DIMPLE_SEC;
+  const turn = Math.sin((round + 1) * 12.9898 + i * 78.233) * 43758.5453;
+  const angle = (turn - Math.floor(turn)) * Math.PI * 2;
+  const out = DIMPLE_REACH * Math.sqrt(Math.abs(Math.cos(turn)));
+  return { dx: Math.cos(angle) * out, dz: Math.sin(angle) * out, age };
+}
