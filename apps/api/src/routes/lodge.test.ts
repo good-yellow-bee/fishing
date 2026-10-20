@@ -76,3 +76,21 @@ describe("GET /lodge/recent", () => {
     expect(await tracks()).toHaveLength(2);
   });
 });
+
+describe("GET /lodge/released", () => {
+  it("lists other anglers' let-go fish from earlier days that nobody has landed again, leaving out small common ones", async () => {
+    const letGo = (id: string, userId: string, speciesId: string, daysAgo: number) =>
+      db.prepare(`INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, released, created_at) VALUES (?, ?, ?, 2, 1, 'dock', ?, 0, 1, ?)`).run(id, userId, speciesId, `r-${id}`, new Date(Date.now() - daysAgo * 86_400_000).toISOString());
+    letGo("bass", "mara", "smallmouth-bass", 2);
+    letGo("carp", "mara", "carp", 1);
+    letGo("perch", "mara", "perch", 2);
+    letGo("mine", "ash", "carp", 2);
+    letGo("stale", "mara", "carp", 40);
+    letGo("taken", "mara", "carp", 3);
+    db.prepare(`INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, tagged_from, created_at) VALUES ('again', 'ash', 'carp', 2.1, 1, 'dock', 'r-again', 0, 'taken', ?)`).run(new Date().toISOString());
+    const response = await app.request("http://test/lodge/released");
+    const { released } = (await response.json()) as { released: { catchId: string; by: string }[] };
+    expect(released.map((row) => row.catchId)).toEqual(["carp", "bass"]);
+    expect(released[0]!.by).toBe("Mara");
+  });
+});

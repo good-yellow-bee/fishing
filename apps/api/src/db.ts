@@ -2,7 +2,7 @@ import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Database from "better-sqlite3";
-import { BAG_SIZE, fishById, isLakeHour, isTrophyWeight, TROPHY_RELEASE_BONUS, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type LodgeTrack, type SpeciesRecord, type SpotId } from "@stillwater/shared";
+import { BAG_SIZE, fishById, TAG_RETURN_BONUS, isLakeHour, isTrophyWeight, TROPHY_RELEASE_BONUS, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type LodgeRelease, type LodgeTrack, type SpeciesRecord, type SpotId } from "@stillwater/shared";
 
 const dir = dirname(fileURLToPath(import.meta.url));
 export const dataDir = join(dir, "../data");
@@ -144,7 +144,12 @@ if (!catchColumns.some((column) => column.name === "released")) {
 if (!catchColumns.some((column) => column.name === "day")) {
   db.exec(`ALTER TABLE catch ADD COLUMN day TEXT`);
 }
+// A fish another angler let go and this catch landed again: that catch's id.
+if (!catchColumns.some((column) => column.name === "tagged_from")) {
+  db.exec(`ALTER TABLE catch ADD COLUMN tagged_from TEXT`);
+}
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS catch_user_request ON catch (user_id, request_id)`);
+db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS catch_tagged_from ON catch (tagged_from) WHERE tagged_from IS NOT NULL`);
 
 export type ProfileRow = {
   user_id: string;
@@ -172,6 +177,8 @@ export type CatchRow = {
   /** Read back from the table; a new catch is never released yet. */
   released?: 0 | 1;
   day: string | null;
+  /** Another angler's let-go fish this catch landed again. */
+  tagged_from?: string | null;
   created_at: string;
 };
 
@@ -277,6 +284,21 @@ export function listBagWeights(userId: string, from: string, to: string): number
     .prepare(`SELECT weight FROM catch WHERE user_id = ? AND created_at >= ? AND created_at < ? ORDER BY weight DESC LIMIT ?`)
     .all(userId, from, to, BAG_SIZE) as { weight: number }[];
   return rows.map((row) => row.weight);
+}
+
+const LODGE_RELEASE_SELECT = `SELECT c.id as catchId, c.species_id as speciesId, c.weight as weight, c.spot as spot, c.created_at as at, p.display_name as by
+  FROM catch c JOIN profile p ON p.user_id = c.user_id
+  WHERE c.released = 1 AND c.user_id != ? AND c.created_at >= ? AND c.created_at < ?
+    AND NOT EXISTS (SELECT 1 FROM catch again WHERE again.tagged_from = c.id)`;
+
+/** Fish other anglers let go in a window and nobody has landed again, newest first. */
+export function listLodgeReleases(userId: string, from: string, before: string, limit: number): LodgeRelease[] {
+  return db.prepare(`${LODGE_RELEASE_SELECT} ORDER BY c.created_at DESC LIMIT ?`).all(userId, from, before, limit) as LodgeRelease[];
+}
+
+/** One of those let-go fish, by its catch's id, if it is still in the lake for this angler. */
+export function findLodgeRelease(userId: string, catchId: string, from: string, before: string): LodgeRelease | undefined {
+  return db.prepare(`${LODGE_RELEASE_SELECT} AND c.id = ?`).get(userId, from, before, catchId) as LodgeRelease | undefined;
 }
 
 /** How many ended derbies this angler held the top spot of, back to their first catch. */
@@ -409,9 +431,12 @@ export function recordCatch(row: CatchRow): RecordCatchResult {
       .get(row.user_id, cutoff) as { count: number };
     if (count.count >= 12) return { kind: "rate_limited" } as const;
     db.prepare(
-      `INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, hour, sky, season, golden, day, created_at)
-       VALUES (@id, @user_id, @species_id, @weight, @points, @spot, @request_id, @clean, @hour, @sky, @season, @golden, @day, @created_at)`,
-    ).run(row);
+      `INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, hour, sky, season, golden, day, tagged_from, created_at)
+       VALUES (@id, @user_id, @species_id, @weight, @points, @spot, @request_id, @clean, @hour, @sky, @season, @golden, @day, @tagged_from, @created_at)`,
+    ).run({ ...row, tagged_from: row.tagged_from ?? null });
+    // The angler who let the fish go is paid for it once, when it is landed again.
+    const tagged = row.tagged_from ? (db.prepare(`SELECT user_id FROM catch WHERE id = ?`).get(row.tagged_from) as { user_id: string } | undefined) : undefined;
+    if (tagged) db.prepare(`UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`).run(TAG_RETURN_BONUS, TAG_RETURN_BONUS, tagged.user_id);
     db.prepare(
       `UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`,
     ).run(row.points, row.points, row.user_id);

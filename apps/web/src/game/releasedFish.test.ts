@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { castForReleased, grownWeight, loadReleased, RECAPTURE_GROWTH_CAP, RECAPTURE_ODDS, RELEASED_KEEP, RELEASED_KEY, rememberReleased } from "./releasedFish";
+import { LODGE_RECAPTURE_ODDS, type LodgeRelease } from "@stillwater/shared";
+import { castForLodgeTag, castForReleased, grownWeight, loadReleased, RECAPTURE_GROWTH_CAP, RECAPTURE_ODDS, RELEASED_KEEP, RELEASED_KEY, rememberReleased } from "./releasedFish";
 
 const pike = FISH.find((fish) => fish.id === "pike")!;
 const common = FISH.find((fish) => fish.rarity === "common")!;
@@ -51,5 +52,25 @@ describe("fish let go from the lake", () => {
     const back = castForReleased(list, "reeds", day(11), RECAPTURE_ODDS / 2);
     expect(back.fish).toEqual({ species: pike, weight: grownWeight(pike, 6, 7), was: 6, at: day(4, 9) });
     expect(back.next).toEqual([]);
+  });
+});
+
+describe("fish other anglers let go", () => {
+  const now = Date.UTC(2026, 9, 20, 12);
+  const list: LodgeRelease[] = [
+    { catchId: "a", speciesId: "carp", weight: 6, spot: "reeds", at: "2026-10-20T08:00:00.000Z", by: "Mara" },
+    { catchId: "b", speciesId: "carp", weight: 6, spot: "reeds", at: "2026-10-13T08:00:00.000Z", by: "Mara" },
+  ];
+
+  it("brings up one let go at this bank before today, grown, with its tag", () => {
+    const back = castForLodgeTag(list, "reeds", now, LODGE_RECAPTURE_ODDS / 2, new Set());
+    expect(back).toMatchObject({ was: 6, weight: grownWeight(back!.species, 6, 7), tag: { id: "b", by: "Mara" } });
+    expect(back!.species.id).toBe("carp");
+  });
+
+  it("brings up none at another bank, on an unlucky roll, or once landed this visit", () => {
+    expect(castForLodgeTag(list, "dock", now, 0, new Set())).toBeNull();
+    expect(castForLodgeTag(list, "reeds", now, LODGE_RECAPTURE_ODDS, new Set())).toBeNull();
+    expect(castForLodgeTag(list, "reeds", now, 0, new Set(["b"]))).toBeNull();
   });
 });

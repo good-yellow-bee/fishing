@@ -1,4 +1,4 @@
-import { FISH, type FishSpecies, type SpotId } from "@stillwater/shared";
+import { bagDay, FISH, fishById, isTaggable, LODGE_RECAPTURE_ODDS, RELEASED_GROWTH_CAP, type FishSpecies, type LodgeRelease, type SpotId } from "@stillwater/shared";
 
 export const RELEASED_KEY = "stillwater.released.v1";
 /** Chance a cast at a bank brings up a fish let go there on an earlier day. */
@@ -6,7 +6,7 @@ export const RECAPTURE_ODDS = 0.06;
 /** How much a let-go fish grows each week back in the lake. */
 export const RECAPTURE_GROWTH_WEEK = 0.04;
 /** The most a let-go fish grows, however long it was gone; never past its kind's top weight either. */
-export const RECAPTURE_GROWTH_CAP = 0.3;
+export const RECAPTURE_GROWTH_CAP = RELEASED_GROWTH_CAP;
 /** The lake remembers this many let-go fish, the newest first. */
 export const RELEASED_KEEP = 8;
 
@@ -15,8 +15,8 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 /** A fish let go from the lake: its kind's id, its weight then, the bank and when. */
 export type ReleasedFish = { species: string; weight: number; spot: SpotId; at: number };
 
-/** A let-go fish come back to the line, grown since. */
-export type Recaught = { species: FishSpecies; weight: number; was: number; at: number };
+/** A let-go fish come back to the line, grown since; one another angler let go carries their name and its catch's id as a tag. */
+export type Recaught = { species: FishSpecies; weight: number; was: number; at: number; tag?: { id: string; by: string } };
 
 const dayOf = (ms: number) => new Date(ms).toDateString();
 
@@ -60,4 +60,15 @@ export function castForReleased(list: readonly ReleasedFish[], spot: SpotId, now
   const species = FISH.find((fish) => fish.id === back.species)!;
   const days = Math.max(1, Math.round((now - back.at) / DAY_MS));
   return { fish: { species, weight: grownWeight(species, back.weight, days), was: back.weight, at: back.at }, next: list.filter((one) => one !== back) };
+}
+
+/** Whether this cast brings up a fish another angler let go at this bank before today (UTC), one not yet landed in this visit. */
+export function castForLodgeTag(list: readonly LodgeRelease[], spot: SpotId, now: number, roll: number, landed: ReadonlySet<string>): Recaught | null {
+  const today = bagDay(new Date(now)).from;
+  const back = list.find((one) => one.spot === spot && one.at < today && !landed.has(one.catchId) && isTaggable(fishById(one.speciesId)));
+  if (!back || roll >= LODGE_RECAPTURE_ODDS) return null;
+  const species = fishById(back.speciesId)!;
+  const at = Date.parse(back.at);
+  const days = Math.max(1, Math.round((now - at) / DAY_MS));
+  return { species, weight: grownWeight(species, back.weight, days), was: back.weight, at, tag: { id: back.catchId, by: back.by } };
 }

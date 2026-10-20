@@ -23,6 +23,7 @@ export * from "./weeklyChallenges.ts";
 export * from "./legendHunt.ts";
 export * from "./dayBag.ts";
 export * from "./derby.ts";
+export * from "./lodgeTags.ts";
 export * from "./golden.ts";
 export * from "./streak.ts";
 export * from "./snow.ts";

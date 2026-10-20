@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { Hono } from "hono";
-import { catchPoints, CLEAN_RUN_BONUS, DAY_RUN_BONUS, fishById, GOLDEN_BONUS, GROUNDBAIT_PRICE, isGolden, LODGE_RECORD_BONUS, MASTER_BONUS, PB_BONUS, SHINER_PRICE, weeklyBonus } from "@stillwater/shared";
+import { catchPoints, CLEAN_RUN_BONUS, DAY_RUN_BONUS, fishById, GOLDEN_BONUS, GROUNDBAIT_PRICE, isGolden, LODGE_RECORD_BONUS, MASTER_BONUS, PB_BONUS, SHINER_PRICE, TAG_FINDER_BONUS, TAG_RETURN_BONUS, weeklyBonus } from "@stillwater/shared";
 
 const testDir = mkdtempSync(join(tmpdir(), "stillwater-api-"));
 process.env.STILLWATER_DB_PATH = join(testDir, "stillwater.sqlite");
@@ -307,6 +307,49 @@ describe("POST /catches", () => {
     expect((await post({ ...fish, requestId: id(5), day: "2026-02-30" })).status).toBe(400);
     expect((await post({ ...fish, requestId: id(6), day: "2999-01-01" })).status).toBe(400);
     expect((await post({ ...fish, requestId: id(1), day: "2026-10-12" })).status).toBe(409);
+  });
+
+  describe("another angler's let-go fish", () => {
+    const tagId = "2b1c0d3e-4f5a-4b6c-8d7e-9f0a1b2c3d4e";
+    const yesterday = new Date(Date.now() - 86_400_000).toISOString();
+    function letGo(id: string, at: string, owner = "other", spot = "dock", weight = 2) {
+      db.prepare(`INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, released, created_at) VALUES (?, ?, 'smallmouth-bass', ?, 10, ?, ?, 0, 1, ?)`).run(id, owner, weight, spot, `r-${id}`, at);
+    }
+    beforeEach(() => {
+      db.prepare(`INSERT INTO "user" (id, name, email, emailVerified, createdAt, updatedAt) VALUES ('other', 'Mara', 'mara@example.test', 0, ?, ?)`).run(yesterday, yesterday);
+      createProfile("other", "Mara");
+      db.prepare(`UPDATE profile SET strength = 2 WHERE user_id = ?`).run(user.id);
+    });
+    const points = (id: string) => (db.prepare(`SELECT points FROM profile WHERE user_id = ?`).get(id) as { points: number }).points;
+    const landTag = (weight = 2.2, extra: Record<string, unknown> = {}) => post({ requestId, speciesId: "smallmouth-bass", weight, spot: "dock", taggedFrom: tagId, ...extra });
+
+    it("pays the finder and the angler who let it go, once", async () => {
+      letGo(tagId, yesterday);
+      // A heavier bass of Mara's keeps the lodge record out of the sum.
+      db.prepare(`INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, created_at) VALUES ('big', 'other', 'smallmouth-bass', 3.5, 0, 'dock', 'r-big', 0, ?)`).run(yesterday);
+      const plain = catchPoints(fishById("smallmouth-bass")!, 2.2, false, weeklyBonus("smallmouth-bass", new Date().toISOString().slice(0, 10)) * (isGolden(requestId) ? GOLDEN_BONUS : 1));
+      const response = await landTag();
+      expect(response.status).toBe(200);
+      expect((await response.json()).points).toBe(plain + TAG_FINDER_BONUS);
+      expect(points("other")).toBe(TAG_RETURN_BONUS);
+      // Landed, it is out of the lake for everyone: a second claim saves a plain catch.
+      const again = await landTag(2.2, { requestId: "3c2d1e4f-5a6b-4c7d-8e9f-0a1b2c3d4e5f" });
+      expect(again.status).toBe(200);
+      expect(points("other")).toBe(TAG_RETURN_BONUS);
+    });
+
+    it("pays no tag for the angler's own fish, one let go today, at another bank, or grown past what it could, but keeps the catch", async () => {
+      const tagged = () => (db.prepare(`SELECT COUNT(*) as n FROM catch WHERE tagged_from IS NOT NULL`).get() as { n: number }).n;
+      const claims: [string, string, string, number][] = [[user.id, yesterday, "dock", 2.2], ["other", new Date().toISOString(), "dock", 2.2], ["other", yesterday, "reeds", 2.2], ["other", yesterday, "dock", 2.7], ["other", yesterday, "dock", 1.9]];
+      for (const [owner, at, spot, weight] of claims) {
+        db.exec(`DELETE FROM catch`);
+        letGo(tagId, at, owner, spot);
+        expect((await landTag(weight)).status).toBe(200);
+        expect(tagged()).toBe(0);
+      }
+      expect(points("other")).toBe(0);
+      expect((await post({ requestId, speciesId: "smallmouth-bass", weight: 2.2, spot: "dock", taggedFrom: "not-an-id" })).status).toBe(400);
+    });
   });
 
   it("limits successful catch submissions per minute", async () => {
