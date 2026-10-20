@@ -37,12 +37,17 @@ export function topOuting(trips: readonly Trip[], fishOn: (tripId: string) => nu
 
 /**
  * The latest outing fished before a day: today's counts once it has a fish, a planned one never.
- * "Last time here" on an outing and its form, so both name the same day.
+ * "Last time here" on an outing and its form, so both name the same day; `order` picks among a day's outings, as
+ * the lists order them (newestOutingFirst: of a dawn and a dusk, the dusk).
  */
-export function lastOutingBefore(trips: readonly Trip[], before: string, today: string, fishOn: (tripId: string) => number): Trip | undefined {
-  return trips
-    .filter((trip) => trip.date < before && outingFished(trip, today, fishOn(trip.id) > 0))
-    .reduce<Trip | undefined>((last, trip) => (!last || trip.date > last.date ? trip : last), undefined);
+export function lastOutingBefore(
+  trips: readonly Trip[],
+  before: string,
+  today: string,
+  fishOn: (tripId: string) => number,
+  order: (a: Trip, b: Trip) => number = (a, b) => b.date.localeCompare(a.date),
+): Trip | undefined {
+  return trips.filter((trip) => trip.date < before && outingFished(trip, today, fishOn(trip.id) > 0)).sort(order)[0];
 }
 
 /**

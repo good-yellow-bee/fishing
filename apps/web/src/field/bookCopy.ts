@@ -1,5 +1,6 @@
-import { localDate, sampleLogbook, type Logbook, type TackleItem } from "@stillwater/shared";
+import { sampleLogbook, type Logbook, type TackleItem } from "@stillwater/shared";
 import { PLAY_LAKE_ID, offPlayLake, upcomingOwnTrips } from "./playLake";
+import { bookFishDay } from "./tripMonths";
 
 export const BOOK_COPY_STORAGE_KEY = "stillwater.field-log.copied.v1";
 
@@ -86,8 +87,9 @@ export function upcomingRealTrips(book: Logbook, today: string) {
 /** The outings still to start, for "Next outing": today's once it has a fish is under way, not ahead. */
 export function nextRealTrips(book: Logbook, today: string) {
   const fished = new Set(book.catches.map((entry) => entry.tripId));
-  // A fish logged loose on its water today puts it under way too, as underWay and Out now take it.
-  const looseAt = new Set(book.catches.filter((entry) => entry.tripId === null && localDate(new Date(entry.caughtAt)) === today).map((entry) => entry.spotId));
+  // A fish logged loose on its water today puts it under way too, as underWay and Out now take it: by the day it counts
+  // on, so last evening's small-hours fish stays that session's.
+  const looseAt = new Set(book.catches.filter((entry) => entry.tripId === null && bookFishDay(book, entry) === today).map((entry) => entry.spotId));
   return upcomingRealTrips(book, today).filter((trip) => trip.date > today || !(fished.has(trip.id) || looseAt.has(trip.spotId) || trip.lost || trip.missed));
 }
 

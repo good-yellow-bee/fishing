@@ -6,6 +6,7 @@ import { outingFished, plainName } from "./tripDates";
 import { newestOutingFirst } from "./catchNeighbors";
 import { noteText, outingName, outingNameById } from "./format";
 import { countedBook } from "./milestones";
+import { outingFish } from "./outingFish";
 import { bookFishDay } from "./tripMonths";
 import { kindNames } from "./speciesLink";
 
@@ -67,7 +68,7 @@ export function catchesCsv(book: Logbook): string {
       lureName(entry.lure),
       plainName(spotById(book, entry.spotId)?.name ?? ""),
       // An untitled outing by its water, as the outings sheet names it, so the two sheets join on it.
-      entry.tripId ? (outingNameById(book, entry.tripId) ?? "") : "",
+      entry.tripId ? plainName(outingNameById(book, entry.tripId) ?? "") : "",
       weather ? t(SKY_LABELS[weather.sky]) : "",
       weather ? t(WIND_LABELS[weather.wind]) : "",
       weather?.waterTempF === undefined ? "" : waterTemp(metric ? ((weather.waterTempF - 32) * 5) / 9 : weather.waterTempF),
@@ -90,9 +91,10 @@ export function sheet(rows: string[][], separator: string): string {
  */
 export function sheetOutings(book: Logbook, today: string): Logbook {
   const counted = countedBook(book);
-  // Today's outing once it has a fish: before that it is still ahead, as the calendar and the averages take it.
-  const fished = new Set(counted.catches.map((entry) => entry.tripId));
-  return { ...counted, trips: counted.trips.filter((trip) => outingFished(trip, today, fished.has(trip.id))) };
+  // Today's outing once it is under way, as Trips' "planned" takes it: a fish (filed, or loose there on its day's one
+  // outing), a fish lost or a strike missed. Before that it is still ahead.
+  const fishOn = outingFish(book);
+  return { ...counted, trips: counted.trips.filter((trip) => outingFished(trip, today, fishOn(trip.id) > 0 || Boolean(trip.lost || trip.missed))) };
 }
 
 /**

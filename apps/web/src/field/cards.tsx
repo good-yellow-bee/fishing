@@ -22,7 +22,7 @@ import { useTackleItems } from "./gear/TackleState";
 import { catchLink, type ListKey } from "./catchList";
 import { FROM_LIST } from "./leaveDeleted";
 import { isPlanned } from "./TripMonthHead";
-import { outingDay, outNow, plainName, sameName } from "./tripDates";
+import { outNow, plainName, sameName } from "./tripDates";
 import { bookFishDay } from "./tripMonths";
 import { bookKindName } from "./speciesLink";
 import { bookLureName } from "./pieceTally";
@@ -119,12 +119,12 @@ export function TripCard({
   const tackle = useTackleItems();
   const { book } = useLogbook();
   // An outing still ahead with nothing logged: how the bag is coming along says more than "Nothing logged".
-  const bag = tackle && fishCount === 0 && trip.date >= outingDay(today) ? itemsForTrip(tackle, trip.id) : [];
+  const bag = tackle && fishCount === 0 && isPlanned(trip, today, fishCount, book) ? itemsForTrip(tackle, trip.id) : [];
   const packed = packedCount(bag);
   const tally =
     bag.length === 0
       ? // Still ahead, or today's before its first fish, with nothing packed: planned, not a blank day.
-        isPlanned(trip, today, fishCount)
+        isPlanned(trip, today, fishCount, book)
         ? // Last evening's, still going in the small hours: the angler is sitting on it, as the Map says.
           trip.date < today && outNow(book, trip)
           ? t("Out now")

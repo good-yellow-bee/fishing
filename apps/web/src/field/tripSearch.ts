@@ -7,6 +7,7 @@ import { outingDay } from "./tripDates";
 import { bookSpelling } from "./gear/pieceKey";
 import { isSampleOnly, isSampleOuting } from "./bookCopy";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
+import { newestOutingFirst } from "./catchNeighbors";
 
 /** Words that ask for the outings already fished that landed nothing. */
 const NO_FISH = ["no fish", "blank", "bez ryb", "bez ryby", "pusty", "puste"];
@@ -138,7 +139,7 @@ export function findTrips(
     if (NO_FISH.includes(part)) return trip.date < outingDay(today, now) && fishOn(trip.id) === 0;
     if (LOST.includes(part)) return (trip.lost ?? 0) > 0;
     if (MISSED.includes(part)) return (trip.missed ?? 0) > 0;
-    if (PLANNED.includes(part)) return isPlanned(trip, today, fishOn(trip.id));
+    if (PLANNED.includes(part)) return isPlanned(trip, today, fishOn(trip.id), book);
     // The game's rounds stay out, as Bests leaves them out of the split these words open.
     if (WEEKEND.includes(part) || WEEKDAY.includes(part)) {
       if (!offPlayLake(trip)) return false;
@@ -163,5 +164,5 @@ export function findTrips(
       const text = tripText(book, trip, t);
       return !left(trip, text) && parts.every((part) => matches(trip, text, part));
     })
-    .sort((a, b) => b.date.localeCompare(a.date));
+    .sort(newestOutingFirst(book));
 }

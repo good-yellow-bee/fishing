@@ -1,14 +1,26 @@
-import { localDate, type Trip } from "@stillwater/shared";
+import { localDate, type Logbook, type Trip } from "@stillwater/shared";
 import { tn } from "../i18n";
 import { fishSum } from "./format";
 import { monthName } from "./tripMonths";
 import { PLAY_LAKE_ID } from "./playLake";
-import { outingDay } from "./tripDates";
+import { lateOutings, outingDay } from "./tripDates";
 
 /** A month's heading over its outings: the month, how many outings, and how many fish they brought. */
 /** An outing still to come, or today's before its first fish, is counted apart as planned, as a water's season line and the cards say it. */
 /** `counted` says which outings are the angler's own, as Home and Bests count them; the sample week's and the game's are said apart. */
-export function TripMonthHead({ month, trips: all, fishOn, counted }: { month: string; trips: readonly Trip[]; fishOn: (tripId: string) => number; counted?: (trip: Trip) => boolean }) {
+export function TripMonthHead({
+  month,
+  trips: all,
+  fishOn,
+  counted,
+  book,
+}: {
+  month: string;
+  trips: readonly Trip[];
+  fishOn: (tripId: string) => number;
+  counted?: (trip: Trip) => boolean;
+  book?: Logbook;
+}) {
   const today = localDate(new Date());
   const own = counted ? all.filter(counted) : all;
   const rest = counted ? all.filter((trip) => !counted(trip)) : [];
@@ -22,7 +34,7 @@ export function TripMonthHead({ month, trips: all, fishOn, counted }: { month: s
     return <h3 className="month-head">{`${monthName(month)} · ${label}`}</h3>;
   }
   const trips = own;
-  const planned = trips.filter((trip) => isPlanned(trip, today, fishOn(trip.id))).length;
+  const planned = trips.filter((trip) => isPlanned(trip, today, fishOn(trip.id), book)).length;
   const fished = trips.length - planned;
   return (
     <h3 className="month-head">
@@ -39,9 +51,12 @@ export function TripMonthHead({ month, trips: all, fishOn, counted }: { month: s
 
 /**
  * An outing still to come, or today's before its first fish; never a round of the game, which is made by playing. In
- * the small hours last evening's is still today's: an outing going on past midnight isn't a blank day yet.
+ * the small hours last evening's is still today's: an outing going on past midnight isn't a blank day yet. Its day
+ * come, an outing that counted a fish lost or a strike missed is under way, though none is landed yet. With `book`,
+ * last evening's blank one only while it is still going: one that gave way to today's plan is a past blank day, as
+ * Recent and Home's Just back list it.
  */
-/** Its day come, an outing that counted a fish lost or a strike missed is under way, though none is landed yet. */
-export function isPlanned(trip: Trip, today: string, fish: number): boolean {
-  return trip.spotId !== PLAY_LAKE_ID && trip.date >= outingDay(today) && fish === 0 && !(trip.date <= today && (trip.lost || trip.missed));
+export function isPlanned(trip: Trip, today: string, fish: number, book?: Logbook): boolean {
+  const ahead = trip.spotId !== PLAY_LAKE_ID && trip.date >= outingDay(today) && fish === 0 && !(trip.date <= today && (trip.lost || trip.missed));
+  return ahead && (!book || trip.date >= today || lateOutings(book).some((late) => late.id === trip.id));
 }
