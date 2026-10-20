@@ -10,6 +10,7 @@ import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { SHINER_KEY } from "../game/groundbaitBag";
 import { nightLineKey } from "../game/nightLine";
+import { baitBucketKey } from "../game/baitBucket";
 import { sessionKey, startSession } from "../game/session";
 import type { Outcome } from "../game/useFishingGame";
 
@@ -780,7 +781,7 @@ describe("the shack's bait tin", () => {
     expect([...page.querySelectorAll(".bait-shop button")].map((button) => button.textContent)).toEqual(["A handful (48 pts)", "A live shiner (40 pts)"]);
   });
 
-  it("sells a live shiner onto the hook, one at a time, and keeps it for a reload", async () => {
+  it("sells a live shiner onto the hook, then into the bait bucket, and keeps it for a reload", async () => {
     vi.mocked(getMe).mockResolvedValue({ ...me, profile: { ...me.profile, points: 500 } });
     vi.mocked(buyShiner).mockClear();
     vi.mocked(buyShiner).mockResolvedValue({ profile: { ...me.profile, points: 450 } });
@@ -792,11 +793,12 @@ describe("the shack's bait tin", () => {
     expect(note.textContent).toBe("Goes on your hook for the next cast and draws the hunters at the bank.");
     await act(async () => buy.click());
     expect(buyShiner).toHaveBeenCalledTimes(1);
-    expect(note.textContent).toBe("A live shiner is on your hook already.");
-    expect(buy.getAttribute("aria-disabled")).toBe("true");
+    expect(note.textContent).toBe("A shiner is on your hook, so another goes in your bait bucket, which holds 0 of 3.");
     await act(async () => buy.click());
-    expect(buyShiner).toHaveBeenCalledTimes(1);
+    expect(buyShiner).toHaveBeenCalledTimes(2);
+    expect(note.textContent).toBe("A shiner is on your hook, so another goes in your bait bucket, which holds 1 of 3.");
     expect(localStorage.getItem("stillwater.shiner.v1")).toBe("live");
+    expect(localStorage.getItem(baitBucketKey("u1"))).toBe("1");
     localStorage.removeItem("stillwater.shiner.v1");
   });
 });
