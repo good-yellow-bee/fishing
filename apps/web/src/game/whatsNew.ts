@@ -1,16 +1,16 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-field65";
+export const NEWS_ID = "2026-10-20-game48";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "A fish hooked along the point's rock edge now dives off the ledge instead of dragging your line over the rocks. A perch or smallmouth hooked raiding the sunfish beds bolts from the guarding sunfish, so its first run is the long one. And on a windy day a fish hooked in a foam lane lets a slack line drift out faster still.",
   "Home's Next says Out now while today's outing is being fished, and offers today's plan for the calendar until it is under way. The outings spreadsheet counts the fish released on each outing.",
   "The lake now runs a little smoother on a phone: it spends less of each frame sorting out how to draw its creatures and their shadows. And on spring nights the pollen on the water no longer glows yellow in the dark.",
   "Out on the boat, a fish hooked tight to the far rock runs round it: turn every run, or the rock frays your line. A fish hooked through the duckweed comes in slower under a ball of weed until its first run strips it off. And a bank you fished hard yesterday starts today wary, its first casts biting slower, unless you bring groundbait or a lure the fish haven't seen.",
   "A search's summary splits its fish by water too, each opening that water's. A fish's page says how near it came to your longest or heaviest of its kind, and a kind typed two ways, such as Perch and Perches, keeps one name and one record on every catch page.",
   "The lake now opens sooner, above all on a phone: the creatures you only meet at night, in one season or in the rain load when their time comes instead of all at once, without popping in when they appear.",
-  "Cast tight to the sunken log and the fish there now run for it: turn every run, or the line wraps round the log and frays. Land a smallmouth and a largemouth bass on one day for the Bass slam badge, or a brook trout, a rainbow trout and a salmon for the Trout slam. And a fish you let go that breaks off stays itself when it bites again, tag and all.",
   "An outing's page opens every outing on its water in one tap, and a copied outing says how many of the fish hooked were landed.",
   "Fishing from the bank, you now have company in any weather: on wet evenings a toad hops past behind you, on rainy days a blackbird comes to your feet in place of the robin, and on winter nights a wood mouse pops out of the snow and scurries across, leaving tiny tracks.",
   "The rowboats and the float no longer turn black: their colours load properly again. On a phone held upright, the view now opens wider, so you see the whole dock, the boat and both shores instead of a narrow slice of the lake. And see-through things like rain rings and dragonfly wings now draw in one pass, so the lake runs a little smoother.",
