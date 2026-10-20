@@ -1239,6 +1239,42 @@ describe("a foam lane on a windy day", () => {
   });
 });
 
+describe("the lantern's light at the net", () => {
+  it("makes any netted fish bolt once on first seeing the net, as a net-shy carp does", () => {
+    const atNet = (lantern: boolean) => {
+      const f = makeFight(fish("pike"), 6, 10, () => 0, 1, "pilings", undefined, false, false, false, false, false, false, false, 1, 1, true, { lantern });
+      f.sim.line = 0.01;
+      f.sim.stamina = 0.1;
+      let now = 0;
+      while (!f.sim.netting && now < 30_000) f.step((now += 50), 0.05, true);
+      for (let at = 0; at < NET_SHY_MS + 200; at += 50) f.step((now += 50), 0.05, false);
+      return f.sim.shyBolt === true;
+    };
+    expect(atNet(true)).toBe(true);
+    expect(atNet(false)).toBe(false);
+  });
+});
+
+describe("fired up on the fry", () => {
+  it("doesn't tire on its first run, and tires as usual after", () => {
+    const afterRuns = (fired: boolean, runs: number) => {
+      const f = makeFight(fish("pike"), 6, 3, () => 0, 1, "open", undefined, false, false, false, false, false, false, false, 1, 1, false, { fired });
+      let now = 0;
+      let done = 0;
+      let was = f.sim.surge;
+      while (done < runs) {
+        f.step((now += 50), 0.05, false);
+        if (was === 2 && f.sim.surge === 0) done += 1;
+        was = f.sim.surge;
+      }
+      return f.sim.stamina;
+    };
+    expect(afterRuns(true, 1)).toBeGreaterThan(afterRuns(false, 1));
+    expect(afterRuns(true, 1)).toBe(1);
+    expect(afterRuns(true, 2)).toBeLessThan(1);
+  });
+});
+
 describe("the dock's pilings", () => {
   /** Lets one run go unturned, then reels or rests through the calm after it. */
   function afterRun(water: "pilings" | "open", turn: boolean, reel: boolean) {

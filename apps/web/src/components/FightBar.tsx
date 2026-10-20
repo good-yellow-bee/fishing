@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import { CLEAN_RUN_FROM } from "@stillwater/shared";
-import { canTurnRuns, ESCAPE_LINE, FRAYED_SNAP, fightLines, isCleanFight, jumpLines, RED_TENSION, SHORT_LINE, SOFT_MOUTHS, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone, NET_BOLT_LINE, LEAPERS } from "../game/fight";
+import { canTurnRuns, ESCAPE_LINE, FRAYED_SNAP, fightLines, isCleanFight, jumpLines, RED_TENSION, SHORT_LINE, SOFT_MOUTHS, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone, NET_BOLT_LINE, LEAPERS, NET_SHY } from "../game/fight";
 import { nextDrag, type Drag } from "../game/drag";
 import { habitLines } from "../game/habitLines";
 import { updateSettings, useSettings } from "../game/settings";
@@ -293,6 +293,8 @@ export function FightBar({ fight, sim, performance, best = null, note = null, cl
           {fight.water === "deep" && <p className="fight-water">{t("Drop-off: runs dive and pull harder, but tire the fish faster")}</p>}
           {fight.water === "rocks" && !fight.edge && <p className="fight-water">{t("Point: turn every run; reeling while it drags over the rocks frays the line")}</p>}
           {fight.rising && LEAPERS.has(fight.species.id) && <p className="fight-water">{t("Risen to the hatch: it is at the top already, so its first run is a leap — bow")}</p>}
+          {fight.lantern && !NET_SHY.has(fight.species.id) && <p className="fight-water">{t("Lantern light: it will see the net in the light and bolt from it once, so be ready to bring it back")}</p>}
+          {fight.fired && <p className="fight-water">{t("Fired up on the fry: its first run doesn't tire it at all")}</p>}
           {fight.foam && <p className="fight-water">{t("Foam lane: the wind's drift is strongest here, so a slack line drifts out faster still")}</p>}
           {fight.bed && <p className="fight-water">{t("Egg raider: chased off the beds by the sunfish, its first run is the long one")}</p>}
           {fight.edge && <p className="fight-water">{t("Rock edge: runs dive off the ledge, pulling harder but tiring the fish faster")}</p>}
