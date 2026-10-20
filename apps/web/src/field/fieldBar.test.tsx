@@ -93,3 +93,39 @@ describe("the phone's bars at the bottom", () => {
     }
   });
 });
+
+describe("arriving in the field log from the lake", () => {
+  it("focuses the page's heading after a link in, and leaves a page load alone", async () => {
+    const { Link, Route, Routes } = await import("react-router-dom");
+    const shell = (
+      <LogbookProvider>
+        <FieldShell>
+          <h1>Catches</h1>
+        </FieldShell>
+      </LogbookProvider>
+    );
+    const box = document.createElement("div");
+    document.body.append(box);
+    const root = createRoot(box);
+    await act(async () => {
+      root.render(
+        <MemoryRouter initialEntries={["/play"]}>
+          <Routes>
+            <Route path="/play" element={<Link to="/catches">Field log</Link>} />
+            <Route path="/catches" element={shell} />
+          </Routes>
+        </MemoryRouter>,
+      );
+    });
+    await act(async () => box.querySelector("a")!.click());
+    expect(document.activeElement?.textContent).toBe("Catches");
+    await act(async () => root.unmount());
+
+    const again = createRoot(box);
+    await act(async () => {
+      again.render(<MemoryRouter initialEntries={["/catches"]}>{shell}</MemoryRouter>);
+    });
+    expect(document.activeElement).toBe(document.body);
+    await act(async () => again.unmount());
+  });
+});

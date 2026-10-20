@@ -205,7 +205,9 @@ export function FieldShell({ children }: { children: ReactNode }) {
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
   }, []);
-  const lastFocused = useRef(pathname);
+  // Come in by a link from outside the field log (the lake's "Field log"), the first page focuses its heading too, so a
+  // screen reader says where it landed; a page load or reload leaves focus to the browser.
+  const lastFocused = useRef<string | null>(how === "POP" ? pathname : null);
   // The page left with its search: Bests' rows open "/?find=…" searches that differ only there.
   const lastShown = useRef(pathname + search);
   useEffect(() => {
@@ -231,7 +233,7 @@ export function FieldShell({ children }: { children: ReactNode }) {
         return;
       }
     }
-    const from = /^\/(catches|trips|spots)\/([^/]+)$/.exec(left);
+    const from = left === null ? null : /^\/(catches|trips|spots)\/([^/]+)$/.exec(left);
     if (how === "POP" && main && from && (from[1] === "catches" || from[2] !== "new")) {
       // A list's card before a sum's "Heaviest" link to the same fish; an outing or a water only from its card.
       const links = [...main.querySelectorAll<HTMLAnchorElement>("a[href]")].filter((link) => new URL(link.href).pathname === left);
