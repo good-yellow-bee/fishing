@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-field65";
+export const NEWS_ID = "2026-10-20-scene57";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "At night your headlamp now draws moths: from spring to fall a few find the beam one by one and flutter round it, and on summer nights a bat comes now and then to hawk them.",
   "Home's Next says Out now while today's outing is being fished, and offers today's plan for the calendar until it is under way. The outings spreadsheet counts the fish released on each outing.",
   "The lake now runs a little smoother on a phone: it spends less of each frame sorting out how to draw its creatures and their shadows. And on spring nights the pollen on the water no longer glows yellow in the dark.",
   "Out on the boat, a fish hooked tight to the far rock runs round it: turn every run, or the rock frays your line. A fish hooked through the duckweed comes in slower under a ball of weed until its first run strips it off. And a bank you fished hard yesterday starts today wary, its first casts biting slower, unless you bring groundbait or a lure the fish haven't seen.",
