@@ -1946,6 +1946,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT459~~ | ~~The shiner trap follows the season: baited in winter it goes into cold water, so it soaks twelve hours instead of six and holds one shiner, not up to two; the shack's trap note says which before baiting, and the trap keeps the season it went in~~ (#1693) | gameplay | S |
 | ~~GT460~~ | ~~The bait bucket follows the season: a spare shiner keeps five days in winter's cold water and only two in summer's heat (three otherwise), judged by the season when the angler comes back, so stocking the bucket ahead is a seasonal call; the shack's shiner note says the season's days before a spare goes in, and the died-while-away hint names them~~ (#1695) | gameplay | S |
 | GT461 | News card 2026-10-20-game69 covers GT459-GT460: the winter shiner trap and the bait bucket's seasonal days (#1699) | ui | S |
+| GT462 | The groundbaited swim follows the season: a swim left behind primes after three hours in summer but is eaten within a day, and after twelve hours in winter but keeps four days (six hours and two days otherwise), judged by the season when the angler comes back, like the bait bucket; the toss hint says the season's timing in summer and winter (#1702) | gameplay | S |
 
 ## Risks / open questions for the owner
 
