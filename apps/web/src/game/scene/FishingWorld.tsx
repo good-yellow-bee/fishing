@@ -353,6 +353,25 @@ function ShadowDepths() {
   return null;
 }
 
+/** Redraws the sun's shadow map at the saver rate, not every frame: it is drawn from the sun, so the camera never changes it, only moving casters do. */
+function ShadowPace() {
+  const gl = useThree((state) => state.gl);
+  const last = useRef(-Infinity);
+  useEffect(() => {
+    gl.shadowMap.autoUpdate = false;
+    return () => {
+      gl.shadowMap.autoUpdate = true;
+    };
+  }, [gl]);
+  useFrame(() => {
+    const now = performance.now();
+    if (!frameDue(now, last.current)) return;
+    last.current = now;
+    gl.shadowMap.needsUpdate = true;
+  });
+  return null;
+}
+
 /** Lets later scene parts load on their own once the scene is in, and fetches the likely ones ahead (lazyPart.tsx). */
 function PartsAhead() {
   useSceneParts();
@@ -2248,6 +2267,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       <CameraRig phase={phase} sim={sim} />
       <PartsAhead />
       <ShadowDepths />
+      <ShadowPace />
       <FitFov phase={phase} />
       <Tone hour={hour} />
       <FrameWatch />
