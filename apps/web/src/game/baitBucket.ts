@@ -24,7 +24,7 @@ export function bucketLifeMs(season: LakeSeason | undefined) {
 }
 
 /** The spare shiners still alive at `now`, oldest first, no more than the bucket holds. */
-export function liveShiners(shiners: readonly number[], now: number, season?: LakeSeason): number[] {
+export function liveShiners(shiners: readonly number[], now: number, season: LakeSeason | undefined): number[] {
   const life = bucketLifeMs(season);
   return shiners.filter((at) => now - at <= life).sort((a, b) => a - b).slice(-BUCKET_SIZE);
 }

@@ -512,6 +512,12 @@ describe("useFishingGame live shiner", () => {
     mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, undefined, season);
     expect(container!.querySelector("[data-testid=bucket]")?.textContent).toBe(season === "winter" ? "1" : "0");
     expect(hint()).toBe(season === "winter" ? said : said.replace("1 of", "2 of"));
+    if (season === "winter") {
+      // Through the visit too: the four-day-old spare is still alive to hook in winter.
+      act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === "hook from bucket") as HTMLButtonElement).click());
+      expect(container!.querySelector("[data-testid=bucket]")?.textContent).toBe("0");
+      expect(hint()).toBe("You hook a shiner from your bucket on as live bait. Cast it out to the hunters.");
+    }
   });
 
   it("keeps spare shiners in a bait bucket: a night line takes one from it first, and one can be hooked from it later", () => {
