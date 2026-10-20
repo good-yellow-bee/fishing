@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-game58";
+export const NEWS_ID = "2026-10-20-scene66";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "On a clear dawn or dusk the low sun now lays long shadows across the lake, yours among them: at the drop-off at dawn and the inlet at dusk you can see it fall on the water the fish are watching. And on a phone held upright the lake sits a little lower, so the far bank and the hills show clear of the panels at the top.",
   "A night line now fishes through its night and comes in once the night is out, and the sky over that night matters: rain fills more lines, a clear night fewer, so the forecast tells when to set one. And a fish you let go remembers the lure it was caught on: back at its bank it won't take that lure again, though another may bring it up.",
   "The outings spreadsheet says when each outing's fish came, so a dawn and a dusk tell apart. Adding a book file says how many of its fish were the game's, and Home's Next goes to the outing you are fishing when a day has two.",
   "While a bank's giant is still out there this week, now and then it rolls on that bank's water in a big swirl. And a night line you leave out now shows at its bank: a forked stick leaning over the water, the line running down into it.",
