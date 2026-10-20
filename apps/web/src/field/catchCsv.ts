@@ -2,7 +2,7 @@ import { catchesNewestFirst, measuresOf, spotById, SKY_LABELS, WIND_LABELS, type
 import { getLang, getUnits, num, t } from "../i18n";
 import { CM_PER_IN, KG_PER_LB } from "../i18n/content";
 import { lureNames } from "./pieceTally";
-import { plainName } from "./tripDates";
+import { outingFished, plainName } from "./tripDates";
 import { newestOutingFirst } from "./catchNeighbors";
 import { noteText, outingName, outingNameById } from "./format";
 import { countedBook } from "./milestones";
@@ -92,7 +92,7 @@ export function sheetOutings(book: Logbook, today: string): Logbook {
   const counted = countedBook(book);
   // Today's outing once it has a fish: before that it is still ahead, as the calendar and the averages take it.
   const fished = new Set(counted.catches.map((entry) => entry.tripId));
-  return { ...counted, trips: counted.trips.filter((trip) => trip.date < today || (trip.date === today && fished.has(trip.id))) };
+  return { ...counted, trips: counted.trips.filter((trip) => outingFished(trip, today, fished.has(trip.id))) };
 }
 
 /**

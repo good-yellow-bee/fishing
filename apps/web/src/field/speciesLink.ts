@@ -3,6 +3,7 @@ import { offPlayLake } from "./playLake";
 import { isSampleCatch } from "./bookCopy";
 import { getLang, t } from "../i18n";
 import { bookSpelling, pieceKey } from "./gear/pieceKey";
+import { countedFish } from "./milestones";
 
 /** The page for one kind of fish, by the name the book keeps it under. */
 export function speciesLink(species: string) {
@@ -77,6 +78,15 @@ export function kindNames(catches: readonly CatchEntry[]): (species: string) => 
     // before and after the Polish book has loaded.
     return getLang() === "pl" ? t(bookSpelling(best)) : best;
   };
+}
+
+const kindNameCache = new WeakMap<readonly CatchEntry[], (species: string) => string>();
+
+/** kindNames for a book's own fish, kept while the book stays the same: for many cards in one list. */
+export function bookKindName(catches: readonly CatchEntry[]): (species: string) => string {
+  let name = kindNameCache.get(catches);
+  if (!name) kindNameCache.set(catches, (name = kindNames(countedFish(catches))));
+  return name;
 }
 
 /**

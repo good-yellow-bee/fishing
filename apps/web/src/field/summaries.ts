@@ -13,6 +13,7 @@ import { goalPace } from "./YearGoal";
 import { sheetOutings } from "./catchCsv";
 import { outingDay, plainName, sameName } from "./tripDates";
 import { pieceName } from "./gear/pieceKey";
+import { countedFish } from "./milestones";
 
 /**
  * An outing as plain text to paste into a message: the day, the water, then each fish in the order it came.
@@ -138,8 +139,8 @@ export function yearSummary(book: Logbook, year: string, today: string, goal: nu
   // The outings fished that year, as the outings sheet lists them: the number anglers set season against season.
   const outings = sheetOutings(book, outingDay(today)).trips.filter((trip) => trip.date.startsWith(`${year}-`)).length;
   const bests = personalBests({ ...book, catches });
-  // One kind written two ways under the name the book gives it most: "Zander", not "Zander ".
-  const kindName = kindNames(catches);
+  // One kind written two ways under the name the whole book gives it most, as the page and its recap name it.
+  const kindName = kindNames(countedFish(book.catches));
   const best = (entry: CatchEntry | null | undefined, kind: "length" | "weight") =>
     entry
       ? [t(kind === "length" ? "Longest: {species}, {size}" : "Heaviest: {species}, {size}", { species: kindName(entry.species), size: measureText(measureOf(entry, kind)!) })]
