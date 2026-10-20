@@ -177,7 +177,6 @@ if (!catchColumns.some((column) => column.name === "day")) {
 if (!catchColumns.some((column) => column.name === "bonuses")) {
   db.exec(`ALTER TABLE catch ADD COLUMN bonuses TEXT`);
 }
-// When the angler let the fish go; older releases have only their catch's time.
 // A giant its first angler let go is out again for the week, once: who landed it after, and when.
 const giantColumns = db.prepare(`PRAGMA table_info(giant_landed)`).all() as { name: string }[];
 if (!giantColumns.some((column) => column.name === "released_at")) {
@@ -185,6 +184,7 @@ if (!giantColumns.some((column) => column.name === "released_at")) {
   db.exec(`ALTER TABLE giant_landed ADD COLUMN again_user_id TEXT`);
   db.exec(`ALTER TABLE giant_landed ADD COLUMN again_at TEXT`);
 }
+// When the angler let the fish go; older releases have only their catch's time.
 if (!catchColumns.some((column) => column.name === "released_at")) {
   db.exec(`ALTER TABLE catch ADD COLUMN released_at TEXT`);
   db.exec(`UPDATE catch SET released_at = created_at WHERE released = 1`);
@@ -426,19 +426,19 @@ export function claimAndPayLost(lostId: string, fish: { speciesId: string; weigh
   })();
 }
 
-/** How many of the weekly giants the angler was first to land. */
+/** How many of the weekly giants the angler landed for pay: first, or again after its first angler let it go. */
 export function countGiantsLanded(userId: string): number {
   return (db.prepare(`SELECT COUNT(*) as n FROM giant_landed WHERE user_id = ? OR again_user_id = ?`).get(userId, userId) as { n: number }).n;
 }
 
 /** Who landed each of a week's giants and when, whether they let it go, and who landed it again after. */
-export function listGiantsLanded(week: string): { spot: string; displayName: string; landedAt: string; released: 0 | 1; againName: string | null; againAt: string | null }[] {
+export function listGiantsLanded(week: string): { spot: string; userId: string; displayName: string; landedAt: string; released: 0 | 1; againName: string | null; againAt: string | null }[] {
   return db
     .prepare(
-      `SELECT g.spot, p.display_name as displayName, g.landed_at as landedAt, g.released_at IS NOT NULL as released, a.display_name as againName, g.again_at as againAt
+      `SELECT g.spot, g.user_id as userId, p.display_name as displayName, g.landed_at as landedAt, g.released_at IS NOT NULL as released, a.display_name as againName, g.again_at as againAt
        FROM giant_landed g JOIN profile p ON p.user_id = g.user_id LEFT JOIN profile a ON a.user_id = g.again_user_id WHERE g.week = ?`,
     )
-    .all(week) as { spot: string; displayName: string; landedAt: string; released: 0 | 1; againName: string | null; againAt: string | null }[];
+    .all(week) as { spot: string; userId: string; displayName: string; landedAt: string; released: 0 | 1; againName: string | null; againAt: string | null }[];
 }
 
 /** The kinds whose studies the angler has been paid for. */
@@ -661,8 +661,8 @@ export function releaseCatch(userId: string, requestId: string): { row: CatchRow
     const species = fishById(row.species_id);
     // The season is the server's own, from when the catch was saved, not the one the client sent.
     const bonus = change.changes === 1 && species ? releaseBonus(species, row.weight, row.spot, lakeSeason(new Date(row.created_at))) : 0;
-    // A giant let go goes back to its bank for the rest of its week.
-    if (change.changes === 1 && (row.bonuses ?? "").split(",").includes("giant")) releaseGiant(giantWeek(new Date(row.created_at)), row.spot, userId);
+    // A giant let go goes back to its bank for the rest of its week: the week it was landed in, as its claim was made.
+    if (change.changes === 1 && (row.bonuses ?? "").split(",").includes("giant")) releaseGiant(giantWeek(row.day ? new Date(`${row.day}T12:00:00.000Z`) : new Date(row.created_at)), row.spot, userId);
     if (bonus) {
       db.prepare(`UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`).run(bonus, bonus, userId);
     }

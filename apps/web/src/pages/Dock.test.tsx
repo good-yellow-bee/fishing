@@ -202,9 +202,9 @@ describe("dock weather", () => {
   it("marks the walk signs of the banks whose giant is still out there, and the stance it is at", async () => {
     landed.stance = "dock";
     vi.mocked(getGiants).mockResolvedValue([
-      { spot: "reeds", name: "Iron Jaw", speciesId: "pike", weight: 19, landedBy: null, landedAt: null, letGoBy: null, bonus: 200 },
-      { spot: "point", name: "Old Moss", speciesId: "carp", weight: 17, landedBy: "Mara", landedAt: "2026-10-20T10:00:00Z", letGoBy: null, bonus: 100 },
-      { spot: "dock", name: "Tarnish", speciesId: "smallmouth-bass", weight: 3.9, landedBy: null, landedAt: null, letGoBy: null, bonus: 200 },
+      { spot: "reeds", name: "Iron Jaw", speciesId: "pike", weight: 19, landedBy: null, landedAt: null, letGoBy: null, letGoByYou: false, bonus: 200 },
+      { spot: "point", name: "Old Moss", speciesId: "carp", weight: 17, landedBy: "Mara", landedAt: "2026-10-20T10:00:00Z", letGoBy: null, letGoByYou: false, bonus: 0 },
+      { spot: "dock", name: "Tarnish", speciesId: "smallmouth-bass", weight: 3.9, landedBy: null, landedAt: null, letGoBy: null, letGoByYou: false, bonus: 200 },
     ]);
     const spring = await openDock("/?hour=day&sky=partly-cloudy&season=spring");
     const sign = (name: string) => [...spring.querySelectorAll(".walk-signs button")].find((button) => button.textContent?.startsWith(name));

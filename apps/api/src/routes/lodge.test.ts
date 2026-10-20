@@ -157,10 +157,11 @@ describe("GET /lodge/giants", () => {
     const { giantWeek, GIANT_AGAIN_BONUS } = await import("@stillwater/shared");
     claimGiant(giantWeek(), "reeds", "ash");
     releaseGiant(giantWeek(), "reeds", "ash");
-    const reeds = async () => ((await (await app.request("http://test/lodge/giants")).json()) as { giants: { spot: string; landedBy: string | null; letGoBy: string | null; bonus: number }[] }).giants.find((giant) => giant.spot === "reeds")!;
-    expect(await reeds()).toMatchObject({ landedBy: null, letGoBy: "Ash", bonus: GIANT_AGAIN_BONUS });
+    const reeds = async () => ((await (await app.request("http://test/lodge/giants")).json()) as { giants: { spot: string; landedBy: string | null; letGoBy: string | null; letGoByYou: boolean; bonus: number }[] }).giants.find((giant) => giant.spot === "reeds")!;
+    // Out again for the lodge, though not for Ash, who let it go.
+    expect(await reeds()).toMatchObject({ landedBy: null, letGoBy: "Ash", letGoByYou: true, bonus: GIANT_AGAIN_BONUS });
     claimAndPayGiant(giantWeek(), "reeds", "mara", "none");
-    expect(await reeds()).toMatchObject({ landedBy: "Mara", letGoBy: "Ash" });
+    expect(await reeds()).toMatchObject({ landedBy: "Mara", letGoBy: "Ash", bonus: 0 });
   });
 });
 

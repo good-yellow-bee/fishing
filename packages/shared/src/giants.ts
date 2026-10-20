@@ -7,6 +7,8 @@ import type { SpotId } from "./types.ts";
 export const GIANT_BANKS: readonly SpotId[] = ["dock", "reeds", "point", "dropoff", "inlet"];
 /** Landing a bank's giant first pays this many points on top. */
 export const GIANT_BONUS = 200;
+/** A giant its first angler let go back pays the next angler to land it this many. */
+export const GIANT_AGAIN_BONUS = 100;
 /** Chance a cast at a bank whose giant is still about brings it up. */
 export const GIANT_ODDS = 0.012;
 /** The names the lodge gives its giants, one per bank each week. */

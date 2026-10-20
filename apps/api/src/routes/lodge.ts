@@ -43,6 +43,7 @@ lodgeRoutes.get("/lodge/bank-week", (c) => {
 
 /** The week's giants, one per bank, and who landed each, if anyone has. */
 lodgeRoutes.get("/lodge/giants", (c) => {
+  const user = c.get("user") as SessionUser;
   const landed = new Map(listGiantsLanded(giantWeek()).map((row) => [row.spot, row]));
   return c.json({
     giants: giantsForWeek().map((giant) => {
@@ -54,7 +55,9 @@ lodgeRoutes.get("/lodge/giants", (c) => {
         landedBy: out ? null : (by.againName ?? by.displayName),
         landedAt: out ? null : (by.againAt ?? by.landedAt),
         letGoBy: by && by.released === 1 ? by.displayName : null,
-        bonus: by ? GIANT_AGAIN_BONUS : GIANT_BONUS,
+        // The angler who let it go can't land it again for pay, so it is not out for them.
+        letGoByYou: !!by && by.released === 1 && by.userId === user.id,
+        bonus: !out ? 0 : by ? GIANT_AGAIN_BONUS : GIANT_BONUS,
       };
     }),
   });

@@ -129,7 +129,7 @@ import { shyOf } from "../game/giantShy";
 import { nightLineKinds, nightLineState } from "../game/nightLine";
 import { isOldFoe, loadOldFoe, saveOldFoe } from "../game/oldFoe";
 import { BUCKET_SIZE } from "../game/baitBucket";
-import { isLiveBait, isTopwater, touchScreen, useFishingGame } from "../game/useFishingGame";
+import { isLiveBait, isTopwater, touchScreen, useFishingGame, type Outcome } from "../game/useFishingGame";
 import { useCatchSync } from "../game/useCatchSync";
 import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
 import { rarityLabel } from "../game/logic";
@@ -324,7 +324,7 @@ export function DockPage() {
       live = false;
     };
   }, [angler, latestCatch, giantLetGo]);
-  const openGiants = useMemo(() => giants.filter((giant) => !giant.landedBy), [giants]);
+  const openGiants = useMemo(() => giants.filter((giant) => !giant.landedBy && !giant.letGoByYou), [giants]);
   // Other anglers' lost trophies, read like the giants; one of the angler's own that someone landed is no foe of theirs any more.
   const [lodgeLost, setLodgeLost] = useState<LodgeLost[]>([]);
   const [lostFound, setLostFound] = useState<LostFound[]>([]);
@@ -771,6 +771,8 @@ export function DockPage() {
   const [releaseError, setReleaseError] = useState(false);
   const [paidReleaseBonus, setPaidReleaseBonus] = useState(0);
   const landedReleased = game.outcome?.kind === "landed" && releasedId === game.outcome.id;
+  // Only the first angler paid for a giant sends it back out by letting it go.
+  const firstGiant = (outcome: Outcome) => outcome.kind === "landed" && !!outcome.giant && (outcome.giantBonus ?? GIANT_BONUS) === GIANT_BONUS && paid("giant", true);
   // What letting the landed fish go would pay, and whether it goes back to its nest.
   const releaseOffer =
     game.outcome?.kind === "landed"
@@ -796,7 +798,7 @@ export function DockPage() {
       const { bonus } = await releaseCatch(outcome.id);
       setPaidReleaseBonus(bonus);
       setReleasedId(outcome.id);
-      if (outcome.giant) setGiantLetGo((count) => count + 1);
+      if (firstGiant(outcome)) setGiantLetGo((count) => count + 1);
       // The lake remembers the fish, so it may bite again at this bank another day, a little heavier.
       rememberReleased(outcome.species, outcome.weight, outcome.spot, Date.now(), outcome.lure);
       // Let go, it went back to its bank, so the bank's week no longer counts it.
@@ -1527,7 +1529,7 @@ export function DockPage() {
                         : t("Released back into the lake")}
                   {/* A fish the lake remembers shies from the lure it was caught on. */}
                   {game.outcome.lure && remembersReleased(game.outcome.species) && ` · ${t("it will shy from the {lure} now", { lure: t(game.outcome.lure) })}`}
-                  {game.outcome.giant && ` · ${t("{name} is out again for the week", { name: t(game.outcome.giant) })}`}
+                  {firstGiant(game.outcome) && ` · ${t("{name} is out again for the week", { name: t(game.outcome.giant!) })}`}
                 </p>
               ) : (
                 <button className="panel-btn" type="button" onClick={() => void releaseFish()} aria-disabled={releasing || undefined}>
