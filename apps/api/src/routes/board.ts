@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { BOARD_LIMIT, boardView, derbyOn, isBoardPeriod, nextDerby, pastDerbies, weekStart } from "@stillwater/shared";
+import { BOARD_LIMIT, boardView, derbyOn, isBoardPeriod, lastDerby, nextDerby, weekStart } from "@stillwater/shared";
 import { listBoardStats, listDerbyEntries, listSpeciesRecords } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
@@ -21,7 +21,7 @@ boardRoutes.get("/board/derby", (c) => {
   const derby = on ?? nextDerby(now);
   const ranked = on ? listDerbyEntries(on.fishId, on.from, on.to, 1000) : [];
   const yourRank = ranked.findIndex((row) => row.userId === user.id);
-  const last = pastDerbies(new Date(now.getTime() - 8 * 86_400_000), now)[0];
+  const last = lastDerby(now);
   const champion = last ? listDerbyEntries(last.fishId, last.from, last.to, 1)[0] ?? null : null;
   return c.json({
     derby,
