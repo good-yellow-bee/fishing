@@ -117,7 +117,7 @@ vi.mock("./fight", async (importOriginal) => {
 });
 
 import { updateSettings } from "./settings";
-import { carriesBait, FALSE_STRIKE_MS, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TIRE_REASONS, TOPWATER_POPS, useFishingGame, WAIT_REASONS } from "./useFishingGame";
+import { carriesBait, FALSE_STRIKE_MS, FIGURE_EIGHT_ODDS, FIGURE_TURN_MS, FIGURE_WINDOW_MS, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TIRE_REASONS, TOPWATER_POPS, useFishingGame, WAIT_REASONS } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { CLOUD_SHADE_WAIT, cloudShadeWaitMul } from "./sunCover";
@@ -1754,6 +1754,8 @@ describe("level unlock integration", () => {
     const surface = mount(DOCK_BUBBLES.at, profile, "day", false, lure);
     vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "pike")!);
     cast(surface);
+    // It takes rather than following to the bank.
+    vi.mocked(Math.random).mockReturnValue(FIGURE_EIGHT_ODDS);
     for (let waited = 0; phase() !== "hookset:none" && waited < 20_000; waited += 10) act(() => vi.advanceTimersByTime(10));
     expect(phase()).toBe("hookset:none");
     for (let waited = 0; phase() === "hookset:none" && waited < 5_000; waited += 10) act(() => vi.advanceTimersByTime(10));
@@ -1767,6 +1769,35 @@ describe("level unlock integration", () => {
     expect(phase()).toBe("hookset:none");
     for (let waited = 0; phase() === "hookset:none" && waited < 5_000; waited += 10) act(() => vi.advanceTimersByTime(10));
     expect(phase()).toBe("result:miss");
+  });
+
+  describe("a pike following a flashing lure to the bank", () => {
+    const follow = () => {
+      const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "#5 Mepps");
+      vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "pike")!);
+      cast(surface);
+      for (let waited = 0; !/followed it to the bank/.test(hint()) && waited < 20_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+      expect(phase()).toBe("waiting:none");
+    };
+    const tap = () => act(() => window.dispatchEvent(new KeyboardEvent("keydown", { code: "Space", bubbles: true })));
+
+    it("strikes on a figure-eight as it turns", () => {
+      follow();
+      now += FIGURE_TURN_MS + 50;
+      act(() => vi.advanceTimersByTime(FIGURE_TURN_MS + 50));
+      tap();
+      expect(phase()).toBe("hookset:none");
+      expect(hint()).toBe("It turned on the figure-eight and hit! Strike!");
+    });
+
+    it("sinks away on a tap before it turns, or when it is left to turn", () => {
+      follow();
+      tap();
+      expect(phase()).toBe("result:miss");
+      follow();
+      act(() => vi.advanceTimersByTime(FIGURE_TURN_MS + FIGURE_WINDOW_MS + 50));
+      expect(phase()).toBe("result:miss");
+    });
   });
 
   it("brings a fish up sooner when a sitting topwater lure is popped, for the first two pops", () => {
