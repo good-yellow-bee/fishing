@@ -2,6 +2,7 @@ import { FISH, fishById } from "./fish.ts";
 import { isTrophyWeight } from "./guide.ts";
 import type { LakeHour } from "./hour.ts";
 import type { LakeSeason } from "./season.ts";
+import { SLAMS, type SlamId } from "./slams.ts";
 import type { SpotId } from "./types.ts";
 import { REGULAR_DAYS } from "./streak.ts";
 import type { Sky } from "./weather.ts";
@@ -26,11 +27,13 @@ export type BadgeFactRow = {
   heaviest: number;
 };
 
-/** What the grouped facts can't carry: the longest run of consecutive local days with a fish. */
-/** `derbyWins`: weekend derbies the angler held the top spot of when they ended. */
-export type BadgeHistory = { longestStreak: number; derbyWins?: number };
+/**
+ * What the grouped facts can't carry: the longest run of consecutive local days with a fish, the weekend derbies the
+ * angler held the top spot of when they ended, and the most of each slam's kinds landed on one day.
+ */
+export type BadgeHistory = { longestStreak: number; derbyWins?: number; slams?: Partial<Record<SlamId, number>> };
 
-export type BadgeId = "four-banks" | "night-owl" | "rain-pike" | "clean-sweep" | "trophy" | "full-book" | "four-seasons" | "gold" | "steward" | "regular" | "early-bird" | "whole-lake" | "trophy-hunter" | "derby-champion";
+export type BadgeId = "four-banks" | "night-owl" | "rain-pike" | "clean-sweep" | "trophy" | "full-book" | "four-seasons" | "gold" | "steward" | "regular" | "early-bird" | "whole-lake" | "trophy-hunter" | "derby-champion" | "bass-slam" | "trout-slam";
 
 export type Badge = {
   id: BadgeId;
@@ -65,6 +68,10 @@ export const FIRST_BOOK: readonly string[] = [
   "tiger-muskie",
   "sturgeon",
 ];
+
+function slamSize(id: SlamId) {
+  return SLAMS.find((slam) => slam.id === id)!.kinds.length;
+}
 
 export const BADGES: readonly Badge[] = [
   {
@@ -178,6 +185,20 @@ export const BADGES: readonly Badge[] = [
     blurb: "Hold the top spot when a weekend derby ends.",
     need: 1,
     have: (_facts, history) => history.derbyWins ?? 0,
+  },
+  {
+    id: "bass-slam",
+    label: "Bass slam",
+    blurb: "Land a smallmouth and a largemouth bass on the same day.",
+    need: slamSize("bass-slam"),
+    have: (_facts, history) => history.slams?.["bass-slam"] ?? 0,
+  },
+  {
+    id: "trout-slam",
+    label: "Trout slam",
+    blurb: "Land a brook trout, a rainbow trout and a salmon on the same day.",
+    need: slamSize("trout-slam"),
+    have: (_facts, history) => history.slams?.["trout-slam"] ?? 0,
   },
 ];
 

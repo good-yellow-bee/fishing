@@ -109,3 +109,18 @@ describe("listTagReturns", () => {
     expect(listTagReturns("mara", at(30), 5)).toEqual([]);
   });
 });
+
+describe("listSlamDays", () => {
+  it("lists each day's slam kinds the angler landed, once each, leaving out other kinds and catches without a day", async () => {
+    const { listSlamDays } = await import("../db.ts");
+    const row = (id: string, speciesId: string, day: string | null) =>
+      db.prepare(`INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, day, created_at) VALUES (?, 'ash', ?, 2, 1, 'dock', ?, 0, ?, ?)`).run(id, speciesId, `r-${id}`, day, new Date().toISOString());
+    row("a", "smallmouth-bass", "2026-10-20");
+    row("b", "smallmouth-bass", "2026-10-20");
+    row("c", "largemouth-bass", "2026-10-20");
+    row("d", "perch", "2026-10-20");
+    row("e", "salmon", null);
+    const rows = listSlamDays("ash").sort((x, y) => x.speciesId.localeCompare(y.speciesId));
+    expect(rows).toEqual([{ day: "2026-10-20", speciesId: "largemouth-bass" }, { day: "2026-10-20", speciesId: "smallmouth-bass" }]);
+  });
+});
