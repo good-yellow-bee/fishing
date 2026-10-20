@@ -124,3 +124,18 @@ describe("listSlamDays", () => {
     expect(rows).toEqual([{ day: "2026-10-20", speciesId: "largemouth-bass" }, { day: "2026-10-20", speciesId: "smallmouth-bass" }]);
   });
 });
+
+describe("GET /lodge/bank-week", () => {
+  it("counts the angler's own fish at each bank over the last week", async () => {
+    const at = (daysAgo: number) => new Date(Date.now() - daysAgo * 86_400_000).toISOString();
+    const row = (id: string, userId: string, spot: string, daysAgo: number) =>
+      db.prepare(`INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, created_at) VALUES (?, ?, 'perch', 1, 1, ?, ?, 0, ?)`).run(id, userId, spot, `r-${id}`, at(daysAgo));
+    row("a", "ash", "dock", 1);
+    row("b", "ash", "dock", 6);
+    row("c", "ash", "reeds", 2);
+    row("d", "ash", "dock", 8);
+    row("e", "mara", "dock", 1);
+    const response = await app.request("http://test/lodge/bank-week");
+    expect(await response.json()).toEqual({ counts: { dock: 2, reeds: 1 } });
+  });
+});

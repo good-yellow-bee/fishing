@@ -19,6 +19,7 @@ import {
   badgeById,
   lodgeStamp,
   type SpeciesRecord,
+  type SpotId,
   type LodgeRelease,
   TAG_FINDER_BONUS,
   TAG_RETURN_BONUS,
@@ -39,6 +40,7 @@ import {
   weekOf,
   streakDays,
   addToBag,
+  fishedDown,
   slamCompletedBy,
   bagToBeat,
   bagDay,
@@ -67,7 +69,7 @@ import {
   type SkillId,
   type StanceId,
 } from "@stillwater/shared";
-import { buyGroundbait, buyShiner, buyUpgrade, errorText, getLodgeReleased, getMe, getSpeciesRecords, getWeeklyChallenges, releaseCatch, type Me, type WeeklyBoard } from "../api";
+import { buyGroundbait, buyShiner, buyUpgrade, errorText, getBankWeek, getLodgeReleased, getMe, getSpeciesRecords, getWeeklyChallenges, releaseCatch, type Me, type WeeklyBoard } from "../api";
 import { DailyRequestsPanel } from "../components/DailyRequestsPanel";
 import { WeeklyChallengesPanel } from "../components/WeeklyChallengesPanel";
 import { FightBar } from "../components/FightBar";
@@ -266,7 +268,26 @@ export function DockPage() {
   const bookCatchesRef = useRef(bookCatches);
   bookCatchesRef.current = bookCatches;
   const luckyLures = useMemo(() => new Set(lureChoices.filter((choice) => lureTiers.get(choice) === "lucky")), [lureChoices, lureTiers]);
-  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind, legend, lodgeReleased, luckyLures);
+  // The angler's fish at each bank over the week, read once a visit; this visit's landings count on top.
+  const [bankWeek, setBankWeek] = useState<Partial<Record<SpotId, number>>>({});
+  useEffect(() => {
+    if (!angler) return;
+    let live = true;
+    getBankWeek()
+      .then((counts) => live && setBankWeek(counts))
+      // Without the counts no bank reads as fished down this visit.
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [angler]);
+  const fishedDownBanks = useMemo(() => new Set((Object.entries(bankWeek) as [SpotId, number][]).filter(([, count]) => fishedDown(count)).map(([bank]) => bank)), [bankWeek]);
+  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind, legend, lodgeReleased, luckyLures, fishedDownBanks);
+  useEffect(() => {
+    if (game.outcome?.kind !== "landed") return;
+    const bank = game.outcome.spot;
+    setBankWeek((counts) => ({ ...counts, [bank]: (counts[bank] ?? 0) + 1 }));
+  }, [game.outcome]);
   // The cast's left-out reasons, opened from its hint; each cast's list starts closed.
   const [reasonsOpenFor, setReasonsOpenFor] = useState<readonly string[] | null>(null);
   const reasonsOpen = reasonsOpenFor === game.moreReasons;
@@ -1094,6 +1115,7 @@ export function DockPage() {
           {!rowing && moonPass && isFishingStance(game.stance) && <small className="stance-hot"> · {t(moonPass === "overhead" ? "moon overhead" : "moon underfoot")}</small>}
           {!rowing && game.groundbait?.spot === game.stance && <small className="stance-hot"> · {t("groundbait · {casts} left", { casts: game.groundbait.casts })}</small>}
           {!rowing && fishedHardAt(game.stance) && <small className="stance-cold"> · {t("fished hard")}</small>}
+          {!rowing && !mercy && isFishingStance(game.stance) && fishedDownBanks.has(game.stance) && <small className="stance-cold"> · {t("fished down this week")}</small>}
           {!rowing && !mercy && isFishingStance(game.stance) && longShadowWaitMul(game.stance, hour, sky) > 1 && <small className="stance-cold"> · {t("your shadow on the water")}</small>}
           {game.frayed && <small className="stance-cold"> · {t("line frayed")}</small>}
           {game.twisted && <small className="stance-cold"> · {t("line twisted")}</small>}

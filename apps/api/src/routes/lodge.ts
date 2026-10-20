@@ -1,6 +1,6 @@
 import { Hono } from "hono";
-import { tagWindow, TRACK_LIMIT, TRACK_WINDOW_MS, type LodgeTrack } from "@stillwater/shared";
-import { listLodgeReleases, listRecentLodgeCatches } from "../db.ts";
+import { BANK_STOCK_DAYS, tagWindow, TRACK_LIMIT, TRACK_WINDOW_MS, type LodgeTrack } from "@stillwater/shared";
+import { listBankCounts, listLodgeReleases, listRecentLodgeCatches } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
 export const lodgeRoutes = new Hono();
@@ -31,4 +31,11 @@ lodgeRoutes.get("/lodge/recent", (c) => {
 lodgeRoutes.get("/lodge/released", (c) => {
   const user = c.get("user") as SessionUser;
   return c.json({ released: listLodgeReleases(user.id, ...tagWindow(), 50) });
+});
+
+/** How many fish the angler landed at each bank in the last BANK_STOCK_DAYS days, read once a visit. */
+lodgeRoutes.get("/lodge/bank-week", (c) => {
+  const user = c.get("user") as SessionUser;
+  const since = new Date(Date.now() - BANK_STOCK_DAYS * 86_400_000).toISOString();
+  return c.json({ counts: Object.fromEntries(listBankCounts(user.id, since).map((row) => [row.spot, row.count])) });
 });
