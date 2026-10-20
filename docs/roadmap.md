@@ -2440,3 +2440,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR584~~ | ~~Round 108 Home and export ideas: Out now on Home's Next, today's plan to the calendar, released fish in the outings sheet~~ (#1564) | field | S |
 | ~~BR585~~ | ~~Round 109 gear and map fixes: Out now and Last night by Home's rule everywhere, loose fish make an outing under way, Gear's record and Pack name lures as shown, names trimmed on Gear, the Map and GPX~~ (#1574) | field | S |
 | ~~BR586~~ | ~~Round 109 gear and map ideas: Log a catch on the Map's Out now row, fish counts on a water's tips~~ (#1577) | field | S |
+| ~~BR587~~ | ~~Round 110 Bests fixes: today's outing under way counted in the small hours, a kind named as Bests does on its page, cards and copies, links search what they show, waters sorted and named tidily, a record's age in whole years~~ (#1584) | field | S |
