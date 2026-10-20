@@ -65,6 +65,7 @@ import { FAR_ROCK_WAIT, tightToFarRock } from "./farRock";
 import { castSnags, onRockEdge, onShoreIce, ROCK_EDGE_WAIT, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { FLUTTER_SEC, flutterGrabberFor, flutterTip, followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { BUCKET_SIZE, loadBucket, saveBucket } from "./baitBucket";
+import { loadSwim, saveSwim, swimNow } from "./swim";
 import { castForFoe, foeGone, isOldFoe, loadOldFoe, saveOldFoe } from "./oldFoe";
 import { loadNightLine, nightLineCatch, nightLineKinds, nightLineState, nightSkyFor, saveNightLine, type NightLine } from "./nightLine";
 import { markShy, loadGiantShy, rollGiantShy, saveGiantShy, shyOf, type GiantShy } from "./giantShy";
@@ -697,6 +698,26 @@ export function useFishingGame(
     setLivelyShiner(kept === "lively");
   }, [profile?.userId]);
   const [groundbait, setGroundbait] = useState<Groundbait | null>(null);
+  /** When the swim's handful went in, kept with it for the next visit. */
+  const swimAtRef = useRef(0);
+  const keepGroundbait = (next: Groundbait | null, thrownAt = swimAtRef.current) => {
+    groundbaitRef.current = next;
+    swimAtRef.current = thrownAt;
+    setGroundbait(next);
+    if (anglerIdRef.current) saveSwim(anglerIdRef.current, next ? { ...next, at: thrownAt } : null);
+  };
+  // The angler's swim from an earlier visit, read when they sign in: left overnight, the feeders have gathered over it.
+  useEffect(() => {
+    const swim = profile?.userId ? loadSwim(profile.userId) : null;
+    const now = swimNow(swim, Date.now());
+    groundbaitRef.current = now ? { spot: now.spot, casts: now.casts } : null;
+    swimAtRef.current = now?.primed ? Date.now() : (swim?.at ?? 0);
+    setGroundbait(groundbaitRef.current);
+    if (now?.primed && profile?.userId) {
+      saveSwim(profile.userId, { spot: now.spot, casts: now.casts, at: swimAtRef.current });
+      setHint(t("The groundbait you left at the {bank} has the feeders gathered there: {casts} casts of it.", { bank: t(SPOT_LABELS[now.spot]), casts: now.casts }));
+    }
+  }, [profile?.userId]);
   /** The bank whose next cast meets wary fish, for the stance chip to say so before the cast. */
   const [fishedHard, setFishedHard] = useState<readonly SpotId[]>([]);
   const [lurking, setLurking] = useState(false);
@@ -996,9 +1017,8 @@ export function useFishingGame(
     const spooked = spookedBank && !rainCover;
     spookRef.current = null;
     const bait = castOverGroundbait(groundbaitRef.current, spotRef.current);
-    groundbaitRef.current = bait.next;
     castBaitedRef.current = bait.baited;
-    setGroundbait(bait.next);
+    keepGroundbait(bait.next);
     const schoolFish = school.schoolId ? FISH.find((fish) => fish.id === school.schoolId) : undefined;
     setSchooled(!!schoolFish);
     if (schoolFish) waitHintRef.current = `${t("Into the school.")} ${waitHintRef.current}`;
@@ -2205,9 +2225,7 @@ export function useFishingGame(
   /** Toss a handful of groundbait off the bank the angler stands on: the next casts there bite sooner. */
   const throwGroundbait = useCallback(() => {
     if (phaseRef.current !== "idle" || handfulsRef.current <= 0) return;
-    const next = { spot: spotRef.current, casts: GROUNDBAIT_CASTS };
-    groundbaitRef.current = next;
-    setGroundbait(next);
+    keepGroundbait({ spot: spotRef.current, casts: GROUNDBAIT_CASTS }, Date.now());
     keepHandfuls(handfulsRef.current - 1);
     fx.plop();
     setHint(t("You toss a handful of groundbait. The fish will gather to feed here for the next {casts} casts.", { casts: GROUNDBAIT_CASTS }));
