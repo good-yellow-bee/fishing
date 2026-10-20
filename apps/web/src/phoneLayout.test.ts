@@ -310,3 +310,13 @@ describe("high contrast", () => {
     expect(keep).toContain(".walk-signs .walk-retie");
   });
 });
+
+describe("the fight card's drag line", () => {
+  it("is for a screen reader only on a touch screen with larger text, held sideways or narrower than 360 px", () => {
+    expect(css).toMatch(/html\[data-text-size\] \.fight-bar \.fight-drag-line \{\s*position: absolute;/);
+    const short = css.slice(css.indexOf("@media (pointer: coarse) and (max-height: 500px), (pointer: coarse) and (max-width: 359px) {"));
+    expect(/\.fight-bar \.fight-drag-line \{([^}]*)\}/.exec(short)?.[1]).toContain("clip: rect(0 0 0 0);");
+    const bar = readFileSync(`${import.meta.dirname}/components/FightBar.tsx`, "utf8");
+    expect(bar).toContain('<span className="fight-drag-line">{t(DRAG_LINE[drag])}</span>');
+  });
+});
