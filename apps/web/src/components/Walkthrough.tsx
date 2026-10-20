@@ -90,7 +90,12 @@ export function Walkthrough({ userId, caughtTotal, fishing, phase, nibble, outco
           );
         })}
       </ol>
-      <p role="status">{line}</p>
+      <p aria-hidden="true">{line}</p>
+      {/* In the fight the line turns with every run, which the fight card already calls out at once: a screen reader
+          hears the fight's first line and no more, not each step twice. */}
+      <span className="sr-only" role="status">
+        {step === "ease" ? t("Hold to reel it in. Ease off when the line runs hot.") : line}
+      </span>
       {step !== "landed" && (
         <button
           className="walkthrough-skip"
