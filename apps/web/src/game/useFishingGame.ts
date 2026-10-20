@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   hotBankForDay,
+  downWeight,
   GROUNDBAIT_CARRY,
   anglerLevel,
   fishTireMulForLevel,
@@ -321,6 +322,11 @@ function takenTags(landed: ReadonlySet<string>, lost: GotAway | null): ReadonlyS
   return pending ? new Set([...landed, pending]) : landed;
 }
 
+/** A fresh catch as a fished-down bank gives it: smaller, nearer its kind's least. */
+function downAtBank<T extends { species: FishSpecies; weight: number }>(caught: T, down: boolean): T {
+  return down ? { ...caught, weight: downWeight(caught.species, caught.weight) } : caught;
+}
+
 function frenzyHint(spot: SpotId) {
   return t("A feeding frenzy at the {bank}: baitfish boil over the bubbles. Cast into them!", { bank: t(SPOT_LABELS[spot]) });
 }
@@ -347,7 +353,11 @@ export function useFishingGame(
   lodgeReleased: readonly LodgeRelease[] = [],
   /** Lures that have taken enough fish in the field log to be lucky: their hook sets a little more solid. */
   luckyLures: ReadonlySet<string> = new Set(),
+  /** Banks the angler has fished down this week: their fish come smaller till they rest. */
+  fishedDownBanks: ReadonlySet<SpotId> = new Set(),
 ) {
+  const fishedDownRef = useRef(fishedDownBanks);
+  fishedDownRef.current = fishedDownBanks;
   const luckyLuresRef = useRef(luckyLures);
   luckyLuresRef.current = luckyLures;
   /** Read live in the frame loop, which outlives a render's profile. */
@@ -738,7 +748,7 @@ export function useFishingGame(
         flutterRef.current = flutterer ? { predator: flutterer, profile: current } : null;
         flutterSecRef.current = 0;
         const follower = predator ? null : followerFor(species.id, spotRef.current, current, mercyRef.current, Math.random());
-        followRef.current = follower ? makeCatch(follower, current.patience, anglerLevel(current.lifetimePoints)) : null;
+        followRef.current = follower ? downAtBank(makeCatch(follower, current.patience, anglerLevel(current.lifetimePoints)), fishedDownRef.current.has(spotRef.current) && !mercyRef.current) : null;
       }
       if (solid) runtime.sim.stamina = Math.min(runtime.sim.stamina, SOLID_HOOK_STAMINA);
       // A late strike only just catches, so the hook can pull out like a soft mouth's.
@@ -1079,7 +1089,7 @@ export function useFishingGame(
     const frenzyFish = castFrenzyRef.current && !lost.again && !recaughtRef.current && !hunter && !mercyNow ? frenzyHunter(spotRef.current, lureRef?.current, current, hour) : null;
     const species = lost.again ? lost.again.species : recaughtRef.current ? recaughtRef.current.species : hunter ? hunter : raider ? raider : crayHunter ? crayHunter : gorger ? gorger : fryChaser ? fryChaser : logFish ? logFish : sipper ? sipper : lightFish ? lightFish : riser ? riser : frenzyFish ? frenzyFish : schoolFish && Math.random() < SCHOOL_SAME ? schoolFish : (feeder ?? drawn);
     fedRef.current = !!feeder && species === feeder;
-    const bitten = lost.again ? { species, weight: lost.again.weight } : recaughtRef.current ? { species, weight: recaughtRef.current.weight } : makeCatch(species, current.patience, anglerLevel(current.lifetimePoints));
+    const bitten = lost.again ? { species, weight: lost.again.weight } : recaughtRef.current ? { species, weight: recaughtRef.current.weight } : downAtBank(makeCatch(species, current.patience, anglerLevel(current.lifetimePoints)), fishedDownRef.current.has(spotRef.current) && !mercyNow);
     biteRef.current = bitten;
     setBite(bitten);
     const hotBank = hotBankForDay(new Date()) === spotRef.current;
@@ -1645,7 +1655,7 @@ export function useFishingGame(
             grabRef.current = null;
             followRef.current = null;
             grabbedRef.current = current.species.id;
-            const taken = makeCatch(grab.predator, grab.profile.patience, anglerLevel(grab.profile.lifetimePoints));
+            const taken = downAtBank(makeCatch(grab.predator, grab.profile.patience, anglerLevel(grab.profile.lifetimePoints)), fishedDownRef.current.has(spotRef.current) && !mercyRef.current);
             biteRef.current = taken;
             setBite(taken);
             fx.splash();

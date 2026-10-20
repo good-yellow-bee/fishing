@@ -116,6 +116,10 @@ export function getBoard(period: BoardPeriod = "all") {
   return request<BoardView>(period === "all" ? "/api/board" : `/api/board?period=${period}`);
 }
 
+export function getBankWeek() {
+  return request<{ counts: Partial<Record<SpotId, number>> }>("/api/lodge/bank-week").then((body) => body.counts);
+}
+
 export function getLodgeReleased() {
   return request<{ released: LodgeRelease[] }>("/api/lodge/released").then((body) => body.released);
 }

@@ -1849,7 +1849,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT400~~ | ~~Fired up on fry: a fish hooked chasing the kingfisher's fry is fired up, so its first run doesn't tire it at all; the fight card says so~~ (#1579) | gameplay | S |
 | ~~GT401~~ | ~~News card 2026-10-20-game49 covers GT398 to GT400: risers leap first, the lantern-lit net and fired up on the fry~~ (#1580) | ui | S |
 | ~~GT403~~ | ~~The landed card tells what the server paid: once the catch is saved, its points line shows the saved points, and a lodge tag's stamp shows only if the server paid the tag (another angler may have landed that fish first)~~ (#1585) | gameplay | S |
-| GT404 | Bank stock across the week: a bank where the angler landed many fish in the last seven days is fished down, so its fish come smaller until it rests; the bank's sign says so, and the server reads the week's catches on its own call | gameplay | M |
+| ~~GT404~~ | ~~Bank stock across the week: a bank where the angler kept 30 or more fish in the last seven days (fish let go don't count) is fished down, so a fresh fish there keeps only 0.6 of its weight above its kind's least (no trophies) till the bank rests; the stance chip says so, a new angler is spared, and the server counts the week's kept fish on its own call once a visit~~ (#1588) | gameplay | M |
 | GT405 | News card game50 covers GT403 and GT404 | ui | S |
 
 ## Risks / open questions for the owner
