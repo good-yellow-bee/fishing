@@ -1791,6 +1791,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT373~~ | ~~Legend hunt: each week the weekly challenges carry a rumor about one legendary fish (tiger muskie, sturgeon or ghost pike) with three clues from the week's catches (its prey at its bank, a fish there at its hour, a trophy of any kind); once all three are found, that legend bites far more often at its bank (3x its weight among the fish the angler can land there) for the rest of the week, and the shack and the wait hint say so~~ (#1515) | gameplay | M |
 | ~~GT374~~ | ~~Weekend derby: every Saturday and Sunday (UTC, one ranking for the whole lodge) the Board names a derby fish and ranks the heaviest of it landed that weekend; the angler who held the top spot when a weekend ended earns the Derby champion badge~~ (#1518) | gameplay | M |
 | GT375 | Second fight habits for the one-habit kinds: the bluegill swims tight circles that spin the line (reel slow while it circles), the carp bores into the weeds at the net, the catfish rolls on the line in the current, and the burbot coils round the line in the cold; each with its own call and field-guide line | gameplay | M |
+| ~~GT376~~ | ~~News card 2026-10-20-game42 covers GT373 and GT374: the legend hunt and the weekend derby~~ | ui | S |
 
 ## Risks / open questions for the owner
 

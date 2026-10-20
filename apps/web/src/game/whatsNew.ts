@@ -1,14 +1,14 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-scene52";
+export const NEWS_ID = "2026-10-20-game42";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "Each week the shack's weekly board carries a rumor of a legend, the tiger muskie, the sturgeon or the ghost pike, with three clues to find in your catches; find all three and that legend bites far more often at its bank for the rest of the week. And every weekend the lodge board runs a derby for the heaviest of one fish: hold the top spot when Sunday ends (UTC) to earn the Derby champion badge.",
   "On dry evenings a hedgehog now snuffles past behind you on the bank, curling into a ball at any fuss. In a feeding frenzy the bubbles boil with little silver baitfish leaping out, and at night your headlamp throws a beam onto the float. Out on the boat in a strong wind, the anchored hull now swings less toward a run, as the fight card says.",
   "Bigger fish no longer just slide in: once one is played out it lies at the net, and you let go of the reel, then strike as its head comes up to net it; strike too soon and it bolts off again. And now and then the bubbles boil in a feeding frenzy for a minute and a half: the bank's sign gets a star, and casts into it bite twice as fast with the hunters crowding in.",
   "Fishing from the bank by day, the robin now comes to you too, landing by your feet to hop about and peck before it flies off. And the lake now draws about a third fewer pieces each frame, so it runs smoother on a phone.",
-  "Every kind of fish now climbs mastery tiers as you land it, Known at 5, Skilled at 15 and Master at 40: the field guide shows how far you are, and a mastered kind pays 1.1× points. And the shack board adds three challenges that run all week, Monday to Sunday, for bigger rewards.",
   "On a smaller phone the fight card now hangs just under the lake's header instead of rising over it, and the header's chips step aside until the fish is in. And while you wait for a bite, the hint's \"2 more reasons\" is much easier to tap.",
   "On a phone, the lake's hint now sits below the bank chip when the chip has a lot to say, instead of under it. Held sideways, a long bank note ends in an ellipsis before the shore signs, and with larger text on a short screen the lure moves up beside the bank chip, clear of the walk stick.",
   "On summer evenings a bat now and then swoops in to hawk the moths by the dock's lantern. And on snowy winter nights the little owl comes to the snow-capped post too.",
