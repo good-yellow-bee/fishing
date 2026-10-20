@@ -776,7 +776,7 @@ describe("the shack's bait tin", () => {
     expect(buy.getAttribute("aria-disabled")).toBe("true");
     await act(async () => buy.click());
     expect(buyGroundbait).toHaveBeenCalledTimes(2);
-    expect(localStorage.getItem(bagKey("u1"))).toBe("3");
+    expect(JSON.parse(localStorage.getItem(bagKey("u1"))!).handfuls).toBe(3);
   });
 
   it("will not sell to an angler short of points", async () => {

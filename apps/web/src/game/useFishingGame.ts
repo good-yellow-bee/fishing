@@ -669,7 +669,7 @@ export function useFishingGame(
   };
   // Each angler's own bag, read when they sign in.
   useEffect(() => {
-    handfulsRef.current = Math.max(GROUNDBAIT_HANDFULS, profile?.userId ? loadBag(profile.userId) : 0);
+    handfulsRef.current = profile?.userId ? loadBag(profile.userId) : GROUNDBAIT_HANDFULS;
     setHandfuls(handfulsRef.current);
   }, [profile?.userId]);
   /** The line came out of a fight over the rocks or round a piling frayed, and snaps sooner until retied. */

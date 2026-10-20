@@ -1,6 +1,6 @@
 import { JSDOM } from "jsdom";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { bagKey, LEGACY_BAG_KEY, LEGACY_SHINER_KEY, loadBag, loadShiner, saveBag, saveShiner, shinerKey } from "./groundbaitBag";
+import { bagKey, DAILY_HANDFULS, LEGACY_BAG_KEY, LEGACY_SHINER_KEY, loadBag, loadShiner, saveBag, saveShiner, shinerKey } from "./groundbaitBag";
 
 const dom = new JSDOM("", { url: "http://localhost/" });
 
@@ -10,22 +10,29 @@ beforeEach(() => {
 afterEach(() => dom.window.localStorage.clear());
 
 describe("the groundbait bag", () => {
-  it("keeps what it holds across a reload, within what it carries, for each angler", () => {
-    expect(loadBag("ash")).toBe(0);
-    saveBag("ash", 2);
-    expect(loadBag("ash")).toBe(2);
-    expect(loadBag("mara")).toBe(0);
-    dom.window.localStorage.setItem(bagKey("ash"), "9");
-    expect(loadBag("ash")).toBe(3);
-    dom.window.localStorage.setItem(bagKey("ash"), "junk");
-    expect(loadBag("ash")).toBe(0);
+  const day = (date: number) => new Date(2026, 9, date, 12);
+
+  it("finds the free handful once a day, keeps what it holds through a day's reloads, within what it carries, for each angler", () => {
+    expect(loadBag("ash", day(20))).toBe(DAILY_HANDFULS);
+    saveBag("ash", 0, day(20));
+    // Spent today, a reload doesn't bring it back.
+    expect(loadBag("ash", day(20))).toBe(0);
+    // A new day brings the free handful again.
+    expect(loadBag("ash", day(21))).toBe(DAILY_HANDFULS);
+    saveBag("ash", 3, day(21));
+    expect(loadBag("ash", day(22))).toBe(3);
+    expect(loadBag("mara", day(20))).toBe(DAILY_HANDFULS);
+    dom.window.localStorage.setItem(bagKey("ash"), JSON.stringify({ handfuls: 9, day: "2026-10-22" }));
+    expect(loadBag("ash", day(22))).toBe(3);
   });
 
-  it("hands a bag kept before anglers had their own to the first angler who loads", () => {
-    dom.window.localStorage.setItem(LEGACY_BAG_KEY, "2");
-    expect(loadBag("ash")).toBe(2);
+  it("reads a bag kept before the free handful came once a day, and one from before anglers had their own", () => {
+    dom.window.localStorage.setItem("stillwater.groundbait.ash.v1", "2");
+    expect(loadBag("ash", day(20))).toBe(2);
+    expect(dom.window.localStorage.getItem("stillwater.groundbait.ash.v1")).toBeNull();
+    dom.window.localStorage.setItem(LEGACY_BAG_KEY, "3");
+    expect(loadBag("kit", day(20))).toBe(3);
     expect(dom.window.localStorage.getItem(LEGACY_BAG_KEY)).toBeNull();
-    expect(loadBag("mara")).toBe(0);
   });
 });
 
