@@ -733,6 +733,8 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "Fishing from the bank by day, the robin now comes to you too, landing by your feet to hop about and peck before it flies off. And the lake now draws about a third fewer pieces each frame, so it runs smoother on a phone.":
+    "Gdy łowisz z brzegu za dnia, rudzik przylatuje teraz także do ciebie: siada przy twoich stopach, skacze i dziobie, a potem odlatuje. A jezioro rysuje teraz w każdej klatce o jedną trzecią mniej elementów, więc na telefonie działa płynniej.",
   "On a smaller phone the fight card now hangs just under the lake's header instead of rising over it, and the header's chips step aside until the fish is in. And while you wait for a bite, the hint's \"2 more reasons\" is much easier to tap.":
     "Na mniejszym telefonie karta holu wisi teraz tuż pod nagłówkiem jeziora, zamiast na niego nachodzić, a plakietki nagłówka ustępują miejsca, aż ryba będzie na brzegu. A gdy czekasz na branie, „jeszcze 2 powody” na końcu podpowiedzi o wiele łatwiej trafić.",
   "On a phone, the lake's hint now sits below the bank chip when the chip has a lot to say, instead of under it. Held sideways, a long bank note ends in an ellipsis before the shore signs, and with larger text on a short screen the lure moves up beside the bank chip, clear of the walk stick.":
@@ -741,8 +743,6 @@ export const PL_GAME: PlBook = {
     "W letnie wieczory nietoperz czasem wlatuje polować na ćmy przy latarni na pomoście. A w śnieżne zimowe noce na zaśnieżony słupek przylatuje też pójdźka.",
   "Strike a fish while the mallard is on the dock and it bursts off over the water. And on summer nights a few fireflies now drift and blink over the water right beside the dock.":
     "Zatnij rybę, gdy kaczor jest na pomoście, a zerwie się i odleci nad wodą. A w letnie noce tuż przy pomoście unosi się teraz i mruga kilka świetlików.",
-  "On rainy days a mallard drake now and then swims in and climbs onto the dock behind you to preen and shake off the rain. And in fog and rain the dock lanterns glow wider and warmer at night.":
-    "W deszczowe dni na pomost za tobą wychodzi czasem kaczor krzyżówki, który czyści pióra i otrząsa się z deszczu. A we mgle i w deszczu latarnie na pomoście świecą nocą szerszym, cieplejszym blaskiem.",
   "{lure} · good here": "{lure} · dobra tutaj",
   "This bank suits it: the bites come sooner.": "Ten brzeg jej sprzyja: brania przychodzą szybciej.",
   "{lure} · good now": "{lure} · dobra teraz",
