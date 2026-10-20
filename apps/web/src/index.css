@@ -2434,15 +2434,21 @@ html[data-input="pad"] .fight-bar .on-pad {
     bottom: 16px;
   }
 
+  /* At the foot of the screen, below the fight: on an upright phone the angler, the line and the hooked fish fill the
+     middle third (from about 31% to 63% of the height), where the card used to sit or hang from the header. */
   .fight-bar {
-    bottom: clamp(16px, calc(100dvh / var(--text-zoom, 1) - 280px), 244px);
-    width: min(340px, calc(92vw / var(--text-zoom, 1)));
+    top: auto;
+    right: 8px;
+    bottom: calc(8px + env(safe-area-inset-bottom));
+    left: 8px;
+    width: auto;
+    padding: 10px 14px 11px;
+    transform: none;
   }
 
-  /* Larger text makes the header and this card taller: hang it from the header instead, so they never overlap. */
-  html[data-text-size] .fight-bar {
-    top: calc(var(--hud-bottom, 140px) + 8px);
-    bottom: auto;
+  /* The coach's line in a fight came down to the card's place; the card's own status says the same. */
+  .scene-wrap[data-phase="fight"] .walkthrough {
+    display: none;
   }
 
   /* Over the hint, which can come down this far under a tall bank chip: the meter is what a cast is read from. */
@@ -2464,13 +2470,6 @@ html[data-input="pad"] .fight-bar .on-pad {
     width: min(160px, calc((100vw - 152px) / var(--text-zoom, 1)));
   }
 
-  /* In a fight with larger text the card ran down under the thumb button, over the "let go" line: the header's
-     time, weather, level and points chips step aside until the fight ends, and the coach and bank chip, which only
-     showed through the card, go too. */
-  html[data-text-size] .hud:has(+ .scene-wrap[data-phase="fight"]) :is(.hour-chip, .sky-chip, .level-chip, .points-chip),
-  html[data-text-size] .scene-wrap[data-phase="fight"] :is(.walkthrough, .stance-chip) {
-    display: none;
-  }
 }
 
 /* Under 360 px with larger text the header's links took three rows, which pushed the hint down under the walk stick
@@ -2487,25 +2486,43 @@ html[data-input="pad"] .fight-bar .on-pad {
   }
 }
 
-/* On a short upright phone (320 x 568 to 375 x 667) the fight card, now taller with its fish's habit and the clean-fight
-   line, ran up over the header and the bank chip from its low place: as with larger text, it hangs from the header,
-   whose time, weather, level and points chips step aside until the fight ends, and the coach and bank chip go too. */
-@media (max-width: 800px) and (min-height: 501px) and (max-height: 700px) {
+/* On a touch screen the card stops short of the Reel button in the corner beside it, and keeps to what a fight is read
+   from: the thumb button already says Reel and the status line when to let go, so the hold-and-release line goes, and
+   the drag's explanation is for a screen reader (its knob stays). A shorter phone drops the clean-fight line, then the
+   fish's habits (the water's own warnings stay): the card has the foot of the screen, below the fish, and no more. */
+@media (pointer: coarse) and (max-width: 800px) and (min-height: 501px) {
   .fight-bar {
-    top: calc(var(--hud-bottom, 140px) + 8px);
-    bottom: auto;
+    right: calc(112px / var(--text-zoom, 1));
   }
 
-  .hud:has(+ .scene-wrap[data-phase="fight"]) :is(.hour-chip, .sky-chip, .level-chip, .points-chip),
-  .scene-wrap[data-phase="fight"] :is(.walkthrough, .stance-chip) {
+  html[data-hand="left"] .fight-bar {
+    right: 8px;
+    left: calc(112px / var(--text-zoom, 1));
+  }
+
+  .fight-bar .fight-controls {
+    display: none;
+  }
+
+  .fight-bar .fight-drag-line {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
+@media (pointer: coarse) and (max-width: 800px) and (min-height: 501px) and (max-height: 760px) {
+  .fight-bar .fight-clean,
+  html[data-text-size] .fight-bar .fight-habit {
     display: none;
   }
 }
 
-/* On a touch screen the thumb button already says Reel and the status line says when to let go, so the card's
-   hold-and-release line goes with larger text too. */
-@media (pointer: coarse) and (max-width: 800px) and (min-height: 501px) {
-  html[data-text-size] .fight-bar .fight-controls {
+@media (pointer: coarse) and (max-width: 800px) and (min-height: 501px) and (max-height: 600px) {
+  .fight-bar .fight-habit {
     display: none;
   }
 }
@@ -3890,13 +3907,17 @@ html[data-contrast="high"] .sound-captions li {
     display: none;
   }
 
-  /* Centred in the room beside the Reel button, which stood over its right edge on a 640 px phone. */
+  /* Held sideways the fight fills the middle of the screen (from about 30% to 60% of its width): the card takes the
+     side away from the Reel button, its foot to the header. */
   .fight-bar {
-    left: calc(50% - 56px);
+    left: 8px;
+    width: min(320px, calc(32vw / var(--text-zoom, 1)));
+    transform: none;
   }
 
   html[data-hand="left"] .fight-bar {
-    left: calc(50% + 56px);
+    right: 8px;
+    left: auto;
   }
 }
 

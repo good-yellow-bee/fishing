@@ -311,7 +311,7 @@ export function FightBar({ fight, sim, performance, best = null, note = null, cl
           )}
           {fight.lightHook && !SOFT_MOUTHS.has(fight.species.id) && <p className="fight-water">{t("Hooked light: reel in the red and the hook pulls out")}</p>}
           {habits.map((line) => (
-            <p key={line} className="fight-water">
+            <p key={line} className="fight-water fight-habit">
               {line}
             </p>
           ))}
