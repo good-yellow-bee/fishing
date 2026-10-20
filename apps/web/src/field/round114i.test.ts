@@ -18,4 +18,16 @@ describe("round 114 ideas: the outings sheet's fish times", () => {
     expect(csv).toContain("05:30–06:10");
     expect(csv).toMatch(/Dusk[^\n]*,18:00,/);
   });
+
+  it("give each end its day when the fish came either side of midnight", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 9, 20, 12, 0));
+    const at = (id: string, date: Date): CatchEntry => ({ id, species: "Pike", measure: { kind: "length", inches: 30 }, lure: "Spoon", spotId: "a", tripId: "night", caughtAt: date.toISOString(), note: "", weather: null });
+    const book: Logbook = {
+      spots: [{ id: "a", name: "Pine Pond", waterType: "pond", notes: "", bestConditions: "" }],
+      trips: [{ id: "night", date: "2026-10-18", spotId: "a", title: "Night", note: "" }],
+      catches: [at("1", new Date(2026, 9, 18, 22, 10)), at("2", new Date(2026, 9, 19, 1, 30))],
+    };
+    expect(tripsCsv(book, "2026-10-20")).toContain("2026-10-18 22:10–2026-10-19 01:30");
+  });
 });

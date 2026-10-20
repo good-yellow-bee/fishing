@@ -1,4 +1,4 @@
-import { catchesNewestFirst, measuresOf, spotById, SKY_LABELS, WIND_LABELS, type CatchEntry, type Logbook } from "@stillwater/shared";
+import { catchesNewestFirst, localDate, measuresOf, spotById, SKY_LABELS, WIND_LABELS, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { getLang, getUnits, num, t } from "../i18n";
 import { CM_PER_IN, KG_PER_LB } from "../i18n/content";
 import { lureNames } from "./pieceTally";
@@ -114,7 +114,7 @@ export function tripsCsv(whole: Logbook, today: string): string {
   const header = [t("Date"), t("Trip"), t("Water"), t("Fish"), t("Kinds"), t("Lures"), t("Lost fish"), t("Missed strikes"), t("Released fish"), t("Fish times"), t("Note")];
   const fish = new Map<string, number>();
   // When its fish came, first to last on the 24-hour clock, so a day's dawn and dusk rows tell apart: "18:00–18:40".
-  const times = new Map<string, { first: string; last: string }>();
+  const times = new Map<string, { first: number; last: number }>();
   // How many of them went back, for a club's catch-and-release return: a new column before the note, so the older ones keep their places.
   const released = new Map<string, number>();
   // What each outing took, most first, in the sheet's language: "Zander ×2, Northern pike".
@@ -135,7 +135,8 @@ export function tripsCsv(whole: Logbook, today: string): string {
       fish.set(id, (fish.get(id) ?? 0) + 1);
       if (entry.released) released.set(id, (released.get(id) ?? 0) + 1);
       const was = times.get(id);
-      times.set(id, !was ? { first: entry.caughtAt, last: entry.caughtAt } : { first: entry.caughtAt < was.first ? entry.caughtAt : was.first, last: entry.caughtAt > was.last ? entry.caughtAt : was.last });
+      const at = Date.parse(entry.caughtAt);
+      times.set(id, !was ? { first: at, last: at } : { first: Math.min(at, was.first), last: Math.max(at, was.last) });
       const tally = kinds.get(id) ?? new Map<string, number>();
       const name = kindName(entry.species);
       tally.set(name, (tally.get(name) ?? 0) + 1);
@@ -153,14 +154,14 @@ export function tripsCsv(whole: Logbook, today: string): string {
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
       .map(([name, count]) => (count > 1 ? `${name} ×${count}` : name))
       .join(", ");
-  const clock = (iso: string) => {
-    const at = new Date(iso);
-    return `${pad(at.getHours())}:${pad(at.getMinutes())}`;
-  };
+  // Each end with its day when the fish came on two days (a night past midnight): "2026-10-19 22:10–2026-10-20 01:30".
   const timesOf = (tripId: string) => {
     const span = times.get(tripId);
     if (!span) return "";
-    return clock(span.first) === clock(span.last) ? clock(span.first) : `${clock(span.first)}–${clock(span.last)}`;
+    const [first, last] = [new Date(span.first), new Date(span.last)];
+    const days = localDate(first) !== localDate(last);
+    const [from, to] = [first, last].map((at) => `${days ? `${localDate(at)} ` : ""}${pad(at.getHours())}:${pad(at.getMinutes())}`);
+    return from === to ? from : `${from}–${to}`;
   };
   const rows = [...book.trips]
     // Newest first, a day's dusk before its dawn, as Trips lists them.
