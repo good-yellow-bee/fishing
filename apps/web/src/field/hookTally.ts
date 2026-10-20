@@ -11,8 +11,9 @@ export type HookTally = { outings: number; landed: number; lost: number; missed:
 export function hookTally(book: Logbook, spotId?: string): HookTally | null {
   const counted = book.trips.filter((trip) => (trip.lost || trip.missed) && (spotId === undefined || trip.spotId === spotId));
   if (counted.length === 0) return null;
-  // With the fish logged loose on an outing's water that day, as the outing's own count has them.
-  const fishOn = outingFish(book);
+  // With the fish logged loose on an outing's water that day, as the outing's own count has them; on one water, only
+  // those caught there, as its outing list counts them.
+  const fishOn = outingFish(book, spotId !== undefined);
   return {
     outings: counted.length,
     landed: counted.reduce((sum, trip) => sum + fishOn(trip.id), 0),

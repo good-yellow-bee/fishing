@@ -5,7 +5,8 @@ import type { CatchEntry, Trip } from "@stillwater/shared";
 import { DayCalendar } from "./bests/DayCalendar";
 import { SeasonRecapBox } from "./bests/SeasonRecap";
 import { newWatersThisYear } from "./bests/notYet";
-import { foldName, twinsTogether } from "./spotOrder";
+import { foldName } from "./spotOrder";
+import { speciesWaters } from "./speciesLink";
 import { renameInBook } from "./bookRename";
 
 const spot = (id: string, name: string) => ({ id, name, waterType: "lake" as const, notes: "", bestConditions: "" });
@@ -60,19 +61,14 @@ describe("round 116 fixes: Bests", () => {
     expect(newWatersThisYear(catches, new Date())).toEqual(["b", "c"]);
   });
 
-  it("adds twin waters' fish together under the busier twin's name", () => {
-    const rows = [
-      { spotId: "a", name: "Home Lake", count: 3 },
-      { spotId: "b", name: "Deep Lake", count: 4 },
-      { spotId: "c", name: "home  lake", count: 2 },
-      { spotId: "gone", name: null, count: 1 },
-      { spotId: "lost", name: null, count: 1 },
-    ];
-    expect(twinsTogether(rows)).toEqual([
-      { name: "Home Lake", count: 5 },
-      { name: "Deep Lake", count: 4 },
-      { name: null, count: 1 },
-      { name: null, count: 1 },
+  it("adds twin waters' fish together under the busier twin's name and page", () => {
+    const spots = [spot("a", "Home Lake"), spot("b", "Deep Lake"), spot("c", "home  lake")];
+    const catches = [..."aaabbbbcc"].map((id, n) => fish(String(n), id, "2026-06-01T08:00:00")).concat(fish("9", "gone", "2026-06-01T08:00:00"), fish("10", "lost", "2026-06-01T08:00:00"));
+    expect(speciesWaters({ spots, trips: [], catches }, catches)).toEqual([
+      { spotId: "a", spotIds: ["a", "c"], name: "Home Lake", count: 5 },
+      { spotId: "b", spotIds: ["b"], name: "Deep Lake", count: 4 },
+      { spotId: "gone", spotIds: ["gone"], name: null, count: 1 },
+      { spotId: "lost", spotIds: ["lost"], name: null, count: 1 },
     ]);
   });
 

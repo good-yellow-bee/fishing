@@ -8,7 +8,7 @@ import { FROM_LIST } from "../leaveDeleted";
 import { monthName } from "../tripMonths";
 import { dayMarks, markedMonths } from "./dayMarks";
 import { outingFish } from "../outingFish";
-import { gaveWay, outingFished } from "../tripDates";
+import { gaveWay, outingCounted } from "../tripDates";
 
 /** The weekdays' first letters in the reader's language, Monday first: "M T W T F S S", "P W Ś C P S N". */
 function weekdayLetters(): string[] {
@@ -116,7 +116,7 @@ export function DayCalendar({
   // An outing already fished, as the trip search and the season box count it: today's once a fish, one lost or a strike missed.
   const fished = (id: string) => {
     const trip = tripsById.get(id);
-    return trip !== undefined && (outingFished(trip, fishedBy, fishOn(id) > 0 || Boolean(trip.lost || trip.missed)) || gaveWay(book, trip));
+    return trip !== undefined && outingCounted(book, trip, fishedBy, fishOn(id));
   };
   // The month's days out, as the shaded and outlined days show them: a fish, or an outing already past.
   const monthDays = (month: string) => [...marks.entries()].filter(([day, mark]) => day.startsWith(`${month}-`) && (mark.fish > 0 || pastBlank(mark.trips))).length;

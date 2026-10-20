@@ -1,4 +1,5 @@
 import type { Trip } from "@stillwater/shared";
+import { outingFished } from "./tripDates";
 
 /** The longest a note's line runs in the water page's list before it is cut. */
 const EXCERPT = 100;
@@ -7,7 +8,7 @@ const EXCERPT = 100;
 /** Today's outing counts once it has a fish (`fishOn`), as the average takes it: until then its note is the day's plan. */
 export function notesHere(trips: readonly Trip[], today: string, limit = 3, fishOn: (tripId: string) => number = () => 0): { trip: Trip; text: string }[] {
   return trips
-    .filter((trip) => (trip.date < today || (trip.date === today && fishOn(trip.id) > 0)) && trip.note.trim())
+    .filter((trip) => outingFished(trip, today, fishOn(trip.id) > 0) && trip.note.trim())
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, limit)
     .map((trip) => {

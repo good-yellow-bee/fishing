@@ -31,7 +31,7 @@ import { PLAY_LAKE_ID } from "../playLake";
 import { countedSearch } from "../countedSearch";
 import { countedBook, countedFish } from "../milestones";
 import { isSampleCatch, isSampleOnly, isSampleOuting, withoutSample } from "../bookCopy";
-import { daysBetween, foldName, twinsTogether } from "../spotOrder";
+import { daysBetween, foldName } from "../spotOrder";
 import { SameKinds } from "./SameKinds";
 import { tripDaySearch } from "../tripSearch";
 import { gaveWay, outingDay, plainName } from "../tripDates";
@@ -121,7 +121,7 @@ function KindLeaders({ book, species, lureName }: { book: Logbook; species: stri
   const fish = book.catches.filter((entry) => kindKey(entry.species) === key);
   const [lure, nextLure] = pieceTally(fish, 2);
   // Twin waters together, as the water's search the line names opens them.
-  const [water, nextWater] = twinsTogether(speciesWaters(book, fish));
+  const [water, nextWater] = speciesWaters(book, fish);
   // A tie has no leader, as the catch search's own "Most on" line takes it.
   const parts = [
     lure && lure.count >= 2 && lure.count > (nextLure?.count ?? 0) ? t("Most on {lure} ({count})", { lure: lureName(lure.lure), count: lure.count }) : null,
