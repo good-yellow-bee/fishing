@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import type { Groundbait } from "../logic";
-import { CLOUD_RADIUS, cloudCenter, cloudOpacity } from "./groundbaitCloud";
+import { CLOUD_RADIUS, DIMPLES, cloudCenter, cloudOpacity, dimpleAt } from "./groundbaitCloud";
 import { useReducedMotion } from "./reducedMotion";
 import { waterHeight } from "./water";
 
@@ -24,21 +24,24 @@ function softEdge() {
   return new THREE.CanvasTexture(canvas);
 }
 
-/** The muddy cloud a handful of groundbait leaves off the bank, thinning as its casts are fished out. One draw. */
-export function GroundbaitCloud({ bait }: { bait: Groundbait }) {
+/** The muddy cloud a handful of groundbait leaves off the bank, thinning as its casts are fished out; with `feeding`, fish dimple over it. */
+export function GroundbaitCloud({ bait, feeding = false }: { bait: Groundbait; feeding?: boolean }) {
   const still = useReducedMotion();
   const geo = useMemo(() => new THREE.CircleGeometry(CLOUD_RADIUS, 32).rotateX(-Math.PI / 2), []);
   const edge = useMemo(() => softEdge(), []);
   const mat = useMemo(() => new THREE.MeshBasicMaterial({ color: CLOUD, alphaMap: edge, transparent: true, depthWrite: false }), [edge]);
   const cloud = useRef<THREE.Mesh>(null);
+  const rings = useRef<(THREE.Mesh | null)[]>([]);
+  const ring = useMemo(() => new THREE.RingGeometry(0.85, 1, 24).rotateX(-Math.PI / 2), []);
   const at = cloudCenter(bait.spot);
   useEffect(
     () => () => {
       geo.dispose();
+      ring.dispose();
       edge.dispose();
       mat.dispose();
     },
-    [geo, edge, mat],
+    [geo, ring, edge, mat],
   );
   useFrame((state) => {
     const mesh = cloud.current;
@@ -48,6 +51,26 @@ export function GroundbaitCloud({ bait }: { bait: Groundbait }) {
     // A slow swell as the crumbs drift and settle.
     mesh.scale.setScalar(still ? 1 : 1 + 0.06 * Math.sin(t * 0.8));
     mat.opacity = cloudOpacity(bait.casts);
+    rings.current.forEach((ring, i) => {
+      if (!ring) return;
+      const dimple = dimpleAt(i, t);
+      ring.visible = feeding && !still && dimple.age < 1;
+      if (!ring.visible) return;
+      const x = at.x + dimple.dx;
+      const z = at.z + dimple.dz;
+      ring.position.set(x, waterHeight(x, z, t) + 0.03, z);
+      ring.scale.setScalar(0.08 + 0.5 * (1 - (1 - dimple.age) ** 2));
+      (ring.material as THREE.MeshBasicMaterial).opacity = 0.55 * (1 - dimple.age);
+    });
   });
-  return <mesh ref={cloud} geometry={geo} material={mat} renderOrder={1} />;
+  return (
+    <>
+      <mesh ref={cloud} geometry={geo} material={mat} renderOrder={1} />
+      {Array.from({ length: DIMPLES }, (_, i) => (
+        <mesh key={i} ref={(mesh) => void (rings.current[i] = mesh)} geometry={ring} visible={false} renderOrder={4}>
+          <meshBasicMaterial color="#e4efea" transparent opacity={0} depthWrite={false} />
+        </mesh>
+      ))}
+    </>
+  );
 }

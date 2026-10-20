@@ -713,8 +713,13 @@ export function useFishingGame(
   const [groundbait, setGroundbait] = useState<Groundbait | null>(null);
   /** When the swim's handful went in, and whether it has primed once, kept with it for the next visit. */
   const swimRef = useRef<{ at: number; primed: boolean }>({ at: 0, primed: false });
+  /** The groundbait out now is a swim left from an earlier visit that the feeders have gathered over. */
+  const [swimPrimed, setSwimPrimed] = useState(false);
   const keepGroundbait = (next: Groundbait | null, thrown?: number) => {
-    if (thrown !== undefined) swimRef.current = { at: thrown, primed: false };
+    if (thrown !== undefined) {
+      swimRef.current = { at: thrown, primed: false };
+      setSwimPrimed(false);
+    }
     groundbaitRef.current = next;
     setGroundbait(next);
     if (anglerIdRef.current) saveSwim(anglerIdRef.current, next ? { ...next, at: swimRef.current.at, ...(swimRef.current.primed ? { primed: true } : {}) } : null);
@@ -725,6 +730,7 @@ export function useFishingGame(
     const now = swimNow(swim, Date.now());
     groundbaitRef.current = now ? { spot: now.spot, casts: now.casts } : null;
     swimRef.current = { at: now?.at ?? 0, primed: !!now?.primed };
+    setSwimPrimed(!!now?.primed);
     setGroundbait(groundbaitRef.current);
     if (profile?.userId && swim && !now) saveSwim(profile.userId, null);
     if (now?.primedNow && profile?.userId) {
@@ -2350,6 +2356,7 @@ export function useFishingGame(
     schooled,
     handfuls,
     groundbait,
+    swimPrimed,
     fishedHard,
     giantShy,
     nightLine,
