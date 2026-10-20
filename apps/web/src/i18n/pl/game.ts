@@ -309,8 +309,8 @@ export const PL_GAME: PlBook = {
     "Żywopłoty dzielą teraz górne zbocza wzgórz na pola, widoczne nad farmą na telefonie trzymanym pionowo: zielone wiosną i latem, przebarwione jesienią i nagie na zimowym śniegu. A nocą księżycowa ścieżka i światła odbite w jeziorze migoczą łagodnie zamiast leżeć twardymi pasami.",
   "From the shack you can now see the shiner trap in the shallows below it, and once it is ready a shiner flips in the cage now and then. And while you wait at the shack, the trap turns ready the moment its soak ends, even if you touch nothing.":
     "Ze szopy widać teraz pułapkę na złotawce na płyciźnie pod nią, a gdy jest gotowa, co jakiś czas podskakuje w niej złotawiec. A gdy czekasz przy szopie, pułapka staje się gotowa dokładnie wtedy, gdy mija jej czas w wodzie, nawet jeśli niczego nie dotykasz.",
-  "The shack now has a shiner trap: bait it with a handful of groundbait, and after six hours it holds a shiner or two for your bait bucket. And holding a run on a heavy drag now tires your arm as reeling does.":
-    "W chacie jest teraz pułapka na złotawce: zanęć ją garścią zanęty, a po sześciu godzinach znajdziesz w niej złotawca lub dwa do wiaderka. A trzymanie odjazdu na mocnym hamulcu męczy teraz rękę tak jak kręcenie.",
+  "The shiner trap now follows the season: baited in winter's cold water, it soaks twelve hours and holds just one shiner. And spare shiners in your bait bucket keep five days in winter, but only two in the summer heat.":
+    "Pułapka na złotawce zależy teraz od pory roku: zanęcona zimą, w zimnej wodzie, czeka dwanaście godzin i mieści tylko jednego złotawca. A zapasowe złotawce w wiaderku żyją zimą pięć dni, ale w letnim upale tylko dwa.",
   "Tight to the lily pads, where the bass and pike wait in ambush.": "Tuż przy liściach grzybieni, gdzie w zasadzce czekają bassy i szczupaki.",
   "Tight to the far rock, where the walleye hold in its shadow.": "Tuż przy dalekiej skale, gdzie w jej cieniu trzymają się sandacze.",
   "Along the rock edge, where the point drops off and the bass hold.": "Wzdłuż skalnej krawędzi, gdzie cypel opada w głąb i trzymają się bassy.",

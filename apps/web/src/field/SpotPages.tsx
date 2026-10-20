@@ -39,7 +39,7 @@ import { CopySummary } from "./CopySummary";
 import { spotSummary } from "./summaries";
 import { EditDelete } from "./EditDelete";
 import { fishCountLabel, formatDay, formatTimeOfDay, messageText, outingName, outingNameById, tripWhen } from "./format";
-import { outingCounted, outingDay, outingFished, outNow, outNowAt, plainName } from "./tripDates";
+import { outingCounted, outingDay, outNow, outNowAt, plainName } from "./tripDates";
 import { newestOutingFirst } from "./catchNeighbors";
 import { useLogbook } from "./LogbookState";
 import { locale, num, t, tn, useT } from "../i18n";
@@ -465,11 +465,11 @@ function SpotView() {
   const fishedBy = outingDay(today);
   const { fishOn, looseByDay } = outingFishHere(book, fishByTrip, summed, countedTrips);
   // The best outing among the angler's own here, as an outing's page names it.
-  const top = topOuting(countedTrips, fishOn, fishedBy);
+  const top = topOuting(countedTrips, fishOn, fishedBy, book);
   // A blank spell still running here, once the water has given a fish: whether to try elsewhere.
-  const average = outingAverage(countedTrips, fishOn, fishedBy);
-  const streak = outingStreak(countedTrips, fishOn, fishedBy, looseByDay.keys());
-  const split = weekendSplit(countedTrips, fishOn, fishedBy);
+  const average = outingAverage(countedTrips, fishOn, fishedBy, book);
+  const streak = outingStreak(countedTrips, fishOn, fishedBy, looseByDay.keys(), book);
+  const split = weekendSplit(countedTrips, fishOn, fishedBy, book);
   // Last year's kinds here still to come back, and the day this water gave the most kinds: as Bests says them for the book.
   // Dated as the season line above dates them, so a New Year's Eve night fish is last year's on both.
   const notYet = notYetThisYear(summed, new Date(`${fishedBy}T12:00:00`), undefined, (entry) => bookFishDay(book, entry));
@@ -498,11 +498,11 @@ function SpotView() {
   const lastHereText = lastHere ? t("Last fished here: {day}", { day: lastHereTrip ? `${formatDay(lastHere)} · ${tn(fishOn(lastHereTrip.id), "{n} fish", "{n} fish")}` : formatDay(lastHere) }) : null;
   // By the day a fish counts on, as the year search each bar opens reads it.
   const years = yearTally(summed, (entry) => bookFishDay(book, entry));
-  // This season here against last season up to the same date, once last season had begun by now. Today's outing
-  // counts once it has a fish, as the average counts outings.
+  // This season here against last season up to the same date, once last season had begun by now. Outings counted as
+  // the average counts them.
   const ownHere = summed;
   const seasonSoFar = (year: string) => ({
-    outings: countedTrips.filter((trip) => trip.date.startsWith(`${year}-`) && trip.date.slice(5) <= today.slice(5) && outingFished(trip, fishedBy, fishOn(trip.id) > 0 || Boolean(trip.lost || trip.missed))).length,
+    outings: countedTrips.filter((trip) => trip.date.startsWith(`${year}-`) && trip.date.slice(5) <= today.slice(5) && outingCounted(book, trip, fishedBy, fishOn(trip.id))).length,
     fish: ownHere.filter((entry) => {
       // A night's small-hours fish counts on its outing's day, as Bests and the day search put it.
       const day = bookFishDay(book, entry);
