@@ -198,7 +198,7 @@ export function lostTrophy(species: FishSpecies, weight: number) {
 export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; lightHook?: boolean; turnedRuns: number; cleanRun?: number; closeCall?: boolean; fightSec?: number; bowedLeaps?: number; easedShakes?: number; followedDarts?: number; encore?: boolean; secondWind?: boolean; secondTake?: boolean; grabbed?: string; gotAway?: boolean; followedIn?: boolean; recaught?: boolean; clearOf?: "weeds" | "rocks" | "pilings" | "log" | "current" };
 
 export type Outcome =
-  | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes; note?: string; tag?: { id: string; by: string }; giant?: string }
+  | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes; note?: string; tag?: { id: string; by: string }; giant?: string; hour?: LakeHour }
   | { kind: "broke"; message: string }
   | { kind: "miss"; message: string; fish?: { species: FishSpecies; weight: number } }
   | { kind: "error"; message: string };
@@ -2160,7 +2160,10 @@ export function useFishingGame(
     }
     const fish = downAtBank(caught, fishedDownRef.current.has(spot) && !mercyRef.current);
     keepBankMemory(profile.userId, countAtBank(bankMemoryNow(profile.userId), spot, "landed"));
-    setOutcome({ kind: "landed", id: localId(), species: fish.species, weight: fish.weight, spot, clean: false, note: t("{fish} took the shiner on your night line.", { fish: t(fish.species.name) }) });
+    // Not fought, so not clean, and it ends any run of clean fights.
+    cleanRunRef.current = 0;
+    // Logged at the hour it took the bait, the night, not when the line came in.
+    setOutcome({ kind: "landed", id: localId(), species: fish.species, weight: fish.weight, spot, clean: false, hour: "night", note: t("{fish} took the shiner on your night line.", { fish: t(fish.species.name) }) });
     setPhaseBoth("result");
     setHint(castHint("landed"));
   };

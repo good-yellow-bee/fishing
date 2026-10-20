@@ -194,6 +194,7 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <button type="button" onClick={game.addShiner}>buy shiner</button>
       <button type="button" onClick={game.setNightLine}>set night line</button>
       <button type="button" onClick={game.checkNightLine}>check night line</button>
+      <i data-testid="caught-hour">{game.outcome?.kind === "landed" ? (game.outcome.hour ?? "") : ""}</i>
       <i data-testid="night-line">{game.nightLine ? game.nightLine.spot : ""}</i>
       <i data-testid="live-shiner">{String(game.liveShiner)}</i>
       <i data-testid="frayed">{String(game.frayed)}</i>
@@ -416,6 +417,7 @@ describe("useFishingGame live shiner", () => {
       expect(line()).toBe("");
       expect(phase()).toBe("result:landed");
       expect(container!.querySelector("[data-testid=clean]")?.textContent).toBe("false");
+      expect(container!.querySelector("[data-testid=caught-hour]")?.textContent).toBe("night");
       expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toMatch(/^(Common carp|Channel catfish) took the shiner on your night line\.$/);
     } finally {
       try {

@@ -9,6 +9,7 @@ import { buyGroundbait, buyShiner, getGiants, getLodgeTracks, getMe, getSpeciesR
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { SHINER_KEY } from "../game/groundbaitBag";
+import { nightLineKey } from "../game/nightLine";
 import { sessionKey, startSession } from "../game/session";
 import type { Outcome } from "../game/useFishingGame";
 
@@ -222,7 +223,7 @@ describe("dock weather", () => {
     act(() => root!.unmount());
     root = null;
     container?.remove();
-    localStorage.setItem("stillwater.nightline.u1.v1", JSON.stringify({ spot: "reeds", setAt: Date.now() }));
+    localStorage.setItem(nightLineKey("u1"), JSON.stringify({ spot: "reeds", setAt: Date.now() }));
     const later = await openDock("/?hour=day&sky=clear");
     const reeds = [...later.querySelectorAll(".walk-signs button")].find((button) => button.textContent?.startsWith("Reeds"));
     expect(reeds?.querySelector(".sign-line")).not.toBeNull();
