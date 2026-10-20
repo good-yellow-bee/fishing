@@ -1,15 +1,15 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-scene66";
+export const NEWS_ID = "2026-10-20-game59";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "A bait bucket now keeps up to three spare live shiners beside the one on your hook: the shack sells into it, a shiner you land can go in it, and the shack hooks one from it again. With a shiner on, the sign of the bank you stand at leaves one out on a night line, taking it from the bucket first.",
   "On a clear dawn or dusk the low sun now lays long shadows across the lake, yours among them: at the drop-off at dawn and the inlet at dusk you can see it fall on the water the fish are watching. And on a phone held upright the lake sits a little lower, so the far bank and the hills show clear of the panels at the top.",
   "A night line now fishes through its night and comes in once the night is out, and the sky over that night matters: rain fills more lines, a clear night fewer, so the forecast tells when to set one. And a fish you let go remembers the lure it was caught on: back at its bank it won't take that lure again, though another may bring it up.",
   "The outings spreadsheet says when each outing's fish came, so a dawn and a dusk tell apart. Adding a book file says how many of its fish were the game's, and Home's Next goes to the outing you are fishing when a day has two.",
   "While a bank's giant is still out there this week, now and then it rolls on that bank's water in a big swirl. And a night line you leave out now shows at its bank: a forked stick leaning over the water, the line running down into it.",
-  "With a live shiner on the hook, the sign of the bank you stand at can now leave it out on a night line. Come back six hours to two days later and the same sign brings it in, often with one of the bank's night feeders on it. And a new badge, Giant hunter, waits for whoever is first to land three of the weekly giants.",
   "The angler who fishes the day's crowded bank now sits there on a camp chair a few steps from you, rod out, from dawn to dusk. And a pike that follows your lure in for the figure-eight now shows as a long shadow behind the float, swinging round as it turns.",
   "On a phone you can now watch the whole fight: the fight card moves up to the top of the screen, over the far shore, and the header steps aside until the fish is in; held sideways it waits beside the action, above the steering buttons. Left-handed, the steering buttons now take the other corner from the Reel button instead of lying under it.",
   "A search's summary now splits its fish by lure too, each opening that lure's fish, and a fish caught after midnight says whose night it counts on. The catch form finds a kind typed in Polish however the book wrote it.",
