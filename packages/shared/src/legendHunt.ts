@@ -3,7 +3,7 @@ import { isTrophyWeight } from "./guide.ts";
 import { LAKE_HOURS, type LakeHour } from "./hour.ts";
 import type { FishSpecies, SpotId } from "./types.ts";
 
-/** A solved hunt makes its legend bite this many times as often at its bank, for the rest of the week. */
+/** A solved hunt weighs its legend this many times heavier among the fish its bank can give the angler, for the rest of the week. */
 export const LEGEND_HUNT_BITE = 3;
 
 /** The week's rumor: which legend, the bank it haunts, the hour it was seen at, and the prey it follows there. */
@@ -21,16 +21,11 @@ function weekNumber(monday: string): number {
 /** The rumor for the week starting `monday`: the same for every angler, with no stored state. */
 export function rumorFor(monday: string): Rumor {
   const week = weekNumber(monday);
-  const all = legends();
-  const legend = all[((week % all.length) + all.length) % all.length]!;
-  const spot = legend.spots[((week % legend.spots.length) + legend.spots.length) % legend.spots.length]!;
+  const pick = <T,>(list: readonly T[]): T => list[((week % list.length) + list.length) % list.length]!;
+  const legend = pick(legends());
+  const spot = pick(legend.spots);
   const prey = FISH.filter((fish) => fish.rarity === "common" && fish.spots.includes(spot)).sort((a, b) => a.id.localeCompare(b.id));
-  return {
-    legendId: legend.id,
-    spot,
-    hour: LAKE_HOURS[((week % LAKE_HOURS.length) + LAKE_HOURS.length) % LAKE_HOURS.length]!,
-    preyId: prey[((week % prey.length) + prey.length) % prey.length]!.id,
-  };
+  return { legendId: legend.id, spot, hour: pick(LAKE_HOURS), preyId: pick(prey).id };
 }
 
 /** The three clues the week's catches have found: the prey at the bank, any fish there at the hour, and a trophy of any kind. */

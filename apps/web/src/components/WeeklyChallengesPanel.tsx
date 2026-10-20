@@ -106,10 +106,13 @@ export function WeeklyChallengesPanel({ catchKey, onClaimed }: Props) {
 
 /** The week's rumor of a legend and the three clues that draw it to its bank. */
 function LegendRumor({ rumor }: { rumor: WeeklyBoard["rumor"] }) {
-  const legend = t(fishById(rumor.legendId)!.name);
+  const legendFish = fishById(rumor.legendId);
+  const preyFish = fishById(rumor.preyId);
+  if (!legendFish || !preyFish) return null;
+  const legend = t(legendFish.name);
   const bank = t(SPOT_LABELS[rumor.spot]);
   const clues = [
-    t("A {fish} at the {bank}", { fish: t(fishById(rumor.preyId)!.name).toLowerCase(), bank }),
+    t("A {fish} at the {bank}", { fish: t(preyFish.name).toLowerCase(), bank }),
     t("A fish at the {bank} at {hour}", { bank, hour: t(LAKE_HOUR_LABELS[rumor.hour]).toLowerCase() }),
     t("A trophy of any kind"),
   ];
@@ -127,7 +130,7 @@ function LegendRumor({ rumor }: { rumor: WeeklyBoard["rumor"] }) {
         ))}
       </ul>
       {rumor.clues.every(Boolean) && (
-        <p className="daily-requests-note">{t("All three found: the {legend} bites three times as often at the {bank} for the rest of the week.", { legend, bank })}</p>
+        <p className="daily-requests-note">{t("All three found: the {legend} bites far more often at the {bank} for the rest of the week.", { legend, bank })}</p>
       )}
     </div>
   );

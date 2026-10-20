@@ -23,8 +23,8 @@ function weekCatches(userId: string, week: string) {
   return listCatchesOnDays(userId, weekDays(week), savedFrom);
 }
 
-function weekBoard(userId: string, week: string, lifetimePoints: number) {
-  const catches = weekCatches(userId, week).map((row) => ({ speciesId: row.species_id, spot: row.spot, weight: row.weight, clean: row.clean === 1 }));
+function weekBoard(userId: string, week: string, lifetimePoints: number, rows = weekCatches(userId, week)) {
+  const catches = rows.map((row) => ({ speciesId: row.species_id, spot: row.spot, weight: row.weight, clean: row.clean === 1 }));
   const claimed = new Set(listWeeklyClaims(userId, week));
   return weeklyChallengesFor(week, anglerLevel(lifetimePoints)).map((challenge) => ({ ...challenge, progress: weeklyProgress(challenge, catches, week), claimed: claimed.has(challenge.id) }));
 }
@@ -35,9 +35,10 @@ weeklyChallengeRoutes.get("/weekly-challenges", (c) => {
   if (!week) return c.json({ error: "invalid day" }, 400);
   const profile = getProfile(user.id);
   if (!profile) return c.json({ error: "profile missing" }, 404);
+  const rows = weekCatches(user.id, week);
   const rumor = rumorFor(week);
-  const clues = huntClues(rumor, weekCatches(user.id, week).map((row) => ({ speciesId: row.species_id, spot: row.spot, hour: row.hour, weight: row.weight })));
-  return c.json({ week, weekFish: weekFishFor(week).id, challenges: weekBoard(user.id, week, profile.lifetime_points), rumor: { ...rumor, clues } });
+  const clues = huntClues(rumor, rows.map((row) => ({ speciesId: row.species_id, spot: row.spot, hour: row.hour, weight: row.weight })));
+  return c.json({ week, weekFish: weekFishFor(week).id, challenges: weekBoard(user.id, week, profile.lifetime_points, rows), rumor: { ...rumor, clues } });
 });
 
 weeklyChallengeRoutes.post("/weekly-challenges/:id/claim", (c) => {

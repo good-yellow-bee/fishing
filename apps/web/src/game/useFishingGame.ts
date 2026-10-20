@@ -28,6 +28,7 @@ import {
   type StanceId,
   type Wind,
   fishById,
+  legendaryCanBite,
 } from "@stillwater/shared";
 import { locale, t } from "../i18n";
 import { fightLines, liftsStickerInOne, netsFish, TOOTHY, fightWater, fightWind, isCleanFight, isCloseCall, LEAPERS, makeFight, seasonTireMul, thrivesInCold, floodedInlet, warmTireMul, rainCooled, deepCooled, runTireMul, nestTireMul, nightTireMul, spentTireMul, twilightTireMul, springRunTireMul, currentTireMul, fallFeedTireMul, rainHunterTireMul, summerStrengthTireMul, SOFT_MOUTHS, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type FightWater, type FightWind, type Steer, type SurgeState } from "./fight";
@@ -809,7 +810,9 @@ export function useFishingGame(
     const schoolFish = school.schoolId ? FISH.find((fish) => fish.id === school.schoolId) : undefined;
     setSchooled(!!schoolFish);
     if (schoolFish) waitHintRef.current = `${t("Into the school.")} ${waitHintRef.current}`;
-    if (legendRef.current?.spot === spotRef.current) waitHintRef.current = `${t("The {fish} your hunt tracked down haunts this water.", { fish: t(fishById(legendRef.current.legendId)!.name) })} ${waitHintRef.current}`;
+    // Only told when the legend can take this cast: the angler can land it and the cast went out full.
+    const huntedFish = legendRef.current?.spot === spotRef.current ? fishById(legendRef.current.legendId) : undefined;
+    if (huntedFish && !short && legendaryCanBite(current, huntedFish, spotRef.current)) waitHintRef.current = `${t("The {fish} your hunt tracked down haunts this water.", { fish: t(huntedFish.name) })} ${waitHintRef.current}`;
     if (castFrenzyRef.current) waitHintRef.current = `${t("Into the frenzy! The baitfish boil and the hunters are slashing through them.")} ${waitHintRef.current}`;
     if (bait.baited) waitHintRef.current = `${t("Over the groundbait.")} ${waitHintRef.current}`;
     if (spooked) waitHintRef.current = `${t("The lost fish spooked this water, so the next bite is slower.")} ${waitHintRef.current}`;

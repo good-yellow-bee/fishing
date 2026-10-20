@@ -18,7 +18,7 @@ const board: WeeklyBoard = {
     { id: "week-trophy", kind: "trophy", goal: 1, reward: 120, progress: 1, claimed: false },
     { id: "week-clean", kind: "clean", goal: 10, reward: 60, progress: 10, claimed: true },
   ],
-  rumor: { legendId: "ghost-pike", spot: "reeds", hour: "dusk", preyId: "perch", clues: [true, false, true] },
+  rumor: { legendId: "ghost-pike", spot: "inlet", hour: "dusk", preyId: "golden-shiner", clues: [true, false, true] },
 };
 
 let root: Root | null = null;
@@ -55,7 +55,7 @@ describe("WeeklyChallengesPanel", () => {
     expect(onClaimed).toHaveBeenCalled();
     expect(container.querySelectorAll(".weekly-challenges > ul > li")[1]!.textContent).toContain("Claimed");
     const clues = [...container.querySelectorAll(".legend-rumor li")].map((row) => row.textContent);
-    expect(clues).toEqual(["A yellow perch at the ReedsFound", "A fish at the Reeds at duskNot yet", "A trophy of any kindFound"]);
+    expect(clues).toEqual(["A golden shiner at the InletFound", "A fish at the Inlet at duskNot yet", "A trophy of any kindFound"]);
     expect(container.querySelector(".legend-rumor")!.textContent).not.toContain("All three found");
   });
 });

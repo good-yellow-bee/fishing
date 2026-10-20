@@ -32,6 +32,7 @@ import {
   luresPacked,
   keepPlayTrip,
   localDate,
+  weekOf,
   streakDays,
   dayRunForFirstFish,
   DAY_RUN_BONUS,
@@ -218,20 +219,22 @@ export function DockPage() {
   const caughtTotal = me?.speciesStats.reduce((sum, stat) => sum + stat.caught, 0) ?? 0;
   const mercy = isMercy(caughtTotal);
   // The week's legend hunt, read with the weekly challenges; a solved one draws its legend to its bank.
-  const [hunt, setHunt] = useState<WeeklyBoard["rumor"] | null>(null);
+  const [hunt, setHunt] = useState<{ week: string; rumor: WeeklyBoard["rumor"] } | null>(null);
   const latestCatch = me?.catches[0]?.id;
   const angler = me?.profile.userId;
   useEffect(() => {
     if (!angler) return;
     let live = true;
     getWeeklyChallenges()
-      .then((board) => live && setHunt(board.rumor))
-      .catch(() => live && setHunt(null));
+      .then((board) => live && setHunt({ week: board.week, rumor: board.rumor }))
+      // The shack's own panel reports the board's errors; the hunt keeps what it last read until a catch reads it again.
+      .catch(() => undefined);
     return () => {
       live = false;
     };
   }, [angler, latestCatch]);
-  const legend = useMemo(() => (hunt && hunt.clues.every(Boolean) ? { legendId: hunt.legendId, spot: hunt.spot } : null), [hunt]);
+  // A hunt only holds for its own week, even in a tab left open past Sunday midnight.
+  const legend = hunt && hunt.week === weekOf(localDate(new Date())) && hunt.rumor.clues.every(Boolean) ? { legendId: hunt.rumor.legendId, spot: hunt.rumor.spot } : null;
   const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind, legend);
   // The cast's left-out reasons, opened from its hint; each cast's list starts closed.
   const [reasonsOpenFor, setReasonsOpenFor] = useState<readonly string[] | null>(null);

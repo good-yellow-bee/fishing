@@ -2613,13 +2613,24 @@ describe("level unlock integration", () => {
     expect(hint()).toMatch(/^The anchor's splash put the fish down, so the bites come slow: give it a few seconds before you cast\. /);
   });
 
-  it("draws a hunted legend at its bank and says so in the wait hint", () => {
-    harnessLegend.current = { legendId: "ghost-pike", spot: "dock" };
-    try {
-      const surface = mount();
+  it("draws a hunted legend at its bank, and says so only when the angler could land it", () => {
+    harnessLegend.current = { legendId: "sturgeon", spot: "dropoff" };
+    const castAtDropoff = (current: Profile) => {
+      const surface = mount(DOCK_BUBBLES.at, current);
+      surface.dataset.stance = "dropoff";
+      surface.dataset.angler = "15.4,7.8";
+      surface.dataset.aim = "15.4,-5.4";
       cast(surface);
-      expect(hint()).toContain("The Ghost pike your hunt tracked down haunts this water.");
-      expect(vi.mocked(pickBite).mock.lastCall?.[11]).toBe("ghost-pike");
+      const told = hint();
+      act(() => root!.unmount());
+      root = null;
+      container!.remove();
+      return told;
+    };
+    try {
+      expect(castAtDropoff({ ...profile, lifetimePoints: 700, strength: 8, accuracy: 8 })).toContain("The Lake sturgeon your hunt tracked down haunts this water.");
+      expect(vi.mocked(pickBite).mock.lastCall?.[11]).toBe("sturgeon");
+      expect(castAtDropoff({ ...profile, lifetimePoints: 700, strength: 1, accuracy: 1 })).not.toContain("your hunt tracked down");
     } finally {
       harnessLegend.current = null;
     }
