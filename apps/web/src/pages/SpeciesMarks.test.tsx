@@ -9,7 +9,7 @@ import { BoardPage } from "./Board";
 import { LogPage } from "./Log";
 import { GOLDEN_COLOR } from "../components/FishMark";
 
-vi.mock("../api", () => ({ getBoard: vi.fn(), getDerby: vi.fn(() => new Promise(() => {})), getDayBag: vi.fn(() => new Promise(() => {})), getStewards: vi.fn(() => new Promise(() => {})), getMe: vi.fn(), getSpeciesRecords: vi.fn() }));
+vi.mock("../api", () => ({ getBoard: vi.fn(), getDerby: vi.fn(() => new Promise(() => {})), getDayBag: vi.fn(() => new Promise(() => {})), getStewards: vi.fn(() => new Promise(() => {})), getStudies: vi.fn(() => new Promise(() => {})), getMe: vi.fn(), getSpeciesRecords: vi.fn() }));
 
 let root: Root;
 let container: HTMLDivElement;
@@ -58,7 +58,7 @@ describe("species marks on the lodge pages", () => {
       level: 1,
       spots: { dock: true, reeds: true, point: true, dropoff: false, inlet: false, open: false },
       catches: ["pike", "catfish", "old-fish"].map((speciesId) => ({
-        id: speciesId, userId: "u1", speciesId, weight: 4, points: 1, spot: "dock", hour: "dusk", sky: "clear", season: "fall", golden: false, released: false, requestId: null, tagged: false, createdAt: "2026-10-01T00:00:00Z",
+        id: speciesId, userId: "u1", speciesId, weight: 4, points: 1, spot: "dock", hour: "dusk", sky: "clear", season: "fall", golden: false, released: false, requestId: null, tagged: false, bonuses: [], createdAt: "2026-10-01T00:00:00Z",
       })),
       speciesStats: [],
       badges: [],
@@ -89,7 +89,7 @@ describe("species marks on the lodge pages", () => {
       profile: { userId: "u1", displayName: "Ash", points: 0, lifetimePoints: 0, strength: 1, accuracy: 1, patience: 1 },
       level: 1,
       spots: { dock: true, reeds: true, point: true, dropoff: false, inlet: false, open: false },
-      catches: [{ id: "c1", userId: "u1", speciesId: "pike", weight: 4, points: 2, spot: "dock", hour: "dusk", sky: "clear", season: "fall", golden: true, released: false, requestId: null, tagged: false, createdAt: "2026-10-01T00:00:00Z" }],
+      catches: [{ id: "c1", userId: "u1", speciesId: "pike", weight: 4, points: 2, spot: "dock", hour: "dusk", sky: "clear", season: "fall", golden: true, released: false, requestId: null, tagged: false, bonuses: [], createdAt: "2026-10-01T00:00:00Z" }],
       speciesStats: [],
       badges: [],
       longestStreak: 0,

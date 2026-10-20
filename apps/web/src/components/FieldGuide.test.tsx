@@ -147,3 +147,23 @@ describe("field guide card", () => {
     expect(links.map((link) => [link.textContent, link.getAttribute("href")])).toEqual([["In your field log: 3", "/species/Smallmouth%20bass"]]);
   });
 });
+
+describe("species studies in the field guide", () => {
+  const stats: CatchStat[] = [{ speciesId: "perch", caught: 4, heaviest: 0.8, lastAt: "2026-10-01T00:00:00Z" }];
+  const study = { speciesId: "perch", banks: { have: 4, need: 4 }, hours: { have: 3, need: 3 }, trophy: true, done: true, claimed: false };
+  const page = (claimed: boolean, done = true) =>
+    JSDOM.fragment(
+      renderToStaticMarkup(
+        <MemoryRouter>
+          <FieldGuide stats={stats} studies={[{ ...study, done, claimed, trophy: done }]} onClaimStudy={() => undefined} />
+        </MemoryRouter>,
+      ),
+    );
+
+  it("shows a kind's studies with a claim once all are done, and Studied once paid", () => {
+    expect(page(false).querySelector(".guide-studies button")?.textContent).toBe("Claim · +100 pts");
+    expect(page(false, false).querySelector(".guide-studies")?.textContent).toBe("Studies: banks 4/4 ✓ · hours 3/3 ✓ · trophy ·");
+    expect(page(false, false).querySelector(".guide-studies button")).toBeNull();
+    expect(page(true).querySelector(".guide-studies")?.textContent).toBe("Studied");
+  });
+});

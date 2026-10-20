@@ -159,6 +159,11 @@ export const PL_GAME: PlBook = {
   "Light line: the fish can't see it, so the bites come sooner.": "Cienka żyłka: ryby jej nie widzą, więc brania przychodzą szybciej.",
   "Light line: it snaps sooner, so keep out of the red": "Cienka żyłka: pęka szybciej, więc nie wchodź na czerwone",
   "Heavy line: it holds more strain before it snaps": "Gruba żyłka: wytrzyma większe napięcie, zanim pęknie",
+  "Lodge record · was {weight} ({holder})": "Rekord przystani · było {weight} ({holder})",
+  "Lodge record · 1.5× points": "Rekord przystani · 1,5× punktów",
+  "First fish of a run of days · 1.5× points": "Pierwsza ryba w serii dni · 1,5× punktów",
+  "Another angler has been fishing this bank today, so its fish are wary for your first casts.": "Dziś łowi tu ktoś inny, więc ryby są płochliwe przy twoich pierwszych rzutach.",
+  "another angler here today": "dziś łowi tu ktoś inny",
   "Drag: light": "Hamulec: lekki",
   "Drag: normal": "Hamulec: zwykły",
   "Drag: heavy": "Hamulec: mocny",
@@ -194,8 +199,10 @@ export const PL_GAME: PlBook = {
   "Not yet": "Jeszcze nie",
   "All three found: the {legend} bites far more often at the {bank} for the rest of the week.": "Wszystkie trzy znalezione: {legend} bierze dużo częściej na łowisku {bank} do końca tygodnia.",
   "The {fish} your hunt tracked down haunts this water.": "{fish}, którego wytropiono, krąży po tej wodzie.",
-  "A bank where you kept thirty or more fish this week is fished down: its fish come smaller until it rests, and the bank chip says so. Fish you let go don't count, so releasing them keeps a bank stocked. And once a catch is saved, the landed card shows the points the server paid, with a lodge tag's stamp only when the tag was paid.":
-    "Łowisko, z którego w tym tygodniu zabrano trzydzieści lub więcej ryb, jest przetrzebione: ryby są tam mniejsze, dopóki nie odpocznie, co pokazuje etykieta łowiska. Wypuszczone ryby się nie liczą, więc wypuszczanie ich chroni łowisko. A gdy połów zostanie zapisany, karta ryby pokazuje punkty przyznane przez serwer, a oznaczenie z przystani tylko wtedy, gdy zostało zapłacone.",
+  "Each kind you have landed now has three studies in the field guide on your catch log: land it at every bank it lives at, at three of the lake's four hours, and at trophy weight. Finish all three to claim 100 points once and mark the kind Studied.":
+    "Każdy złowiony gatunek ma teraz w atlasie ryb w dzienniku połowów trzy badania: złów go na każdym łowisku, na którym żyje, o trzech z czterech pór dnia i w wadze trofeum. Ukończ wszystkie trzy, by raz odebrać 100 punktów i oznaczyć gatunek jako zbadany.",
+  "The lake asks a little less of your phone again: shadows are redrawn at most thirty times a second, the shore's foam does less work each frame, and the anglers you only see in rain or fog and the deer, moose and hare of dawn and dusk now load only when they come out.":
+    "Jezioro znów trochę mniej obciąża twój telefon: cienie odświeżają się najwyżej trzydzieści razy na sekundę, piana przy brzegu wymaga mniej pracy w każdej klatce, a wędkarze widoczni tylko w deszczu lub mgle oraz jelenie, łosie i zające o świcie i zmierzchu wczytują się dopiero, gdy się pojawiają.",
   "If the lake runs slowly on your phone, it now also turns shadows off and draws a lighter picture from your next visit, besides lighter effects, and says so; Settings can turn each back. And the moving water costs less of every frame, so the lake runs a little smoother everywhere.":
     "Jeśli jezioro działa wolno na twoim telefonie, od następnej wizyty wyłącza też cienie i rysuje lżejszy obraz, oprócz lżejszych efektów, i mówi o tym; każde z nich możesz przywrócić w Ustawieniach. A ruchoma woda zabiera mniej z każdej klatki, więc jezioro działa nieco płynniej wszędzie.",
   "On a phone held upright, the view now lifts while you play a fish, so you can watch the fight above the fight card instead of behind it. And with reduced motion on, the lake bed's shimmer slows and your boat no longer rocks.":

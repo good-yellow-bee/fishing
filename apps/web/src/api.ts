@@ -8,6 +8,7 @@ import {
   type BoardPeriod,
   type LodgeRelease,
   type LodgeTrack,
+  type StudyProgress,
   type TagReturn,
   type SpeciesRecord,
   type CatchRecord,
@@ -114,6 +115,16 @@ export function releaseCatch(requestId: string) {
 
 export function getBoard(period: BoardPeriod = "all") {
   return request<BoardView>(period === "all" ? "/api/board" : `/api/board?period=${period}`);
+}
+
+export type Study = StudyProgress & { claimed: boolean };
+
+export function getStudies() {
+  return request<{ studies: Study[] }>("/api/studies").then((body) => body.studies);
+}
+
+export function claimStudy(speciesId: string) {
+  return request<{ speciesId: string; points: number }>(`/api/studies/${encodeURIComponent(speciesId)}/claim`, { method: "POST" });
 }
 
 export function getBankWeek() {

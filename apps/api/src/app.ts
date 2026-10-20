@@ -7,6 +7,7 @@ import { serveClient } from "./client.ts";
 import { boardRoutes } from "./routes/board.ts";
 import { catchRoutes } from "./routes/catches.ts";
 import { dailyRequestRoutes } from "./routes/dailyRequests.ts";
+import { studyRoutes } from "./routes/studies.ts";
 import { weeklyChallengeRoutes } from "./routes/weeklyChallenges.ts";
 import { lodgeRoutes } from "./routes/lodge.ts";
 import { meRoutes } from "./routes/me.ts";
@@ -39,6 +40,8 @@ app.use("/api/shiner", requireSession);
 app.use("/api/board", requireSession);
 app.use("/api/board/*", requireSession);
 app.use("/api/lodge/*", requireSession);
+app.use("/api/studies", requireSession);
+app.use("/api/studies/*", requireSession);
 
 app.route("/api", meRoutes);
 app.route("/api", catchRoutes);
@@ -47,6 +50,7 @@ app.route("/api", weeklyChallengeRoutes);
 app.route("/api", upgradeRoutes);
 app.route("/api", boardRoutes);
 app.route("/api", lodgeRoutes);
+app.route("/api", studyRoutes);
 
 app.get("/api/health", (c) => c.json({ ok: true }));
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { badgeById, fishById, LAKE_HOUR_LABELS, localDate, SEASON_LABELS, skyLabel, SPOT_LABELS, streakDays } from "@stillwater/shared";
-import { errorText, getMe, type Me } from "../api";
+import { claimStudy, errorText, getMe, getStudies, type Me, type Study } from "../api";
 import { FieldGuide } from "../components/FieldGuide";
 import { FishMark } from "../components/FishMark";
 import { readStoredLogbook } from "../field/storage";
@@ -18,11 +18,37 @@ export function LogPage() {
   const t = useT();
   usePageTitle(`${me ? t("{name}’s catch log", { name: me.profile.displayName }) : t("Catch log")} · Stillwater`);
 
+  // Each kind's studies, read with the log and again after a claim pays.
+  const [studies, setStudies] = useState<Study[] | null>(null);
+  const [studyError, setStudyError] = useState("");
+  const readStudies = () =>
+    getStudies()
+      .then(setStudies)
+      .catch((err: Error) => setStudyError(errorText(err.message)));
+
   useEffect(() => {
     getMe()
       .then(setMe)
       .catch((err: Error) => setError(err.message));
+    void readStudies();
   }, []);
+
+  const [claiming, setClaiming] = useState(false);
+  const onClaimStudy = async (speciesId: string) => {
+    if (claiming) return;
+    setClaiming(true);
+    try {
+      await claimStudy(speciesId);
+      setStudyError("");
+      await getMe().then(setMe);
+    } catch (err) {
+      setStudyError(errorText((err as Error).message));
+    } finally {
+      // Paid or refused, the list is read again so its claim buttons match the server.
+      await readStudies();
+      setClaiming(false);
+    }
+  };
 
   if (error) return <main className="log-page">{errorText(error)}</main>;
   if (!me) return <main className="log-page">{t("Loading the log…")}</main>;
@@ -67,7 +93,8 @@ export function LogPage() {
           })}
         </ul>
       </section>
-      <FieldGuide stats={me.speciesStats} inBook={(name) => (book ? kindOnPage(book, name).length : 0)} />
+      {studyError && <p className="warn" role="alert">{studyError}</p>}
+      <FieldGuide stats={me.speciesStats} inBook={(name) => (book ? kindOnPage(book, name).length : 0)} studies={studies} onClaimStudy={claiming ? undefined : onClaimStudy} />
       {heaviest && (
         <div className="log-summary">
           <div>

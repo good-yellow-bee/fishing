@@ -3,6 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { BOAT_DECK } from "./boat";
 import { ANCHORED_AT, anglerAt, boatYaw } from "./fogFishing";
+import { floatShape } from "./anglerShapes";
 import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
@@ -16,8 +17,6 @@ const TROUSERS = "#3d4a5c";
 const SKIN = "#d9a882";
 const BOOTS = "#2e3a2c";
 const ROD = "#2a2622";
-const FLOAT_TOP = "#e0412f";
-const FLOAT_BOTTOM = "#f4f1e8";
 /** How high the thwart is above the hull's origin, and where the hands hold the rod, from the angler's seat. */
 const SEAT_Y = 0.32;
 const HANDS: THREE.Vector3Tuple = [0.1, 0.3, 0.3];
@@ -47,14 +46,6 @@ export function rodShape() {
   return mergePainted([
     { geometry: new THREE.CylinderGeometry(0.008, 0.02, ROD_LENGTH, 5), position: [0, 0, ROD_LENGTH / 2], rotation: [Math.PI / 2, 0, 0], color: ROD },
     { geometry: new THREE.CylinderGeometry(0.035, 0.035, 0.05, 8), position: [0.04, 0, 0.22], rotation: [0, 0, Math.PI / 2], color: "#8f8a80" },
-  ]);
-}
-
-/** The float: red cap over a white body. */
-export function floatShape() {
-  return mergePainted([
-    { geometry: new THREE.SphereGeometry(0.05, 8, 6, 0, Math.PI * 2, 0, Math.PI / 2), position: [0, 0.01, 0], color: FLOAT_TOP },
-    { geometry: new THREE.SphereGeometry(0.05, 8, 6, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), position: [0, 0.01, 0], color: FLOAT_BOTTOM },
   ]);
 }
 

@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import {
   canUseSpot,
   hotBankForDay,
+  crowdedBankForDay,
   DROPOFF_LEVEL,
   INLET_LEVEL,
   catchPoints,
@@ -20,6 +21,7 @@ import {
   lodgeStamp,
   type SpeciesRecord,
   type SpotId,
+  type BonusId,
   type LodgeRelease,
   TAG_FINDER_BONUS,
   TAG_RETURN_BONUS,
@@ -201,6 +203,7 @@ export function DockPage() {
   // The real moon, read once per visit; ?moon= pins the phase for testing.
   const moon = moonFromSearch(params.toString()) ?? moonPhase(openedAt);
   const hotBank = useMemo(() => hotBankForDay(openedAt), [openedAt]);
+  const crowdedBank = useMemo(() => crowdedBankForDay(openedAt), [openedAt]);
   // The field log's wind for the day, as a drift on the sitting float.
   const wind = useMemo(() => dailyWind(openedAt, sky), [openedAt, sky]);
   const rising = eveningRiseOn(hour, season, sky, wind.wind);
@@ -400,6 +403,8 @@ export function DockPage() {
   /** The landed fish as the server saved it, once the profile has been read again after the save. */
   const landedId = game.outcome?.kind === "landed" ? game.outcome.id : null;
   const savedLanded = landedId ? me?.catches.find((saved) => saved.requestId === landedId) : undefined;
+  /** Whether a bonus was paid: as the server saved it once it has, till then the card's own reckoning. */
+  const paid = (bonus: BonusId, guess: boolean) => (savedLanded?.bonuses ? savedLanded.bonuses.includes(bonus) : guess);
   /** The tier the tied lure climbs to with this landed fish, read from the book before the fish goes in. */
   const lureReached = useMemo(() => (game.outcome?.kind === "landed" ? lureTierReachedBy(lureCatchCount(bookCatchesRef.current, tiedLure.current)) : null), [game.outcome]);
   const fieldBeat = useMemo(() => {
@@ -1122,6 +1127,7 @@ export function DockPage() {
         <aside className="stance-chip" data-stance={game.stance} aria-label={t("Where you stand")}>
           {stanceLabel}
           {!rowing && game.stance === hotBank && <small className="stance-hot"> · {t("biting today")}</small>}
+          {!rowing && !mercy && game.stance === crowdedBank && <small className="stance-cold"> · {t("another angler here today")}</small>}
           {!rowing && isFishingStance(game.stance) && game.stance !== "open" && favoredNow(game.stance) && <small className="stance-hot"> · {t("bites sooner now")}</small>}
           {rising && <small className="stance-hot"> · {t("fish rising")}</small>}
           {!rowing && clouded && isFishingStance(game.stance) && SHALLOW_BANKS.has(game.stance) && <small className="stance-hot"> · {t("cloud over the sun")}</small>}
@@ -1327,18 +1333,20 @@ export function DockPage() {
                 ) + (game.outcome.tag ? TAG_FINDER_BONUS : 0),
               })}
             </p>
-            {landedGolden && <p className="catch-stamp golden">{t("Golden fish · 2× points")}</p>}
-            {game.outcome.tag && (savedLanded ? savedLanded.tagged : true) && <p className="catch-stamp">{t("Tagged by {name} · +{points} pts, and {back} for them", { name: game.outcome.tag.by, points: TAG_FINDER_BONUS, back: TAG_RETURN_BONUS })}</p>}
-            {weeklyBonus(game.outcome.species.id, landedDay.current) > 1 && <p className="catch-stamp">{t("Fish of the week · 1.5× points")}</p>}
+            {landedGolden && paid("golden", true) && <p className="catch-stamp golden">{t("Golden fish · 2× points")}</p>}
+            {game.outcome.tag && paid("tag", true) && <p className="catch-stamp">{t("Tagged by {name} · +{points} pts, and {back} for them", { name: game.outcome.tag.by, points: TAG_FINDER_BONUS, back: TAG_RETURN_BONUS })}</p>}
+            {paid("weekly", weeklyBonus(game.outcome.species.id, landedDay.current) > 1) && <p className="catch-stamp">{t("Fish of the week · 1.5× points")}</p>}
             {game.outcome.clean && (
               <p className="catch-stamp">
-                {(game.outcome.notes?.cleanRun ?? 0) >= CLEAN_RUN_FROM
+                {(game.outcome.notes?.cleanRun ?? 0) >= CLEAN_RUN_FROM && paid("cleanRun", true)
                   ? t("Clean fight · {n} in a row · 1.2× points", { n: game.outcome.notes!.cleanRun! })
                   : t("Clean fight")}
               </p>
             )}
             {fightNotesText(game.outcome.notes) && <p className="catch-stamp quiet fight-notes">{fightNotesText(game.outcome.notes)}</p>}
-            {dayRun > 0 && <p className="catch-stamp">{t("First fish of day {n} in a row · 1.5× points", { n: dayRun })}</p>}
+            {paid("dayRun", dayRun > 0) && (
+              <p className="catch-stamp">{dayRun > 0 ? t("First fish of day {n} in a row · 1.5× points", { n: dayRun }) : t("First fish of a run of days · 1.5× points")}</p>
+            )}
             {stamp?.kind === "first" && <p className="catch-stamp">{t("New in the field guide")}</p>}
             {tierReached && (
               <p className="catch-stamp">
@@ -1349,10 +1357,10 @@ export function DockPage() {
                     : t("Mastered: {fish} · 1.1× points from the next one", { fish: t(game.outcome.species.name) })}
               </p>
             )}
-            {masteryBonus(priorCaught) > 1 && <p className="catch-stamp">{t("Mastered kind · 1.1× points")}</p>}
+            {paid("mastery", masteryBonus(priorCaught) > 1) && <p className="catch-stamp">{t("Mastered kind · 1.1× points")}</p>}
             {stamp?.kind === "pb" && (
               <p className="catch-stamp">
-                {lodgeTaken ? t("Personal best · was {weight}", { weight: weightText(stamp.previous) }) : t("Personal best · was {weight} · 1.25× points", { weight: weightText(stamp.previous) })}
+                {paid("pb", !lodgeTaken) ? t("Personal best · was {weight} · 1.25× points", { weight: weightText(stamp.previous) }) : t("Personal best · was {weight}", { weight: weightText(stamp.previous) })}
               </p>
             )}
             {stamp?.kind === "repeat" && (
@@ -1369,10 +1377,14 @@ export function DockPage() {
               </p>
             )}
             {lodge?.kind === "first" && <p className="catch-stamp">{t("First on the lodge wall")}</p>}
+            {/* The server took the record from another angler where this card's lodge board was out of date. */}
+            {paid("lodgeRecord", false) && !(lodge?.kind === "record" && !lodge.yours) && <p className="catch-stamp">{t("Lodge record · 1.5× points")}</p>}
             {lodge?.kind === "record" && (
               <p className="catch-stamp">
                 {lodge.yours
                   ? t("Lodge record · beat your {weight}", { weight: weightText(lodge.previous) })
+                  : !paid("lodgeRecord", true)
+                    ? t("Lodge record · was {weight} ({holder})", { weight: weightText(lodge.previous), holder: lodge.holder })
                   : t("Lodge record · was {weight} ({holder}) · 1.5× points", { weight: weightText(lodge.previous), holder: lodge.holder })}
               </p>
             )}

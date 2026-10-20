@@ -2,7 +2,7 @@ import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Database from "better-sqlite3";
-import { BAG_SIZE, SLAMS, fishById, TAG_RETURN_BONUS, TAGGABLE_IDS, isLakeHour, isTrophyWeight, TROPHY_RELEASE_BONUS, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type LodgeRelease, type LodgeTrack, type TagReturn, type SpeciesRecord, type SpotId } from "@stillwater/shared";
+import { BAG_SIZE, SLAMS, fishById, TAG_RETURN_BONUS, TAGGABLE_IDS, isLakeHour, isTrophyWeight, TROPHY_RELEASE_BONUS, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type BonusId, type LodgeRelease, type LodgeTrack, type StudyFact, type TagReturn, type SpeciesRecord, type SpotId } from "@stillwater/shared";
 
 const dir = dirname(fileURLToPath(import.meta.url));
 export const dataDir = join(dir, "../data");
@@ -96,6 +96,13 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS catch_species_created ON catch (species_id, created_at);
   CREATE INDEX IF NOT EXISTS catch_created ON catch (created_at);
 
+  CREATE TABLE IF NOT EXISTS study_claim (
+    user_id TEXT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
+    species_id TEXT NOT NULL,
+    claimed_at TEXT NOT NULL,
+    PRIMARY KEY (user_id, species_id)
+  );
+
   CREATE TABLE IF NOT EXISTS daily_request_claim (
     user_id TEXT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
     day TEXT NOT NULL,
@@ -144,6 +151,10 @@ if (!catchColumns.some((column) => column.name === "released")) {
 if (!catchColumns.some((column) => column.name === "day")) {
   db.exec(`ALTER TABLE catch ADD COLUMN day TEXT`);
 }
+// The bonuses the catch was paid, comma-separated, so the landed card stamps only those.
+if (!catchColumns.some((column) => column.name === "bonuses")) {
+  db.exec(`ALTER TABLE catch ADD COLUMN bonuses TEXT`);
+}
 // When the angler let the fish go; older releases have only their catch's time.
 if (!catchColumns.some((column) => column.name === "released_at")) {
   db.exec(`ALTER TABLE catch ADD COLUMN released_at TEXT`);
@@ -186,6 +197,8 @@ export type CatchRow = {
   day: string | null;
   /** Another angler's let-go fish this catch landed again. */
   tagged_from?: string | null;
+  /** The bonuses it was paid, comma-separated. */
+  bonuses?: string | null;
   created_at: string;
 };
 
@@ -291,6 +304,28 @@ export function listDayBags(from: string, to: string, limit: number) {
        ) WHERE nth <= ? GROUP BY userId ORDER BY total DESC, madeAt ASC, userId ASC LIMIT ?`,
     )
     .all(from, to, BAG_SIZE, limit) as { userId: string; displayName: string; total: number; count: number; madeAt: string }[];
+}
+
+/** Each kind's banks, hours and heaviest the angler landed it at, for the studies. */
+export function listStudyFacts(userId: string): StudyFact[] {
+  return db
+    .prepare(`SELECT species_id as speciesId, spot, hour, MAX(weight) as heaviest FROM catch WHERE user_id = ? GROUP BY species_id, spot, hour`)
+    .all(userId) as StudyFact[];
+}
+
+/** The kinds whose studies the angler has been paid for. */
+export function listStudyClaims(userId: string): string[] {
+  return (db.prepare(`SELECT species_id FROM study_claim WHERE user_id = ?`).all(userId) as { species_id: string }[]).map((row) => row.species_id);
+}
+
+/** Pays a kind's finished studies once; null when they were paid already. */
+export function claimStudy(userId: string, speciesId: string, reward: number): number | null {
+  return db.transaction(() => {
+    const claim = db.prepare(`INSERT OR IGNORE INTO study_claim (user_id, species_id, claimed_at) VALUES (?, ?, ?)`).run(userId, speciesId, new Date().toISOString());
+    if (claim.changes !== 1) return null;
+    db.prepare(`UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`).run(reward, reward, userId);
+    return reward;
+  })();
 }
 
 /** Each angler's count of fish let go since `since`, most first; of equal counts, by name. */
@@ -475,9 +510,9 @@ export function recordCatch(row: CatchRow): RecordCatchResult {
       .get(row.user_id, cutoff) as { count: number };
     if (count.count >= 12) return { kind: "rate_limited" } as const;
     db.prepare(
-      `INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, hour, sky, season, golden, day, tagged_from, created_at)
-       VALUES (@id, @user_id, @species_id, @weight, @points, @spot, @request_id, @clean, @hour, @sky, @season, @golden, @day, @tagged_from, @created_at)`,
-    ).run({ ...row, tagged_from: row.tagged_from ?? null });
+      `INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, hour, sky, season, golden, day, tagged_from, bonuses, created_at)
+       VALUES (@id, @user_id, @species_id, @weight, @points, @spot, @request_id, @clean, @hour, @sky, @season, @golden, @day, @tagged_from, @bonuses, @created_at)`,
+    ).run({ ...row, tagged_from: row.tagged_from ?? null, bonuses: row.bonuses ?? null });
     // The angler who let the fish go is paid for it once, when it is landed again.
     const tagged = row.tagged_from ? (db.prepare(`SELECT user_id FROM catch WHERE id = ?`).get(row.tagged_from) as { user_id: string } | undefined) : undefined;
     if (tagged) db.prepare(`UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`).run(TAG_RETURN_BONUS, TAG_RETURN_BONUS, tagged.user_id);
@@ -620,6 +655,7 @@ export function toCatch(row: CatchRow) {
     released: row.released === 1,
     requestId: row.request_id,
     tagged: !!row.tagged_from,
+    bonuses: row.bonuses == null ? null : (row.bonuses ? (row.bonuses.split(",") as BonusId[]) : []),
     createdAt: row.created_at,
   };
 }

@@ -25,3 +25,4 @@ export { Swans } from "../Swans";
 export { ValleyMist } from "../ValleyMist";
 export { Woodcutter } from "../Woodcutter";
 export { Woodpecker } from "../Woodpecker";
+export { Hammock } from "../Hammock";
