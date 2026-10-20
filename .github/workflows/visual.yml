@@ -39,7 +39,7 @@ jobs:
           node-version: 26
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm visual --repeat-each ${{ inputs.repeat_each || 1 }} ${{ inputs.update_snapshots && '--update-snapshots' || '' }}
+      - run: pnpm visual --repeat-each ${{ inputs.repeat_each || 3 }} ${{ inputs.update_snapshots && '--update-snapshots' || '' }}
         env:
           CI: "true"
           HOME: /root
