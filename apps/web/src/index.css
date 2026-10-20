@@ -3863,3 +3863,8 @@ html[data-contrast="high"] .sound-captions li {
     right: 10px;
   }
 }
+
+.derby-entries li[data-you="1"] {
+  color: var(--amber);
+  font-weight: 700;
+}

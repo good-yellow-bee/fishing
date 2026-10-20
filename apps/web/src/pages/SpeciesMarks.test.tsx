@@ -9,7 +9,7 @@ import { BoardPage } from "./Board";
 import { LogPage } from "./Log";
 import { GOLDEN_COLOR } from "../components/FishMark";
 
-vi.mock("../api", () => ({ getBoard: vi.fn(), getMe: vi.fn(), getSpeciesRecords: vi.fn() }));
+vi.mock("../api", () => ({ getBoard: vi.fn(), getDerby: vi.fn(() => new Promise(() => {})), getMe: vi.fn(), getSpeciesRecords: vi.fn() }));
 
 let root: Root;
 let container: HTMLDivElement;

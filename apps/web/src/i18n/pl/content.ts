@@ -191,6 +191,8 @@ export const PL_CONTENT: PlBook = {
   "Land every kind of fish in the lake.": "Złów każdy gatunek ryby w jeziorze.",
   "Trophy hunter": "Łowca trofeów",
   "Land five kinds of fish at trophy weight.": "Złów pięć gatunków ryb o wadze trofeum.",
+  "Derby champion": "Zwycięstwo w zawodach",
+  "Hold the top spot when a weekend derby ends.": "Bądź na pierwszym miejscu, gdy kończą się weekendowe zawody.",
   "Regular": "Stały bywalec",
   "Land a fish seven days in a row.": "Złów rybę siedem dni z rzędu.",
   "Early bird": "Ranny ptaszek",
