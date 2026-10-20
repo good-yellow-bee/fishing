@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-game43";
+export const NEWS_ID = "2026-10-20-scene53";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "The rowboats and the float no longer turn black: their colours load properly again. On a phone held upright, the view now opens wider, so you see the whole dock, the boat and both shores instead of a narrow slice of the lake. And see-through things like rain rings and dragonfly wings now draw in one pass, so the lake runs a little smoother.",
   "Four fish learned a second trick: a bluegill's tight circles twist your line toward a tangle, a carp bolts the first time it sees the net, a catfish lifts its head at the net only a moment, and a burbot slithers off the hook if you leave the line slack between its runs.",
   "The lake opens sooner on a phone: it now fetches its code and your profile together and each model only once, so on a slow signal it is ready about three seconds earlier, and coming back to it no longer downloads every model again. In high contrast, a switched-on Headlamp now stands out in amber.",
   "Each week the shack's weekly board carries a rumor of a legend, the tiger muskie, the sturgeon or the ghost pike, with three clues to find in your catches; find all three and that legend bites far more often at its bank for the rest of the week. And every weekend the lodge board runs a derby for the heaviest of one fish: hold the top spot when Sunday ends (UTC) to earn the Derby champion badge.",
@@ -23,7 +24,6 @@ export const NEWS_ITEMS: readonly string[] = [
   "On Bests, a water's card names its biggest fish, the record tiles say the day, and a season marks each kind that set a new best and names its best lure. The year's goal box says how many days since your last fish, and the goal form offers a goal that beats last year.",
   "An outing's tackle list offers Undo after Unpack all or taking a piece off. On the Map, a water's next outing says how much of its bag is packed, and in the small hours the water you are on says Out now. Gear's best lures to pack put those of the outing's own water first.",
   "Home's What's new keeps to the field log. With nothing planned, Home's Next says when you were last out, with Go again, and behind a year's goal it says how many fish a week it needs. The book file gives this year's catches as a sheet of their own, and its last copy says how many fish it held.",
-  "Find a catch offers its best words as one-tap searches, and a search's spreadsheet is named after it. A fish's page says its place on the outing, such as fish 3 of 5.",
 ];
 
 /** Whether this angler should see the card: someone who has fished before and not yet dismissed this batch. */
