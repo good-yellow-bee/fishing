@@ -1,7 +1,7 @@
 import { catchesForTrip, localDate, shiftDate, type Logbook, type Trip } from "@stillwater/shared";
-import { PLAY_LAKE_ID } from "./playLake";
+import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 import { LATE_NIGHT_UNTIL } from "./suggestions";
-import { isSampleOuting } from "./bookCopy";
+import { isSampleOuting, upcomingRealTrips } from "./bookCopy";
 import { newestOutingFirst } from "./catchNeighbors";
 
 export type DatePick = { label: "Last night" | "Today" | "Tomorrow" | "Saturday" | "Sunday" | "Next Saturday"; date: string };
@@ -40,8 +40,21 @@ export function outingDay(today: string, now = new Date()): string {
  */
 export function stillGoing(book: Logbook, trip: Trip, now = new Date()): boolean {
   if (now.getHours() >= LATE_NIGHT_UNTIL || trip.date !== shiftDate(now, -1)) return false;
-  const fish = catchesForTrip(book, trip.id);
+  // Its own fish; with none, those logged loose on its water since its day began, so a morning's loose fish end it.
+  const own = catchesForTrip(book, trip.id);
+  const fish = own.length > 0 ? own : book.catches.filter((entry) => entry.tripId === null && entry.spotId === trip.spotId && localDate(new Date(entry.caughtAt)) >= trip.date);
   return fish.length === 0 || fish.some((entry) => recentFish(entry.caughtAt, now));
+}
+
+/**
+ * Last evening's outings still out on the water in the small hours, as Home and Trips list them first: none once one of
+ * today's has a fish, and a blank one gives way to any plan for today.
+ */
+export function lateOutings(book: Logbook, now = new Date()): Trip[] {
+  const today = localDate(now);
+  const todayOutings = upcomingRealTrips(book, today).filter((trip) => offPlayLake(trip) && trip.date === today);
+  if (todayOutings.some((trip) => catchesForTrip(book, trip.id).length > 0)) return [];
+  return book.trips.filter((trip) => offPlayLake(trip) && !isSampleOuting(trip) && stillGoing(book, trip, now) && (todayOutings.length === 0 || catchesForTrip(book, trip.id).length > 0));
 }
 
 /** A fish in the last twelve hours; never one logged ahead of the clock. */

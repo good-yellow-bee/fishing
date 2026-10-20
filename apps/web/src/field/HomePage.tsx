@@ -12,7 +12,7 @@ import { countedSearch } from "./countedSearch";
 import { RESUME_PARAM } from "./anotherCatch";
 import { hasSampleLeft, isSampleCatch, isSampleOnly, isSamplePlan, isSampleSpot, isSampleOuting, upcomingRealTrips, withoutSample } from "./bookCopy";
 import { outingFish } from "./outingFish";
-import { outingDay, stillGoing } from "./tripDates";
+import { lateOutings, outingDay } from "./tripDates";
 import { sheetOutings } from "./catchCsv";
 import { NEWS_ITEMS, markNewsSeen, newsDue, readSeenNews } from "../game/whatsNew";
 import { FIELD_NEWS } from "./fieldNews";
@@ -145,11 +145,7 @@ export function HomePage() {
   // In the small hours, last evening's outing is still the one out on the water: it stays first, with its log link.
   // Only one still going, with no fish yet or one in the last twelve hours; a morning plan for today doesn't end a
   // session with a fish this past hour, though one that has a fish of its own does, as does any plan for one still blank.
-  const todayOutings = upcomingRealTrips(book, today).filter((trip) => offPlayLake(trip) && trip.date === today);
-  const todayFished = todayOutings.some((trip) => catchesForTrip(book, trip.id).length > 0);
-  const lateOuting = todayFished
-    ? undefined
-    : book.trips.find((trip) => offPlayLake(trip) && !isSampleOuting(trip) && stillGoing(book, trip, now) && (todayOutings.length === 0 || catchesForTrip(book, trip.id).length > 0));
+  const lateOuting = lateOutings(book, now)[0];
   const upcoming = [...(lateOuting ? [lateOuting] : []), ...upcomingRealTrips(book, today)];
   // Just back from the water, not from a round of the game, nor the sample week's plans once their day has passed.
   // Last evening's outing still on the water shows once, among what's coming up.

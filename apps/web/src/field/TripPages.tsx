@@ -73,7 +73,7 @@ import { pieceTally } from "./pieceTally";
 import { WaterOptions } from "./WaterOptions";
 import { kindKey, kindNames, speciesCounts, speciesLink } from "./speciesLink";
 import { pieceName } from "./gear/pieceKey";
-import { datePicks, outingDay, ownTitle, pastTitles, stillGoing } from "./tripDates";
+import { datePicks, lateOutings, outingDay, ownTitle, pastTitles, stillGoing } from "./tripDates";
 import "./search.css";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 import { bestFishDay, bookFishDay } from "./tripMonths";
@@ -175,16 +175,13 @@ export function saveOutingIcs(book: Logbook, trip: Trip, tackleItems: TackleItem
   downloadFile(tripIcs(named, spot?.name ?? null, new Date(), spot?.place, calendarNotes(book, trip, tackleItems), alarm), "text/calendar;charset=utf-8", tripIcsName(named));
 }
 
-/**
- * Trips' two lists. In the small hours last evening's outing still going stays "Coming up", not a blank day in Recent;
- * one of yesterday's that has ended (a morning's, or an evening's quiet these twelve hours) is Recent from midnight.
- * Today's round of the game is Recent too, as "Coming up" leaves it out; the sample week's plans stay out of Recent
- * once their day has passed: made up, they are no blank days of the angler's.
- */
+/** Trips' two lists: last evening's outings still going lead Coming up, as on Home; the rest of yesterday is Recent. */
 export function tripLists(book: Logbook, now = new Date()): { upcoming: Trip[]; recent: Trip[] } {
   const today = localDate(now);
-  const upcoming = upcomingRealTrips(book, outingDay(today, now)).filter((trip) => trip.date >= today || stillGoing(book, trip, now));
-  const going = new Set(upcoming.map((trip) => trip.id));
+  const late = lateOutings(book, now);
+  const upcoming = [...late, ...upcomingRealTrips(book, today)];
+  const going = new Set(late.map((trip) => trip.id));
+  // Today's round of the game too, as Coming up leaves it out; not the sample week's plans once their day has passed.
   const recent = [
     ...book.trips.filter((trip) => trip.date === today && !offPlayLake(trip)),
     ...recentTrips(book, today).filter((trip) => !going.has(trip.id) && !isSamplePlan(book, trip)),
@@ -197,10 +194,12 @@ export function TripsPage() {
   const { items: tackleItems } = useTackle();
   useT();
   const [query, setQuery] = useTypedParam(TRIP_FIND);
-  const today = localDate(new Date());
-  const tomorrow = shiftDate(new Date(), 1);
-  const fishedBy = outingDay(today);
-  const { upcoming, recent } = tripLists(book);
+  // One clock for the page, so its lists and its days agree about midnight and the small hours.
+  const now = new Date();
+  const today = localDate(now);
+  const tomorrow = shiftDate(now, 1);
+  const fishedBy = outingDay(today, now);
+  const { upcoming, recent } = tripLists(book, now);
   // Each outing's fish with those logged loose that day on its water, as the average counts them.
   const fishOn = outingFish(book);
   // The angler's own outings, as Home and Bests count them: Recent's month headings count these and say the rest apart.
