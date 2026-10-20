@@ -2,7 +2,7 @@ import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Database from "better-sqlite3";
-import { BAG_SIZE, fishById, TAG_RETURN_BONUS, TAGGABLE_IDS, isLakeHour, isTrophyWeight, TROPHY_RELEASE_BONUS, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type LodgeRelease, type LodgeTrack, type TagReturn, type SpeciesRecord, type SpotId } from "@stillwater/shared";
+import { BAG_SIZE, SLAMS, fishById, TAG_RETURN_BONUS, TAGGABLE_IDS, isLakeHour, isTrophyWeight, TROPHY_RELEASE_BONUS, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type LodgeRelease, type LodgeTrack, type TagReturn, type SpeciesRecord, type SpotId } from "@stillwater/shared";
 
 const dir = dirname(fileURLToPath(import.meta.url));
 export const dataDir = join(dir, "../data");
@@ -149,6 +149,7 @@ if (!catchColumns.some((column) => column.name === "tagged_from")) {
   db.exec(`ALTER TABLE catch ADD COLUMN tagged_from TEXT`);
 }
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS catch_user_request ON catch (user_id, request_id)`);
+db.exec(`CREATE INDEX IF NOT EXISTS catch_user_day ON catch (user_id, day)`);
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS catch_tagged_from ON catch (tagged_from) WHERE tagged_from IS NOT NULL`);
 
 export type ProfileRow = {
@@ -240,6 +241,14 @@ export function listSpeciesStats(userId: string) {
     heaviest: row.heaviest,
     lastAt: row.last_at,
   }));
+}
+
+/** Each (local day, kind) the angler landed of a slam's kinds; catches saved before days were sent are left out. */
+export function listSlamDays(userId: string, since = "0000-01-01"): { day: string; speciesId: string }[] {
+  const kinds = SLAMS.flatMap((slam) => slam.kinds);
+  return db
+    .prepare(`SELECT DISTINCT day, species_id as speciesId FROM catch WHERE user_id = ? AND day >= ? AND species_id IN (${kinds.map(() => "?").join(", ")})`)
+    .all(userId, since, ...kinds) as { day: string; speciesId: string }[];
 }
 
 /** Every local day the angler landed a fish on, oldest first; catches saved before days were sent are left out. */

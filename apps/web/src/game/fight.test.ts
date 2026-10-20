@@ -1101,7 +1101,7 @@ describe("runs off the point", () => {
 
 describe("keeping a fish clear of the reeds' weeds and the point's rocks", () => {
   /** Plays two runs, turning them or not, reeling between and through them, and returns what the landed card would note. */
-  function twoRuns(water: "weeds" | "rocks" | "pilings" | "open", turn: boolean, read: "clearOf" | "scuffed" = "clearOf") {
+  function twoRuns(water: "weeds" | "rocks" | "pilings" | "log" | "open", turn: boolean, read: "clearOf" | "scuffed" = "clearOf") {
     const runtime = makeFight(fish("lake-whitefish"), 2, 3, () => 0, 1, water);
     let runs = 0;
     let was = runtime.sim.surge;
@@ -1118,7 +1118,9 @@ describe("keeping a fish clear of the reeds' weeds and the point's rocks", () =>
   it("frays the line on runs dragged over the rocks or round a piling, and not on turned ones or in the weeds", () => {
     expect(twoRuns("rocks", false, "scuffed")).toBe(true);
     expect(twoRuns("pilings", false, "scuffed")).toBe(true);
+    expect(twoRuns("log", false, "scuffed")).toBe(true);
     expect(twoRuns("rocks", true, "scuffed")).toBeFalsy();
+    expect(twoRuns("log", true, "scuffed")).toBeFalsy();
     expect(twoRuns("pilings", true, "scuffed")).toBeFalsy();
     expect(twoRuns("weeds", false, "scuffed")).toBeFalsy();
     expect(twoRuns("open", false, "scuffed")).toBeFalsy();
@@ -1131,6 +1133,8 @@ describe("keeping a fish clear of the reeds' weeds and the point's rocks", () =>
     expect(twoRuns("rocks", false)).toBeUndefined();
     expect(twoRuns("pilings", true)).toBe("pilings");
     expect(twoRuns("pilings", false)).toBeUndefined();
+    expect(twoRuns("log", true)).toBe("log");
+    expect(twoRuns("log", false)).toBeUndefined();
     expect(twoRuns("open", true)).toBeUndefined();
   });
 });

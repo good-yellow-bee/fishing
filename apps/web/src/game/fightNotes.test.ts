@@ -31,6 +31,7 @@ describe("fight notes", () => {
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 2, clearOf: "current" })).toBe("Turned 2 runs · Turned it upstream every time");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 1, encore: true, fightSec: 40 })).toBe("Turned 1 run · Rode out a second run at the net · Landed in 40 s");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, secondWind: true })).toBe("Wore down its second wind");
+    expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, clearOf: "log" })).toBe("Kept it clear of the sunken log");
   });
 
   it("says it in Polish too", () => {

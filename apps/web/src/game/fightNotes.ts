@@ -22,6 +22,7 @@ export function fightNotesText(notes: FightNotes | undefined): string | null {
   if (notes.clearOf === "weeds") parts.push(t("Kept it out of the weeds"));
   if (notes.clearOf === "rocks") parts.push(t("Kept it off the rocks"));
   if (notes.clearOf === "pilings") parts.push(t("Kept it clear of the pilings"));
+  if (notes.clearOf === "log") parts.push(t("Kept it clear of the sunken log"));
   if (notes.clearOf === "current") parts.push(t("Turned it upstream every time"));
   if ((notes.bowedLeaps ?? 0) > 0) parts.push(tn(notes.bowedLeaps!, "Bowed to {n} leap", "Bowed to {n} leaps"));
   if ((notes.followedDarts ?? 0) > 0) parts.push(tn(notes.followedDarts!, "Followed {n} dart", "Followed {n} darts"));

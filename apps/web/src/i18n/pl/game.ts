@@ -131,6 +131,11 @@ export const PL_GAME: PlBook = {
   "{lure} · {tier}": "{lure} · {tier}",
   "{lure} is now {tier}": "{lure} — teraz: {tier}",
   "Lucky lure: its hook sets a little more solid": "Talizman: hak zacina trochę pewniej",
+  "Rubbing round the sunken log frayed your line: it snaps sooner until you retie it.": "Ocieranie o zatopiony pień przetarło żyłkę: pęknie szybciej, dopóki jej nie przewiążesz.",
+  "It wrapped the line round the log — ease off till it swings free!": "Owinęła żyłkę wokół pnia — odpuść, aż się odwinie!",
+  "Kept it clear of the sunken log": "Z dala od zatopionego pnia",
+  "Sunken log: turn every run, or it wraps the line round the log and frays it": "Zatopiony pień: zawracaj każdy odjazd, bo owinie żyłkę wokół pnia i ją przetrze",
+  "{slam} · every kind in one day": "{slam} · wszystkie gatunki jednego dnia",
   "Drag: light": "Hamulec: lekki",
   "Drag: normal": "Hamulec: zwykły",
   "Drag: heavy": "Hamulec: mocny",
@@ -734,8 +739,8 @@ export const PL_GAME: PlBook = {
   "Jumper: every second run is a leap, so let go when it comes up": "Skoczek: co drugi odjazd to skok, więc puść, gdy idzie do góry",
   "Breacher: its first run is a leap, so let go when it comes up": "Wyskakuje: jego pierwszy odjazd to skok, więc puść, gdy idzie do góry",
   "Roller: at the net it rolls on the line instead of running": "Kręci się: przy podbieraku obraca się na żyłce zamiast odjeżdżać",
-  "Cover-diver: at the reeds or the dock it buries itself in cover and stays put, so turn every run there":
-    "Nurek: przy trzcinach i przy pomoście zaszywa się w kryjówce i nie wychodzi, więc zawracaj tam każdy odjazd",
+  "Cover-diver: at the reeds, the dock or the sunken log it buries itself in cover and stays put, so turn every run there":
+    "Nurek: przy trzcinach, przy pomoście i przy zatopionym pniu zaszywa się w kryjówce i nie wychodzi, więc zawracaj tam każdy odjazd",
   "Darter: halfway through a run it cuts back the other way, so switch sides to keep turning it":
     "Zygzak: w połowie odjazdu skręca w drugą stronę, więc zmień stronę, by dalej ją zawracać",
   "It darted the other way — switch sides!": "Skręciła w drugą stronę — zmień stronę!",
