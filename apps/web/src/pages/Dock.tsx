@@ -130,6 +130,7 @@ import { nightLineKinds, nightLineState, wormLineHour } from "../game/nightLine"
 import { trapIsCold, trapState } from "../game/minnowTrap";
 import { foeAbout, isOldFoe, loadOldFoe, saveOldFoe } from "../game/oldFoe";
 import { BUCKET_SIZE } from "../game/baitBucket";
+import { WORM_TIN_WET } from "../game/wormTin";
 import { isLiveBait, isTopwater, touchScreen, useFishingGame, type Outcome } from "../game/useFishingGame";
 import { useCatchSync } from "../game/useCatchSync";
 import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
@@ -998,6 +999,8 @@ export function DockPage() {
   };
 
   const onBuyWorm = async () => {
+    // The server doesn't see the tin, so a full one must not reach it and be charged for.
+    if (game.worms >= WORM_TIN_WET) return;
     setBusy(true);
     setError("");
     try {
