@@ -2,7 +2,7 @@ import { useEffect, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { LAKE_RX, LAKE_RZ, lakeEdge } from "@stillwater/shared";
-import { washAt } from "./lappingWaves";
+import { onshore, washFrom, type Wash } from "./lappingWaves";
 import { useReducedMotion } from "./reducedMotion";
 
 /** Points round the shore, and the foam's resting band: from just over the waterline to a little up the bank. */
@@ -47,6 +47,9 @@ export function ShoreWash({ wind, opacity }: { wind: { x: number; z: number }; o
       }),
     [],
   );
+  // The wind's push on each bank only changes with the wind, not every frame.
+  const blows = useMemo(() => rim.map(({ angle }) => onshore(angle, { x: wind.x, z: wind.z })), [rim, wind.x, wind.z]);
+  const wash = useMemo<Wash>(() => ({ reach: 0, thickness: 0 }), []);
   useEffect(
     () => () => {
       geometry.dispose();
@@ -57,18 +60,25 @@ export function ShoreWash({ wind, opacity }: { wind: { x: number; z: number }; o
   useFrame(({ clock }) => {
     const position = geometry.getAttribute("position") as THREE.BufferAttribute;
     const color = geometry.getAttribute("color") as THREE.BufferAttribute;
+    const p = position.array as Float32Array;
+    const c = color.array as Float32Array;
     const t = clock.elapsedTime;
-    rim.forEach(({ angle, edge, cos, sin }, i) => {
-      const wash = washAt(angle, wind, t, still);
-      // Offsets out from the water's edge: up the bank, the foam's leading edge, and its faded fringe.
-      const offsets = [BANK, LINE - wash.reach, LINE - wash.reach - FADE];
-      const alphas = [Math.min(1, opacity * wash.thickness), Math.min(1, opacity * wash.thickness), 0];
-      offsets.forEach((offset, ring) => {
+    for (let i = 0; i < STEPS; i += 1) {
+      const { angle, edge, cos, sin } = rim[i]!;
+      washFrom(blows[i]!, angle, t, still, wash);
+      const alpha = Math.min(1, opacity * wash.thickness);
+      // Out from the water's edge: up the bank, the foam's leading edge, and its faded fringe.
+      for (let ring = 0; ring < 3; ring += 1) {
+        const offset = ring === 0 ? BANK : ring === 1 ? LINE - wash.reach : LINE - wash.reach - FADE;
         const k = i * 3 + ring;
-        position.setXYZ(k, cos * (LAKE_RX * edge + offset), sin * (LAKE_RZ * edge + offset), 0);
-        color.setXYZW(k, 1, 1, 1, alphas[ring]!);
-      });
-    });
+        p[k * 3] = cos * (LAKE_RX * edge + offset);
+        p[k * 3 + 1] = sin * (LAKE_RZ * edge + offset);
+        c[k * 4] = 1;
+        c[k * 4 + 1] = 1;
+        c[k * 4 + 2] = 1;
+        c[k * 4 + 3] = ring === 2 ? 0 : alpha;
+      }
+    }
     position.needsUpdate = true;
     color.needsUpdate = true;
   });

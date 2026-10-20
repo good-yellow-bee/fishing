@@ -5,7 +5,7 @@ import { APPROACH } from "./pierDeck";
 export function shoreInland(x: number, z: number) {
   const nx = x / LAKE_RX;
   const nz = (z - LAKE_CENTER_Z) / LAKE_RZ;
-  const radius = Math.hypot(nx, nz);
+  const radius = Math.sqrt(nx * nx + nz * nz);
   const edge = lakeEdge(Math.atan2(nz, nx)) * 0.96;
   if (edge < 1e-4) return 0;
   return Math.min(1, Math.max(0, 1 - radius / edge));
@@ -21,7 +21,7 @@ function pierShelter(x: number, z: number) {
   for (const box of APPROACH) {
     const dx = Math.max(box.minX - x, 0, x - box.maxX);
     const dz = Math.max(box.minZ - z, 0, z - box.maxZ);
-    reach = Math.min(reach, Math.hypot(dx, dz));
+    reach = Math.min(reach, Math.sqrt(dx * dx + dz * dz));
   }
   const u = Math.min(1, Math.max(0, (reach - PIER_CALM_NEAR) / (PIER_CALM_FAR - PIER_CALM_NEAR)));
   return u * u * (3 - 2 * u);

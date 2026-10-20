@@ -50,10 +50,16 @@ export type Wash = {
 
 /** The wash at a point `angle` round the shore, `time` seconds in. `still` holds each bank at its middle reach. */
 export function washAt(angle: number, wind: { x: number; z: number }, time: number, still = false): Wash {
-  const blow = onshore(angle, wind);
+  return washFrom(onshore(angle, wind), angle, time, still, { reach: 0, thickness: 0 });
+}
+
+/** `washAt` for a bank whose `onshore` blow is already known, written into `out`, for a frame loop round the whole shore. */
+export function washFrom(blow: number, angle: number, time: number, still: boolean, out: Wash): Wash {
   const span = CALM_WASH + (MAX_WASH - CALM_WASH) * blow;
   // A wave runs in fast and drains back slowly, so the lap is skewed rather than a plain swing.
   const phase = still ? 0.5 : ((((time / LAP_SEC - (angle * WAVES_ROUND) / (Math.PI * 2)) % 1) + 1) % 1);
   const lap = phase < 0.3 ? Math.sin((phase / 0.3) * (Math.PI / 2)) : 0.5 + 0.5 * Math.cos(((phase - 0.3) / 0.7) * Math.PI);
-  return { reach: span * lap, thickness: 0.7 + 0.6 * blow * (0.6 + 0.4 * lap) };
+  out.reach = span * lap;
+  out.thickness = 0.7 + 0.6 * blow * (0.6 + 0.4 * lap);
+  return out;
 }
