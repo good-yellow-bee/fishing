@@ -79,6 +79,13 @@ export type FightSim = {
 };
 /** -1 rod pulled left, 1 right, 0 straight. */
 export type Steer = -1 | 0 | 1;
+/** The reel's drag: light gives a run line easily, heavy makes it fight for every foot. */
+export type Drag = "light" | "normal" | "heavy";
+export const DRAGS: readonly Drag[] = ["light", "normal", "heavy"];
+/** The next drag setting, round from light to heavy and back. */
+export function nextDrag(drag: Drag): Drag {
+  return DRAGS[(DRAGS.indexOf(drag) + 1) % DRAGS.length];
+}
 
 /** The keys that pull the rod in a fight: ← or A left, → or D right (a pad's stick sends A and D). */
 /** A head shake is a twist on the spot, not a run, so the starter fish that shake can't be turned. */
@@ -165,7 +172,7 @@ export const JUMP_GRACE_SEC = 0.15;
 export type FightRuntime = {
   sim: FightSim;
   performance: FightPerformance;
-  step(nowMs: number, dtSec: number, reeling: boolean, steer?: Steer): FightOutcome;
+  step(nowMs: number, dtSec: number, reeling: boolean, steer?: Steer, drag?: Drag): FightOutcome;
 };
 
 export type FightPerformance = {
@@ -228,6 +235,12 @@ export const WITH_RUN_GRACE_SEC = 0.25;
 /** After a run the angler turned, the fish faces the rod this long, and line reeled meanwhile comes in this much faster. */
 export const TURNED_HEAD_MS = 1000;
 export const TURNED_HEAD_REEL = 1.3;
+/** How much line a run takes off a slack reel at each drag setting, and how hard it pulls on a reel that is turning. */
+export const DRAG_RUN_LINE: Record<Drag, number> = { light: 1.35, normal: 1, heavy: 0.65 };
+export const DRAG_RUN_PULL: Record<Drag, number> = { light: 0.7, normal: 1, heavy: 1.3 };
+/** A run against a heavy drag loads the line this tight even with the reel let go, this much a second. */
+export const HEAVY_DRAG_HOLD = 0.5;
+export const HEAVY_DRAG_LOAD = 1.5;
 
 /** Under this the fish is tiring; under the other it is played out. */
 export const TIRING_STAMINA = 0.6;
@@ -632,7 +645,7 @@ export function makeFight(
   const headMs = THRASHERS.has(species.id) ? THRASH_HEAD_MS : NET_HEAD_MS;
   const slipper = SLIPPERS.has(species.id);
   let slipSec = 0;
-  const step = (nowMs: number, dtSec: number, reeling: boolean, steer: Steer = 0): FightOutcome => {
+  const step = (nowMs: number, dtSec: number, reeling: boolean, steer: Steer = 0, drag: Drag = "normal"): FightOutcome => {
     const pressed = reeling && !wasReeling;
     wasReeling = reeling;
     if (sim.netting) {
@@ -810,14 +823,16 @@ export function makeFight(
     // Line reeled over the rocks or rubbing round a piling comes out of the fight frayed.
     if ((sim.rocky && reeling) || sim.wrapped) performance.scuffed = true;
     if (reeling) {
-      sim.tension += (tensionUpCalm + (sim.surge === 2 && !charging ? eff * (rocky ? ROCK_PULL : 1) : 0) + (sim.wrapped ? WRAP_PULL : 0)) * dtSec;
+      sim.tension += (tensionUpCalm + (sim.surge === 2 && !charging ? eff * (rocky ? ROCK_PULL : 1) * DRAG_RUN_PULL[drag] : 0) + (sim.wrapped ? WRAP_PULL : 0)) * dtSec;
       // Line under real pressure comes in faster, for an angler brave enough to reel in the amber.
       const pressure = sim.tension >= TIGHT_TENSION && sim.tension < RED_TENSION ? PRESSURE_REEL : 1;
       sim.line -= reelRate * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * (sim.weeded ? WEED_REEL : 1) * (sim.wrapped ? 0 : 1) * (broadsider && sim.stamina >= TIRING_STAMINA ? BROADSIDE_REEL : 1) * (charging ? CHARGE_REEL / pattern.reelSurge : 1) * (sim.withRun ? WITH_RUN_REEL : 1) * (sim.headTurned ? TURNED_HEAD_REEL : 1) * dtSec;
     } else {
-      sim.tension = Math.max(0, sim.tension - tensionDecay * dtSec);
+      // A run against a heavy drag loads the line even with the reel let go; a leap or a roll only slackens it.
+      const heavyRun = drag === "heavy" && sim.surge === 2 && !sim.jump && !sim.roll && !charging;
+      sim.tension = heavyRun && sim.tension < HEAVY_DRAG_HOLD ? Math.min(HEAVY_DRAG_HOLD, sim.tension + HEAVY_DRAG_LOAD * dtSec) : Math.max(heavyRun ? HEAVY_DRAG_HOLD : 0, sim.tension - tensionDecay * dtSec);
       // A sulking fish sits where it is: no line goes out.
-      if (!sim.sulk && !sim.weeded && !sim.wrapped && !charging) sim.line += (sim.surge === 2 ? driftSurge * (sim.downstream ? DOWNSTREAM_RUN : 1) * (sim.withRun ? WITH_RUN_DRIFT : 1) : driftCalm) * dtSec;
+      if (!sim.sulk && !sim.weeded && !sim.wrapped && !charging) sim.line += (sim.surge === 2 ? driftSurge * DRAG_RUN_LINE[drag] * (sim.downstream ? DOWNSTREAM_RUN : 1) * (sim.withRun ? WITH_RUN_DRIFT : 1) : driftCalm) * dtSec;
     }
     // Like a leap, a shake reeled through costs the clean bonus, never the fish.
     if (reeling && sim.shake && nowMs >= shakeAt + SHAKE_GRACE_SEC * 1000) {

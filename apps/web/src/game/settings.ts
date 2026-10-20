@@ -1,4 +1,5 @@
 import { useEffect, useSyncExternalStore } from "react";
+import type { Drag } from "./fight";
 import { FLOAT_COLOURS, type FloatColour } from "./scene/floatColour";
 
 /**
@@ -48,6 +49,8 @@ export type Settings = {
   floatColour: FloatColour;
   /** The lure tied on last, if it is still packed next visit. */
   lastLure: string | null;
+  /** The reel's drag, kept from fight to fight until the angler turns it. */
+  drag: Drag;
 };
 
 export const SETTINGS_KEY = "stillwater.settings.v1";
@@ -73,6 +76,7 @@ export const DEFAULT_SETTINGS: Settings = {
   vibration: true,
   floatColour: "blue",
   lastLure: null,
+  drag: "normal",
 };
 
 export const SHAKE_SCALE: Record<ShakeLevel, number> = { off: 0, soft: 0.45, full: 1 };
@@ -125,6 +129,7 @@ export function parseSettings(raw: string | null, wantsContrast = systemWantsCon
     vibration: typeof data.vibration === "boolean" ? data.vibration : d.vibration,
     floatColour: pick(data.floatColour, FLOAT_COLOURS, d.floatColour),
     lastLure: typeof data.lastLure === "string" && data.lastLure ? data.lastLure : null,
+    drag: pick(data.drag, ["light", "normal", "heavy"], d.drag),
   };
 }
 

@@ -12,6 +12,7 @@ export const KEY_ROWS = [
   { keys: "G", pad: "X", does: "Toss the groundbait" },
   { keys: "T", pad: "LT", does: "Retie the line or touch up a dull hook" },
   { keys: "L", pad: "", does: "At night: switch the headlamp on or off" },
+  { keys: "F", pad: "", does: "Turn the reel's drag: light, normal or heavy" },
   { keys: "H", pad: "Back", does: "Photo mode: hide the panels" },
   { keys: "P / Space", pad: "A", does: "In photo mode: save a picture of the lake" },
   { keys: "Arrows / + −", pad: "Sticks", does: "In photo mode: turn and zoom the view" },
