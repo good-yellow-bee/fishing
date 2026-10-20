@@ -1829,7 +1829,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT392~~ | ~~Yesterday's pressure: a bank where eight or more fish were landed yesterday (this browser remembers each bank's fish by local day) starts today wary: its first five casts there bite 1.15x slower, and the wait hint says why; groundbait or a lure the fish haven't seen lifts it as it does today's pressure, and a new angler is spared~~ (#1557) | gameplay | M |
 | ~~GT393~~ | ~~News card 2026-10-20-game47 covers GT390 to GT392: the far rock fights back, duckweed on the line and yesterday's pressure~~ (#1559) | ui | S |
 | ~~GT394~~ | ~~The rock edge's ledge: a fish hooked along the point's rock edge, past the shallow rocks, dives off the ledge as at the drop-off (runs pull harder but tire it faster) instead of dragging the line over the rocks, and the fight card says so; the fight's cover (far rock, duckweed, rock edge) now travels as one set~~ (#1562) | gameplay | S |
-| GT395 | Bed guarders: a sunfish or bass hooked over its spawning bed fights to stay by it, its runs half as long but coming twice as often; the fight card says so | gameplay | S |
+| ~~GT395~~ | ~~Bed guarders: a bluegill or bass hooked over the sunfish beds fights to stay by them, its runs half as long (a charge keeps its full length) with calms a quarter shorter between them; the fight card says so~~ (#1566) | gameplay | S |
 | GT396 | The foam lane's drift: on a breezy or strong day a fish hooked in the foam lane has the wind's drift take slack line faster still between runs; the fight card says so | gameplay | S |
 | GT397 | News card game48 covers GT394 to GT396 | ui | S |
 

@@ -476,9 +476,9 @@ export function fightWind(wind: string | undefined): FightWind | undefined {
  * sunfish beds (a nest guarder's runs come short and quick).
  */
 export type FightCover = { farRock?: boolean; weedBall?: boolean; edge?: boolean; bed?: boolean };
-/** A nest guarder hooked over the sunfish beds won't leave them: its runs last this share as long, and the calms between them too. */
+/** A nest guarder hooked over the sunfish beds won't leave them: its runs last this share as long, and the calms between them this share. */
 export const BED_GUARD_RUN = 0.5;
-export const BED_GUARD_CALM = 0.5;
+export const BED_GUARD_CALM = 0.75;
 export type FightWater = "open" | "weeds" | "current" | "deep" | "rocks" | "boat" | "pilings" | "log";
 /** Water where an unturned run wraps the line round wood: the dock's pilings, or the half-sunk log a fish was hooked tight to. */
 export function wrapsLine(water: FightWater | undefined): water is "pilings" | "log" {
