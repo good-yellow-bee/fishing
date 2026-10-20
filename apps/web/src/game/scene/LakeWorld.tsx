@@ -784,6 +784,9 @@ const DUCKS: DuckProps[] = [
 
 
 
+// The scatter lists load their models as a list (one cache entry per list), so each file was fetched again after its
+// preload, and the shared colour map once per model: three's file cache hands a repeat request the bytes it already has.
+THREE.Cache.enabled = true;
 for (const url of Object.values(MODELS)) useGLTF.preload(url);
 
 function pushDiscIndices(rings: number, segments: number, indices: number[]) {
