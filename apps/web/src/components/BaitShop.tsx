@@ -19,12 +19,14 @@ type Props = {
   onHookFromBucket: () => void;
   /** The shiner trap by the shack: not set, soaking, ready to lift, or sat too long. */
   trap: "none" | "soaking" | "ready" | "stale";
+  /** The trap soaks in winter's cold water: the one down already, or one baited today. */
+  trapCold: boolean;
   onSetTrap: () => void;
   onLiftTrap: () => void;
 };
 
 /** The shack's bait tin: points buy a handful of groundbait, up to what the bag carries, or a live shiner for the hook. */
-export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, busy, onBuy, onBuyShiner, onHookFromBucket, trap, onSetTrap, onLiftTrap }: Props) {
+export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, busy, onBuy, onBuyShiner, onHookFromBucket, trap, trapCold, onSetTrap, onLiftTrap }: Props) {
   useT();
   const full = handfuls >= GROUNDBAIT_CARRY;
   // aria-disabled, as on the skills: a disabled button would drop keyboard focus the moment a purchase starts.
@@ -93,13 +95,19 @@ export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, b
           )}
           <p id="trap-note">
             {trap === "none"
-              ? t("A handful of groundbait in the trap by the shack draws a few shiners in for your bucket, ready after six hours.")
+              ? trapCold
+                ? t("In the cold winter water the shiners move slowly: a handful of groundbait in the trap by the shack draws one in for your bucket, ready after twelve hours.")
+                : t("A handful of groundbait in the trap by the shack draws a few shiners in for your bucket, ready after six hours.")
               : trap === "soaking"
-                ? t("The shiner trap is soaking: lift it after six hours.")
+                ? trapCold
+                  ? t("The shiner trap is soaking in cold water: lift it after twelve hours.")
+                  : t("The shiner trap is soaking: lift it after six hours.")
                 : bucketFull
                   ? t("Your bait bucket is full: lift the trap once it has room.")
                   : trap === "ready"
-                  ? t("Shiners have found the trap.")
+                  ? trapCold
+                    ? t("A shiner has found the trap.")
+                    : t("Shiners have found the trap.")
                   : t("The trap has sat a long while.")}
           </p>
         </div>

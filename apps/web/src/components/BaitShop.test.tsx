@@ -18,7 +18,7 @@ function shop(shinerOn: boolean, bucket: number, onBuyShiner = vi.fn(), onHookFr
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
-  act(() => root!.render(<BaitShop points={500} lifetimePoints={0} handfuls={0} shinerOn={shinerOn} bucket={bucket} busy={false} onBuy={vi.fn()} onBuyShiner={onBuyShiner} onHookFromBucket={onHookFromBucket} trap="none" onSetTrap={vi.fn()} onLiftTrap={vi.fn()} />));
+  act(() => root!.render(<BaitShop points={500} lifetimePoints={0} handfuls={0} shinerOn={shinerOn} bucket={bucket} busy={false} onBuy={vi.fn()} onBuyShiner={onBuyShiner} onHookFromBucket={onHookFromBucket} trap="none" trapCold={false} onSetTrap={vi.fn()} onLiftTrap={vi.fn()} />));
   const button = (start: string) => [...container!.querySelectorAll("button")].find((one) => one.textContent?.startsWith(start));
   return { button, note: () => container!.querySelector("#shiner-shop-note")?.textContent };
 }
@@ -47,13 +47,13 @@ describe("BaitShop's bait bucket", () => {
 
   it("offers to bait the trap with a handful, says when it soaks, and lifts it when ready", () => {
     vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
-    const render = (trap: "none" | "soaking" | "ready", handfuls: number, onSetTrap = vi.fn(), onLiftTrap = vi.fn()) => {
+    const render = (trap: "none" | "soaking" | "ready", handfuls: number, onSetTrap = vi.fn(), onLiftTrap = vi.fn(), trapCold = false) => {
       container?.remove();
       container = document.createElement("div");
       document.body.append(container);
       act(() => root?.unmount());
       root = createRoot(container);
-      act(() => root!.render(<BaitShop points={500} lifetimePoints={0} handfuls={handfuls} shinerOn={false} bucket={0} busy={false} onBuy={vi.fn()} onBuyShiner={vi.fn()} onHookFromBucket={vi.fn()} trap={trap} onSetTrap={onSetTrap} onLiftTrap={onLiftTrap} />));
+      act(() => root!.render(<BaitShop points={500} lifetimePoints={0} handfuls={handfuls} shinerOn={false} bucket={0} busy={false} onBuy={vi.fn()} onBuyShiner={vi.fn()} onHookFromBucket={vi.fn()} trap={trap} trapCold={trapCold} onSetTrap={onSetTrap} onLiftTrap={onLiftTrap} />));
       return (start: string) => [...container!.querySelectorAll("button")].find((one) => one.textContent?.startsWith(start));
     };
     const set = vi.fn();
@@ -66,5 +66,12 @@ describe("BaitShop's bait bucket", () => {
     const lifting = render("ready", 1, vi.fn(), lift)("Lift the shiner trap")!;
     act(() => lifting.click());
     expect(lift).toHaveBeenCalledOnce();
+    const note = () => container!.querySelector("#trap-note")!.textContent;
+    render("none", 1, vi.fn(), vi.fn(), true);
+    expect(note()).toMatch(/draws one in for your bucket, ready after twelve hours\.$/);
+    render("soaking", 1, vi.fn(), vi.fn(), true);
+    expect(note()).toBe("The shiner trap is soaking in cold water: lift it after twelve hours.");
+    render("ready", 1, vi.fn(), vi.fn(), true);
+    expect(note()).toBe("A shiner has found the trap.");
   });
 });
