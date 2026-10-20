@@ -73,7 +73,7 @@ import { pieceTally } from "./pieceTally";
 import { WaterOptions } from "./WaterOptions";
 import { kindKey, kindNames, speciesCounts, speciesLink } from "./speciesLink";
 import { pieceName } from "./gear/pieceKey";
-import { datePicks, lateOutings, outingDay, ownTitle, pastTitles, plainName, stillGoing } from "./tripDates";
+import { datePicks, lateOutings, outingDay, ownTitle, pastTitles, plainName, sameName, stillGoing } from "./tripDates";
 import "./search.css";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 import { bestFishDay, bookFishDay } from "./tripMonths";
@@ -334,8 +334,8 @@ export function TripsPage() {
                 onClick={() => {
                   const outings = toCalendar.map((trip) => {
                     const spot = spotById(book, trip.spotId);
-                    const title = outingName(trip, book.spots);
-                    return { trip: { ...trip, title }, place: spot?.name ?? null, at: spot?.place, more: calendarNotes(book, trip, tackleItems), alarm: trip.date > today ? t("Pack for {outing} tomorrow", { outing: title }) : undefined };
+                    const title = plainName(outingName(trip, book.spots));
+                    return { trip: { ...trip, title }, place: spot ? plainName(spot.name) : null, at: spot?.place, more: calendarNotes(book, trip, tackleItems), alarm: trip.date > today ? t("Pack for {outing} tomorrow", { outing: title }) : undefined };
                   });
                   downloadFile(tripsIcs(outings), "text/calendar;charset=utf-8", datedName("stillwater-coming-up.ics"));
                 }}
@@ -778,7 +778,7 @@ function TripView() {
         ) : null
       )}
       {/* A hard day is worth telling too: a past blank outing with a note, or fish lost or missed. Today's plan with only a note isn't a day yet. */}
-      {catches.length > 0 || (!samplePlan && (trip.date < fishedBy || trip.lost || trip.missed) && (trip.note.trim() || trip.lost || trip.missed)) ? <CopySummary text={() => tripSummary(trip, spot ? plainName(spot.name) : null, catches, (id) => { const name = spotById(book, id)?.name; return name === undefined ? null : plainName(name); }, book.catches)} file="stillwater-outing.txt" /> : null}
+      {catches.length > 0 || (!samplePlan && (trip.date < fishedBy || trip.lost || trip.missed) && (trip.note.trim() || trip.lost || trip.missed)) ? <CopySummary text={() => tripSummary(trip, spot ? plainName(spot.name) : null, catches, (id) => { const name = spotById(book, id)?.name; return name === undefined ? null : plainName(name); }, countedFish(book.catches))} file="stillwater-outing.txt" /> : null}
       {/* Planning ahead: what has worked on this water before. */}
       {!fished && spot && !play ? <WaterTipsBox catches={countedFish(catchesForSpot(book, spot.id))} on={trip.date} within={exactTerm("water", spot.name)} /> : null}
       <TripWeather catches={catches} />
@@ -1045,7 +1045,7 @@ function TripForm() {
             {lastHere ? (
               <small className="field-hint" id="last-here">
                 {/* An untitled outing goes by the water's name, which the field above already shows. */}
-                {outingName(lastHere, book.spots) === spotById(book, lastHere.spotId)?.name
+                {sameName(outingName(lastHere, book.spots), spotById(book, lastHere.spotId)?.name ?? "")
                   ? t("Last here: {day} · {fish}", { day: formatDay(lastHere.date), fish: fishSum(outingFish(book, true)(lastHere.id)) })
                   : t("Last here: {title}, {day} · {fish}", {
                       title: outingName(lastHere, book.spots),

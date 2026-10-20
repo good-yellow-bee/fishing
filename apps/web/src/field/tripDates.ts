@@ -54,7 +54,9 @@ export function lateOutings(book: Logbook, now = new Date()): Trip[] {
   const today = localDate(now);
   const todayOutings = upcomingRealTrips(book, today).filter((trip) => offPlayLake(trip) && trip.date === today);
   if (todayOutings.some((trip) => catchesForTrip(book, trip.id).length > 0)) return [];
-  return book.trips.filter((trip) => offPlayLake(trip) && !isSampleOuting(trip) && stillGoing(book, trip, now) && (todayOutings.length === 0 || catchesForTrip(book, trip.id).length > 0));
+  return book.trips
+    .filter((trip) => offPlayLake(trip) && !isSampleOuting(trip) && stillGoing(book, trip, now) && (todayOutings.length === 0 || catchesForTrip(book, trip.id).length > 0))
+    .sort(newestOutingFirst(book));
 }
 
 /** A fish in the last twelve hours; never one logged ahead of the clock. */

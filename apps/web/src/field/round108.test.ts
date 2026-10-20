@@ -4,6 +4,7 @@ import { setLang } from "../i18n";
 import { outingName } from "./format";
 import { kindNames } from "./speciesLink";
 import { tripLists } from "./TripPages";
+import { newestOutingFirst } from "./catchNeighbors";
 
 const fish = (id: string, species: string, tripId: string | null = null, caughtAt = "2026-08-20T08:00:00.000Z"): CatchEntry => ({ id, species, measure: { kind: "length", inches: 9 }, lure: "Jig", spotId: "own", tripId, caughtAt, note: "", weather: null });
 
@@ -29,5 +30,14 @@ describe("round 108: Trips' Recent", () => {
     const day = { date: "2026-10-10", spotId: "own", title: "", note: "" };
     const book: Logbook = { spots: [], trips: [{ ...day, id: "dawn" }, { ...day, id: "dusk" }], catches: [fish("d", "Perch", "dawn", "2026-10-10T05:00:00.000Z"), fish("k", "Perch", "dusk", "2026-10-10T18:00:00.000Z")] };
     expect(tripLists(book, new Date(2026, 9, 19, 12)).recent.map((trip) => trip.id)).toEqual(["dusk", "dawn"]);
+  });
+});
+
+describe("round 108: a day's outings in one order", () => {
+  it("holds whichever pair is compared, an outing without a fish after those with one", () => {
+    const day = { date: "2026-10-10", spotId: "own", title: "", note: "" };
+    const trips = [{ ...day, id: "c" }, { ...day, id: "b" }, { ...day, id: "a" }];
+    const book: Logbook = { spots: [], trips, catches: [fish("x", "Perch", "c", "2026-10-10T18:00:00.000Z"), fish("y", "Perch", "a", "2026-10-10T05:00:00.000Z")] };
+    for (const order of [trips, [...trips].reverse(), [trips[1]!, trips[0]!, trips[2]!]]) expect([...order].sort(newestOutingFirst(book)).map((trip) => trip.id)).toEqual(["c", "a", "b"]);
   });
 });

@@ -142,10 +142,8 @@ export function HomePage() {
   const countedOwn = countedBook(book);
   // The angler's own, as the counts above them: not a round of the game, nor the sample week beside fish of their own.
   const catches = recentCatches({ ...countedOwn, catches: countedOwn.catches.filter(offPlayLake) }, 4);
-  // In the small hours, last evening's outing is still the one out on the water: it stays first, with its log link.
-  // Only one still going, with no fish yet or one in the last twelve hours; a morning plan for today doesn't end a
-  // session with a fish this past hour, though one that has a fish of its own does, as does any plan for one still blank.
-  // Every one still going, as Trips lists them; the first leads Next.
+  // In the small hours, last evening's outings still on the water stay first, as Trips lists them; the newest leads Next
+  // with its log link.
   const late = lateOutings(book, now);
   const lateOuting = late[0];
   const lateIds = new Set(late.map((trip) => trip.id));

@@ -32,13 +32,14 @@ export function tripNeighbors(book: Logbook, id: string, today = localDate(new D
   return neighborsIn(rows, id);
 }
 
-/** Outings newest day first; two on one day go by their first fish (a dusk before a dawn), where both have one. */
+/** Outings newest day first; two on one day go by their first fish (a dusk before a dawn), one without a fish after. */
 export function newestOutingFirst(book: Logbook): (a: Trip, b: Trip) => number {
   const firstFish = new Map<string, string>();
   for (const entry of book.catches) if (entry.tripId && entry.caughtAt < (firstFish.get(entry.tripId) ?? "~")) firstFish.set(entry.tripId, entry.caughtAt);
   return (a, b) => {
     const x = firstFish.get(a.id);
     const y = firstFish.get(b.id);
-    return b.date.localeCompare(a.date) || (x && y ? y.localeCompare(x) : 0) || a.id.localeCompare(b.id);
+    // One with a fish before one without (its time unknown), so the order holds whichever pair is compared.
+    return b.date.localeCompare(a.date) || (x && y ? y.localeCompare(x) : x ? -1 : y ? 1 : 0) || a.id.localeCompare(b.id);
   };
 }
