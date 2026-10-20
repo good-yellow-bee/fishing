@@ -144,6 +144,10 @@ if (!catchColumns.some((column) => column.name === "released")) {
 if (!catchColumns.some((column) => column.name === "day")) {
   db.exec(`ALTER TABLE catch ADD COLUMN day TEXT`);
 }
+// When the angler let the fish go; older releases have only their catch's time.
+if (!catchColumns.some((column) => column.name === "released_at")) {
+  db.exec(`ALTER TABLE catch ADD COLUMN released_at TEXT`);
+}
 // A fish another angler let go and this catch landed again: that catch's id.
 if (!catchColumns.some((column) => column.name === "tagged_from")) {
   db.exec(`ALTER TABLE catch ADD COLUMN tagged_from TEXT`);
@@ -287,13 +291,13 @@ export function listDayBags(from: string, to: string, limit: number) {
     .all(from, to, BAG_SIZE, limit) as { userId: string; displayName: string; total: number; count: number; madeAt: string }[];
 }
 
-/** Each angler's count of fish let go that were landed since `since`, most first; of equal counts, by name. */
+/** Each angler's count of fish let go since `since`, most first; of equal counts, by name. */
 export function listStewards(since: string) {
   return db
     .prepare(
       `SELECT c.user_id as userId, p.display_name as displayName, COUNT(*) as count
        FROM catch c JOIN profile p ON p.user_id = c.user_id
-       WHERE c.released = 1 AND c.created_at >= ?
+       WHERE c.released = 1 AND COALESCE(c.released_at, c.created_at) >= ?
        GROUP BY c.user_id ORDER BY count DESC, displayName ASC, userId ASC`,
     )
     .all(since) as { userId: string; displayName: string; count: number }[];
@@ -486,7 +490,7 @@ export function recordCatch(row: CatchRow): RecordCatchResult {
 /** Marks the angler's catch released; it keeps its points, and the first release of a trophy-weight fish pays TROPHY_RELEASE_BONUS. Undefined when there is no such catch. */
 export function releaseCatch(userId: string, requestId: string): { row: CatchRow; bonus: number } | undefined {
   return db.transaction(() => {
-    const change = db.prepare(`UPDATE catch SET released = 1 WHERE user_id = ? AND request_id = ? AND released = 0`).run(userId, requestId);
+    const change = db.prepare(`UPDATE catch SET released = 1, released_at = ? WHERE user_id = ? AND request_id = ? AND released = 0`).run(new Date().toISOString(), userId, requestId);
     const row = findCatchByRequestId(userId, requestId);
     if (!row) return undefined;
     const species = fishById(row.species_id);

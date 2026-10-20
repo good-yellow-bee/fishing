@@ -132,8 +132,11 @@ describe("GET /board/stewards", () => {
     letGo("mara", thisWeek);
     letGo("ash", thisWeek);
     letGo("idle", lastWeek);
+    // Landed last week, let go this week: it counts this week.
+    landed("idle", "perch", 1, 1, lastWeek);
+    db.prepare(`UPDATE catch SET released = 1, released_at = ? WHERE id = ?`).run(thisWeek, `c${n}`);
     const body = await get<{ entries: { userId: string; count: number }[]; you: { rank: number; count: number } | null }>("/board/stewards");
-    expect(body.entries.map((row) => [row.userId, row.count])).toEqual([["mara", 2], ["ash", 1]]);
+    expect(body.entries.map((row) => [row.userId, row.count])).toEqual([["mara", 2], ["ash", 1], ["idle", 1]]);
     expect(body.you).toEqual({ rank: 2, count: 1 });
   });
 });
