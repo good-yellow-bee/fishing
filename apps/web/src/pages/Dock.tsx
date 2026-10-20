@@ -126,7 +126,7 @@ import { bankSuitsNow } from "../game/bankNow";
 import { PowerMeter } from "../game/scene/PowerMeter";
 import { prefersReducedMotion } from "../game/scene/reducedMotion";
 import { shyOf } from "../game/giantShy";
-import { nightLineKinds, nightLineState } from "../game/nightLine";
+import { nightLineKinds, nightLineState, wormLineHour } from "../game/nightLine";
 import { isOldFoe, loadOldFoe, saveOldFoe } from "../game/oldFoe";
 import { BUCKET_SIZE } from "../game/baitBucket";
 import { isLiveBait, isTopwater, touchScreen, useFishingGame, type Outcome } from "../game/useFishingGame";
@@ -1024,20 +1024,22 @@ export function DockPage() {
   const giantAt = (bank: string) => openGiants.find((giant) => giant.spot === bank);
   const lineState = game.nightLine ? nightLineState(game.nightLine, Date.now()) : null;
   const lineAt = (bank: string) => (game.nightLine?.spot === bank ? lineState : null);
-  // The bank underfoot's own sign sets a night line with the shiner on the hook, or brings in the one out there.
+  // A shiner to spare, or a worm tied on as the light goes, can go out on a night line.
+  const lineBait = game.liveShiner || game.bucket > 0 ? "shiner" : isLiveBait(lure) && wormLineHour(hour) ? "worm" : null;
+  // The bank underfoot's own sign sets a night line with that bait, or brings in the one out there.
   const stanceLine =
     !me || rowing
       ? null
       : lineAt(game.stance) && lineAt(game.stance) !== "soaking"
         ? "check"
-        : !game.nightLine && (game.liveShiner || game.bucket > 0) && isFishingStance(game.stance) && game.stance !== "open" && nightLineKinds(game.stance, me.profile).length > 0
+        : !game.nightLine && lineBait && isFishingStance(game.stance) && game.stance !== "open" && nightLineKinds(game.stance, me.profile).length > 0
           ? "set"
           : null;
   const lineAction = (target: WalkTarget) => (target === game.stance ? stanceLine : null);
   // A bank whose giant is still out there, or where the night line is out, says so after its other news.
   const signNote = (target: WalkTarget, label: string) => {
     const action = lineAction(target);
-    if (action) return action === "set" ? t("{bank}: leave the shiner out on a night line here", { bank: t(label) }) : t("{bank}: bring in your night line", { bank: t(label) });
+    if (action) return action === "set" ? (lineBait === "shiner" ? t("{bank}: leave the shiner out on a night line here", { bank: t(label) }) : t("{bank}: leave a worm out on a night line here", { bank: t(label) })) : t("{bank}: bring in your night line", { bank: t(label) });
     const giant = giantAt(target);
     const note = bankNote(target, label);
     const withGiant = giant ? t("{note} · {name}, its giant, is still out there", { note: note ?? t(label), name: t(giant.name) }) : note;
@@ -1231,7 +1233,7 @@ export function DockPage() {
           {!rowing && !mercy && game.stance === crowdedBank && <small className="stance-cold"> · {t("another angler here today")}</small>}
           {!rowing && isFishingStance(game.stance) && game.stance !== "open" && favoredNow(game.stance) && <small className="stance-hot"> · {t("bites sooner now")}</small>}
           {!rowing && lineAt(game.stance) && (lineAt(game.stance) === "ready" ? <small className="stance-hot"> · {t("night line ready")}</small> : <small className="stance-cold"> · {t(lineAt(game.stance) === "soaking" ? "night line soaking" : "night line left too long")}</small>)}
-          {!rowing && game.nightLine && game.nightLine.spot !== game.stance && (game.liveShiner || game.bucket > 0) && <small className="stance-cold"> · {t("night line out at the {bank}", { bank: t(SPOT_LABELS[game.nightLine.spot]) })}</small>}
+          {!rowing && game.nightLine && game.nightLine.spot !== game.stance && lineBait && <small className="stance-cold"> · {t("night line out at the {bank}", { bank: t(SPOT_LABELS[game.nightLine.spot]) })}</small>}
           {!rowing && giantAt(game.stance) && (
             game.giantShy && isFishingStance(game.stance) && shyOf(game.giantShy, game.stance, giantAt(game.stance)!.name, lure)
               ? <small className="stance-cold"> · {t("giant: {name}, shy of this lure", { name: t(giantAt(game.stance)!.name) })}</small>

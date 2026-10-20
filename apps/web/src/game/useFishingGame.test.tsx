@@ -437,6 +437,24 @@ describe("useFishingGame live shiner", () => {
     }
   });
 
+  it("leaves a worm out on a night line when there is no shiner to spare", () => {
+    const strong = { ...profile, strength: 10, accuracy: 10 };
+    mount(DOCK_BUBBLES.at, strong, "dusk", false, "Nightcrawler");
+    const press = (name: string) => act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === name) as HTMLButtonElement).click());
+    try {
+      act(() => frames.at(-1)!(now));
+      press("set night line");
+      expect(container!.querySelector("[data-testid=night-line]")?.textContent).toBe("dock");
+      expect(hint()).toMatch(/^You leave a worm out on a night line here\./);
+    } finally {
+      try {
+        localStorage.removeItem(nightLineKey(strong.userId));
+      } catch {
+        // No store in this run, so nothing was kept.
+      }
+    }
+  });
+
   it("keeps spare shiners in a bait bucket: a night line takes one from it first, and one can be hooked from it later", () => {
     const strong = { ...profile, strength: 10, accuracy: 10 };
     mount(DOCK_BUBBLES.at, strong);
