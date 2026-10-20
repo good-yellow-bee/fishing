@@ -11,7 +11,7 @@ import { daysBetween } from "./spotOrder";
 import { useLogbook } from "./LogbookState";
 import { PagedCatches } from "./PagedCatches";
 import { bookFishDay, yearTally } from "./tripMonths";
-import { catchesOfSpecies, kindKey, kindOnPage, speciesWaters } from "./speciesLink";
+import { catchesOfSpecies, kindKey, kindNames, kindOnPage, speciesWaters } from "./speciesLink";
 import { pieceName } from "./gear/pieceKey";
 import { FROM_LIST } from "./leaveDeleted";
 import { isSampleCatch } from "./bookCopy";
@@ -137,7 +137,8 @@ function SpeciesView() {
   // The angler's own fish of the kind, as Bests counts them; a kind only ever caught in the game shows its game fish.
   const every = catchesOfSpecies(book, species);
   const catches = kindOnPage(book, species);
-  const name = catches[0]?.species ?? species;
+  // Named as Bests and its cards name it: the spelling most of its fish carry, the dictionary's in Polish.
+  const name = catches.length > 0 ? kindNames(catches)(species) : species;
   // Its searches leave the game's lake out when the page does, so each count opens the fish it counted.
   const shownIds = new Set(catches.map((entry) => entry.id));
   const leftOut = every.filter((entry) => !shownIds.has(entry.id));

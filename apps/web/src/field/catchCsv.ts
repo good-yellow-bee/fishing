@@ -8,6 +8,7 @@ import { noteText, outingName, outingNameById } from "./format";
 import { countedBook } from "./milestones";
 import { bookFishDay } from "./tripMonths";
 import { kindNames } from "./speciesLink";
+import { dayAfter } from "./suggestions";
 
 /**
  * One cell, quoted when it holds the separator, a quote or a line break. Text a spreadsheet would read as a formula
@@ -92,7 +93,8 @@ export function sheetOutings(book: Logbook, today: string): Logbook {
   const counted = countedBook(book);
   // Today's outing once it has a fish: before that it is still ahead, as the calendar and the averages take it.
   const fished = new Set(counted.catches.map((entry) => entry.tripId));
-  return { ...counted, trips: counted.trips.filter((trip) => trip.date < today || (trip.date === today && fished.has(trip.id))) };
+  // In the small hours `today` is last evening's day; the calendar's own day after it counts too once it has a fish.
+  return { ...counted, trips: counted.trips.filter((trip) => trip.date < today || ((trip.date === today || trip.date === dayAfter(today)) && fished.has(trip.id))) };
 }
 
 /**

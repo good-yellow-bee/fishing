@@ -3,6 +3,7 @@ import { offPlayLake } from "./playLake";
 import { isSampleCatch } from "./bookCopy";
 import { getLang, t } from "../i18n";
 import { bookSpelling, pieceKey } from "./gear/pieceKey";
+import { countedFish } from "./milestones";
 
 /** The page for one kind of fish, by the name the book keeps it under. */
 export function speciesLink(species: string) {
@@ -61,6 +62,17 @@ export function speciesWaters(book: Logbook, catches: readonly CatchEntry[]) {
  * A kind's name as the book writes it most, in the reader's language: "zander", "Zander " and "Zander" are one kind, so
  * a sheet or a copied text names it once, as "Sandacz" in Polish, not as three.
  */
+/** kindNames for a book's own fish, kept while the book and the language stay the same: for many cards in one list. */
+const kindNameCache = new WeakMap<readonly CatchEntry[], { lang: string; name: (species: string) => string }>();
+export function bookKindName(catches: readonly CatchEntry[]): (species: string) => string {
+  const lang = getLang();
+  const known = kindNameCache.get(catches);
+  if (known?.lang === lang) return known.name;
+  const name = kindNames(countedFish(catches));
+  kindNameCache.set(catches, { lang, name });
+  return name;
+}
+
 export function kindNames(catches: readonly CatchEntry[]): (species: string) => string {
   const spellings = new Map<string, Map<string, number>>();
   for (const entry of catches) {

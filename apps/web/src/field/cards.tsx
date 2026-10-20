@@ -25,6 +25,7 @@ import { isPlanned } from "./TripMonthHead";
 import { outingDay, outNow, sameName } from "./tripDates";
 import { bookSpelling, pieceName } from "./gear/pieceKey";
 import { bookFishDay } from "./tripMonths";
+import { bookKindName } from "./speciesLink";
 
 /** A card's heading sits one below the section it is listed under. */
 type CardLevel = 2 | 3 | 4;
@@ -56,7 +57,8 @@ export const CatchCard = memo(function CatchCard({
       <p className={`measure measure-${entry.measure.kind}`}>{measuresText(entry)}</p>
       <div>
         <Head>
-          <Link to={catchLink(entry.id, list)} state={FROM_LIST}>{pieceName(entry.species)}</Link>
+          {/* The kind as the book writes it most, as Bests and the kind's page name it. */}
+          <Link to={catchLink(entry.id, list)} state={FROM_LIST}>{bookKindName(book.catches)(entry.species)}</Link>
           {badge ? <span className="card-badge">{badge === "book" ? t("Book record") : t("Best of its kind")}</span> : null}
         </Head>
         <p className="meta">

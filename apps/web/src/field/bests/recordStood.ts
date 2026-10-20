@@ -5,5 +5,8 @@ import { daysBetween } from "../spotOrder";
 export function recordStood(day: string, today: string): string {
   const days = daysBetween(day, today);
   if (days < 30) return "";
-  return days < 365 ? tn(days, "{n} day ago", "{n} days ago") : tn(Math.floor(days / 365.25) || 1, "{n} year ago", "{n} years ago");
+  if (days < 365) return tn(days, "{n} day ago", "{n} days ago");
+  // Whole calendar years, as a birthday counts them: May 1 2025 is two years back on May 1 2027.
+  const years = Number(today.slice(0, 4)) - Number(day.slice(0, 4)) - (today.slice(5) < day.slice(5) ? 1 : 0);
+  return tn(Math.max(1, years), "{n} year ago", "{n} years ago");
 }

@@ -45,6 +45,9 @@ function bestOf(catches: CatchEntry[], kind: Measure["kind"]): CatchEntry | null
   return best;
 }
 
+/** A name as it reads, its stray spaces gone. */
+const plain = (name: string) => name.trim().replace(/\s+/g, " ");
+
 /** `kindOf` says which names are one kind: by default the same letters in any case. */
 export function personalBests(book: Logbook, kindOf: (species: string) => string = (species) => species.trim().toLowerCase()): PersonalBests {
   const longest = bestOf(book.catches, "length");
@@ -83,7 +86,8 @@ export function personalBests(book: Logbook, kindOf: (species: string) => string
       name: spotById(book, spotId)?.name ?? "Unknown water",
       count,
     }))
-    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+    // By the name as it reads: an older book's "  Pine   Pond " sorts as "Pine Pond".
+    .sort((a, b) => b.count - a.count || plain(a.name).localeCompare(plain(b.name)));
 
   return { longest, heaviest, species, watersWithFish: waters.length, waters };
 }

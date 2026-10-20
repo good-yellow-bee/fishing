@@ -1,5 +1,6 @@
 import { localDate, type Trip } from "@stillwater/shared";
 import { num, t, tn } from "../i18n";
+import { dayAfter } from "./suggestions";
 
 /**
  * How the outings already fished here went: "2.5 fish an outing on average, 1 without a fish".
@@ -14,7 +15,8 @@ export function outingAverage(trips: readonly Trip[], fishOn: (tripId: string) =
 /** The average and its blank outings apart ("1 without a fish", or null), for a page that links the blank ones. */
 export function averageParts(trips: readonly Trip[], fishOn: (tripId: string) => number, today: string): { average: string; blank: string | null } | null {
   // Today's outing counts once it has a fish; until then it is still the day's plan.
-  const fished = trips.filter((trip) => trip.date < today || (trip.date === today && fishOn(trip.id) > 0));
+  // In the small hours `today` is last evening's day: the calendar's day after it counts too once it has a fish.
+  const fished = trips.filter((trip) => trip.date < today || ((trip.date === today || trip.date === dayAfter(today)) && fishOn(trip.id) > 0));
   if (fished.length < 2) return null;
   const counts = fished.map((trip) => fishOn(trip.id));
   // A few fish over many outings still reads as a few, not "0".
@@ -27,7 +29,8 @@ export function averageParts(trips: readonly Trip[], fishOn: (tripId: string) =>
 
 /** The outing on a water that caught strictly more fish than every other one fished there, once three have been fished. */
 export function topOuting(trips: readonly Trip[], fishOn: (tripId: string) => number, today: string): Trip | null {
-  const fished = trips.filter((trip) => trip.date < today || (trip.date === today && fishOn(trip.id) > 0));
+  // In the small hours `today` is last evening's day: the calendar's day after it counts too once it has a fish.
+  const fished = trips.filter((trip) => trip.date < today || ((trip.date === today || trip.date === dayAfter(today)) && fishOn(trip.id) > 0));
   if (fished.length < 3) return null;
   const top = fished.reduce((best, trip) => (fishOn(trip.id) > fishOn(best.id) ? trip : best));
   if (fishOn(top.id) === 0 || fished.some((trip) => trip.id !== top.id && fishOn(trip.id) === fishOn(top.id))) return null;
@@ -124,7 +127,8 @@ export function weekStreak(trips: readonly Trip[], today: string, fishOn?: (trip
  * whether a day off midweek pays.
  */
 export function weekendSplit(trips: readonly Trip[], fishOn: (tripId: string) => number, today: string): { weekend: number; weekday: number } | null {
-  const fished = trips.filter((trip) => trip.date < today || (trip.date === today && fishOn(trip.id) > 0));
+  // In the small hours `today` is last evening's day: the calendar's day after it counts too once it has a fish.
+  const fished = trips.filter((trip) => trip.date < today || ((trip.date === today || trip.date === dayAfter(today)) && fishOn(trip.id) > 0));
   const [weekend, weekday] = [true, false].map((wanted) =>
     fished.filter((trip) => {
       const [y, m, d] = trip.date.split("-").map(Number);
