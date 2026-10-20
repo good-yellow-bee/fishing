@@ -1,13 +1,13 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-game60";
+export const NEWS_ID = "2026-10-20-game61";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "A trophy that breaks your line is now known to the whole lodge for a week: another angler at that bank may hook it, and the first to land it is paid 30 points for finding your lost fish. The shack's chalk board also names each wet night as a good one to leave a night line out.",
   "A trophy that breaks off now stays about its bank for a few days, and on a later day it may take again, still with your lure in its jaw. And in spring, letting a bass go back to guard its nest at the Reeds or the Dock pays 15 points more.",
   "While your bait bucket holds spare shiners, it now stands at your feet on the dock or at the bank. And a fish hooked through the duckweed comes in under a green ball of weed until its first run strips it off.",
-  "A bait bucket now keeps up to three spare live shiners beside the one on your hook: the shack sells into it, a shiner you land can go in it, and the shack hooks one from it again. With a shiner on, the sign of the bank you stand at leaves one out on a night line, taking it from the bucket first.",
   "On a clear dawn or dusk the low sun now lays long shadows across the lake, yours among them: at the drop-off at dawn and the inlet at dusk you can see it fall on the water the fish are watching. And on a phone held upright the lake sits a little lower, so the far bank and the hills show clear of the panels at the top.",
   "The outings spreadsheet says when each outing's fish came, so a dawn and a dusk tell apart. Adding a book file says how many of its fish were the game's, and Home's Next goes to the outing you are fishing when a day has two.",
   "While a bank's giant is still out there this week, now and then it rolls on that bank's water in a big swirl. And a night line you leave out now shows at its bank: a forked stick leaning over the water, the line running down into it.",
