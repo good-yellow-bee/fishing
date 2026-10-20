@@ -244,6 +244,7 @@ import { bedColor, bedHeight, causticStrength, glitterDirection, glitterOnWater,
 import { DockFrost } from "./DockFrost";
 import { WindowGlow } from "./WindowGlow";
 import { HillHedges } from "./HillHedges";
+import { lowSunShadow, lowSunShadows } from "./lowSun";
 import { RivalAngler } from "./RivalAngler";
 import { rivalOut } from "./rivalSeat";
 import { lazyPart } from "./lazyPart";
@@ -375,7 +376,9 @@ export const LAKE_HOUR_LOOK: Record<
     hemi: 0.95,
     sun: "#ffb078",
     sunInt: 1.7,
-    sunPos: [20, 12, 14],
+    // Low behind the bank cameras (which look north), so at the drop-off the angler's long shadow streaks out across
+    // the water ahead of them (the long-shadow rule, logic.ts LONG_SHADOW_BANKS).
+    sunPos: [-5.1, 7, 25.6],
     sky: ["#f2d2b0", "#e8a888", "#7a9ab8"],
     disc: "#ffd4a0",
     glow: "#f4c9a0",
@@ -413,7 +416,8 @@ export const LAKE_HOUR_LOOK: Record<
     hemi: 0.85,
     sun: "#ff8a50",
     sunInt: 1.55,
-    sunPos: [-14, 10, 10],
+    // Low in the south-west behind the bank cameras, so at the inlet the angler's long shadow streaks out across the water.
+    sunPos: [-18.4, 7, 18.4],
     sky: ["#e8a070", "#c45c48", "#4a3a68"],
     disc: "#ffb070",
     glow: "#e89060",
@@ -1379,6 +1383,12 @@ function LakeSurface({
       <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
         <meshBasicMaterial map={detailMap} transparent opacity={0.07} depthWrite={false} />
       </mesh>
+      {lowSunShadows(hour, sky) && (
+        // After the caustics (renderOrder 2), so the sunlit net goes dark in shade too.
+        <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.022, 0]} renderOrder={3} receiveShadow>
+          <shadowMaterial color="#08151d" transparent opacity={lowSunShadow(hour)} depthWrite={false} />
+        </mesh>
+      )}
       {mirror > 0.02 && <BankMirror geometry={geometry} trees={MIRROR_TREES} hills={mirrorHills} season={season} hour={hour} strength={mirror} />}
       {duckweed > 0 && <DuckweedFilm geometry={geometry} wind={wind} hour={hour} amount={duckweed} />}
       {pollen > 0 && <PollenFilm geometry={geometry} wind={wind} hour={hour} amount={pollen} />}
