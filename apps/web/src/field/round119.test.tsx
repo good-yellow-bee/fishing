@@ -64,6 +64,14 @@ describe("round 119 fixes: catch pages", () => {
     expect((await draw("/catches/c1", spots, catches)).textContent).toContain("First Zander here.");
   });
 
+  it("takes the form's best and picks at a water from its twin water too", async () => {
+    const spots = [spot("a", "Śniardwy"), spot("b", "Sniardwy"), spot("c", "Deep Lake")];
+    const catches = [fish("a1", "a", "2026-06-01T08:00:00"), { ...fish("b1", "b", "2026-06-02T08:00:00", "Zander", "Spoon"), measure: { kind: "length" as const, inches: 30 } }, { ...fish("c1", "c", "2026-06-03T08:00:00"), measure: { kind: "length" as const, inches: 35 } }];
+    const box = await draw("/catches/a1/edit", spots, catches);
+    expect(box.textContent).toContain("At this water: 30 in");
+    expect([...box.querySelectorAll("button.lure-tip")].map((chip) => chip.textContent)).toContain("Spoon");
+  });
+
   it("names twin waters in a search's summary as the busier twin writes it", async () => {
     const spots = [spot("a", "Home Lake"), spot("b", "Deep Lake"), spot("c", "home  lake")];
     const catches = [fish("1", "a", "2026-06-01T08:00:00"), fish("2", "a", "2026-06-02T08:00:00"), fish("3", "a", "2026-06-03T08:00:00"), fish("4", "c", "2026-06-04T08:00:00"), fish("5", "b", "2026-06-05T08:00:00")];

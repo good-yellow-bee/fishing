@@ -73,7 +73,7 @@ import { focusPageHeading } from "./pageFocus";
 import { addedWater, forgetAddedWater } from "./addedWater";
 import { dropEditDraft, dropKeptDraft, keepDraft, keepEditDraft, readEditDraft, readKeptDraft, type KeptDraft } from "./catchDraft";
 import { FishSum } from "./FishSum";
-import { likelyWater, nearestWater, waterKeys } from "./spotOrder";
+import { likelyWater, nearestWater, sameWater, waterKeys } from "./spotOrder";
 import { NearestWater, canFindNearest } from "./NearestWater";
 import { SpeciesChips } from "./SpeciesChips";
 import { CatchSearch, FIND_PARAM, exactTerm, findCatches, findLink } from "./CatchSearch";
@@ -405,8 +405,8 @@ function CatchForm() {
   // Sample fish only when the best anywhere is one too (a book still all samples for this kind).
   const sampleBest = [bestSoFar?.longest, bestSoFar?.heaviest].some((best) => best && isSampleCatch(best.id));
   // Twin waters ("Śniardwy", "Sniardwy") are one water here, as the water search takes them.
-  const twinKeys = waterKeys(book);
-  const hereBest = spotId ? speciesBestSoFar({ ...book, catches: book.catches.filter((entry) => twinKeys.get(entry.spotId) === twinKeys.get(spotId) && (sampleBest || !isSampleCatch(entry.id))) }, species, t, existing?.id) : null;
+  const twinKeys = useMemo(() => waterKeys(book), [book]);
+  const hereBest = spotId ? speciesBestSoFar({ ...book, catches: book.catches.filter((entry) => sameWater(twinKeys, entry.spotId, spotId) && (sampleBest || !isSampleCatch(entry.id))) }, species, shownKind, existing?.id) : null;
   const hereDiffers = hereBest && (hereBest.longest?.id !== bestSoFar?.longest?.id || hereBest.heaviest?.id !== bestSoFar?.heaviest?.id);
   // The last fish's time, when "Save and log another" came from a fish of an earlier day.
   const startAt = existing ? null : params.get(AT_PARAM);
@@ -609,7 +609,7 @@ function CatchForm() {
 
   // A long book makes these slow enough to drag typing, so they wait for the book, water or language to change.
   const spotTrips = useMemo(() => tripsForSpot(book, spotId), [book, spotId]);
-  const hereCatches = useMemo(() => catchesForSpot(book, spotId), [book, spotId]);
+  const hereCatches = useMemo(() => catchesNewestFirst(book).filter((entry) => sameWater(twinKeys, entry.spotId, spotId)), [book, spotId, twinKeys]);
   // Named as the catch cards name them, however the book wrote them: "spinnerbaits" reads "Spinnerbait" in Polish too.
   const hereLures = useMemo(() => ownFirst((waterTips(hereCatches)?.lures ?? []).map((row) => row.lure), [], pieceName), [hereCatches, lang]);
   // One-tap picks: the kinds this water gives, and once a kind is typed, the lures that took it here.
@@ -1740,7 +1740,7 @@ function CatchView() {
   // The first of its kind at this water, once another has followed it there: the book's first says so already.
   // Its twin waters too, as the link's water search opens them.
   const twinKeys = waterKeys(book);
-  const atWater = spot && isCounted ? counted.filter((other) => twinKeys.get(other.spotId) === twinKeys.get(entry.spotId)) : [];
+  const atWater = spot && isCounted ? counted.filter((other) => sameWater(twinKeys, other.spotId, entry.spotId)) : [];
   // Two fish logged in the same minute go by id, as the milestones order them.
   const firstHere = !(milestone?.of === "kind" && milestone.n === 1) && atWater.length > 1 && atWater.every((other) => other.id === entry.id || byTime(entry, other) < 0);
   // The fish of its kind that year, through the catch search.

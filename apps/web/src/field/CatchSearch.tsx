@@ -1054,7 +1054,7 @@ function MatchSplits({ matches, all, search, largest, counted }: { matches: read
   const nameOf = new Map(book.spots.map((spot) => [spot.id, plainName(spot.name)]));
   // As the search compares names: case, accents and spacing aside ("Śniardwy" is "Sniardwy").
   const waterKey = (entry: CatchEntry) => foldText(nameOf.get(entry.spotId) ?? "");
-  const shownWater = twinWaterNames(book);
+  const shownWater = useMemo(() => twinWaterNames(book), [book]);
   const waters = tally(waterKey)
     .filter(([key]) => key !== "")
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
@@ -1129,7 +1129,7 @@ function FishDays({ book, catches }: { book: Logbook; catches: readonly CatchEnt
 /** Each water name as a search folds it, written as the book's waters with the most fish write it: "Home Lake", not a twin's "home  lake". */
 function twinWaterNames(book: Logbook): Map<string, string> {
   const fish = new Map<string, number>();
-  for (const entry of book.catches) fish.set(entry.spotId, (fish.get(entry.spotId) ?? 0) + 1);
+  for (const entry of countedFish(book.catches)) fish.set(entry.spotId, (fish.get(entry.spotId) ?? 0) + 1);
   const spellings = new Map<string, Map<string, number>>();
   for (const spot of book.spots) {
     const key = foldText(spot.name);
@@ -1151,7 +1151,7 @@ function TopLure({ catches }: { catches: readonly CatchEntry[] }) {
     return Number.isNaN(at.getTime()) ? null : biteTimeOf(at.getHours());
   });
   // Waters that read the same are one, as "By water" and the search take them.
-  const shownWater = twinWaterNames(book);
+  const shownWater = useMemo(() => twinWaterNames(book), [book]);
   const water = leader(catches, (entry) => {
     const name = spotById(book, entry.spotId)?.name;
     return name ? foldText(name) : null;
