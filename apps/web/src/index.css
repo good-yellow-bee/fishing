@@ -1425,8 +1425,8 @@ html[data-reduce-motion="1"] .fight-bar .fight-note {
   }
 }
 
-/* And at any text size on a phone held sideways or narrower than 360 px, where the card had no line to spare either. */
-@media (pointer: coarse) and (max-height: 500px), (pointer: coarse) and (max-width: 359px) {
+/* And at any text size on a phone, upright or sideways, where the card has no line to spare either. */
+@media (pointer: coarse) and (max-height: 500px), (pointer: coarse) and (max-width: 520px) {
   .fight-bar .fight-drag-line {
     position: absolute;
     width: 1px;
@@ -1520,18 +1520,19 @@ html[data-input="pad"] .fight-bar .on-pad {
   }
 }
 
+/* On its own translate, so it shivers wherever a layout puts the card (centred by a transform or not). */
 @keyframes fight-shiver {
   0%,
   100% {
-    transform: translateX(-50%);
+    translate: 0;
   }
 
   25% {
-    transform: translateX(calc(-50% - 2px));
+    translate: -2px 0;
   }
 
   75% {
-    transform: translateX(calc(-50% + 2px));
+    translate: 2px 0;
   }
 }
 
@@ -2465,13 +2466,6 @@ html[data-input="pad"] .fight-bar .on-pad {
     width: min(160px, calc((100vw - 152px) / var(--text-zoom, 1)));
   }
 
-  /* In a fight with larger text the card ran down under the thumb button, over the "let go" line: the header's
-     time, weather, level and points chips step aside until the fight ends, and the coach and bank chip, which only
-     showed through the card, go too. */
-  html[data-text-size] .hud:has(+ .scene-wrap[data-phase="fight"]) :is(.hour-chip, .sky-chip, .level-chip, .points-chip),
-  html[data-text-size] .scene-wrap[data-phase="fight"] :is(.walkthrough, .stance-chip) {
-    display: none;
-  }
 }
 
 /* Under 360 px with larger text the header's links took three rows, which pushed the hint down under the walk stick
@@ -2488,26 +2482,69 @@ html[data-input="pad"] .fight-bar .on-pad {
   }
 }
 
-/* On a short upright phone (320 x 568 to 375 x 667) the fight card, now taller with its fish's habit and the clean-fight
-   line, ran up over the header and the bank chip from its low place: as with larger text, it hangs from the header,
-   whose time, weather, level and points chips step aside until the fight ends, and the coach and bank chip go too. */
-@media (max-width: 800px) and (min-height: 501px) and (max-height: 700px) {
-  .fight-bar {
-    top: calc(var(--hud-bottom, 140px) + 8px);
-    bottom: auto;
+/* A phone held upright (a touch screen up to 520 px wide). At the top of the screen, above the fight: the angler, the
+   line and the hooked fish fill the middle third (from about 31% to 63% of the height), where the card used to sit low
+   or hang from the header, and the corners below hold the Reel and steering buttons. The header, of no use mid-fight,
+   steps aside for it, and so does the bank chip; the first-fight coach keeps its place below on a tall phone, and
+   steps aside too where it would reach the fight (a phone up to 700 px tall, or larger text). */
+@media (pointer: coarse) and (max-width: 520px) and (min-height: 501px) {
+  .hud:has(+ .scene-wrap[data-phase="fight"]) {
+    visibility: hidden;
   }
 
-  .hud:has(+ .scene-wrap[data-phase="fight"]) :is(.hour-chip, .sky-chip, .level-chip, .points-chip),
-  .scene-wrap[data-phase="fight"] :is(.walkthrough, .stance-chip) {
+  .fight-bar,
+  html[data-text-size] .fight-bar {
+    top: calc(8px + env(safe-area-inset-top));
+    right: 8px;
+    bottom: auto;
+    left: 8px;
+    width: auto;
+    padding: 10px 14px 11px;
+    transform: none;
+  }
+
+  .scene-wrap[data-phase="fight"] .stance-chip,
+  html[data-text-size] .scene-wrap[data-phase="fight"] .walkthrough {
     display: none;
   }
 }
 
-/* On a touch screen the thumb button already says Reel and the status line says when to let go, so the card's
-   hold-and-release line goes with larger text too. */
-@media (pointer: coarse) and (max-width: 800px) and (min-height: 501px) {
-  html[data-text-size] .fight-bar .fight-controls {
+@media (pointer: coarse) and (max-width: 520px) and (min-height: 501px) and (max-height: 700px) {
+  .scene-wrap[data-phase="fight"] .walkthrough {
     display: none;
+  }
+}
+
+/* On a touch screen the card keeps to what a fight is read from, to fit above the water: the thumb button already says
+   Reel and the status line when to let go, so the hold-and-release line goes (the first-fight coach still says it); the
+   drag's explanation is for a screen reader (its knob stays); the clean-fight line waits for the catch card; and with
+   the steering buttons on screen their standing instruction goes after a first fight (a run's own call still comes),
+   and so do the fish's habits, as with larger text or a phone under 700 px tall. The water's own warnings stay. */
+@media (pointer: coarse) and (max-width: 520px) and (min-height: 501px) {
+  .fight-bar :is(.fight-controls, .fight-clean),
+  .scene-wrap:has(.steer-buttons) .fight-bar .fight-habit,
+  .scene-wrap:has(.steer-buttons):not([data-walkthrough="1"]) .fight-bar .fight-steer[data-call="calm"],
+  html[data-text-size] .fight-bar .fight-habit {
+    display: none;
+  }
+}
+
+@media (pointer: coarse) and (max-width: 520px) and (min-height: 501px) and (max-height: 700px) {
+  .fight-bar .fight-habit {
+    display: none;
+  }
+}
+
+/* The strike's note ("Hooked solid in 0.3 s! … a long first run.") added three lines to the card just as the fish, still
+   out where it took, lay under it: on a phone up to 700 px tall, or held sideways, a screen reader still says it. */
+@media (pointer: coarse) and (max-width: 520px) and (min-height: 501px) and (max-height: 700px), (pointer: coarse) and (max-height: 500px) {
+  .fight-bar .fight-note {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
 }
 
@@ -3516,6 +3553,12 @@ html[data-contrast="high"] :is(.daily-requests-note, .hud .eyebrow, .settings-no
     left: 16px;
   }
 
+  /* The steering buttons trade corners with it, where they lay under the Reel button. */
+  html[data-hand="left"] .steer-buttons {
+    right: 16px;
+    left: auto;
+  }
+
   html[data-hand="left"] .power-meter {
     right: auto;
     left: 12px;
@@ -3879,7 +3922,6 @@ html[data-contrast="high"] .sound-captions li {
    off the top of the screen. As on an upright phone, the thumb button says Reel and the status line says when to let go,
    so the card's hold-and-release line goes, and the bar's status chips step aside so its links fit one row. */
 @media (pointer: coarse) and (max-height: 500px) {
-  html[data-text-size] .fight-bar .fight-controls,
   html[data-text-size] .hud:has(+ .scene-wrap[data-phase="fight"]) :is(.hour-chip, .sky-chip, .level-chip, .points-chip),
   html[data-text-size] .scene-wrap[data-phase="fight"] :is(.walkthrough, .stance-chip) {
     display: none;
@@ -3891,13 +3933,28 @@ html[data-contrast="high"] .sound-captions li {
     display: none;
   }
 
-  /* Centred in the room beside the Reel button, which stood over its right edge on a 640 px phone. */
+  /* Held sideways the fight fills the middle of the screen (from about 30% to 60% of its width): the card takes the
+     side away from the Reel button, above the steering buttons in that corner, and the header steps aside for it. */
   .fight-bar {
-    left: calc(50% - 56px);
+    bottom: calc(96px + env(safe-area-inset-bottom));
+    left: 8px;
+    width: min(320px, calc(32vw / var(--text-zoom, 1)));
+    transform: none;
+  }
+
+  .hud:has(+ .scene-wrap[data-phase="fight"]) {
+    visibility: hidden;
   }
 
   html[data-hand="left"] .fight-bar {
-    left: calc(50% + 56px);
+    right: 8px;
+    left: auto;
+  }
+
+  /* And keeps to what a fight is read from, as on an upright phone, to fit the height. */
+  .fight-bar :is(.fight-controls, .fight-clean, .fight-habit),
+  .scene-wrap:has(.steer-buttons):not([data-walkthrough="1"]) .fight-bar .fight-steer[data-call="calm"] {
+    display: none;
   }
 }
 
