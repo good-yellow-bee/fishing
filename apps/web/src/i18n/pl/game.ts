@@ -263,8 +263,8 @@ export const PL_GAME: PlBook = {
   "Not yet": "Jeszcze nie",
   "All three found: the {legend} bites far more often at the {bank} for the rest of the week.": "Wszystkie trzy znalezione: {legend} bierze dużo częściej na łowisku {bank} do końca tygodnia.",
   "The {fish} your hunt tracked down haunts this water.": "{fish}, którego wytropiono, krąży po tej wodzie.",
-  "When another angler lands a trophy that broke your line, you are now told who it was, the next time you come to the lake. And the Board lists the lodge's lost trophies still about the lake, bank by bank, so you can choose where to try for one.":
-    "Gdy inna osoba wyląduje trofeum, które zerwało ci żyłkę, przy następnej wizycie nad jeziorem dowiesz się, kto to był. A tablica wyników wymienia zgubione trofea wciąż krążące w jeziorze, łowisko po łowisku, żeby można było wybrać, gdzie spróbować.",
+  "A giant you land can now be let go back to its bank for the rest of the week: you keep it toward Giant hunter, the Board says you let it go, and the next angler to land it is paid 100 points.":
+    "Złowionego olbrzyma można teraz wypuścić z powrotem na jego łowisko do końca tygodnia: zachowujesz go do odznaki Łowca olbrzymów, tablica podaje, kto go wypuścił, a następna osoba, która go wyląduje, dostaje 100 punktów.",
   "While your bait bucket holds spare shiners, it now stands at your feet on the dock or at the bank. And a fish hooked through the duckweed comes in under a green ball of weed until its first run strips it off.":
     "Dopóki w wiaderku na przynętę są zapasowe złotawce, stoi ono teraz u twoich stóp na pomoście albo na brzegu. A ryba zacięta w rzęsie płynie pod zieloną kulą zielska, aż pierwszy odjazd ją zerwie.",
   "On a clear dawn or dusk the low sun now lays long shadows across the lake, yours among them: at the drop-off at dawn and the inlet at dusk you can see it fall on the water the fish are watching. And on a phone held upright the lake sits a little lower, so the far bank and the hills show clear of the panels at the top.":
