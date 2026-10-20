@@ -135,6 +135,7 @@ export const PL_GAME: PlBook = {
   "It wrapped the line round the log — ease off till it swings free!": "Owinęła żyłkę wokół pnia — odpuść, aż się odwinie!",
   "Kept it clear of the sunken log": "Z dala od zatopionego pnia",
   "Sunken log: turn every run, or it wraps the line round the log and frays it": "Zatopiony pień: zawracaj każdy odjazd, bo owinie żyłkę wokół pnia i ją przetrze",
+  "{slam} · every kind in one day": "{slam} · wszystkie gatunki jednego dnia",
   "Drag: light": "Hamulec: lekki",
   "Drag: normal": "Hamulec: zwykły",
   "Drag: heavy": "Hamulec: mocny",

@@ -39,6 +39,7 @@ import {
   weekOf,
   streakDays,
   addToBag,
+  slamCompletedBy,
   bagToBeat,
   bagDay,
   bagTotal,
@@ -414,6 +415,14 @@ export function DockPage() {
   }, [userId, lastCatch]);
   // The day on the water, kept per angler so a closed tab can be written up next visit.
   const [session, setSession] = useState<SessionDraft | null>(null);
+  const sessionRef = useRef(session);
+  sessionRef.current = session;
+  /** The slam this landed fish completes, with today's earlier fish of the outing, read before it joins them. */
+  const slam = useMemo(() => {
+    if (game.outcome?.kind !== "landed") return null;
+    const today = sessionRef.current?.date === localDate(new Date()) ? sessionRef.current.fish.map((fish) => fish.speciesId) : [];
+    return slamCompletedBy(today, game.outcome.species.id);
+  }, [game.outcome]);
   const [recap, setRecap] = useState<{ leftover: boolean } | null>(null);
   const [filedTrip, setFiledTrip] = useState<{ id: string; title: string } | null>(null);
   const sessionOwner = useRef<string | null>(null);
@@ -1287,6 +1296,7 @@ export function DockPage() {
               <p className="catch-stamp quiet">{t("Book PB {weight}", { weight: weightText(stamp.heaviest) })}</p>
             )}
             {stamp?.trophy && <p className="catch-stamp">{t("Trophy")}</p>}
+            {slam && <p className="catch-stamp">{t("{slam} · every kind in one day", { slam: t(badgeById(slam)?.label ?? slam) })}</p>}
             {lureReached && <p className="catch-stamp">{t("{lure} is now {tier}", { lure: t(tiedLure.current), tier: t(LURE_TIER_WORD[lureReached]) })}</p>}
             {dayBag && (
               <p className="catch-stamp quiet day-bag">
