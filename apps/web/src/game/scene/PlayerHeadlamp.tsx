@@ -51,11 +51,10 @@ export function PlayerHeadlamp({ phase, float, season }: { phase: ScenePhase; fl
   const aim = useRef<THREE.Vector3 | null>(null);
   const scratch = useMemo(() => ({ lamp: new THREE.Vector3(), target: new THREE.Vector3(), centre: new THREE.Vector3(), moth: new THREE.Object3D() }), []);
   const onAt = useRef<number | null>(null);
-  const lastTime = useRef(0);
-  // Switched off, the moths are gone and a bat among them eases away.
+  // Switched off, the moths are gone (a bat among them eases away, Bats.tsx).
   useEffect(
     () => () => {
-      if (lampMoths.on) Object.assign(lampMoths, { on: false, offAt: lastTime.current });
+      lampMoths.on = false;
     },
     [],
   );
@@ -83,9 +82,10 @@ export function PlayerHeadlamp({ phase, float, season }: { phase: ScenePhase; fl
     const flock = moths.current;
     if (!flock) return;
     flock.visible = season !== "winter";
-    lastTime.current = clock.elapsedTime;
     if (!flock.visible) {
+      // Moths come again one by one once winter is over.
       lampMoths.on = false;
+      onAt.current = null;
       return;
     }
     onAt.current ??= clock.elapsedTime;
@@ -99,7 +99,11 @@ export function PlayerHeadlamp({ phase, float, season }: { phase: ScenePhase; fl
       flock.setMatrixAt(i, scratch.moth.matrix);
     }
     // Where they gather, for the bats that come to hawk them (batFlight.ts).
-    Object.assign(lampMoths, { on: true, since: onAt.current + LAMP_MOTHS_AT[0], offAt: Infinity, x: centre.x, y: centre.y, z: centre.z });
+    lampMoths.on = true;
+    lampMoths.since = onAt.current + LAMP_MOTHS_AT[0];
+    lampMoths.x = centre.x;
+    lampMoths.y = centre.y;
+    lampMoths.z = centre.z;
     flock.instanceMatrix.needsUpdate = true;
   });
   return (
