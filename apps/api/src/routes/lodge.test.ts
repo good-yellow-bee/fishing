@@ -126,7 +126,7 @@ describe("listSlamDays", () => {
 });
 
 describe("GET /lodge/bank-week", () => {
-  it("counts the angler's own fish at each bank over the last week", async () => {
+  it("counts the angler's own kept fish at each bank over the last week, not ones let go", async () => {
     const at = (daysAgo: number) => new Date(Date.now() - daysAgo * 86_400_000).toISOString();
     const row = (id: string, userId: string, spot: string, daysAgo: number) =>
       db.prepare(`INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, created_at) VALUES (?, ?, 'perch', 1, 1, ?, ?, 0, ?)`).run(id, userId, spot, `r-${id}`, at(daysAgo));
@@ -135,6 +135,7 @@ describe("GET /lodge/bank-week", () => {
     row("c", "ash", "reeds", 2);
     row("d", "ash", "dock", 8);
     row("e", "mara", "dock", 1);
+    db.prepare(`INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, released, created_at) VALUES ('f', 'ash', 'perch', 1, 1, 'dock', 'r-f', 0, 1, ?)`).run(at(1));
     const response = await app.request("http://test/lodge/bank-week");
     expect(await response.json()).toEqual({ counts: { dock: 2, reeds: 1 } });
   });

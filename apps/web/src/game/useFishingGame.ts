@@ -1025,7 +1025,6 @@ export function useFishingGame(
     const yesterdayWait = waryFromYesterday(banks, spotRef.current) && !switched.relieved && !bait.baited && !mercyRef.current ? YESTERDAY_WAIT : 1;
     saveBankMemory(current.userId, countAtBank(banks, spotRef.current, "casts"));
     if (yesterdayWait > 1) reasons.unshift(t("This bank was fished hard yesterday, so its fish are still wary for your first casts."));
-    if (fishedDownRef.current.has(spotRef.current) && !mercyRef.current) reasons.push(t("You have fished this bank down this week, so its fish come smaller till it rests."));
     // The visit's first cast at a bank meets fish that haven't seen a lure today; it is told last, so the bank's own reasons come first.
     // The anchor's splash puts the fish down for a few seconds; a cast into it doesn't spend the fresh water's first look.
     const anchorWait = anchorSplashWaitMul(spotRef.current, boat.mode === "anchored" ? Date.now() - boat.anchoredAt : null);

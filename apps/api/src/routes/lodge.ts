@@ -33,7 +33,7 @@ lodgeRoutes.get("/lodge/released", (c) => {
   return c.json({ released: listLodgeReleases(user.id, ...tagWindow(), 50) });
 });
 
-/** How many fish the angler landed at each bank in the last BANK_STOCK_DAYS days, read once a visit. */
+/** How many fish the angler kept at each bank in the last BANK_STOCK_DAYS days, read once a visit. */
 lodgeRoutes.get("/lodge/bank-week", (c) => {
   const user = c.get("user") as SessionUser;
   const since = new Date(Date.now() - BANK_STOCK_DAYS * 86_400_000).toISOString();

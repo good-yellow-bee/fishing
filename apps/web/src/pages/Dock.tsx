@@ -268,9 +268,12 @@ export function DockPage() {
   const bookCatchesRef = useRef(bookCatches);
   bookCatchesRef.current = bookCatches;
   const luckyLures = useMemo(() => new Set(lureChoices.filter((choice) => lureTiers.get(choice) === "lucky")), [lureChoices, lureTiers]);
-  // The angler's fish at each bank over the week, read once a visit; this visit's landings count on top.
+  // The fish the angler kept at each bank over the week, read once a visit; this visit's kept fish count on top.
   const [bankWeek, setBankWeek] = useState<Partial<Record<SpotId, number>>>({});
+  const [keptHere, setKeptHere] = useState<Partial<Record<SpotId, number>>>({});
   useEffect(() => {
+    setBankWeek({});
+    setKeptHere({});
     if (!angler) return;
     let live = true;
     getBankWeek()
@@ -281,12 +284,15 @@ export function DockPage() {
       live = false;
     };
   }, [angler]);
-  const fishedDownBanks = useMemo(() => new Set((Object.entries(bankWeek) as [SpotId, number][]).filter(([, count]) => fishedDown(count)).map(([bank]) => bank)), [bankWeek]);
+  const fishedDownBanks = useMemo(
+    () => new Set((Object.keys({ ...bankWeek, ...keptHere }) as SpotId[]).filter((bank) => fishedDown((bankWeek[bank] ?? 0) + (keptHere[bank] ?? 0)))),
+    [bankWeek, keptHere],
+  );
   const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind, legend, lodgeReleased, luckyLures, fishedDownBanks);
   useEffect(() => {
     if (game.outcome?.kind !== "landed") return;
     const bank = game.outcome.spot;
-    setBankWeek((counts) => ({ ...counts, [bank]: (counts[bank] ?? 0) + 1 }));
+    setKeptHere((counts) => ({ ...counts, [bank]: (counts[bank] ?? 0) + 1 }));
   }, [game.outcome]);
   // The cast's left-out reasons, opened from its hint; each cast's list starts closed.
   const [reasonsOpenFor, setReasonsOpenFor] = useState<readonly string[] | null>(null);
@@ -710,6 +716,8 @@ export function DockPage() {
       setReleasedId(outcome.id);
       // The lake remembers the fish, so it may bite again at this bank another day, a little heavier.
       rememberReleased(outcome.species, outcome.weight, outcome.spot);
+      // Let go, it went back to its bank, so the bank's week no longer counts it.
+      setKeptHere((counts) => ({ ...counts, [outcome.spot]: Math.max(0, (counts[outcome.spot] ?? 0) - 1) }));
       try {
         markReleasedInBook(outcome.id);
       } catch {

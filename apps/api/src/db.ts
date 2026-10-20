@@ -306,9 +306,9 @@ export function listLodgeReleases(userId: string, from: string, before: string, 
   return db.prepare(`${LODGE_RELEASE_SELECT} ORDER BY c.created_at DESC LIMIT ?`).all(userId, from, before, ...TAGGABLE_IDS, limit) as LodgeRelease[];
 }
 
-/** How many fish the angler landed at each bank since `since`. */
+/** How many fish the angler kept at each bank since `since`; fish let go went back to the bank. */
 export function listBankCounts(userId: string, since: string): { spot: SpotId; count: number }[] {
-  return db.prepare(`SELECT spot, COUNT(*) as count FROM catch WHERE user_id = ? AND created_at >= ? GROUP BY spot`).all(userId, since) as { spot: SpotId; count: number }[];
+  return db.prepare(`SELECT spot, COUNT(*) as count FROM catch WHERE user_id = ? AND created_at >= ? AND released = 0 GROUP BY spot`).all(userId, since) as { spot: SpotId; count: number }[];
 }
 
 /** The angler's let-go fish other anglers landed again since `since`, newest first. */
