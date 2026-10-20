@@ -394,6 +394,9 @@ export function SpotMapPage() {
         <>
           {`${line} · `}
           <Link className="map-next" to={`/trips/${going.id}`}>{t("Out now: {outing}", { outing: outingName(going, book.spots) })}</Link>
+          {/* A fish goes straight onto it, as from Home's Next. */}
+          {" · "}
+          <Link to={`/catches/new?trip=${going.id}&spot=${going.spotId}`}>{t("Log a catch")}</Link>
         </>
       );
     const next = upcoming.find((trip) => trip.spotId === spotId);

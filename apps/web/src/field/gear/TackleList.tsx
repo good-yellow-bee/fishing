@@ -1,6 +1,6 @@
 import { useId, useMemo, useRef, useState, type FormEvent } from "react";
 import { isLureLabel, localDate, itemsForTrip, lureClass, packedCount, type CatchEntry, type Spot, type TackleItem, type Trip } from "@stillwater/shared";
-import { useT } from "../../i18n";
+import { tn, useT } from "../../i18n";
 import { fishCountLabel, formatDay, messageText, outingName } from "../format";
 import { useTackle } from "./TackleState";
 import { packingText } from "./packingText";
@@ -23,6 +23,11 @@ export function lastPackedTrip(trips: readonly Trip[], items: readonly TackleIte
   return pick(others.filter((trip) => trip.spotId === self?.spotId)) ?? pick(others);
 }
 
+/** A water's tips as TackleList's props: the lures to suggest and the fish each took there. */
+export function tipProps(rows: readonly { lure: string; count: number }[]): { suggest: string[]; suggestCounts: Map<string, number> } {
+  return { suggest: rows.map((row) => row.lure), suggestCounts: new Map(rows.map((row) => [row.lure, row.count])) };
+}
+
 /** Every other outing with a list to copy, newest first; `order` puts a day's dusk before its dawn (newestOutingFirst). */
 export function packedTrips(trips: readonly Trip[], items: readonly TackleItem[], tripId: string, order: (a: Trip, b: Trip) => number = (a, b) => b.date.localeCompare(a.date)): Trip[] {
   const listed = new Set(items.map((item) => item.tripId));
@@ -41,6 +46,7 @@ export function TackleList({
   heading,
   name,
   suggest = [],
+  suggestCounts,
   caught = [],
   trips = [],
   spots = [],
@@ -50,6 +56,8 @@ export function TackleList({
   heading?: string;
   name?: string;
   suggest?: readonly string[];
+  /** The fish each suggested lure took on the water, said beside it: "+ Jig (4)". */
+  suggestCounts?: ReadonlyMap<string, number>;
   caught?: readonly CatchEntry[];
   trips?: readonly Trip[];
   /** The book's waters, so an untitled outing goes by its water's name. */
@@ -326,7 +334,9 @@ export function TackleList({
                 setError(message ?? "");
                 if (!message) focusAfter();
               }}>
-              {t("+ {lure}", { lure: pieceName(lure) })}
+              {suggestCounts?.get(lure)
+                ? tn(suggestCounts.get(lure)!, "+ {lure} ({n} fish)", "+ {lure} ({n} fish)", { lure: pieceName(lure) })
+                : t("+ {lure}", { lure: pieceName(lure) })}
             </button>
           ))}
           {/* A fresh list takes them all in one tap, rather than one tap each with the tips scrolling away. */}

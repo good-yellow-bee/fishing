@@ -909,6 +909,8 @@ export const PL_GAME: PlBook = {
     "Jezioro działa teraz nieco płynniej na telefonie: w każdej klatce traci mniej czasu na ustalanie, jak narysować zwierzęta i ich cienie. A wiosenną nocą pyłek na wodzie nie świeci już na żółto w ciemności.",
   "At night your headlamp now draws moths: from spring to fall a few find the beam one by one and flutter round it, and on summer nights a bat comes now and then to hawk them.":
     "Nocą twoja czołówka przyciąga teraz ćmy: od wiosny do jesieni kilka po kolei odnajduje snop światła i krąży wokół niego, a w letnie noce co jakiś czas przylatuje nietoperz, żeby na nie zapolować.",
+  "On the Map, a water you are out on now offers Log a catch for that outing, and a list's Works on this water tips say how many fish each lure took there.":
+    "Na mapie przy łowisku, na którym teraz łowisz, można od razu zapisać połów na tę wyprawę, a podpowiedzi „Działa na tym łowisku” na liście mówią, ile ryb złowiono tam na każdą przynętę.",
   "Home's Next says Out now while today's outing is being fished, and offers today's plan for the calendar until it is under way. The outings spreadsheet counts the fish released on each outing.":
     "Pole „Następna” na stronie głównej mówi „Teraz na wodzie”, gdy trwa dzisiejsza wyprawa, i pozwala dodać dzisiejszy plan do kalendarza, dopóki wyprawa się nie zaczęła. Arkusz wypraw liczy ryby wypuszczone na każdej wyprawie.",
   "A search's summary splits its fish by water too, each opening that water's. A fish's page says how near it came to your longest or heaviest of its kind, and a kind typed two ways, such as Perch and Perches, keeps one name and one record on every catch page.":

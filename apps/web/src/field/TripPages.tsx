@@ -31,7 +31,7 @@ import { CatchCard, TripCard } from "./cards";
 import { tripNeighbors } from "./catchNeighbors";
 import { PagedCatches } from "./PagedCatches";
 import { EditDelete } from "./EditDelete";
-import { TackleList } from "./gear/TackleList";
+import { TackleList, tipProps } from "./gear/TackleList";
 import { useTackle } from "./gear/TackleState";
 import { measureText } from "../i18n/content";
 import { daysAheadLabel, fishSum, formatClock, formatDay, formatTimeOfDay, messageText, outingName, toLocalInput, tripWhen } from "./format";
@@ -43,7 +43,7 @@ import { sheetOutings, tripsCsv } from "./catchCsv";
 import { LureChips, SpeciesChips } from "./SpeciesChips";
 import { WaterTipsBox, sameTimeText } from "./WaterTipsBox";
 import { exactTerm } from "./findLinks";
-import { packingTips } from "./waterTips";
+import { packingTipRows } from "./waterTips";
 import { datedName, downloadFile } from "./download";
 import { tripIcs, tripIcsName, tripsIcs } from "./tripIcs";
 import { tripSummary } from "./summaries";
@@ -510,7 +510,7 @@ function TripView() {
     <TackleList
       tripId={trip.id}
       heading={t("Tackle")}
-      suggest={packingTips(book, trip, today)}
+      {...tipProps(packingTipRows(book, trip, today))}
       caught={catchesForTrip(book, trip.id)}
       trips={book.trips}
         catches={book.catches}
