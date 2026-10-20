@@ -1027,8 +1027,8 @@ export function DockPage() {
   const giantAt = (bank: string) => openGiants.find((giant) => giant.spot === bank);
   const lineState = game.nightLine ? nightLineState(game.nightLine, Date.now()) : null;
   const lineAt = (bank: string) => (game.nightLine?.spot === bank ? lineState : null);
-  // A shiner to spare, or a worm tied on as the light goes, can go out on a night line.
-  const lineBait = game.liveShiner || game.bucket > 0 ? "shiner" : isLiveBait(lure) && wormLineHour(hour) ? "worm" : null;
+  // A shiner to spare, or a worm from the tin with one tied on as the light goes, can go out on a night line.
+  const lineBait = game.liveShiner || game.bucket > 0 ? "shiner" : isLiveBait(lure) && wormLineHour(hour) && game.worms > 0 ? "worm" : null;
   // The bank underfoot's own sign sets a night line with that bait, or brings in the one out there.
   const stanceLine =
     !me || rowing
@@ -1258,6 +1258,7 @@ export function DockPage() {
           {game.twisted && <small className="stance-cold"> · {t("line twisted")}</small>}
           {game.dulled && <small className="stance-cold"> · {t("hook dulled")}</small>}
           {washedWorm && <small className="stance-cold"> · {t("worm washed out")}</small>}
+          {isLiveBait(lure) && game.worms === 0 && (washedWorm || (wormLineHour(hour) && !game.nightLine)) && <small className="stance-cold"> · {t("worm tin empty")}</small>}
           {game.liveShiner && <small className="stance-hot"> · {t("live shiner on")}</small>}
         </aside>
         <LureChoice
@@ -1358,7 +1359,9 @@ export function DockPage() {
                       ? t("Retie the twisted line, so it casts clean again.")
                       : game.dulled
                         ? t("Touch up the dull hook, so it sets solid again.")
-                        : t("Put a fresh worm on, so its scent draws the fish again.")
+                        : game.worms > 0
+                          ? t("Put a fresh worm from your tin on, so its scent draws the fish again. Worms in the tin: {worms}.", { worms: game.worms })
+                          : t("Your worm tin is empty, so the washed-out worm stays on. More worms are dug each day.")
                 }
                 onClick={(event) => {
                   // Leave Space free for casting.
