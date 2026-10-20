@@ -443,8 +443,8 @@ describe("useFishingGame live shiner", () => {
   });
 
   it.each([
-    ["summer", "Check it once the night is out, and within a day: in the summer heat crayfish strip the bait fast."],
-    ["winter", "In the winter cold the fish are slow: check it after twelve hours, and within four days."],
+    ["summer", "Check it once the night is out, and before that evening: in the summer heat crayfish strip the bait fast."],
+    ["winter", "In the winter cold the fish are slow: check it once the night is out and it has soaked twelve hours, and within four days."],
   ] as const)("keeps the season a night line goes out in and says its timing: %s", (season, said) => {
     const strong = { ...profile, strength: 10, accuracy: 10 };
     const kept = new Map<string, string>();

@@ -17,6 +17,8 @@ export const NIGHT_LINE_HOT_STALE_MS = 24 * 3_600_000;
 /** Winter's slow fish need twelve hours to find it, but the bait keeps four days in the cold. */
 export const NIGHT_LINE_COLD_SOAK_MS = 12 * 3_600_000;
 export const NIGHT_LINE_COLD_STALE_MS = 96 * 3_600_000;
+/** However early it goes stale, a line still holds its bait till the evening after the night it stood through. */
+export const NIGHT_LINE_DAY_MS = 15 * 3_600_000;
 /** Chance a line checked in time holds a fish, by the sky over its night: the night feeders roam on a dark, wet night. */
 export const NIGHT_LINE_ODDS: Record<Sky, number> = { rain: 0.85, overcast: 0.75, fog: 0.7, "partly-cloudy": 0.7, clear: 0.55 };
 
@@ -54,7 +56,8 @@ export function nightLineTimes(season: NightLine["season"]): { soakMs: number; s
 export function loadNightLine(userId: string): NightLine | null {
   try {
     const line = JSON.parse(localStorage.getItem(nightLineKey(userId)) ?? "null") as Partial<NightLine> | null;
-    return line && typeof line.spot === "string" && typeof line.setAt === "number" ? { spot: line.spot, setAt: line.setAt, ...(line.bait === "worm" ? { bait: "worm" as const } : {}), ...(line.season === "summer" || line.season === "winter" ? { season: line.season } : {}) } : null;
+    const season = nightLineSeason(line?.season);
+    return line && typeof line.spot === "string" && typeof line.setAt === "number" ? { spot: line.spot, setAt: line.setAt, ...(line.bait === "worm" ? { bait: "worm" as const } : {}), ...(season ? { season } : {}) } : null;
   } catch {
     return null;
   }
@@ -77,16 +80,21 @@ export function nightLineReadyAt(setAt: number, soakMs = NIGHT_LINE_SOAK_MS): nu
   return Math.max(dawn.getTime(), setAt + soakMs);
 }
 
-export function nightLineState(line: NightLine, now: number): "soaking" | "ready" | "stale" {
+/** When a line turns ready, and the first instant it is stale. */
+function nightLineTurns(line: NightLine): { ready: number; stale: number } {
   const { soakMs, staleMs } = nightLineTimes(line.season);
-  return now < nightLineReadyAt(line.setAt, soakMs) ? "soaking" : now - line.setAt > staleMs ? "stale" : "ready";
+  const ready = nightLineReadyAt(line.setAt, soakMs);
+  return { ready, stale: Math.max(line.setAt + staleMs, ready + NIGHT_LINE_DAY_MS) + 1 };
+}
+
+export function nightLineState(line: NightLine, now: number): "soaking" | "ready" | "stale" {
+  const { ready, stale } = nightLineTurns(line);
+  return now < ready ? "soaking" : now >= stale ? "stale" : "ready";
 }
 
 /** When a line next changes state: as it turns ready, then as it goes stale, then never again. */
 export function nightLineNextChange(line: NightLine, now: number): number | null {
-  const { soakMs, staleMs } = nightLineTimes(line.season);
-  const ready = nightLineReadyAt(line.setAt, soakMs);
-  const stale = line.setAt + staleMs + 1;
+  const { ready, stale } = nightLineTurns(line);
   return now < ready ? ready : now < stale ? stale : null;
 }
 

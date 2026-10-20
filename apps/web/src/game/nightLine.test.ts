@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { skyAt, type Sky } from "@stillwater/shared";
-import { loadNightLine, saveNightLine, wormLineHour, NIGHT_LINE_ODDS, NIGHT_LINE_SOAK_MS, WORM_LINE_ODDS, NIGHT_LINE_STALE_MS, NIGHT_LINE_HOT_STALE_MS, NIGHT_LINE_COLD_SOAK_MS, NIGHT_LINE_COLD_STALE_MS, nightLineCatch, nightLineKinds, nightLineNextChange, nightLineReadyAt, nightLineSeason, nightLineState, nightSkyFor } from "./nightLine";
+import { loadNightLine, saveNightLine, wormLineHour, NIGHT_LINE_ODDS, NIGHT_LINE_SOAK_MS, WORM_LINE_ODDS, NIGHT_LINE_STALE_MS, NIGHT_LINE_HOT_STALE_MS, NIGHT_LINE_COLD_SOAK_MS, NIGHT_LINE_COLD_STALE_MS, NIGHT_LINE_DAY_MS, nightLineCatch, nightLineKinds, nightLineNextChange, nightLineReadyAt, nightLineSeason, nightLineState, nightSkyFor } from "./nightLine";
 
 const strong = { strength: 10, accuracy: 10, patience: 5 };
 const at = (day: number, hour: number) => new Date(2026, 9, day, hour).getTime();
@@ -31,6 +31,10 @@ describe("a night line", () => {
     expect(nightLineState({ ...line, setAt: at(21, 2) }, at(21, 5))).toBe("soaking");
     expect(nightLineState(summer, line.setAt + NIGHT_LINE_HOT_STALE_MS)).toBe("ready");
     expect(nightLineState(summer, line.setAt + NIGHT_LINE_HOT_STALE_MS + 1)).toBe("stale");
+    // Set just after dawn, it still holds its bait till the evening after its night.
+    const morning = { ...summer, setAt: at(20, 6) };
+    expect(nightLineState(morning, at(21, 5) + NIGHT_LINE_DAY_MS)).toBe("ready");
+    expect(nightLineState(morning, at(21, 5) + NIGHT_LINE_DAY_MS + 1)).toBe("stale");
     const winter = { ...line, season: "winter" as const };
     // Set at eight in the evening, it is not ready at dawn but at eight in the morning.
     expect(nightLineState(winter, at(21, 5))).toBe("soaking");
@@ -41,7 +45,7 @@ describe("a night line", () => {
   });
 
   it("knows when its state next changes: as it turns ready, then stale, then never", () => {
-    for (const set of [at(20, 20), at(21, 2)].flatMap((setAt) => [undefined, "summer" as const, "winter" as const].map((season) => ({ spot: "dropoff" as const, setAt, season })))) {
+    for (const set of [at(20, 20), at(21, 2), at(20, 6)].flatMap((setAt) => [undefined, "summer" as const, "winter" as const].map((season) => ({ spot: "dropoff" as const, setAt, season })))) {
       const setAt = set.setAt;
       const turnsReady = nightLineNextChange(set, setAt)!;
       expect(nightLineState(set, turnsReady - 1)).toBe("soaking");

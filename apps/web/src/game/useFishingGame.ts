@@ -2375,7 +2375,7 @@ export function useFishingGame(
         : t("You leave a worm out on a night line here. Come back to check it once the night is out, and within two days.")
       : [
           shiner ? t("You leave the shiner out on a night line here.") : t("You leave a worm out on a night line here."),
-          lineSeason === "summer" ? t("Check it once the night is out, and within a day: in the summer heat crayfish strip the bait fast.") : t("In the winter cold the fish are slow: check it after twelve hours, and within four days."),
+          lineSeason === "summer" ? t("Check it once the night is out, and before that evening: in the summer heat crayfish strip the bait fast.") : t("In the winter cold the fish are slow: check it once the night is out and it has soaked twelve hours, and within four days."),
         ].join(" ");
     setHint([left, tonight].filter(Boolean).join(" "));
   };
