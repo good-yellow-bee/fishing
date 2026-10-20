@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BASE_FOV, MAX_FOV, fovFor } from "./cameraFov";
+import { BASE_FOV, FIGHT_LIFT, MAX_FOV, fightLiftFor, fovFor } from "./cameraFov";
 
 const sideways = (fov: number, aspect: number) => (2 * Math.atan(Math.tan((fov / 2) * (Math.PI / 180)) * aspect)) / (Math.PI / 180);
 
@@ -16,5 +16,12 @@ describe("fovFor", () => {
     expect(fovFor(390 / 844)).toBe(MAX_FOV);
     expect(sideways(fovFor(390 / 844), 390 / 844)).toBeGreaterThan(35);
     expect(sideways(BASE_FOV, 390 / 844)).toBeLessThan(24);
+  });
+
+  it("lifts an upright phone's view while a fish is on, and no other screen's", () => {
+    expect(fightLiftFor(390 / 844)).toBe(FIGHT_LIFT);
+    expect(fightLiftFor(360 / 640)).toBe(FIGHT_LIFT);
+    // A tablet held upright (768x1024) keeps its view.
+    for (const aspect of [768 / 1024, 0.8, 1.6, 2.16, 0, Number.NaN]) expect(fightLiftFor(aspect)).toBe(0);
   });
 });

@@ -36,7 +36,7 @@ import { Mayflies } from "./Mayflies";
 import { RodBell } from "./RodBell";
 import { dogOut } from "./dogMood";
 import { paperBoatOut } from "./paperDrift";
-import { BASE_FOV, fovFor } from "./cameraFov";
+import { BASE_FOV, fightLiftFor, fovFor } from "./cameraFov";
 import { PlayerHeadlamp } from "./PlayerHeadlamp";
 import { DockRobin, GroundBlackbird, GroundRobin } from "./DockRobin";
 import { hedgehogOut } from "./hedgehogWalk";
@@ -360,7 +360,7 @@ function PartsAhead() {
 }
 
 /** Opens the view up on a tall phone screen (cameraFov.ts). */
-function FitFov() {
+function FitFov({ phase }: { phase: ScenePhase }) {
   const camera = useThree((state) => state.camera) as THREE.PerspectiveCamera;
   const aspect = useThree((state) => state.size.width / state.size.height);
   // Before the next frame draws, so a turned phone never shows a frame at the old view.
@@ -368,6 +368,21 @@ function FitFov() {
     camera.fov = fovFor(aspect);
     camera.updateProjectionMatrix();
   }, [camera, aspect]);
+  // On a phone held upright the view eases up while a fish is on, raising the fight above the fight card, and drops
+  // back at once when it ends (the landing camera is moving then anyway), so aiming and the catch photo never see it.
+  const lift = useRef(0);
+  const shown = useRef({ lift: 0, width: 0, height: 0 });
+  const calm = useReducedMotion();
+  useFrame(({ size }, delta) => {
+    const target = isFighting(phase) ? fightLiftFor(size.width / size.height) : 0;
+    lift.current = target === 0 || calm ? target : lift.current + (target - lift.current) * (1 - Math.exp(-3 * Math.min(delta, 0.1)));
+    const was = shown.current;
+    if (Math.abs(lift.current - was.lift) < 1e-4 && was.width === size.width && was.height === size.height) return;
+    shown.current = { lift: lift.current, width: size.width, height: size.height };
+    if (lift.current === 0) camera.clearViewOffset();
+    else camera.setViewOffset(size.width, size.height, 0, lift.current * size.height, size.width, size.height);
+  });
+  useEffect(() => () => camera.clearViewOffset(), [camera]);
   return null;
 }
 
@@ -2233,7 +2248,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       <CameraRig phase={phase} sim={sim} />
       <PartsAhead />
       <ShadowDepths />
-      <FitFov />
+      <FitFov phase={phase} />
       <Tone hour={hour} />
       <FrameWatch />
       <FrameCap />
