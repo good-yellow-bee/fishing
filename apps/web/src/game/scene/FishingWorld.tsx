@@ -34,12 +34,9 @@ import { Angler } from "./Angler";
 import { RiseRings } from "./RiseRings";
 import { Mayflies } from "./Mayflies";
 import { RodBell } from "./RodBell";
-import { RodDragonfly } from "./RodDragonfly";
 import { DockDog } from "./DockDog";
 import { dogOut } from "./dogMood";
 import { paperBoatOut } from "./paperDrift";
-import { DockMallard } from "./DockMallard";
-import { BankHedgehog } from "./BankHedgehog";
 import { BASE_FOV, fovFor } from "./cameraFov";
 import { PlayerHeadlamp } from "./PlayerHeadlamp";
 import { DockRobin, GroundBlackbird, GroundRobin } from "./DockRobin";
@@ -49,15 +46,11 @@ import { blackbirdOut, robinOut, robinVisitIndex } from "./robinVisit";
 import { useStrikeStartle } from "./useStrikeStartle";
 import { knitsOut } from "./scarfKnit";
 import { leavesOut, petalsOut } from "./leafFall";
-import { PostOwl } from "./PostOwl";
 import { littleOwlOut } from "./littleOwl";
 import { mothsOut } from "./mothOrbit";
 import { dockSnowy } from "./snowyDock";
 import { rodDragonflyOut } from "./dragonflyPerch";
 import { Windsock } from "./Windsock";
-import { Lightning } from "./Lightning";
-import { Rainbow } from "./Rainbow";
-import { Aurora } from "./Aurora";
 import { auroraOut } from "./auroraCurtain";
 import { rainbowOut } from "./rainbowArc";
 import {
@@ -155,6 +148,15 @@ import { createFrameWatch, noteEffectsSteppedDown } from "../frameWatch";
 import { frameDue, frameThrottle, idleNow } from "./frameCap";
 import { GOLDEN_ACCENT, GOLDEN_COLOR } from "../../components/FishMark";
 import { LIFT_RISE, LIGHT_PLUNGE, liftTilt, ROLL_SPLASH, RUN_PLUNGE, runSlide, takeStyle } from "../nibblePlan";
+import { lazyPart, useSceneParts } from "./lazyPart";
+
+const Lightning = lazyPart("weather", "Lightning");
+const Aurora = lazyPart("night", "Aurora");
+const BankHedgehog = lazyPart("night", "BankHedgehog");
+const DockMallard = lazyPart("weather", "DockMallard");
+const PostOwl = lazyPart("night", "PostOwl");
+const Rainbow = lazyPart("weather", "Rainbow");
+const RodDragonfly = lazyPart("summer", "RodDragonfly");
 
 const BUOY_URL = "/models/buoy.glb";
 /** Top of the buoy model at its 0.32 scale, where the night tip sits. */
@@ -337,6 +339,12 @@ function placeBobber(
 
 function isAiming(phase: ScenePhase) {
   return phase === "idle" || phase === "casting";
+}
+
+/** Lets later scene parts load on their own once the scene is in, and fetches the likely ones ahead (lazyPart.tsx). */
+function PartsAhead() {
+  useSceneParts();
+  return null;
 }
 
 /** Opens the view up on a tall phone screen (cameraFov.ts). */
@@ -2211,6 +2219,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       <PlayerMove phase={phase} />
       <FightMotion phase={phase} sim={sim} ambush={take === "ambush"} light={take === "light"} lift={take === "lift"} run={take === "run"} boatSwing={boatSwing} />
       <CameraRig phase={phase} sim={sim} />
+      <PartsAhead />
       <FitFov />
       <Tone hour={hour} />
       <FrameWatch />
