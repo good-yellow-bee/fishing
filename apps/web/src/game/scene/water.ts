@@ -44,6 +44,49 @@ export function waterHeightWithShoreWeight(x: number, z: number, time: number, w
   return chop * weight;
 }
 
+/** The same four waves as [x rate, z rate, speed, height], for `chopBasis` and `writeChop`. */
+const CHOP_WAVES = [
+  [0.33, 0, 0.85, 0.16],
+  [0, 0.47, -0.7, 0.12],
+  [0.22, 0.31, 1.15, 0.08],
+  [0.9, -0.62, 1.6, 0.035],
+] as const;
+
+/**
+ * Sine and cosine of each wave's place-only phase at fixed points (x, z pairs), worked out once, so
+ * `writeChop` can move a whole surface with a few sines a frame instead of one per wave per point.
+ */
+export function chopBasis(points: ArrayLike<number>) {
+  const count = points.length / 2;
+  const basis = new Float32Array(count * CHOP_WAVES.length * 2);
+  for (let i = 0; i < count; i += 1) {
+    const x = points[i * 2]!;
+    const z = points[i * 2 + 1]!;
+    CHOP_WAVES.forEach(([kx, kz], w) => {
+      const phase = x * kx + z * kz;
+      basis[(i * CHOP_WAVES.length + w) * 2] = Math.sin(phase);
+      basis[(i * CHOP_WAVES.length + w) * 2 + 1] = Math.cos(phase);
+    });
+  }
+  return basis;
+}
+
+const timeSin = new Float64Array(CHOP_WAVES.length);
+const timeCos = new Float64Array(CHOP_WAVES.length);
+
+/** The unweighted chop at each `chopBasis` point at `time`, into `out`: sin(a + b) = sin a cos b + cos a sin b. */
+export function writeChop(basis: Float32Array, time: number, out: Float32Array) {
+  CHOP_WAVES.forEach(([, , speed, amp], w) => {
+    timeSin[w] = Math.sin(time * speed) * amp;
+    timeCos[w] = Math.cos(time * speed) * amp;
+  });
+  for (let i = 0, b = 0; i < out.length; i += 1) {
+    let chop = 0;
+    for (let w = 0; w < CHOP_WAVES.length; w += 1, b += 2) chop += basis[b]! * timeCos[w]! + basis[b + 1]! * timeSin[w]!;
+    out[i] = chop;
+  }
+}
+
 /** Texture offset per second for each meter per second of wind; ripples run well ahead of the float they push. */
 export const STREAK_WIND = 0.5;
 export const DETAIL_WIND = 0.25;

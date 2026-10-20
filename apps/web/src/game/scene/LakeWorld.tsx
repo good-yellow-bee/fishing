@@ -248,7 +248,7 @@ import { fx } from "../fx";
 import { useSettings } from "../settings";
 import { BOAT_DECK, boat, boatPathPoint } from "./boat";
 import { CREEK_BANK, CREEK_HALF_WIDTH, CREEK_ROCKS, creekRibbon, nearCreek } from "./creek";
-import { bedColor, bedHeight, causticStrength, glitterDirection, glitterOnWater, waterDepthColor, waterHeight, waterHeightWithShoreWeight, surfaceScroll, waterShoreWeight } from "./water";
+import { bedColor, bedHeight, causticStrength, glitterDirection, glitterOnWater, waterDepthColor, waterHeight, surfaceScroll, waterShoreWeight, chopBasis, writeChop } from "./water";
 import { DockFrost } from "./DockFrost";
 import { WindowGlow } from "./WindowGlow";
 import { lazyPart } from "./lazyPart";
@@ -986,12 +986,18 @@ function makeWaveSurface(radiusX: number, radiusZ: number) {
   }
   geometry.userData.shoreWeights = shoreWeights;
   geometry.userData.tints = tints;
+  const worldPoints = new Float32Array(position.count * 2);
+  for (let i = 0; i < position.count; i += 1) {
+    worldPoints[i * 2] = base[i * 2]!;
+    worldPoints[i * 2 + 1] = -base[i * 2 + 1]! + LAKE_CENTER_Z;
+  }
+  geometry.userData.chopBasis = chopBasis(worldPoints);
+  geometry.userData.chop = new Float32Array(position.count);
   return geometry;
 }
 
 function displaceWater(geometry: THREE.BufferGeometry, time: number) {
   const position = geometry.getAttribute("position") as THREE.BufferAttribute;
-  const base = geometry.userData.base as Float32Array;
   const shoreWeights = geometry.userData.shoreWeights as Float32Array;
   const tints = geometry.userData.tints as Float32Array;
   let colors = geometry.getAttribute("color") as THREE.BufferAttribute | undefined;
@@ -999,11 +1005,10 @@ function displaceWater(geometry: THREE.BufferGeometry, time: number) {
     colors = new THREE.BufferAttribute(new Float32Array(position.count * 3), 3);
     geometry.setAttribute("color", colors);
   }
+  const chop = geometry.userData.chop as Float32Array;
+  writeChop(geometry.userData.chopBasis as Float32Array, time, chop);
   for (let i = 0; i < position.count; i += 1) {
-    const x = base[i * 2]!;
-    const y = base[i * 2 + 1]!;
-    const worldZ = -y + LAKE_CENTER_Z;
-    const height = waterHeightWithShoreWeight(x, worldZ, time, shoreWeights[i]!);
+    const height = chop[i]! * shoreWeights[i]!;
     position.setZ(i, height);
     const crest = 1 + height * 0.55;
     colors.setXYZ(i, tints[i * 3]! * crest, tints[i * 3 + 1]! * crest, tints[i * 3 + 2]! * crest);
