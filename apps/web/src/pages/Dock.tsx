@@ -1030,14 +1030,14 @@ export function DockPage() {
       ? null
       : lineAt(game.stance) && lineAt(game.stance) !== "soaking"
         ? "check"
-        : !game.nightLine && (game.liveShiner || game.bucket > 0) && isFishingStance(game.stance) && game.stance !== "open" && nightLineKinds(game.stance, me.profile).length > 0
+        : !game.nightLine && (game.liveShiner || game.bucket > 0 || isLiveBait(lure)) && isFishingStance(game.stance) && game.stance !== "open" && nightLineKinds(game.stance, me.profile).length > 0
           ? "set"
           : null;
   const lineAction = (target: WalkTarget) => (target === game.stance ? stanceLine : null);
   // A bank whose giant is still out there, or where the night line is out, says so after its other news.
   const signNote = (target: WalkTarget, label: string) => {
     const action = lineAction(target);
-    if (action) return action === "set" ? t("{bank}: leave the shiner out on a night line here", { bank: t(label) }) : t("{bank}: bring in your night line", { bank: t(label) });
+    if (action) return action === "set" ? (game.liveShiner || game.bucket > 0 ? t("{bank}: leave the shiner out on a night line here", { bank: t(label) }) : t("{bank}: leave a worm out on a night line here", { bank: t(label) })) : t("{bank}: bring in your night line", { bank: t(label) });
     const giant = giantAt(target);
     const note = bankNote(target, label);
     const withGiant = giant ? t("{note} · {name}, its giant, is still out there", { note: note ?? t(label), name: t(giant.name) }) : note;

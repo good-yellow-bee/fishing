@@ -204,7 +204,7 @@ export const BADGES: readonly Badge[] = [
   {
     id: "giant-hunter",
     label: "Giant hunter",
-    blurb: "Be first to land three of the lake's weekly giants.",
+    blurb: "Land three of the lake's weekly giants, first or after one was let go.",
     need: 3,
     have: (_facts, history) => history.giants ?? 0,
   },

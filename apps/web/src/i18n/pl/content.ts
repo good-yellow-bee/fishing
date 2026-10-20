@@ -196,7 +196,7 @@ export const PL_CONTENT: PlBook = {
   "Bass slam": "Bassowy szlem",
   "Land a smallmouth and a largemouth bass on the same day.": "Złów bassa małogębowego i wielkogębowego tego samego dnia.",
   "Giant hunter": "Łowca olbrzymów",
-  "Be first to land three of the lake's weekly giants.": "Bądź pierwszą osobą, która złowi trzy cotygodniowe olbrzymy jeziora.",
+  "Land three of the lake's weekly giants, first or after one was let go.": "Złów trzy cotygodniowe olbrzymy jeziora, jako pierwsza osoba albo po ich wypuszczeniu.",
   "Trout slam": "Pstrągowy szlem",
   "Land a brook trout, a rainbow trout and a salmon on the same day.": "Złów pstrąga źródlanego, tęczowego i łososia tego samego dnia.",
   "Regular": "Stały bywalec",

@@ -2258,16 +2258,18 @@ export function useFishingGame(
   /** Leave the shiner on the hook out on a night line at this bank, for a later visit to check. */
   const setNightLine = () => {
     const spot = stanceRef.current;
-    if (!profile || nightLine || (!liveShinerRef.current && bucketRef.current === 0) || phaseRef.current !== "idle" || !isFishingStance(spot) || spot === "open" || nightLineKinds(spot, profile).length === 0) return;
+    // With no shiner to spare, a worm on the hook goes out instead: free, but fewer night feeders come to it.
+    const shiner = liveShinerRef.current || bucketRef.current > 0;
+    if (!profile || nightLine || (!shiner && !isLiveBait(lureRef?.current)) || phaseRef.current !== "idle" || !isFishingStance(spot) || spot === "open" || nightLineKinds(spot, profile).length === 0) return;
     // A spare from the bucket goes out first, so the shiner on the hook stays for casting.
     if (bucketRef.current > 0) keepBucket(profile.userId, bucketRef.current - 1);
-    else hookShiner(null);
+    else if (shiner) hookShiner(null);
     const setAt = Date.now();
-    keepNightLine(profile.userId, { spot, setAt });
+    keepNightLine(profile.userId, { spot, setAt, ...(shiner ? {} : { bait: "worm" as const }) });
     // The forecast tells the night's sky, and the sky tells how likely the line is to hold a fish.
     const sky = nightSkyFor(setAt);
     const tonight = sky === "rain" ? t("Rain tonight: the night feeders will be roaming.") : sky === "clear" ? t("A clear night: the feeders keep close to cover, so the line may come in empty.") : "";
-    setHint([t("You leave the shiner out on a night line here. Come back to check it once the night is out, and within two days."), tonight].filter(Boolean).join(" "));
+    setHint([shiner ? t("You leave the shiner out on a night line here. Come back to check it once the night is out, and within two days.") : t("You leave a worm out on a night line here. Come back to check it once the night is out, and within two days."), tonight].filter(Boolean).join(" "));
   };
 
   /** Bring in the night line set at this bank: a night feeder of the bank, or an empty hook. */
@@ -2288,7 +2290,7 @@ export function useFishingGame(
     // Not fought, so not clean, and it ends any run of clean fights.
     cleanRunRef.current = 0;
     // Logged at the hour it took the bait, the night, not when the line came in.
-    setOutcome({ kind: "landed", id: localId(), species: fish.species, weight: fish.weight, spot, clean: false, hour: "night", note: t("{fish} took the shiner on your night line.", { fish: t(fish.species.name) }) });
+    setOutcome({ kind: "landed", id: localId(), species: fish.species, weight: fish.weight, spot, clean: false, hour: "night", note: nightLine.bait === "worm" ? t("{fish} took the worm on your night line.", { fish: t(fish.species.name) }) : t("{fish} took the shiner on your night line.", { fish: t(fish.species.name) }) });
     setPhaseBoth("result");
     setHint(castHint("landed"));
   };
