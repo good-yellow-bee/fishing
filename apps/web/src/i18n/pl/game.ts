@@ -946,6 +946,8 @@ export const PL_GAME: PlBook = {
     "Jezioro działa teraz nieco płynniej na telefonie: w każdej klatce traci mniej czasu na ustalanie, jak narysować zwierzęta i ich cienie. A wiosenną nocą pyłek na wodzie nie świeci już na żółto w ciemności.",
   "At night your headlamp now draws moths: from spring to fall a few find the beam one by one and flutter round it, and on summer nights a bat comes now and then to hawk them.":
     "Nocą twoja czołówka przyciąga teraz ćmy: od wiosny do jesieni kilka po kolei odnajduje snop światła i krąży wokół niego, a w letnie noce co jakiś czas przylatuje nietoperz, żeby na nie zapolować.",
+  "Two outings on one water and day now show when each one's fish came, so a dawn and a dusk tell apart on Trips. The outing search finds those “with a note” and those left “untitled”, and an outing's page names kinds and lures as the rest of the book does.":
+    "Dwie wyprawy na jednym łowisku tego samego dnia pokazują, kiedy przyszły ich ryby, więc świt i zmierzch łatwo odróżnić na liście wypraw. Wyszukiwanie znajduje wyprawy „z notatką” i „bez tytułu”, a strona wyprawy nazywa gatunki i przynęty tak jak reszta dziennika.",
   "A water's page names kinds and lures as the rest of the book does, and each of its counts opens just the fish it counted. Its copied summary adds the next outing there and the fish lost or missed.":
     "Strona łowiska nazywa gatunki i przynęty tak jak reszta dziennika, a każda jej liczba otwiera dokładnie policzone ryby. Skopiowane podsumowanie dodaje następną wyprawę tam oraz ryby stracone lub chybione.",
   "On Bests, a season names the water it was won on beside its best lure, each opening its fish, and a kind's Last fish opens that fish. A kind's page and its catch cards name it as Bests does.":
