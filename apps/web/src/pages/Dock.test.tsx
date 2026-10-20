@@ -8,7 +8,7 @@ import { badgeProgress, catchPoints, CLEAN_RUN_BONUS, DAY_RUN_BONUS, GOLDEN_BONU
 import { buyGroundbait, buyShiner, getGiants, getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
-import { SHINER_KEY } from "../game/groundbaitBag";
+import { bagKey, shinerKey } from "../game/groundbaitBag";
 import { nightLineKey } from "../game/nightLine";
 import { baitBucketKey } from "../game/baitBucket";
 import { sessionKey, startSession } from "../game/session";
@@ -216,7 +216,7 @@ describe("dock weather", () => {
   it("turns the bank underfoot's own sign into the night line with a shiner on, and marks the bank a line is out at", async () => {
     vi.mocked(getMe).mockResolvedValue({ ...me, profile: { ...me.profile, strength: 5, accuracy: 5 } });
     landed.stance = "dock";
-    localStorage.setItem(SHINER_KEY, "live");
+    localStorage.setItem(shinerKey("u1"), "live");
     const page = await openDock("/?hour=day&sky=clear");
     const sign = (name: string) => [...page.querySelectorAll<HTMLButtonElement>(".walk-signs button")].find((button) => button.textContent?.startsWith(name));
     expect(sign("Night line")?.disabled).toBe(false);
@@ -761,7 +761,7 @@ describe("the shack's bait tin", () => {
     expect(buy.getAttribute("aria-disabled")).toBe("true");
     await act(async () => buy.click());
     expect(buyGroundbait).toHaveBeenCalledTimes(2);
-    expect(localStorage.getItem("stillwater.groundbait.v1")).toBe("3");
+    expect(localStorage.getItem(bagKey("u1"))).toBe("3");
   });
 
   it("will not sell to an angler short of points", async () => {
@@ -797,9 +797,9 @@ describe("the shack's bait tin", () => {
     await act(async () => buy.click());
     expect(buyShiner).toHaveBeenCalledTimes(2);
     expect(note.textContent).toBe("A shiner is on your hook, so another goes in your bait bucket, which holds 1 of 3.");
-    expect(localStorage.getItem("stillwater.shiner.v1")).toBe("live");
+    expect(localStorage.getItem(shinerKey("u1"))).toBe("live");
     expect(localStorage.getItem(baitBucketKey("u1"))).toBe("1");
-    localStorage.removeItem("stillwater.shiner.v1");
+    localStorage.removeItem(shinerKey("u1"));
   });
 });
 

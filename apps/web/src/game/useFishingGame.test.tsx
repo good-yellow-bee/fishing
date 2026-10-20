@@ -120,6 +120,7 @@ import { updateSettings } from "./settings";
 import { giantShyKey } from "./giantShy";
 import { nightLineKey, nightLineReadyAt } from "./nightLine";
 import { baitBucketKey } from "./baitBucket";
+import { bagKey, shinerKey } from "./groundbaitBag";
 import { carriesBait, FALSE_STRIKE_MS, FIGURE_EIGHT_ODDS, FIGURE_TURN_MS, FIGURE_WINDOW_MS, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TIRE_REASONS, TOPWATER_POPS, useFishingGame, WAIT_REASONS } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
@@ -489,12 +490,29 @@ describe("useFishingGame live shiner", () => {
     cast(surface);
     expect(liveShiner()).toBe("false");
     expect(hint()).toMatch(/^The live shiner swims down off the hook/);
+    // The browser-wide shiner from before anglers had their own hook went to this angler, and out on the cast.
     expect(kept.has("stillwater.shiner.v1")).toBe(false);
+    expect(kept.has(shinerKey(profile.userId))).toBe(false);
     act(() => vi.advanceTimersByTime(60_000));
     const buy = () => act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === "buy shiner") as HTMLButtonElement).click());
     buy();
     expect(liveShiner()).toBe("true");
-    expect(kept.get("stillwater.shiner.v1")).toBe("live");
+    expect(kept.get(shinerKey(profile.userId))).toBe("live");
+  });
+
+  it("keeps each angler's own shiner on the hook and handfuls in the bag", () => {
+    const kept = new Map<string, string>([[shinerKey(profile.userId), "lively"], [bagKey(profile.userId), "3"]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    mount();
+    const bag = () => container!.querySelector("[data-testid=groundbait]")?.textContent?.split("|")[0];
+    expect(liveShiner()).toBe("true");
+    expect(bag()).toBe("3");
+    act(() => root!.render(<Harness current={{ ...profile, userId: "other" }} />));
+    expect(liveShiner()).toBe("false");
+    expect(bag()).toBe(String(GROUNDBAIT_HANDFULS));
+    act(() => root!.render(<Harness />));
+    expect(liveShiner()).toBe("true");
+    expect(bag()).toBe("3");
   });
 
   it("leaves any other landed fish on the card", () => {
