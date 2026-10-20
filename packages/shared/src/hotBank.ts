@@ -42,3 +42,14 @@ export function hotBankForDay(date: Date): SpotId {
   if (order[0] === runOrder(run - 1)[HOT_BANKS.length - 1]) [order[0], order[1]] = [order[1]!, order[0]!];
   return order[day - run * HOT_BANKS.length]!;
 }
+
+/** The day's first casts at the crowded bank bite this much slower, for this many casts. */
+export const CROWDED_WAIT = 1.15;
+export const CROWDED_CASTS = 6;
+
+/** The bank another angler fishes on this local day: the same for everyone that day, never the day's hot bank. */
+export function crowdedBankForDay(date: Date): SpotId {
+  const hot = hotBankForDay(date);
+  const others = HOT_BANKS.filter((bank) => bank !== hot);
+  return others[Math.floor(seeded(dayNumber(date) * 31 + 5)() * others.length)]!;
+}

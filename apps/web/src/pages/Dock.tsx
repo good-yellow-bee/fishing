@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import {
   canUseSpot,
   hotBankForDay,
+  crowdedBankForDay,
   DROPOFF_LEVEL,
   INLET_LEVEL,
   catchPoints,
@@ -202,6 +203,7 @@ export function DockPage() {
   // The real moon, read once per visit; ?moon= pins the phase for testing.
   const moon = moonFromSearch(params.toString()) ?? moonPhase(openedAt);
   const hotBank = useMemo(() => hotBankForDay(openedAt), [openedAt]);
+  const crowdedBank = useMemo(() => crowdedBankForDay(openedAt), [openedAt]);
   // The field log's wind for the day, as a drift on the sitting float.
   const wind = useMemo(() => dailyWind(openedAt, sky), [openedAt, sky]);
   const rising = eveningRiseOn(hour, season, sky, wind.wind);
@@ -1125,6 +1127,7 @@ export function DockPage() {
         <aside className="stance-chip" data-stance={game.stance} aria-label={t("Where you stand")}>
           {stanceLabel}
           {!rowing && game.stance === hotBank && <small className="stance-hot"> · {t("biting today")}</small>}
+          {!rowing && !mercy && game.stance === crowdedBank && <small className="stance-cold"> · {t("another angler here today")}</small>}
           {!rowing && isFishingStance(game.stance) && game.stance !== "open" && favoredNow(game.stance) && <small className="stance-hot"> · {t("bites sooner now")}</small>}
           {rising && <small className="stance-hot"> · {t("fish rising")}</small>}
           {!rowing && clouded && isFishingStance(game.stance) && SHALLOW_BANKS.has(game.stance) && <small className="stance-hot"> · {t("cloud over the sun")}</small>}

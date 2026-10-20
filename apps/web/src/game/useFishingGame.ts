@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   hotBankForDay,
+  crowdedBankForDay,
+  CROWDED_CASTS,
+  CROWDED_WAIT,
   downWeight,
   GROUNDBAIT_CARRY,
   anglerLevel,
@@ -1027,9 +1030,13 @@ export function useFishingGame(
     // A bank fished hard yesterday keeps its fish wary for today's first casts there; as with today's pressure, fish on
     // groundbait or a lure they haven't seen don't mind, and a beginner is spared.
     const banks = loadBankMemory(current.userId);
-    const yesterdayWait = waryFromYesterday(banks, spotRef.current) && !switched.relieved && !bait.baited && !mercyRef.current ? YESTERDAY_WAIT : 1;
+    const unrelieved = !switched.relieved && !bait.baited && !mercyRef.current;
+    const yesterdayWait = waryFromYesterday(banks, spotRef.current) && unrelieved ? YESTERDAY_WAIT : 1;
+    // Another angler fishes one bank each day, so its first casts meet fish already wary; told once, not stacked on yesterday's.
+    const crowdedWait = yesterdayWait === 1 && crowdedBankForDay(new Date()) === spotRef.current && (banks.today.casts[spotRef.current] ?? 0) < CROWDED_CASTS && unrelieved ? CROWDED_WAIT : 1;
     saveBankMemory(current.userId, countAtBank(banks, spotRef.current, "casts"));
     if (yesterdayWait > 1) reasons.unshift(t("This bank was fished hard yesterday, so its fish are still wary for your first casts."));
+    if (crowdedWait > 1) reasons.unshift(t("Another angler has been fishing this bank today, so its fish are wary for your first casts."));
     // The visit's first cast at a bank meets fish that haven't seen a lure today; it is told last, so the bank's own reasons come first.
     // The anchor's splash puts the fish down for a few seconds; a cast into it doesn't spend the fresh water's first look.
     const anchorWait = anchorSplashWaitMul(spotRef.current, boat.mode === "anchored" ? Date.now() - boat.anchoredAt : null);
@@ -1106,7 +1113,7 @@ export function useFishingGame(
     const hotBank = hotBankForDay(new Date()) === spotRef.current;
     const unschooledWait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current, castPerfectRef.current);
     // However many bonuses stack, the bite never comes before the floor, so a nibble still fits.
-    const wait = stackWaitMs(unschooledWait, castSkipRef.current ? SKIP_CAST_WAIT : 1, castPadsRef.current ? LILY_COVER_WAIT : 1, castEdgeRef.current ? ROCK_EDGE_WAIT : 1, castFarRockRef.current ? FAR_ROCK_WAIT : 1, castFoamRef.current ? FOAM_LANE_WAIT : 1, castBedRef.current ? SUNFISH_BED_WAIT : 1, castCrayfishRef.current ? CRAYFISH_JIG_WAIT : 1, castTadpoleRef.current ? TADPOLE_WAIT : 1, castFryRef.current ? KINGFISHER_FRY_WAIT : 1, castLogRef.current ? SUNKEN_LOG_WAIT : 1, castBugRef.current ? SURFACE_BUG_WAIT : 1, castMinnowRef.current ? LANTERN_MINNOW_WAIT : 1, castMidgeRef.current ? MIDGE_RISE_WAIT : 1, castWeedRef.current === "topwater" ? DUCKWEED_TOPWATER_WAIT : castWeedRef.current === "fouled" && !mercyNow ? DUCKWEED_FOUL_WAIT : 1, schoolFish ? SCHOOL_WAIT : 1, bait.baited ? GROUNDBAIT_WAIT : 1, spooked ? SPOOK_WAIT : 1, washedWait, pressureWait, yesterdayWait, freshWait, topwaterWait, chopWait, stormWait, rainComingWait, fogLiftWait, frontWait, turnoverWait, swingWait, glareWait, shadowWait, darkWait, nightTopwaterWait, flashWait, jigWait, winterWait, shallowsWait, inletWait, fallWait, heatWait, shadeWait, lanternWait, sunWait, blowWait, windwardWait, cloudWait, moonWait, driftWait, rockWait, pilingWait, spoonWait, reedWait, floatWait, streamerWait, washWait, flowWait, knockWait, nightWait, hatchWait, thumpWait, colourWait, anchorWait, lampWait, lineWait, castFrenzyRef.current ? FRENZY_WAIT : 1);
+    const wait = stackWaitMs(unschooledWait, castSkipRef.current ? SKIP_CAST_WAIT : 1, castPadsRef.current ? LILY_COVER_WAIT : 1, castEdgeRef.current ? ROCK_EDGE_WAIT : 1, castFarRockRef.current ? FAR_ROCK_WAIT : 1, castFoamRef.current ? FOAM_LANE_WAIT : 1, castBedRef.current ? SUNFISH_BED_WAIT : 1, castCrayfishRef.current ? CRAYFISH_JIG_WAIT : 1, castTadpoleRef.current ? TADPOLE_WAIT : 1, castFryRef.current ? KINGFISHER_FRY_WAIT : 1, castLogRef.current ? SUNKEN_LOG_WAIT : 1, castBugRef.current ? SURFACE_BUG_WAIT : 1, castMinnowRef.current ? LANTERN_MINNOW_WAIT : 1, castMidgeRef.current ? MIDGE_RISE_WAIT : 1, castWeedRef.current === "topwater" ? DUCKWEED_TOPWATER_WAIT : castWeedRef.current === "fouled" && !mercyNow ? DUCKWEED_FOUL_WAIT : 1, schoolFish ? SCHOOL_WAIT : 1, bait.baited ? GROUNDBAIT_WAIT : 1, spooked ? SPOOK_WAIT : 1, washedWait, pressureWait, yesterdayWait, crowdedWait, freshWait, topwaterWait, chopWait, stormWait, rainComingWait, fogLiftWait, frontWait, turnoverWait, swingWait, glareWait, shadowWait, darkWait, nightTopwaterWait, flashWait, jigWait, winterWait, shallowsWait, inletWait, fallWait, heatWait, shadeWait, lanternWait, sunWait, blowWait, windwardWait, cloudWait, moonWait, driftWait, rockWait, pilingWait, spoonWait, reedWait, floatWait, streamerWait, washWait, flowWait, knockWait, nightWait, hatchWait, thumpWait, colourWait, anchorWait, lampWait, lineWait, castFrenzyRef.current ? FRENZY_WAIT : 1);
     // When the fish still about this bank is the one biting, its shadow closes in on the float over the wait.
     setLurkerCloseInMs(lost.again ? wait : 0);
     // A topwater lure is hit at the top, so every fish takes it without a nibble.
