@@ -124,7 +124,7 @@ export function validateCatch(
   const best = bestBonus(request.weight, priorBest, othersBest);
   const dayRun = dayRunBonus(catchDays, request.day);
   const mastery = masteryBonus(priorCaught);
-  const paid: [BonusId, boolean][] = [["golden", golden > 1], ["weekly", weekly > 1], ["cleanRun", cleanRun > 1], ["lodgeRecord", lodge > 1], ["pb", lodge === 1 && best > 1], ["dayRun", dayRun > 1], ["mastery", mastery > 1]];
+  const paid: [BonusId, boolean][] = [["golden", golden > 1], ["weekly", weekly > 1], ["cleanRun", cleanRun > 1], ["lodgeRecord", lodge > 1], ["pb", lodge === 1 && personalBestBonus(request.weight, priorBest) > 1], ["dayRun", dayRun > 1], ["mastery", mastery > 1]];
   return { ok: true, points: catchPoints(species, request.weight, request.clean, weekly * golden * cleanRun * best * dayRun * mastery), species, bonuses: paid.filter(([, on]) => on).map(([id]) => id) };
 }
 

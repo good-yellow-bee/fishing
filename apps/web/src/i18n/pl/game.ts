@@ -160,6 +160,8 @@ export const PL_GAME: PlBook = {
   "Light line: it snaps sooner, so keep out of the red": "Cienka żyłka: pęka szybciej, więc nie wchodź na czerwone",
   "Heavy line: it holds more strain before it snaps": "Gruba żyłka: wytrzyma większe napięcie, zanim pęknie",
   "Lodge record · was {weight} ({holder})": "Rekord przystani · było {weight} ({holder})",
+  "Lodge record · 1.5× points": "Rekord przystani · 1,5× punktów",
+  "First fish of a run of days · 1.5× points": "Pierwsza ryba w serii dni · 1,5× punktów",
   "Drag: light": "Hamulec: lekki",
   "Drag: normal": "Hamulec: zwykły",
   "Drag: heavy": "Hamulec: mocny",

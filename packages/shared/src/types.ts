@@ -1,3 +1,4 @@
+import type { BonusId } from "./rules.ts";
 import type { LakeHour } from "./hour.ts";
 import type { LakeSeason } from "./season.ts";
 import type { Sky } from "./weather.ts";
@@ -54,8 +55,8 @@ export type CatchRecord = {
   requestId: string | null;
   /** Another angler's let-go fish, landed again: the server paid the tag. */
   tagged: boolean;
-  /** The bonuses the server paid on it (names from shared `BonusId`). */
-  bonuses: string[];
+  /** The bonuses the server paid on it; null on catches saved before bonuses were kept. */
+  bonuses: BonusId[] | null;
   createdAt: string;
 };
 

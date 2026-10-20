@@ -655,7 +655,7 @@ export function toCatch(row: CatchRow) {
     released: row.released === 1,
     requestId: row.request_id,
     tagged: !!row.tagged_from,
-    bonuses: (row.bonuses ? row.bonuses.split(",") : []) as BonusId[],
+    bonuses: row.bonuses == null ? null : (row.bonuses ? (row.bonuses.split(",") as BonusId[]) : []),
     createdAt: row.created_at,
   };
 }

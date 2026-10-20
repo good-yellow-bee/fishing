@@ -243,10 +243,23 @@ describe("the landed card's points", () => {
     expect(card.textContent).not.toContain("Tagged by Mara");
   });
 
+  it("shows a mastery stamp the server paid even when the card didn't reckon it", async () => {
+    const bass = fishById("smallmouth-bass")!;
+    vi.mocked(recordCatch).mockResolvedValue({ id: "c-m", points: 30, speciesId: bass.id, weight: 2 });
+    const saved = { ...me, catches: [{ id: "c-m", userId: "u", speciesId: bass.id, weight: 2, points: 30, spot: "dock" as const, hour: null, sky: null, season: null, golden: false, released: false, requestId: "catch-mastered", tagged: false, bonuses: ["mastery" as const], createdAt: new Date().toISOString() }] };
+    vi.mocked(getMe).mockResolvedValueOnce(me).mockResolvedValue(saved);
+    landed.outcome = { kind: "landed", id: "catch-mastered", species: bass, weight: 2, spot: "dock", clean: false };
+    const page = await openDock("/");
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(page.querySelector(".landed-card")!.textContent).toContain("Mastered kind · 1.1× points");
+  });
+
   it("keeps a lodge tag's stamp when the server paid it", async () => {
     const bass = fishById("smallmouth-bass")!;
     vi.mocked(recordCatch).mockResolvedValue({ id: "c-paid", points: 60, speciesId: bass.id, weight: 2 });
-    const saved = { ...me, catches: [{ id: "c-paid", userId: "u", speciesId: bass.id, weight: 2, points: 60, spot: "dock" as const, hour: null, sky: null, season: null, golden: false, released: false, requestId: "catch-paid", tagged: true, bonuses: ["tag"], createdAt: new Date().toISOString() }] };
+    const saved = { ...me, catches: [{ id: "c-paid", userId: "u", speciesId: bass.id, weight: 2, points: 60, spot: "dock" as const, hour: null, sky: null, season: null, golden: false, released: false, requestId: "catch-paid", tagged: true, bonuses: ["tag" as const], createdAt: new Date().toISOString() }] };
     vi.mocked(getMe).mockResolvedValueOnce(me).mockResolvedValue(saved);
     landed.outcome = { kind: "landed", id: "catch-paid", species: bass, weight: 2, spot: "dock", clean: false, tag: { id: "t2", by: "Mara" } };
     const page = await openDock("/");
