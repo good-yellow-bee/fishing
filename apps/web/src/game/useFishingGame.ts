@@ -621,14 +621,19 @@ export function useFishingGame(
   const [schooled, setSchooled] = useState(false);
   // Handfuls left in the bag this visit, and the bank the last one still feeds, so the page can offer and show it.
   // A handful comes free with each visit; ones bought at the shack stay in the bag across a reload.
-  const [handfuls, setHandfuls] = useState(() => Math.max(GROUNDBAIT_HANDFULS, profile ? loadBag(profile.userId) : 0));
-  // Each angler's own bag, read when they sign in; a handful thrown or bought is kept for them.
+  const [handfuls, setHandfuls] = useState(GROUNDBAIT_HANDFULS);
+  const handfulsRef = useRef(GROUNDBAIT_HANDFULS);
+  /** A handful thrown or bought is kept for the angler it belongs to. */
+  const keepHandfuls = (next: number) => {
+    handfulsRef.current = next;
+    setHandfuls(next);
+    if (anglerIdRef.current) saveBag(anglerIdRef.current, next);
+  };
+  // Each angler's own bag, read when they sign in.
   useEffect(() => {
-    if (profile?.userId) setHandfuls(Math.max(GROUNDBAIT_HANDFULS, loadBag(profile.userId)));
+    handfulsRef.current = Math.max(GROUNDBAIT_HANDFULS, profile?.userId ? loadBag(profile.userId) : 0);
+    setHandfuls(handfulsRef.current);
   }, [profile?.userId]);
-  useEffect(() => {
-    if (profile?.userId) saveBag(profile.userId, handfuls);
-  }, [handfuls]);
   /** The line came out of a fight over the rocks or round a piling frayed, and snaps sooner until retied. */
   const frayedRef = useRef(false);
   const [frayed, setFrayed] = useState(false);
@@ -659,14 +664,12 @@ export function useFishingGame(
   };
   /** This cast went out on a washed-out worm, so its bite comes slower. */
   const castWashedRef = useRef(false);
-  /** A shiner left on the hook before a reload, landed or bought. */
-  const [keptShiner] = useState(() => (profile ? loadShiner(profile.userId) : null));
   /** A landed golden shiner hooked back on as live bait, or one bought at the shack, for the next cast. */
-  const liveShinerRef = useRef(keptShiner !== null);
+  const liveShinerRef = useRef(false);
   /** The shiner on the hook was landed in a clean fight, so it swims hard and draws more of the hunters. */
-  const livelyShinerRef = useRef(keptShiner === "lively");
-  const [liveShiner, setLiveShiner] = useState(keptShiner !== null);
-  const [livelyShiner, setLivelyShiner] = useState(keptShiner === "lively");
+  const livelyShinerRef = useRef(false);
+  const [liveShiner, setLiveShiner] = useState(false);
+  const [livelyShiner, setLivelyShiner] = useState(false);
   const hookShiner = (next: HookedShiner) => {
     liveShinerRef.current = next !== null;
     livelyShinerRef.current = next === "lively";
@@ -674,10 +677,9 @@ export function useFishingGame(
     setLivelyShiner(next === "lively");
     if (anglerIdRef.current) saveShiner(anglerIdRef.current, next);
   };
-  // The angler's own hook, read when they sign in.
+  // The angler's own hook, left on before a reload, read when they sign in.
   useEffect(() => {
-    if (!profile?.userId) return;
-    const kept = loadShiner(profile.userId);
+    const kept = profile?.userId ? loadShiner(profile.userId) : null;
     liveShinerRef.current = kept !== null;
     livelyShinerRef.current = kept === "lively";
     setLiveShiner(kept !== null);
@@ -2157,17 +2159,17 @@ export function useFishingGame(
 
   /** Toss a handful of groundbait off the bank the angler stands on: the next casts there bite sooner. */
   const throwGroundbait = useCallback(() => {
-    if (phaseRef.current !== "idle" || handfuls <= 0) return;
+    if (phaseRef.current !== "idle" || handfulsRef.current <= 0) return;
     const next = { spot: spotRef.current, casts: GROUNDBAIT_CASTS };
     groundbaitRef.current = next;
     setGroundbait(next);
-    setHandfuls((left) => left - 1);
+    keepHandfuls(handfulsRef.current - 1);
     fx.plop();
     setHint(t("You toss a handful of groundbait. The fish will gather to feed here for the next {casts} casts.", { casts: GROUNDBAIT_CASTS }));
-  }, [handfuls]);
+  }, []);
 
   /** A handful bought at the shack goes in the bag, which carries no more than GROUNDBAIT_CARRY. */
-  const addHandful = useCallback(() => setHandfuls((left) => Math.min(GROUNDBAIT_CARRY, left + 1)), []);
+  const addHandful = useCallback(() => keepHandfuls(Math.min(GROUNDBAIT_CARRY, handfulsRef.current + 1)), []);
 
   /** A live shiner bought at the shack goes on the hook for the next cast, or, with one on it already, into the bait bucket. */
   const addShiner = () => {
