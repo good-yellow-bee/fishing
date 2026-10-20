@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState, Suspense, type ComponentRef, type RefObject } from "react";
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, Suspense, type ComponentRef, type RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { useGLTF } from "./loadGltf";
@@ -40,6 +40,7 @@ import { dogOut } from "./dogMood";
 import { paperBoatOut } from "./paperDrift";
 import { DockMallard } from "./DockMallard";
 import { BankHedgehog } from "./BankHedgehog";
+import { BASE_FOV, fovFor } from "./cameraFov";
 import { PlayerHeadlamp } from "./PlayerHeadlamp";
 import { DockRobin, GroundRobin } from "./DockRobin";
 import { hedgehogOut } from "./hedgehogWalk";
@@ -336,6 +337,18 @@ function placeBobber(
 
 function isAiming(phase: ScenePhase) {
   return phase === "idle" || phase === "casting";
+}
+
+/** Opens the view up on a tall phone screen (cameraFov.ts). */
+function FitFov() {
+  const camera = useThree((state) => state.camera) as THREE.PerspectiveCamera;
+  const aspect = useThree((state) => state.size.width / state.size.height);
+  // Before the next frame draws, so a turned phone never shows a frame at the old view.
+  useLayoutEffect(() => {
+    camera.fov = fovFor(aspect);
+    camera.updateProjectionMatrix();
+  }, [camera, aspect]);
+  return null;
 }
 
 function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
@@ -2198,6 +2211,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       <PlayerMove phase={phase} />
       <FightMotion phase={phase} sim={sim} ambush={take === "ambush"} light={take === "light"} lift={take === "lift"} run={take === "run"} boatSwing={boatSwing} />
       <CameraRig phase={phase} sim={sim} />
+      <FitFov />
       <Tone hour={hour} />
       <FrameWatch />
       <FrameCap />
@@ -2298,7 +2312,7 @@ export const FishingWorld = memo(function FishingWorld(props: Props) {
       // "percentage" is PCF: three already draws its deprecated soft default that way, and saying so keeps the console quiet.
       shadows={quality.shadows ? "percentage" : false}
       dpr={quality.dpr}
-      camera={{ position: CAM_START, fov: 48, near: 0.1, far: 160 }}
+      camera={{ position: CAM_START, fov: BASE_FOV, near: 0.1, far: 160 }}
       gl={{ antialias: true }}
       style={{ cursor: "crosshair" }}
       onCreated={({ gl }) => {
