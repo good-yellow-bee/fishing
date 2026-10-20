@@ -1,22 +1,11 @@
-import { useEffect, useState } from "react";
-import { errorText, getStewards, type StewardsBoard } from "../api";
+import { getStewards } from "../api";
 import { t, useT } from "../i18n";
+import { RankedList, useBoardRead } from "./rankedBoard";
 
 /** This week's stewards on the lodge board: the anglers who let the most fish go since Monday (UTC). */
 export function StewardsCard() {
   useT();
-  const [board, setBoard] = useState<StewardsBoard | null>(null);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    let live = true;
-    getStewards()
-      .then((next) => live && setBoard(next))
-      .catch((err: Error) => live && setError(errorText(err.message)));
-    return () => {
-      live = false;
-    };
-  }, []);
+  const { board, error } = useBoardRead(getStewards);
 
   if (error) return <p className="warn" role="alert">{error}</p>;
   if (!board) return null;
@@ -28,13 +17,7 @@ export function StewardsCard() {
         <small>{t("Since Monday 00:00 UTC. Fish let go keep their banks stocked.")}</small>
       </p>
       {board.entries.length > 0 ? (
-        <ol className="derby-entries">
-          {board.entries.map((row) => (
-            <li key={row.userId} data-you={board.you && row.rank === board.you.rank ? "1" : "0"}>
-              {t("{rank}. {name} · {count} let go", { rank: row.rank, name: row.displayName, count: row.count })}
-            </li>
-          ))}
-        </ol>
+        <RankedList entries={board.entries} youRank={board.you?.rank ?? null} row={(row) => t("{rank}. {name} · {count} let go", { rank: row.rank, name: row.displayName, count: row.count })} />
       ) : (
         <p>{t("No one has let a fish go yet this week.")}</p>
       )}
