@@ -6,6 +6,7 @@ export const NEWS_KEY = "stillwater.news.v1";
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
   "A Line button by the bank signs now swaps the line on your reel between casts: light line brings more bites but snaps sooner, heavy line holds more strain but the fish see it. And the lodge board now names the week's stewards, the anglers who let the most fish go.",
+  "If the lake runs slowly on your phone, it now also turns shadows off and draws a lighter picture from your next visit, besides lighter effects, and says so; Settings can turn each back. And the moving water costs less of every frame, so the lake runs a little smoother everywhere.",
   "A bank where you kept thirty or more fish this week is fished down: its fish come smaller until it rests, and the bank chip says so. Fish you let go don't count, so releasing them keeps a bank stocked. And once a catch is saved, the landed card shows the points the server paid, with a lodge tag's stamp only when the tag was paid.",
   "On Bests, a season names the water it was won on beside its best lure, each opening its fish, and a kind's Last fish opens that fish. A kind's page and its catch cards name it as Bests does.",
   "On a phone held upright, the view now lifts while you play a fish, so you can watch the fight above the fight card instead of behind it. And with reduced motion on, the lake bed's shimmer slows and your boat no longer rocks.",
