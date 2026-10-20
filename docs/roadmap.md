@@ -1437,7 +1437,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC247~~ | ~~News card scene57 covers SC245 and SC246: moths at the headlamp and the bat that hawks them~~ (#1573) | scene | S |
 | ~~SC248~~ | ~~The cormorant keeps off the anchored boat: its rock is 3 m from the anchor spot, so with the boat at anchor it stood drying its wings right by the camera, filling the lower right of every boat session; as the boat comes out past 60% of its way it now slips off the rock (a quick hop, 3 s each way) and fishes out on the far side (diving as usual), coming back as the boat rows home (shyTarget, stepShy, cormorantAway, shyBlend)~~ (#1576) | scene | S |
 | ~~SC249~~ | ~~Bank-stand posts out of the way: each stand's lantern post stood on the inland edge right behind the angler, on the camera's line to them, hiding the body at Reeds; posts now stand to the angler's left on the stand (Reeds clearly clear; the Inlet's was already aside, and the Drop-off's small stand leaves little room)~~ (#1581) | scene | S |
-| ~~SC250~~ | ~~News card scene58 covers SC248 and SC249: the cormorant keeping off the anchored boat and the bank-stand posts moved aside~~ (#NEWS) | scene | S |
+| ~~SC250~~ | ~~News card scene58 covers SC248 and SC249: the cormorant keeping off the anchored boat and the bank-stand posts moved aside~~ (#1582) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
