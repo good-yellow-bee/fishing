@@ -1,7 +1,7 @@
 import { Fragment, useRef, useState, type ReactNode } from "react";
 import { MapAnchor } from "./MapAnchor";
 import { Link } from "react-router-dom";
-import { MOON_QUARTER_LABELS, catchesForTrip, itemsForTrip, localDate, moonQuarterOf, packedCount, recentCatches, shiftDate, spotById, type Logbook, type Spot, type Trip } from "@stillwater/shared";
+import { MOON_QUARTER_LABELS, itemsForTrip, localDate, moonQuarterOf, packedCount, recentCatches, shiftDate, spotById, type Logbook, type Spot, type Trip } from "@stillwater/shared";
 import { BookFile, SET_ASIDE_ID } from "./BookFile";
 import { readUnreadableBook } from "./storage";
 import { CatchSearch } from "./CatchSearch";
@@ -22,7 +22,7 @@ import { daysBetween } from "./spotOrder";
 import { speciesCounts } from "./speciesLink";
 import { findLink } from "./CatchSearch";
 import { bookFishDay, daysOut } from "./tripMonths";
-import { pieceTally } from "./pieceTally";
+import { bookLureName, pieceTally } from "./pieceTally";
 import { pieceName } from "./gear/pieceKey";
 import { countedBook, countedFish, nextBookMark, ownFish } from "./milestones";
 import { FROM_LIST } from "./leaveDeleted";
@@ -36,6 +36,7 @@ import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "./playLake";
 import { newestOutingFirst } from "./catchNeighbors";
 import { planText, saveOutingIcs } from "./TripPages";
 import { CopySummary } from "./CopySummary";
+import { lastOutingBefore } from "./outingAverage";
 
 function deskLine(now: Date): string {
   const hour = now.getHours();
@@ -93,10 +94,15 @@ function NextDayLine({ trip, spot, today, now }: { trip: Trip; spot: Spot | unde
 function LastTimeLine({ book, trip, today }: { book: Logbook; trip: Trip; today: string }) {
   // The outings as the outing's own page reads them: the sample week's made-up ones left out once the book has the angler's own.
   const here = countedBook(book).trips.filter((other) => other.spotId === trip.spotId);
-  const last = here
-    // Today's outing only once it has given a fish: one still to happen says nothing yet.
-    .filter((other) => other.id !== trip.id && other.date < trip.date && (other.date < today || (other.date === today && catchesForTrip(book, other.id).length > 0)))
-    .sort(newestOutingFirst(book))[0];
+  // The same outing "Last time here" names on the outing's own page: today's once it has a fish, last evening's still
+  // going in the small hours not yet.
+  const last = lastOutingBefore(
+    here.filter((other) => other.id !== trip.id),
+    trip.date,
+    outingDay(today),
+    outingFish(book, true),
+    book,
+  );
   if (!last) return null;
   // That water's fish of it, with those logged loose there that day, as the water's own page counts them.
   // A loose fish only when that was the day's one outing there: of a dawn and a dusk, it is neither's until filed.
@@ -105,6 +111,7 @@ function LastTimeLine({ book, trip, today }: { book: Logbook; trip: Trip; today:
   // The lure only when it led: after a one-all tie, naming either would be a guess.
   const [top, next] = pieceTally(fish, 2);
   const lure = top && top.count > (next?.count ?? 0) ? top : undefined;
+  const lureName = bookLureName(book.catches);
   // How long the water has rested, as the outing's own page says it: during a night session, to the outing's own day.
   const rest = daysBetween(last.date, trip.date < today ? trip.date : today);
   const day = rest >= 2 ? `${formatDay(last.date)} · ${tn(rest, "{n} day ago", "{n} days ago")}` : formatDay(last.date);
@@ -112,7 +119,7 @@ function LastTimeLine({ book, trip, today }: { book: Logbook; trip: Trip; today:
     <small className="next-last">
       <Link to={`/trips/${last.id}`} state={FROM_LIST}>
         {lure
-          ? t("Last time: {day} · {fish} · {lure}", { day, fish: fishSum(fish.length), lure: lure.count > 1 ? `${pieceName(lure.lure)} ×${lure.count}` : pieceName(lure.lure) })
+          ? t("Last time: {day} · {fish} · {lure}", { day, fish: fishSum(fish.length), lure: lure.count > 1 ? `${lureName(lure.lure)} ×${lure.count}` : lureName(lure.lure) })
           : t("Last time: {day} · {fish}", { day, fish: fishSum(fish.length) })}
       </Link>
     </small>

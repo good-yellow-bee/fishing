@@ -1,6 +1,7 @@
-import { localDate, type Trip } from "@stillwater/shared";
+import { localDate, type Logbook, type Trip } from "@stillwater/shared";
 import { num, t, tn } from "../i18n";
-import { outingFished } from "./tripDates";
+import { gaveWay, outingFished } from "./tripDates";
+import { newestOutingFirst } from "./catchNeighbors";
 
 /**
  * How the outings already fished here went: "2.5 fish an outing on average, 1 without a fish".
@@ -37,12 +38,13 @@ export function topOuting(trips: readonly Trip[], fishOn: (tripId: string) => nu
 
 /**
  * The latest outing fished before a day: today's counts once it has a fish, a planned one never.
- * "Last time here" on an outing and its form, so both name the same day.
+ * "Last time here" on an outing and its form, so both name the same day. With `book`, a day's outings go as the
+ * lists order them (of a dawn and a dusk, the dusk), and last evening's blank one that gave way to today's plan counts
+ * as the past day Recent lists it as.
  */
-export function lastOutingBefore(trips: readonly Trip[], before: string, today: string, fishOn: (tripId: string) => number): Trip | undefined {
-  return trips
-    .filter((trip) => trip.date < before && outingFished(trip, today, fishOn(trip.id) > 0))
-    .reduce<Trip | undefined>((last, trip) => (!last || trip.date > last.date ? trip : last), undefined);
+export function lastOutingBefore(trips: readonly Trip[], before: string, today: string, fishOn: (tripId: string) => number, book?: Logbook): Trip | undefined {
+  const done = trips.filter((trip) => trip.date < before && (outingFished(trip, today, fishOn(trip.id) > 0) || (book !== undefined && gaveWay(book, trip))));
+  return done.sort(book ? newestOutingFirst(book) : (a, b) => b.date.localeCompare(a.date))[0];
 }
 
 /**

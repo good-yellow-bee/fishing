@@ -4,6 +4,7 @@ import { t } from "../i18n";
 import { catchPage, useShowMore } from "./PagedCatches";
 import { tripsByMonth } from "./tripMonths";
 import { TripMonthHead } from "./TripMonthHead";
+import { useLogbook } from "./LogbookState";
 
 /**
  * Past outings, newest first, a page at a time under month headings, with Show more while any are left.
@@ -25,6 +26,7 @@ export function PagedTrips({
   counted?: (trip: Trip) => boolean;
 }) {
   const { shown, showMore, box } = useShowMore("trips");
+  const { book } = useLogbook();
   const { visible, more } = catchPage(trips, shown);
   const wholeMonths = new Map(tripsByMonth(trips).map((group) => [group.month, group.trips]));
   return (
@@ -33,7 +35,7 @@ export function PagedTrips({
       {tripsByMonth(visible).map((group) => (
         // Unnamed, so a season's months aren't a landmark each; the month's heading says which it is.
         <section key={group.month}>
-          <TripMonthHead month={group.month} trips={wholeMonths.get(group.month) ?? group.trips} fishOn={fishOn} counted={counted} />
+          <TripMonthHead month={group.month} trips={wholeMonths.get(group.month) ?? group.trips} fishOn={fishOn} counted={counted} book={book} />
           {stack ? <div className="stack">{group.trips.map(children)}</div> : group.trips.map(children)}
         </section>
       ))}

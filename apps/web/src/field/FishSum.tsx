@@ -14,12 +14,25 @@ const SEP = "\u00a0· ";
 /** `oneKind` is for a page about one species, where naming it again says nothing. */
 /** `best` is the fish the largest is picked from, when that is not all of them. */
 /** `list` is the page's list of fish, so the largest opens within it, its arrows stepping through the page's fish. */
-export function FishSum({ catches, oneKind = false, best = catches, list }: { catches: readonly CatchEntry[]; oneKind?: boolean; best?: readonly CatchEntry[]; list?: ListKey }) {
+/** `kindName` names a kind as the whole book does; by default as these fish write it most. */
+export function FishSum({
+  catches,
+  oneKind = false,
+  best = catches,
+  list,
+  kindName: named,
+}: {
+  catches: readonly CatchEntry[];
+  oneKind?: boolean;
+  best?: readonly CatchEntry[];
+  list?: ListKey;
+  kindName?: (species: string) => string;
+}) {
   useT();
   if (catches.length === 0) return null;
   // A kind however it was typed is one, and named as most of its fish are.
   const species = new Set(catches.map((entry) => kindKey(entry.species))).size;
-  const kindName = kindNames(catches);
+  const kindName = named ?? kindNames(catches);
   const bests = personalBests({ spots: [], trips: [], catches: [...best] });
   // One fish can be both the heaviest and the longest; two different ones are both named, so a long pike isn't hidden behind a light perch.
   const both = bests.heaviest && bests.longest && bests.heaviest.id !== bests.longest.id;

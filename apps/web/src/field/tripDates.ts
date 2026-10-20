@@ -3,6 +3,7 @@ import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 import { LATE_NIGHT_UNTIL } from "./suggestions";
 import { isSampleOnly, isSampleOuting, upcomingRealTrips } from "./bookCopy";
 import { newestOutingFirst } from "./catchNeighbors";
+import { bookFishDay } from "./tripMonths";
 
 export type DatePick = { label: "Last night" | "Today" | "Tomorrow" | "Saturday" | "Sunday" | "Next Saturday"; date: string };
 
@@ -44,10 +45,13 @@ export function stillGoing(book: Logbook, trip: Trip, now = new Date()): boolean
   return fish.length === 0 || fish.some((entry) => recentFish(entry.caughtAt, now));
 }
 
-/** An outing's own fish; with none, those logged loose on its water since its day began, which say how it went. */
+/**
+ * An outing's own fish; with none, those logged loose on its water on its day, which say how it went: by the day a fish
+ * counts on, so a small-hours fish of last evening's session doesn't put this morning's plan there under way.
+ */
 function fishOf(book: Logbook, trip: Trip): CatchEntry[] {
   const own = catchesForTrip(book, trip.id);
-  return own.length > 0 ? own : book.catches.filter((entry) => entry.tripId === null && entry.spotId === trip.spotId && localDate(new Date(entry.caughtAt)) >= trip.date);
+  return own.length > 0 ? own : book.catches.filter((entry) => entry.tripId === null && entry.spotId === trip.spotId && bookFishDay(book, entry) === trip.date);
 }
 
 /** Whether an outing is under way: a fish (its own or loose on its water that day), a lost fish or a missed strike. */
@@ -70,6 +74,22 @@ export function lateOutings(book: Logbook, now = new Date()): Trip[] {
   return book.trips
     .filter((trip) => offPlayLake(trip) && (sampleToo || !isSampleOuting(trip)) && stillGoing(book, trip, now) && (todayOutings.length === 0 || fishOf(book, trip).length > 0))
     .sort(newestOutingFirst(book));
+}
+
+const lateCache = new WeakMap<Logbook, { minute: number; ids: ReadonlySet<string> }>();
+
+/**
+ * Whether last evening's outing has ended in the small hours though its day is still the one counted: no longer among
+ * the late outings, as a blank evening that gave way to today's plan. Recent and Just back list it as past, so it is
+ * no plan any more, and a blank one is a blank day. The late outings are worked out once a minute per book.
+ */
+export function gaveWay(book: Logbook, trip: Trip, now = new Date()): boolean {
+  const today = localDate(now);
+  if (trip.date >= today || trip.date < outingDay(today, now)) return false;
+  const minute = Math.floor(now.getTime() / 60_000);
+  let late = lateCache.get(book);
+  if (late?.minute !== minute) lateCache.set(book, (late = { minute, ids: new Set(lateOutings(book, now).map((each) => each.id)) }));
+  return !late.ids.has(trip.id);
 }
 
 /** A fish in the last twelve hours; never one logged ahead of the clock. */

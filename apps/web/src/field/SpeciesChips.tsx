@@ -34,9 +34,9 @@ export function SpeciesChips({
           key={row.species}
           to={
             outing
-              ? findWithLink([exactTerm("outing", `${outing.date} ${outing.title}`), ...(water ? [exactTerm("water", water)] : [])].join(" + "), exactTerm("species", t(row.species)))
+              ? findWithLink([exactTerm("outing", `${outing.date} ${outing.title}`), ...(water ? [exactTerm("water", water)] : [])].join(" + "), exactTerm("species", kindName(row.species)))
               : within
-                ? findWithLink(within, exactTerm("species", t(row.species)))
+                ? findWithLink(within, exactTerm("species", kindName(row.species)))
                 : speciesLink(row.species)
           }
         >
@@ -52,7 +52,18 @@ export function SpeciesChips({
  * What an outing's fish took, most first, each opening that outing's fish on that lure: "Jig (2)".
  * Only once two or more fish name a lure.
  */
-export function LureChips({ catches, outing, water }: { catches: readonly CatchEntry[]; outing: { date: string; title: string }; water?: string }) {
+export function LureChips({
+  catches,
+  outing,
+  water,
+  lureName = pieceName,
+}: {
+  catches: readonly CatchEntry[];
+  outing: { date: string; title: string };
+  water?: string;
+  /** How the book names a lure; by default as these fish write it most. */
+  lureName?: (lure: string) => string;
+}) {
   useT();
   // One chip a lure however it was spelled, as the lure search it opens groups it: "Spinnerbait (4)", not two of 2.
   const lures = pieceTally(catches, Infinity);
@@ -62,8 +73,8 @@ export function LureChips({ catches, outing, water }: { catches: readonly CatchE
       <span className="meta">{t("Took:")}</span>
       {lures.map((row) => (
         // With the water too: two outings of a day can share a name, or both go unnamed.
-        <Link key={row.lure} to={findWithLink([exactTerm("outing", `${outing.date} ${outing.title}`), ...(water ? [exactTerm("water", water)] : [])].join(" + "), exactTerm("lure", pieceName(row.lure)))}>
-          {pieceName(row.lure)} ({row.count})
+        <Link key={row.lure} to={findWithLink([exactTerm("outing", `${outing.date} ${outing.title}`), ...(water ? [exactTerm("water", water)] : [])].join(" + "), exactTerm("lure", lureName(row.lure)))}>
+          {lureName(row.lure)} ({row.count})
         </Link>
       ))}
     </p>
