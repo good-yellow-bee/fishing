@@ -45,6 +45,7 @@ import { focusPageHeading } from "../pageFocus";
 import { bookLureName, onPiece } from "../pieceTally";
 import { newestOutingFirst } from "../catchNeighbors";
 import { kindNames } from "../speciesLink";
+import { twinName } from "../spotOrder";
 
 function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
   const { book } = useLogbook();
@@ -131,11 +132,18 @@ function LureRecord({ today }: { today: string }) {
   // for, once there are two; the sample's only while the book has nothing of the angler's own, as the record counts.
   const counted = countedBook(book);
   const packedFor = new Set(items.map((item) => item.tripId));
-  const bookAt = (spotId: string) => ({ ...book, trips: book.trips.filter((trip) => trip.spotId === spotId), catches: book.catches.filter((entry) => entry.spotId === spotId) });
-  // Only a water with a record of its own: one picked never empties the record and takes its choice with it.
-  const waters = counted.spots.filter(
-    (spot) => counted.trips.some((trip) => trip.spotId === spot.id && trip.date <= today && packedFor.has(trip.id)) && pieceRecords(bookAt(spot.id), items, today).length > 0,
-  );
+  // A water and any that read the same: its links search the name, which opens both.
+  const bookAt = (spotId: string) => {
+    const name = book.spots.find((spot) => spot.id === spotId)?.name ?? "";
+    const here = new Set(book.spots.filter((spot) => spot.id === spotId || twinName(spot.name, name)).map((spot) => spot.id));
+    return { ...book, trips: book.trips.filter((trip) => here.has(trip.spotId)), catches: book.catches.filter((entry) => here.has(entry.spotId)) };
+  };
+  // Only a water with a record of its own: one picked never empties the record and takes its choice with it. Waters
+  // that read the same are one choice, as their record is one.
+  const waters = counted.spots
+    .filter((spot) => counted.trips.some((trip) => trip.spotId === spot.id && trip.date <= today && packedFor.has(trip.id)) && pieceRecords(bookAt(spot.id), items, today).length > 0)
+    .filter((spot, index, all) => all.findIndex((other) => twinName(other.name, spot.name)) === index);
+
   const [waterId, setWaterId] = useState("all");
   const water = waters.find((spot) => spot.id === waterId) ?? null;
   const atWater = water ? bookAt(water.id) : book;

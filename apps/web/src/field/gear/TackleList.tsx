@@ -8,7 +8,7 @@ import { CopySummary } from "../CopySummary";
 import { pieceKey, pieceName, shownPieceKey } from "./pieceKey";
 import { isSampleOuting, isSampleTrip } from "../bookCopy";
 import { newestOutingFirst } from "../catchNeighbors";
-import { outingDay, stillGoing } from "../tripDates";
+import { gaveWay, outingDay, stillGoing } from "../tripDates";
 import "./gear.css";
 
 /**
@@ -91,9 +91,10 @@ export function TackleList({
   const took = new Map<string, number>();
   for (const entry of caught) took.set(readKey(entry.lure), (took.get(readKey(entry.lure)) ?? 0) + 1);
   const outing = trips.find((row) => row.id === tripId);
-  // Done once its day is over, unless it is last night's still going in the small hours (as the lure record takes it).
+  // Done once its day is over, unless it is last night's still going in the small hours and not given way to today's
+  // plan (as the lure record takes it).
   // Without the book's fish to tell, done once the outing's day (last night's in the small hours) is over.
-  const done = outing && (catches ? outing.date < localDate(new Date()) && !stillGoing(book, outing) : outing.date < outingDay(localDate(new Date())));
+  const done = outing && (catches ? outing.date < localDate(new Date()) && (!stillGoing(book, outing) || gaveWay(book, outing)) : outing.date < outingDay(localDate(new Date())));
   const idle = outing && caught.length > 0 && done ? rows.filter((item) => item.packed && isLureLabel(item.label) && !took.has(readKey(item.label))) : [];
   const [label, setLabel] = useState("");
   const [error, setError] = useState("");

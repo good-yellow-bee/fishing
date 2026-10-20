@@ -3,6 +3,7 @@ import { PLAY_LAKE_ID } from "./playLake";
 import { bookFishDay } from "./tripMonths";
 import { countedFish, ownFish } from "./milestones";
 import { isSampleSpot, isSampleOuting } from "./bookCopy";
+import { gaveWay } from "./tripDates";
 
 /** A water's name as a search reads it: "Śniardwy" and "sniardwy " are one name, so their links open both waters' fish. */
 export function foldName(name: string): string {
@@ -90,7 +91,8 @@ export function lastOutByWater(book: Logbook, today: string): Map<string, string
     if (day <= until && day > (last.get(spotId) ?? "")) last.set(spotId, day);
   };
   // Today's outing counts once it has a fish, which the fish below already says.
-  for (const trip of book.trips) if (trip.date < today && trip.spotId !== PLAY_LAKE_ID) note(trip.spotId, trip.date, today);
+  // Last evening's blank one that gave way to today's plan is a past day out, as Recent lists it.
+  for (const trip of book.trips) if ((trip.date < today || gaveWay(book, trip)) && trip.spotId !== PLAY_LAKE_ID) note(trip.spotId, trip.date, trip.date);
   // A night's small-hours fish on its outing's day, as the rest of the book dates it; one logged loose after midnight
   // on the calendar's day, though `today` is still last evening's.
   const calendarDay = localDate(new Date());
