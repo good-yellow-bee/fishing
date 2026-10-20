@@ -1775,7 +1775,7 @@ function Dragonflies() {
   const shapes = useMemo(() => ({ body: new THREE.CapsuleGeometry(0.02, 0.3, 3, 6).rotateX(Math.PI / 2), wing: dragonflyWingShape() }), []);
   const bodyMaterial = useMemo(() => new THREE.MeshToonMaterial({ color: "#3d6f78", gradientMap: toonRamp() }), []);
   const wingMaterial = useMemo(
-    () => new THREE.MeshBasicMaterial({ color: "#e6f1f2", transparent: true, opacity: 0.25, depthWrite: false, side: THREE.DoubleSide }),
+    () => new THREE.MeshBasicMaterial({ color: "#e6f1f2", transparent: true, opacity: 0.25, depthWrite: false, side: THREE.DoubleSide, forceSinglePass: true }),
     [],
   );
   useEffect(

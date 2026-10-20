@@ -25,7 +25,7 @@ export function DockRain({ light }: { light: number }) {
     [],
   );
   const ringMat = useMemo(
-    () => new THREE.MeshBasicMaterial({ color: SPLASH_COLOR, transparent: true, opacity: 0.5, depthWrite: false, toneMapped: false, side: THREE.DoubleSide }),
+    () => new THREE.MeshBasicMaterial({ color: SPLASH_COLOR, transparent: true, opacity: 0.5, depthWrite: false, toneMapped: false, side: THREE.DoubleSide, forceSinglePass: true }),
     [],
   );
   useEffect(() => {

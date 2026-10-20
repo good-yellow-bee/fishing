@@ -2064,6 +2064,7 @@ function StrikeSplash({ phase, roll }: { phase: ScenePhase; roll: boolean }) {
           toneMapped={false}
           fog={false}
           side={THREE.DoubleSide}
+          forceSinglePass
         />
       </mesh>
       <mesh ref={rim} visible={false} rotation={[-Math.PI / 2, 0, 0]} renderOrder={5} frustumCulled={false}>
@@ -2076,6 +2077,7 @@ function StrikeSplash({ phase, roll }: { phase: ScenePhase; roll: boolean }) {
           toneMapped={false}
           fog={false}
           side={THREE.DoubleSide}
+          forceSinglePass
         />
       </mesh>
       <mesh ref={flash} visible={false} rotation={[-Math.PI / 2, 0, 0]} renderOrder={6} frustumCulled={false}>
@@ -2088,6 +2090,7 @@ function StrikeSplash({ phase, roll }: { phase: ScenePhase; roll: boolean }) {
           toneMapped={false}
           fog={false}
           side={THREE.DoubleSide}
+          forceSinglePass
         />
       </mesh>
       <primitive object={sprayPool} />

@@ -43,7 +43,7 @@ export function Rainbow({ hour }: { hour: LakeHour }) {
     const at = sky.getAttribute("position") as THREE.BufferAttribute;
     points.forEach((p, i) => at.setXYZ(i, p[0], p[1], p[2]));
     const lake = makeRibbon(rows);
-    const options = { vertexColors: true, transparent: true, opacity: 0, depthWrite: false, fog: false, toneMapped: false, side: THREE.DoubleSide };
+    const options = { vertexColors: true, transparent: true, opacity: 0, depthWrite: false, fog: false, toneMapped: false, side: THREE.DoubleSide, forceSinglePass: true };
     return { sky, lake, skyMaterial: new THREE.MeshBasicMaterial(options), lakeMaterial: new THREE.MeshBasicMaterial(options) };
   }, [rows, points]);
   useEffect(

@@ -26,7 +26,7 @@ export function SunBreak({ discPos, wind }: { discPos: Vec3; wind: { x: number; 
   const materials = useMemo(
     () => ({
       patch: new THREE.MeshBasicMaterial({ map: textures.spot, color: SUN, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }),
-      beam: new THREE.MeshBasicMaterial({ map: textures.shaft, transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, toneMapped: false, fog: false }),
+      beam: new THREE.MeshBasicMaterial({ map: textures.shaft, transparent: true, depthWrite: false, side: THREE.DoubleSide, forceSinglePass: true, blending: THREE.AdditiveBlending, toneMapped: false, fog: false }),
     }),
     [textures],
   );

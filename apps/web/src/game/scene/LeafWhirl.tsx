@@ -21,7 +21,7 @@ export function LeafWhirl() {
   const geometry = useMemo(() => leafGeometry(), []);
   const ring = useMemo(() => new THREE.RingGeometry(0.55, 1, 24), []);
   const material = useMemo(() => new THREE.MeshToonMaterial({ gradientMap: toonRamp(), side: THREE.DoubleSide }), []);
-  const scuffMat = useMemo(() => new THREE.MeshBasicMaterial({ color: SCUFF, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide }), []);
+  const scuffMat = useMemo(() => new THREE.MeshBasicMaterial({ color: SCUFF, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide, forceSinglePass: true }), []);
   const colors = useMemo(() => LEAF_COLORS.map((c) => new THREE.Color(c)), []);
   const scratch = useMemo(() => new THREE.Object3D(), []);
   useEffect(

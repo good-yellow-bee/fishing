@@ -14,7 +14,7 @@ export function SunkenLeaves() {
   const mesh = useRef<THREE.InstancedMesh>(null);
   const geometry = useMemo(leafGeometry, []);
   // Seen through the water: drawn after it (renderOrder), part see-through so the water's tint shows.
-  const material = useMemo(() => new THREE.MeshToonMaterial({ gradientMap: toonRamp(), side: THREE.DoubleSide, transparent: true, opacity: 0.55, depthWrite: false }), []);
+  const material = useMemo(() => new THREE.MeshToonMaterial({ gradientMap: toonRamp(), side: THREE.DoubleSide, forceSinglePass: true, transparent: true, opacity: 0.55, depthWrite: false }), []);
   useEffect(
     () => () => {
       geometry.dispose();

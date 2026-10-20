@@ -108,7 +108,7 @@ export function NightAngler() {
   const fade = useMemo(() => beamFade(), []);
   const lights = useMemo(
     () => ({
-      beam: new THREE.MeshBasicMaterial({ map: fade, color: "#fff1c4", transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }),
+      beam: new THREE.MeshBasicMaterial({ map: fade, color: "#fff1c4", transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, forceSinglePass: true, toneMapped: false }),
       lamp: new THREE.MeshBasicMaterial({ color: LAMP, toneMapped: false }),
       lampGlow: new THREE.SpriteMaterial({ map: spot, color: LAMP, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }),
       stick: new THREE.MeshBasicMaterial({ color: STICK, toneMapped: false }),

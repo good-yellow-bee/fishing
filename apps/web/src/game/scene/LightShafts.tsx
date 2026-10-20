@@ -50,6 +50,7 @@ export function LightShafts({ discPos, color, strength }: { discPos: Vec3; color
         transparent: true,
         depthWrite: false,
         side: THREE.DoubleSide,
+        forceSinglePass: true,
         blending: THREE.AdditiveBlending,
         toneMapped: false,
         fog: false,
