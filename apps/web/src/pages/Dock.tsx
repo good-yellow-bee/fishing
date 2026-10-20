@@ -108,7 +108,7 @@ import { useCatchSync } from "../game/useCatchSync";
 import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
 import { rarityLabel } from "../game/logic";
 import { locale, t, tn, useT } from "../i18n";
-import { canTurnRuns, fightWind } from "../game/fight";
+import { boatSwingShare, canTurnRuns, fightWind } from "../game/fight";
 import { fightNotesText } from "../game/fightNotes";
 import { savePng, saveShareCard, shareCardFileName } from "../game/shareCard";
 import { lakePictureFileName, requestLakeShot } from "../game/scene/lakeShot";
@@ -911,6 +911,7 @@ export function DockPage() {
           released={landedReleased}
           moon={moon}
           wind={wind}
+          boatSwing={boatSwingShare(game.fight)}
           hotspot={game.hotspot}
           groundbait={game.groundbait}
           rising={rising}

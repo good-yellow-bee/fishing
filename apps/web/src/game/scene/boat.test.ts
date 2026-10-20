@@ -71,8 +71,8 @@ describe("the boat swinging to a run", () => {
   it("turns toward a run's side and squares up between runs", () => {
     expect(boatSwingTarget(2, 1)).toBeCloseTo(-BOAT_SWING);
     expect(boatSwingTarget(2, -0.5)).toBeCloseTo(BOAT_SWING * 0.5);
-    // A strong wind holds the hull back, as much as it costs the run in line.
-    expect(boatSwingTarget(2, 1, false, true)).toBeCloseTo(-BOAT_SWING * 0.15 / 0.35);
+    expect(boatSwingTarget(2, 1, false, 0.5)).toBeCloseTo(-BOAT_SWING * 0.5);
+    expect(boatSwingTarget(2, 1, true, 0.5)).toBe(0);
     expect(boatSwingTarget(1, 1)).toBe(0);
     expect(boatSwingTarget(0, -1)).toBe(0);
   });
