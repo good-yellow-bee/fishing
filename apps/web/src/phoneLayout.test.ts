@@ -97,8 +97,10 @@ describe("the fight card on a phone held upright", () => {
   });
 
   it("keeps to what a fight is read from on a touch screen, by height and text size", () => {
-    expect(touch).toContain("html[data-text-size] .fight-bar :is(.fight-clean, .fight-habit) {");
-    expect(css).toMatch(/and \(max-height: 760px\) \{\n  \.fight-bar \.fight-clean \{\n    display: none;/);
+    expect(touch).toContain(".fight-bar :is(.fight-controls, .fight-clean),");
+    expect(touch).toContain(".scene-wrap:has(.steer-buttons) .fight-bar .fight-habit,");
+    expect(touch).toContain('.scene-wrap:has(.steer-buttons):not([data-walkthrough="1"]) .fight-bar .fight-steer[data-call="calm"],');
+    expect(css).toMatch(/\(pointer: coarse\) and \(max-height: 500px\) \{\n  \.fight-bar \.fight-note \{\n    position: absolute;/);
     expect(css).toMatch(/and \(max-height: 700px\) \{\n  \.fight-bar \.fight-habit \{\n    display: none;/);
   });
 
@@ -149,9 +151,10 @@ describe("a fight on a phone held sideways with larger text", () => {
   });
 
   it("puts the card on the side away from the Reel button, clear of the fight in the middle", () => {
-    expect(block).toMatch(/\n  \.fight-bar \{\n    top: calc\(var\(--hud-bottom, 52px\) \+ 8px\);\n    bottom: auto;\n    left: 8px;\n    width: min\(320px, calc\(32vw \/ var\(--text-zoom, 1\)\)\);/);
+    expect(block).toMatch(/\n  \.fight-bar \{\n    bottom: calc\(96px \+ env\(safe-area-inset-bottom\)\);\n    left: 8px;\n    width: min\(320px, calc\(32vw \/ var\(--text-zoom, 1\)\)\);/);
+    expect(block).toMatch(/\.hud:has\(\+ \.scene-wrap\[data-phase="fight"\]\) \{\n    visibility: hidden;/);
     expect(block).toMatch(/html\[data-hand="left"\] \.fight-bar \{\n    right: 8px;\n    left: auto;/);
-    expect(block).toContain(".fight-bar :is(.fight-controls, .fight-clean, .fight-habit) {");
+    expect(block).toContain(".fight-bar :is(.fight-controls, .fight-clean, .fight-habit),");
   });
 });
 
