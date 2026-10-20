@@ -5,8 +5,10 @@ import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { inLake, onDockPlanks } from "@stillwater/shared";
 import { anglerPose } from "./pose";
-import { HOP_START, hopAt, hopStep, type HopState } from "./robinHop";
-import { robinAt, type RobinPose } from "./robinVisit";
+import { aboard } from "./boat";
+import { hopAt, hopStart, hopStep, type HopState } from "./robinHop";
+import type { ScenePhase } from "./types";
+import { robinAt, robinVisitIndex, type RobinPose } from "./robinVisit";
 import { toonRamp } from "./toon";
 import { useSkinnedFigure } from "./skinFigure";
 
@@ -103,25 +105,38 @@ function RobinBird({ name, poseAt }: { name: string; poseAt: (time: number) => R
   );
 }
 
+/** Dock-robin visits (robinVisit.ts numbers) the ground robin was out during: the dock robin sits those out, so there is only ever one robin. */
+const sharedVisits = new Set<number>();
+
 /** A robin dropping in on the dock's front posts, startled off early by a strike (robinVisit.ts). */
 export function DockRobin({ snow, startledAt }: { snow: boolean; startledAt: Readonly<{ current: number }> }) {
   const still = useReducedMotion();
-  const poseAt = useCallback((time: number) => robinAt(time, snow, still, startledAt.current), [snow, still, startledAt]);
+  const poseAt = useCallback(
+    (time: number) => {
+      const pose = robinAt(time, snow, still, startledAt.current);
+      return sharedVisits.has(robinVisitIndex(time)) ? { ...pose, here: false } : pose;
+    },
+    [snow, still, startledAt],
+  );
   return <RobinBird name="dock-robin" poseAt={poseAt} />;
 }
 
-/** The robin coming to the angler's feet while they fish from the bank by day (robinHop.ts). */
-export function GroundRobin() {
+/** The robin coming to the angler's feet while they stand ashore by day, off the dock and out of the boat (robinHop.ts). */
+export function GroundRobin({ phase }: { phase: ScenePhase }) {
   const still = useReducedMotion();
-  const state = useRef<HopState>(HOP_START);
+  const state = useRef<HopState | null>(null);
+  const lastPhase = useRef(phase);
   const poseAt = useCallback(
     (time: number) => {
-      // Only on dry ground off the dock: not on the boards, and not out in the boat.
-      const ashore = !onDockPlanks(anglerPose.x, anglerPose.z) && !inLake(anglerPose.x, anglerPose.z);
-      state.current = hopStep(state.current, time, anglerPose, ashore);
+      const ashore = !aboard() && !onDockPlanks(anglerPose.x, anglerPose.z) && !inLake(anglerPose.x, anglerPose.z);
+      const struck = phase === "fight" && lastPhase.current !== "fight";
+      lastPhase.current = phase;
+      const world = { dockRobinHere: robinAt(time).here && !sharedVisits.has(robinVisitIndex(time)), struck, still };
+      state.current = hopStep(state.current ?? hopStart(time), time, anglerPose, ashore, world);
+      if (state.current.mode !== "away") sharedVisits.add(robinVisitIndex(time));
       return hopAt(state.current, time, still);
     },
-    [still],
+    [still, phase],
   );
   return <RobinBird name="ground-robin" poseAt={poseAt} />;
 }
