@@ -1915,7 +1915,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT439~~ | ~~The Board lists the lodge's lost trophies still about the lake, by bank, with who lost each, so an angler can choose where to try for one~~ (#1664) | gameplay | S |
 | ~~GT440~~ | ~~News card 2026-10-20-game62 covers GT438-GT439: news of a lost trophy found, and the Board's lost trophies~~ (#1665) | ui | S |
 | ~~GT441~~ | ~~A lost trophy's lodge report takes its id from the client at the moment of the loss, so the angler's own foe holds it at once (landing it the same day closes the report) and a retried report is filed only once~~ (#1666) | gameplay | S |
-| ~~GT442~~ | ~~The pre-baited swim: groundbait thrown at a bank is kept per angler for the next visit; soon after it keeps its casts, left six hours or more the feeders have gathered and it fishes as freshly baited (the load says so), past two days it is gone~~ (#PR) | gameplay | M |
+| ~~GT442~~ | ~~The pre-baited swim: groundbait thrown at a bank is kept per angler for the next visit; soon after it keeps its casts, left six hours or more the feeders have gathered and it fishes as freshly baited (the load says so), past two days it is gone~~ (#1667) | gameplay | M |
 
 ## Risks / open questions for the owner
 
