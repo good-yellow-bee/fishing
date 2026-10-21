@@ -361,4 +361,14 @@ describe("the bank chip on a small upright phone with larger text", () => {
     expect(chipIn("@media (pointer: coarse) and (max-width: 375px) and (min-height: 501px) and (max-height: 667px) {")).toContain("-webkit-line-clamp: 6;");
     expect(chipIn("@media (pointer: coarse) and (max-width: 360px) and (min-height: 501px) and (max-height: 667px) {")).toContain("-webkit-line-clamp: 3;");
   });
+
+  it("lifts the hint clear of the walk stick on a touch phone, but never over the chip or the lure panel", () => {
+    const media = "@media (pointer: coarse) and (max-width: 800px) and (min-height: 501px) {";
+    const block = css.slice(css.indexOf(media), css.indexOf("\n}\n", css.indexOf(media)));
+    const top = /\.scene-wrap:not\(\[data-walkthrough="1"\]\) \.hint \{\s*top: ([^;]*);/.exec(block)?.[1].replace(/\s+/g, " ");
+    expect(top).toBe("max( calc(var(--hud-bottom, 140px) + 10px + max(var(--stance-h, 0px), var(--lure-h, 80px))), min( calc(var(--hud-bottom, 140px) + max(90px, calc(var(--stance-h, 0px) + 16px))), calc(100% - 208px / var(--text-zoom, 1) - 2px - var(--hint-h, 0px)) ) )");
+    const dock = readFileSync(`${import.meta.dirname}/pages/Dock.tsx`, "utf8");
+    expect(dock).toContain('wrap.style.setProperty("--lure-h"');
+    expect(dock).toContain('style.setProperty("--hint-h"');
+  });
 });

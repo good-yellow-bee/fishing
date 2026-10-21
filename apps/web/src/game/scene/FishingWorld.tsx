@@ -1,7 +1,6 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, Suspense, type ComponentRef, type RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { useGLTF } from "./loadGltf";
 import * as THREE from "three";
 import {
   CAST_RANGE,
@@ -88,6 +87,7 @@ import { LurkerShadow } from "./LurkerShadow";
 import { FollowShadow } from "./FollowShadow";
 import { GiantSwirl } from "./GiantSwirl";
 import { NightLineStake } from "./NightLineStake";
+import { SnappedFloat } from "./SnappedFloat";
 import type { LineState } from "./stakePose";
 import { ShinerTrap } from "./ShinerTrap";
 import type { trapState } from "../minnowTrap";
@@ -139,7 +139,7 @@ import {
 import { markSplash } from "./duckFlush";
 import { releaseDrop, releaseEntry, releasePitch, releasePoint, releaseRing } from "./releaseMotion";
 import { bobberRingHeight, waterHeight, waterRayHit } from "./water";
-import { applyToon, disposeMaterials, toonRamp } from "./toon";
+import { toonRamp } from "./toon";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
 import { aimInputs, listenForWaterAim, sameAim } from "./pointerAim";
@@ -150,7 +150,7 @@ import { castRing, CAST_RING_COLORS } from "./castRing";
 import { LIFT_START_AGE, liftDepth, liftFlop } from "./catchLift";
 import { sweetBand } from "../logic";
 import { settings, SHAKE_SCALE, updateSettings, useSettings } from "../settings";
-import { recolourFloatUvs } from "./floatColour";
+import { FloatModel, GLOW_TIP_Y } from "./FloatModel";
 import { createFrameWatch, noteEffectsSteppedDown, STEP_DOWN } from "../frameWatch";
 import { frameDue, frameThrottle, idleNow } from "./frameCap";
 import { GOLDEN_ACCENT, GOLDEN_COLOR } from "../../components/FishMark";
@@ -167,10 +167,6 @@ const PostOwl = lazyPart("night", "PostOwl");
 const Rainbow = lazyPart("weather", "Rainbow");
 const RodDragonfly = lazyPart("summer", "RodDragonfly");
 
-const BUOY_URL = "/models/buoy.glb";
-/** Top of the buoy model at its 0.32 scale, where the night tip sits. */
-const GLOW_TIP_Y = 0.46;
-useGLTF.preload(BUOY_URL);
 
 export type SimRef = { current: FightSim | null };
 
@@ -190,6 +186,8 @@ type Props = {
   follow?: "follow" | "turn" | null;
   /** Banks whose giant is still out this week: now and then it rolls out on their water. */
   giantBanks?: readonly SpotId[];
+  /** Banks a trophy that broke a line is still about: the snapped float it trails drifts on their water. */
+  lostFloatBanks?: readonly SpotId[];
   /** The bank where the angler's night line is out, if it is. */
   nightLineSpot?: SpotId | null;
   /** How that line stands (nightLine.ts nightLineState); passed apart from the spot so the memoized world keeps primitive props. */
@@ -1385,38 +1383,6 @@ function RisingFish({ phase, color, accent, size, build }: { phase: ScenePhase; 
   );
 }
 
-/** The float, its body painted the colour picked in Settings. */
-function FloatModel() {
-  const colour = useSettings().floatColour;
-  const { scene } = useGLTF(BUOY_URL);
-  const model = useMemo(() => {
-    const next = scene.clone(true);
-    next.traverse((obj) => {
-      if (!(obj instanceof THREE.Mesh)) return;
-      // The clone shares geometry with the cached model, so repaint a copy.
-      obj.geometry = obj.geometry.clone();
-      const uv = obj.geometry.getAttribute("uv") as THREE.BufferAttribute | undefined;
-      if (uv) recolourFloatUvs(uv.array as Float32Array, colour);
-    });
-    applyToon(next);
-    return next;
-  }, [scene, colour]);
-  useEffect(
-    () => () => {
-      model.traverse((obj) => {
-        if (obj instanceof THREE.Mesh) obj.geometry.dispose();
-      });
-      disposeMaterials(model);
-    },
-    [model],
-  );
-  return (
-    <group scale={0.32}>
-      <primitive object={model} />
-    </group>
-  );
-}
-
 function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, species, weight, level, hour, wind = NO_WIND, topwater = false }: LineAndBobberProps) {
   const look = lineLook(hour);
   const restOpacity = useRef(look.opacity);
@@ -2333,7 +2299,7 @@ function Tone({ hour }: { hour: LakeHour }) {
 
 const NO_BANKS: readonly SpotId[] = [];
 
-function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, follow = null, giantBanks = NO_BANKS, nightLineSpot = null, nightLineState = null, baitBucket = 0, topwater = false, hour, sky, season = DEFAULT_SEASON, species, weight, golden = false, released = false, moon, wind, boatSwing = 0, headlamp = false, hotspot, groundbait = null, groundbaitPrimed = false, shinerTrap = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
+function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, follow = null, giantBanks = NO_BANKS, lostFloatBanks = NO_BANKS, nightLineSpot = null, nightLineState = null, baitBucket = 0, topwater = false, hour, sky, season = DEFAULT_SEASON, species, weight, golden = false, released = false, moon, wind, boatSwing = 0, headlamp = false, hotspot, groundbait = null, groundbaitPrimed = false, shinerTrap = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
   // How this fish takes the bait: a topwater lure makes every take a hit at the top.
   const take = species !== null ? takeStyle(species.id, topwater) : null;
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
@@ -2408,6 +2374,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       <LurkerShadow phase={phase} lurking={lurking} closeInMs={lurkerCloseInMs} bobber={bobberWorld} />
       <FollowShadow phase={phase} follow={follow} bobber={bobberWorld} rodTip={rodTip} />
       <GiantSwirl banks={giantBanks} />
+      <SnappedFloat banks={lostFloatBanks} />
       {nightLineSpot && nightLineState && <NightLineStake bank={nightLineSpot} state={nightLineState} />}
       <BaitBucket count={baitBucket} />
       {shinerTrap && <ShinerTrap ready={shinerTrap === "ready"} />}
