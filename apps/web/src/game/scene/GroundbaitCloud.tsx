@@ -24,7 +24,7 @@ function softEdge() {
   return new THREE.CanvasTexture(canvas);
 }
 
-/** The muddy cloud a handful of groundbait leaves off the bank, thinning as its casts are fished out; with `feeding`, fish dimple over it. */
+/** The muddy cloud a handful of groundbait leaves off the bank, thinning as its casts are fished out; with `feeding`, fish dimple over it, more often on a swim built up. */
 export function GroundbaitCloud({ bait, feeding = false }: { bait: Groundbait; feeding?: boolean }) {
   const still = useReducedMotion();
   const geo = useMemo(() => new THREE.CircleGeometry(CLOUD_RADIUS, 32).rotateX(-Math.PI / 2), []);
@@ -53,7 +53,7 @@ export function GroundbaitCloud({ bait, feeding = false }: { bait: Groundbait; f
     mat.opacity = cloudOpacity(bait.casts);
     rings.current.forEach((ring, i) => {
       if (!ring) return;
-      const dimple = dimpleAt(i, t);
+      const dimple = dimpleAt(i, t, bait.built);
       ring.visible = feeding && !still && dimple.age < 1;
       if (!ring.visible) return;
       const x = at.x + dimple.dx;
