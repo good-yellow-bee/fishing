@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-21-game75";
+export const NEWS_ID = "2026-10-21-pa41";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "With larger text on a phone held sideways, the shore signs now stop beside the lure panel instead of running under it, and their row scrolls sideways with each label on one line. And in a row of signs that scrolls sideways, reaching a half-hidden sign with Tab now scrolls it whole into view, its focus ring inside; a tap leaves the row still, so the sign doesn't slide from under your finger.",
   "A carp or catfish lost over a swim topped up twice now scatters its feeders with its thrashing: the swim needs building up again, and its next two casts draw no feeder, as the lost fish's card says. And bait one bank three days running and its feeders come to expect it: the day's first handful there draws them in as after a top-up, so one more brings the big feeders.",
   "A swim you have topped up now looks it: its groundbait cloud grows thicker, up to the ten casts a swim holds, and its feeders dimple the water over it, the more often the more you fed it. And over a swim topped up all the way, where your lure would take the big feeders, a carp now and then rolls at the cloud's edge, its back and then its tail breaking the water.",
   "Groundbait is now best fed little and often: a handful thrown on a swim with two casts or fewer left tops it up, keeping its fish and drawing more feeders in, while one thrown too soon fills them up, so the next two casts bite slower. And a swim topped up twice draws the big feeders: carp and catfish come to it three times as often, and the hint and the card say so where your lure would draw them.",
