@@ -814,7 +814,7 @@ export function useFishingGame(
     setGroundbait(groundbaitRef.current);
     if (profile?.userId && swim && !now) saveSwim(profile.userId, null);
     if (now?.primedNow && profile?.userId) {
-      saveSwim(profile.userId, { spot: now.spot, casts: now.casts, at: now.at, primed: true, ...(now.bread ? { bread: true } : {}), ...(now.worm ? { worm: true } : {}) });
+      saveSwim(profile.userId, { spot: now.spot, casts: now.casts, at: now.at, primed: true, ...(now.bread ? { bread: true } : {}), ...(now.worm ? { worm: true } : {}), ...(now.landedBig ? { landedBig: now.landedBig } : {}) });
       const left = { bank: t(SPOT_LABELS[now.spot]), casts: now.casts };
       const primed = now.bread
         ? t("The groundbait and bread crumb you left at the {bank} have the feeders gathered there: {casts} casts of it.", left)
