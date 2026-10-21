@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { canLand, localDate, DOCK_STAND_X, DOCK_STAND_Z, FISH, type Giant, type LodgeLost, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind, type SpotId } from "@stillwater/shared";
 import { floodedInlet, makeFight, springRunTireMul, SPRING_RUN_TIRE, currentTireMul, CURRENT_FIGHTER_TIRE, type FightOutcome, type FightPerformance, type FightSim } from "./fight";
 import { FRENZY_SLOT_MS, HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt, slotFrenzy } from "./hotspot";
-import { bedRaider, COLD_WORK_GAP_MS, LONG_CAST_SOLID, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, castIntoSpooked, isSkipCast, castOnFreshWater, TWIST_CASTS, twistAfterCast, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, PRESSURE_CASTS, GROUNDBAIT_CASTS, OVERFED_CASTS, SPOOKED_SWIM_CASTS, TOPUP_MAX, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WARMING_WAIT, COOLING_WAIT, waterSwingWaitMul, anchorSplashWaitMul, ANCHOR_SPLASH_WAIT, LAMP_WINDOW } from "./logic";
+import { bedRaider, CHOPPED_WORMS, COLD_WORK_GAP_MS, LONG_CAST_SOLID, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, castIntoSpooked, isSkipCast, castOnFreshWater, TWIST_CASTS, twistAfterCast, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, PRESSURE_CASTS, GROUNDBAIT_CASTS, OVERFED_CASTS, SPOOKED_SWIM_CASTS, TOPUP_MAX, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WARMING_WAIT, COOLING_WAIT, waterSwingWaitMul, anchorSplashWaitMul, ANCHOR_SPLASH_WAIT, LAMP_WINDOW } from "./logic";
 import { LIGHT_HOLD, stealsBait } from "./nibblePlan";
 import { castForReleased } from "./releasedFish";
 
@@ -199,6 +199,7 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <i data-testid="clean-run">{game.outcome?.kind === "landed" ? String(game.outcome.notes?.cleanRun) : ""}</i>
       <button type="button" onClick={game.dismissResult}>dismiss</button>
       <button type="button" onClick={game.throwGroundbait}>groundbait</button>
+      <button type="button" onClick={game.throwChoppedWorm}>chopped worm</button>
       <button type="button" onClick={game.retie}>retie</button>
       <button type="button" onClick={game.toggleLamp}>lamp</button>
       <button type="button" onClick={game.baitShiner}>bait shiner</button>
@@ -734,6 +735,34 @@ describe("useFishingGame live shiner", () => {
     expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ casts: BREAD_SWIM_CASTS, primed: true, bread: true });
     remount();
     expect(bait()).toBe(`dock:${BREAD_SWIM_CASTS}`);
+  });
+
+  it("chops two worms from the tin into a handful, and the swim keeps its chopped worm through a cast and a reload", () => {
+    const kept = new Map<string, string>([[wormTinKey(profile.userId), JSON.stringify({ worms: CHOPPED_WORMS - 1, day: localDate(new Date(DOCK_BUBBLES.at)) })]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    mount();
+    const chop = () => act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === "chopped worm") as HTMLButtonElement).click());
+    const worms = () => container!.querySelector("[data-testid=worms]")?.textContent;
+    // One worm short, nothing goes in.
+    chop();
+    expect(worms()).toBe(String(CHOPPED_WORMS - 1));
+    expect(kept.has(swimKey(profile.userId))).toBe(false);
+    expect(container!.querySelector("[data-testid=groundbait]")?.textContent).toBe("1|");
+    act(() => root!.unmount());
+    root = null;
+    container!.remove();
+    kept.set(wormTinKey(profile.userId), JSON.stringify({ worms: 3, day: localDate(new Date(DOCK_BUBBLES.at)) }));
+    mount();
+    chop();
+    expect(worms()).toBe(String(3 - CHOPPED_WORMS));
+    expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ spot: "dock", casts: GROUNDBAIT_CASTS, worm: true });
+    expect(hint()).toContain(`${CHOPPED_WORMS} chopped worms went in with it: the perch here come in to feed with the feeders while the swim lasts. Worms left in your tin: ${3 - CHOPPED_WORMS}.`);
+    act(() => root!.unmount());
+    root = null;
+    container!.remove();
+    mount();
+    cast(container!.querySelector<HTMLDivElement>("[data-stance]")!);
+    expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ spot: "dock", casts: GROUNDBAIT_CASTS - 1, worm: true });
   });
 
   it("leaves any other landed fish on the card", () => {
@@ -3322,7 +3351,7 @@ describe("useFishingGame groundbait", () => {
     expect(topped).toMatchObject({ spot: "dock", casts: 2 + GROUNDBAIT_CASTS, built: 1 });
     expect(topped.at).toBeGreaterThan(at);
     cast(surface);
-    expect(groundbaitFeeder).toHaveBeenLastCalledWith("dock", undefined, false, "day", Math.random, 1);
+    expect(groundbaitFeeder).toHaveBeenLastCalledWith("dock", undefined, false, "day", Math.random, 1, false);
     expect(hint()).toContain("Over the groundbait.");
 
     act(() => root!.unmount());
@@ -3346,7 +3375,7 @@ describe("useFishingGame groundbait", () => {
     toss();
     cast(surface);
     expect(phase()).toBe("waiting:none");
-    expect(groundbaitFeeder).toHaveBeenCalledWith("dock", undefined, false, "day", Math.random, 0);
+    expect(groundbaitFeeder).toHaveBeenCalledWith("dock", undefined, false, "day", Math.random, 0, false);
     expect(container!.querySelector("[data-testid=bite]")?.textContent).toMatch(/^carp\|/);
     // Landed, the card says the groundbait drew it in.
     step.mockReturnValueOnce("landed");
@@ -3382,7 +3411,7 @@ describe("useFishingGame groundbait", () => {
     expect(hint()).toContain(`Day ${PREBAIT_DAYS} running you bait this bank: its feeders expect it now and come straight in, as after a top-up.`);
     expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ spot: "dock", casts: GROUNDBAIT_CASTS, built: 1 });
     cast(surface);
-    expect(groundbaitFeeder).toHaveBeenLastCalledWith("dock", undefined, false, "day", Math.random, 1);
+    expect(groundbaitFeeder).toHaveBeenLastCalledWith("dock", undefined, false, "day", Math.random, 1, false);
     // A second fresh handful the same day is not the day's first: it lands as any other.
     kept.delete(swimKey(profile.userId));
     act(() => root!.unmount());
@@ -3423,7 +3452,7 @@ describe("useFishingGame groundbait", () => {
     vi.mocked(groundbaitFeeder).mockReturnValueOnce(FISH.find((fish) => fish.id === "carp")!);
     vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "perch")!);
     cast(surface);
-    expect(groundbaitFeeder).toHaveBeenLastCalledWith("dock", undefined, false, "day", Math.random, TOPUP_MAX);
+    expect(groundbaitFeeder).toHaveBeenLastCalledWith("dock", undefined, false, "day", Math.random, TOPUP_MAX, false);
     step.mockReturnValueOnce("landed");
     act(() => vi.advanceTimersByTime(2_201));
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));

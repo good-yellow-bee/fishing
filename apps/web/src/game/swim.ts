@@ -44,6 +44,7 @@ export function loadSwim(userId: string): Swim | null {
           ...(upTo(swim.spooked, SPOOKED_SWIM_CASTS) ? { spooked: swim.spooked } : {}),
           ...(swim.primed ? { primed: true } : {}),
           ...(swim.bread ? { bread: true } : {}),
+          ...(swim.worm ? { worm: true } : {}),
         }
       : null;
   });
@@ -53,11 +54,11 @@ export function saveSwim(userId: string, swim: Swim | null) {
   writeAngler(swimKey(userId), swim);
 }
 
-/** The swim on a new visit: as it was if soon after, freshly baited once when the feeders have gathered (longer with bread crumb in it, its top-ups gone), gone once the season's days run out. */
+/** The swim on a new visit: as it was if soon after, freshly baited once when the feeders have gathered (longer with bread crumb in it, its top-ups gone, its chopped worm kept), gone once the season's days run out. */
 export function swimNow(swim: Swim | null, now: number, season?: LakeSeason): (Swim & { primedNow: boolean }) | null {
   if (!swim || swim.casts <= 0) return null;
   const age = now - swim.at;
   const { primedMs, goneMs } = swimTimes(season);
   if (age > goneMs) return null;
-  return age >= primedMs && !swim.primed ? { spot: swim.spot as SpotId, casts: swim.bread ? BREAD_SWIM_CASTS : GROUNDBAIT_CASTS, at: swim.at, primed: true, ...(swim.bread ? { bread: true } : {}), primedNow: true } : { ...swim, primedNow: false };
+  return age >= primedMs && !swim.primed ? { spot: swim.spot as SpotId, casts: swim.bread ? BREAD_SWIM_CASTS : GROUNDBAIT_CASTS, at: swim.at, primed: true, ...(swim.bread ? { bread: true } : {}), ...(swim.worm ? { worm: true } : {}), primedNow: true } : { ...swim, primedNow: false };
 }

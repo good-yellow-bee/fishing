@@ -853,7 +853,7 @@ describe("the shack's bait tin", () => {
     const buy = [...page.querySelectorAll<HTMLButtonElement>(".bait-shop button")].find((button) => button.textContent?.startsWith("A worm"))!;
     await act(async () => buy.click());
     expect(buyWorm).toHaveBeenCalledTimes(1);
-    expect(page.querySelector("#worm-shop-note")?.textContent).toBe(`Your worm tin is full: ${WORM_TIN_WET} worms.`);
+    expect(page.querySelector("#worm-shop-note")?.textContent).toBe(`Your worm tin is full: ${WORM_TIN_WET} worms. 2 chopped into a handful of groundbait bring the perch in with the feeders.`);
     expect(JSON.parse(localStorage.getItem(wormTinKey("u1"))!).worms).toBe(WORM_TIN_WET);
     await act(async () => buy.click());
     expect(buyWorm).toHaveBeenCalledTimes(1);
