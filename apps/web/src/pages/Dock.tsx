@@ -108,7 +108,7 @@ import { useEffectsSteppedDown } from "../game/frameWatch";
 import { useEffectsNotice } from "../game/effectsNotice";
 import { saveLogbook } from "../field/storage";
 import { fx } from "../game/fx";
-import { canBaitShiner, GROUNDBAIT_CASTS, hookWindowMs, isMercy, lampLit, longShadowWaitMul, solidStrikeMs } from "../game/logic";
+import { canBaitShiner, GROUNDBAIT_CASTS, OVERFED_CASTS, TOPUP_CASTS_LEFT, hookWindowMs, isMercy, lampLit, longShadowWaitMul, solidStrikeMs } from "../game/logic";
 import { useBadgeToast } from "../game/useBadgeToast";
 import { lostNewsKey, useNewsToast, useTagNewsToast } from "../game/useTagNewsToast";
 import { bookSeasonNote, bookSessionTitle, loadSession, saveSession, sessionTitle, startSession, withSessionFish, type SessionDraft } from "../game/session";
@@ -1364,7 +1364,13 @@ export function DockPage() {
                 className="panel-btn walk-bait"
                 type="button"
                 aria-label={t("Groundbait")}
-                title={t("Toss a handful of groundbait here: the next {casts} casts bite sooner.", { casts: GROUNDBAIT_CASTS })}
+                title={
+                  game.groundbait?.spot !== game.stance
+                    ? t("Toss a handful of groundbait here: the next {casts} casts bite sooner.", { casts: GROUNDBAIT_CASTS })
+                    : game.groundbait.casts > TOPUP_CASTS_LEFT
+                      ? t("The fish here are still feeding: another handful now fills them up, and the next {full} casts bite slower.", { full: OVERFED_CASTS })
+                      : t("Top up the swim here as it fades: more feeders come in.")
+                }
                 onClick={(event) => {
                   // Leave Space free for casting.
                   event.currentTarget.blur();
