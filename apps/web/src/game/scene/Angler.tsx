@@ -12,7 +12,7 @@ import {
   loadedRodPitch,
   thrownRodPitch,
 } from "./castMotion";
-import { HOOKSET_SEC, fightBodyLean, fightRodPitch, fightRodRoll,
+import { HOOKSET_SEC, armTremble, fightBodyLean, fightRodPitch, fightRodRoll,
   steerRodRoll, fightView } from "./fightMotion";
 import { landBodyLean, landRodPitch, landView } from "./landMotion";
 import { missBodyLean, missRodPitch, missRodRoll, missView } from "./missMotion";
@@ -201,6 +201,7 @@ function CapLeaf({ head, phase, petal }: { head: THREE.Object3D; phase: ScenePha
 
 export function Angler({ phase, powerRef, rodTip, lookAt, snowfall = false, nibble = false, scarf = false, wind = NO_WIND, leaf = null }: Props) {
   const gltf = useGLTF("/models/character-male-c.glb");
+  const still = useReducedMotion();
   const rodFile = useGLTF("/models/fishing-rod.glb");
   const root = useRef<THREE.Group>(null);
   const wrap = useSceneWrap();
@@ -428,7 +429,8 @@ export function Angler({ phase, powerRef, rodTip, lookAt, snowfall = false, nibb
     if (wrap.current) wrap.current.dataset.yaw = anglerPose.yaw.toFixed(2);
     if (grip.current) {
       if (root.current) grip.current.position.copy(root.current.worldToLocal(fist.getWorldPosition(fistAt)));
-      grip.current.rotation.x = rodPitch.current;
+      // Too quick to smooth, so the tired arm's shake goes straight to the rod.
+      grip.current.rotation.x = rodPitch.current + (fighting && !still ? armTremble(fightView.arm, t) : 0);
       if (fighting) {
         const rollTarget = fightRodRoll(fightView.surge, fightView.runSide, t, fightView.strikeAge, fightView.biteAge) + steerRodRoll(fightView.steer);
         if (phase === "hookset") rodRoll.current = rollTarget;

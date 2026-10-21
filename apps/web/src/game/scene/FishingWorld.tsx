@@ -853,7 +853,8 @@ function FightMotion({ phase, sim, ambush, light, lift, run, boatSwing }: { phas
     fightView.steer = live ? fightInput.steer : 0;
     fightView.turning = live && sim.current?.turning === true;
 
-    if (fightView.reeling) fightView.pump += dt * (surge === 2 ? 0.7 : 1.15);
+    fightView.arm = live ? sim.current?.armPace ?? 1 : 1;
+    if (fightView.reeling) fightView.pump += dt * (surge === 2 ? 0.7 : 1.15) * fightView.arm;
 
     if (live) {
       const worn = 1 - (sim.current?.stamina ?? 1);

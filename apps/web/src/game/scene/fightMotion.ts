@@ -1,4 +1,5 @@
 import { inLake } from "@stillwater/shared";
+import { ARM_FLOOR, ARM_TELL } from "../fight";
 
 /** How long the strike whip takes before the rod settles into the fight. */
 export const HOOKSET_SEC = 1.55;
@@ -63,6 +64,8 @@ export const fightView = {
   localZ: 0,
   /** Scene clock time until which the strike's hit-stop holds the line and camera still. */
   freezeUntil: -1,
+  /** How fast the angler's tiring arm still reels, 1 fresh: the retrieve slows with it. */
+  arm: 1,
 };
 
 const FIGHT_VIEW_START = { ...fightView };
@@ -237,6 +240,16 @@ export function fightRodPitch(input: RodInput) {
   if (input.strikeAge < 0) return biteRodPitch(input.biteAge, input.time);
   if (input.strikeAge < HOOKSET_SEC) return strikeRodPitch(input.strikeAge, input.fromPitch, loaded);
   return loaded;
+}
+
+/**
+ * A tiring arm shakes the rod: radians added to its pitch, nothing until the fight card says the arm tires,
+ * growing to full as it reaches its slowest. A quick tremor that swells and fades, faster than a run's shiver.
+ */
+export function armTremble(pace: number, time: number) {
+  const k = Math.min(1, Math.max(0, (ARM_TELL - pace) / (ARM_TELL - ARM_FLOOR)));
+  if (k <= 0) return 0;
+  return Math.sin(time * 41) * (0.6 + 0.4 * Math.sin(time * 3.7)) * 0.04 * k;
 }
 
 /** The rod swept over against a run: added to the roll, so it fights the twist the run puts in it. */

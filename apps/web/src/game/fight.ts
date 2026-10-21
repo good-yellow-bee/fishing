@@ -14,6 +14,8 @@ export type SurgeState = 0 | 1 | 2; // 0 calm, 1 warning (telegraph), 2 surging
 export type FightSim = {
   /** The angler's arm is tiring in a long fight, so the reel wins less line. */
   armTired?: boolean;
+  /** How fast the tiring arm still reels, from ARM_FLOOR up to just under 1; unset while it is fresh. */
+  armPace?: number;
   /** A slippery fish on a slack line, slithering toward slipping the hook. */
   slipping?: boolean;
   /** It slipped the hook on a slack line. */
@@ -705,12 +707,20 @@ export function makeFight(
   let runDrag: Drag = "normal";
   /** Seconds the angler has reeled, less what resting gave back: it tires the arm. */
   let reelSec = 0;
+  const showArm = () => {
+    const pace = armMul(reelSec);
+    if (pace < 1) sim.armPace = pace;
+    else delete sim.armPace;
+    if (pace < ARM_TELL) sim.armTired = true;
+    else delete sim.armTired;
+  };
   const step = (nowMs: number, dtSec: number, reeling: boolean, steer: Steer = 0, drag: Drag = "normal"): FightOutcome => {
     const pressed = reeling && !wasReeling;
     wasReeling = reeling;
     if (sim.netting) {
       // Waiting at the net, the arm rests.
       reelSec = Math.max(0, reelSec - dtSec * ARM_REST_RECOVER);
+      showArm();
       // Its head comes up now and then; a strike then nets it, a strike with its head down sends it off on one short bolt.
       sim.netHead = (nowMs - netFrom) % NET_HEAD_EVERY_MS >= NET_HEAD_EVERY_MS - headMs;
       if (pressed && sim.netHead) return "landed";
@@ -950,8 +960,7 @@ export function makeFight(
     performance.fightSec = (performance.fightSec ?? 0) + dtSec;
     // Holding a run against a heavy drag works the arm as reeling does, so it gets no rest.
     reelSec = reeling || heavyRun ? reelSec + dtSec : Math.max(0, reelSec - dtSec * ARM_REST_RECOVER);
-    if (armMul(reelSec) < ARM_TELL) sim.armTired = true;
-    else delete sim.armTired;
+    showArm();
     // Fought too long, a pike chews the line it swallowed down to frayed.
     if (toothed && !sim.frayed && performance.fightSec >= TEETH_SEC) {
       sim.frayed = true;
