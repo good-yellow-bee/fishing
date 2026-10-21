@@ -124,7 +124,7 @@ describe("BaitShop's worms", () => {
     const buy = vi.fn();
     const button = render(2, buy);
     expect(button.textContent).toBe(`A worm (${WORM_PRICE} pts)`);
-    expect(note()).toBe("A fresh worm for a washed-out hook or a night line. In your tin: 2 of 5.");
+    expect(note()).toBe("A fresh worm for a washed-out hook or a night line. In your tin: 2 of 5. 2 chopped into a handful of groundbait bring the perch in with the feeders.");
     act(() => button.click());
     expect(buy).toHaveBeenCalledOnce();
     const full = vi.fn();
@@ -132,9 +132,9 @@ describe("BaitShop's worms", () => {
     expect(tinFull.getAttribute("aria-disabled")).toBe("true");
     act(() => tinFull.click());
     expect(full).not.toHaveBeenCalled();
-    expect(note()).toBe("Your worm tin is full: 5 worms.");
+    expect(note()).toBe("Your worm tin is full: 5 worms. 2 chopped into a handful of groundbait bring the perch in with the feeders.");
     render(2, vi.fn(), "summer");
-    expect(note()).toBe("A fresh worm for a washed-out hook or a night line. In your tin: 2 of 5. In the summer heat it keeps only today.");
+    expect(note()).toBe("A fresh worm for a washed-out hook or a night line. In your tin: 2 of 5. In the summer heat it keeps only today. 2 chopped into a handful of groundbait bring the perch in with the feeders.");
   });
 
   it("sells the tin's place in the worm bin once, and then the summer note says a worm keeps to tomorrow", () => {
@@ -166,7 +166,7 @@ describe("BaitShop's worms", () => {
     act(() => owned.click());
     expect(again).not.toHaveBeenCalled();
     expect(note("worm-bin-note")).toBe("Your worm tin keeps in the cool worm bin, so in summer its worms last to the next day.");
-    expect(note("worm-shop-note")).toBe("A fresh worm for a washed-out hook or a night line. In your tin: 2 of 5. In the summer heat your place in the worm bin keeps it to tomorrow.");
+    expect(note("worm-shop-note")).toBe("A fresh worm for a washed-out hook or a night line. In your tin: 2 of 5. In the summer heat your place in the worm bin keeps it to tomorrow. 2 chopped into a handful of groundbait bring the perch in with the feeders.");
   });
 
   it("sells a sack of bread crumb once, and says how long a swim left baited holds the feeders", () => {

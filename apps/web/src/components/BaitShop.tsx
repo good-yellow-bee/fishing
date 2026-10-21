@@ -1,6 +1,6 @@
 import { AERATOR_PRICE, BREAD_CRUMB_PRICE, GROUNDBAIT_CARRY, GROUNDBAIT_PRICE, shackPrice, SHINER_PRICE, WORM_BIN_PRICE, WORM_PRICE, type LakeSeason } from "@stillwater/shared";
 import { t, useT } from "../i18n";
-import { GROUNDBAIT_CASTS } from "../game/logic";
+import { CHOPPED_WORMS, GROUNDBAIT_CASTS } from "../game/logic";
 import { BUCKET_SIZE } from "../game/baitBucket";
 import { BREAD_SWIM_CASTS } from "../game/swim";
 import { PREBAIT_DAYS } from "../game/prebait";
@@ -145,7 +145,8 @@ export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, b
               ? t("Your worm tin is full: {max} worms.", { max: WORM_TIN_WET })
               : `${t("A fresh worm for a washed-out hook or a night line. In your tin: {n} of {max}.", { n: worms, max: WORM_TIN_WET })}${
                   season === "summer" ? ` ${wormBin ? t("In the summer heat your place in the worm bin keeps it to tomorrow.") : t("In the summer heat it keeps only today.")}` : ""
-                }`}
+                }`}{" "}
+            {t("{n} chopped into a handful of groundbait bring the perch in with the feeders.", { n: CHOPPED_WORMS })}
           </p>
         </div>
         <div className="upgrade-skill">
