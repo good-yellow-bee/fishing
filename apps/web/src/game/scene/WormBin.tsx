@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import type { LakeSeason } from "@stillwater/shared";
-import { BIN_AT, BIN_INSIDE, BIN_WORMS, binSnowy, binWorm } from "./binWorms";
+import { BIN_AT, BIN_HEIGHT as HEIGHT, BIN_INSIDE, BIN_WALL as WALL, BIN_WORMS, binSnowy, binWorm } from "./binWorms";
 import { mergePainted } from "./mergeParts";
 import { STILL_TIME, useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
@@ -13,9 +13,6 @@ const POST = "#6b4a32";
 const SOIL = "#3f2e20";
 const BOARD = "#e4d6b5";
 const SNOW = "#f3f6f8";
-/** The crate's wall height and thickness. */
-const HEIGHT = 0.18;
-const WALL = 0.025;
 /** The stake the sign board is nailed to, behind the crate's right corner. */
 const STAKE_X = BIN_INSIDE.width / 2 + 0.06;
 const STAKE_Z = -BIN_INSIDE.depth / 2 - 0.02;

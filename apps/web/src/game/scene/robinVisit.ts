@@ -62,6 +62,11 @@ export type RobinPose = Point & {
   look: number;
   /** The tail flicked up, 0 to 1. */
   flick: number;
+  /** Bowed forward about its feet (negative leans back), in radians. */
+  pitch?: number;
+  /** The worm hanging from its bill, meters long (0 for none), and its swing. */
+  worm?: number;
+  wormSway?: number;
 };
 
 /** Facing the angler, back up the dock, as it perches. */
