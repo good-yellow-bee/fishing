@@ -3399,6 +3399,26 @@ describe("useFishingGame groundbait", () => {
     expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ casts: 4, spooked: SPOOKED_SWIM_CASTS - 1 });
   });
 
+  it("scatters the swim when a big feeder throws the hook too, and the scatter outlasts a reload", () => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 6, built: TOPUP_MAX, at: DOCK_BUBBLES.at - 60_000 }));
+    let surface = mount();
+    vi.mocked(groundbaitFeeder).mockReturnValueOnce(FISH.find((fish) => fish.id === "catfish")!);
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "perch")!);
+    step.mockReturnValueOnce("escaped");
+    castAndFight(surface, 1);
+    expect(container!.querySelector("[data-testid=broke]")?.textContent).toContain("Its thrashing scattered the feeders off the swim");
+    act(() => root!.unmount());
+    root = null;
+    container!.remove();
+    vi.mocked(groundbaitFeeder).mockClear();
+    surface = mount();
+    cast(surface);
+    expect(groundbaitFeeder).not.toHaveBeenCalled();
+    expect(hint()).toContain("Over the groundbait, but its feeders are still scattered.");
+  });
+
   it("leaves a built swim as it was when the fish lost over it is not a big feeder", () => {
     const kept = new Map<string, string>();
     vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
