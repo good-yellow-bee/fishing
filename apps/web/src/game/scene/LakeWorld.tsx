@@ -42,6 +42,7 @@ import { spawnOut } from "./spawnClumps";
 import { crayfishOut } from "./crayfishCrawl";
 import { floesOut } from "./iceFloes";
 import { nestsOut } from "./sunfishNests";
+import { bassBedsOut } from "./bassBeds";
 import { snakeOut } from "./snakeSwim";
 import { tadpolesOut } from "./tadpoleSchools";
 import { FROST_COLOR, dockFrost, walkwayPale } from "./dockFrost";
@@ -2422,7 +2423,7 @@ export const LakeWorld = memo(function LakeWorld({
       <Reeds count={6} origin={[11.4, 0.03, -9.7]} wind={wind} />
       {lilyPads(season) && <LilyBed lilies={LILIES} season={season} open={lilyOpen(hour, sky)} />}
       {frogsOnPads(hour, season) && FROG_PADS.map((_, i) => <PadFrog key={i} index={i} />)}
-      {nestsOut(season) && <SunfishNests />}
+      {nestsOut(season) && <SunfishNests bass={bassBedsOut(season)} />}
       {floesOut(season) && <IceFloes wind={wind} />}
       {crayfishOut(season) && <Crayfish />}
       <Waterweed season={season} />
