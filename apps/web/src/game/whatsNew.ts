@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-21-scene73";
+export const NEWS_ID = "2026-10-21-field80";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "A water's page now says Only from this water for the kinds no other water has given you, each opening its fish there, and in the small hours last evening's outing still going reads as fished today beside Out now. Beside the sample week with only a water of your own, Waters, a water's page and the Map now leave its made-up plans out, and a water with several namesakes names them all.",
   "A long fight now shows in a tired arm: the reel's handle turns slower, the lure comes back slower with it, and the rod shakes in your hands, the more the slower you reel; a pause from reeling steadies it again. And with the shack's aerator fitted, the bait bucket at your feet shows its pump hung on the rim, a tube across the water and small bubbles rising from an airstone.",
   "With high contrast on a touch phone, the header, the lure panel and the hint over the lake now keep their usual size, so a long hint, such as a winter night line's, no longer runs its last line under the walking stick. And with larger text on a phone held sideways, the note naming where you stand, when the shore signs leave it no room, now goes from sight instead of showing as a sliver under them; a screen reader still reads it, and the pressed sign still names the bank.",
   "On Bests, this year's days on the water now say how many of them gave a fish, and in a season picked, a water whose first fish came that season says New this season. Beside the sample week with only a water of your own, Bests' runs of outings and its calendar now leave the made-up plans out.",

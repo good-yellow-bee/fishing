@@ -27,9 +27,9 @@ import { FishCsv } from "./FishCsv";
 import { TallyBars } from "./TallyBars";
 import { WaterTipsBox } from "./WaterTipsBox";
 import { exactTerm, findWithLink } from "./findLinks";
-import { bookKindName, kindOnPage, speciesLink } from "./speciesLink";
+import { bookKindName, kindKey, kindOnPage, speciesCounts, speciesLink } from "./speciesLink";
 import { SpeciesChips } from "./SpeciesChips";
-import { daysBetween, foldName, lastOutByWater, spotsByLastFish, twinName } from "./spotOrder";
+import { daysBetween, foldName, lastOutByWater, sameWater, spotsByLastFish, twinName, waterKeys } from "./spotOrder";
 import { bookFishDay, yearTally } from "./tripMonths";
 import { PagedTrips } from "./PagedTrips";
 import { outingAverage, outingStreak, topOuting, weekendSplit } from "./outingAverage";
@@ -478,6 +478,13 @@ function SpotView() {
   // Dated as the season line above dates them, so a New Year's Eve night fish is last year's on both.
   const notYet = notYetThisYear(summed, new Date(`${fishedBy}T12:00:00`), undefined, (entry) => bookFishDay(book, entry));
   const kindsDay = mostKindsDay({ ...book, catches: summed });
+  // The kinds no other water has given, its twins aside as its links take them: where to come back for them. Said once
+  // another water has a fish, or every kind would be this water's alone.
+  const waterOf = waterKeys(book);
+  const elsewhere = counted.catches.filter((entry) => entry.spotId !== PLAY_LAKE_ID && !sameWater(waterOf, entry.spotId, spot.id));
+  const elsewhereKinds = new Set(elsewhere.map((entry) => kindKey(entry.species)));
+  const onlyHere =
+    spot.id === PLAY_LAKE_ID || elsewhere.length === 0 ? [] : speciesCounts(summed).map((row) => row.species).filter((species) => !elsewhereKinds.has(kindKey(species)));
   // Its links open the fish its counts count: the sample week's beside the angler's own left out, as here.
   // Kinds named as the book writes them most, as Bests and the catch cards name them, not as this water's few fish do.
   const kindName = bookKindName(book.catches);
@@ -583,7 +590,8 @@ function SpotView() {
         {/* When it was last fished, by its last outing or fish: how long it has rested. */}
         {lastHere ? (
           <p className="meta last-here">
-            <LastHereLine rest={restHere} day={lastHere} trip={lastHereTrip} fish={fishOn} catches={catches} loose={lastHereLoose} lureName={lureName} />
+            {/* Last evening's outing still going in the small hours is today's, as Out now below says it. */}
+            <LastHereLine rest={lastHereTrip && lastHereTrip.id === outNowHere?.id ? 0 : restHere} day={lastHere} trip={lastHereTrip} fish={fishOn} catches={catches} loose={lastHereLoose} lureName={lureName} />
           </p>
         ) : null}
         {/* How long the angler has known this water: its first fish, once another fish day has followed it. */}
@@ -737,6 +745,19 @@ function SpotView() {
           <span>
             {t("Not yet this year:")}{" "}
             {inReadersOrder(notYet, kindName).map((name, index) => (
+              <Fragment key={name}>
+                {index > 0 ? ", " : null}
+                <Link to={findWithLink(here, exactTerm("species", kindName(name)))}>{kindName(name)}</Link>
+              </Fragment>
+            ))}
+          </span>
+        </p>
+      ) : null}
+      {onlyHere.length > 0 ? (
+        <p className="meta only-here">
+          <span>
+            {t("Only from this water:")}{" "}
+            {inReadersOrder(onlyHere, kindName).map((name, index) => (
               <Fragment key={name}>
                 {index > 0 ? ", " : null}
                 <Link to={findWithLink(here, exactTerm("species", kindName(name)))}>{kindName(name)}</Link>
