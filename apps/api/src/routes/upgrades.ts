@@ -1,6 +1,6 @@
 import { Hono, type Context } from "hono";
-import { validateAeratorBuy, validateWormBinBuy, validateGroundbaitBuy, validateShinerBuy, validateUpgrade, validateWormBuy, type SkillId } from "@stillwater/shared";
-import { applyUpgrade, fitAerator, getProfile, spendPoints, takeWormBin, toProfile } from "../db.ts";
+import { validateAeratorBuy, validateBreadCrumbBuy, validateWormBinBuy, validateGroundbaitBuy, validateShinerBuy, validateUpgrade, validateWormBuy, type SkillId } from "@stillwater/shared";
+import { applyUpgrade, fitAerator, getProfile, spendPoints, takeBreadCrumb, takeWormBin, toProfile } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
 const skills: SkillId[] = ["strength", "accuracy", "patience"];
@@ -32,7 +32,7 @@ upgradeRoutes.post("/upgrades", async (c) => {
   return c.json({ profile: updated ? toProfile(updated) : profile });
 });
 
-// A handful of groundbait, a live shiner, a worm, the bucket's aerator or a place in the worm bin from the shack: the server takes the points, and what was bought lives in the game.
+// A handful of groundbait, a live shiner, a worm, the bucket's aerator, a place in the worm bin or a sack of bread crumb from the shack: the server takes the points, and what was bought lives in the game.
 const shackSale = (validate: typeof validateGroundbaitBuy, spend = spendPoints) => (c: Context) => {
   const user = c.get("user") as SessionUser;
   const row = getProfile(user.id);
@@ -53,3 +53,4 @@ upgradeRoutes.post("/shiner", shackSale(validateShinerBuy));
 upgradeRoutes.post("/worm", shackSale(validateWormBuy));
 upgradeRoutes.post("/aerator", shackSale(validateAeratorBuy, fitAerator));
 upgradeRoutes.post("/worm-bin", shackSale(validateWormBinBuy, takeWormBin));
+upgradeRoutes.post("/bread-crumb", shackSale(validateBreadCrumbBuy, takeBreadCrumb));

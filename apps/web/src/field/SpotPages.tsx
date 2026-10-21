@@ -29,7 +29,7 @@ import { WaterTipsBox } from "./WaterTipsBox";
 import { exactTerm, findWithLink } from "./findLinks";
 import { bookKindName, kindOnPage, speciesLink } from "./speciesLink";
 import { SpeciesChips } from "./SpeciesChips";
-import { daysBetween, lastOutByWater, spotsByLastFish, twinName } from "./spotOrder";
+import { daysBetween, foldName, lastOutByWater, spotsByLastFish, twinName } from "./spotOrder";
 import { bookFishDay, yearTally } from "./tripMonths";
 import { PagedTrips } from "./PagedTrips";
 import { outingAverage, outingStreak, topOuting, weekendSplit } from "./outingAverage";
@@ -61,7 +61,7 @@ import { notesHere } from "./outingNotes";
 import { largestFirst } from "./largestFirst";
 import { MatchOrder, useLargestOrder } from "./MatchOrder";
 import { PLAY_LAKE_ID } from "./playLake";
-import { isSampleSpot, nextRealTrips } from "./bookCopy";
+import { isSampleSpot, nextRealTrips, withoutSamplePlans } from "./bookCopy";
 import { canGoBack, pageBefore } from "./FieldShell";
 import { noteAddedWater } from "./addedWater";
 import { bestLureAt } from "./waterLure";
@@ -135,7 +135,8 @@ function outingFishHere(book: Logbook, fishByTrip: ReadonlyMap<string, number>, 
 }
 
 export function SpotsPage() {
-  const { book } = useLogbook();
+  // The sample week's blank plans stay out beside a water of the angler's own, as Trips leaves them out.
+  const book = withoutSamplePlans(useLogbook().book);
   useT();
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
@@ -396,7 +397,9 @@ export function SpotPage() {
 }
 
 function SpotView() {
-  const { book, deleteSpot } = useLogbook();
+  const { book: whole, deleteSpot } = useLogbook();
+  // The sample week's blank plans stay out beside a water of the angler's own, as Trips and Waters leave them out.
+  const book = withoutSamplePlans(whole);
   useT();
   const navigate = useNavigate();
   const location = useLocation();
@@ -440,6 +443,7 @@ function SpotView() {
   }
 
   const trips = tripsForSpot(book, spot.id);
+  const storedTrips = tripsForSpot(whole, spot.id).length;
   const catches = catchesForSpot(book, spot.id);
   // An untitled outing goes by this water's name, which the page already says: its link reads as the day's outing.
   const outingHere = (tripId: string) => {
@@ -479,8 +483,10 @@ function SpotView() {
   const kindName = bookKindName(book.catches);
   const lureName = bookLureName(book.catches);
   const here = summed.length < catches.length ? `${exactTerm("water", plainName(spot.name))} -${t("sample|search word")}` : exactTerm("water", plainName(spot.name));
-  // A search finds a water by its name, so while another shares it, this page's links open both waters' fish.
-  const twin = book.spots.find((other) => other.id !== spot.id && twinName(other.name, spot.name));
+  // A search finds a water by its name, so while others share it, this page's links open their fish too. A water with
+  // no name is no one's twin.
+  const twins = foldName(spot.name) ? book.spots.filter((other) => other.id !== spot.id && twinName(other.name, spot.name)) : [];
+  const twin = twins[0];
   const lastHere = spot.id === PLAY_LAKE_ID ? undefined : lastOutByWater(counted, fishedBy).get(spot.id);
   // The outing on this water now, as the Map says it: of a dawn and a dusk, the later.
   const outNowHere = outNowAt(book, spot.id);
@@ -521,13 +527,13 @@ function SpotView() {
       <EditDelete
         editTo={`/spots/${spot.id}/edit`}
         ask={
-          // How much goes with it, since a water with a season on it takes a lot.
-          trips.length + catches.length === 0
+          // How much goes with it, since a water with a season on it takes a lot: the sample week's blank plans too.
+          storedTrips + catches.length === 0
             ? t("Delete this water?")
-            : trips.length > 0 && catches.length > 0
-              ? t("Delete this water? Its {outings} and {fish} leave the book too.", { outings: tn(trips.length, "{n} outing", "{n} outings"), fish: tn(catches.length, "{n} fish", "{n} fish") })
+            : storedTrips > 0 && catches.length > 0
+              ? t("Delete this water? Its {outings} and {fish} leave the book too.", { outings: tn(storedTrips, "{n} outing", "{n} outings"), fish: tn(catches.length, "{n} fish", "{n} fish") })
               : // Only outings or only fish: "and Nothing logged" would read mid-sentence.
-                t("Delete this water? Also leaving the book: {what}.", { what: trips.length > 0 ? tn(trips.length, "{n} outing", "{n} outings") : tn(catches.length, "{n} fish", "{n} fish") })
+                t("Delete this water? Also leaving the book: {what}.", { what: storedTrips > 0 ? tn(storedTrips, "{n} outing", "{n} outings") : tn(catches.length, "{n} fish", "{n} fish") })
         }
         onDelete={() => {
           if (deleteSpot(spot.id)) leaveDeleted(navigate, location.state, "/spots");
@@ -548,10 +554,14 @@ function SpotView() {
         <span className={`stamp stamp-${spot.waterType}`}>{t(WATER_LABELS[spot.waterType])}</span>
         {twin ? (
           <p className="meta twin-note">
-            {/* The other water's spelling, which is the one the angler may not know about: "Śniardwy" beside "Sniardwy". */}
-            {plainName(twin.name) === plainName(spot.name)
-              ? t("Another water is also called {name}, so the links on this page open the fish of both.", { name: plainName(spot.name) })
-              : t("Another water has nearly the same name, {name}, so the links on this page open the fish of both.", { name: plainName(twin.name) })}{" "}
+            {/* The other waters' spellings, which the angler may not know about: "Śniardwy" beside "Sniardwy". */}
+            {twins.length > 1
+              ? twins.every((other) => plainName(other.name) === plainName(spot.name))
+                ? t("Other waters are also called {name}, so the links on this page open the fish of all of them.", { name: plainName(spot.name) })
+                : t("Other waters have the same or nearly the same name ({names}), so the links on this page open the fish of all of them.", { names: [...new Set(twins.map((other) => plainName(other.name)))].join(", ") })
+              : plainName(twin.name) === plainName(spot.name)
+                ? t("Another water is also called {name}, so the links on this page open the fish of both.", { name: plainName(spot.name) })
+                : t("Another water has nearly the same name, {name}, so the links on this page open the fish of both.", { name: plainName(twin.name) })}{" "}
             {spot.id === PLAY_LAKE_ID || twin.id === PLAY_LAKE_ID || isSampleSpot(spot.id) || isSampleSpot(twin.id) ? (
               // The game's lake keeps its name: the other one is the one to rename.
               <Link to={`/spots/${spot.id === PLAY_LAKE_ID ? twin.id : spot.id}/edit`} state={spot.id === PLAY_LAKE_ID ? undefined : editFromPage(location.state)}>

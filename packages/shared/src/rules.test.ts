@@ -37,7 +37,7 @@ import {
 } from "./lake.ts";
 import { anglerLevel, canUseSpot, INLET_LEVEL, skillCost, SPOT_IDS } from "./progression.ts";
 import { DAY_RUN_BONUS } from "./streak.ts";
-import { AERATOR_PRICE, validateAeratorBuy, validateWormBinBuy, WORM_BIN_PRICE, canLand, catchPoints, cleanRunBonus, GROUNDBAIT_PRICE, LODGE_RECORD_BONUS, lodgeRecordBonus, PB_BONUS, personalBestBonus, SHACK_DISCOUNT_LEVEL, shackPrice, SHINER_PRICE, validateGroundbaitBuy, validateShinerBuy, validateWormBuy, WORM_PRICE, CLEAN_RUN_BONUS, CLEAN_RUN_FROM, legendaryCanBite, skillUnlock, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
+import { AERATOR_PRICE, BREAD_CRUMB_PRICE, validateAeratorBuy, validateBreadCrumbBuy, validateWormBinBuy, WORM_BIN_PRICE, canLand, catchPoints, cleanRunBonus, GROUNDBAIT_PRICE, LODGE_RECORD_BONUS, lodgeRecordBonus, PB_BONUS, personalBestBonus, SHACK_DISCOUNT_LEVEL, shackPrice, SHINER_PRICE, validateGroundbaitBuy, validateShinerBuy, validateWormBuy, WORM_PRICE, CLEAN_RUN_BONUS, CLEAN_RUN_FROM, legendaryCanBite, skillUnlock, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
 import type { Profile } from "./types.ts";
 import { weeklyFish } from "./weeklyFish.ts";
 
@@ -660,6 +660,15 @@ describe("validateWormBinBuy", () => {
     expect(validateWormBinBuy(profile)).toEqual({ ok: true, cost: WORM_BIN_PRICE });
     expect(validateWormBinBuy({ ...profile, points: WORM_BIN_PRICE - 1 })).toMatchObject({ ok: false, error: "not enough points", status: 409 });
     expect(validateWormBinBuy({ ...profile, wormBin: true })).toMatchObject({ ok: false, error: "worm bin already yours", status: 409 });
+  });
+});
+
+describe("validateBreadCrumbBuy", () => {
+  it("sells the sack of bread crumb once, and not to an angler short of points", () => {
+    const profile = { userId: "u", displayName: "A", points: BREAD_CRUMB_PRICE, lifetimePoints: 500, strength: 1, accuracy: 1, patience: 1 };
+    expect(validateBreadCrumbBuy(profile)).toEqual({ ok: true, cost: BREAD_CRUMB_PRICE });
+    expect(validateBreadCrumbBuy({ ...profile, points: BREAD_CRUMB_PRICE - 1 })).toMatchObject({ ok: false, error: "not enough points", status: 409 });
+    expect(validateBreadCrumbBuy({ ...profile, breadCrumb: true })).toMatchObject({ ok: false, error: "bread crumb already yours", status: 409 });
   });
 });
 

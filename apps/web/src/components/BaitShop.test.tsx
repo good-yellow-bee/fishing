@@ -2,7 +2,7 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { AERATOR_PRICE, WORM_BIN_PRICE, WORM_PRICE, type LakeSeason } from "@stillwater/shared";
+import { AERATOR_PRICE, BREAD_CRUMB_PRICE, WORM_BIN_PRICE, WORM_PRICE, type LakeSeason } from "@stillwater/shared";
 import { BaitShop } from "./BaitShop";
 
 let root: Root | null = null;
@@ -19,7 +19,7 @@ function shop(shinerOn: boolean, bucket: number, onBuyShiner = vi.fn(), onHookFr
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
-  act(() => root!.render(<BaitShop points={points} lifetimePoints={0} handfuls={0} shinerOn={shinerOn} bucket={bucket} busy={false} onBuy={vi.fn()} onBuyShiner={onBuyShiner} onHookFromBucket={onHookFromBucket} aerator={aerator} onBuyAerator={onBuyAerator} worms={0} onBuyWorm={vi.fn()} wormBin={false} onBuyWormBin={vi.fn()} trap="none" trapCold={false} onSetTrap={vi.fn()} onLiftTrap={vi.fn()} season={season} />));
+  act(() => root!.render(<BaitShop points={points} lifetimePoints={0} handfuls={0} shinerOn={shinerOn} bucket={bucket} busy={false} onBuy={vi.fn()} onBuyShiner={onBuyShiner} onHookFromBucket={onHookFromBucket} aerator={aerator} onBuyAerator={onBuyAerator} worms={0} onBuyWorm={vi.fn()} wormBin={false} onBuyWormBin={vi.fn()} breadCrumb={false} onBuyBreadCrumb={vi.fn()} trap="none" trapCold={false} onSetTrap={vi.fn()} onLiftTrap={vi.fn()} season={season} />));
   const button = (start: string) => [...container!.querySelectorAll("button")].find((one) => one.textContent?.startsWith(start));
   return { button, note: () => container!.querySelector("#shiner-shop-note")?.textContent };
 }
@@ -85,7 +85,7 @@ describe("BaitShop's bait bucket", () => {
       document.body.append(container);
       act(() => root?.unmount());
       root = createRoot(container);
-      act(() => root!.render(<BaitShop points={500} lifetimePoints={0} handfuls={handfuls} shinerOn={false} bucket={0} busy={false} onBuy={vi.fn()} onBuyShiner={vi.fn()} onHookFromBucket={vi.fn()} aerator={false} onBuyAerator={vi.fn()} worms={0} onBuyWorm={vi.fn()} wormBin={false} onBuyWormBin={vi.fn()} trap={trap} trapCold={trapCold} onSetTrap={onSetTrap} onLiftTrap={onLiftTrap} season={undefined} />));
+      act(() => root!.render(<BaitShop points={500} lifetimePoints={0} handfuls={handfuls} shinerOn={false} bucket={0} busy={false} onBuy={vi.fn()} onBuyShiner={vi.fn()} onHookFromBucket={vi.fn()} aerator={false} onBuyAerator={vi.fn()} worms={0} onBuyWorm={vi.fn()} wormBin={false} onBuyWormBin={vi.fn()} breadCrumb={false} onBuyBreadCrumb={vi.fn()} trap={trap} trapCold={trapCold} onSetTrap={onSetTrap} onLiftTrap={onLiftTrap} season={undefined} />));
       return (start: string) => [...container!.querySelectorAll("button")].find((one) => one.textContent?.startsWith(start));
     };
     const set = vi.fn();
@@ -117,7 +117,7 @@ describe("BaitShop's worms", () => {
       document.body.append(container);
       act(() => root?.unmount());
       root = createRoot(container);
-      act(() => root!.render(<BaitShop points={500} lifetimePoints={0} handfuls={0} shinerOn={false} bucket={0} busy={false} onBuy={vi.fn()} onBuyShiner={vi.fn()} onHookFromBucket={vi.fn()} aerator={false} onBuyAerator={vi.fn()} worms={worms} onBuyWorm={onBuyWorm} wormBin={false} onBuyWormBin={vi.fn()} trap="none" trapCold={false} onSetTrap={vi.fn()} onLiftTrap={vi.fn()} season={season} />));
+      act(() => root!.render(<BaitShop points={500} lifetimePoints={0} handfuls={0} shinerOn={false} bucket={0} busy={false} onBuy={vi.fn()} onBuyShiner={vi.fn()} onHookFromBucket={vi.fn()} aerator={false} onBuyAerator={vi.fn()} worms={worms} onBuyWorm={onBuyWorm} wormBin={false} onBuyWormBin={vi.fn()} breadCrumb={false} onBuyBreadCrumb={vi.fn()} trap="none" trapCold={false} onSetTrap={vi.fn()} onLiftTrap={vi.fn()} season={season} />));
       return [...container!.querySelectorAll("button")].find((one) => one.textContent?.startsWith("A worm"))!;
     };
     const note = () => container!.querySelector("#worm-shop-note")!.textContent;
@@ -145,7 +145,7 @@ describe("BaitShop's worms", () => {
       document.body.append(container);
       act(() => root?.unmount());
       root = createRoot(container);
-      act(() => root!.render(<BaitShop points={points} lifetimePoints={0} handfuls={0} shinerOn={false} bucket={0} busy={false} onBuy={vi.fn()} onBuyShiner={vi.fn()} onHookFromBucket={vi.fn()} aerator={false} onBuyAerator={vi.fn()} worms={2} onBuyWorm={vi.fn()} wormBin={wormBin} onBuyWormBin={onBuyWormBin} trap="none" trapCold={false} onSetTrap={vi.fn()} onLiftTrap={vi.fn()} season="summer" />));
+      act(() => root!.render(<BaitShop points={points} lifetimePoints={0} handfuls={0} shinerOn={false} bucket={0} busy={false} onBuy={vi.fn()} onBuyShiner={vi.fn()} onHookFromBucket={vi.fn()} aerator={false} onBuyAerator={vi.fn()} worms={2} onBuyWorm={vi.fn()} wormBin={wormBin} onBuyWormBin={onBuyWormBin} breadCrumb={false} onBuyBreadCrumb={vi.fn()} trap="none" trapCold={false} onSetTrap={vi.fn()} onLiftTrap={vi.fn()} season="summer" />));
       return container!.querySelector<HTMLButtonElement>("[aria-describedby=worm-bin-note]")!;
     };
     const note = (id: string) => container!.querySelector(`#${id}`)!.textContent;
@@ -167,5 +167,36 @@ describe("BaitShop's worms", () => {
     expect(again).not.toHaveBeenCalled();
     expect(note("worm-bin-note")).toBe("Your worm tin keeps in the cool worm bin, so in summer its worms last to the next day.");
     expect(note("worm-shop-note")).toBe("A fresh worm for a washed-out hook or a night line. In your tin: 2 of 5. In the summer heat your place in the worm bin keeps it to tomorrow.");
+  });
+
+  it("sells a sack of bread crumb once, and says how long a swim left baited holds the feeders", () => {
+    vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+    const render = (breadCrumb: boolean, onBuyBreadCrumb = vi.fn(), points = 500) => {
+      container?.remove();
+      container = document.createElement("div");
+      document.body.append(container);
+      act(() => root?.unmount());
+      root = createRoot(container);
+      act(() => root!.render(<BaitShop points={points} lifetimePoints={0} handfuls={0} shinerOn={false} bucket={0} busy={false} onBuy={vi.fn()} onBuyShiner={vi.fn()} onHookFromBucket={vi.fn()} aerator={false} onBuyAerator={vi.fn()} worms={0} onBuyWorm={vi.fn()} wormBin={false} onBuyWormBin={vi.fn()} breadCrumb={breadCrumb} onBuyBreadCrumb={onBuyBreadCrumb} trap="none" trapCold={false} onSetTrap={vi.fn()} onLiftTrap={vi.fn()} season={undefined} />));
+      return container!.querySelector<HTMLButtonElement>("[aria-describedby=bread-crumb-note]")!;
+    };
+    const note = () => container!.querySelector("#bread-crumb-note")!.textContent;
+    const buy = vi.fn();
+    const button = render(false, buy);
+    expect(button.textContent).toBe(`A sack of bread crumb (${BREAD_CRUMB_PRICE} pts)`);
+    expect(note()).toBe("Mix bread crumb into your groundbait, so a swim you leave baited holds the feeders gathered there for 8 casts when you come back, not 5. Bought once.");
+    act(() => button.click());
+    expect(buy).toHaveBeenCalledOnce();
+    const short = vi.fn();
+    const poor = render(false, short, BREAD_CRUMB_PRICE - 1);
+    act(() => poor.click());
+    expect(short).not.toHaveBeenCalled();
+    const again = vi.fn();
+    const owned = render(true, again);
+    expect(owned.textContent).toBe("Your sack of bread crumb");
+    expect(owned.getAttribute("aria-disabled")).toBe("true");
+    act(() => owned.click());
+    expect(again).not.toHaveBeenCalled();
+    expect(note()).toBe("Bread crumb goes in your groundbait, so a swim you leave baited holds the feeders gathered there for 8 casts when you come back.");
   });
 });
