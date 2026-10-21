@@ -54,7 +54,7 @@ describe("round 124: an outing and its form beside the sample week with only a w
 
   it("names no blank plan as the water's next outing", async () => {
     const text = await page(book, "/trips/trip-quarry");
-    expect(text).toContain("Rock points");
+    expect(text).toContain("Fish came between 2:10 PM and 3:05 PM");
     expect(text).not.toContain("Next time here");
   });
 
@@ -67,13 +67,15 @@ describe("round 124: an outing and its form beside the sample week with only a w
 
   it("says no outing is already there on the plan's day", async () => {
     const text = await page(book, "/trips/new?spot=spot-cedar&date=2026-10-14");
+    expect(text).toContain("Last here: Evening edge, Sun, Oct 11 · 2 fish");
     expect(text).not.toContain("You already have an outing");
   });
 });
 
 describe("round 124: the quiet since the last fish counts a fish logged loose on the outing's water", () => {
   const fish = (id: string, at: Date, tripId: string | null): CatchEntry => ({ id, species: "Perch", measure: { kind: "length", inches: 9 }, lure: "Jig", spotId: "own", tripId, caughtAt: at.toISOString(), note: "", weather: null });
-  const book = (catches: CatchEntry[]): Logbook => ({ spots: [spot("own", "Own Lake")], trips: [{ id: "today", date: "2026-10-21", spotId: "own", title: "", note: "" }], catches });
+  const outing = (id: string) => ({ id, date: "2026-10-21", spotId: "own", title: id, note: "" });
+  const book = (catches: CatchEntry[], trips = [outing("today")]): Logbook => ({ spots: [spot("own", "Own Lake")], trips, catches });
 
   it("goes from the loose fish after the outing's own", async () => {
     const text = await page(book([fish("mine", new Date(2026, 9, 21, 7), "today"), fish("loose", new Date(2026, 9, 21, 11), null)]), "/trips/today");
@@ -83,5 +85,12 @@ describe("round 124: the quiet since the last fish counts a fish logged loose on
   it("is there with only a loose fish", async () => {
     const text = await page(book([fish("loose", new Date(2026, 9, 21, 11, 30), null)]), "/trips/today");
     expect(text).toContain("Last fish 30 min ago");
+  });
+
+  it("leaves a dawn's loose fish to the dawn, not the day's dusk", async () => {
+    const both = book([fish("loose", new Date(2026, 9, 21, 6), null)], [outing("dawn"), outing("dusk")]);
+    expect(await page(both, "/trips/dawn")).toContain("Last fish 6 h ago");
+    document.body.innerHTML = "";
+    expect(await page(both, "/trips/dusk")).not.toContain("Last fish");
   });
 });

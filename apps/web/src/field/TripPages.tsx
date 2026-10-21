@@ -64,7 +64,7 @@ import { useKeptForm } from "./keptForm";
 import { addedWater, forgetAddedWater } from "./addedWater";
 import { findCatches, isTimePhrase, isTimeWord } from "./CatchSearch";
 import { findTrips } from "./tripSearch";
-import { LATE_NIGHT_UNTIL, fishOnOutingDay } from "./suggestions";
+import { LATE_NIGHT_UNTIL, fishOnOutingDay, tripForFish } from "./suggestions";
 import { looseFishFor } from "./looseFish";
 import { averagedOutings, countedBook, countedFish, hasOwnEntries, ownFish } from "./milestones";
 import { isSampleOnly, isSamplePlan, isSampleSpot, isSampleOuting, upcomingRealTrips } from "./bookCopy";
@@ -156,7 +156,7 @@ export function calendarNotes(book: Logbook, trip: Trip, tackleItems: TackleItem
 function lastTimeNote(book: Logbook, trip: Trip): string {
   if (trip.spotId === PLAY_LAKE_ID) return "";
   const fishHere = outingFish(book, true);
-  const last = lastOutingBefore(countedBook(book).trips.filter((other) => other.spotId === trip.spotId && other.id !== trip.id), trip.date, outingDay(localDate(new Date())), fishHere, book);
+  const last = lastOutingBefore(averagedOutings(book).filter((other) => other.spotId === trip.spotId && other.id !== trip.id), trip.date, outingDay(localDate(new Date())), fishHere, book);
   if (!last) return "";
   const counts = [fishSum(fishHere(last.id)), ...(last.lost ? [tn(last.lost, "{n} lost", "{n} lost")] : []), ...(last.missed ? [tn(last.missed, "{n} missed", "{n} missed")] : [])];
   return t("Last time here: {day} · {counts}", { day: formatDay(last.date), counts: counts.join(" · ") });
@@ -516,7 +516,11 @@ function TripView() {
   // Fish from this water on the outing's day (or its small hours) that were logged without it.
   // Of a dawn and a dusk there, each fish goes to the one nearer its time, as its own page offers it.
   const loose = looseFishFor(book, trip);
-  const lastFish = [...catches, ...loose].map((entry) => entry.caughtAt).sort().at(-1);
+  // Its newest fish, with those logged loose that their own page files here (not a dawn's fish on the day's dusk).
+  const lastFish = [...catches, ...loose.filter((entry) => tripForFish(book, trip.spotId, toLocalInput(new Date(entry.caughtAt)))?.id === trip.id)]
+    .map((entry) => entry.caughtAt)
+    .sort()
+    .at(-1);
   // A day of the game on its lake: no fish to log by hand, nothing to plan or pack.
   const play = trip.spotId === PLAY_LAKE_ID;
   // Counted with the fish on its water, as the water's page counts its outings.
@@ -854,6 +858,8 @@ function TripForm() {
   const smallHours = new Date().getHours() < LATE_NIGHT_UNTIL;
   const guess = likelyWater(book, localDate(new Date()), smallHours);
   const lastEvening = shiftDate(new Date(), -1);
+  // The outings the form weighs: not the sample week's blank plans Trips hides beside a water of the angler's own.
+  const outings = averagedOutings(book);
   // Logged after midnight on a night session with no outing yet: the outing is last night's, and the night's fish so
   // far (the evening's and the small hours') go on it, rather than splitting the session over two days.
   const [nightOuting] = useState(
@@ -861,7 +867,7 @@ function TripForm() {
       !existing &&
       !params.has("date") &&
       smallHours &&
-      !averagedOutings(book).some((trip) => trip.spotId === guess && (trip.date === lastEvening || trip.date === localDate(new Date()))) &&
+      !outings.some((trip) => trip.spotId === guess && (trip.date === lastEvening || trip.date === localDate(new Date()))) &&
       book.catches.some((entry) => !entry.tripId && entry.spotId === guess && fishOnOutingDay(book, guess, toLocalInput(new Date(entry.caughtAt)), lastEvening)),
   );
   // Never the game's lake: its days are made by playing.
@@ -869,12 +875,12 @@ function TripForm() {
   const againDate = again
     ? datePicks(new Date())
         .map((pick) => pick.date)
-        .find((day) => day >= localDate(new Date()) && !averagedOutings(book).some((trip) => trip.spotId === again.spotId && trip.date === day))
+        .find((day) => day >= localDate(new Date()) && !outings.some((trip) => trip.spotId === again.spotId && trip.date === day))
     : undefined;
   const presetDate = /^\d{4}-\d{2}-\d{2}$/.test(params.get("date") ?? "") ? (params.get("date") as string) : nightOuting ? lastEvening : (againDate ?? localDate(new Date()));
   // Unasked, not a water that already has an outing that day: the next one fished, if any is free.
   // The sample week's made-up plans don't count once the book has the angler's own, as Coming up leaves them out.
-  const busy = (spotId: string) => averagedOutings(book).some((trip) => trip.spotId === spotId && trip.date === presetDate);
+  const busy = (spotId: string) => outings.some((trip) => trip.spotId === spotId && trip.date === presetDate);
   // A new book holds only the sample week's made-up waters.
   const onlySampleWaters = !existing && book.spots.every((spot) => spot.id === PLAY_LAKE_ID || isSampleSpot(spot.id));
   // A water just added from this form's "Add a spot" comes back picked.
@@ -895,7 +901,7 @@ function TripForm() {
   const lastHere = existing || !spotId
     ? undefined
     : lastOutingBefore(
-        spotId === PLAY_LAKE_ID ? tripsForSpot(book, spotId) : averagedOutings(book).filter((trip) => trip.spotId === spotId),
+        spotId === PLAY_LAKE_ID ? tripsForSpot(book, spotId) : outings.filter((trip) => trip.spotId === spotId),
         /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : "9999",
         outingDay(localDate(new Date())),
         outingFish(book, true),
@@ -906,14 +912,14 @@ function TripForm() {
     existing || !spotId || spotId === PLAY_LAKE_ID
       ? []
       : notesHere(
-          averagedOutings(book).filter((trip) => trip.spotId === spotId && (!/^\d{4}-\d{2}-\d{2}$/.test(date) || trip.date < date)),
+          outings.filter((trip) => trip.spotId === spotId && (!/^\d{4}-\d{2}-\d{2}$/.test(date) || trip.date < date)),
           localDate(new Date()),
           2,
           (id) => catchesForTrip(book, id).length,
         );
   const peak = spotId && spotId !== PLAY_LAKE_ID ? peakTime(countedFish(catchesForSpot(book, spotId))) : null;
   // A second outing on the same water and day is usually a slip; say which one is already there.
-  const sameDay = averagedOutings(book)
+  const sameDay = outings
     .filter((trip) => trip.spotId === spotId && trip.date === date && trip.id !== existing?.id)
     .sort(newestOutingFirst(book));
   // What this water gave around the same date in earlier years, for an outing being planned.
