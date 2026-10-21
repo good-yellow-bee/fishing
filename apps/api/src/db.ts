@@ -149,6 +149,10 @@ const profileColumns = db.prepare(`PRAGMA table_info(profile)`).all() as { name:
 if (!profileColumns.some((column) => column.name === "aerator")) {
   db.exec(`ALTER TABLE profile ADD COLUMN aerator INTEGER NOT NULL DEFAULT 0`);
 }
+// The angler's place for the worm tin in the shack's cool worm bin, bought once.
+if (!profileColumns.some((column) => column.name === "worm_bin")) {
+  db.exec(`ALTER TABLE profile ADD COLUMN worm_bin INTEGER NOT NULL DEFAULT 0`);
+}
 const catchColumns = db.prepare(`PRAGMA table_info(catch)`).all() as { name: string }[];
 if (!catchColumns.some((column) => column.name === "request_id")) {
   db.exec(`ALTER TABLE catch ADD COLUMN request_id TEXT`);
@@ -212,6 +216,7 @@ export type ProfileRow = {
   accuracy: number;
   patience: number;
   aerator: number;
+  worm_bin: number;
 };
 
 export type CatchRow = {
@@ -765,11 +770,15 @@ export function spendPoints(userId: string, cost: number) {
   if (result.changes !== 1) throw new Error("purchase failed");
 }
 
-/** Spends the points and fits the aerator in one step, so a second purchase, from another tab or a double click, finds it fitted and fails. */
-export function fitAerator(userId: string, cost: number) {
-  const result = db.prepare(`UPDATE profile SET points = points - ?, aerator = 1 WHERE user_id = ? AND points >= ? AND aerator = 0`).run(cost, userId, cost);
-  if (result.changes !== 1) throw new Error("purchase failed");
-}
+/** Spends the points and sets a one-time shack purchase in one step, so a second purchase, from another tab or a double click, finds it set and fails. */
+const buyOnce = (column: "aerator" | "worm_bin") => {
+  const update = db.prepare(`UPDATE profile SET points = points - ?, ${column} = 1 WHERE user_id = ? AND points >= ? AND ${column} = 0`);
+  return (userId: string, cost: number) => {
+    if (update.run(cost, userId, cost).changes !== 1) throw new Error("purchase failed");
+  };
+};
+export const fitAerator = buyOnce("aerator");
+export const takeWormBin = buyOnce("worm_bin");
 
 export function toProfile(row: ProfileRow) {
   return {
@@ -781,6 +790,7 @@ export function toProfile(row: ProfileRow) {
     accuracy: row.accuracy,
     patience: row.patience,
     aerator: row.aerator === 1,
+    wormBin: row.worm_bin === 1,
   };
 }
 

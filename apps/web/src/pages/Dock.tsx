@@ -77,7 +77,7 @@ import {
   type SkillId,
   type StanceId,
 } from "@stillwater/shared";
-import { buyAerator, buyGroundbait, buyShiner, buyUpgrade, buyWorm, errorText, getBankWeek, getGiants, getLodgeLost, reportLost, type GiantStatus, getLodgeReleased, getMe, getSpeciesRecords, getWeeklyChallenges, releaseCatch, type Me, type WeeklyBoard } from "../api";
+import { buyAerator, buyGroundbait, buyShiner, buyUpgrade, buyWorm, buyWormBin, errorText, getBankWeek, getGiants, getLodgeLost, reportLost, type GiantStatus, getLodgeReleased, getMe, getSpeciesRecords, getWeeklyChallenges, releaseCatch, type Me, type WeeklyBoard } from "../api";
 import { DailyRequestsPanel } from "../components/DailyRequestsPanel";
 import { WeeklyChallengesPanel } from "../components/WeeklyChallengesPanel";
 import { FightBar } from "../components/FightBar";
@@ -1036,11 +1036,12 @@ export function DockPage() {
     }
   };
 
-  const onBuyAerator = async () => {
+  /** A one-time shack purchase the server keeps on the profile: the refreshed profile shows it bought. */
+  const buyOnce = (buy: typeof buyAerator) => async () => {
     setBusy(true);
     setError("");
     try {
-      await buyAerator();
+      await buy();
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? errorText(err.message) : t("purchase failed"));
@@ -1048,6 +1049,8 @@ export function DockPage() {
       setBusy(false);
     }
   };
+  const onBuyAerator = buyOnce(buyAerator);
+  const onBuyWormBin = buyOnce(buyWormBin);
 
   if (!me) {
     return <main className="dock-page">{error || t("Walking the planks…")}</main>;
@@ -1720,7 +1723,7 @@ export function DockPage() {
               {t("The shack")}
             </h2>
             <UpgradePanel profile={me.profile} busy={busy || scenePhase !== "idle"} onBuy={onBuy} />
-            <BaitShop points={me.profile.points} lifetimePoints={me.profile.lifetimePoints} handfuls={game.handfuls} shinerOn={game.liveShiner} bucket={game.bucket} busy={busy || scenePhase !== "idle"} onBuy={onBuyBait} onBuyShiner={onBuyShiner} onHookFromBucket={game.hookFromBucket} aerator={game.aerator} onBuyAerator={onBuyAerator} worms={game.worms} onBuyWorm={onBuyWorm} trap={game.trap ? trapState(game.trap, Date.now()) : "none"} trapCold={game.trap ? game.trap.cold === true : trapIsCold(season)} onSetTrap={game.setTrap} onLiftTrap={game.liftTrap} season={season} />
+            <BaitShop points={me.profile.points} lifetimePoints={me.profile.lifetimePoints} handfuls={game.handfuls} shinerOn={game.liveShiner} bucket={game.bucket} busy={busy || scenePhase !== "idle"} onBuy={onBuyBait} onBuyShiner={onBuyShiner} onHookFromBucket={game.hookFromBucket} aerator={game.aerator} onBuyAerator={onBuyAerator} worms={game.worms} onBuyWorm={onBuyWorm} wormBin={game.wormBin} onBuyWormBin={onBuyWormBin} trap={game.trap ? trapState(game.trap, Date.now()) : "none"} trapCold={game.trap ? game.trap.cold === true : trapIsCold(season)} onSetTrap={game.setTrap} onLiftTrap={game.liftTrap} season={season} />
             <DailyRequestsPanel key={userId} catchKey={me.catches[0]?.id} onClaimed={refresh} />
             <WeeklyChallengesPanel key={`week-${userId}`} catchKey={me.catches[0]?.id} onClaimed={refresh} />
             <ForecastBoard />
