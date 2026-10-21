@@ -564,9 +564,9 @@ export function GearPage() {
   const counted = countedBook(book);
   const recent = recentTrips(counted, today).filter((trip) => offPlayLake(trip) && !going.includes(trip)).sort(newestOutingFirst(counted));
   // Each outing's fish with those logged loose that day on its water, as Trips and Home count them.
-  const fishOn = outingFish(book);
-  // Under each month, the lure that took most of its fish: what worked then, for a bag packed now.
   const fishOf = outingCatches(book);
+  const fishOn = (tripId: string) => fishOf(tripId).length;
+  // Under each month, the lure that took most of its fish: what worked then, for a bag packed now.
   const lureName = bookLureName(book.catches);
   const monthLure = (trips: readonly Trip[]) => {
     const lure = bestLure(trips.flatMap((trip) => fishOf(trip.id)));
