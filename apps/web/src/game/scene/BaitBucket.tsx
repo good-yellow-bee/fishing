@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { AERATOR_BUBBLES, aeratorBubble } from "./aeratorBubbles";
+import { AERATOR_BUBBLES, aeratorBubble, STONE_X, STONE_Z } from "./aeratorBubbles";
 import { aboard } from "./boat";
 import { bucketSpot } from "./bucketSpot";
 import { mergePainted, mergeParts } from "./mergeParts";
@@ -20,8 +20,8 @@ const BUBBLE = "#eef8f4";
 const HEIGHT = 0.2;
 const RIM_R = 0.1;
 const WATER_Y = HEIGHT * 0.8;
-/** The pump box hangs outside the rim on the side the camera sees, its tube climbing over the rim and down to the airstone. */
-const TUBE_X = 0.05;
+/** The pump box hangs outside the rim on the bucket's back, away from the angler's legs; its tube climbs over the rim and lies across the water to the airstone. */
+const TUBE_X = -0.05;
 const TUBE_Z = -0.045;
 const PUMP_OUT = RIM_R + 0.0175;
 const TUBE_IN = Math.hypot(TUBE_X, TUBE_Z);
@@ -32,12 +32,15 @@ const TUBE_R = 0.003;
 function pumpShape() {
   return mergePainted([
     { geometry: new THREE.BoxGeometry(0.05, 0.05, 0.035), position: [0, HEIGHT - 0.03, -PUMP_OUT], color: PUMP },
-    { geometry: new THREE.BoxGeometry(0.014, 0.006, 0.045), position: [-0.012, HEIGHT + 0.004, -PUMP_OUT + 0.01], color: TUBE },
+    { geometry: new THREE.BoxGeometry(0.014, 0.006, 0.045), position: [-0.012, HEIGHT + 0.011, -PUMP_OUT + 0.01], color: TUBE },
     { geometry: new THREE.CylinderGeometry(TUBE_R, TUBE_R, 0.02, 5), position: [0, HEIGHT + 0.005, -PUMP_OUT], color: TUBE },
     { geometry: new THREE.CylinderGeometry(TUBE_R, TUBE_R, PUMP_OUT - TUBE_IN, 5).rotateX(Math.PI / 2), position: [0, TUBE_Y, -(PUMP_OUT + TUBE_IN) / 2], color: TUBE },
     { geometry: new THREE.CylinderGeometry(TUBE_R, TUBE_R, TUBE_Y - WATER_Y + 0.005, 5), position: [0, (TUBE_Y + WATER_Y - 0.005) / 2, -TUBE_IN], color: TUBE },
   ]).rotateY(Math.atan2(-TUBE_X, -TUBE_Z));
 }
+
+/** The tube's run across the water, from where it dips in to over the airstone. */
+const RUN = Math.hypot(STONE_X - TUBE_X, STONE_Z - TUBE_Z);
 
 function bucketShape(aerated: boolean) {
   const bucket = mergePainted([
@@ -47,7 +50,15 @@ function bucketShape(aerated: boolean) {
     { geometry: new THREE.TorusGeometry(RIM_R * 0.95, 0.005, 3, 12, Math.PI), position: [0, HEIGHT, 0], color: RIM },
     { geometry: new THREE.CircleGeometry(RIM_R * 0.94, 12).rotateX(-Math.PI / 2), position: [0, WATER_Y, 0], color: WATER },
   ]);
-  return aerated ? mergeParts([{ geometry: bucket }, { geometry: pumpShape() }]) : bucket;
+  if (!aerated) return bucket;
+  const run = mergePainted([
+    {
+      geometry: new THREE.CylinderGeometry(TUBE_R, TUBE_R, RUN, 5).rotateX(Math.PI / 2).rotateY(Math.atan2(STONE_X - TUBE_X, STONE_Z - TUBE_Z)),
+      position: [(TUBE_X + STONE_X) / 2, WATER_Y + 0.002, (TUBE_Z + STONE_Z) / 2],
+      color: TUBE,
+    },
+  ]);
+  return mergeParts([{ geometry: bucket }, { geometry: pumpShape() }, { geometry: run }]);
 }
 
 /** Where each spare shiner lies across the water in the bucket. */
@@ -70,12 +81,14 @@ export function BaitBucket({ count, aerated = false }: { count: number; aerated?
   const fish = useMemo(() => new THREE.SphereGeometry(1, 6, 4), []);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
   const shiner = useMemo(() => new THREE.MeshToonMaterial({ color: SHINER, gradientMap: toonRamp() }), []);
-  const bubble = useMemo(() => new THREE.MeshBasicMaterial({ color: BUBBLE, transparent: true, opacity: 0.7, depthWrite: false, toneMapped: false }), []);
+  // Lit like the shiners, so the bubbles dim at night instead of glowing.
+  const bubble = useMemo(() => new THREE.MeshToonMaterial({ color: BUBBLE, transparent: true, opacity: 0.8, depthWrite: false, gradientMap: toonRamp() }), []);
+  useEffect(() => () => shape.dispose(), [shape]);
   useEffect(
     () => () => {
-      [shape, fish, material, shiner, bubble].forEach((item) => item.dispose());
+      [fish, material, shiner, bubble].forEach((item) => item.dispose());
     },
-    [shape, fish, material, shiner, bubble],
+    [fish, material, shiner, bubble],
   );
   useFrame(({ clock }) => {
     const g = group.current;

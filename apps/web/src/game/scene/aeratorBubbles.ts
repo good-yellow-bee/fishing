@@ -1,3 +1,5 @@
+import { frac, GOLDEN } from "./hotspotBubbles";
+
 /** The aerator's bubbles (SC299), in the bait bucket's own frame: its water at `waterY`, the airstone under (STONE_X, STONE_Z). Pure. */
 
 export const AERATOR_BUBBLES = 5;
@@ -6,18 +8,13 @@ export const AERATOR_CYCLE_SEC = 1.1;
 /** How high a bubble domes over the water before it pops, and its widest. */
 export const AERATOR_RISE = 0.018;
 export const AERATOR_BUBBLE_MAX = 0.012;
-/** The airstone on the bucket's floor: on its far side from the camera behind the angler, where the near rim doesn't hide the water, clear of the shiners. */
-export const STONE_X = 0.045;
+/** The airstone on the bucket's floor: on its far side from the camera behind the angler, where the near rim doesn't hide the water. */
+export const STONE_X = -0.045;
 export const STONE_Z = 0.045;
 /** How far from over the airstone the bubbles break. */
 const SPREAD = 0.02;
-const GOLDEN = 0.618034;
 
 export type AeratorBubble = { x: number; y: number; z: number; size: number };
-
-function frac(value: number) {
-  return value - Math.floor(value);
-}
 
 /** Bubble `index` at `time`: it swells and lifts over the water above the airstone, then pops and a new one rises a little aside. */
 export function aeratorBubble(index: number, time: number, waterY: number): AeratorBubble {
