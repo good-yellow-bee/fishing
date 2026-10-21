@@ -2283,6 +2283,7 @@ export const LakeWorld = memo(function LakeWorld({
   moon = 0.5,
   wind = CALM,
   wormBin = false,
+  breadCrumb = false,
 }: {
   spot: SpotId;
   hour: LakeHour;
@@ -2295,6 +2296,8 @@ export const LakeWorld = memo(function LakeWorld({
   wind?: { x: number; z: number };
   /** The angler has a place in the shack's worm bin. */
   wormBin?: boolean;
+  /** The angler has bought the shack's sack of bread crumb. */
+  breadCrumb?: boolean;
 }) {
   const look = LAKE_HOUR_LOOK[hour];
   const weather = useMemo(() => weatherLook(hour, sky, moonLight(moon)), [hour, sky, moon]);
@@ -2394,7 +2397,7 @@ export const LakeWorld = memo(function LakeWorld({
       {stridersOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Striders />}
       {whirligigsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Whirligigs />}
       <Shack />
-      <WormBin season={season} owned={wormBin} />
+      <WormBin season={season} owned={wormBin} sack={breadCrumb} />
       {binBirdOut(hour, sky, season) && <BinBlackbird />}
       {rivalOut(hour) && <RivalAngler />}
       <Campfire lit={campfireLit(hour, sky)} hour={hour} wind={wind} />
