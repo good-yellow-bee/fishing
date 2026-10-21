@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
-import type { CatchEntry, Logbook, Spot, Trip } from "@stillwater/shared";
+import type { CatchEntry, Logbook, Spot } from "@stillwater/shared";
 import { BestsPage } from "./bests/BestsPage";
 import { LogbookProvider } from "./LogbookState";
 import { LOGBOOK_STORAGE_KEY } from "./storage";
@@ -15,7 +15,6 @@ import { PL_GAME } from "../i18n/pl/game";
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 const spot = (id: string, name: string): Spot => ({ id, name, waterType: "lake", notes: "", bestConditions: "" }) as Spot;
-const trip = (id: string, date: string, spotId: string): Trip => ({ id, date, spotId, title: "", note: "" }) as Trip;
 const fish = (id: string, spotId: string, at: Date): CatchEntry =>
   ({ id, species: "Roach", measure: { kind: "length", inches: 8 }, lure: "Jig", spotId, tripId: null, caughtAt: at.toISOString(), note: "", weather: null }) as CatchEntry;
 
