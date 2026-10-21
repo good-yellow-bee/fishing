@@ -1,6 +1,8 @@
 import { DOCK_STAND_X, DOCK_STAND_Z, footHeight, inLake } from "@stillwater/shared";
 import { describe, expect, it } from "vitest";
+import { ARM_FLOOR, ARM_TELL } from "../fight";
 import {
+  armTremble,
   WIND_BELLY_MAX,
   windBellyMeters,
   BITE_SLACK_END,
@@ -274,5 +276,22 @@ describe("the wind on a slack fight line", () => {
 
   it("leaves a reeled or running line straight", () => {
     expect(windBellyMeters(0.13, false)).toBe(0);
+  });
+});
+
+describe("tired arm", () => {
+  const at = 0.4;
+
+  it("keeps the rod steady until the arm tires", () => {
+    expect(armTremble(1, at)).toBe(0);
+    expect(armTremble(ARM_TELL, at)).toBe(0);
+  });
+
+  it("shakes it harder the slower the arm reels", () => {
+    const spent = armTremble(ARM_FLOOR, at);
+    expect(Math.abs(spent)).toBeGreaterThan(0);
+    expect(Math.abs(spent)).toBeLessThanOrEqual(0.05);
+    expect(armTremble((ARM_TELL + ARM_FLOOR) / 2, at)).toBeCloseTo(spent / 2);
+    expect(armTremble(ARM_FLOOR - 0.1, at)).toBe(spent);
   });
 });
