@@ -1964,6 +1964,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT466~~ | ~~Worms at the shack: a worm costs 15 points (a fifth off from level 17, like the shack's other bait) and goes in the worm tin, up to the five a wet morning digs; the shack's row shows the tin's count and turns off when it is full, and the empty-tin hint says the shack sells one~~ (#1714) | gameplay | S |
 | ~~GT467~~ | ~~News card 2026-10-21-game71 covers GT465-GT466: the worm tin dug each day and the shack's worms~~ (#1719) | ui | S |
 | GT468 | Worms in the summer heat: worms left in the tin from an earlier day have died by the first visit of a summer day, so the tin holds only that day's dig (judged by the season when the angler comes back, like the bait bucket), and worms bought ahead at the shack don't carry over; the sign-in hint says how many died, beside a dead-shiner line, and the shack's worm note says a worm keeps only today in summer (#1723) | gameplay | S |
+| GT469 | Bucket aerator: the shack sells an aerator for the bait bucket, bought once (150 pts, a fifth off from level 17), and from then on every spare shiner keeps a day longer in any season (two days become three in summer, three four, five six in winter); the shack's bucket note and the sign-in dead-shiner hint say so (#1728) | gameplay | M |
 
 ## Risks / open questions for the owner
 

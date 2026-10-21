@@ -37,7 +37,7 @@ import {
 } from "./lake.ts";
 import { anglerLevel, canUseSpot, INLET_LEVEL, skillCost, SPOT_IDS } from "./progression.ts";
 import { DAY_RUN_BONUS } from "./streak.ts";
-import { canLand, catchPoints, cleanRunBonus, GROUNDBAIT_PRICE, LODGE_RECORD_BONUS, lodgeRecordBonus, PB_BONUS, personalBestBonus, SHACK_DISCOUNT_LEVEL, shackPrice, SHINER_PRICE, validateGroundbaitBuy, validateShinerBuy, validateWormBuy, WORM_PRICE, CLEAN_RUN_BONUS, CLEAN_RUN_FROM, legendaryCanBite, skillUnlock, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
+import { AERATOR_PRICE, validateAeratorBuy, canLand, catchPoints, cleanRunBonus, GROUNDBAIT_PRICE, LODGE_RECORD_BONUS, lodgeRecordBonus, PB_BONUS, personalBestBonus, SHACK_DISCOUNT_LEVEL, shackPrice, SHINER_PRICE, validateGroundbaitBuy, validateShinerBuy, validateWormBuy, WORM_PRICE, CLEAN_RUN_BONUS, CLEAN_RUN_FROM, legendaryCanBite, skillUnlock, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
 import type { Profile } from "./types.ts";
 import { weeklyFish } from "./weeklyFish.ts";
 
@@ -642,6 +642,15 @@ describe("validateWormBuy", () => {
     const profile = { userId: "u", displayName: "A", points: WORM_PRICE, lifetimePoints: 500, strength: 1, accuracy: 1, patience: 1 };
     expect(validateWormBuy(profile)).toEqual({ ok: true, cost: WORM_PRICE });
     expect(validateWormBuy({ ...profile, points: WORM_PRICE - 1 })).toMatchObject({ ok: false, error: "not enough points", status: 409 });
+  });
+});
+
+describe("validateAeratorBuy", () => {
+  it("sells the aerator for its price, and not to an angler short of points", () => {
+    const profile = { userId: "u", displayName: "A", points: AERATOR_PRICE, lifetimePoints: 500, strength: 1, accuracy: 1, patience: 1 };
+    expect(validateAeratorBuy(profile)).toEqual({ ok: true, cost: AERATOR_PRICE });
+    expect(validateAeratorBuy({ ...profile, points: AERATOR_PRICE - 1 })).toMatchObject({ ok: false, error: "not enough points", status: 409 });
+    expect(validateAeratorBuy({ ...profile, aerator: true })).toMatchObject({ ok: false, error: "aerator already fitted", status: 409 });
   });
 });
 

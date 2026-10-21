@@ -477,11 +477,15 @@ export function useFishingGame(
   const [bucket, setBucket] = useState(0);
   /** When each spare shiner went in, oldest first: the oldest goes out first, before it dies. */
   const bucketRef = useRef<number[]>([]);
+  /** The shack's aerator fitted to the bait bucket: its spare shiners keep a day longer. */
+  const aerator = profile?.aerator === true;
+  const aeratorRef = useRef(aerator);
+  aeratorRef.current = aerator;
   /** What died in the bucket and the tin since the last visit, said on sign-in; the primed swim's line adds to it, not over it. */
   const baitDiedRef = useRef("");
   // The bait kept from an earlier visit, read when the angler signs in: the bucket's shiners and the tin's worms may have died since.
   useEffect(() => {
-    const kept = profile?.userId ? loadBucket(profile.userId, Date.now(), season) : { shiners: [], died: 0 };
+    const kept = profile?.userId ? loadBucket(profile.userId, Date.now(), season, aeratorRef.current) : { shiners: [], died: 0 };
     bucketRef.current = kept.shiners;
     setBucket(kept.shiners.length);
     const tin = profile?.userId ? loadTin(profile.userId, new Date(), season) : { worms: WORM_TIN_DAILY, died: 0 };
@@ -496,17 +500,18 @@ export function useFishingGame(
           : season === "summer"
             ? t("{n} of the shiners in your bait bucket died while you were away: in the summer heat they keep two days.", { n: kept.died })
             : t("{n} of the shiners in your bait bucket died while you were away: they keep three days.", { n: kept.died });
+    const aeratedDied = kept.died > 0 && aeratorRef.current ? `${shinersDied} ${t("Your aerator keeps them a day longer.")}` : shinersDied;
     const wormsDied = tin.died > 0 ? t("{n} of the worms left in your tin died in the summer heat while you were away: they keep only the day they are dug or bought.", { n: tin.died }) : "";
-    baitDiedRef.current = [shinersDied, wormsDied].filter(Boolean).join(" ");
+    baitDiedRef.current = [aeratedDied, wormsDied].filter(Boolean).join(" ");
     if (baitDiedRef.current) setHint(baitDiedRef.current);
   }, [profile?.userId]);
   const keepBucket = (userId: string, shiners: number[]) => {
-    bucketRef.current = liveShiners(shiners, Date.now(), season);
+    bucketRef.current = liveShiners(shiners, Date.now(), season, aeratorRef.current);
     saveBucket(userId, bucketRef.current);
     setBucket(bucketRef.current.length);
   };
   /** The spare shiners alive right now: one whose days in the bucket ran out during the visit has died. */
-  const bucketNow = () => liveShiners(bucketRef.current, Date.now(), season);
+  const bucketNow = () => liveShiners(bucketRef.current, Date.now(), season, aeratorRef.current);
   /** The shiner trap by the shack, read when the angler signs in. */
   const [trap, setTrapState] = useState<Trap | null>(null);
   const trapRef = useRef<Trap | null>(null);
@@ -2490,6 +2495,7 @@ export function useFishingGame(
     lostReport,
     livelyShiner,
     bucket,
+    aerator,
     hookFromBucket,
     setNightLine,
     checkNightLine,

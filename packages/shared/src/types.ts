@@ -33,6 +33,8 @@ export type Profile = {
   strength: number;
   accuracy: number;
   patience: number;
+  /** The shack's aerator is fitted to the bait bucket: bought once, it keeps every spare shiner a day longer. */
+  aerator?: boolean;
 };
 
 export type CatchRecord = {

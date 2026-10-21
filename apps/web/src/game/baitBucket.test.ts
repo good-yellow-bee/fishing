@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { BUCKET_COLD_LIFE_MS, BUCKET_HOT_LIFE_MS, BUCKET_LIFE_MS, baitBucketKey, bucketLifeMs, loadBucket, saveBucket } from "./baitBucket";
+import { AERATOR_EXTRA_MS, BUCKET_COLD_LIFE_MS, BUCKET_HOT_LIFE_MS, BUCKET_LIFE_MS, baitBucketKey, bucketLifeMs, liveShiners, loadBucket, saveBucket } from "./baitBucket";
 
 let kept: Map<string, string>;
 beforeEach(() => {
@@ -38,5 +38,15 @@ describe("the bait bucket", () => {
     expect(loadBucket("ash", 600).shiners).toEqual([500, 500]);
     saveBucket("ash", []);
     expect(kept.has(baitBucketKey("ash"))).toBe(false);
+  });
+
+  it("keeps every spare shiner a day longer in any season once the aerator is fitted", () => {
+    expect(AERATOR_EXTRA_MS / 86_400_000).toBe(1);
+    expect((["summer", "spring", "fall", "winter", undefined] as const).map((season) => bucketLifeMs(season, true) / 86_400_000)).toEqual([3, 4, 4, 6, 4]);
+    expect(liveShiners([0], BUCKET_LIFE_MS + AERATOR_EXTRA_MS, "fall", true)).toEqual([0]);
+    expect(liveShiners([0], BUCKET_LIFE_MS + AERATOR_EXTRA_MS + 1, "fall", true)).toEqual([]);
+    saveBucket("ash", [0, BUCKET_LIFE_MS]);
+    expect(loadBucket("ash", BUCKET_HOT_LIFE_MS + 1, "summer", true)).toEqual({ shiners: [0, BUCKET_LIFE_MS], died: 0 });
+    expect(loadBucket("ash", BUCKET_LIFE_MS + 1, "summer", true)).toEqual({ shiners: [BUCKET_LIFE_MS], died: 1 });
   });
 });

@@ -5,7 +5,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { badgeProgress, catchPoints, CLEAN_RUN_BONUS, DAY_RUN_BONUS, GOLDEN_BONUS, LODGE_RECORD_BONUS, PB_BONUS, isGolden, weeklyBonus, dailyConditions, skyTurnForDay, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky, type SpotId, MASTER_BONUS, localDate } from "@stillwater/shared";
-import { buyGroundbait, buyShiner, buyWorm, getGiants, getLodgeLost, getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
+import { buyAerator, buyGroundbait, buyShiner, buyWorm, getGiants, getLodgeLost, getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { bagKey, shinerKey } from "../game/groundbaitBag";
@@ -34,6 +34,7 @@ vi.mock("../api", async (importOriginal) => ({
   buyGroundbait: vi.fn(),
   buyShiner: vi.fn(),
   buyWorm: vi.fn(),
+  buyAerator: vi.fn(),
 }));
 // The real game loop, with a landed fish slipped in so the page saves it without playing a fight.
 vi.mock("../game/useFishingGame", async (importOriginal) => {
@@ -795,7 +796,7 @@ describe("the shack's bait tin", () => {
     vi.mocked(getMe).mockResolvedValue({ ...me, level: 17, profile: { ...me.profile, points: 500, lifetimePoints: 57_000 } });
     const page = await openDock("/?hour=day&sky=clear");
     act(() => page.querySelector<HTMLButtonElement>(".walk-shop")!.click());
-    expect([...page.querySelectorAll(".bait-shop button")].map((button) => button.textContent)).toEqual(["A handful (48 pts)", "A live shiner (40 pts)", "A worm (12 pts)", "Bait the shiner trap (1 handful)"]);
+    expect([...page.querySelectorAll(".bait-shop button")].map((button) => button.textContent)).toEqual(["A handful (48 pts)", "A live shiner (40 pts)", "A bucket aerator (120 pts)", "A worm (12 pts)", "Bait the shiner trap (1 handful)"]);
   });
 
   it("sells a live shiner onto the hook, then into the bait bucket, and keeps it for a reload", async () => {
@@ -834,6 +835,24 @@ describe("the shack's bait tin", () => {
     await act(async () => buy.click());
     expect(buyWorm).toHaveBeenCalledTimes(1);
     localStorage.removeItem(wormTinKey("u1"));
+  });
+
+  it("buys the aerator once, and the bucket shows it fitted from the profile the server sends back", async () => {
+    vi.mocked(getMe).mockResolvedValue({ ...me, profile: { ...me.profile, points: 500 } });
+    vi.mocked(buyAerator).mockClear();
+    vi.mocked(buyAerator).mockImplementation(async () => {
+      vi.mocked(getMe).mockResolvedValue({ ...me, profile: { ...me.profile, points: 350, aerator: true } });
+      return { profile: { ...me.profile, points: 350, aerator: true } };
+    });
+    const page = await openDock("/?hour=day&sky=clear");
+    act(() => page.querySelector<HTMLButtonElement>(".walk-shop")!.click());
+    const aeratorButton = () => page.querySelector<HTMLButtonElement>("[aria-describedby=aerator-note]")!;
+    await act(async () => aeratorButton().click());
+    expect(buyAerator).toHaveBeenCalledTimes(1);
+    expect(aeratorButton().textContent).toBe("Bucket aerator fitted");
+    expect(page.querySelector("#aerator-note")?.textContent).toBe("The aerator on your bait bucket keeps each spare shiner a day longer.");
+    await act(async () => aeratorButton().click());
+    expect(buyAerator).toHaveBeenCalledTimes(1);
   });
 });
 

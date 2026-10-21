@@ -18,22 +18,25 @@ export const BUCKET_COLD_LIFE_MS = 120 * 3_600_000;
 /** Summer's warm water kills a spare shiner sooner. */
 export const BUCKET_HOT_LIFE_MS = 48 * 3_600_000;
 
-/** How long a spare shiner lives in the bucket, judged by the lake's season now. */
-export function bucketLifeMs(season: LakeSeason | undefined) {
-  return season === "winter" ? BUCKET_COLD_LIFE_MS : season === "summer" ? BUCKET_HOT_LIFE_MS : BUCKET_LIFE_MS;
+/** The shack's aerator, bought once, keeps every spare shiner alive this much longer, in any season. */
+export const AERATOR_EXTRA_MS = 24 * 3_600_000;
+
+/** How long a spare shiner lives in the bucket, judged by the lake's season now, and longer with the aerator fitted. */
+export function bucketLifeMs(season: LakeSeason | undefined, aerated = false) {
+  return (season === "winter" ? BUCKET_COLD_LIFE_MS : season === "summer" ? BUCKET_HOT_LIFE_MS : BUCKET_LIFE_MS) + (aerated ? AERATOR_EXTRA_MS : 0);
 }
 
 /** The spare shiners still alive at `now`, oldest first, no more than the bucket holds. */
-export function liveShiners(shiners: readonly number[], now: number, season: LakeSeason | undefined): number[] {
-  const life = bucketLifeMs(season);
+export function liveShiners(shiners: readonly number[], now: number, season: LakeSeason | undefined, aerated = false): number[] {
+  const life = bucketLifeMs(season, aerated);
   return shiners.filter((at) => now - at <= life).sort((a, b) => a - b).slice(-BUCKET_SIZE);
 }
 
 /** When each spare shiner went in, oldest first, with the ones that have died left out, and how many those were. */
-export function loadBucket(userId: string, now = Date.now(), season?: LakeSeason): { shiners: number[]; died: number } {
+export function loadBucket(userId: string, now = Date.now(), season?: LakeSeason, aerated = false): { shiners: number[]; died: number } {
   const stored = readAngler(baitBucketKey(userId), (raw) => (Array.isArray(raw) ? raw.filter((at): at is number => typeof at === "number") : null));
   if (stored) {
-    const shiners = liveShiners(stored, now, season);
+    const shiners = liveShiners(stored, now, season, aerated);
     return { shiners, died: Math.max(0, Math.min(stored.length, BUCKET_SIZE) - shiners.length) };
   }
   // The bucket from before each shiner kept its time moves over once, its shiners counted as put in now.
