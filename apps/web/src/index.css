@@ -3785,6 +3785,15 @@ html[data-contrast="high"] .sound-captions li {
     display: none;
   }
 
+  /* Where the signs fill that row (740 x 300 with larger text) the chip was a 16 px sliver under them: it goes from
+     sight, and a screen reader keeps it. */
+  .scene-wrap[data-chip-cramped] > .stance-chip {
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    clip: rect(0 0 0 0);
+  }
+
   /* Down the right edge, stopping above the power meter; more signs than fit (larger text, the inlet, the boat) start a second column. */
   .walk-signs {
     top: calc(var(--hud-bottom, 52px) + 6px);
