@@ -24,7 +24,7 @@ import { findLink } from "./CatchSearch";
 import { bookFishDay, daysOut } from "./tripMonths";
 import { bookLureName, pieceTally } from "./pieceTally";
 import { pieceName } from "./gear/pieceKey";
-import { countedBook, countedFish, nextBookMark, ownFish } from "./milestones";
+import { countedBook, countedFish, hasOwnEntries, nextBookMark, ownFish } from "./milestones";
 import { FROM_LIST } from "./leaveDeleted";
 import { thisWeekInPastYears, yearsBack } from "./yearsAgo";
 import { GOAL_PARAM, goalPace, readYearGoal } from "./YearGoal";
@@ -188,8 +188,10 @@ export function HomePage() {
   // The goal counts a night session's small hours on its outing's day, as Bests does.
   const yearRows = book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${thisYear}-`));
   const yearFish = yearRows.filter((entry) => counted.has(entry.id)).length;
-  // The goal is the angler's own: the sample week's invented fish don't fill it, so a book of only those shows none.
-  const goal = sampleOnly ? null : readYearGoal(thisYear);
+  const ownAny = hasOwnEntries(book);
+  // The goal is the angler's own: the sample week's invented fish don't fill it, so a book of only those shows none,
+  // a water of their own beside them too, as Bests counts it.
+  const goal = ownAny ? readYearGoal(thisYear) : null;
   const pace = goal !== null ? goalPace(yearFish, goal, now) : null;
   // Last year up to this same date, once last year has any fish: is this year on pace?
   const lastYear = String(Number(thisYear) - 1);
@@ -200,8 +202,7 @@ export function HomePage() {
   const firstDay = real.reduce((first, entry) => (bookFishDay(book, entry) < first ? bookFishDay(book, entry) : first), "9999");
   const comparable = lastYearDays.length > 0 && firstDay <= `${lastYear}-${today.slice(5)}`;
   // Early January: how last year's goal ended, before the new year's count says much.
-  const lastGoal = today.slice(5) <= "01-14" ? readYearGoal(lastYear) : null;
-  const ownAny = countedOwn.trips.some((trip) => !isSampleOuting(trip)) || countedOwn.catches.some((entry) => !isSampleCatch(entry.id));
+  const lastGoal = ownAny && today.slice(5) <= "01-14" ? readYearGoal(lastYear) : null;
   const ownWaters = (ownAny ? withoutSample(book) : book).spots.filter((spot) => spot.id !== PLAY_LAKE_ID).length;
   // Today's outing counts once it has a fish, as the averages take it.
   const daysThisYear = daysOut(countedOwn, thisYear, fishedBy);
@@ -342,7 +343,7 @@ export function HomePage() {
                 </>
               ) : null}
               {/* A year with fish but no goal yet: one tap to Bests with the goal's form open. */}
-              {goal === null && yearFish > 0 && !sampleOnly ? (
+              {goal === null && yearFish > 0 && ownAny ? (
                 <>
                   {" · "}
                   <Link to={`/bests?${GOAL_PARAM}=set`}>{t("Set a goal for {year}", { year: thisYear })}</Link>
