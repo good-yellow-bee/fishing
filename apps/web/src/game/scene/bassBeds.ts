@@ -3,10 +3,10 @@ import { waterDepth } from "./water";
 
 export type BassBed = { x: number; z: number; radius: number; phase: number };
 
-/** The bass beds: one in the Reeds shallows, one beside the dock's sunfish beds; wider than any sunfish nest. */
+/** The bass beds: one in the Reeds shallows, one beside the dock's sunfish beds; wider than any sunfish nest, and a little deeper, at the shelf's edge. */
 export const BASS_BEDS: readonly BassBed[] = [
   { x: -10.2, z: 8.8, radius: 0.55, phase: 0.8 },
-  { x: 1.7, z: 5.7, radius: 0.5, phase: 3.9 },
+  { x: -2.1, z: 5.8, radius: 0.5, phase: 3.9 },
 ];
 
 /** The bass guard their beds in spring only. */
@@ -46,7 +46,7 @@ function strayBearings(bed: BassBed) {
       const x = bed.x + Math.sin(bearing) * bed.radius * r;
       const z = bed.z + Math.cos(bearing) * bed.radius * r;
       const depth = waterDepth(x, z);
-      return inLake(x, z) && depth > 0.02 && depth <= 0.35;
+      return inLake(x, z) && depth > 0.02 && depth <= 0.45;
     });
     if (clear) bearings.push(bearing);
   }

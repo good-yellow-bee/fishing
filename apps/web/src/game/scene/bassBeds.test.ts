@@ -12,12 +12,12 @@ describe("bass on their spring beds", () => {
     for (const season of ["summer", "fall", "winter"] as const) expect(bassBedsOut(season)).toBe(false);
   });
 
-  it("fan wider beds than the sunfish, on the shallow shelf by the Reeds and the dock, clear of the sunfish and tadpoles", () => {
+  it("fan wider beds than the sunfish, at the shallow shelf's edge by the Reeds and the dock, clear of the sunfish and tadpoles", () => {
     const nests = sunfishNests();
     for (const bed of BASS_BEDS) {
       expect(inLake(bed.x, bed.z)).toBe(true);
       for (const [dx, dz] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) {
-        expect(waterDepth(bed.x + dx! * bed.radius, bed.z + dz! * bed.radius)).toBeLessThanOrEqual(0.3);
+        expect(waterDepth(bed.x + dx! * bed.radius, bed.z + dz! * bed.radius)).toBeLessThanOrEqual(0.4);
       }
       for (const nest of nests) {
         expect(bed.radius).toBeGreaterThan(nest.radius);
@@ -53,7 +53,7 @@ describe("bass on their spring beds", () => {
         expect(Math.hypot(stray!.x - bed.x, stray!.z - bed.z)).toBeGreaterThan(bed.radius);
         expect(inLake(stray!.x, stray!.z)).toBe(true);
         expect(waterDepth(stray!.x, stray!.z)).toBeGreaterThan(0.02);
-        expect(waterDepth(stray!.x, stray!.z)).toBeLessThanOrEqual(0.35);
+        expect(waterDepth(stray!.x, stray!.z)).toBeLessThanOrEqual(0.45);
         if (Math.abs(off.u - 0.5) < 0.03) {
           peaks += 1;
           const bass = bassSpot(bed, t);
