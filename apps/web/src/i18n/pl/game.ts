@@ -432,6 +432,8 @@ export const PL_GAME: PlBook = {
   "Feeder: it comes in to feed on groundbait": "Żeruje na zanęcie: przypływa, gdy ją rzucisz",
   "{fish}: the big feeders have moved in on the built-up swim.": "{fish}: duże ryby podpłynęły do obficie zanęconego łowiska.",
   "{fish}: it came in to feed on the groundbait.": "{fish}: ta ryba przypłynęła żerować na zanęcie.",
+  "{fish}: it was hunting the feeders on the built-up swim.": "{fish}: ta ryba polowała na ryby żerujące na obficie zanęconym łowisku.",
+  "{fish} prowls round it now, hunting the small feeders: one hooked here scatters them, landed or lost.": "{fish} krąży teraz wokół niej, polując na drobne ryby: zacięty tutaj płoszy je, wyholowany czy stracony.",
   "{fish}: there's a school here, feeding on the groundbait. It stays a while, so cast again quickly!": "{fish}: tu jest ławica, żeruje na zanęcie. Zostanie dłużej, więc zarzuć szybko jeszcze raz!",
   "bites sooner now": "teraz szybciej bierze",
   "{bank}: bites sooner now": "{bank}: teraz szybciej bierze",

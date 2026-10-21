@@ -3531,6 +3531,101 @@ describe("useFishingGame groundbait", () => {
     expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ casts: 5, built: TOPUP_MAX });
   });
 
+  const atDropoff = (surface: HTMLDivElement) => {
+    surface.dataset.stance = "dropoff";
+    surface.dataset.angler = "15.4,7.8";
+    surface.dataset.aim = "15.4,-5.4";
+  };
+
+  it.each([
+    [TOPUP_MAX, "Spinner", "pike"],
+    [TOPUP_MAX - 1, "Spinner", undefined],
+    [TOPUP_MAX, "Nightcrawler", undefined],
+  ] as const)("draws the pike to a swim built %s times on a %s: %s", (built, lure, prowler) => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dropoff", casts: 6, built, at: DOCK_BUBBLES.at - 60_000 }));
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, lure);
+    atDropoff(surface);
+    cast(surface);
+    expect(phase()).toBe("waiting:none");
+    expect(vi.mocked(pickBite).mock.lastCall?.[12]).toBe(prowler);
+  });
+
+  it("keeps the pike off a swim when the angler can't land one", () => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dropoff", casts: 6, built: TOPUP_MAX, at: DOCK_BUBBLES.at - 60_000 }));
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700, strength: 1 }, "day", false, "Spinner");
+    atDropoff(surface);
+    cast(surface);
+    expect(vi.mocked(pickBite).mock.lastCall?.[12]).toBeUndefined();
+  });
+
+  it("scatters a built swim when a pike hooked over it is landed, and says so on the card", () => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dropoff", casts: 6, built: TOPUP_MAX, at: DOCK_BUBBLES.at - 60_000 }));
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, "Crankbait");
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "pike")!);
+    atDropoff(surface);
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 1);
+    expect(phase()).toBe("result:landed");
+    expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toBe(`Northern pike: it was hunting the feeders on the built-up swim. Its thrashing scattered the feeders off the swim: none take for the next ${SPOOKED_SWIM_CASTS} casts, and it needs building up again.`);
+    const scattered = JSON.parse(kept.get(swimKey(profile.userId))!);
+    expect(scattered).toMatchObject({ spot: "dropoff", casts: 5, spooked: SPOOKED_SWIM_CASTS });
+    expect(scattered.built).toBeUndefined();
+  });
+
+  it("scatters a built swim when a pike hooked over it gets away", () => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dropoff", casts: 6, built: TOPUP_MAX, at: DOCK_BUBBLES.at - 60_000 }));
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, "Crankbait");
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "pike")!);
+    atDropoff(surface);
+    step.mockReturnValueOnce("snapped");
+    castAndFight(surface, 1);
+    expect(phase()).toBe("idle:broke");
+    expect(container!.querySelector("[data-testid=broke]")?.textContent).toContain("Its thrashing scattered the feeders off the swim");
+    expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ casts: 5, spooked: SPOOKED_SWIM_CASTS });
+  });
+
+  it("leaves a swim not yet built as it was when a pike is landed over it", () => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dropoff", casts: 6, built: TOPUP_MAX - 1, at: DOCK_BUBBLES.at - 60_000 }));
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, "Crankbait");
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "pike")!);
+    atDropoff(surface);
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 1);
+    expect(phase()).toBe("result:landed");
+    expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toBe("");
+    expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ casts: 5, built: TOPUP_MAX - 1 });
+  });
+
+  it.each([
+    ["Spinner", true],
+    ["Nightcrawler", false],
+  ] as const)("names the pike on the top-up that builds the swim when a %s is tied: %s", (lure, named) => {
+    const kept = new Map<string, string>([[bagKey(profile.userId), JSON.stringify({ handfuls: 3, day: "2000-01-01" })]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dropoff", casts: 3, built: TOPUP_MAX - 1, at: DOCK_BUBBLES.at - 60_000 }));
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, lure);
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "perch")!);
+    atDropoff(surface);
+    step.mockReturnValueOnce("escaped");
+    castAndFight(surface, 1);
+    expect(phase()).toBe("idle:broke");
+    toss();
+    const said = "Northern pike prowls round it now, hunting the small feeders: one hooked here scatters them, landed or lost.";
+    if (named) expect(hint()).toContain(said);
+    else expect(hint()).not.toContain("Northern pike");
+    expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ spot: "dropoff", built: TOPUP_MAX });
+  });
+
   it("keeps the big feeders on a swim already built, when topped up again", () => {
     const kept = new Map<string, string>([[bagKey(profile.userId), JSON.stringify({ handfuls: 3, day: "2000-01-01" })]]);
     vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });

@@ -79,7 +79,7 @@ import { weightText } from "../i18n/content";
 import { FRENZY_SLOT_MS, frenzyOn, HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, slotFrenzy, type Hotspot } from "./hotspot";
 import { loadBag, loadShiner, saveBag, saveShiner, type HookedShiner } from "./groundbaitBag";
 import { loadTin, saveTin, WORM_TIN_DAILY, WORM_TIN_WET } from "./wormTin";
-import { BACKLASH_POWER, BED_RAIDERS, COLD_WORK_WAIT, tooQuickForCold, isLongCast, castIntoSchool, castOverGroundbait, canChopWorm, CHOPPED_WORMS, wormFeedersTake, scatterSwim, SPOOKED_SWIM_CASTS, isBigFeeder, bigFeedersOver, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, OVERFED_WAIT, throwHandful, TOPUP_CASTS_LEFT, canBaitShiner, shinerHunter, bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, type Groundbait, castIntoSpooked, castUnderPressure, castNewLure, type LuresShown, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, colourSuits, colourWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, anchorSplashWaitMul, openGlareWaitMul, frenzyHunter, FRENZY_WAIT, lampLit, LAMP_WAIT, LAMP_WINDOW, longShadowWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, waterSwingWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
+import { BACKLASH_POWER, BED_RAIDERS, COLD_WORK_WAIT, tooQuickForCold, isLongCast, castIntoSchool, castOverGroundbait, canChopWorm, CHOPPED_WORMS, wormFeedersTake, scatterSwim, SPOOKED_SWIM_CASTS, isBigFeeder, bigFeedersOver, prowlerAt, PROWLERS, scattersSwim, TOPUP_MAX, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, OVERFED_WAIT, throwHandful, TOPUP_CASTS_LEFT, canBaitShiner, shinerHunter, bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, type Groundbait, castIntoSpooked, castUnderPressure, castNewLure, type LuresShown, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, colourSuits, colourWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, anchorSplashWaitMul, openGlareWaitMul, frenzyHunter, FRENZY_WAIT, lampLit, LAMP_WAIT, LAMP_WINDOW, longShadowWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, waterSwingWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -1318,7 +1318,10 @@ export function useFishingGame(
     // Roll the fish as the lure sits, so the one rising under the bobber is the one that bites.
     const mercyNow = mercyRef.current;
     const hunted = legendRef.current?.spot === spotRef.current ? legendRef.current.legendId : undefined;
-    const drawn = pickBite(spotRef.current, current, short, Math.random, hour, lureRef?.current, sky, castHotspotRef.current, mercyNow, season, moon, hunted);
+    // The small feeders on a swim built all the way draw the bank's pike, when the tied lure would take one the angler can land.
+    const prowling = bait.built >= TOPUP_MAX && !mercyNow ? prowlerAt(spotRef.current, lureRef?.current) : undefined;
+    const prowler = prowling && canLand(current, prowling) ? prowling.id : undefined;
+    const drawn = pickBite(spotRef.current, current, short, Math.random, hour, lureRef?.current, sky, castHotspotRef.current, mercyNow, season, moon, hunted, prowler);
     // The fish that broke off here may come back, at the same weight; while it's about this bank its shadow circles the float.
     setLurking(gotAwayRef.current?.spot === spotRef.current);
     // A giant that broke free of the tied lure this week will not take it again, whether still about or fresh.
@@ -1960,9 +1963,9 @@ export function useFishingGame(
       keepGiantShy(userId, markShy(giantShyNow(userId), spotRef.current, giant, lure));
       return ` ${t("{name} knows the {lure} now, and won't take one again this week.", { name: t(giant), lure: t(lure) })}`;
     };
-    // A big feeder lost off the built-up swim scatters the rest: the build is gone and the feeders stay off it a few casts.
+    // A big feeder or a prowler lost off the built-up swim scatters the rest: the build is gone and the feeders stay off it a few casts.
     const feedersScattered = (species: FishSpecies) => {
-      const scattered = isBigFeeder(species.id, castBuiltRef.current) ? scatterSwim(groundbaitRef.current, spotRef.current) : null;
+      const scattered = scattersSwim(species.id, castBuiltRef.current) ? scatterSwim(groundbaitRef.current, spotRef.current) : null;
       if (!scattered) return "";
       keepGroundbait(scattered);
       return ` ${t("Its thrashing scattered the feeders off the swim: none take for the next {n} casts, and it needs building up again.", { n: SPOOKED_SWIM_CASTS })}`;
@@ -2135,6 +2138,9 @@ export function useFishingGame(
                 : fedRef.current
                   ? t("{fish}: it came in to feed on the groundbait.", { fish: t(current.species.name) })
                   : "";
+            // A prowler is fought through the swim even when landed, so it scatters the feeders as a lost big feeder does.
+            const prowlerScattered = PROWLERS.has(current.species.id) ? feedersScattered(current.species).trim() : "";
+            const prowled = prowlerScattered ? `${t("{fish}: it was hunting the feeders on the built-up swim.", { fish: t(current.species.name) })} ${prowlerScattered}` : "";
             const frays = runtime.performance.scuffed || runtime.performance.bitten;
             const scuffed = frays && !frayedRef.current ? scuffNote(current.water, !runtime.performance.scuffed, current.farRock) : "";
             if (frays) markFrayed(true);
@@ -2163,7 +2169,7 @@ export function useFishingGame(
               : recaught.weight > recaught.was
                 ? t("{fish}: you let this one go here on {date}, and it has put on {gain} since.", { fish: t(current.species.name), date: new Date(recaught.at).toLocaleDateString(locale(), { month: "long", day: "numeric" }), gain: weightText(recaught.weight - recaught.was) })
                 : t("{fish}: you let this one go here on {date}, and it's back on your line.", { fish: t(current.species.name), date: new Date(recaught.at).toLocaleDateString(locale(), { month: "long", day: "numeric" }) });
-            const landedNote = [back, fed, schooled, followed, scuffed].filter(Boolean).join(" ");
+            const landedNote = [back, fed, prowled, schooled, followed, scuffed].filter(Boolean).join(" ");
             const angler = anglerIdRef.current;
             if (angler) keepBankMemory(angler, countAtBank(bankMemoryNow(angler), spotRef.current, "landed"));
             setOutcome({
@@ -2373,15 +2379,18 @@ export function useFishingGame(
       // The big feeders are told of only where they live and would take the tied lure.
       const big = bigFeedersOver(next, lureRef?.current);
       const grew = next.built! > before;
+      // The prowler is named only where it lives and would take the tied lure.
+      const prowler = next.built! >= TOPUP_MAX ? prowlerAt(spotRef.current, lureRef?.current) : undefined;
+      const prowl = prowler ? t("{fish} prowls round it now, hunting the small feeders: one hooked here scatters them, landed or lost.", { fish: t(prowler.name) }) : "";
       setHint(
         withWorm(
-          big && grew
+          [big && grew
             ? t("You top up the swim again as it fades: the feeders stay, and the big ones move in. {casts} casts of it now.", { casts: next.casts })
             : big
               ? t("You top up the swim as it fades: the feeders stay, the big ones too. {casts} casts of it now.", { casts: next.casts })
               : grew
                 ? t("You top up the swim as it fades: the feeders stay, and more come in. {casts} casts of it now.", { casts: next.casts })
-                : t("You top up the swim as it fades: the feeders stay. {casts} casts of it now.", { casts: next.casts }),
+                : t("You top up the swim as it fades: the feeders stay. {casts} casts of it now.", { casts: next.casts }), prowl].filter(Boolean).join(" "),
         ),
       );
       return;

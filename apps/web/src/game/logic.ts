@@ -856,6 +856,20 @@ export function bigFeedersOver(bait: Groundbait, lure: string | undefined) {
   return (bait.built ?? 0) >= TOPUP_MAX && hasBigFeeders(bait.spot, lure);
 }
 
+/** The hunters that prowl a swim built all the way for the small feeders gathered on it, biting this many times as often. */
+export const PROWLERS: ReadonlySet<string> = new Set(["pike"]);
+export const PROWLER_BITE = 2;
+
+/** The prowler at this bank that would take this lure, if any. */
+export function prowlerAt(spot: SpotId, lure: string | undefined) {
+  return poolForLure(FISH.filter((fish) => fish.spots.includes(spot)), lure).find((fish) => PROWLERS.has(fish.id));
+}
+
+/** Whether a fish hooked over a swim topped up this many times scatters it when lost: a big feeder, or a prowler (landed too). */
+export function scattersSwim(id: string, built: number) {
+  return isBigFeeder(id, built) || (built >= TOPUP_MAX && PROWLERS.has(id));
+}
+
 /** A feeder drawn to the groundbait for this bite, from the bank's own lure split and weighed as the bank draws them (the big ones more over a built-up swim, the perch too over chopped worm), or none. */
 export function groundbaitFeeder(spot: SpotId, lure: string | undefined, shortCast: boolean, hour: LakeHour, random = Math.random, built = 0, worm = false): FishSpecies | null {
   if (random() >= feederShare(built)) return null;
@@ -1093,6 +1107,8 @@ export function pickBite(
   moon?: number,
   /** The legend a solved hunt has drawn to this bank, which bites LEGEND_HUNT_BITE times as often. */
   legend?: string,
+  /** The prowler a built swim has drawn to this bank, which bites PROWLER_BITE times as often. */
+  prowler?: string,
 ): FishSpecies {
   let home = FISH.filter((fish) => fish.spots.includes(spot));
   if (mercy) {
@@ -1153,8 +1169,9 @@ export function pickBite(
     (legendaryBonus && fish.rarity === "legendary" ? 2 : 1) *
     (fish.rarity === "rare" || fish.rarity === "legendary" ? rareLift : 1) *
     (moon !== undefined ? biteMoonMul(fish, hour, moon) : 1) *
-    (legend === fish.id ? LEGEND_HUNT_BITE : 1);
-  const drawWeights = sky || season || hotspot || legendaryBonus || rareLift > 1 || moon !== undefined || legend !== undefined ? reshuffle(pool, weights, profile, lift) : weights;
+    (legend === fish.id ? LEGEND_HUNT_BITE : 1) *
+    (prowler === fish.id ? PROWLER_BITE : 1);
+  const drawWeights = sky || season || hotspot || legendaryBonus || rareLift > 1 || moon !== undefined || legend !== undefined || prowler !== undefined ? reshuffle(pool, weights, profile, lift) : weights;
   let roll = random() * drawWeights.reduce((sum, weight) => sum + weight, 0);
   for (let i = 0; i < pool.length; i++) {
     roll -= drawWeights[i]!;
