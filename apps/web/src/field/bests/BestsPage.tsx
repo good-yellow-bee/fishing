@@ -29,7 +29,7 @@ import { MonthYearTable } from "./MonthYearTable";
 import { recordStood } from "./recordStood";
 import { PLAY_LAKE_ID } from "../playLake";
 import { countedSearch } from "../countedSearch";
-import { countedBook, countedFish, hasOwnEntries } from "../milestones";
+import { averagedOutings, countedBook, countedFish, hasOwnEntries } from "../milestones";
 import { hasSampleFish, isSampleCatch, withoutSample } from "../bookCopy";
 import { daysBetween, foldName, waterKeys } from "../spotOrder";
 import { SameKinds } from "./SameKinds";
@@ -156,7 +156,8 @@ export function BestsPage() {
   // and each search link leaves them out too, so a count and the list it opens agree.
   // And the sample week stays out once the angler has fish of their own, as Home counts them, so a best day, a tally
   // or a streak is never one of its made-up days.
-  const counted = countedBook(all);
+  // Its blank plans go with the angler's first own water, as Trips' streak and the days out leave them out.
+  const counted = { ...countedBook(all), trips: averagedOutings(all) };
   // The sample's waters go with its fish and outings, as taking the sample week out would take them.
   const ownAny = hasOwnEntries(all);
   // But a sample water keeps its name while a fish or outing still counted here is on it: an outing planned before the
