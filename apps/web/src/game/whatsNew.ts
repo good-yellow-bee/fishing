@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-field76";
+export const NEWS_ID = "2026-10-21-game71";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "Worms now come from a worm tin, topped up to three each day, or five after a night of rain: a fresh worm for a washed-out hook or a worm on the night line takes one. With the tin empty the washed-out worm stays on, and the shack sells worms for 15 points each, up to a full tin of five.",
   "On a water with a dawn and a dusk outing planned, the catch form now files a new fish on the one you are fishing, the one with a fish lost or missed so far, as Home and Trips take it. Its outing list leaves out the sample week's made-up outings, and the kinds it offers at a water always fill three picks, a kind named two ways counting once.",
   "A night line out on a bank now shows how it is doing: once a fish is on, the stick bows toward the water, the line runs taut and the white tag at its tip knocks now and then; left out too long, its line hangs slack. And while you wait on the bank, the line is ready to bring in the moment its night is out, even if you touch nothing.",
   "Groundbait left on a bank now follows the season: in the summer heat it draws the fish back after three hours but is eaten within a day, and in the winter cold it takes twelve hours but keeps four days. A night line set in summer soaks just three hours but should come in before that evening, as crayfish strip the bait; set in winter it soaks twelve hours and keeps four days.",
