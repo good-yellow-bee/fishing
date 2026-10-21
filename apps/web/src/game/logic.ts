@@ -806,14 +806,29 @@ export function feederShare(built: number) {
   return GROUNDBAIT_FEEDER_SHARE + TOPUP_FEEDER_SHARE * built;
 }
 
-/** A feeder drawn to the groundbait for this bite, from the bank's own lure split and weighed as the bank draws them, or none. */
-export function groundbaitFeeder(spot: SpotId, lure: string | undefined, shortCast: boolean, hour: LakeHour, random = Math.random, share = GROUNDBAIT_FEEDER_SHARE): FishSpecies | null {
-  if (random() >= share) return null;
+/** The heavy bottom feeders: once a swim is topped up TOPUP_MAX times they move in, drawn this many times as often. */
+export const BIG_FEEDERS: ReadonlySet<string> = new Set(["carp", "catfish"]);
+export const BIG_FEEDER_PULL = 3;
+
+/** Whether this feeder is one of the big ones moved in on a swim topped up this many times. */
+export function isBigFeeder(id: string, built: number) {
+  return built >= TOPUP_MAX && BIG_FEEDERS.has(id);
+}
+
+/** Whether a big feeder at this bank would take this lure on a full cast. */
+export function hasBigFeeders(spot: SpotId, lure: string | undefined) {
+  return poolForLure(FISH.filter((fish) => fish.spots.includes(spot)), lure).some((fish) => BIG_FEEDERS.has(fish.id));
+}
+
+/** A feeder drawn to the groundbait for this bite, from the bank's own lure split and weighed as the bank draws them (the big ones more over a built-up swim), or none. */
+export function groundbaitFeeder(spot: SpotId, lure: string | undefined, shortCast: boolean, hour: LakeHour, random = Math.random, built = 0): FishSpecies | null {
+  if (random() >= feederShare(built)) return null;
   const home = FISH.filter((fish) => fish.spots.includes(spot) && (!shortCast || fish.rarity === "common"));
   const feeders = poolForLure(home, lure).filter((fish) => GROUNDBAIT_FEEDERS.has(fish.id));
-  let roll = random() * feeders.reduce((sum, fish) => sum + appeal(fish, hour), 0);
+  const pull = (fish: FishSpecies) => appeal(fish, hour) * (isBigFeeder(fish.id, built) ? BIG_FEEDER_PULL : 1);
+  let roll = random() * feeders.reduce((sum, fish) => sum + pull(fish), 0);
   for (const fish of feeders) {
-    roll -= appeal(fish, hour);
+    roll -= pull(fish);
     if (roll <= 0) return fish;
   }
   return feeders.at(-1) ?? null;
