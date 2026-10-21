@@ -51,6 +51,9 @@ describe("bass on their spring beds", () => {
         }
         expect(stray).not.toBeNull();
         expect(Math.hypot(stray!.x - bed.x, stray!.z - bed.z)).toBeGreaterThan(bed.radius);
+        expect(inLake(stray!.x, stray!.z)).toBe(true);
+        expect(waterDepth(stray!.x, stray!.z)).toBeGreaterThan(0.02);
+        expect(waterDepth(stray!.x, stray!.z)).toBeLessThanOrEqual(0.35);
         if (Math.abs(off.u - 0.5) < 0.03) {
           peaks += 1;
           const bass = bassSpot(bed, t);

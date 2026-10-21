@@ -1,4 +1,5 @@
-import type { LakeSeason } from "@stillwater/shared";
+import { inLake, type LakeSeason } from "@stillwater/shared";
+import { waterDepth } from "./water";
 
 export type BassBed = { x: number; z: number; radius: number; phase: number };
 
@@ -32,13 +33,35 @@ function turnToward(from: number, to: number, w: number) {
   return from + d * w;
 }
 
+/** How far out a stray starts and how near it noses in, in bed radii. */
+const STRAY_FAR = 2.6;
+const STRAY_NEAR = 1.2;
+
+/** The bearings a sunfish can stray in along: its whole path over the shallows, never over the bank or under the dock. */
+function strayBearings(bed: BassBed) {
+  const bearings: number[] = [];
+  for (let k = 0; k < 24; k += 1) {
+    const bearing = (k / 24) * Math.PI * 2;
+    const clear = [STRAY_NEAR, (STRAY_NEAR + STRAY_FAR) / 2, STRAY_FAR].every((r) => {
+      const x = bed.x + Math.sin(bearing) * bed.radius * r;
+      const z = bed.z + Math.cos(bearing) * bed.radius * r;
+      const depth = waterDepth(x, z);
+      return inLake(x, z) && depth > 0.02 && depth <= 0.35;
+    });
+    if (clear) bearings.push(bearing);
+  }
+  return bearings;
+}
+const STRAY_BEARINGS = new Map(BASS_BEDS.map((bed) => [bed, strayBearings(bed)]));
+
 /** Where a bed's face-off stands `time` seconds in: how far through it is (0..1), and the stray's bearing from the middle; null between face-offs. */
 export function faceOff(bed: BassBed, time: number) {
   const t = time + bed.phase * 3;
   const cycle = Math.floor(t / FACE_OFF_EVERY);
   const into = t - cycle * FACE_OFF_EVERY;
   if (into >= FACE_OFF_LENGTH) return null;
-  return { u: into / FACE_OFF_LENGTH, bearing: seeded(cycle, bed.phase) * Math.PI * 2 };
+  const bearings = STRAY_BEARINGS.get(bed) ?? strayBearings(bed);
+  return { u: into / FACE_OFF_LENGTH, bearing: bearings[Math.floor(seeded(cycle, bed.phase) * bearings.length)]! };
 }
 
 /**
@@ -50,7 +73,7 @@ export function straySpot(bed: BassBed, time: number, still = false) {
   if (!off) return null;
   const dx = Math.sin(off.bearing);
   const dz = Math.cos(off.bearing);
-  const reach = bed.radius * (2.6 - 1.4 * Math.sin(Math.PI * off.u));
+  const reach = bed.radius * (STRAY_FAR - (STRAY_FAR - STRAY_NEAR) * Math.sin(Math.PI * off.u));
   const inward = Math.atan2(-dx, -dz);
   return {
     x: bed.x + dx * reach,
