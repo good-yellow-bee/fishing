@@ -7,7 +7,7 @@ import { readYearGoal } from "../YearGoal";
 import { seasonRecap } from "./seasonRecap";
 import { newWatersThisYear } from "./notYet";
 import { bestFishDay, bookFishDay } from "../tripMonths";
-import { formatDay } from "../format";
+import { formatDay, waterName } from "../format";
 import { kindNames, mostWritten } from "../speciesLink";
 import { bookLureName, pieceTally } from "../pieceTally";
 import { countedFish, hasOwnEntries } from "../milestones";
@@ -30,7 +30,7 @@ function seasonFirsts(book: Logbook, year: string, today: string) {
   const bestDay = top && top.count > 1 ? [t("Best day: {day} · {fish}", { day: formatDay(top.date), fish: tn(top.count, "{n} fish", "{n} fish") })] : [];
   // The waters that gave their first fish that season.
   const waterOf = waterKeys(book);
-  const newWaters = newWatersThisYear(book.catches, new Date(Number(year), 6, 1), (entry) => bookFishDay(book, entry), (id) => waterOf.get(id) || id).flatMap((id) => book.spots.filter((spot) => spot.id === id).map((spot) => plainName(spot.name)));
+  const newWaters = newWatersThisYear(book.catches, new Date(Number(year), 6, 1), (entry) => bookFishDay(book, entry), (id) => waterOf.get(id) || id).flatMap((id) => book.spots.filter((spot) => spot.id === id).map((spot) => waterName(spot.name)));
   const recap = seasonRecap(book, year, today);
   const firsts = [
     ...bestDay,
@@ -109,7 +109,7 @@ export function SeasonRecapBox({
   const byWater = new Map<string, Map<string, number>>();
   for (const entry of countedFish(book.catches)) {
     const spotName = book.spots.find((spot) => spot.id === entry.spotId)?.name;
-    if (!spotName || !bookFishDay(book, entry).startsWith(`${year}-`)) continue;
+    if (!spotName?.trim() || !bookFishDay(book, entry).startsWith(`${year}-`)) continue;
     const names = byWater.get(foldName(spotName)) ?? new Map<string, number>();
     names.set(plainName(spotName), (names.get(plainName(spotName)) ?? 0) + 1);
     byWater.set(foldName(spotName), names);
