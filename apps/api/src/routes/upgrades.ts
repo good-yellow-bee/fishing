@@ -1,5 +1,5 @@
 import { Hono, type Context } from "hono";
-import { validateGroundbaitBuy, validateShinerBuy, validateUpgrade, validateWormBuy, type SkillId } from "@stillwater/shared";
+import { validateAeratorBuy, validateGroundbaitBuy, validateShinerBuy, validateUpgrade, validateWormBuy, type SkillId } from "@stillwater/shared";
 import { applyUpgrade, getProfile, spendPoints, toProfile } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
@@ -32,7 +32,7 @@ upgradeRoutes.post("/upgrades", async (c) => {
   return c.json({ profile: updated ? toProfile(updated) : profile });
 });
 
-// A handful of groundbait, a live shiner or a worm from the shack: the server takes the points, and what was bought lives in the game.
+// A handful of groundbait, a live shiner, a worm or the bucket's aerator from the shack: the server takes the points, and what was bought lives in the game.
 const shackSale = (validate: typeof validateGroundbaitBuy) => (c: Context) => {
   const user = c.get("user") as SessionUser;
   const row = getProfile(user.id);
@@ -51,3 +51,4 @@ const shackSale = (validate: typeof validateGroundbaitBuy) => (c: Context) => {
 upgradeRoutes.post("/groundbait", shackSale(validateGroundbaitBuy));
 upgradeRoutes.post("/shiner", shackSale(validateShinerBuy));
 upgradeRoutes.post("/worm", shackSale(validateWormBuy));
+upgradeRoutes.post("/aerator", shackSale(validateAeratorBuy));

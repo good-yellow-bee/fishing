@@ -179,6 +179,13 @@ export function validateWormBuy(profile: Profile): PurchaseResult {
   return shackSale(profile, WORM_PRICE);
 }
 
+/** The aerator for the bait bucket costs this many points, bought once; it keeps every spare shiner alive a day longer. */
+export const AERATOR_PRICE = 150;
+
+export function validateAeratorBuy(profile: Profile): PurchaseResult {
+  return shackSale(profile, AERATOR_PRICE);
+}
+
 export function rollWeight(species: FishSpecies, patience: number, random = Math.random, level = 1): number {
   const trophyBoost = level >= 8 ? 0.1 : 0;
   const t = Math.min(1, Math.max(0, random() + patience * 0.015 + trophyBoost));

@@ -1,4 +1,4 @@
-import { GROUNDBAIT_CARRY, GROUNDBAIT_PRICE, shackPrice, SHINER_PRICE, WORM_PRICE, type LakeSeason } from "@stillwater/shared";
+import { AERATOR_PRICE, GROUNDBAIT_CARRY, GROUNDBAIT_PRICE, shackPrice, SHINER_PRICE, WORM_PRICE, type LakeSeason } from "@stillwater/shared";
 import { t, useT } from "../i18n";
 import { GROUNDBAIT_CASTS } from "../game/logic";
 import { BUCKET_SIZE } from "../game/baitBucket";
@@ -18,6 +18,9 @@ type Props = {
   onBuy: () => void;
   onBuyShiner: () => void;
   onHookFromBucket: () => void;
+  /** The aerator is fitted to the bait bucket already. */
+  aerator: boolean;
+  onBuyAerator: () => void;
   /** Worms in the worm tin now. */
   worms: number;
   onBuyWorm: () => void;
@@ -32,7 +35,7 @@ type Props = {
 };
 
 /** The shack's bait tin: points buy a handful of groundbait, up to what the bag carries, a live shiner for the hook, or a worm for the tin. */
-export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, busy, onBuy, onBuyShiner, onHookFromBucket, worms, onBuyWorm, trap, trapCold, onSetTrap, onLiftTrap, season }: Props) {
+export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, busy, onBuy, onBuyShiner, onHookFromBucket, aerator, onBuyAerator, worms, onBuyWorm, trap, trapCold, onSetTrap, onLiftTrap, season }: Props) {
   useT();
   const full = handfuls >= GROUNDBAIT_CARRY;
   // aria-disabled, as on the skills: a disabled button would drop keyboard focus the moment a purchase starts.
@@ -41,6 +44,8 @@ export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, b
   const off = busy || full || points < groundbaitCost;
   const bucketFull = bucket >= BUCKET_SIZE;
   const shinerOff = busy || (shinerOn && bucketFull) || points < shinerCost;
+  const aeratorCost = shackPrice(AERATOR_PRICE, lifetimePoints);
+  const aeratorOff = busy || points < aeratorCost;
   const wormCost = shackPrice(WORM_PRICE, lifetimePoints);
   const tinFull = worms >= WORM_TIN_WET;
   const wormOff = busy || tinFull || points < wormCost;
@@ -86,13 +91,32 @@ export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, b
                 ? t("Your hook and your bait bucket are full.")
                 : `${t("A shiner is on your hook, so another goes in your bait bucket, which holds {n} of {max}.", { n: bucket, max: BUCKET_SIZE })} ${
                     season === "winter" ? t("In the cold winter water it keeps five days there.") : season === "summer" ? t("In the summer heat it keeps two days there.") : t("It keeps three days there.")
-                  }`}
+                  }${aerator ? ` ${t("Your aerator keeps it a day longer.")}` : ""}`}
           </p>
           {!shinerOn && bucket > 0 && (
             <button type="button" aria-disabled={busy || undefined} onClick={() => !busy && onHookFromBucket()}>
               {t("Hook one from your bucket ({n} left)", { n: bucket })}
             </button>
           )}
+        </div>
+        <div className="upgrade-skill">
+          {!aerator && (
+            <button
+              type="button"
+              aria-disabled={aeratorOff || undefined}
+              aria-describedby="aerator-note"
+              onClick={() => {
+                if (!aeratorOff) onBuyAerator();
+              }}
+            >
+              {t("A bucket aerator ({cost} pts)", { cost: aeratorCost })}
+            </button>
+          )}
+          <p id="aerator-note">
+            {aerator
+              ? t("The aerator on your bait bucket keeps each spare shiner a day longer.")
+              : t("Bubbles air through your bait bucket, so each spare shiner keeps a day longer, in any season. Bought once.")}
+          </p>
         </div>
         <div className="upgrade-skill">
           <button
