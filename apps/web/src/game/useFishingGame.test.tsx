@@ -3392,6 +3392,25 @@ describe("useFishingGame groundbait", () => {
     toss();
     expect(hint()).not.toContain("running you bait this bank");
     expect(JSON.parse(kept.get(swimKey(profile.userId))!).built).toBeUndefined();
+
+    // A day's first handful that tops up a swim left from yesterday leaves the build for the day's first fresh one.
+    act(() => root!.unmount());
+    root = null;
+    container!.remove();
+    kept.set(bagKey(profile.userId), JSON.stringify({ handfuls: 3, day: daysAgo(0) }));
+    kept.set(prebaitKey(profile.userId), JSON.stringify({ spot: "dock", day: daysAgo(1), days: PREBAIT_DAYS - 1 }));
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 1, at: DOCK_BUBBLES.at - 60_000 }));
+    mount();
+    toss();
+    expect(JSON.parse(kept.get(swimKey(profile.userId))!).built).toBe(1);
+    kept.delete(swimKey(profile.userId));
+    act(() => root!.unmount());
+    root = null;
+    container!.remove();
+    mount();
+    toss();
+    expect(hint()).toContain(`Day ${PREBAIT_DAYS} running you bait this bank: its feeders expect it now`);
+    expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ casts: GROUNDBAIT_CASTS, built: 1 });
   });
 
   it("draws the big feeders in on the swim's last top-up, and says so on the card", () => {

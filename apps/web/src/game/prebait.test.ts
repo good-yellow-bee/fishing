@@ -15,8 +15,9 @@ describe("prebaiting a bank days running", () => {
     expect(second.regular).toBe(false);
     const third = baitDay(second.next, "reeds", day(3));
     expect(third).toEqual({ next: { spot: "reeds", day: "2026-10-03", days: PREBAIT_DAYS }, newDay: true, regular: true });
-    // Only the day's first handful there comes regular.
-    expect(baitDay(third.next, "reeds", day(3)).regular).toBe(false);
+    // Until a fresh swim there has come built today: a top-up or an overfeed first leaves it for the day's first fresh one.
+    expect(baitDay(third.next, "reeds", day(3))).toEqual({ next: third.next, newDay: false, regular: true });
+    expect(baitDay({ ...third.next, built: "2026-10-03" }, "reeds", day(3)).regular).toBe(false);
     expect(baitDay(third.next, "reeds", day(4))).toMatchObject({ next: { days: PREBAIT_DAYS + 1 }, regular: true });
   });
 
@@ -30,7 +31,7 @@ describe("prebaiting a bank days running", () => {
   it("keeps the run per angler, and reads nothing from a broken one", () => {
     const kept = new Map<string, string>();
     vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
-    const run = { spot: "reeds" as const, day: "2026-10-02", days: 2 };
+    const run = { spot: "reeds" as const, day: "2026-10-02", days: 2, built: "2026-10-02" };
     savePrebait("a", run);
     expect(loadPrebait("a")).toEqual(run);
     expect(loadPrebait("b")).toBeNull();

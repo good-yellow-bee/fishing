@@ -2356,8 +2356,9 @@ export function useFishingGame(
     const before = groundbaitRef.current?.built ?? 0;
     const angler = anglerIdRef.current;
     const day = angler ? baitDay(loadPrebait(angler), spotRef.current, new Date()) : null;
-    if (angler && day) savePrebait(angler, day.next);
     const { next, kind } = throwHandful(groundbaitRef.current, spotRef.current, day?.regular);
+    const builtFresh = kind === "fresh" && !!day?.regular;
+    if (angler && day) savePrebait(angler, builtFresh ? { ...day.next, built: day.next.day } : day.next);
     keepGroundbait(next, Date.now());
     keepHandfuls(handfulsRef.current - 1);
     fx.plop();
@@ -2380,11 +2381,11 @@ export function useFishingGame(
       setHint(t("Too much too soon: the fish fill up on it, so the next {full} casts bite slower and no feeders take. {casts} casts of it now.", { full: next.full!, casts: next.casts }));
       return;
     }
-    const run = day?.newDay && day.next.days >= 2
-      ? day.regular
-        ? t("Day {days} running you bait this bank: its feeders expect it now and come straight in, as after a top-up.", { days: day.next.days })
-        : t("Day {days} running you bait this bank: from day {need} its feeders start to expect it.", { days: day.next.days, need: PREBAIT_DAYS })
-      : "";
+    const run = builtFresh
+      ? t("Day {days} running you bait this bank: its feeders expect it now and come straight in, as after a top-up.", { days: day!.next.days })
+      : day?.newDay && day.next.days >= 2
+        ? t("Day {days} running you bait this bank: from day {need} its feeders start to expect it.", { days: day.next.days, need: PREBAIT_DAYS })
+        : "";
     const tossed = [t("You toss a handful of groundbait. The fish will gather to feed here for the next {casts} casts.", { casts: GROUNDBAIT_CASTS }), t("Top it up as it fades, with {left} casts or fewer left, and more feeders come in.", { left: TOPUP_CASTS_LEFT }), run].filter(Boolean).join(" ");
     setHint(
       season === "summer"
