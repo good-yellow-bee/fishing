@@ -434,6 +434,8 @@ export function DockPage() {
     const observer = new ResizeObserver(sync);
     observer.observe(signs);
     observer.observe(wrap);
+    // The chip is hidden while the coach shows, and measures again when the coach goes.
+    if (chip) observer.observe(chip);
     return () => observer.disconnect();
   }, [game.surfaceRef, scenePhase, shopOpen, photo, lakeShown]);
   // On an upright phone the hint hangs under the bank chip, which wraps tall in its narrow column when it

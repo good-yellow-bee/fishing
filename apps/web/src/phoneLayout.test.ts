@@ -31,7 +31,9 @@ describe("a phone held sideways", () => {
     expect(cramped).toContain("clip: rect(0 0 0 0);");
     expect(cramped).not.toContain("display: none");
     const dock = readFileSync(`${import.meta.dirname}/pages/Dock.tsx`, "utf8");
-    expect(dock).toContain('wrap.toggleAttribute("data-chip-cramped", !!chip && signsLeft - chip.getBoundingClientRect().left - 8 < 64);');
+    expect(dock).toContain('wrap.toggleAttribute("data-chip-cramped"');
+    // The coach hides the chip, which reads 0 px from the left: it measures again once the coach goes.
+    expect(dock).toContain("if (chip) observer.observe(chip);");
   });
 
   it("keeps the coach and the news card off the signs, which take a second column with larger text", () => {
