@@ -7,12 +7,12 @@ import { mergePainted, rod, type PaintedPart } from "./mergeParts";
 import { anglerPose } from "./pose";
 import { toonRamp } from "./toon";
 
-const CLOTH = "#6f7d52";
+const CLOTH = "#9a4f38";
 const CORD = "#d9cba4";
 const GROUNDBAIT = "#7d6644";
 /** The bag's widest radius, and where its drawstring pulls the neck in. */
-const R = 0.06;
-const NECK = 0.082;
+const R = 0.07;
+const NECK = 0.095;
 
 const lathe = (points: readonly (readonly [number, number])[]) => new THREE.LatheGeometry(points.map(([r, y]) => new THREE.Vector2(r, y)), 10);
 

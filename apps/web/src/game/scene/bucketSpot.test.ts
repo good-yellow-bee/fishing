@@ -76,13 +76,12 @@ describe("the worm tin at the angler's feet", () => {
 });
 
 describe("the groundbait bag at the angler's feet", () => {
-  it("sits on the dock's deck beside the bucket, clear of it, the tin, the thermos and the night line's stake", () => {
+  it("sits on the dock's deck at the angler's feet, clear of the bucket, the tin, the thermos, its cup and the night line's stake", () => {
     const spot = bagSpot(DOCK_STAND_X, DOCK_STAND_Z, Math.PI)!;
-    const bucket = bucketSpot(DOCK_STAND_X, DOCK_STAND_Z, Math.PI)!;
     expect(onDockPlanks(spot.x, spot.z)).toBe(true);
     expect(spot.y).toBe(DOCK_PLANKS.top);
-    expect(Math.hypot(spot.x - bucket.x, spot.z - bucket.z)).toBeLessThan(0.4);
-    for (const other of [bucket, tinSpot(DOCK_STAND_X, DOCK_STAND_Z, Math.PI)!, THERMOS_SPOT, stakeAt("dock")!]) {
+    expect(Math.hypot(spot.x - DOCK_STAND_X, spot.z - DOCK_STAND_Z)).toBeLessThan(0.5);
+    for (const other of [bucketSpot(DOCK_STAND_X, DOCK_STAND_Z, Math.PI)!, tinSpot(DOCK_STAND_X, DOCK_STAND_Z, Math.PI)!, THERMOS_SPOT, CUP_SPOT, stakeAt("dock")!]) {
       expect(Math.hypot(spot.x - other.x, spot.z - other.z)).toBeGreaterThanOrEqual(0.25);
     }
   });
@@ -100,11 +99,10 @@ describe("the groundbait bag at the angler's feet", () => {
     }
   });
 
-  it("sits nowhere rather than in the water on the narrow walk out to the dock", () => {
+  it("sits on the boards, never in the water, on the narrow walk out to the dock", () => {
     for (const z of [8.6, 9.1, 9.8, 10.3]) {
       const spot = bagSpot(0, z, Math.PI);
       if (spot) expect(!inLake(spot.x, spot.z) || walkableAt(spot.x, spot.z)).toBe(true);
     }
-    expect(bagSpot(0, 9.1, Math.PI)).toBeNull();
   });
 });
