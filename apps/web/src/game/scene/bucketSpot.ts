@@ -1,5 +1,5 @@
 import { footHeight, inLake, walkableAt, type SpotId } from "@stillwater/shared";
-import { BIN_AT, BIN_HALF } from "./binWorms";
+import { BIN_AT, BIN_HALF, BIN_SACK } from "./binWorms";
 import { stakeAt } from "./stakeSpot";
 import { CUP_SPOT, THERMOS_SPOT } from "./steamWisp";
 
@@ -7,7 +7,7 @@ import { CUP_SPOT, THERMOS_SPOT } from "./steamWisp";
  * Where the bait bucket (GT429) stands while the angler stands still: at their feet, a little ahead and to their
  * right, where the camera behind them sees it (clear of the dock's thermos, which stands behind them); where that is
  * water, the first of their left, behind-right or behind-left that is deck, boards or bank. None where all four are
- * water, as on the narrow walk out to the dock, and never in the shack's worm bin. The worm tin (GT465) stands the same way, out to their right just
+ * water, as on the narrow walk out to the dock, and never in the shack's worm bin or on the bread crumb sack beside it. The worm tin (GT465) stands the same way, out to their right just
  * behind their feet, where their body doesn't hide it, never where the bucket, the thermos, a night line's stake or the worm bin is. Pure.
  */
 
@@ -24,8 +24,10 @@ type Spot = { x: number; z: number; r?: number };
 
 /** The shack's worm bin, as wide as its crate. */
 const BIN: Spot = { x: BIN_AT.x, z: BIN_AT.z, r: BIN_HALF };
-/** Where things stand for good: the thermos and its cup, the worm bin, and the night line's stake at each bank, whether or not a line is out. */
-const FIXED: readonly Spot[] = [THERMOS_SPOT, CUP_SPOT, BIN, ...(["dock", "point", "reeds", "dropoff", "inlet"] as SpotId[]).flatMap((bank) => stakeAt(bank) ?? [])];
+/** The angler's sack of bread crumb beside it, kept clear whether or not it is bought. */
+const SACK: Spot = { x: BIN_AT.x + BIN_SACK.x, z: BIN_AT.z + BIN_SACK.z, r: BIN_SACK.radius };
+/** Where things stand for good: the thermos and its cup, the worm bin and its sack, and the night line's stake at each bank, whether or not a line is out. */
+const FIXED: readonly Spot[] = [THERMOS_SPOT, CUP_SPOT, BIN, SACK, ...(["dock", "point", "reeds", "dropoff", "inlet"] as SpotId[]).flatMap((bank) => stakeAt(bank) ?? [])];
 
 /** The first of `tries` (each [right, ahead] of the angler's feet) that is dry and clear of everything `taken`, at its foot height. */
 function firstDry(x: number, z: number, yaw: number, tries: readonly (readonly [number, number])[], taken: readonly Spot[] = []) {
@@ -48,7 +50,7 @@ export function bucketSpot(x: number, z: number, yaw: number) {
     [-BUCKET_SIDE, BUCKET_AHEAD],
     [BUCKET_SIDE, -BUCKET_AHEAD],
     [-BUCKET_SIDE, -BUCKET_AHEAD],
-  ], [BIN]);
+  ], [BIN, SACK]);
 }
 
 /** The worm tin's spot: right, else left, then the same a step further back, never where the bucket, thermos or a stake stands. */
