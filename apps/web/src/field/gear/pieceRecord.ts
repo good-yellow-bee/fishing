@@ -6,6 +6,7 @@ import { PLAY_LAKE_ID } from "../playLake";
 import { bookFishDay } from "../tripMonths";
 import { gaveWay, stillGoing } from "../tripDates";
 import { pieceTally } from "../pieceTally";
+import { outingFish } from "../outingFish";
 
 /**
  * `lure`: the name the fish were logged under, for opening them; `lastAt`: when the newest of them was caught, and
@@ -28,12 +29,13 @@ export function pieceRecords(book: Logbook, items: readonly TackleItem[], today:
   const ownFish = book.catches.some((entry) => !isSampleCatch(entry.id) && entry.spotId !== PLAY_LAKE_ID);
   const ownAny = ownFish || book.trips.some((trip) => !isSampleOuting(trip) && trip.spotId !== PLAY_LAKE_ID);
   const trips = ownAny ? ownTrips : book.trips;
-  // Today's outing counts once it has a fish: packed this morning, it hasn't yet gone without one.
-  const withFish = new Set(book.catches.map((entry) => entry.tripId));
+  // Today's outing counts once it has a fish: packed this morning, it hasn't yet gone without one. A fish logged loose
+  // on its water counts for the day's one outing there, as Trips and the Recent list count it.
+  const fishOn = outingFish(book);
   // Not last evening's outing still going in the small hours, until its first fish: it may bring one yet. One that gave
   // way to today's plan is over, as Recent lists it.
   const past = new Set(
-    trips.filter((trip) => (trip.date < today && (!stillGoing(book, trip) || gaveWay(book, trip) || withFish.has(trip.id))) || (trip.date === today && withFish.has(trip.id))).map((trip) => trip.id),
+    trips.filter((trip) => (trip.date < today && (!stillGoing(book, trip) || gaveWay(book, trip) || fishOn(trip.id) > 0)) || (trip.date === today && fishOn(trip.id) > 0)).map((trip) => trip.id),
   );
   const dateOf = new Map(book.trips.map((trip) => [trip.id, trip.date]));
   // The fish make the same switch as the bags: a sample fish never counts against an outing of the angler's own.
