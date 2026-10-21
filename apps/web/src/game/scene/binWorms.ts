@@ -27,6 +27,8 @@ export const WORM_REACH = 0.105;
 export const BIN_TIN = { x: 0.155, z: -0.1, radius: 0.035, rim: 0.03, lip: 0.005 };
 /** A worm hangs over the tin's rim this way across the soil, its tail lying this many tin radii out. */
 export const TIN_WORM = { x: -0.85, z: 0.53, out: 1.2 };
+/** With a sack of bread crumb bought (GT472), it stands tied off the crate's right side, in front of the sign's stake: where, how wide and how tall. */
+export const BIN_SACK = { x: 0.31, z: 0.11, radius: 0.07, height: 0.2 };
 
 /** Where each worm comes up, as a share of the inside from its middle. */
 const SPOTS = [

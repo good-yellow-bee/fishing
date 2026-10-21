@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import type { LakeSeason } from "@stillwater/shared";
-import { BIN_AT, BIN_HEIGHT as HEIGHT, BIN_INSIDE, BIN_SOIL, BIN_TIN, BIN_WALL as WALL, BIN_WORMS, TIN_WORM, binSnowy, binWorm } from "./binWorms";
+import { BIN_AT, BIN_HEIGHT as HEIGHT, BIN_INSIDE, BIN_SACK, BIN_SOIL, BIN_TIN, BIN_WALL as WALL, BIN_WORMS, TIN_WORM, binSnowy, binWorm } from "./binWorms";
 import { mergePainted, type PaintedPart } from "./mergeParts";
 import { STILL_TIME, useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
@@ -13,6 +13,11 @@ const POST = "#6b4a32";
 const SOIL = "#3f2e20";
 const BOARD = "#e4d6b5";
 const SNOW = "#f3f6f8";
+const BURLAP = "#b7956a";
+const TWINE = "#6e5236";
+const PATCH = "#efe2c0";
+const CRUST = "#c58a47";
+const CRUMB = "#ead9a6";
 /** The stake the sign board is nailed to, behind the crate's right corner. */
 const STAKE_X = BIN_INSIDE.width / 2 + 0.06;
 const STAKE_Z = -BIN_INSIDE.depth / 2 - 0.02;
@@ -45,8 +50,48 @@ function tinWorm() {
   return new THREE.TubeGeometry(curve, 12, 0.007, 5);
 }
 
-/** The open crate with its soil, snow on it in winter, the sign beside it painted with a worm, and the angler's keeping tin in it once they have a place. */
-function binShape(snowy: boolean, owned: boolean) {
+/** Where a few crumbs lie spilled in front of the sack, off its middle. */
+const CRUMBS = [
+  [-0.02, 0.085],
+  [0.015, 0.095],
+  [0.04, 0.078],
+  [-0.045, 0.072],
+  [0.005, 0.115],
+] as const;
+
+/** The angler's sack of bread crumb, tied at the neck, its top folded in, a loaf painted on its front; crumbs spilled before it, or snow on its top in winter. */
+function sackParts(snowy: boolean): PaintedPart[] {
+  const { x, z, radius: r, height: h } = BIN_SACK;
+  const neck = h * 0.8;
+  const body = [
+    [0.001, 0],
+    [r * 0.8, 0.004],
+    [r, 0.035],
+    [r * 0.97, 0.09],
+    [r * 0.75, neck - 0.015],
+    [r * 0.38, neck],
+  ].map(([radius, y]) => new THREE.Vector2(radius, y));
+  const tuft = [
+    [r * 0.36, neck],
+    [r * 0.42, neck + 0.015],
+    [r * 0.58, h],
+  ].map(([radius, y]) => new THREE.Vector2(radius, y));
+  return [
+    { geometry: new THREE.LatheGeometry(body, 10), position: [x, 0, z], color: BURLAP },
+    { geometry: new THREE.LatheGeometry(tuft, 10), position: [x, 0, z], color: BURLAP },
+    { geometry: new THREE.TorusGeometry(r * 0.4, 0.005, 4, 12).rotateX(Math.PI / 2), position: [x, neck + 0.003, z], color: TWINE },
+    { geometry: new THREE.CircleGeometry(r * 0.56, 10).rotateX(-Math.PI / 2), position: [x, h - 0.012, z], color: BURLAP },
+    // The patch and its loaf wrap the sack's front, where it is about 0.985 of its width.
+    { geometry: new THREE.CylinderGeometry(r * 0.99, r * 0.99, 0.05, 6, 1, true, -0.4, 0.8), position: [x, 0.062, z], color: PATCH },
+    { geometry: new THREE.CylinderGeometry(r, r, 0.022, 4, 1, true, -0.22, 0.44), position: [x, 0.062, z], color: CRUST },
+    ...(snowy
+      ? [{ geometry: new THREE.SphereGeometry(r * 0.6, 10, 3, 0, Math.PI * 2, 0, Math.PI / 2), position: [x, h - 0.008, z] as const, scale: [1, 0.4, 1] as const, color: SNOW }]
+      : CRUMBS.map(([dx, dz], i) => ({ geometry: new THREE.BoxGeometry(0.011, 0.007, 0.009), position: [x + dx, 0.0035, z + dz] as const, rotation: [0, i * 1.1, 0] as const, color: CRUMB }))),
+  ];
+}
+
+/** The open crate with its soil, snow on it in winter, the sign beside it painted with a worm, the angler's keeping tin in it once they have a place, and their sack of bread crumb beside it once bought. */
+function binShape(snowy: boolean, owned: boolean, sack: boolean) {
   const { width: w, depth: d } = BIN_INSIDE;
   return mergePainted([
     { geometry: new THREE.BoxGeometry(w + WALL * 2, HEIGHT, WALL), position: [0, HEIGHT / 2, d / 2 + WALL / 2], color: SLAT },
@@ -60,6 +105,7 @@ function binShape(snowy: boolean, owned: boolean) {
     { geometry: new THREE.BoxGeometry(0.2, 0.12, 0.015), position: [STAKE_X, STAKE_TOP - 0.08, STAKE_Z + 0.025], rotation: [0, 0, 0.06], color: BOARD },
     { geometry: signWorm(), position: [STAKE_X, STAKE_TOP - 0.08, STAKE_Z + 0.036], rotation: [0, 0, 0.06], color: WORM },
     ...(owned ? tinParts(snowy) : []),
+    ...(sack ? sackParts(snowy) : []),
   ]);
 }
 
@@ -83,13 +129,13 @@ const Y = new THREE.Vector3(0, 1, 0);
 const Z = new THREE.Vector3(0, 0, 1);
 const matrix = new THREE.Matrix4();
 
-/** The shack's worm bin by the deck, worms rising out of its soil and sinking back (none under winter snow), with a sign painted with a worm and, once `owned`, the angler's keeping tin (binWorms.ts). */
-export function WormBin({ season, owned = false }: { season: LakeSeason; owned?: boolean }) {
+/** The shack's worm bin by the deck, worms rising out of its soil and sinking back (none under winter snow), with a sign painted with a worm, once `owned` the angler's keeping tin, and with `sack` their sack of bread crumb beside it (binWorms.ts). */
+export function WormBin({ season, owned = false, sack = false }: { season: LakeSeason; owned?: boolean; sack?: boolean }) {
   const worms = useRef<THREE.InstancedMesh>(null);
   const posed = useRef(false);
   const still = useReducedMotion();
   const snowy = binSnowy(season);
-  const shape = useMemo(() => binShape(snowy, owned), [snowy, owned]);
+  const shape = useMemo(() => binShape(snowy, owned, sack), [snowy, owned, sack]);
   useEffect(() => {
     posed.current = false;
   }, [snowy, still]);
