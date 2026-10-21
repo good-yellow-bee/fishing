@@ -2602,6 +2602,19 @@ describe("level unlock integration", () => {
     expect(hint()).toBe(said);
   });
 
+  it("keeps the plain chance and hint over a swim whose feeders were scattered", () => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 6, spooked: 2, at: DOCK_BUBBLES.at - 60_000 }));
+    const surface = mount();
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "golden-shiner")!);
+    vi.mocked(stealsBait).mockReturnValueOnce(true);
+    cast(surface);
+    expect(vi.mocked(stealsBait).mock.lastCall?.[3]).toBe(STEAL_CHANCE);
+    for (let waited = 0; phase() !== "result:miss" && waited < 20_000; waited += 100) act(() => vi.advanceTimersByTime(100));
+    expect(hint()).toBe("Little fish steal bait. Cast again.");
+  });
+
   it("keeps the plain chance off the groundbait", () => {
     cast(mount());
     expect(vi.mocked(stealsBait).mock.lastCall?.[3]).toBe(STEAL_CHANCE);

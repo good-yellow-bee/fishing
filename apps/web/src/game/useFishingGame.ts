@@ -1385,7 +1385,9 @@ export function useFishingGame(
     const topwater = isTopwater(lureRef?.current);
     const style = takeStyle(species.id, topwater);
     const nibbles = nibblePlan(wait, Math.random, style);
-    const stolen = carriesBait(lureRef?.current) && stealsBait(species.id, nibbles.length, Math.random, stealChance(bait.baited ? bait.built : null));
+    // A swim whose feeders were scattered has no thieves crowding it either, however little built it is left.
+    const thiefSwim = bait.baited && !bait.spooked ? bait.built : null;
+    const stolen = carriesBait(lureRef?.current) && stealsBait(species.id, nibbles.length, Math.random, stealChance(thiefSwim));
     const arm = () => {
       let secondTake = false;
       let followed = false;
@@ -1422,7 +1424,7 @@ export function useFishingGame(
         if (stolen) {
           setSoak(0);
           setOutcome({ kind: "miss", message: t("{fish} nibbled the bait clean off the hook.", { fish: t(species.name) }), fish: bitten });
-          resetToIdle(bait.baited && bait.built === 0 ? t("Shiners crowd a fresh swim and steal bait until it's topped up. Cast again.") : t("Little fish steal bait. Cast again."), "result");
+          resetToIdle(thiefSwim === 0 ? t("Shiners crowd a fresh swim and steal bait until it's topped up. Cast again.") : t("Little fish steal bait. Cast again."), "result");
           return;
         }
         // A pike on a flashing lure may follow it to the bank instead of taking: the angler figure-eights it as it turns.
