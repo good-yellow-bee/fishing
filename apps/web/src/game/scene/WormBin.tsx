@@ -33,7 +33,16 @@ function tinParts(snowy: boolean): PaintedPart[] {
     { geometry: new THREE.CylinderGeometry(r * 1.02, r * 1.02, rim * 0.45, 12, 1, true), position: [x, BIN_SOIL + rim * 0.45, z], color: BAND },
     { geometry: new THREE.TorusGeometry(r, 0.005, 4, 14).rotateX(Math.PI / 2), position: [x, BIN_SOIL + rim, z], color: RIM },
     { geometry: new THREE.CircleGeometry(r * 0.98, 12).rotateX(-Math.PI / 2), position: [x, BIN_SOIL + rim * 0.7, z], color: snowy ? SNOW : SOIL },
+    ...(snowy ? [] : [{ geometry: tinWorm(), position: [x, BIN_SOIL, z] as const, color: WORM }]),
   ];
+}
+
+/** A worm out of the tin's soil, over its rim toward the bin's middle and down onto the bin's soil. */
+function tinWorm() {
+  const { radius: r, rim } = BIN_TIN;
+  const out = (reach: number, y: number) => new THREE.Vector3(-reach * 0.75, y, reach * 0.66);
+  const curve = new THREE.CatmullRomCurve3([out(0.2 * r, rim * 0.6), out(0.6 * r, rim + 0.01), out(r, rim + 0.007), out(1.35 * r, rim * 0.45), out(1.7 * r, 0.006)]);
+  return new THREE.TubeGeometry(curve, 12, 0.007, 5);
 }
 
 /** The open crate with its soil, snow on it in winter, the sign beside it painted with a worm, and the angler's tin in it once they have a place. */
