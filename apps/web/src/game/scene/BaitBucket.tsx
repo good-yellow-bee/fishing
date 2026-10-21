@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { AERATOR_BUBBLES, aeratorBubble, TUBE_X, TUBE_Z } from "./aeratorBubbles";
+import { AERATOR_BUBBLES, aeratorBubble } from "./aeratorBubbles";
 import { aboard } from "./boat";
 import { bucketSpot } from "./bucketSpot";
-import { mergePainted } from "./mergeParts";
+import { mergePainted, mergeParts } from "./mergeParts";
 import { anglerPose } from "./pose";
 import { STILL_TIME, useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
@@ -20,29 +20,34 @@ const BUBBLE = "#eef8f4";
 const HEIGHT = 0.2;
 const RIM_R = 0.1;
 const WATER_Y = HEIGHT * 0.8;
-/** The pump box hangs outside the rim on the bucket's back; its tube climbs over the rim and dips into the water. */
-const PUMP_Z = -(RIM_R + 0.0175);
+/** The pump box hangs outside the rim on the side the camera sees, its tube climbing over the rim and down to the airstone. */
+const TUBE_X = 0.05;
+const TUBE_Z = -0.045;
+const PUMP_OUT = RIM_R + 0.0175;
+const TUBE_IN = Math.hypot(TUBE_X, TUBE_Z);
 const TUBE_Y = HEIGHT + 0.015;
 const TUBE_R = 0.003;
 
-function bucketShape(aerated: boolean) {
-  const pump: Parameters<typeof mergePainted>[0] = aerated
-    ? [
-        { geometry: new THREE.BoxGeometry(0.07, 0.05, 0.035), position: [TUBE_X, HEIGHT - 0.03, PUMP_Z], color: PUMP },
-        { geometry: new THREE.BoxGeometry(0.02, 0.006, 0.045), position: [TUBE_X - 0.02, HEIGHT + 0.004, PUMP_Z + 0.01], color: TUBE },
-        { geometry: new THREE.CylinderGeometry(TUBE_R, TUBE_R, 0.02, 5), position: [TUBE_X, HEIGHT + 0.005, PUMP_Z], color: TUBE },
-        { geometry: new THREE.CylinderGeometry(TUBE_R, TUBE_R, TUBE_Z - PUMP_Z, 5).rotateX(Math.PI / 2), position: [TUBE_X, TUBE_Y, (PUMP_Z + TUBE_Z) / 2], color: TUBE },
-        { geometry: new THREE.CylinderGeometry(TUBE_R, TUBE_R, TUBE_Y - WATER_Y + 0.005, 5), position: [TUBE_X, (TUBE_Y + WATER_Y - 0.005) / 2, TUBE_Z], color: TUBE },
-      ]
-    : [];
+/** The pump and its tube, built facing -z and turned toward where the tube dips in. */
+function pumpShape() {
   return mergePainted([
+    { geometry: new THREE.BoxGeometry(0.05, 0.05, 0.035), position: [0, HEIGHT - 0.03, -PUMP_OUT], color: PUMP },
+    { geometry: new THREE.BoxGeometry(0.014, 0.006, 0.045), position: [-0.012, HEIGHT + 0.004, -PUMP_OUT + 0.01], color: TUBE },
+    { geometry: new THREE.CylinderGeometry(TUBE_R, TUBE_R, 0.02, 5), position: [0, HEIGHT + 0.005, -PUMP_OUT], color: TUBE },
+    { geometry: new THREE.CylinderGeometry(TUBE_R, TUBE_R, PUMP_OUT - TUBE_IN, 5).rotateX(Math.PI / 2), position: [0, TUBE_Y, -(PUMP_OUT + TUBE_IN) / 2], color: TUBE },
+    { geometry: new THREE.CylinderGeometry(TUBE_R, TUBE_R, TUBE_Y - WATER_Y + 0.005, 5), position: [0, (TUBE_Y + WATER_Y - 0.005) / 2, -TUBE_IN], color: TUBE },
+  ]).rotateY(Math.atan2(-TUBE_X, -TUBE_Z));
+}
+
+function bucketShape(aerated: boolean) {
+  const bucket = mergePainted([
     { geometry: new THREE.CylinderGeometry(RIM_R, RIM_R * 0.8, HEIGHT, 12, 1, true), position: [0, HEIGHT / 2, 0], color: TIN },
     { geometry: new THREE.CircleGeometry(RIM_R * 0.8, 12).rotateX(-Math.PI / 2), position: [0, 0.005, 0], color: RIM },
     { geometry: new THREE.TorusGeometry(RIM_R, 0.008, 4, 16).rotateX(Math.PI / 2), position: [0, HEIGHT, 0], color: RIM },
     { geometry: new THREE.TorusGeometry(RIM_R * 0.95, 0.005, 3, 12, Math.PI), position: [0, HEIGHT, 0], color: RIM },
     { geometry: new THREE.CircleGeometry(RIM_R * 0.94, 12).rotateX(-Math.PI / 2), position: [0, WATER_Y, 0], color: WATER },
-    ...pump,
   ]);
+  return aerated ? mergeParts([{ geometry: bucket }, { geometry: pumpShape() }]) : bucket;
 }
 
 /** Where each spare shiner lies across the water in the bucket. */

@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { AERATOR_BUBBLE_MAX, AERATOR_BUBBLES, AERATOR_CYCLE_SEC, AERATOR_RISE, aeratorBubble, TUBE_X, TUBE_Z } from "./aeratorBubbles";
+import { AERATOR_BUBBLE_MAX, AERATOR_BUBBLES, AERATOR_CYCLE_SEC, AERATOR_RISE, aeratorBubble, STONE_X, STONE_Z } from "./aeratorBubbles";
 
 const WATER = 0.16;
 
 describe("the aerator's bubbles in the bait bucket", () => {
-  it("break over the water near the tube, inside the bucket's rim", () => {
+  it("break over the water over the airstone, inside the bucket's rim", () => {
     for (let i = 0; i < AERATOR_BUBBLES; i += 1) {
       for (let time = 0; time < 20; time += 0.07) {
         const b = aeratorBubble(i, time, WATER);
         expect(b.y).toBeGreaterThanOrEqual(WATER);
         expect(b.y).toBeLessThanOrEqual(WATER + AERATOR_RISE);
-        expect(Math.hypot(b.x - TUBE_X, b.z - TUBE_Z)).toBeLessThan(0.03);
+        expect(Math.hypot(b.x - STONE_X, b.z - STONE_Z)).toBeLessThan(0.03);
         expect(Math.hypot(b.x, b.z)).toBeLessThan(0.094);
         expect(b.size).toBeGreaterThanOrEqual(0);
         expect(b.size).toBeLessThanOrEqual(AERATOR_BUBBLE_MAX);
