@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-21-field82";
+export const NEWS_ID = "2026-10-21-game76";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "With two worms or more in your tin, a handful of groundbait at the Dock, the Reeds or the Drop-off can now go in with chopped worm, from the Chopped worm sign beside Groundbait: that swim then draws the perch in with its feeders while it lasts. And over a swim topped up twice, the small feeders draw the bank's pike: on a lure pike take, they come there twice as often, and a pike hooked there, landed or lost, scatters the feeders as a lost carp does.",
   "While today's outing is out, Home's Next now says how many fish it has so far and when the last one came, and an outing card on Home or Trips says Out now once a fish logged without its outing is in on its water. Under Longest rested on Waters, a water whose outing from last evening is still going in the small hours now says Fished here today, as its page does.",
   "With larger text on a phone held sideways, the shore signs now stop beside the lure panel instead of running under it, and their row scrolls sideways with each label on one line. And in a row of signs that scrolls sideways, reaching a half-hidden sign with Tab now scrolls it whole into view, its focus ring inside; a tap leaves the row still, so the sign doesn't slide from under your finger.",
   "A carp or catfish lost over a swim topped up twice now scatters its feeders with its thrashing: the swim needs building up again, and its next two casts draw no feeder, as the lost fish's card says. And bait one bank three days running and its feeders come to expect it: the day's first handful there draws them in as after a top-up, so one more brings the big feeders.",
