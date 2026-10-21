@@ -1,9 +1,9 @@
+import * as THREE from "three";
 import { describe, expect, it } from "vitest";
 import { BIN_AT, BIN_INSIDE } from "./binWorms";
-import { BILL, BIN_BIRD_SCALE, BIN_VISIT_EVERY_SEC, BIN_VISIT_SEC, DIP_PITCH, HELD_WORM, PERCH, SOIL_Y, billAt, binBirdAt, binBirdOut, binVisit } from "./binVisit";
-import { birdHeadShape } from "./DockRobin";
+import { BILL, BIN_BIRD_SCALE, BIN_FIRST_SEC as FIRST, BIN_VISIT_EVERY_SEC, BOW_AT, BIN_VISIT_SEC, DIP_PITCH, HELD_WORM, PERCH, SOIL_Y, billAt, binBirdAt, binBirdOut, binLatch, binVisit } from "./binVisit";
+import { BLACKBIRD, birdBodyShape, birdHeadShape } from "./DockRobin";
 
-const FIRST = 16;
 const poses = (from: number, to: number) => Array.from({ length: Math.round((to - from) / 0.05) }, (_, i) => binBirdAt(from + i * 0.05));
 
 describe("the worm bin's blackbird", () => {
@@ -40,6 +40,18 @@ describe("the worm bin's blackbird", () => {
     expect(BILL.up).toBeCloseTo(0.088 + 0.01, 3);
   });
 
+  it("bows about the middle of its body, its breast never sinking into the soil", () => {
+    const body = birdBodyShape();
+    body.computeBoundingBox();
+    expect(BOW_AT).toBeCloseTo((body.boundingBox!.min.y + body.boundingBox!.max.y) / 2, 2);
+    for (const pitch of [0, DIP_PITCH / 2, DIP_PITCH]) {
+      const bowed = birdBodyShape().scale(BIN_BIRD_SCALE, BIN_BIRD_SCALE, BIN_BIRD_SCALE);
+      bowed.applyMatrix4(new THREE.Matrix4().makeTranslation(0, -BOW_AT * BIN_BIRD_SCALE, 0)).rotateX(pitch).translate(0, BOW_AT * BIN_BIRD_SCALE, 0);
+      bowed.computeBoundingBox();
+      expect(bowed.boundingBox!.min.y).toBeGreaterThan(SOIL_Y - PERCH.y);
+    }
+  });
+
   it("bows its bill to the soil inside the crate", () => {
     const bill = billAt(DIP_PITCH);
     expect(PERCH.y + bill.up).toBeCloseTo(SOIL_Y, 2);
@@ -67,6 +79,17 @@ describe("the worm bin's blackbird", () => {
     expect(leaving.at(-1)!.y).toBeGreaterThan(PERCH.y + 1.5);
   });
 
+  it("shows a visit only when its start is seen with the angler by the shack", () => {
+    const yes = () => true;
+    const start = binLatch(null, FIRST + 0.02, yes);
+    expect(start.shown).toBe(true);
+    expect(binLatch(start, FIRST + 5, () => false)).toBe(start);
+    expect(binLatch(null, FIRST + 5, yes).shown).toBe(false);
+    expect(binLatch(null, FIRST + 0.02, () => false).shown).toBe(false);
+    const next = binLatch(binLatch(null, FIRST + 5, yes), FIRST + BIN_VISIT_EVERY_SEC + 0.02, yes);
+    expect(next).toEqual({ index: 1, shown: true });
+  });
+
   it("is held perched on the rim, looking in, with no worm, under reduced motion", () => {
     const pose = binBirdAt(FIRST - 10, true);
     expect(pose).toMatchObject({ here: true, x: PERCH.x, y: PERCH.y, flying: 0, pitch: 0, worm: 0, look: 0 });
@@ -74,6 +97,6 @@ describe("the worm bin's blackbird", () => {
   });
 
   it("is drawn smaller than the bank blackbird", () => {
-    expect(BIN_BIRD_SCALE).toBeLessThan(2.6);
+    expect(BIN_BIRD_SCALE).toBeLessThan(BLACKBIRD.scale);
   });
 });

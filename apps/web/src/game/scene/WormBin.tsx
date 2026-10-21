@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import type { LakeSeason } from "@stillwater/shared";
-import { BIN_AT, BIN_HEIGHT as HEIGHT, BIN_INSIDE, BIN_WALL as WALL, BIN_WORMS, binSnowy, binWorm } from "./binWorms";
+import { BIN_AT, BIN_HEIGHT as HEIGHT, BIN_INSIDE, BIN_SOIL, BIN_WALL as WALL, BIN_WORMS, binSnowy, binWorm } from "./binWorms";
 import { mergePainted } from "./mergeParts";
 import { STILL_TIME, useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
@@ -34,7 +34,7 @@ function binShape(snowy: boolean) {
     { geometry: new THREE.BoxGeometry(WALL, HEIGHT, d), position: [-w / 2 - WALL / 2, HEIGHT / 2, 0], color: SLAT },
     // A darker band across each long side, where the slats meet.
     { geometry: new THREE.BoxGeometry(w + WALL * 2 + 0.004, 0.012, WALL + 0.004), position: [0, HEIGHT * 0.5, d / 2 + WALL / 2], color: POST },
-    { geometry: new THREE.BoxGeometry(w, 0.02, d), position: [0, HEIGHT - 0.03, 0], color: snowy ? SNOW : SOIL },
+    { geometry: new THREE.BoxGeometry(w, 0.02, d), position: [0, BIN_SOIL - 0.01, 0], color: snowy ? SNOW : SOIL },
     { geometry: new THREE.BoxGeometry(0.03, STAKE_TOP, 0.03), position: [STAKE_X, STAKE_TOP / 2, STAKE_Z], color: POST },
     { geometry: new THREE.BoxGeometry(0.2, 0.12, 0.015), position: [STAKE_X, STAKE_TOP - 0.08, STAKE_Z + 0.025], rotation: [0, 0, 0.06], color: BOARD },
     { geometry: signWorm(), position: [STAKE_X, STAKE_TOP - 0.08, STAKE_Z + 0.036], rotation: [0, 0, 0.06], color: WORM },
@@ -89,7 +89,7 @@ export function WormBin({ season }: { season: LakeSeason }) {
     for (let i = 0; i < BIN_WORMS; i += 1) {
       const pose = binWorm(i, time);
       turn.setFromAxisAngle(Y, pose.yaw).multiply(lean.setFromAxisAngle(Z, pose.lean));
-      at.set(pose.x, HEIGHT - 0.02, pose.z);
+      at.set(pose.x, BIN_SOIL, pose.z);
       mesh.setMatrixAt(i, matrix.compose(at, turn, size.set(1, pose.rise, 1)));
     }
     mesh.instanceMatrix.needsUpdate = true;

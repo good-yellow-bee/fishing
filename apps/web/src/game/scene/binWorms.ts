@@ -13,6 +13,8 @@ export const BIN_HALF = 0.23;
 /** The crate's wall height and thickness. */
 export const BIN_HEIGHT = 0.18;
 export const BIN_WALL = 0.025;
+/** The soil's top, up from the crate's foot. */
+export const BIN_SOIL = BIN_HEIGHT - 0.02;
 /** How far each worm's lean swings, in radians, the least and most of it that shows above the soil, and the farthest its tip reaches from its root. */
 export const WORM_LEAN = 0.35;
 export const RISE_MIN = 0.45;
