@@ -1,6 +1,6 @@
 import { SPOT_IDS, type LakeSeason, type SpotId } from "@stillwater/shared";
 import { readAngler, writeAngler } from "./anglerStore";
-import { GROUNDBAIT_CASTS, SWIM_MAX_CASTS, TOPUP_MAX, type Groundbait } from "./logic";
+import { GROUNDBAIT_CASTS, SPOOKED_SWIM_CASTS, SWIM_MAX_CASTS, TOPUP_MAX, type Groundbait } from "./logic";
 
 /** Kept per angler: the swim they last groundbaited, so a handful thrown before leaving still works on the next visit. */
 export function swimKey(userId: string) {
@@ -31,7 +31,7 @@ export type Swim = Groundbait & { at: number; primed?: boolean; bread?: boolean 
 
 const upTo = (n: unknown, max: number) => Number.isInteger(n) && (n as number) >= 1 && (n as number) <= max;
 
-/** The swim as kept: fish full from an overfeed are hungry again by the next visit, so only its top-ups are read back. */
+/** The swim as kept: fish full from an overfeed are hungry again by the next visit, so only its top-ups and scattered feeders are read back. */
 export function loadSwim(userId: string): Swim | null {
   return readAngler(swimKey(userId), (raw) => {
     const swim = raw as Partial<Swim> | null;
@@ -41,6 +41,7 @@ export function loadSwim(userId: string): Swim | null {
           casts: swim.casts!,
           at: swim.at,
           ...(upTo(swim.built, TOPUP_MAX) ? { built: swim.built } : {}),
+          ...(upTo(swim.spooked, SPOOKED_SWIM_CASTS) ? { spooked: swim.spooked } : {}),
           ...(swim.primed ? { primed: true } : {}),
           ...(swim.bread ? { bread: true } : {}),
         }

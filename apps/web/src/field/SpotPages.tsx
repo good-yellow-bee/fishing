@@ -169,6 +169,11 @@ export function SpotsPage() {
     const going = outNowAt(book, spotId);
     return going ? outingName(going, book.spots) : null;
   };
+  // How long a water has rested, as its page says it: none while last evening's outing there is still going.
+  const restOf = (spotId: string) => {
+    const last = lastOut.get(spotId)!;
+    return outNowAt(book, spotId)?.date === last ? 0 : daysBetween(last, today);
+  };
   // The water left alone longest first, to give a rested one a go; waters never fished after them.
   // The angler's own outings and fish, as each water's page counts them: a sample water they have fished too counts
   // theirs, not the sample week's beside them. A water with nothing of theirs keeps what it has.
@@ -362,7 +367,7 @@ export function SpotsPage() {
                   tripCount={fishedHere(row.spot.id)}
                   lastFishDay={ownHere(row.spot.id) ? ownRow.get(row.spot.id)?.lastFishDay ?? null : row.lastFishDay}
                   // Under any order once it has rested a week, as the Map says it: a water left alone is worth a look.
-                  restDays={lastOut.has(row.spot.id) && (order === "rested" || daysBetween(lastOut.get(row.spot.id)!, today) >= 7) ? daysBetween(lastOut.get(row.spot.id)!, today) : null}
+                  restDays={lastOut.has(row.spot.id) && (order === "rested" || daysBetween(lastOut.get(row.spot.id)!, today) >= 7) ? restOf(row.spot.id) : null}
                   nextOuting={nextOutingLine(upcoming.find((trip) => trip.spotId === row.spot.id), today, tomorrow)}
                   // The angler's own fish where the card counts theirs; the game's lake and an untouched sample water what they have.
                   bestLure={bestLureAt(ownHere(row.spot.id) ? countedCatches : book.catches, row.spot.id)}

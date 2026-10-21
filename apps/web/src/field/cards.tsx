@@ -119,6 +119,7 @@ export function TripCard({
   const t = useT();
   const tackle = useTackleItems();
   const { book } = useLogbook();
+  const going = outNow(book, trip);
   // An outing still ahead with nothing logged: how the bag is coming along says more than "Nothing logged".
   const bag = tackle && fishCount === 0 && isPlanned(trip, today, fishCount, book) ? itemsForTrip(tackle, trip.id) : [];
   const packed = packedCount(bag);
@@ -126,8 +127,9 @@ export function TripCard({
     bag.length === 0
       ? // Still ahead, or today's before its first fish, with nothing packed: planned, not a blank day.
         isPlanned(trip, today, fishCount, book)
-        ? // Last evening's, still going in the small hours: the angler is sitting on it, as the Map says.
-          trip.date < today && outNow(book, trip)
+        ? // Out on it, as Home's Next and the Map say: last evening's still going in the small hours, or today's with a
+          // fish loose on its water these twelve hours.
+          going
           ? t("Out now")
           : t("Planned")
         : // Beside "3 lost", a count: "0 fish · 3 lost", not "Nothing logged · 3 lost".
@@ -143,7 +145,7 @@ export function TripCard({
   const span = !from ? null : from === to ? from : `${from}–${to}`;
   return (
     <Link to={`/trips/${trip.id}`} className="trip-card" state={FROM_LIST}>
-      <p className="when">{tripWhen(trip.date, today, tomorrow, outNow(book, trip))}</p>
+      <p className="when">{tripWhen(trip.date, today, tomorrow, going)}</p>
       <div>
         <Head>{outingName(trip, book.spots)}</Head>
         <p className="meta">

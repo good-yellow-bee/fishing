@@ -767,8 +767,8 @@ export const GROUNDBAIT_WAIT = 0.8;
 /** The free handfuls of groundbait the bag is topped up to on a day's first visit. */
 export const GROUNDBAIT_HANDFULS = 1;
 
-/** A groundbaited swim: its bank, the casts left, how often it was topped up as it faded, and the casts its fish are still full for. */
-export type Groundbait = { spot: SpotId; casts: number; built?: number; full?: number };
+/** A groundbaited swim: its bank, the casts left, how often it was topped up as it faded, the casts its fish are still full for, and the casts its feeders stay scattered for. */
+export type Groundbait = { spot: SpotId; casts: number; built?: number; full?: number; spooked?: number };
 
 /** A handful onto a swim at its bank with this many casts or fewer left tops it up as it fades: the feeders stay and more come in. */
 export const TOPUP_CASTS_LEFT = 2;
@@ -789,11 +789,21 @@ export function throwHandful(bait: Groundbait | null, spot: SpotId): { next: Gro
   return { next: { ...bait, casts, full: OVERFED_CASTS }, kind: "overfed" };
 }
 
-/** Whether a cast at this bank lands over the groundbait (and on fish still full from it, or on a swim built up), and what is left of it after the cast. */
-export function castOverGroundbait(bait: Groundbait | null, spot: SpotId): { baited: boolean; full: boolean; built: number; next: Groundbait | null } {
-  if (!bait || bait.spot !== spot || bait.casts <= 0) return { baited: false, full: false, built: 0, next: bait };
-  const { full = 0, ...rest } = bait;
-  return { baited: true, full: full > 0, built: bait.built ?? 0, next: bait.casts > 1 ? { ...rest, casts: bait.casts - 1, ...(full > 1 ? { full: full - 1 } : {}) } : null };
+/** A big feeder lost off a swim built all the way scatters its feeders: the build is gone, and for this many casts no feeder takes. */
+export const SPOOKED_SWIM_CASTS = 2;
+
+/** The swim at this bank once a big feeder hooked over it got away. */
+export function scatterSwim(bait: Groundbait | null, spot: SpotId): Groundbait | null {
+  if (!bait || bait.spot !== spot || bait.casts <= 0) return null;
+  const { built: _built, ...rest } = bait;
+  return { ...rest, spooked: SPOOKED_SWIM_CASTS };
+}
+
+/** Whether a cast at this bank lands over the groundbait (and on fish still full from it, on feeders scattered off it, or on a swim built up), and what is left of it after the cast. */
+export function castOverGroundbait(bait: Groundbait | null, spot: SpotId): { baited: boolean; full: boolean; spooked: boolean; built: number; next: Groundbait | null } {
+  if (!bait || bait.spot !== spot || bait.casts <= 0) return { baited: false, full: false, spooked: false, built: 0, next: bait };
+  const { full = 0, spooked = 0, ...rest } = bait;
+  return { baited: true, full: full > 0, spooked: spooked > 0, built: bait.built ?? 0, next: bait.casts > 1 ? { ...rest, casts: bait.casts - 1, ...(full > 1 ? { full: full - 1 } : {}), ...(spooked > 1 ? { spooked: spooked - 1 } : {}) } : null };
 }
 
 /** Fish that crowd in to feed on groundbait: the panfish, baitfish and bottom feeders. */
