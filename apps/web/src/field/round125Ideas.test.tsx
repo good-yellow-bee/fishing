@@ -8,7 +8,9 @@ import { HomePage } from "./HomePage";
 import { LogbookProvider } from "./LogbookState";
 import { TackleProvider } from "./gear/TackleState";
 import { LOGBOOK_STORAGE_KEY } from "./storage";
-import { markFieldNewsSeen } from "./fieldNews";
+import { FIELD_NEWS, markFieldNewsSeen } from "./fieldNews";
+import { NEWS_ITEMS } from "../game/whatsNew";
+import { PL_GAME } from "../i18n/pl/game";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -70,5 +72,14 @@ describe("round 125 ideas: Home's Next while out", () => {
     vi.setSystemTime(new Date(2026, 9, 21, 22));
     const box = await show({ spots: [water("own", "Own Lake")], trips: [trip("day", TODAY, "own", "Day")], catches: [fish("1", "day", 21, 6)] }, <HomePage />);
     expect(nextBox(box)).not.toContain("So far");
+  });
+});
+
+describe("round 125: news card field82", () => {
+  it("lists the line for the field log, with its Polish", () => {
+    const line = NEWS_ITEMS.find((item) => item.includes("Home's Next now says how many fish it has so far"));
+    expect(line).toBeDefined();
+    expect(FIELD_NEWS.has(line!)).toBe(true);
+    expect(PL_GAME[line!]).toBeTruthy();
   });
 });
