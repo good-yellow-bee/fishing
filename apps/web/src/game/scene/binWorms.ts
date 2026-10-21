@@ -20,6 +20,13 @@ export const WORM_LEAN = 0.35;
 export const RISE_MIN = 0.45;
 export const RISE_MAX = 1;
 export const WORM_REACH = 0.105;
+/**
+ * With a place in the bin bought, the angler's keeping tin is sunk into its back right corner, the one corner no worm comes up in:
+ * where, how wide, how far its rim stands over the soil and how thick that rim is.
+ */
+export const BIN_TIN = { x: 0.155, z: -0.1, radius: 0.035, rim: 0.03, lip: 0.005 };
+/** A worm hangs over the tin's rim this way across the soil, its tail lying this many tin radii out. */
+export const TIN_WORM = { x: -0.85, z: 0.53, out: 1.2 };
 
 /** Where each worm comes up, as a share of the inside from its middle. */
 const SPOTS = [
