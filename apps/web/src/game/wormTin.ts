@@ -37,15 +37,18 @@ function readTin(userId: string): Tin | null {
  * What the tin holds now: as last seen, topped up to the day's dug worms on the first visit of a day.
  * In summer's heat the worms that went in on an earlier day have died by then, judged by the season when the angler comes back,
  * so the tin holds only the day's dig; `died` is how many fewer that leaves than the tin held.
+ * With a place in the shack's cool worm bin (`binned`), yesterday's worms are still alive, and die the day after.
  */
-export function loadTin(userId: string, now = new Date(), season?: LakeSeason): { worms: number; died: number } {
+export function loadTin(userId: string, now = new Date(), season?: LakeSeason, binned = false): { worms: number; died: number } {
   const today = localDate(now);
   const tin = readTin(userId);
   if (tin && tin.day === today) return { worms: tin.worms, died: 0 };
   const dug = wormsDug(now);
   const held = tin?.worms ?? 0;
-  const worms = season === "summer" && tin?.kept !== today ? dug : Math.max(dug, held);
-  writeAngler(wormTinKey(userId), { worms, day: today, kept: today });
+  const keptYesterday = binned && tin?.kept === localDate(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 12));
+  const worms = season === "summer" && tin?.kept !== today && !keptYesterday ? dug : Math.max(dug, held);
+  // Yesterday's worms left over past the day's dig stay yesterday's, so the bin keeps them only the one day.
+  writeAngler(wormTinKey(userId), { worms, day: today, kept: season === "summer" && keptYesterday && held > dug ? tin!.kept : today });
   return { worms, died: Math.max(0, held - worms) };
 }
 

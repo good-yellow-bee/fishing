@@ -481,6 +481,10 @@ export function useFishingGame(
   const aerator = profile?.aerator === true;
   const aeratorRef = useRef(aerator);
   aeratorRef.current = aerator;
+  /** The worm tin's place in the shack's cool worm bin: in summer its worms keep a day longer. */
+  const wormBin = profile?.wormBin === true;
+  const wormBinRef = useRef(wormBin);
+  wormBinRef.current = wormBin;
   /** What died in the bucket and the tin since the last visit, said on sign-in; the primed swim's line adds to it, not over it. */
   const baitDiedRef = useRef("");
   // The bait kept from an earlier visit, read when the angler signs in: the bucket's shiners and the tin's worms may have died since.
@@ -488,7 +492,7 @@ export function useFishingGame(
     const kept = profile?.userId ? loadBucket(profile.userId, Date.now(), season, aeratorRef.current) : { shiners: [], died: 0 };
     bucketRef.current = kept.shiners;
     setBucket(kept.shiners.length);
-    const tin = profile?.userId ? loadTin(profile.userId, new Date(), season) : { worms: WORM_TIN_DAILY, died: 0 };
+    const tin = profile?.userId ? loadTin(profile.userId, new Date(), season, wormBinRef.current) : { worms: WORM_TIN_DAILY, died: 0 };
     wormsRef.current = tin.worms;
     setWorms(tin.worms);
     if (profile?.userId && kept.died > 0) saveBucket(profile.userId, kept.shiners);
@@ -501,7 +505,12 @@ export function useFishingGame(
             ? t("{n} of the shiners in your bait bucket died while you were away: in the summer heat they keep two days.", { n: kept.died })
             : t("{n} of the shiners in your bait bucket died while you were away: they keep three days.", { n: kept.died });
     const aeratedDied = kept.died > 0 && aeratorRef.current ? `${shinersDied} ${t("Your aerator keeps them a day longer.")}` : shinersDied;
-    const wormsDied = tin.died > 0 ? t("{n} of the worms left in your tin died in the summer heat while you were away: they keep only the day they are dug or bought.", { n: tin.died }) : "";
+    const wormsDied =
+      tin.died === 0
+        ? ""
+        : wormBinRef.current
+          ? t("{n} of the worms left in your tin died in the summer heat while you were away: even in the worm bin they keep only to the next day.", { n: tin.died })
+          : t("{n} of the worms left in your tin died in the summer heat while you were away: they keep only the day they are dug or bought.", { n: tin.died });
     baitDiedRef.current = [aeratedDied, wormsDied].filter(Boolean).join(" ");
     if (baitDiedRef.current) setHint(baitDiedRef.current);
   }, [profile?.userId]);
@@ -2496,6 +2505,7 @@ export function useFishingGame(
     livelyShiner,
     bucket,
     aerator,
+    wormBin,
     hookFromBucket,
     setNightLine,
     checkNightLine,

@@ -215,6 +215,10 @@ export function buyAerator() {
   return request<{ profile: Profile }>("/api/aerator", { method: "POST" });
 }
 
+export function buyWormBin() {
+  return request<{ profile: Profile }>("/api/worm-bin", { method: "POST" });
+}
+
 /** The local day as the instants it starts and ends, which stay right where clocks jump at midnight. */
 export function dayQuery(day: string) {
   const [year, month, date] = day.split("-").map(Number);

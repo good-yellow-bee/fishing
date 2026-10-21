@@ -349,6 +349,7 @@ export const PL_CONTENT: PlBook = {
   "skill already maxed": "umiejętność już na maksimum",
   "not enough points": "za mało punktów",
   "aerator already fitted": "napowietrzacz jest już zamontowany",
+  "worm bin already yours": "miejsce w skrzynce na robaki jest już twoje",
 
   // Sentences rebuilt in i18n/content.ts
   "A {fish}": "1 × {fish}",

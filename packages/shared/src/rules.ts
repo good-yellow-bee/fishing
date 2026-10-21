@@ -187,6 +187,14 @@ export function validateAeratorBuy(profile: Profile): PurchaseResult {
   return shackSale(profile, AERATOR_PRICE);
 }
 
+/** A place for the worm tin in the shack's cool worm bin costs this many points, bought once; in summer the tin's worms then keep a day longer. */
+export const WORM_BIN_PRICE = 100;
+
+export function validateWormBinBuy(profile: Profile): PurchaseResult {
+  if (profile.wormBin) return { ok: false, error: "worm bin already yours", status: 409 };
+  return shackSale(profile, WORM_BIN_PRICE);
+}
+
 export function rollWeight(species: FishSpecies, patience: number, random = Math.random, level = 1): number {
   const trophyBoost = level >= 8 ? 0.1 : 0;
   const t = Math.min(1, Math.max(0, random() + patience * 0.015 + trophyBoost));

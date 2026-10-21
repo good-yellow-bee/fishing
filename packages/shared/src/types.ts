@@ -35,6 +35,8 @@ export type Profile = {
   patience: number;
   /** The shack's aerator is fitted to the bait bucket: bought once, it keeps every spare shiner a day longer. */
   aerator?: boolean;
+  /** The worm tin keeps in the shack's cool worm bin: bought once, its worms keep a day longer in summer. */
+  wormBin?: boolean;
 };
 
 export type CatchRecord = {
