@@ -3,7 +3,7 @@ import { DOCK_PLANKS, DOCK_STAND_X, DOCK_STAND_Z, inLake, onDockPlanks, walkable
 import { DROPOFF_STAND, INLET_STAND, REEDS_STAND } from "./bankWalk";
 import { BUCKET_SIDE, bucketSpot, tinSpot } from "./bucketSpot";
 import { stakeAt } from "./stakeSpot";
-import { THERMOS_SPOT } from "./steamWisp";
+import { CUP_SPOT, THERMOS_SPOT } from "./steamWisp";
 
 describe("the bait bucket at the angler's feet", () => {
   it("stands on the dock's deck beside the angler, clear of the thermos", () => {
@@ -60,6 +60,17 @@ describe("the worm tin at the angler's feet", () => {
     for (const z of [8.6, 9.1, 9.8, 10.3]) {
       const spot = tinSpot(0, z, Math.PI);
       if (spot) expect(!inLake(spot.x, spot.z) || walkableAt(spot.x, spot.z)).toBe(true);
+    }
+    expect(tinSpot(0, 9.1, Math.PI)).toBeNull();
+  });
+
+  it("keeps clear of the thermos, its cup and every bank's stake whichever way the angler turns", () => {
+    const fixed = [THERMOS_SPOT, CUP_SPOT, ...(["dock", "point", "reeds", "dropoff", "inlet"] as const).map((bank) => stakeAt(bank)!)];
+    for (const stand of [{ x: DOCK_STAND_X, z: DOCK_STAND_Z }, REEDS_STAND, DROPOFF_STAND, INLET_STAND]) {
+      for (let yaw = 0; yaw < Math.PI * 2; yaw += Math.PI / 16) {
+        const spot = tinSpot(stand.x, stand.z, yaw);
+        if (spot) for (const other of fixed) expect(Math.hypot(spot.x - other.x, spot.z - other.z)).toBeGreaterThanOrEqual(0.25);
+      }
     }
   });
 });

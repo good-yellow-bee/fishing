@@ -57,7 +57,8 @@ export function WormPot({ count }: { count: number }) {
   const still = useReducedMotion();
   const shape = useMemo(tinShape, []);
   const worm = useMemo(wormShape, []);
-  const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
+  // Both sides, so the open tin's inner wall shows above the soil.
+  const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp(), side: THREE.DoubleSide }), []);
   const pink = useMemo(() => new THREE.MeshToonMaterial({ color: WORM, gradientMap: toonRamp() }), []);
   useEffect(
     () => () => {
