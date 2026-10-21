@@ -10,6 +10,8 @@ import type { ScenePhase } from "./types";
 import { robinAt, robinVisitIndex, type RobinPose } from "./robinVisit";
 import { toonRamp } from "./toon";
 import { useSkinnedFigure } from "./skinFigure";
+import { WORM } from "./WormPot";
+import { BOW_AT } from "./binVisit";
 
 const DARK = "#22201e";
 
@@ -46,20 +48,34 @@ export function birdTailShape(look = ROBIN) {
   return mergePainted([{ geometry: new THREE.BoxGeometry(0.026, 0.006, 0.05), position: [0, 0, -0.025], color: look.back }]);
 }
 
-/** A robin's (or a blackbird's) figure, posed each frame by `poseAt` (a RobinPose at the clock's time): one skinned draw and its wings. */
-function RobinBird({ name, poseAt, look = ROBIN }: { name: string; poseAt: (time: number) => RobinPose; look?: BirdLook }) {
+const unturn = new THREE.Quaternion();
+const sway = new THREE.Quaternion();
+const Z_AXIS = new THREE.Vector3(0, 0, 1);
+
+/** A worm hanging from the bill, one unit long, before scaling. */
+function billWormShape() {
+  return mergePainted([{ geometry: new THREE.CylinderGeometry(0.0045, 0.0045, 1, 5), position: [0, -0.5, 0], color: WORM }]);
+}
+
+/**
+ * A robin's (or a blackbird's) figure, posed each frame by `poseAt` (a RobinPose at the clock's time): one skinned draw and its wings.
+ * `carries` gives it a worm to hang from its bill, as long as the pose's `worm`.
+ */
+export function RobinBird({ name, poseAt, look = ROBIN, carries = false }: { name: string; poseAt: (time: number) => RobinPose; look?: BirdLook; carries?: boolean }) {
   const bird = useRef<THREE.Group>(null);
+  const bow = useRef<THREE.Group>(null);
+  const worm = useRef<THREE.Group>(null);
   const head = useRef<THREE.Group>(null);
   const tail = useRef<THREE.Group>(null);
   const wings = useRef<THREE.Group>(null);
-  const shapes = useMemo(() => ({ body: birdBodyShape(look), head: birdHeadShape(look), tail: birdTailShape(look), wing: new THREE.SphereGeometry(1, 8, 6) }), [look]);
+  const shapes = useMemo(() => ({ body: birdBodyShape(look), head: birdHeadShape(look), tail: birdTailShape(look), wing: new THREE.SphereGeometry(1, 8, 6), worm: carries ? billWormShape() : null }), [look, carries]);
   const materials = useMemo(
     () => ({ painted: new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), wing: new THREE.MeshToonMaterial({ color: look.back, gradientMap: toonRamp() }) }),
     [look],
   );
   useEffect(
     () => () => {
-      [...Object.values(shapes), ...Object.values(materials)].forEach((item) => item.dispose());
+      [...Object.values(shapes), ...Object.values(materials)].forEach((item) => item?.dispose());
     },
     [shapes, materials],
   );
@@ -74,6 +90,15 @@ function RobinBird({ name, poseAt, look = ROBIN }: { name: string; poseAt: (time
     group.rotation.y = pose.yaw;
     // In flight it leans forward into the beat of its wings.
     group.rotation.x = pose.flying * 0.35;
+    // A bow (or a lean back) about the middle of its body, whichever way it faces.
+    if (bow.current) bow.current.rotation.x = pose.pitch ?? 0;
+    if (worm.current && head.current) {
+      const length = pose.worm ?? 0;
+      worm.current.visible = length > 0;
+      // Hanging straight down from the bill however the bird is turned, swinging a little.
+      worm.current.quaternion.copy(head.current.getWorldQuaternion(unturn).invert()).multiply(sway.setFromAxisAngle(Z_AXIS, pose.wormSway ?? 0));
+      worm.current.scale.set(1, Math.max(length, 0.001) / look.scale, 1);
+    }
     if (head.current) head.current.rotation.y = pose.look;
     if (tail.current) tail.current.rotation.x = -0.35 - pose.flick * 0.6;
     if (wings.current) {
@@ -87,20 +112,27 @@ function RobinBird({ name, poseAt, look = ROBIN }: { name: string; poseAt: (time
 
   return (
     <group ref={bird} name={name} visible={false}>
-      <group scale={look.scale}>
-        <mesh geometry={shapes.body} material={materials.painted} castShadow />
-        <group ref={head} position={[0, 0.088, 0.012]}>
-          <mesh geometry={shapes.head} material={materials.painted} />
-        </group>
-        <group ref={tail} position={[0, 0.045, -0.04]}>
-          <mesh geometry={shapes.tail} material={materials.painted} />
-        </group>
-        <group ref={wings} position={[0, 0.06, 0]} visible={false}>
-          {[1, -1].map((side) => (
-            <group key={side} position={[side * 0.03, 0, 0]}>
-              <mesh geometry={shapes.wing} material={materials.wing} position={[side * 0.045, 0, -0.005]} scale={[0.05, 0.006, 0.03]} />
-            </group>
-          ))}
+      <group ref={bow} position={[0, BOW_AT * look.scale, 0]}>
+        <group position={[0, -BOW_AT * look.scale, 0]} scale={look.scale}>
+          <mesh geometry={shapes.body} material={materials.painted} castShadow />
+          <group ref={head} position={[0, 0.088, 0.012]}>
+            <mesh geometry={shapes.head} material={materials.painted} />
+            {shapes.worm && (
+              <group ref={worm} position={[0, 0.01, 0.04]} visible={false}>
+                <mesh geometry={shapes.worm} material={materials.painted} />
+              </group>
+            )}
+          </group>
+          <group ref={tail} position={[0, 0.045, -0.04]}>
+            <mesh geometry={shapes.tail} material={materials.painted} />
+          </group>
+          <group ref={wings} position={[0, 0.06, 0]} visible={false}>
+            {[1, -1].map((side) => (
+              <group key={side} position={[side * 0.03, 0, 0]}>
+                <mesh geometry={shapes.wing} material={materials.wing} position={[side * 0.045, 0, -0.005]} scale={[0.05, 0.006, 0.03]} />
+              </group>
+            ))}
+          </group>
         </group>
       </group>
     </group>

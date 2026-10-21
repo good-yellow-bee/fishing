@@ -10,7 +10,7 @@ import { STARTLE_TURN_SEC, turnBetween, visitAt } from "./visitClock";
  * day in every season, and into dusk in winter; not in the rain, but it comes in the snow. A strike on the dock startles it off early. Pure in time.
  */
 
-type Point = { x: number; y: number; z: number };
+export type Point = { x: number; y: number; z: number };
 
 /** The two front posts, on the lake side of the dock. */
 const front = DOCK_POST_CAPS.filter((cap) => cap.z === Math.min(...DOCK_POST_CAPS.map((c) => c.z)));
@@ -47,7 +47,8 @@ function smooth(t: number) {
   return c * c * (3 - 2 * c);
 }
 
-function lerp(a: Point, b: Point, t: number, arc: number): Point {
+/** From `a` to `b` by `t`, 0 to 1, rising `arc` above the straight line midway. */
+export function lerp(a: Point, b: Point, t: number, arc: number): Point {
   return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t + arc * Math.sin(Math.PI * t), z: a.z + (b.z - a.z) * t };
 }
 
@@ -62,6 +63,11 @@ export type RobinPose = Point & {
   look: number;
   /** The tail flicked up, 0 to 1. */
   flick: number;
+  /** Bowed forward about its feet (negative leans back), in radians. */
+  pitch?: number;
+  /** The worm hanging from its bill, meters long (0 for none), and its swing. */
+  worm?: number;
+  wormSway?: number;
 };
 
 /** Facing the angler, back up the dock, as it perches. */
