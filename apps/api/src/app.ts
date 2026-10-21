@@ -37,6 +37,7 @@ app.use("/api/weekly-challenges/*", requireSession);
 app.use("/api/upgrades", requireSession);
 app.use("/api/groundbait", requireSession);
 app.use("/api/shiner", requireSession);
+app.use("/api/worm", requireSession);
 app.use("/api/board", requireSession);
 app.use("/api/board/*", requireSession);
 app.use("/api/lodge/*", requireSession);
