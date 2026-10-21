@@ -27,7 +27,7 @@ type Props = {
   trapCold: boolean;
   onSetTrap: () => void;
   onLiftTrap: () => void;
-  /** The lake's season now, which sets how long a spare shiner keeps in the bucket. */
+  /** The lake's season now, which sets how long a spare shiner keeps in the bucket and a worm in the tin. */
   season: LakeSeason | undefined;
 };
 
@@ -108,7 +108,9 @@ export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, b
           <p id="worm-shop-note">
             {tinFull
               ? t("Your worm tin is full: {max} worms.", { max: WORM_TIN_WET })
-              : t("A fresh worm for a washed-out hook or a night line. In your tin: {n} of {max}.", { n: worms, max: WORM_TIN_WET })}
+              : `${t("A fresh worm for a washed-out hook or a night line. In your tin: {n} of {max}.", { n: worms, max: WORM_TIN_WET })}${
+                  season === "summer" ? ` ${t("In the summer heat it keeps only today.")}` : ""
+                }`}
           </p>
         </div>
         <div className="upgrade-skill">

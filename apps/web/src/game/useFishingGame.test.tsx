@@ -847,6 +847,28 @@ describe("useFishingGame frayed line", () => {
     expect(container!.querySelector("[data-testid=worms]")?.textContent).toBe(String(WORM_TIN_WET));
   });
 
+  it.each([
+    ["spring", false],
+    ["summer", false],
+    ["summer", true],
+  ] as const)("loses yesterday's spare worms in the summer heat and says so on the next visit: %s, a shiner died too %s", (season, shinerDied) => {
+    const yesterday = localDate(new Date(DOCK_BUBBLES.at - 86_400_000));
+    const kept = new Map<string, string>([[wormTinKey(profile.userId), JSON.stringify({ worms: WORM_TIN_WET, day: yesterday })]]);
+    if (shinerDied) kept.set(baitBucketKey(profile.userId), JSON.stringify([DOCK_BUBBLES.at - BUCKET_HOT_LIFE_MS - 1]));
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, undefined, season);
+    const dug = wormsDug(new Date(DOCK_BUBBLES.at));
+    // A dry morning's dig, so the summer tin ends lower than it was.
+    expect(dug).toBeLessThan(WORM_TIN_WET);
+    const worms = season === "summer" ? dug : WORM_TIN_WET;
+    expect(container!.querySelector("[data-testid=worms]")?.textContent).toBe(String(worms));
+    expect(JSON.parse(kept.get(wormTinKey(profile.userId))!).worms).toBe(worms);
+    const wormsSaid = `${WORM_TIN_WET - dug} of the worms left in your tin died overnight in the summer heat: they keep only the day they are dug or bought.`;
+    const shinerSaid = "1 of the shiners in your bait bucket died while you were away: in the summer heat they keep two days.";
+    if (season === "spring") expect(hint()).not.toContain("worms left in your tin");
+    else expect(hint()).toBe(shinerDied ? `${shinerSaid} ${wormsSaid}` : wormsSaid);
+  });
+
   it("puts a fresh worm on after a landed fish", () => {
     const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Nightcrawler");
     vi.mocked(soakAfterCast).mockReturnValueOnce(WORM_SOAK_CASTS);

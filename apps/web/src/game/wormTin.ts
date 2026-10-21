@@ -1,4 +1,4 @@
-import { localDate } from "@stillwater/shared";
+import { localDate, type LakeSeason } from "@stillwater/shared";
 import { readAngler, writeAngler } from "./anglerStore";
 import { rainedYesterday } from "./logic";
 
@@ -29,14 +29,20 @@ function readTin(userId: string): Tin | null {
   });
 }
 
-/** What the tin holds now: as last seen, topped up to the day's dug worms on the first visit of a day. */
-export function loadTin(userId: string, now = new Date()): number {
+/**
+ * What the tin holds now: as last seen, topped up to the day's dug worms on the first visit of a day.
+ * In summer's heat the worms left from an earlier day have died by then, judged by the season when the angler comes back,
+ * so the tin holds only the day's dig; `died` is how many fewer that leaves than the tin held.
+ */
+export function loadTin(userId: string, now = new Date(), season?: LakeSeason): { worms: number; died: number } {
   const today = localDate(now);
   const tin = readTin(userId);
-  if (tin && tin.day === today) return tin.worms;
-  const worms = Math.max(wormsDug(now), tin?.worms ?? 0);
+  if (tin && tin.day === today) return { worms: tin.worms, died: 0 };
+  const dug = wormsDug(now);
+  const kept = tin?.worms ?? 0;
+  const worms = season === "summer" ? dug : Math.max(dug, kept);
   writeAngler(wormTinKey(userId), { worms, day: today });
-  return worms;
+  return { worms, died: Math.max(0, kept - worms) };
 }
 
 /** Keeps what the tin holds, under the day it was last topped up, so a visit running past midnight doesn't spend the next day's worms. */

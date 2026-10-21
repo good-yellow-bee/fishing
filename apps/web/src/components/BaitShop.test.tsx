@@ -87,13 +87,13 @@ describe("BaitShop's bait bucket", () => {
 describe("BaitShop's worms", () => {
   it("sells a worm into the tin, till the tin is full", () => {
     vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
-    const render = (worms: number, onBuyWorm = vi.fn()) => {
+    const render = (worms: number, onBuyWorm = vi.fn(), season?: LakeSeason) => {
       container?.remove();
       container = document.createElement("div");
       document.body.append(container);
       act(() => root?.unmount());
       root = createRoot(container);
-      act(() => root!.render(<BaitShop points={500} lifetimePoints={0} handfuls={0} shinerOn={false} bucket={0} busy={false} onBuy={vi.fn()} onBuyShiner={vi.fn()} onHookFromBucket={vi.fn()} worms={worms} onBuyWorm={onBuyWorm} trap="none" trapCold={false} onSetTrap={vi.fn()} onLiftTrap={vi.fn()} season={undefined} />));
+      act(() => root!.render(<BaitShop points={500} lifetimePoints={0} handfuls={0} shinerOn={false} bucket={0} busy={false} onBuy={vi.fn()} onBuyShiner={vi.fn()} onHookFromBucket={vi.fn()} worms={worms} onBuyWorm={onBuyWorm} trap="none" trapCold={false} onSetTrap={vi.fn()} onLiftTrap={vi.fn()} season={season} />));
       return [...container!.querySelectorAll("button")].find((one) => one.textContent?.startsWith("A worm"))!;
     };
     const note = () => container!.querySelector("#worm-shop-note")!.textContent;
@@ -109,5 +109,7 @@ describe("BaitShop's worms", () => {
     act(() => tinFull.click());
     expect(full).not.toHaveBeenCalled();
     expect(note()).toBe("Your worm tin is full: 5 worms.");
+    render(2, vi.fn(), "summer");
+    expect(note()).toBe("A fresh worm for a washed-out hook or a night line. In your tin: 2 of 5. In the summer heat it keeps only today.");
   });
 });
