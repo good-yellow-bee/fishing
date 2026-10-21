@@ -14,13 +14,13 @@ describe("a phone held sideways", () => {
     const sideways = css.slice(css.indexOf(SIDEWAYS));
     const block = /\n  \.walk-signs \{([^}]*)\}/.exec(sideways)?.[1];
     expect(block).toContain("grid-auto-flow: column;");
-    expect(block).toContain("max-height: calc((100dvh - var(--hud-bottom, 52px)) / var(--text-zoom, 1) - 66px);");
+    expect(block).toContain("max-height: calc((100dvh - var(--hud-bottom, 52px)) / var(--text-zoom, 1) - 64px);");
   });
 
   it("stops the signs' columns short of the lure panel and scrolls them sideways", () => {
     const sideways = css.slice(css.indexOf(SIDEWAYS));
     const block = /\n  \.walk-signs \{([^}]*)\}/.exec(sideways)?.[1];
-    expect(block).toContain("max-width: calc(100vw / var(--text-zoom, 1) - 18px - min(220px, calc(30vw / var(--text-zoom, 1))));");
+    expect(block).toContain("max-width: calc(100vw / var(--text-zoom, 1) - 16px - min(220px, calc(30vw / var(--text-zoom, 1))));");
     expect(block).toContain("overflow-x: auto;");
     expect(/\n  \.walk-signs \.panel-btn \{([^}]*)\}/.exec(sideways)?.[1]).toContain("white-space: nowrap;");
   });
