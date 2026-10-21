@@ -485,7 +485,7 @@ export function useFishingGame(
   const wormBin = profile?.wormBin === true;
   const wormBinRef = useRef(wormBin);
   wormBinRef.current = wormBin;
-  /** Bread crumb in the groundbait: a swim left behind holds the gathered feeders longer. */
+  /** Bread crumb in the groundbait: a swim baited with it and left behind holds the gathered feeders longer. */
   const breadCrumb = profile?.breadCrumb === true;
   const breadCrumbRef = useRef(breadCrumb);
   breadCrumbRef.current = breadCrumb;
@@ -785,33 +785,34 @@ export function useFishingGame(
     setLivelyShiner(kept === "lively");
   }, [profile?.userId]);
   const [groundbait, setGroundbait] = useState<Groundbait | null>(null);
-  /** When the swim's handful went in, and whether it has primed once, kept with it for the next visit. */
-  const swimRef = useRef<{ at: number; primed: boolean }>({ at: 0, primed: false });
+  /** When the swim's handful went in, whether it has primed once, and whether bread crumb went in with it, kept with it for the next visit. */
+  const swimRef = useRef<{ at: number; primed: boolean; bread: boolean }>({ at: 0, primed: false, bread: false });
   /** The groundbait out now is a swim left from an earlier visit that the feeders have gathered over. */
   const [swimPrimed, setSwimPrimed] = useState(false);
   const keepGroundbait = (next: Groundbait | null, thrown?: number) => {
     if (thrown !== undefined) {
-      swimRef.current = { at: thrown, primed: false };
+      swimRef.current = { at: thrown, primed: false, bread: breadCrumbRef.current };
       setSwimPrimed(false);
     }
     groundbaitRef.current = next;
     setGroundbait(next);
-    if (anglerIdRef.current) saveSwim(anglerIdRef.current, next ? { ...next, at: swimRef.current.at, ...(swimRef.current.primed ? { primed: true } : {}) } : null);
+    if (anglerIdRef.current) saveSwim(anglerIdRef.current, next ? { ...next, at: swimRef.current.at, ...(swimRef.current.primed ? { primed: true } : {}), ...(swimRef.current.bread ? { bread: true } : {}) } : null);
   };
   // The angler's swim from an earlier visit, read when they sign in: left long enough for the season, the feeders have gathered over it, once.
   useEffect(() => {
     const swim = profile?.userId ? loadSwim(profile.userId) : null;
-    const now = swimNow(swim, Date.now(), season, breadCrumbRef.current);
+    const now = swimNow(swim, Date.now(), season);
     groundbaitRef.current = now ? { spot: now.spot, casts: now.casts } : null;
-    swimRef.current = { at: now?.at ?? 0, primed: !!now?.primed };
+    swimRef.current = { at: now?.at ?? 0, primed: !!now?.primed, bread: !!now?.bread };
     setSwimPrimed(!!now?.primed);
     setGroundbait(groundbaitRef.current);
     if (profile?.userId && swim && !now) saveSwim(profile.userId, null);
     if (now?.primedNow && profile?.userId) {
-      saveSwim(profile.userId, { spot: now.spot, casts: now.casts, at: now.at, primed: true });
-      const primed = breadCrumbRef.current
-        ? t("The groundbait and bread crumb you left at the {bank} have the feeders gathered there: {casts} casts of it.", { bank: t(SPOT_LABELS[now.spot]), casts: now.casts })
-        : t("The groundbait you left at the {bank} has the feeders gathered there: {casts} casts of it.", { bank: t(SPOT_LABELS[now.spot]), casts: now.casts });
+      saveSwim(profile.userId, { spot: now.spot, casts: now.casts, at: now.at, primed: true, ...(now.bread ? { bread: true } : {}) });
+      const left = { bank: t(SPOT_LABELS[now.spot]), casts: now.casts };
+      const primed = now.bread
+        ? t("The groundbait and bread crumb you left at the {bank} have the feeders gathered there: {casts} casts of it.", left)
+        : t("The groundbait you left at the {bank} has the feeders gathered there: {casts} casts of it.", left);
       setHint([baitDiedRef.current, primed].filter(Boolean).join(" "));
     }
   }, [profile?.userId]);

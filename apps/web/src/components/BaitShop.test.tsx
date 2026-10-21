@@ -184,7 +184,7 @@ describe("BaitShop's worms", () => {
     const buy = vi.fn();
     const button = render(false, buy);
     expect(button.textContent).toBe(`A sack of bread crumb (${BREAD_CRUMB_PRICE} pts)`);
-    expect(note()).toBe("Mix bread crumb into your groundbait, so a swim you leave baited holds the feeders gathered there for 8 casts, not 5. Bought once.");
+    expect(note()).toBe("Mix bread crumb into your groundbait, so a swim you leave baited holds the feeders gathered there for 8 casts when you come back, not 5. Bought once.");
     act(() => button.click());
     expect(buy).toHaveBeenCalledOnce();
     const short = vi.fn();
@@ -197,6 +197,6 @@ describe("BaitShop's worms", () => {
     expect(owned.getAttribute("aria-disabled")).toBe("true");
     act(() => owned.click());
     expect(again).not.toHaveBeenCalled();
-    expect(note()).toBe("Bread crumb goes in every handful, so a swim you leave baited holds the feeders gathered there for 8 casts.");
+    expect(note()).toBe("Bread crumb goes in your groundbait, so a swim you leave baited holds the feeders gathered there for 8 casts when you come back.");
   });
 });

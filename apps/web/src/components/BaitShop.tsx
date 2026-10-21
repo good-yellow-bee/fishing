@@ -2,7 +2,7 @@ import { AERATOR_PRICE, BREAD_CRUMB_PRICE, GROUNDBAIT_CARRY, GROUNDBAIT_PRICE, s
 import { t, useT } from "../i18n";
 import { GROUNDBAIT_CASTS } from "../game/logic";
 import { BUCKET_SIZE } from "../game/baitBucket";
-import { BREAD_PRIMED_CASTS } from "../game/swim";
+import { BREAD_SWIM_CASTS } from "../game/swim";
 import { WORM_TIN_WET } from "../game/wormTin";
 
 type Props = {
@@ -176,8 +176,8 @@ export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, b
           </button>
           <p id="bread-crumb-note">
             {breadCrumb
-              ? t("Bread crumb goes in every handful, so a swim you leave baited holds the feeders gathered there for {casts} casts.", { casts: GROUNDBAIT_CASTS + BREAD_PRIMED_CASTS })
-              : t("Mix bread crumb into your groundbait, so a swim you leave baited holds the feeders gathered there for {casts} casts, not {base}. Bought once.", { casts: GROUNDBAIT_CASTS + BREAD_PRIMED_CASTS, base: GROUNDBAIT_CASTS })}
+              ? t("Bread crumb goes in your groundbait, so a swim you leave baited holds the feeders gathered there for {casts} casts when you come back.", { casts: BREAD_SWIM_CASTS })
+              : t("Mix bread crumb into your groundbait, so a swim you leave baited holds the feeders gathered there for {casts} casts when you come back, not {base}. Bought once.", { casts: BREAD_SWIM_CASTS, base: GROUNDBAIT_CASTS })}
           </p>
         </div>
         <div className="upgrade-skill">
