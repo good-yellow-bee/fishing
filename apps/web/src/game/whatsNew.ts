@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-21-field80";
+export const NEWS_ID = "2026-10-21-scene74";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "Once you have bought your worm tin a place in the shack's worm bin, the tin now stands sunk in the bin's back corner, a worm hanging over its rim onto the soil. And with the shack's sack of bread crumb bought, it stands tied with twine beside the bin, a loaf painted on its front and a few crumbs spilled before it; in winter snow lies on both.",
   "A water's page now says Only from this water for the kinds no other water has given you, each opening its fish there, and in the small hours last evening's outing still going reads as fished today beside Out now. Beside the sample week with only a water of your own, Waters, a water's page and the Map now leave its made-up plans out, and a water with several namesakes names them all.",
   "The shack now sells your worm tin a place in its cool worm bin, bought once for 100 points, 80 from level 17: in summer, the worms left in the tin from yesterday are then still alive, though two days away still kills them. And it sells a sack of bread crumb for your groundbait, bought once for 120 points, 96 from level 17: a swim you bait with it and leave holds the feeders gathered there for eight casts when you come back, not five.",
   "A long fight now shows in a tired arm: the reel's handle turns slower, the lure comes back slower with it, and the rod shakes in your hands, the more the slower you reel; a pause from reeling steadies it again. And with the shack's aerator fitted, the bait bucket at your feet shows its pump hung on the rim, a tube across the water and small bubbles rising from an airstone.",
