@@ -147,13 +147,14 @@ export function packingTipRows(book: Logbook, trip: Trip, today: string): LureTa
 
 /**
  * The kinds of fish a water has given, most first: one-tap picks for the species on the catch form. A kind however it
- * was typed ("Perches", "perch ") is one, under the spelling most of its fish carry.
+ * was typed ("Perches", "perch ") is one, under the spelling most of its fish carry. `keyOf` says which names are one
+ * kind: in Polish, "Pike" and "Northern pike" both read "Szczupak".
  */
-export function waterSpecies(catches: readonly CatchEntry[], limit = 3): string[] {
+export function waterSpecies(catches: readonly CatchEntry[], limit = 3, keyOf: (name: string) => string = kindKey): string[] {
   const counts = new Map<string, { spellings: Map<string, number>; count: number }>();
   for (const entry of catches) {
     const name = entry.species.trim();
-    const key = kindKey(name);
+    const key = keyOf(name);
     const row = counts.get(key) ?? { spellings: new Map<string, number>(), count: 0 };
     row.count += 1;
     row.spellings.set(name, (row.spellings.get(name) ?? 0) + 1);

@@ -108,7 +108,13 @@ export function tripOnDay(book: Logbook, spotId: string, ymd: string, at?: numbe
     if (gap !== undefined) gaps.set(entry.tripId!, Math.min(gap, Math.abs(Date.parse(entry.caughtAt) - at)));
   }
   for (const [id, gap] of gaps) if (gap === Infinity) gaps.set(id, FRESH_OUTING_MS);
-  return trips.reduce((best, trip) => (gaps.get(trip.id)! < gaps.get(best.id)! ? trip : best));
+  // Neither nearer: the one under way (a fish lost or missed), as Home and Trips take it, whichever was planned first.
+  const underWay = (trip: Trip) => Boolean(trip.lost || trip.missed);
+  return trips.reduce((best, trip) => {
+    const gap = gaps.get(trip.id)!;
+    const bestGap = gaps.get(best.id)!;
+    return gap < bestGap || (gap === bestGap && underWay(trip) && !underWay(best)) ? trip : best;
+  });
 }
 
 /** A fish this soon after the outing's last one is the same session going on, whatever the clock says. */

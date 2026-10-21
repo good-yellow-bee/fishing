@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-scene70";
+export const NEWS_ID = "2026-10-20-field76";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "On a water with a dawn and a dusk outing planned, the catch form now files a new fish on the one you are fishing, the one with a fish lost or missed so far, as Home and Trips take it. Its outing list leaves out the sample week's made-up outings, and the kinds it offers at a water always fill three picks, a kind named two ways counting once.",
   "A night line out on a bank now shows how it is doing: once a fish is on, the stick bows toward the water, the line runs taut and the white tag at its tip knocks now and then; left out too long, its line hangs slack. And while you wait on the bank, the line is ready to bring in the moment its night is out, even if you touch nothing.",
   "Groundbait left on a bank now follows the season: in the summer heat it draws the fish back after three hours but is eaten within a day, and in the winter cold it takes twelve hours but keeps four days. A night line set in summer soaks just three hours but should come in before that evening, as crayfish strip the bait; set in winter it soaks twelve hours and keeps four days.",
   "An outing's page says where it falls among the outings on its water, such as outing 4 of 12. Streaks, the weekend split and a water's best outing now count an outing with only a lost fish or a missed strike, as the average does, and last evening's blank outing reads as a past day once today's plan takes over.",
