@@ -1965,7 +1965,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT467~~ | ~~News card 2026-10-21-game71 covers GT465-GT466: the worm tin dug each day and the shack's worms~~ (#1719) | ui | S |
 | ~~GT468~~ | ~~Worms in the summer heat: worms left in the tin from an earlier day have died by the first visit of a summer day, so the tin holds only that day's dig (judged by the season when the angler comes back, like the bait bucket), and worms bought ahead at the shack don't carry over; the sign-in hint says how many died, beside a dead-shiner line, and the shack's worm note says a worm keeps only today in summer~~ (#1723) | gameplay | S |
 | ~~GT469~~ | ~~Bucket aerator: the shack sells an aerator for the bait bucket, bought once (150 pts, a fifth off from level 17), and from then on every spare shiner keeps a day longer in any season (two days become three in summer, three four, five six in winter); the shack's bucket note and the sign-in dead-shiner hint say so~~ (#1728) | gameplay | M |
-| GT470 | News card 2026-10-21-game72 covers GT468-GT469: worms in the summer heat and the bucket aerator (#) | ui | S |
+| GT470 | News card 2026-10-21-game72 covers GT468-GT469: worms in the summer heat and the bucket aerator (#1732) | ui | S |
 
 ## Risks / open questions for the owner
 
