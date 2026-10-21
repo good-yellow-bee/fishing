@@ -304,11 +304,12 @@ export function CatchesPage() {
 
 /**
  * The outings the catch form offers at a water: never one of the sample week's made-up ones, as tripForFish files a
- * fish, unless the fish is on it already, the form was opened from it, or the fish is a sample one itself.
+ * fish, unless the fish is on it already, it is one of `keep` (the one the form was opened from or the one picked), or
+ * the fish is a sample one itself.
  */
-export function formOutings(book: Logbook, water: string, existing?: CatchEntry, presetTripId?: string): Trip[] {
+export function formOutings(book: Logbook, water: string, existing?: CatchEntry, keep: readonly (string | undefined)[] = []): Trip[] {
   const sampleFish = existing !== undefined && isSampleCatch(existing.id);
-  return tripsForSpot(book, water).filter((trip) => sampleFish || !isSampleOuting(trip) || trip.id === existing?.tripId || trip.id === presetTripId);
+  return tripsForSpot(book, water).filter((trip) => sampleFish || !isSampleOuting(trip) || trip.id === existing?.tripId || keep.includes(trip.id));
 }
 
 export function CatchFormPage() {
@@ -426,7 +427,7 @@ function CatchForm() {
   const [tripId, setTripId] = useState(() =>
     existing ? (existing.tripId ?? "") : (presetTrip?.id ?? tripForFish(book, presetSpot, carriedTime ?? toLocalInput(new Date()))?.id ?? ""),
   );
-  const outingsAt = (water: string) => formOutings(book, water, existing, presetTrip?.id);
+  const outingsAt = (water: string) => formOutings(book, water, existing, [presetTrip?.id, tripId]);
   // Until the player picks an outing themselves, the outing follows the water and the day.
   const [tripPicked, setTripPicked] = useState(Boolean(existing || presetTrip));
   // The outing a change of water took the fish off, until the outing is picked again.
@@ -559,7 +560,8 @@ function CatchForm() {
 
   const pickUp = (kept: KeptDraft) => {
     const keptSpot = book.spots.some((spot) => spot.id === kept.spotId) ? kept.spotId : spotId;
-    const keptTrip = outingsAt(keptSpot).some((trip) => trip.id === kept.tripId) ? kept.tripId : "";
+    // A draft's outing was picked, or the form was opened from it: kept even if it is one of the sample week's.
+    const keptTrip = tripsForSpot(book, keptSpot).some((trip) => trip.id === kept.tripId) ? kept.tripId : "";
     setSpecies(pieceName(kept.species));
     setMeasureKind(kept.measureKind);
     // The draft's measure was the player's: the kind it names doesn't move it.
@@ -619,7 +621,7 @@ function CatchForm() {
   });
 
   // A long book makes these slow enough to drag typing, so they wait for the book, water or language to change.
-  const spotTrips = useMemo(() => outingsAt(spotId), [book, spotId]);
+  const spotTrips = useMemo(() => outingsAt(spotId), [book, spotId, existing, presetTrip?.id, tripId]);
   const hereCatches = useMemo(() => catchesNewestFirst(book).filter((entry) => sameWater(twinKeys, entry.spotId, spotId)), [book, spotId, twinKeys]);
   // Named as the catch cards name them, however the book wrote them: "spinnerbaits" reads "Spinnerbait" in Polish too.
   const hereLures = useMemo(() => ownFirst((waterTips(hereCatches)?.lures ?? []).map((row) => row.lure), [], pieceName), [hereCatches, lang]);

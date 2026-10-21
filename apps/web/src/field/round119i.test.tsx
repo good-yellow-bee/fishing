@@ -63,17 +63,18 @@ describe("round 119 ideas: a dawn and a dusk with no fish yet", () => {
 describe("round 119 ideas: the catch form's outings leave out the sample week's", () => {
   const sample = sampleLogbook(new Date(2026, 9, 18, 12));
   const book: Logbook = { ...sample, spots: [...sample.spots, water("own")], catches: [...sample.catches, fish("own-1", "Pike", "2026-10-19T08:00:00")] };
-  const at = (water: string, existing?: CatchEntry, preset?: string) => formOutings(book, water, existing, preset).map((each) => each.id);
+  const at = (water: string, existing?: CatchEntry, keep?: string) => formOutings(book, water, existing, [keep]).map((each) => each.id);
 
   it("offers none of them for the angler's own fish", () => {
     expect(at("spot-mill")).toEqual([]);
   });
 
-  it("keeps the one the fish is on, the one the form was opened from, and all of them for a sample fish", () => {
+  it("keeps the one the fish is on, the one opened from or picked, and all of them for a sample fish", () => {
     expect(at("spot-mill", { ...book.catches.at(-1)!, tripId: "trip-mill" })).toEqual(["trip-mill"]);
     expect(at("spot-mill", undefined, "trip-mill")).toEqual(["trip-mill"]);
     const sampleFish = sample.catches.find((entry) => entry.tripId === "trip-mill")!;
     expect(at("spot-mill", sampleFish)).toEqual(["trip-mill"]);
+    expect(at("spot-quarry", sampleFish)).toContain("trip-quarry-next");
   });
 
   it("lists only the angler's own outings on the form", async () => {
