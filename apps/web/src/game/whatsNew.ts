@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-21-field79";
+export const NEWS_ID = "2026-10-21-scene73";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "A long fight now shows in a tired arm: the reel's handle turns slower, the lure comes back slower with it, and the rod shakes in your hands, the more the slower you reel; a pause from reeling steadies it again. And with the shack's aerator fitted, the bait bucket at your feet shows its pump hung on the rim, a tube across the water and small bubbles rising from an airstone.",
   "On Bests, this year's days on the water now say how many of them gave a fish, and in a season picked, a water whose first fish came that season says New this season. Beside the sample week with only a water of your own, Bests' runs of outings and its calendar now leave the made-up plans out.",
   "In the summer heat, worms left in your tin from an earlier day have died by the time you come back, so the tin holds only the day's dig, and worms bought ahead at the shack don't keep to the next day either. And the shack now sells an aerator for your bait bucket, bought once for 150 points, 120 from level 17: every spare shiner then keeps a day longer in any season, three days in summer and six in winter.",
   "Tackle's recent outings now say under each month which lure took most of its fish. Today's outing under Coming up says Out now once a fish is in on its water, with no plan to copy beside it, as Home does, and the lure record counts it.",
