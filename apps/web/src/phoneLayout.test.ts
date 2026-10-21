@@ -369,4 +369,12 @@ describe("the bank chip on a small upright phone with larger text", () => {
     expect(dock).toContain('wrap.style.setProperty("--lure-h"');
     expect(dock).toContain('style.setProperty("--hint-h"');
   });
+
+  it("takes high contrast's thicker borders out of the header, lure panel and hint padding, so they keep their height", () => {
+    const media = "@media (pointer: coarse) and (max-width: 800px) and (min-height: 501px) {";
+    const block = css.slice(css.indexOf(media), css.indexOf("\n}\n", css.indexOf(media)));
+    expect(/html\[data-contrast="high"\] \.hud \{([^}]*)\}/.exec(block)?.[1]).toContain("padding-block: 9px;");
+    expect(/html\[data-contrast="high"\] \.lure-choice \{([^}]*)\}/.exec(block)?.[1]).toContain("padding-block: 5px 7px;");
+    expect(/html\[data-contrast="high"\] \.hint \{([^}]*)\}/.exec(block)?.[1]).toContain("padding-block: 8px;");
+  });
 });
