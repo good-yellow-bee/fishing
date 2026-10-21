@@ -17,6 +17,7 @@ export function PagedTrips({
   children,
   stack = false,
   counted,
+  note,
 }: {
   trips: readonly Trip[];
   fishOn: (tripId: string) => number;
@@ -24,6 +25,8 @@ export function PagedTrips({
   stack?: boolean;
   /** Which outings the month headings count as the angler's own; the rest are said apart. */
   counted?: (trip: Trip) => boolean;
+  /** A word more for a month's heading, from its outings. */
+  note?: (trips: readonly Trip[]) => string | null;
 }) {
   const { shown, showMore, box } = useShowMore("trips");
   const { book } = useLogbook();
@@ -35,7 +38,7 @@ export function PagedTrips({
       {tripsByMonth(visible).map((group) => (
         // Unnamed, so a season's months aren't a landmark each; the month's heading says which it is.
         <section key={group.month}>
-          <TripMonthHead month={group.month} trips={wholeMonths.get(group.month) ?? group.trips} fishOn={fishOn} counted={counted} book={book} />
+          <TripMonthHead month={group.month} trips={wholeMonths.get(group.month) ?? group.trips} fishOn={fishOn} counted={counted} book={book} note={note} />
           {stack ? <div className="stack">{group.trips.map(children)}</div> : group.trips.map(children)}
         </section>
       ))}

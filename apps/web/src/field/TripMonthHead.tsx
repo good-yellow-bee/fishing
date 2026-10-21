@@ -14,12 +14,14 @@ export function TripMonthHead({
   fishOn,
   counted,
   book,
+  note,
 }: {
   month: string;
   trips: readonly Trip[];
   fishOn: (tripId: string) => number;
   counted?: (trip: Trip) => boolean;
   book?: Logbook;
+  note?: (trips: readonly Trip[]) => string | null;
 }) {
   const today = localDate(new Date());
   const own = counted ? all.filter(counted) : all;
@@ -36,12 +38,14 @@ export function TripMonthHead({
   const trips = own;
   const planned = trips.filter((trip) => isPlanned(trip, today, fishOn(trip.id), book)).length;
   const fished = trips.length - planned;
+  const noted = fished > 0 ? note?.(trips) : null;
   return (
     <h3 className="month-head">
       {monthName(month)}
       {fished > 0 || planned === 0 ? ` · ${tn(fished, "{n} outing", "{n} outings")}` : ""}
       {planned > 0 ? ` · ${tn(planned, "{n} planned", "{n} planned")}` : ""}
       {fished > 0 ? ` · ${fishSum(trips.reduce((sum, trip) => sum + fishOn(trip.id), 0))}` : ""}
+      {noted ? ` · ${noted}` : ""}
       {others > 0
         ? ` · ${game ? tn(others, "+{n} from the game", "+{n} from the game") : sample ? tn(others, "+{n} from the sample week", "+{n} from the sample week") : tn(others, "+{n} from the sample week or the game", "+{n} from the sample week or the game")}`
         : ""}
