@@ -353,13 +353,11 @@ describe("the cast meter on a short upright phone", () => {
 });
 
 describe("the bank chip on a small upright phone with larger text", () => {
-  it("stops at six rows, three up to 360 px wide, so the hint under it stays clear of the walk stick", () => {
-    const chipIn = (media: string) => {
-      const block = css.slice(css.indexOf(media), css.indexOf("\n}\n", css.indexOf(media)));
-      return /\n  html\[data-text-size\] \.stance-chip \{([^}]*)\}/.exec(block)?.[1];
-    };
-    expect(chipIn("@media (pointer: coarse) and (max-width: 375px) and (min-height: 501px) and (max-height: 667px) {")).toContain("-webkit-line-clamp: 6;");
-    expect(chipIn("@media (pointer: coarse) and (max-width: 360px) and (min-height: 501px) and (max-height: 667px) {")).toContain("-webkit-line-clamp: 3;");
+  it("stops at three rows up to 375 px wide, so the hint under it stays clear of the walk stick", () => {
+    const media = "@media (pointer: coarse) and (max-width: 375px) and (min-height: 501px) and (max-height: 667px) {";
+    const block = css.slice(css.indexOf(media), css.indexOf("\n}\n", css.indexOf(media)));
+    expect(/\n  html\[data-text-size\] \.stance-chip \{([^}]*)\}/.exec(block)?.[1]).toContain("-webkit-line-clamp: 3;");
+    expect(css).not.toContain("-webkit-line-clamp: 6;");
   });
 
   it("lifts the hint clear of the walk stick on a touch phone, but never over the chip or the lure panel", () => {
