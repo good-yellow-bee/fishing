@@ -1,3 +1,5 @@
+import { TOPUP_MAX } from "./logic";
+
 /**
  * When the fish nibbles before it bites. One to three nibbles land at varied
  * times through the wait, each a little different in length, so the bite's
@@ -81,10 +83,21 @@ export const FOLLOWERS: ReadonlySet<string> = new Set(["tiger-muskie"]);
 export const BAIT_THIEVES: ReadonlySet<string> = new Set(["golden-shiner"]);
 /** How often a bait thief strips the hook rather than biting. */
 export const STEAL_CHANCE = 0.25;
+/** Over a swim not yet topped up the thieves crowd the groundbait and strip the hook this often. */
+export const FRESH_SWIM_STEAL_CHANCE = 0.5;
+/** Over a swim topped up all the way the big feeders shoulder the thieves off, so they strip it only this often. */
+export const BUILT_SWIM_STEAL_CHANCE = 0.125;
+
+/** How often a bait thief strips the hook, by how often the swim under it was topped up (null when the cast is not over groundbait). */
+export function stealChance(built: number | null) {
+  if (built === null) return STEAL_CHANCE;
+  if (built === 0) return FRESH_SWIM_STEAL_CHANCE;
+  return built >= TOPUP_MAX ? BUILT_SWIM_STEAL_CHANCE : STEAL_CHANCE;
+}
 
 /** Whether this wait ends with the bait stolen; only a thief that nibbles first can steal it. */
-export function stealsBait(speciesId: string, nibbles: number, rand: () => number = Math.random) {
-  return BAIT_THIEVES.has(speciesId) && nibbles > 0 && rand() < STEAL_CHANCE;
+export function stealsBait(speciesId: string, nibbles: number, rand: () => number = Math.random, chance = STEAL_CHANCE) {
+  return BAIT_THIEVES.has(speciesId) && nibbles > 0 && rand() < chance;
 }
 
 /** A topwater lure is hit at the top: any fish takes it like an ambush, with no nibble first. */
