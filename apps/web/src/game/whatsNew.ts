@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-21-field83";
+export const NEWS_ID = "2026-10-21-scene76";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "Your groundbait bag now sits behind your feet while you stand still on a bank or the dock, plump with a handful or more left and slumped flat once it is empty. And in spring, a bass now hovers over a wider pale bed it has fanned in the shallows at the Reeds and beside the dock's sunfish beds, now and then turning to face off a sunfish that strays too near.",
   "On Bests, a kind's card now names the time of day it came at most, beside its best lure and water, and two waters with no name keep a card each. And in the small hours, Home's Next says Out now, with its fish so far, for last evening's outing still on the water.",
   "With two worms or more in your tin, a handful of groundbait at the Dock, the Reeds or the Drop-off can now go in with chopped worm, from the Chopped worm sign beside Groundbait: that swim then draws the perch in with its feeders while it lasts. And over a swim topped up twice, the small feeders draw the bank's pike: on a lure pike take, they come there twice as often, and a pike hooked there, landed or lost, scatters the feeders as a lost carp does.",
   "While today's outing is out, Home's Next now says how many fish it has so far and when the last one came, and an outing card on Home or Trips says Out now once a fish logged without its outing is in on its water. Under Longest rested on Waters, a water whose outing from last evening is still going in the small hours now says Fished here today, as its page does.",
