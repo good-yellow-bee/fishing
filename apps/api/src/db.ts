@@ -771,9 +771,11 @@ export function spendPoints(userId: string, cost: number) {
 }
 
 /** Spends the points and sets a one-time shack purchase in one step, so a second purchase, from another tab or a double click, finds it set and fails. */
-const buyOnce = (column: "aerator" | "worm_bin") => (userId: string, cost: number) => {
-  const result = db.prepare(`UPDATE profile SET points = points - ?, ${column} = 1 WHERE user_id = ? AND points >= ? AND ${column} = 0`).run(cost, userId, cost);
-  if (result.changes !== 1) throw new Error("purchase failed");
+const buyOnce = (column: "aerator" | "worm_bin") => {
+  const update = db.prepare(`UPDATE profile SET points = points - ?, ${column} = 1 WHERE user_id = ? AND points >= ? AND ${column} = 0`);
+  return (userId: string, cost: number) => {
+    if (update.run(cost, userId, cost).changes !== 1) throw new Error("purchase failed");
+  };
 };
 export const fitAerator = buyOnce("aerator");
 export const takeWormBin = buyOnce("worm_bin");

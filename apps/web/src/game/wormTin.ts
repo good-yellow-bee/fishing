@@ -45,10 +45,11 @@ export function loadTin(userId: string, now = new Date(), season?: LakeSeason, b
   if (tin && tin.day === today) return { worms: tin.worms, died: 0 };
   const dug = wormsDug(now);
   const held = tin?.worms ?? 0;
-  const keptYesterday = binned && tin?.kept === localDate(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 12));
-  const worms = season === "summer" && tin?.kept !== today && !keptYesterday ? dug : Math.max(dug, held);
+  const summer = season === "summer";
+  const binKept = summer && binned && tin?.kept === localDate(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 12));
+  const worms = summer && tin?.kept !== today && !binKept ? dug : Math.max(dug, held);
   // Yesterday's worms left over past the day's dig stay yesterday's, so the bin keeps them only the one day.
-  writeAngler(wormTinKey(userId), { worms, day: today, kept: season === "summer" && keptYesterday && held > dug ? tin!.kept : today });
+  writeAngler(wormTinKey(userId), { worms, day: today, kept: binKept && held > dug ? tin!.kept : today });
   return { worms, died: Math.max(0, held - worms) };
 }
 

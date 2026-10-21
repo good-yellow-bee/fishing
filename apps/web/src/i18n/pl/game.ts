@@ -216,7 +216,7 @@ export const PL_GAME: PlBook = {
   "A place in the worm bin ({cost} pts)": "Miejsce w skrzynce na robaki ({cost} pkt)",
   "Your place in the worm bin": "Twoje miejsce w skrzynce na robaki",
   "Your worm tin keeps in the cool worm bin, so in summer its worms last to the next day.": "Puszka z robakami stoi w chłodnej skrzynce, więc latem robaki przeżywają do następnego dnia.",
-  "Keep your worm tin in the shack's cool worm bin, so in summer its worms last to the next day. Bought once.": "Puszka z robakami stoi w chłodnej skrzynce przy szopie, więc latem robaki przeżywają do następnego dnia. Kupujesz raz.",
+  "Keep your worm tin in the shack's cool worm bin, so in summer its worms last to the next day. Bought once.": "Postaw puszkę z robakami w chłodnej skrzynce przy szopie, a latem robaki przeżyją do następnego dnia. Kupujesz raz.",
   "In the summer heat your place in the worm bin keeps it to tomorrow.": "W letnim upale skrzynka na robaki przechowa go do jutra.",
   "{n} of the worms left in your tin died in the summer heat while you were away: even in the worm bin they keep only to the next day.": "Część robaków z puszki padła w letnim upale pod twoją nieobecność ({n}): nawet w skrzynce przeżywają tylko do następnego dnia.",
   "foe about": "rywal w pobliżu",
