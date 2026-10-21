@@ -10,6 +10,11 @@ export const BIN_AT = { x: SHOP_X - 0.25, y: 0.07, z: SHOP_Z + 0.55 };
 /** The crate's inside, across (x) and front to back (z), and how far its walls stand off its middle. */
 export const BIN_INSIDE = { width: 0.4, depth: 0.3 };
 export const BIN_HALF = 0.23;
+/** The crate's wall height and thickness. */
+export const BIN_HEIGHT = 0.18;
+export const BIN_WALL = 0.025;
+/** The soil's top, up from the crate's foot. */
+export const BIN_SOIL = BIN_HEIGHT - 0.02;
 /** How far each worm's lean swings, in radians, the least and most of it that shows above the soil, and the farthest its tip reaches from its root. */
 export const WORM_LEAN = 0.35;
 export const RISE_MIN = 0.45;
