@@ -58,7 +58,9 @@ export function speciesWaters(book: Logbook, catches: readonly CatchEntry[]) {
   const counts = new Map<string, number>();
   for (const entry of catches) counts.set(entry.spotId, (counts.get(entry.spotId) ?? 0) + 1);
   const byName = (a: { name: string | null; count: number }, b: { name: string | null; count: number }) => b.count - a.count || (a.name ?? "").localeCompare(b.name ?? "");
-  const rows = [...counts].map(([spotId, count]) => ({ spotId, name: book.spots.find((spot) => spot.id === spotId)?.name ?? null, count })).sort(byName);
+  // A water named only with spaces has no name, as one named "": kept apart, never listed under a blank.
+  const nameOf = (spotId: string) => { const name = book.spots.find((spot) => spot.id === spotId)?.name; return name === undefined ? null : name.trim() ? name : ""; };
+  const rows = [...counts].map(([spotId, count]) => ({ spotId, name: nameOf(spotId), count })).sort(byName);
   const twins = new Map<string, { spotId: string; spotIds: string[]; name: string | null; count: number }>();
   for (const row of rows) {
     const key = row.name ? foldName(row.name) : `\u0000${row.spotId}`;

@@ -5,9 +5,9 @@ import { MapAnchor } from "../MapAnchor";
 import { WATER_LABELS, itemsForTrip, localDate, packedCount, shiftDate, type Spot } from "@stillwater/shared";
 import { bestLureAt } from "../waterLure";
 import { getUnits, t, tn, useT } from "../../i18n";
-import { fishCountLabel, formatDay, outingName, tripWhen } from "../format";
+import { fishCountLabel, formatDay, outingName, tripWhen, waterName } from "../format";
 import { useTackleItems } from "../gear/TackleState";
-import { outingDay, outNowAt, plainName } from "../tripDates";
+import { outingDay, outNowAt } from "../tripDates";
 import { inSentence } from "../MonthBars";
 import { useLogbook } from "../LogbookState";
 import {
@@ -224,7 +224,7 @@ function SpotPin({
     >
       <span className="map-pin-dot" />
       <span className="map-pin-label">
-        {plainName(spot.name)}
+        {waterName(spot.name)}
         <small>{t(WATER_LABELS[spot.waterType])}</small>
       </span>
     </Link>
@@ -318,7 +318,7 @@ function PlanHere({ spot }: { spot: Spot }) {
   return (
     <Link className="map-plan" to={`/trips/new?spot=${spot.id}`} onClick={() => (plannedFrom = spot.id)}>
       {t("Plan one")}
-      <span className="sr-only">: {plainName(spot.name)}</span>
+      <span className="sr-only">: {waterName(spot.name)}</span>
     </Link>
   );
 }
@@ -496,7 +496,7 @@ export function SpotMapPage() {
           {plotted.map(({ spot, place }) => (
             // An own water inside the sample sheet's frame is drawn there: "See it on the Map" finds its row here.
             <li key={spot.id} id={`water-${spot.id}`} className={hash === `#water-${spot.id}` ? "map-row-picked" : undefined}>
-              <Link to={`/spots/${spot.id}`}>{plainName(spot.name)}</Link>
+              <Link to={`/spots/${spot.id}`}>{waterName(spot.name)}</Link>
               <span>{t(WATER_LABELS[spot.waterType])}</span>
               <span>{fishLine(spot.id)}</span>
               {/* The angler's own water opens on a real map, as on its own sheet; the sample's places are made up. */}
@@ -525,11 +525,11 @@ export function SpotMapPage() {
               // How far the nearest of the angler's other pinned waters is: which swims are a walk apart.
               const nearest = ownPinned
                 .filter((other) => other.spot.id !== spot.id)
-                .map((other) => ({ name: plainName(other.spot.name), km: kmBetween(place, other.place) }))
+                .map((other) => ({ name: waterName(other.spot.name), km: kmBetween(place, other.place) }))
                 .sort((a, b) => a.km - b.km)[0];
               return (
                 <li key={spot.id} id={`water-${spot.id}`} className={hash === `#water-${spot.id}` ? "map-row-picked" : undefined}>
-                  <Link to={`/spots/${spot.id}`}>{plainName(spot.name)}</Link>
+                  <Link to={`/spots/${spot.id}`}>{waterName(spot.name)}</Link>
                   <span>{t(WATER_LABELS[spot.waterType])}</span>
                   <span>{fishLine(spot.id)}</span>
                   <span className="map-place">
@@ -537,7 +537,7 @@ export function SpotMapPage() {
                       {formatCoord(place.lat, place.lng)}
                     </MapAnchor>{" "}
                     {/* For the car's navigation or a sounder, without opening the water first. */}
-                    <CopyPlace lat={place.lat} lng={place.lng} name={plainName(spot.name)} />
+                    <CopyPlace lat={place.lat} lng={place.lng} name={waterName(spot.name)} />
                   </span>
                   {nearest ? <span className="map-nearest">{t("{distance} from {water}", { distance: distanceText(nearest.km, getUnits()), water: nearest.name })}</span> : null}
                   <PlanHere spot={spot} />
@@ -554,7 +554,7 @@ export function SpotMapPage() {
           {unpinned.map((spot, index) => (
             <span key={spot.id}>
               {index > 0 ? ", " : null}
-              <Link to={`/spots/${spot.id}/edit?then=map#place`}>{plainName(spot.name)}</Link>
+              <Link to={`/spots/${spot.id}/edit?then=map#place`}>{waterName(spot.name)}</Link>
             </span>
           ))}
           . {t("Open one to note where it is.")}

@@ -13,7 +13,7 @@ import {
 } from "@stillwater/shared";
 import { tn, useT } from "../i18n";
 import { measureText, measuresText, tempText } from "../i18n/content";
-import { daysAheadLabel, fishCountLabel, fishSum, formatClock, formatDay, formatTimeOfDay, noteText, outingName, tripWhen } from "./format";
+import { daysAheadLabel, fishCountLabel, fishSum, formatClock, formatDay, formatTimeOfDay, noteText, outingName, tripWhen, waterName } from "./format";
 import { useLogbook } from "./LogbookState";
 import { catchBadge } from "./catchBadge";
 import { WeatherLine } from "./Weather";
@@ -22,7 +22,7 @@ import { useTackleItems } from "./gear/TackleState";
 import { catchLink, type ListKey } from "./catchList";
 import { FROM_LIST } from "./leaveDeleted";
 import { isPlanned } from "./TripMonthHead";
-import { outNow, plainName, sameName } from "./tripDates";
+import { outNow, sameName } from "./tripDates";
 import { bookFishDay } from "./tripMonths";
 import { bookKindName } from "./speciesLink";
 import { bookLureName } from "./pieceTally";
@@ -69,7 +69,7 @@ export const CatchCard = memo(function CatchCard({
           <span aria-hidden="true">·</span>
           {spotName !== null ? (
             <>
-              <Link to={`/spots/${entry.spotId}`}>{spotName}</Link>
+              <Link to={`/spots/${entry.spotId}`}>{waterName(spotName)}</Link>
               <span aria-hidden="true">·</span>
             </>
           ) : null}
@@ -197,7 +197,7 @@ export function SpotCard({
   return (
     <Link to={`/spots/${spot.id}`} className="spot-card" state={FROM_LIST}>
       <div className="spot-card-top">
-        <h2>{plainName(spot.name)}</h2>
+        <h2>{waterName(spot.name)}</h2>
         <span className={`stamp stamp-${spot.waterType}`}>{t(WATER_LABELS[spot.waterType])}</span>
       </div>
       <p className="conditions-line">{spot.bestConditions || t("Conditions not noted")}</p>
