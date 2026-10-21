@@ -22,6 +22,7 @@ describe("a phone held sideways", () => {
     const block = /\n  \.walk-signs \{([^}]*)\}/.exec(sideways)?.[1];
     expect(block).toContain("max-width: calc(100vw / var(--text-zoom, 1) - 16px - min(220px, calc(30vw / var(--text-zoom, 1))));");
     expect(block).toContain("overflow-x: auto;");
+    expect(block).toContain("scroll-padding: 4px;");
     expect(/\n  \.walk-signs \.panel-btn \{([^}]*)\}/.exec(sideways)?.[1]).toContain("white-space: nowrap;");
   });
 
@@ -79,6 +80,7 @@ describe("a phone held sideways", () => {
     const narrow = css.slice(css.indexOf("/* One thumb row along the bottom"));
     const block = /\.walk-signs \{([^}]*)\}/.exec(narrow)?.[1];
     expect(block).toContain("overflow-x: auto;");
+    expect(block).toContain("scroll-padding: 3px;");
   });
 });
 

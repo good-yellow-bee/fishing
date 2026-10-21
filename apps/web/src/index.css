@@ -2297,10 +2297,11 @@ html[data-input="pad"] .fight-bar .on-pad {
     left: 8px;
     grid-auto-flow: column;
     grid-auto-columns: 1fr;
-    /* On a 320 px phone with larger text the last banks ran past the edge out of reach: the row scrolls sideways instead. The padding keeps focus rings inside the scroller. */
+    /* On a 320 px phone with larger text the last banks ran past the edge out of reach: the row scrolls sideways instead. The padding keeps focus rings inside the scroller, also when a Tab scrolls a sign into view. */
     overflow-x: auto;
     padding: 3px;
     margin: -3px;
+    scroll-padding: 3px;
     scrollbar-width: none;
   }
 
@@ -3796,7 +3797,8 @@ html[data-contrast="high"] .sound-captions li {
 
   /* Down the right edge, stopping above the power meter; more signs than fit (larger text, the inlet, the boat) start a second column.
      At 640 x 300 with larger text a fourth column ran under the lure panel: the columns stop 8 px short of it and scroll
-     sideways. The padding keeps focus rings inside the scroller; the box grows by it, so the signs keep their rows. */
+     sideways. The padding keeps focus rings inside the scroller, also when a Tab scrolls a sign into view; the box grows by
+     it, so the signs keep their rows. */
   .walk-signs {
     top: calc(var(--hud-bottom, 52px) + 6px);
     right: 8px;
@@ -3807,6 +3809,7 @@ html[data-contrast="high"] .sound-captions li {
     overflow-x: auto;
     padding: 4px;
     margin: -4px;
+    scroll-padding: 4px;
     scrollbar-width: none;
   }
 

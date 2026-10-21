@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { GROUNDBAIT_CASTS, OVERFED_CASTS, SWIM_MAX_CASTS, TOPUP_MAX } from "./logic";
+import { GROUNDBAIT_CASTS, OVERFED_CASTS, SPOOKED_SWIM_CASTS, SWIM_MAX_CASTS, TOPUP_MAX } from "./logic";
 import { BREAD_SWIM_CASTS, loadSwim, saveSwim, SWIM_COLD_GONE_MS, SWIM_COLD_PRIMED_MS, SWIM_GONE_MS, SWIM_HOT_GONE_MS, SWIM_HOT_PRIMED_MS, SWIM_PRIMED_MS, swimNow, swimTimes } from "./swim";
 
 const swim = { spot: "reeds" as const, casts: 2, at: 0 };
@@ -38,7 +38,7 @@ describe("a groundbaited swim left for the next visit", () => {
     expect(loadSwim("u")).toEqual(held);
   });
 
-  it("keeps a topped-up swim's casts and top-ups through a reload, its full fish hungry again, and drops the top-ups when it primes", () => {
+  it("keeps a topped-up swim's casts, top-ups and scattered feeders through a reload, its full fish hungry again, and drops the top-ups and scatter when it primes", () => {
     const kept = new Map<string, string>();
     vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
     const built = { ...swim, casts: SWIM_MAX_CASTS, built: TOPUP_MAX };
@@ -46,6 +46,12 @@ describe("a groundbaited swim left for the next visit", () => {
     expect(loadSwim("u")).toEqual(built);
     saveSwim("u", { ...built, built: TOPUP_MAX + 1 });
     expect(loadSwim("u")).toEqual({ ...swim, casts: SWIM_MAX_CASTS });
+    const scattered = { ...swim, casts: SWIM_MAX_CASTS, spooked: SPOOKED_SWIM_CASTS };
+    saveSwim("u", scattered);
+    expect(loadSwim("u")).toEqual(scattered);
+    saveSwim("u", { ...scattered, spooked: SPOOKED_SWIM_CASTS + 1 });
+    expect(loadSwim("u")).toEqual({ ...swim, casts: SWIM_MAX_CASTS });
+    expect(swimNow(scattered, SWIM_PRIMED_MS)).toEqual({ spot: "reeds", casts: GROUNDBAIT_CASTS, at: 0, primed: true, primedNow: true });
     saveSwim("u", { ...built, casts: SWIM_MAX_CASTS + 1 });
     expect(loadSwim("u")).toBeNull();
     expect(swimNow(built, SWIM_PRIMED_MS)).toEqual({ spot: "reeds", casts: GROUNDBAIT_CASTS, at: 0, primed: true, primedNow: true });

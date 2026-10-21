@@ -90,6 +90,8 @@ export const PL_GAME: PlBook = {
   "You toss a handful of groundbait. The fish will gather to feed here for the next {casts} casts.": "Rzucasz garść zanęty. Ryby zbiorą się tu na żer przez kolejne rzuty ({casts}).",
   "Over the groundbait.": "Nad zanętą.",
   "Over the groundbait, but the fish are still full from it.": "Nad zanętą, ale ryby są jeszcze najedzone.",
+  "Over the groundbait, but its feeders are still scattered.": "Nad zanętą, ale ryby z niej wciąż są rozpłoszone.",
+  "Its thrashing scattered the feeders off the swim: none take for the next {n} casts, and it needs building up again.": "Szamotanina rozpłoszyła ryby z zanęty: przez kolejne rzuty ({n}) żadna z nich nie weźmie, a łowisko trzeba zanęcić od nowa.",
   "Top it up as it fades, with {left} casts or fewer left, and more feeders come in.": "Dosyp zanęty, gdy zostanie jej najwyżej na {left} rzuty, a podpłynie więcej ryb.",
   "The fish here are still feeding: another handful now fills them up, and the next {full} casts bite slower.": "Ryby jeszcze tu żerują: kolejna garść teraz je nasyci, a kolejne rzuty ({full}) dadzą wolniejsze brania.",
   "Top up the swim here as it fades: more feeders come in.": "Dosyp zanęty, zanim się skończy: podpłynie więcej ryb.",

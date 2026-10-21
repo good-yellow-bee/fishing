@@ -1337,7 +1337,16 @@ export function DockPage() {
           }}
         />
         {scenePhase === "idle" && !shopOpen && (
-          <nav className="walk-signs" data-camera-control aria-label={t("Walk to")}>
+          <nav
+            className="walk-signs"
+            data-camera-control
+            aria-label={t("Walk to")}
+            onFocus={(event) => {
+              // Chrome leaves a partly visible sign where it is in a row that scrolls sideways; a Tab brings it whole into
+              // view. A tap doesn't, or the row would slide the sign out from under the finger before the click.
+              if (event.target.matches(":focus-visible")) event.target.scrollIntoView({ block: "nearest", inline: "nearest" });
+            }}
+          >
             {game.stance === "shop" && (
               <button className="panel-btn walk-shop" type="button" onClick={() => setShopOpen(true)}>
                 {t("Open shop")}
