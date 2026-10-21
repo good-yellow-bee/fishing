@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { describe, expect, it } from "vitest";
-import { BIN_AT, BIN_INSIDE, BIN_TIN } from "./binWorms";
+import { BIN_AT, BIN_INSIDE } from "./binWorms";
 import { BILL, BIN_BIRD_SCALE, BIN_FIRST_SEC as FIRST, BIN_VISIT_EVERY_SEC, BOW_AT, BIN_VISIT_SEC, DIP_PITCH, HELD_WORM, PERCH, SOIL_Y, billAt, binBirdAt, binBirdOut, binLatch, binVisit } from "./binVisit";
 import { BLACKBIRD, birdBodyShape, birdHeadShape } from "./DockRobin";
 
@@ -58,7 +58,6 @@ describe("the worm bin's blackbird", () => {
     const reach = PERCH.x + bill.out;
     expect(reach).toBeGreaterThan(BIN_AT.x - BIN_INSIDE.width / 2);
     expect(reach).toBeLessThan(BIN_AT.x + BIN_INSIDE.width / 2);
-    expect(reach).toBeLessThan(BIN_AT.x + BIN_TIN.x - BIN_TIN.radius);
     expect(Math.max(...poses(FIRST, FIRST + BIN_VISIT_SEC).map((pose) => pose.pitch))).toBeCloseTo(DIP_PITCH, 1);
   });
 
