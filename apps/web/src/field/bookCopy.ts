@@ -84,7 +84,11 @@ export function upcomingRealTrips(book: Logbook, today: string) {
   const real = isSampleOnly(book) ? ahead : ahead.filter((trip) => !isSampleOuting(trip));
   // Of a day's outings, the one being fished first: Next and its "Log a catch" go to it, not to a later plan that day.
   const going = underWayToday(book, today);
-  return real.sort((a, b) => a.date.localeCompare(b.date) || Number(going(b)) - Number(going(a)));
+  // Of a dawn and a dusk both under way by a fish loose on their water, the one with a fish, a lost one or a miss of its
+  // own: the catch form files the next fish there.
+  const filed = new Set(book.catches.map((entry) => entry.tripId));
+  const rank = (trip: Trip) => (going(trip) ? 1 : 0) + (filed.has(trip.id) || trip.lost || trip.missed ? 1 : 0);
+  return real.sort((a, b) => a.date.localeCompare(b.date) || rank(b) - rank(a));
 }
 
 /**

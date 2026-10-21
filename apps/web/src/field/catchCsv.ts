@@ -6,6 +6,7 @@ import { outingCounted, plainName } from "./tripDates";
 import { newestOutingFirst } from "./catchNeighbors";
 import { noteText, outingName, outingNameById } from "./format";
 import { countedBook } from "./milestones";
+import { isSamplePlan } from "./bookCopy";
 import { outingFish } from "./outingFish";
 import { bookFishDay } from "./tripMonths";
 import { kindNames } from "./speciesLink";
@@ -101,7 +102,8 @@ export function sheetOutings(book: Logbook, today: string): Logbook {
   // outing), a fish lost or a strike missed. Before that it is still ahead.
   const fishOn = outingFish(book);
   // Last evening's blank one that gave way to today's plan is a past blank day, as Recent lists it.
-  return { ...counted, trips: counted.trips.filter((trip) => outingCounted(book, trip, today, fishOn(trip.id))) };
+  // Nor the sample week's blank plans Recent hides beside a water of the angler's own.
+  return { ...counted, trips: counted.trips.filter((trip) => !isSamplePlan(book, trip) && outingCounted(book, trip, today, fishOn(trip.id))) };
 }
 
 /**
