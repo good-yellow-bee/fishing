@@ -172,6 +172,13 @@ export function validateShinerBuy(profile: Profile): PurchaseResult {
   return shackSale(profile, SHINER_PRICE);
 }
 
+/** A worm from the shack costs this many points; it goes in the worm tin, for rebaiting or a night line. */
+export const WORM_PRICE = 15;
+
+export function validateWormBuy(profile: Profile): PurchaseResult {
+  return shackSale(profile, WORM_PRICE);
+}
+
 export function rollWeight(species: FishSpecies, patience: number, random = Math.random, level = 1): number {
   const trophyBoost = level >= 8 ? 0.1 : 0;
   const t = Math.min(1, Math.max(0, random() + patience * 0.015 + trophyBoost));

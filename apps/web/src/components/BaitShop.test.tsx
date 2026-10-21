@@ -2,7 +2,7 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { LakeSeason } from "@stillwater/shared";
+import { WORM_PRICE, type LakeSeason } from "@stillwater/shared";
 import { BaitShop } from "./BaitShop";
 
 let root: Root | null = null;
@@ -19,7 +19,7 @@ function shop(shinerOn: boolean, bucket: number, onBuyShiner = vi.fn(), onHookFr
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
-  act(() => root!.render(<BaitShop points={500} lifetimePoints={0} handfuls={0} shinerOn={shinerOn} bucket={bucket} busy={false} onBuy={vi.fn()} onBuyShiner={onBuyShiner} onHookFromBucket={onHookFromBucket} trap="none" trapCold={false} onSetTrap={vi.fn()} onLiftTrap={vi.fn()} season={season} />));
+  act(() => root!.render(<BaitShop points={500} lifetimePoints={0} handfuls={0} shinerOn={shinerOn} bucket={bucket} busy={false} onBuy={vi.fn()} onBuyShiner={onBuyShiner} onHookFromBucket={onHookFromBucket} worms={0} onBuyWorm={vi.fn()} trap="none" trapCold={false} onSetTrap={vi.fn()} onLiftTrap={vi.fn()} season={season} />));
   const button = (start: string) => [...container!.querySelectorAll("button")].find((one) => one.textContent?.startsWith(start));
   return { button, note: () => container!.querySelector("#shiner-shop-note")?.textContent };
 }
@@ -61,7 +61,7 @@ describe("BaitShop's bait bucket", () => {
       document.body.append(container);
       act(() => root?.unmount());
       root = createRoot(container);
-      act(() => root!.render(<BaitShop points={500} lifetimePoints={0} handfuls={handfuls} shinerOn={false} bucket={0} busy={false} onBuy={vi.fn()} onBuyShiner={vi.fn()} onHookFromBucket={vi.fn()} trap={trap} trapCold={trapCold} onSetTrap={onSetTrap} onLiftTrap={onLiftTrap} season={undefined} />));
+      act(() => root!.render(<BaitShop points={500} lifetimePoints={0} handfuls={handfuls} shinerOn={false} bucket={0} busy={false} onBuy={vi.fn()} onBuyShiner={vi.fn()} onHookFromBucket={vi.fn()} worms={0} onBuyWorm={vi.fn()} trap={trap} trapCold={trapCold} onSetTrap={onSetTrap} onLiftTrap={onLiftTrap} season={undefined} />));
       return (start: string) => [...container!.querySelectorAll("button")].find((one) => one.textContent?.startsWith(start));
     };
     const set = vi.fn();
@@ -81,5 +81,33 @@ describe("BaitShop's bait bucket", () => {
     expect(note()).toBe("The shiner trap is soaking in cold water: lift it after twelve hours.");
     render("ready", 1, vi.fn(), vi.fn(), true);
     expect(note()).toBe("A shiner has found the trap.");
+  });
+});
+
+describe("BaitShop's worms", () => {
+  it("sells a worm into the tin, till the tin is full", () => {
+    vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+    const render = (worms: number, onBuyWorm = vi.fn()) => {
+      container?.remove();
+      container = document.createElement("div");
+      document.body.append(container);
+      act(() => root?.unmount());
+      root = createRoot(container);
+      act(() => root!.render(<BaitShop points={500} lifetimePoints={0} handfuls={0} shinerOn={false} bucket={0} busy={false} onBuy={vi.fn()} onBuyShiner={vi.fn()} onHookFromBucket={vi.fn()} worms={worms} onBuyWorm={onBuyWorm} trap="none" trapCold={false} onSetTrap={vi.fn()} onLiftTrap={vi.fn()} season={undefined} />));
+      return [...container!.querySelectorAll("button")].find((one) => one.textContent?.startsWith("A worm"))!;
+    };
+    const note = () => container!.querySelector("#worm-shop-note")!.textContent;
+    const buy = vi.fn();
+    const button = render(2, buy);
+    expect(button.textContent).toBe(`A worm (${WORM_PRICE} pts)`);
+    expect(note()).toBe("A fresh worm for a washed-out hook or a night line. In your tin: 2 of 5.");
+    act(() => button.click());
+    expect(buy).toHaveBeenCalledOnce();
+    const full = vi.fn();
+    const tinFull = render(5, full);
+    expect(tinFull.getAttribute("aria-disabled")).toBe("true");
+    act(() => tinFull.click());
+    expect(full).not.toHaveBeenCalled();
+    expect(note()).toBe("Your worm tin is full: 5 worms.");
   });
 });
