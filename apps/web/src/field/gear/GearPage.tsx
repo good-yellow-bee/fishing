@@ -39,7 +39,8 @@ import { measureText } from "../../i18n/content";
 import { offPlayLake } from "../playLake";
 import { countedBook, ownFish } from "../milestones";
 import { isSampleOnly, nextRealTrips, upcomingRealTrips } from "../bookCopy";
-import { outingFish, underWayOn } from "../outingFish";
+import { outingCatches, outingFish, underWayOn } from "../outingFish";
+import { bestLure } from "../waterLure";
 import { lateOutings, outingDay, outNow, plainName, sameName } from "../tripDates";
 import { focusPageHeading } from "../pageFocus";
 import { bookLureName, onPiece } from "../pieceTally";
@@ -563,7 +564,14 @@ export function GearPage() {
   const counted = countedBook(book);
   const recent = recentTrips(counted, today).filter((trip) => offPlayLake(trip) && !going.includes(trip)).sort(newestOutingFirst(counted));
   // Each outing's fish with those logged loose that day on its water, as Trips and Home count them.
-  const fishOn = outingFish(book);
+  const fishOf = outingCatches(book);
+  const fishOn = (tripId: string) => fishOf(tripId).length;
+  // Under each month, the lure that took most of its fish: what worked then, for a bag packed now.
+  const lureName = bookLureName(book.catches);
+  const monthLure = (trips: readonly Trip[]) => {
+    const lure = bestLure(trips.flatMap((trip) => fishOf(trip.id)));
+    return lure ? t("best on {lure}", { lure: lureName(lure) }) : null;
+  };
 
   return (
     <div className="sheet">
@@ -606,7 +614,7 @@ export function GearPage() {
       {recent.length === 0 ? (
         <p className="empty">{t("No past outings.")}</p>
       ) : (
-        <PagedTrips trips={recent} fishOn={fishOn}>
+        <PagedTrips trips={recent} fishOn={fishOn} note={monthLure}>
           {(trip) => (
             <PastTripTackle
               key={trip.id}
