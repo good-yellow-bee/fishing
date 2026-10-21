@@ -1,6 +1,6 @@
 import { SPOT_IDS, type LakeSeason, type SpotId } from "@stillwater/shared";
 import { readAngler, writeAngler } from "./anglerStore";
-import { GROUNDBAIT_CASTS, SPOOKED_SWIM_CASTS, SWIM_MAX_CASTS, TOPUP_MAX, type Groundbait } from "./logic";
+import { GROUNDBAIT_CASTS, SPOOKED_SWIM_CASTS, SWIM_MAX_CASTS, TOPUP_MAX, WARY_LANDED, type Groundbait } from "./logic";
 
 /** Kept per angler: the swim they last groundbaited, so a handful thrown before leaving still works on the next visit. */
 export function swimKey(userId: string) {
@@ -45,6 +45,7 @@ export function loadSwim(userId: string): Swim | null {
           ...(swim.primed ? { primed: true } : {}),
           ...(swim.bread ? { bread: true } : {}),
           ...(swim.worm ? { worm: true } : {}),
+          ...(upTo(swim.landedBig, WARY_LANDED) ? { landedBig: swim.landedBig } : {}),
         }
       : null;
   });
@@ -54,11 +55,11 @@ export function saveSwim(userId: string, swim: Swim | null) {
   writeAngler(swimKey(userId), swim);
 }
 
-/** The swim on a new visit: as it was if soon after, freshly baited once when the feeders have gathered (longer with bread crumb in it, its top-ups gone, its chopped worm kept), gone once the season's days run out. */
+/** The swim on a new visit: as it was if soon after, freshly baited once when the feeders have gathered (longer with bread crumb in it, its top-ups gone, its chopped worm and wary big feeders kept), gone once the season's days run out. */
 export function swimNow(swim: Swim | null, now: number, season?: LakeSeason): (Swim & { primedNow: boolean }) | null {
   if (!swim || swim.casts <= 0) return null;
   const age = now - swim.at;
   const { primedMs, goneMs } = swimTimes(season);
   if (age > goneMs) return null;
-  return age >= primedMs && !swim.primed ? { spot: swim.spot as SpotId, casts: swim.bread ? BREAD_SWIM_CASTS : GROUNDBAIT_CASTS, at: swim.at, primed: true, ...(swim.bread ? { bread: true } : {}), ...(swim.worm ? { worm: true } : {}), primedNow: true } : { ...swim, primedNow: false };
+  return age >= primedMs && !swim.primed ? { spot: swim.spot as SpotId, casts: swim.bread ? BREAD_SWIM_CASTS : GROUNDBAIT_CASTS, at: swim.at, primed: true, ...(swim.bread ? { bread: true } : {}), ...(swim.worm ? { worm: true } : {}), ...(swim.landedBig ? { landedBig: swim.landedBig } : {}), primedNow: true } : { ...swim, primedNow: false };
 }
