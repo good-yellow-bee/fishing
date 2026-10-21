@@ -34,7 +34,7 @@ import { EditDelete } from "./EditDelete";
 import { TackleList, tipProps } from "./gear/TackleList";
 import { useTackle } from "./gear/TackleState";
 import { measureText } from "../i18n/content";
-import { daysAheadLabel, fishSum, formatClock, formatDay, formatTimeOfDay, messageText, outingName, toLocalInput, tripWhen } from "./format";
+import { daysAheadLabel, fishSum, formatClock, formatDay, formatTimeOfDay, messageText, outingName, toLocalInput, tripWhen, waterName } from "./format";
 import { PagedTrips } from "./PagedTrips";
 import { SAME_TIME_DAYS, thisWeekInPastYears } from "./yearsAgo";
 import { FishSum } from "./FishSum";
@@ -733,7 +733,7 @@ function TripView() {
           {spot ? (
             <>
               {" · "}
-              <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
+              <Link to={`/spots/${spot.id}`}>{waterName(spot.name)}</Link>
               {" · "}
               {t(WATER_LABELS[spot.waterType])}
               {/* On the way there: the water's pin, one tap from the outing. */}

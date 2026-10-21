@@ -6,6 +6,8 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import type { CatchEntry, Logbook, Spot } from "@stillwater/shared";
 import { SpotPage, SpotsPage } from "./SpotPages";
 import { SpotMapPage } from "./map/SpotMapPage";
+import { SpeciesPage } from "./SpeciesPage";
+import { TripPage } from "./TripPages";
 import { BestsPage } from "./bests/BestsPage";
 import { seasonCopy } from "./bests/SeasonRecap";
 import { LogbookProvider } from "./LogbookState";
@@ -13,6 +15,7 @@ import { TackleProvider } from "./gear/TackleState";
 import { LOGBOOK_STORAGE_KEY } from "./storage";
 import { markFieldNewsSeen } from "./fieldNews";
 import { waterName } from "./format";
+import { spotSummary } from "./summaries";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -37,7 +40,7 @@ const fish = (id: string, day: number, spotId: string): CatchEntry =>
 // Waters imported from a file with no name, beside one with a name.
 const book: Logbook = {
   spots: [water("a", ""), water("b", "  "), water("own", "Own Lake")],
-  trips: [],
+  trips: [{ id: "t", date: "2026-10-03", spotId: "a", title: "Dawn", note: "" }],
   catches: [{ ...fish("0", 2, "own"), caughtAt: new Date(2025, 5, 1, 7).toISOString() }, fish("1", 2, "a"), fish("2", 3, "a"), fish("3", 4, "b"), fish("5", 6, "b"), fish("4", 5, "own")],
 };
 
@@ -55,6 +58,8 @@ async function show(path: string, element?: ReactNode): Promise<HTMLElement> {
                 <Route path="/spots" element={<SpotsPage />} />
                 <Route path="/spots/:spotId" element={<SpotPage />} />
                 <Route path="/map" element={<SpotMapPage />} />
+                <Route path="/trips/:tripId" element={<TripPage />} />
+                <Route path="/species/:species" element={<SpeciesPage />} />
               </Routes>
             )}
           </TackleProvider>
@@ -78,6 +83,14 @@ describe("round 127: a water with no name", () => {
     expect(heads.filter((head) => head === "Water with no name")).toHaveLength(2);
     expect(heads).not.toContain("");
     expect((await show("/spots/b")).querySelector("h1")?.textContent).toBe("Water with no name");
+  });
+
+  it("names its link on an outing's page and the kind's page, and opens its copied summary", async () => {
+    expect([...(await show("/trips/t")).querySelectorAll('a[href="/spots/a"]')].map((link) => link.textContent)).toContain("Water with no name");
+    document.body.innerHTML = "";
+    const kind = [...(await show("/species/Roach")).querySelectorAll('a[href="/spots/b"]')].map((link) => link.textContent);
+    expect(kind).toContain("Water with no name");
+    expect(spotSummary(book.spots[1]!, 0, [])).toMatch(/^Water with no name · Lake/);
   });
 
   it("names its link in the Map's list of waters with no place", async () => {

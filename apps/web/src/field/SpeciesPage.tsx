@@ -6,7 +6,7 @@ import { getUnits, num, t, tn, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { FishSum } from "./FishSum";
 import { FishCsv } from "./FishCsv";
-import { fishCountLabel, formatDay, outingNameById } from "./format";
+import { fishCountLabel, formatDay, outingNameById, waterName } from "./format";
 import { daysBetween, waterKeys } from "./spotOrder";
 import { useLogbook } from "./LogbookState";
 import { PagedCatches } from "./PagedCatches";
@@ -225,7 +225,7 @@ function SpeciesView() {
       <ul className="species-waters">
         {waters.map((water) => (
           <li key={water.spotId}>
-            {water.name ? <Link to={`/spots/${water.spotId}`}>{plainName(water.name)}</Link> : t("Unknown water")}
+            {water.name !== null ? <Link to={`/spots/${water.spotId}`}>{waterName(water.name)}</Link> : t("Unknown water")}
             <span className="meta sizes">
               {/* The count opens just those fish, through the catch search. */}
               {water.name ? <Link to={findWithLink(kindTerm, exactTerm("water", plainName(water.name)))}>{fishCountLabel(water.count)}</Link> : fishCountLabel(water.count)}
@@ -235,7 +235,7 @@ function SpeciesView() {
               {waters.length > 1 ? (
                 <>
                   {"\u00a0· "}
-                  <BiggestLinks catches={catches.filter((entry) => water.spotIds.includes(entry.spotId))} list={`species:${species}`} about={`${t(name)}, ${water.name ? plainName(water.name) : t("Unknown water")}`} />
+                  <BiggestLinks catches={catches.filter((entry) => water.spotIds.includes(entry.spotId))} list={`species:${species}`} about={`${t(name)}, ${water.name !== null ? waterName(water.name) : t("Unknown water")}`} />
                 </>
               ) : null}
             </span>
