@@ -11,7 +11,7 @@ import { useLogbook } from "./LogbookState";
 import { countedSearch } from "./countedSearch";
 import { RESUME_PARAM } from "./anotherCatch";
 import { hasSampleLeft, isSampleCatch, isSampleOnly, isSamplePlan, isSampleSpot, isSampleOuting, upcomingRealTrips, withoutSample } from "./bookCopy";
-import { outingFish, underWayOn } from "./outingFish";
+import { outingCatches, outingFish, underWayOn } from "./outingFish";
 import { lateOutings, outNow, outingDay, plainName, sameName } from "./tripDates";
 import { dateWords } from "./dateWords";
 import { sheetOutings } from "./catchCsv";
@@ -227,6 +227,7 @@ export function HomePage() {
   // Out now is under way too, as of a dawn and a dusk with a fish loose on their water: no plan to copy beside it.
   const nextOutNow = next?.date === today && outNow(book, next, now);
   const nextUnderWay = next ? underWayOn(next, fishOn) || nextOutNow : false;
+  const nextFish = nextOutNow ? outingCatches(book)(next.id) : [];
   // The newest outing fished, for a Next with nothing planned: on a water still in the book.
   const lastOut = next ? undefined : [...sheetOutings(book, fishedBy).trips].filter((trip) => spotById(book, trip.spotId) && !isSampleOuting(trip)).sort(newestOutingFirst(book))[0];
   const lastOutRest = lastOut ? daysBetween(lastOut.date, today) : 0;
@@ -439,6 +440,12 @@ export function HomePage() {
               </span>
             ) : null}
           </small>
+          {/* Out on it: how the outing is going, by the fish its card counts, a loose one of a dawn and a dusk being neither's. */}
+          {nextOutNow && nextFish.length > 0 ? (
+            <small className="next-so-far">
+              {t("So far: {fish} · the last at {time}", { fish: fishSum(nextFish.length), time: formatTimeOfDay(nextFish.reduce((last, entry) => (Date.parse(entry.caughtAt) > Date.parse(last) ? entry.caughtAt : last), nextFish[0].caughtAt)) })}
+            </small>
+          ) : null}
           {next && next !== lateOuting && next.date <= tomorrow ? <NextDayLine trip={next} spot={nextSpot} today={today} now={now} /> : null}
           {next ? <LastTimeLine book={book} trip={next} today={today} /> : null}
           {/* A plan still ahead goes on the phone's calendar from here, as from its own page. */}

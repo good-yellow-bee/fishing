@@ -497,6 +497,7 @@ export const PL_FIELD: PlBook = {
   "The catches were downloaded as a spreadsheet.": "Pobrano połowy jako arkusz.",
   "The outings were downloaded as a spreadsheet.": "Pobrano wyprawy jako arkusz.",
   "On this outing so far: {fish} · the last at {time}": "Na tej wyprawie do tej pory: {fish} · ostatnia o {time}",
+  "So far: {fish} · the last at {time}": "Do tej pory: {fish} · ostatnia o {time}",
   "Field log file": "Plik dziennika połowów",
   "Replace the book in this browser with this file? Spots, trips, catches, weather, tackle checks, and photos here will be replaced.":
     "Zastąpić dziennik w tej przeglądarce tym plikiem? Łowiska, wyprawy, połowy, pogoda, listy sprzętu i zdjęcia zostaną zastąpione.",
