@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { BASS_BEDS, bassSpot, straySpot } from "./bassBeds";
 import { guardSpot, sunfishNests } from "./sunfishNests";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
@@ -10,6 +11,8 @@ import { bedHeight } from "./water";
 const NEST_SAND = "#e4d6a8";
 /** How high the guard hovers over its bed, in metres. */
 const GUARD_HOVER = 0.18;
+/** A bass's length and girth against a sunfish's. */
+const BASS_SIZE = new THREE.Vector3(1.7, 1.7, 2.6);
 
 /** A bed: pale clean sand in the middle, a raised rim of darker sand, fading out into the bed. */
 function nestTexture() {
@@ -31,11 +34,16 @@ function nestTexture() {
 
 /**
  * Sunfish nests in the shallows either side of the dock in late spring and summer: pale round beds
- * fanned in the sand, each with its guard hovering over it (sunfishNests.ts). Two draws in all.
+ * fanned in the sand, each with its guard hovering over it (sunfishNests.ts). In spring (`bass`) the
+ * bass guard their wider beds among them too, facing off the sunfish that stray near (bassBeds.ts).
+ * Two draws in all.
  */
-export function SunfishNests() {
+export function SunfishNests({ bass }: { bass: boolean }) {
   const still = useReducedMotion();
-  const nests = useMemo(sunfishNests, []);
+  const sunfish = useMemo(sunfishNests, []);
+  const nests = useMemo(() => (bass ? [...sunfish, ...BASS_BEDS] : sunfish), [bass, sunfish]);
+  const bassBeds = bass ? BASS_BEDS : [];
+  const fishCount = sunfish.length + bassBeds.length * 2;
   const beds = useRef<THREE.InstancedMesh>(null);
   const guards = useRef<THREE.InstancedMesh>(null);
   const bedShape = useMemo(() => new THREE.CircleGeometry(1, 20).rotateX(-Math.PI / 2), []);
@@ -65,20 +73,28 @@ export function SunfishNests() {
   useFrame(({ clock }) => {
     const mesh = guards.current;
     if (!mesh) return;
-    nests.forEach((nest, i) => {
-      const guard = guardSpot(nest, clock.elapsedTime, still);
-      scratch.position.set(guard.x, bedHeight(guard.x, guard.z) + GUARD_HOVER, guard.z);
-      scratch.rotation.set(0, guard.yaw, 0);
-      scratch.scale.setScalar(1);
+    const place = (i: number, fish: { x: number; z: number; yaw: number }, size: THREE.Vector3 | number) => {
+      scratch.position.set(fish.x, bedHeight(fish.x, fish.z) + GUARD_HOVER, fish.z);
+      scratch.rotation.set(0, fish.yaw, 0);
+      if (typeof size === "number") scratch.scale.setScalar(size);
+      else scratch.scale.copy(size);
       scratch.updateMatrix();
       mesh.setMatrixAt(i, scratch.matrix);
+    };
+    const time = clock.elapsedTime;
+    sunfish.forEach((nest, i) => place(i, guardSpot(nest, time, still), 1));
+    bassBeds.forEach((bed, b) => {
+      const i = sunfish.length + b * 2;
+      place(i, bassSpot(bed, time, still), BASS_SIZE);
+      const stray = straySpot(bed, time, still);
+      place(i + 1, stray ?? { x: bed.x, z: bed.z, yaw: 0 }, stray?.size ?? 0);
     });
     mesh.instanceMatrix.needsUpdate = true;
   });
   return (
     <group>
       <instancedMesh ref={beds} name="sunfish-nests" args={[bedShape, bedMaterial, nests.length]} frustumCulled={false} />
-      <instancedMesh ref={guards} name="nest-guards" args={[guardShape, guardMaterial, nests.length]} frustumCulled={false} />
+      <instancedMesh ref={guards} name="nest-guards" args={[guardShape, guardMaterial, fishCount]} frustumCulled={false} />
     </group>
   );
 }
