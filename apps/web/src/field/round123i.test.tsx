@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import type { CatchEntry, Logbook, Spot, Trip } from "@stillwater/shared";
+import { sampleLogbook, type CatchEntry, type Logbook, type Spot, type Trip } from "@stillwater/shared";
 import { SpotPage } from "./SpotPages";
 import { LogbookProvider } from "./LogbookState";
 import { LOGBOOK_STORAGE_KEY } from "./storage";
@@ -77,6 +77,23 @@ describe("round 123 ideas: the kinds only this water has given", () => {
     const twins = [...spots, spot("mill2", "Mill  pond"), spot(PLAY_LAKE_ID, "Stillwater Lake")];
     await page({ spots: twins, trips: [], catches: [...catches, fish("f", "mill2", "Zander", new Date(2026, 5, 6, 7)), fish("g", PLAY_LAKE_ID, "Tench", new Date(2026, 5, 7, 7))] }, "/spots/mill");
     expect(onlyHere()).toBe("Only from this water: Tench, Zander");
+  });
+
+  it("leaves out a fish of a water no longer in the book", async () => {
+    await page({ spots, trips: [], catches: [...catches.filter((entry) => entry.spotId === "mill"), fish("x", "gone", "Tench", new Date(2026, 5, 8, 7))] }, "/spots/mill");
+    expect(onlyHere()).toBeNull();
+  });
+
+  it("is not said on an untouched sample water once the angler has fish of their own", async () => {
+    // One of its made-up fish renamed to a kind no other water has.
+    const made = sampleLogbook(new Date(2026, 9, 14, 12));
+    const sample = { ...made, catches: made.catches.map((entry, index) => (index === 0 ? { ...entry, species: "Sturgeon" } : entry)) };
+    const water = sample.catches[0]!.spotId;
+    await page(sample, `/spots/${water}`);
+    expect(onlyHere()).toContain("Sturgeon");
+    document.body.innerHTML = "";
+    await page({ ...sample, spots: [...sample.spots, ...spots], catches: [...sample.catches, ...catches] }, `/spots/${water}`);
+    expect(onlyHere()).toBeNull();
   });
 
   it("is never said on the game's lake", async () => {
