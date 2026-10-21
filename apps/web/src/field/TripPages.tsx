@@ -152,14 +152,18 @@ export function calendarNotes(book: Logbook, trip: Trip, tackleItems: TackleItem
   ].filter(Boolean);
 }
 
-/** How the last outing on the water went, with what got away: a day of missed strikes is the reason to change hooks. */
+/** An outing's fish with what got away, as its card says them: a day of missed strikes is the reason to change hooks. */
+function gotAwayToo(fish: number, { lost, missed }: { lost?: number; missed?: number }): string {
+  return [fishSum(fish), ...(lost ? [tn(lost, "{n} lost", "{n} lost")] : []), ...(missed ? [tn(missed, "{n} missed", "{n} missed")] : [])].join(" · ");
+}
+
+/** How the last outing on the water went, with what got away. */
 function lastTimeNote(book: Logbook, trip: Trip): string {
   if (trip.spotId === PLAY_LAKE_ID) return "";
   const fishHere = outingFish(book, true);
   const last = lastOutingBefore(averagedOutings(book).filter((other) => other.spotId === trip.spotId && other.id !== trip.id), trip.date, outingDay(localDate(new Date())), fishHere, book);
   if (!last) return "";
-  const counts = [fishSum(fishHere(last.id)), ...(last.lost ? [tn(last.lost, "{n} lost", "{n} lost")] : []), ...(last.missed ? [tn(last.missed, "{n} missed", "{n} missed")] : [])];
-  return t("Last time here: {day} · {counts}", { day: formatDay(last.date), counts: counts.join(" · ") });
+  return t("Last time here: {day} · {counts}", { day: formatDay(last.date), counts: gotAwayToo(fishHere(last.id), last) });
 }
 
 /** A plan as text for a message: the day, the water, what works there and what is still to pack. */
@@ -249,11 +253,14 @@ export function TripsPage() {
     : // In the small hours, last evening's outing first: "today" has none yet.
       [...(fishedBy < today ? ["last night|search word"] : []), ...QUICK_FINDS].map((word) => t(word)).filter((word) => findTrips(book, word, fishOn, today, t, new Date(), fishTrips, timeTrips).length > 0);
   // The plans among them said apart, as the month headings under the count say them.
-  const foundPlanned = found.filter((trip) => isPlanned(trip, today, fishOn(trip.id), book)).length;
+  const foundFished = found.filter((trip) => !isPlanned(trip, today, fishOn(trip.id), book));
+  const foundPlanned = found.length - foundFished.length;
+  // What got away on the outings counted, so a "lost" search says how many.
+  const foundGotAway = foundFished.reduce((sum, trip) => ({ lost: sum.lost + (trip.lost ?? 0), missed: sum.missed + (trip.missed ?? 0) }), { lost: 0, missed: 0 });
   const foundLine = [
-    ...(found.length > foundPlanned || foundPlanned === 0
+    ...(foundFished.length > 0 || foundPlanned === 0
       ? // A count among counts: "0 fish", where a card says "Nothing logged".
-        [t("Outings: {count} · {fish}", { count: found.length - foundPlanned, fish: fishSum(found.reduce((sum, trip) => sum + fishOn(trip.id), 0)) })]
+        [t("Outings: {count} · {fish}", { count: foundFished.length, fish: gotAwayToo(found.reduce((sum, trip) => sum + fishOn(trip.id), 0), foundGotAway) })]
       : []),
     ...(foundPlanned > 0 ? [tn(foundPlanned, "{n} planned", "{n} planned")] : []),
   ].join(" · ");
@@ -580,7 +587,7 @@ function TripView() {
       {lastHere ? (
         <p className="meta last-here">
           <Link to={`/trips/${lastHere.id}`}>
-            {t("Last time here, {day}: {fish}", { day: formatDay(lastHere.date), fish: fishSum(fishHere(lastHere.id)) })}
+            {t("Last time here, {day}: {fish}", { day: formatDay(lastHere.date), fish: gotAwayToo(fishHere(lastHere.id), lastHere) })}
           </Link>
           {/* Before going back: how long the water has rested. */}
           {trip.date >= today && daysBetween(lastHere.date, today) >= 2 ? ` · ${tn(daysBetween(lastHere.date, today), "{n} day ago", "{n} days ago")}` : null}
@@ -601,7 +608,7 @@ function TripView() {
           {sameDayHere.map((other, index) => (
             <Fragment key={other.id}>
               {index > 0 ? "; " : null}
-              <Link to={`/trips/${other.id}`}>{`${outingName(other, book.spots)}, ${fishSum(fishHere(other.id))}`}</Link>
+              <Link to={`/trips/${other.id}`}>{`${outingName(other, book.spots)}, ${gotAwayToo(fishHere(other.id), other)}`}</Link>
             </Fragment>
           ))}
         </p>
@@ -611,7 +618,7 @@ function TripView() {
           <Link to={`/trips/${nextHere.id}`}>
             {nextPlanned
               ? t("Next time here: {day}", { day: formatDay(nextHere.date) })
-              : t("Next time here, {day}: {fish}", { day: formatDay(nextHere.date), fish: fishSum(fishHere(nextHere.id)) })}
+              : t("Next time here, {day}: {fish}", { day: formatDay(nextHere.date), fish: gotAwayToo(fishHere(nextHere.id), nextHere) })}
           </Link>
         </p>
       ) : null}
@@ -898,13 +905,14 @@ function TripForm() {
   const [spotId, setSpotId] = useState(existing?.spotId ?? preset);
   // Planning a day on a water: how the last one there went.
   // The same outing "Last time here" names on the outing's page, before the day picked.
+  const fishHere = outingFish(book, true);
   const lastHere = existing || !spotId
     ? undefined
     : lastOutingBefore(
         spotId === PLAY_LAKE_ID ? tripsForSpot(book, spotId) : outings.filter((trip) => trip.spotId === spotId),
         /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : "9999",
         outingDay(localDate(new Date())),
-        outingFish(book, true),
+        fishHere,
         book,
       );
   const pickedSpot = spotById(book, spotId);
@@ -1078,11 +1086,11 @@ function TripForm() {
               <small className="field-hint" id="last-here">
                 {/* An untitled outing goes by the water's name, which the field above already shows. */}
                 {sameName(outingName(lastHere, book.spots), spotById(book, lastHere.spotId)?.name ?? "")
-                  ? t("Last here: {day} · {fish}", { day: formatDay(lastHere.date), fish: fishSum(outingFish(book, true)(lastHere.id)) })
+                  ? t("Last here: {day} · {fish}", { day: formatDay(lastHere.date), fish: gotAwayToo(fishHere(lastHere.id), lastHere) })
                   : t("Last here: {title}, {day} · {fish}", {
                       title: outingName(lastHere, book.spots),
                       day: formatDay(lastHere.date),
-                      fish: fishSum(outingFish(book, true)(lastHere.id)),
+                      fish: gotAwayToo(fishHere(lastHere.id), lastHere),
                     })}
               </small>
             ) : null}

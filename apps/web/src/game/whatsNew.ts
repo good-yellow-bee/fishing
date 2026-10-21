@@ -1,10 +1,12 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-21-scene74";
+export const NEWS_ID = "2026-10-21-game74";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "Groundbait is now best fed little and often: a handful thrown on a swim with two casts or fewer left tops it up, keeping its fish and drawing more feeders in, while one thrown too soon fills them up, so the next two casts bite slower. And a swim topped up twice draws the big feeders: carp and catfish come to it three times as often, and the hint and the card say so where your lure would draw them.",
+  "An outing's page and the outing form now add the fish lost and the strikes missed to how the last outing on the water went, as its card does, and Find an outing counts them among its matches. Beside the sample week with only a water of your own, an outing's page and the outing form now leave its made-up plans out, and Last fish counts a fish logged without its outing.",
   "Once you have bought your worm tin a place in the shack's worm bin, the tin now stands sunk in the bin's back corner, a worm hanging over its rim onto the soil. And with the shack's sack of bread crumb bought, it stands tied with twine beside the bin, a loaf painted on its front and a few crumbs spilled before it; in winter snow lies on both.",
   "A water's page now says Only from this water for the kinds no other water has given you, each opening its fish there, and in the small hours last evening's outing still going reads as fished today beside Out now. Beside the sample week with only a water of your own, Waters, a water's page and the Map now leave its made-up plans out, and a water with several namesakes names them all.",
   "The shack now sells your worm tin a place in its cool worm bin, bought once for 100 points, 80 from level 17: in summer, the worms left in the tin from yesterday are then still alive, though two days away still kills them. And it sells a sack of bread crumb for your groundbait, bought once for 120 points, 96 from level 17: a swim you bait with it and leave holds the feeders gathered there for eight casts when you come back, not five.",
