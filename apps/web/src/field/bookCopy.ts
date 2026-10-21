@@ -56,6 +56,11 @@ export function isSamplePlan(book: Logbook, trip: { id: string; spotId: string }
   return isSampleOuting(trip) && !book.catches.some((entry) => entry.tripId === trip.id) && !isSampleOnly(book);
 }
 
+/** The book with the sample week's blank plans left out, as Trips leaves them out of its lists. */
+export function withoutSamplePlans(book: Logbook): Logbook {
+  return { ...book, trips: book.trips.filter((trip) => !isSamplePlan(book, trip)) };
+}
+
 /** Whether any of the sample's invented waters is still in the book. */
 export function hasSampleWaters(book: Logbook) {
   return book.spots.some((spot) => SAMPLE_SPOT_IDS.has(spot.id));

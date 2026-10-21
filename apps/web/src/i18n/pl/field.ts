@@ -702,6 +702,8 @@ export const PL_FIELD: PlBook = {
   "Water {temp}, warming, on {day}": "Woda {temp}, ociepla się, {day}",
   "Water {temp}, cooling, on {day}": "Woda {temp}, ochładza się, {day}",
   "Another water has nearly the same name, {name}, so the links on this page open the fish of both.": "Inne łowisko ma prawie taką samą nazwę: {name}, więc linki na tej stronie otwierają ryby z obu.",
+  "Other waters are also called {name}, so the links on this page open the fish of all of them.": "Inne łowiska też nazywają się {name}, więc linki na tej stronie otwierają ryby z nich wszystkich.",
+  "Other waters have the same or nearly the same name ({names}), so the links on this page open the fish of all of them.": "Inne łowiska mają taką samą lub prawie taką samą nazwę ({names}), więc linki na tej stronie otwierają ryby z nich wszystkich.",
   "No pinned water is close by; the nearest is {water}, {distance} away.": "Żadne zapisane łowisko nie jest blisko; najbliższe: {water}, {distance} stąd.",
   "Fish an outing: {rate}": "Ryb na wyprawę: {rate}",
   "Fish an outing: {rate}, up from {before} in {year}": "Ryb na wyprawę: {rate}, więcej niż {before} w {year}",

@@ -22,7 +22,7 @@ export function seasonWaters(book: Logbook, today: string): { fished: number; fi
   const waterOf = waterKeys(book);
   const note = (spotId: string, day: string) => {
     if (spotId === PLAY_LAKE_ID || day > today) return;
-    const water = waterOf.get(spotId) ?? spotId;
+    const water = waterOf.get(spotId) || spotId;
     if (!firstDay.has(water) || day < firstDay.get(water)!) firstDay.set(water, day);
     if (day.startsWith(`${year}-`)) thisYear.add(water);
   };
