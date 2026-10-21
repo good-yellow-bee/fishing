@@ -747,6 +747,7 @@ describe("useFishingGame live shiner", () => {
     chop();
     expect(worms()).toBe(String(CHOPPED_WORMS - 1));
     expect(kept.has(swimKey(profile.userId))).toBe(false);
+    expect(container!.querySelector("[data-testid=groundbait]")?.textContent).toBe("1|");
     act(() => root!.unmount());
     root = null;
     container!.remove();

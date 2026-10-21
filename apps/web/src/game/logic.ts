@@ -800,6 +800,11 @@ export function hasWormFeeders(spot: SpotId) {
   return FISH.some((fish) => WORM_FEEDERS.has(fish.id) && fish.spots.includes(spot));
 }
 
+/** Whether a fish at this bank that comes for chopped worm would take this lure. */
+export function wormFeedersTake(spot: SpotId, lure: string | undefined) {
+  return poolForLure(FISH.filter((fish) => fish.spots.includes(spot)), lure).some((fish) => WORM_FEEDERS.has(fish.id));
+}
+
 /** Whether a handful with chopped worm can go in off this bank: worms enough in the tin, fish here that come for it, and no chopped worm in the swim here already. */
 export function canChopWorm(worms: number, bait: Groundbait | null, spot: SpotId) {
   return worms >= CHOPPED_WORMS && hasWormFeeders(spot) && !(bait?.spot === spot && bait.casts > 0 && bait.worm);

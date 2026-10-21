@@ -99,6 +99,7 @@ export const PL_GAME: PlBook = {
   "Groundbait with chopped worm": "Zanęta z siekanym robakiem",
   "Toss a handful of groundbait with {n} worms from your tin chopped in: the perch here come in with the feeders.": "Rzuć garść zanęty z {n} posiekanymi robakami z puszki: tutejsze okonie podpłyną razem z innymi rybami.",
   "{n} chopped worms went in with it: the perch here come in to feed with the feeders while the swim lasts.": "Wsypujesz z nią {n} posiekane robaki: tutejsze okonie przypłyną żerować z innymi rybami, póki starczy zanęty.",
+  "{n} chopped worms went in with it: the perch here come in to feed while the swim lasts, though not to the lure you have tied on.": "Wsypujesz z nią {n} posiekane robaki: tutejsze okonie przypłyną żerować, póki starczy zanęty, choć nie na przynętę, którą masz założoną.",
   "{n} chopped into a handful of groundbait bring the perch in with the feeders.": "{n} posiekane w garści zanęty przywabią okonie razem z innymi rybami.",
   "Day {days} running you bait this bank: its feeders expect it now and come straight in, as after a top-up.": "{days}. dzień z rzędu nęcisz to łowisko: ryby już na to czekają i podpływają od razu, jak po dosypaniu.",
   "Day {days} running you bait this bank: from day {need} its feeders start to expect it.": "{days}. dzień z rzędu nęcisz to łowisko: od {need}. dnia ryby zaczną na to czekać.",
