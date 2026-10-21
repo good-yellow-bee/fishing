@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CAST_RANGE, castRangeMultiplier, FISH, LAKE_CENTER_Z, SPOT_IDS, type SpotId, skyAt, skyTurnForDay, weatherForDay } from "@stillwater/shared";
 import { BANK_STANDS } from "./hotspot";
-import { pickBite, lampLit, ANCHOR_SETTLE_MS, ANCHOR_SPLASH_WAIT, anchorSplashWaitMul, COLOUR_WAIT, colourSuits, colourWaitMul, lureColour, isLongCast, LONG_CAST_SHARE, LONG_CAST_SOLID, MIDGE_RISERS, MIDGE_RISER_SHARE, midgeRiser, LIGHT_HUNTERS, LIGHT_HUNTER_SHARE, lightHunter, BUG_SIPPERS, BUG_SIPPER_SHARE, bugSipper, LOG_HOLDERS, LOG_HOLDER_SHARE, logHolder, FRY_HUNTERS, FRY_HUNTER_SHARE, fryHunter, castIntoSchool, castIntoSpooked, castOverGroundbait, throwHandful, canChopWorm, CHOPPED_WORMS, hasWormFeeders, wormFeedersTake, WORM_FEEDERS, feederShare, scatterSwim, SPOOKED_SWIM_CASTS, OVERFED_CASTS, SWIM_MAX_CASTS, TOPUP_CASTS_LEFT, TOPUP_FEEDER_SHARE, TOPUP_MAX, castOnFreshWater, FRESH_WAIT, castUnderPressure, castNewLure, NEW_LURE_RELIEF, fishedHardBanks, PRESSURE_CASTS, PRESSURE_REST, GROUNDBAIT_CASTS, BIG_FEEDERS, hasBigFeeders, GROUNDBAIT_FEEDERS, GROUNDBAIT_FEEDER_SHARE, groundbaitFeeder, GROUNDBAIT_WAIT, canBaitShiner, LIVE_SHINER_SHARE, LIVELY_SHINER_SHARE, SHINER_HUNTERS, shinerHunter, BED_RAIDERS, BED_RAIDER_SHARE, bedRaider, CRAYFISH_HUNTERS, CRAYFISH_HUNTER_SHARE, crayfishHunter, TADPOLE_EATERS, TADPOLE_EATER_SHARE, tadpoleEater, CHOP_WAIT, chopWaitMul, STORM_WAIT, stormWaitMul, PRE_RAIN_WAIT, preRainWaitMul, TWIST_CASTS, TWIST_TANGLE, twistAfterCast, isTwisted, castTangles, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, isWashedOut, FOG_LIFT_WAIT, fogLiftWaitMul, WATER_SWING_F, WARMING_WAIT, COOLING_WAIT, waterSwing, waterSwingWaitMul, waterTempFor, POST_FRONT_WAIT, POST_FRONT_UNTIL, postFrontWaitMul, rainedYesterday, TURNOVER_DAYS, TURNOVER_SPAN, TURNOVER_WAIT, TURNOVER_INLET_WAIT, isTurnover, turnoverStart, turnoverWaitMul, CRANK_ROCK_WAIT, crankRockWaitMul, DULL_SOLID, isSkipCast, SKIP_CAST_SHARE, TOPWATER_NIGHT_WAIT, topwaterNightWaitMul, stackWaitMs, WAIT_FLOOR_MS, SPINNER_THUMP_WAIT, spinnerThumpWaitMul, FLY_HATCH_WAIT, flyHatchWaitMul, WORM_NIGHT_WAIT, wormNightWaitMul, JIG_SOLID, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, GROUNDBAIT_SCHOOL_CASTS, TWILIGHT_SCHOOL_CASTS, WINTER_SCHOOL_CASTS, WINTER_SCHOOLERS, isWinterSchool, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, JIG_WINTER_WAIT, jigWinterWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, RAIN_INLET_WAIT, rainInletWaitMul, FALL_BIG_LURE_WAIT, fallBigLureWaitMul, SUMMER_DEEP_WAIT, summerDeepWaitMul, DOCK_SHADE_WAIT, dockShadeWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WIND_POINT_WAIT, windPointWaitMul, WINDWARD_WAIT, WINDWARD_BANKS, windwardWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, DARK_NIGHT_WAIT, NEW_MOON, darkNightWaitMul, WORM_PILING_WAIT, wormPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, FLASH_SUN_WAIT, FULL_MOON_FLASH, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs, LUCKY_SOLID } from "./logic";
+import { pickBite, lampLit, ANCHOR_SETTLE_MS, ANCHOR_SPLASH_WAIT, anchorSplashWaitMul, COLOUR_WAIT, colourSuits, colourWaitMul, lureColour, isLongCast, LONG_CAST_SHARE, LONG_CAST_SOLID, MIDGE_RISERS, MIDGE_RISER_SHARE, midgeRiser, LIGHT_HUNTERS, LIGHT_HUNTER_SHARE, lightHunter, BUG_SIPPERS, BUG_SIPPER_SHARE, bugSipper, LOG_HOLDERS, LOG_HOLDER_SHARE, logHolder, FRY_HUNTERS, FRY_HUNTER_SHARE, fryHunter, castIntoSchool, castIntoSpooked, castOverGroundbait, throwHandful, canChopWorm, CHOPPED_WORMS, hasWormFeeders, wormFeedersTake, WORM_FEEDERS, feederShare, scatterSwim, prowlerAt, scattersSwim, PROWLERS, PROWLER_BITE, SPOOKED_SWIM_CASTS, OVERFED_CASTS, SWIM_MAX_CASTS, TOPUP_CASTS_LEFT, TOPUP_FEEDER_SHARE, TOPUP_MAX, castOnFreshWater, FRESH_WAIT, castUnderPressure, castNewLure, NEW_LURE_RELIEF, fishedHardBanks, PRESSURE_CASTS, PRESSURE_REST, GROUNDBAIT_CASTS, BIG_FEEDERS, hasBigFeeders, GROUNDBAIT_FEEDERS, GROUNDBAIT_FEEDER_SHARE, groundbaitFeeder, GROUNDBAIT_WAIT, canBaitShiner, LIVE_SHINER_SHARE, LIVELY_SHINER_SHARE, SHINER_HUNTERS, shinerHunter, BED_RAIDERS, BED_RAIDER_SHARE, bedRaider, CRAYFISH_HUNTERS, CRAYFISH_HUNTER_SHARE, crayfishHunter, TADPOLE_EATERS, TADPOLE_EATER_SHARE, tadpoleEater, CHOP_WAIT, chopWaitMul, STORM_WAIT, stormWaitMul, PRE_RAIN_WAIT, preRainWaitMul, TWIST_CASTS, TWIST_TANGLE, twistAfterCast, isTwisted, castTangles, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, isWashedOut, FOG_LIFT_WAIT, fogLiftWaitMul, WATER_SWING_F, WARMING_WAIT, COOLING_WAIT, waterSwing, waterSwingWaitMul, waterTempFor, POST_FRONT_WAIT, POST_FRONT_UNTIL, postFrontWaitMul, rainedYesterday, TURNOVER_DAYS, TURNOVER_SPAN, TURNOVER_WAIT, TURNOVER_INLET_WAIT, isTurnover, turnoverStart, turnoverWaitMul, CRANK_ROCK_WAIT, crankRockWaitMul, DULL_SOLID, isSkipCast, SKIP_CAST_SHARE, TOPWATER_NIGHT_WAIT, topwaterNightWaitMul, stackWaitMs, WAIT_FLOOR_MS, SPINNER_THUMP_WAIT, spinnerThumpWaitMul, FLY_HATCH_WAIT, flyHatchWaitMul, WORM_NIGHT_WAIT, wormNightWaitMul, JIG_SOLID, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, GROUNDBAIT_SCHOOL_CASTS, TWILIGHT_SCHOOL_CASTS, WINTER_SCHOOL_CASTS, WINTER_SCHOOLERS, isWinterSchool, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, JIG_WINTER_WAIT, jigWinterWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, RAIN_INLET_WAIT, rainInletWaitMul, FALL_BIG_LURE_WAIT, fallBigLureWaitMul, SUMMER_DEEP_WAIT, summerDeepWaitMul, DOCK_SHADE_WAIT, dockShadeWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WIND_POINT_WAIT, windPointWaitMul, WINDWARD_WAIT, WINDWARD_BANKS, windwardWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, DARK_NIGHT_WAIT, NEW_MOON, darkNightWaitMul, WORM_PILING_WAIT, wormPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, FLASH_SUN_WAIT, FULL_MOON_FLASH, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs, LUCKY_SOLID } from "./logic";
 
 describe("hook window", () => {
   it("leaves a starter over a second to react, and widens with Accuracy", () => {
@@ -1109,5 +1109,39 @@ describe("a solved legend hunt", () => {
     const hunted = count("ghost-pike");
     expect(plain).toBeGreaterThan(0);
     expect(hunted).toBeGreaterThan(plain * 2);
+  });
+});
+
+describe("a pike prowling a built swim", () => {
+  it("is the bank's pike, only where pike live and on a lure that takes them", () => {
+    for (const spot of ["reeds", "dropoff", "point"] as const) expect(prowlerAt(spot, "Spinner")?.id).toBe("pike");
+    expect(prowlerAt("reeds", "Crankbait")?.id).toBe("pike");
+    expect(prowlerAt("dock", "Spinner")).toBeUndefined();
+    expect(prowlerAt("reeds", "Worm")).toBeUndefined();
+  });
+
+  it("scatters a swim built all the way, landed or lost, like a big feeder", () => {
+    expect(PROWLERS.has("pike")).toBe(true);
+    expect(scattersSwim("pike", TOPUP_MAX)).toBe(true);
+    expect(scattersSwim("pike", TOPUP_MAX - 1)).toBe(false);
+    expect(scattersSwim("carp", TOPUP_MAX)).toBe(true);
+    expect(scattersSwim("perch", TOPUP_MAX)).toBe(false);
+  });
+
+  it("bites about twice as often when drawn", () => {
+    const strong = { userId: "u", displayName: "U", points: 0, lifetimePoints: 0, strength: 8, accuracy: 8, patience: 3 };
+    const count = (prowler?: string) => {
+      let seed = 7;
+      const random = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+      let hits = 0;
+      for (let i = 0; i < 6000; i++) if (pickBite("reeds", strong, false, random, "day", "Spinner", undefined, false, false, undefined, undefined, undefined, prowler).id === "pike") hits += 1;
+      return hits;
+    };
+    const plain = count();
+    const prowled = count("pike");
+    expect(PROWLER_BITE).toBe(2);
+    expect(plain).toBeGreaterThan(0);
+    expect(prowled).toBeGreaterThan(plain * 1.5);
+    expect(prowled).toBeLessThan(plain * 2.5);
   });
 });
