@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { GROUNDBAIT_CASTS } from "./logic";
+import { GROUNDBAIT_CASTS, OVERFED_CASTS, SWIM_MAX_CASTS, TOPUP_MAX } from "./logic";
 import { BREAD_SWIM_CASTS, loadSwim, saveSwim, SWIM_COLD_GONE_MS, SWIM_COLD_PRIMED_MS, SWIM_GONE_MS, SWIM_HOT_GONE_MS, SWIM_HOT_PRIMED_MS, SWIM_PRIMED_MS, swimNow, swimTimes } from "./swim";
 
 const swim = { spot: "reeds" as const, casts: 2, at: 0 };
@@ -36,10 +36,19 @@ describe("a groundbaited swim left for the next visit", () => {
     const held = { ...crumb, casts: BREAD_SWIM_CASTS, primed: true };
     saveSwim("u", held);
     expect(loadSwim("u")).toEqual(held);
-    saveSwim("u", { ...held, casts: BREAD_SWIM_CASTS + 1 });
+  });
+
+  it("keeps a topped-up swim's casts, top-ups and full fish through a reload, and drops them when it primes", () => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    const built = { ...swim, casts: SWIM_MAX_CASTS, built: TOPUP_MAX, full: OVERFED_CASTS };
+    saveSwim("u", built);
+    expect(loadSwim("u")).toEqual(built);
+    saveSwim("u", { ...built, built: TOPUP_MAX + 1, full: 0 });
+    expect(loadSwim("u")).toEqual({ ...swim, casts: SWIM_MAX_CASTS });
+    saveSwim("u", { ...built, casts: SWIM_MAX_CASTS + 1 });
     expect(loadSwim("u")).toBeNull();
-    saveSwim("u", { ...swim, casts: GROUNDBAIT_CASTS + 1 });
-    expect(loadSwim("u")).toBeNull();
+    expect(swimNow(built, SWIM_PRIMED_MS)).toEqual({ spot: "reeds", casts: GROUNDBAIT_CASTS, at: 0, primed: true, primedNow: true });
   });
 });
 

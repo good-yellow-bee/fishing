@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { canLand, localDate, DOCK_STAND_X, DOCK_STAND_Z, FISH, type Giant, type LodgeLost, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind, type SpotId } from "@stillwater/shared";
 import { floodedInlet, makeFight, springRunTireMul, SPRING_RUN_TIRE, currentTireMul, CURRENT_FIGHTER_TIRE, type FightOutcome, type FightPerformance, type FightSim } from "./fight";
 import { FRENZY_SLOT_MS, HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt, slotFrenzy } from "./hotspot";
-import { bedRaider, COLD_WORK_GAP_MS, LONG_CAST_SOLID, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, castIntoSpooked, isSkipCast, castOnFreshWater, TWIST_CASTS, twistAfterCast, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, PRESSURE_CASTS, GROUNDBAIT_CASTS, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WARMING_WAIT, COOLING_WAIT, waterSwingWaitMul, anchorSplashWaitMul, ANCHOR_SPLASH_WAIT, LAMP_WINDOW } from "./logic";
+import { bedRaider, COLD_WORK_GAP_MS, LONG_CAST_SOLID, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, castIntoSpooked, isSkipCast, castOnFreshWater, TWIST_CASTS, twistAfterCast, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, PRESSURE_CASTS, GROUNDBAIT_CASTS, GROUNDBAIT_FEEDER_SHARE, feederShare, OVERFED_CASTS, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WARMING_WAIT, COOLING_WAIT, waterSwingWaitMul, anchorSplashWaitMul, ANCHOR_SPLASH_WAIT, LAMP_WINDOW } from "./logic";
 import { LIGHT_HOLD, stealsBait } from "./nibblePlan";
 import { castForReleased } from "./releasedFish";
 
@@ -666,8 +666,8 @@ describe("useFishingGame live shiner", () => {
   });
 
   it.each([
-    ["summer", SWIM_HOT_PRIMED_MS, SWIM_HOT_GONE_MS, "You toss a handful of groundbait. The fish will gather to feed here for the next 5 casts. In the summer heat, any left draws them back after three hours but is eaten within a day."],
-    ["winter", SWIM_COLD_PRIMED_MS, SWIM_COLD_GONE_MS, "You toss a handful of groundbait. The fish will gather to feed here for the next 5 casts. In the winter cold, any left takes twelve hours to draw them back but keeps four days."],
+    ["summer", SWIM_HOT_PRIMED_MS, SWIM_HOT_GONE_MS, "You toss a handful of groundbait. The fish will gather to feed here for the next 5 casts. Top it up as it fades, with two casts or fewer left, and more feeders come in. In the summer heat, any left draws them back after three hours but is eaten within a day."],
+    ["winter", SWIM_COLD_PRIMED_MS, SWIM_COLD_GONE_MS, "You toss a handful of groundbait. The fish will gather to feed here for the next 5 casts. Top it up as it fades, with two casts or fewer left, and more feeders come in. In the winter cold, any left takes twelve hours to draw them back but keeps four days."],
   ] as const)("times a swim left behind by the season: %s", (season, primed, gone, said) => {
     const kept = new Map<string, string>();
     vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
@@ -719,10 +719,10 @@ describe("useFishingGame live shiner", () => {
       mount(DOCK_BUBBLES.at, crumb);
     };
     // A swim baited before the sack was bought has no bread crumb in it.
-    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 1, at: DOCK_BUBBLES.at - SWIM_PRIMED_MS - 60_000 }));
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "reeds", casts: 1, at: DOCK_BUBBLES.at - SWIM_PRIMED_MS - 60_000 }));
     mount(DOCK_BUBBLES.at, crumb);
     const bait = () => container!.querySelector("[data-testid=groundbait]")?.textContent?.split("|")[1];
-    expect(bait()).toBe(`dock:${GROUNDBAIT_CASTS}`);
+    expect(bait()).toBe(`reeds:${GROUNDBAIT_CASTS}`);
     act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === "groundbait") as HTMLButtonElement).click());
     const thrown = JSON.parse(kept.get(swimKey(profile.userId))!);
     expect(thrown).toMatchObject({ spot: "dock", casts: GROUNDBAIT_CASTS, bread: true });
@@ -3307,6 +3307,35 @@ describe("useFishingGame groundbait", () => {
     expect(groundbait()).toBe(`0|dock:${GROUNDBAIT_CASTS - 1}`);
   });
 
+  it("tops up a fading swim so more feeders come in, and overfeeds one still well fed", () => {
+    const kept = new Map<string, string>([[bagKey(profile.userId), JSON.stringify({ handfuls: 3, day: "2000-01-01" })]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    const at = DOCK_BUBBLES.at - 60_000;
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 2, at }));
+    let surface = mount();
+    toss();
+    expect(groundbait()).toBe(`2|dock:${2 + GROUNDBAIT_CASTS}`);
+    expect(hint()).toBe(`You top up the swim as it fades: the feeders stay, and more come in. ${2 + GROUNDBAIT_CASTS} casts of it now.`);
+    // The top-up joins the swim already there, so it keeps when that handful went in.
+    expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toEqual({ spot: "dock", casts: 2 + GROUNDBAIT_CASTS, built: 1, at });
+    cast(surface);
+    expect(groundbaitFeeder).toHaveBeenLastCalledWith("dock", undefined, false, "day", Math.random, feederShare(1));
+    expect(hint()).toContain("Over the groundbait.");
+
+    act(() => root!.unmount());
+    root = null;
+    container!.remove();
+    vi.mocked(groundbaitFeeder).mockClear();
+    surface = mount();
+    toss();
+    expect(groundbait()).toBe(`1|dock:${2 * GROUNDBAIT_CASTS}`);
+    expect(hint()).toBe(`Too much too soon: the fish fill up on it, so the next ${OVERFED_CASTS} casts bite slower and no feeders take. ${2 * GROUNDBAIT_CASTS} casts of it now.`);
+    cast(surface);
+    expect(hint()).toContain("Over the groundbait, but the fish are still full from it.");
+    expect(groundbaitFeeder).not.toHaveBeenCalled();
+    expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ casts: 2 * GROUNDBAIT_CASTS - 1, built: 1, full: OVERFED_CASTS - 1 });
+  });
+
   it("lets a feeder gathered on the groundbait take the bite", () => {
     const surface = mount();
     vi.mocked(groundbaitFeeder).mockReturnValueOnce(FISH.find((fish) => fish.id === "carp")!);
@@ -3314,7 +3343,7 @@ describe("useFishingGame groundbait", () => {
     toss();
     cast(surface);
     expect(phase()).toBe("waiting:none");
-    expect(groundbaitFeeder).toHaveBeenCalledWith("dock", undefined, false, "day");
+    expect(groundbaitFeeder).toHaveBeenCalledWith("dock", undefined, false, "day", Math.random, GROUNDBAIT_FEEDER_SHARE);
     expect(container!.querySelector("[data-testid=bite]")?.textContent).toMatch(/^carp\|/);
     // Landed, the card says the groundbait drew it in.
     step.mockReturnValueOnce("landed");

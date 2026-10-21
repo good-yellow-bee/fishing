@@ -767,12 +767,33 @@ export const GROUNDBAIT_WAIT = 0.8;
 /** The free handfuls of groundbait the bag is topped up to on a day's first visit. */
 export const GROUNDBAIT_HANDFULS = 1;
 
-export type Groundbait = { spot: SpotId; casts: number };
+/** A groundbaited swim: its bank, the casts left, how often it was topped up as it faded, and the casts its fish are still full for. */
+export type Groundbait = { spot: SpotId; casts: number; built?: number; full?: number };
 
-/** Whether a cast at this bank lands over the groundbait, and what is left of it after the cast. */
-export function castOverGroundbait(bait: Groundbait | null, spot: SpotId): { baited: boolean; next: Groundbait | null } {
-  if (!bait || bait.spot !== spot || bait.casts <= 0) return { baited: false, next: bait };
-  return { baited: true, next: bait.casts > 1 ? { ...bait, casts: bait.casts - 1 } : null };
+/** A handful onto a swim at its bank with this many casts or fewer left tops it up as it fades: the feeders stay and more come in. */
+export const TOPUP_CASTS_LEFT = 2;
+/** Each top-up draws this much more of the bites from the feeders, for up to TOPUP_MAX top-ups. */
+export const TOPUP_FEEDER_SHARE = 0.1;
+export const TOPUP_MAX = 2;
+/** A swim holds no more than this many casts of groundbait. */
+export const SWIM_MAX_CASTS = 2 * GROUNDBAIT_CASTS;
+/** A handful thrown on a swim still well fed fills the fish up: for this many casts bites come slower and no feeder takes. */
+export const OVERFED_CASTS = 2;
+export const OVERFED_WAIT = 1.3;
+
+/** A handful tossed off a bank: a fresh swim, a fading swim there topped up, or one still well fed overfed. */
+export function throwHandful(bait: Groundbait | null, spot: SpotId): { next: Groundbait; kind: "fresh" | "topped" | "overfed" } {
+  if (!bait || bait.spot !== spot || bait.casts <= 0) return { next: { spot, casts: GROUNDBAIT_CASTS }, kind: "fresh" };
+  const casts = Math.min(SWIM_MAX_CASTS, bait.casts + GROUNDBAIT_CASTS);
+  if (bait.casts <= TOPUP_CASTS_LEFT) return { next: { ...bait, casts, built: Math.min(TOPUP_MAX, (bait.built ?? 0) + 1) }, kind: "topped" };
+  return { next: { ...bait, casts, full: OVERFED_CASTS }, kind: "overfed" };
+}
+
+/** Whether a cast at this bank lands over the groundbait (and on fish still full from it, or on a swim built up), and what is left of it after the cast. */
+export function castOverGroundbait(bait: Groundbait | null, spot: SpotId): { baited: boolean; full: boolean; built: number; next: Groundbait | null } {
+  if (!bait || bait.spot !== spot || bait.casts <= 0) return { baited: false, full: false, built: 0, next: bait };
+  const { full = 0, ...rest } = bait;
+  return { baited: true, full: full > 0, built: bait.built ?? 0, next: bait.casts > 1 ? { ...rest, casts: bait.casts - 1, ...(full > 1 ? { full: full - 1 } : {}) } : null };
 }
 
 /** Fish that crowd in to feed on groundbait: the panfish, baitfish and bottom feeders. */
@@ -780,9 +801,14 @@ export const GROUNDBAIT_FEEDERS: ReadonlySet<string> = new Set(["golden-shiner",
 /** Chance a bite over the groundbait is one of the feeders gathered there. */
 export const GROUNDBAIT_FEEDER_SHARE = 0.35;
 
+/** The feeders' share of the bites over a swim topped up this many times. */
+export function feederShare(built: number) {
+  return GROUNDBAIT_FEEDER_SHARE + TOPUP_FEEDER_SHARE * Math.min(TOPUP_MAX, built);
+}
+
 /** A feeder drawn to the groundbait for this bite, from the bank's own lure split and weighed as the bank draws them, or none. */
-export function groundbaitFeeder(spot: SpotId, lure: string | undefined, shortCast: boolean, hour: LakeHour, random = Math.random): FishSpecies | null {
-  if (random() >= GROUNDBAIT_FEEDER_SHARE) return null;
+export function groundbaitFeeder(spot: SpotId, lure: string | undefined, shortCast: boolean, hour: LakeHour, random = Math.random, share = GROUNDBAIT_FEEDER_SHARE): FishSpecies | null {
+  if (random() >= share) return null;
   const home = FISH.filter((fish) => fish.spots.includes(spot) && (!shortCast || fish.rarity === "common"));
   const feeders = poolForLure(home, lure).filter((fish) => GROUNDBAIT_FEEDERS.has(fish.id));
   let roll = random() * feeders.reduce((sum, fish) => sum + appeal(fish, hour), 0);
