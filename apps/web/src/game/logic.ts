@@ -767,8 +767,8 @@ export const GROUNDBAIT_WAIT = 0.8;
 /** The free handfuls of groundbait the bag is topped up to on a day's first visit. */
 export const GROUNDBAIT_HANDFULS = 1;
 
-/** A groundbaited swim: its bank, the casts left, how often it was topped up as it faded, the casts its fish are still full for, and the casts its feeders stay scattered for. */
-export type Groundbait = { spot: SpotId; casts: number; built?: number; full?: number; spooked?: number };
+/** A groundbaited swim: its bank, the casts left, how often it was topped up as it faded, the casts its fish are still full for, the casts its feeders stay scattered for, and whether chopped worm went in it. */
+export type Groundbait = { spot: SpotId; casts: number; built?: number; full?: number; spooked?: number; worm?: boolean };
 
 /** A handful onto a swim at its bank with this many casts or fewer left tops it up as it fades: the feeders stay and more come in. */
 export const TOPUP_CASTS_LEFT = 2;
@@ -781,12 +781,28 @@ export const SWIM_MAX_CASTS = 2 * GROUNDBAIT_CASTS;
 export const OVERFED_CASTS = 2;
 export const OVERFED_WAIT = 1.3;
 
-/** A handful tossed off a bank: a fresh swim (built once already on a regular feeding spot), a fading swim there topped up, or one still well fed overfed. */
-export function throwHandful(bait: Groundbait | null, spot: SpotId, regular = false): { next: Groundbait; kind: "fresh" | "topped" | "overfed" } {
-  if (!bait || bait.spot !== spot || bait.casts <= 0) return { next: { spot, casts: GROUNDBAIT_CASTS, ...(regular ? { built: 1 } : {}) }, kind: "fresh" };
+/** A handful tossed off a bank: a fresh swim (built once already on a regular feeding spot), a fading swim there topped up, or one still well fed overfed. Chopped worm in it stays in the swim to its end. */
+export function throwHandful(bait: Groundbait | null, spot: SpotId, regular = false, worm = false): { next: Groundbait; kind: "fresh" | "topped" | "overfed" } {
+  const wormed = worm ? { worm: true } : {};
+  if (!bait || bait.spot !== spot || bait.casts <= 0) return { next: { spot, casts: GROUNDBAIT_CASTS, ...(regular ? { built: 1 } : {}), ...wormed }, kind: "fresh" };
   const casts = Math.min(SWIM_MAX_CASTS, bait.casts + GROUNDBAIT_CASTS);
-  if (bait.casts <= TOPUP_CASTS_LEFT) return { next: { ...bait, casts, built: Math.min(TOPUP_MAX, (bait.built ?? 0) + 1) }, kind: "topped" };
-  return { next: { ...bait, casts, full: OVERFED_CASTS }, kind: "overfed" };
+  if (bait.casts <= TOPUP_CASTS_LEFT) return { next: { ...bait, casts, built: Math.min(TOPUP_MAX, (bait.built ?? 0) + 1), ...wormed }, kind: "topped" };
+  return { next: { ...bait, casts, full: OVERFED_CASTS, ...wormed }, kind: "overfed" };
+}
+
+/** The worms from the tin chopped into a handful of groundbait. */
+export const CHOPPED_WORMS = 2;
+/** Fish that come in to a swim for the chopped worm in it, with its feeders. */
+export const WORM_FEEDERS: ReadonlySet<string> = new Set(["perch"]);
+
+/** Whether any fish at this bank comes in for chopped worm. */
+export function hasWormFeeders(spot: SpotId) {
+  return FISH.some((fish) => WORM_FEEDERS.has(fish.id) && fish.spots.includes(spot));
+}
+
+/** Whether a handful with chopped worm can go in off this bank: worms enough in the tin, fish here that come for it, and no chopped worm in the swim here already. */
+export function canChopWorm(worms: number, bait: Groundbait | null, spot: SpotId) {
+  return worms >= CHOPPED_WORMS && hasWormFeeders(spot) && !(bait?.spot === spot && bait.casts > 0 && bait.worm);
 }
 
 /** A big feeder lost off a swim built all the way scatters its feeders: the build is gone, and for this many casts no feeder takes. */
@@ -799,11 +815,11 @@ export function scatterSwim(bait: Groundbait | null, spot: SpotId): Groundbait |
   return { ...rest, spooked: SPOOKED_SWIM_CASTS };
 }
 
-/** Whether a cast at this bank lands over the groundbait (and on fish still full from it, on feeders scattered off it, or on a swim built up), and what is left of it after the cast. */
-export function castOverGroundbait(bait: Groundbait | null, spot: SpotId): { baited: boolean; full: boolean; spooked: boolean; built: number; next: Groundbait | null } {
-  if (!bait || bait.spot !== spot || bait.casts <= 0) return { baited: false, full: false, spooked: false, built: 0, next: bait };
+/** Whether a cast at this bank lands over the groundbait (and on fish still full from it, on feeders scattered off it, on a swim built up, or on chopped worm), and what is left of it after the cast. */
+export function castOverGroundbait(bait: Groundbait | null, spot: SpotId): { baited: boolean; full: boolean; spooked: boolean; built: number; worm: boolean; next: Groundbait | null } {
+  if (!bait || bait.spot !== spot || bait.casts <= 0) return { baited: false, full: false, spooked: false, built: 0, worm: false, next: bait };
   const { full = 0, spooked = 0, ...rest } = bait;
-  return { baited: true, full: full > 0, spooked: spooked > 0, built: bait.built ?? 0, next: bait.casts > 1 ? { ...rest, casts: bait.casts - 1, ...(full > 1 ? { full: full - 1 } : {}), ...(spooked > 1 ? { spooked: spooked - 1 } : {}) } : null };
+  return { baited: true, full: full > 0, spooked: spooked > 0, built: bait.built ?? 0, worm: !!bait.worm, next: bait.casts > 1 ? { ...rest, casts: bait.casts - 1, ...(full > 1 ? { full: full - 1 } : {}), ...(spooked > 1 ? { spooked: spooked - 1 } : {}) } : null };
 }
 
 /** Fish that crowd in to feed on groundbait: the panfish, baitfish and bottom feeders. */
@@ -835,11 +851,11 @@ export function bigFeedersOver(bait: Groundbait, lure: string | undefined) {
   return (bait.built ?? 0) >= TOPUP_MAX && hasBigFeeders(bait.spot, lure);
 }
 
-/** A feeder drawn to the groundbait for this bite, from the bank's own lure split and weighed as the bank draws them (the big ones more over a built-up swim), or none. */
-export function groundbaitFeeder(spot: SpotId, lure: string | undefined, shortCast: boolean, hour: LakeHour, random = Math.random, built = 0): FishSpecies | null {
+/** A feeder drawn to the groundbait for this bite, from the bank's own lure split and weighed as the bank draws them (the big ones more over a built-up swim, the perch too over chopped worm), or none. */
+export function groundbaitFeeder(spot: SpotId, lure: string | undefined, shortCast: boolean, hour: LakeHour, random = Math.random, built = 0, worm = false): FishSpecies | null {
   if (random() >= feederShare(built)) return null;
   const home = FISH.filter((fish) => fish.spots.includes(spot) && (!shortCast || fish.rarity === "common"));
-  const feeders = poolForLure(home, lure).filter((fish) => GROUNDBAIT_FEEDERS.has(fish.id));
+  const feeders = poolForLure(home, lure).filter((fish) => GROUNDBAIT_FEEDERS.has(fish.id) || (worm && WORM_FEEDERS.has(fish.id)));
   const pull = (fish: FishSpecies) => appeal(fish, hour) * (isBigFeeder(fish.id, built) ? BIG_FEEDER_PULL : 1);
   let roll = random() * feeders.reduce((sum, fish) => sum + pull(fish), 0);
   for (const fish of feeders) {

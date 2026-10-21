@@ -79,7 +79,7 @@ import { weightText } from "../i18n/content";
 import { FRENZY_SLOT_MS, frenzyOn, HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, slotFrenzy, type Hotspot } from "./hotspot";
 import { loadBag, loadShiner, saveBag, saveShiner, type HookedShiner } from "./groundbaitBag";
 import { loadTin, saveTin, WORM_TIN_DAILY, WORM_TIN_WET } from "./wormTin";
-import { BACKLASH_POWER, BED_RAIDERS, COLD_WORK_WAIT, tooQuickForCold, isLongCast, castIntoSchool, castOverGroundbait, scatterSwim, SPOOKED_SWIM_CASTS, isBigFeeder, bigFeedersOver, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, OVERFED_WAIT, throwHandful, TOPUP_CASTS_LEFT, canBaitShiner, shinerHunter, bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, type Groundbait, castIntoSpooked, castUnderPressure, castNewLure, type LuresShown, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, colourSuits, colourWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, anchorSplashWaitMul, openGlareWaitMul, frenzyHunter, FRENZY_WAIT, lampLit, LAMP_WAIT, LAMP_WINDOW, longShadowWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, waterSwingWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
+import { BACKLASH_POWER, BED_RAIDERS, COLD_WORK_WAIT, tooQuickForCold, isLongCast, castIntoSchool, castOverGroundbait, canChopWorm, CHOPPED_WORMS, scatterSwim, SPOOKED_SWIM_CASTS, isBigFeeder, bigFeedersOver, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, OVERFED_WAIT, throwHandful, TOPUP_CASTS_LEFT, canBaitShiner, shinerHunter, bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, type Groundbait, castIntoSpooked, castUnderPressure, castNewLure, type LuresShown, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, colourSuits, colourWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, anchorSplashWaitMul, openGlareWaitMul, frenzyHunter, FRENZY_WAIT, lampLit, LAMP_WAIT, LAMP_WINDOW, longShadowWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, waterSwingWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -805,13 +805,13 @@ export function useFishingGame(
   useEffect(() => {
     const swim = profile?.userId ? loadSwim(profile.userId) : null;
     const now = swimNow(swim, Date.now(), season);
-    groundbaitRef.current = now ? { spot: now.spot, casts: now.casts, ...(now.built ? { built: now.built } : {}), ...(now.spooked ? { spooked: now.spooked } : {}) } : null;
+    groundbaitRef.current = now ? { spot: now.spot, casts: now.casts, ...(now.built ? { built: now.built } : {}), ...(now.spooked ? { spooked: now.spooked } : {}), ...(now.worm ? { worm: true } : {}) } : null;
     swimRef.current = { at: now?.at ?? 0, primed: !!now?.primed, bread: !!now?.bread };
     setSwimPrimed(!!now?.primed);
     setGroundbait(groundbaitRef.current);
     if (profile?.userId && swim && !now) saveSwim(profile.userId, null);
     if (now?.primedNow && profile?.userId) {
-      saveSwim(profile.userId, { spot: now.spot, casts: now.casts, at: now.at, primed: true, ...(now.bread ? { bread: true } : {}) });
+      saveSwim(profile.userId, { spot: now.spot, casts: now.casts, at: now.at, primed: true, ...(now.bread ? { bread: true } : {}), ...(now.worm ? { worm: true } : {}) });
       const left = { bank: t(SPOT_LABELS[now.spot]), casts: now.casts };
       const primed = now.bread
         ? t("The groundbait and bread crumb you left at the {bank} have the feeders gathered there: {casts} casts of it.", left)
@@ -1350,7 +1350,7 @@ export function useFishingGame(
     const lodgeFoe = !lost.again && !mercyNow && !released?.fish && !tagged && !giantUp && !ownFoe && lodgeLostRef.current.length > 0 ? castForLodgeLost(lodgeLostRef.current, spotRef.current, Math.random(), landedLostRef.current, current) : null;
     recaughtRef.current = (lost.again ? backAgain(lost.again, openGiantsRef.current) : undefined) ?? released?.fish ?? tagged ?? giantUp ?? ownFoe ?? lodgeFoe;
     // Over the groundbait the feeders crowd in, so some bites are theirs; a beginner's first fish stays an easy one.
-    const feeder = bait.baited && !bait.full && !bait.spooked && !mercyNow ? groundbaitFeeder(spotRef.current, lureRef?.current, short, hour, Math.random, bait.built) : null;
+    const feeder = bait.baited && !bait.full && !bait.spooked && !mercyNow ? groundbaitFeeder(spotRef.current, lureRef?.current, short, hour, Math.random, bait.built, bait.worm) : null;
     const hunter = shiner && !lost.again && !recaughtRef.current && !mercyNow ? shinerHunter(spotRef.current, current, hour, Math.random, lively) : null;
     shinerTakenRef.current = !!hunter;
     // On the sunfish beds some bites are the perch and smallmouth come to raid the eggs; a beginner's first fish stays an easy one.
@@ -2350,35 +2350,41 @@ export function useFishingGame(
     setHint([fixed, rebaited, tinEmpty ? emptyTin : ""].filter(Boolean).join(" "));
   }, []);
 
-  /** Toss a handful of groundbait off the bank the angler stands on: the next casts there bite sooner. A fading swim there is topped up, a well-fed one overfed. */
-  const throwGroundbait = useCallback(() => {
+  /** Toss a handful of groundbait off the bank the angler stands on: the next casts there bite sooner. A fading swim there is topped up, a well-fed one overfed. With `chopped` worm from the tin in it, the bank's perch come in with the feeders. */
+  const tossHandful = (chopped: boolean) => {
     if (phaseRef.current !== "idle" || handfulsRef.current <= 0) return;
+    if (chopped && !canChopWorm(wormsRef.current, groundbaitRef.current, spotRef.current)) return;
     const before = groundbaitRef.current?.built ?? 0;
     const angler = anglerIdRef.current;
     const day = angler ? baitDay(loadPrebait(angler), spotRef.current, new Date()) : null;
-    const { next, kind } = throwHandful(groundbaitRef.current, spotRef.current, day?.regular);
+    const { next, kind } = throwHandful(groundbaitRef.current, spotRef.current, day?.regular, chopped);
     const builtFresh = kind === "fresh" && !!day?.regular;
     if (angler && day) savePrebait(angler, builtFresh ? { ...day.next, built: day.next.day } : day.next);
     keepGroundbait(next, Date.now());
     keepHandfuls(handfulsRef.current - 1);
+    if (chopped) keepWorms(wormsRef.current - CHOPPED_WORMS);
     fx.plop();
+    const worm = chopped ? `${t("{n} chopped worms went in with it: the perch here come in to feed with the feeders while the swim lasts.", { n: CHOPPED_WORMS })} ${t("Worms left in your tin: {worms}.", { worms: wormsRef.current })}` : "";
+    const withWorm = (said: string) => [said, worm].filter(Boolean).join(" ");
     if (kind === "topped") {
       // The big feeders are told of only where they live and would take the tied lure.
       const big = bigFeedersOver(next, lureRef?.current);
       const grew = next.built! > before;
       setHint(
-        big && grew
-          ? t("You top up the swim again as it fades: the feeders stay, and the big ones move in. {casts} casts of it now.", { casts: next.casts })
-          : big
-            ? t("You top up the swim as it fades: the feeders stay, the big ones too. {casts} casts of it now.", { casts: next.casts })
-            : grew
-              ? t("You top up the swim as it fades: the feeders stay, and more come in. {casts} casts of it now.", { casts: next.casts })
-              : t("You top up the swim as it fades: the feeders stay. {casts} casts of it now.", { casts: next.casts }),
+        withWorm(
+          big && grew
+            ? t("You top up the swim again as it fades: the feeders stay, and the big ones move in. {casts} casts of it now.", { casts: next.casts })
+            : big
+              ? t("You top up the swim as it fades: the feeders stay, the big ones too. {casts} casts of it now.", { casts: next.casts })
+              : grew
+                ? t("You top up the swim as it fades: the feeders stay, and more come in. {casts} casts of it now.", { casts: next.casts })
+                : t("You top up the swim as it fades: the feeders stay. {casts} casts of it now.", { casts: next.casts }),
+        ),
       );
       return;
     }
     if (kind === "overfed") {
-      setHint(t("Too much too soon: the fish fill up on it, so the next {full} casts bite slower and no feeders take. {casts} casts of it now.", { full: next.full!, casts: next.casts }));
+      setHint(withWorm(t("Too much too soon: the fish fill up on it, so the next {full} casts bite slower and no feeders take. {casts} casts of it now.", { full: next.full!, casts: next.casts })));
       return;
     }
     const run = builtFresh
@@ -2386,7 +2392,7 @@ export function useFishingGame(
       : day?.newDay && day.next.days >= 2
         ? t("Day {days} running you bait this bank: from day {need} its feeders start to expect it.", { days: day.next.days, need: PREBAIT_DAYS })
         : "";
-    const tossed = [t("You toss a handful of groundbait. The fish will gather to feed here for the next {casts} casts.", { casts: GROUNDBAIT_CASTS }), t("Top it up as it fades, with {left} casts or fewer left, and more feeders come in.", { left: TOPUP_CASTS_LEFT }), run].filter(Boolean).join(" ");
+    const tossed = [t("You toss a handful of groundbait. The fish will gather to feed here for the next {casts} casts.", { casts: GROUNDBAIT_CASTS }), worm, t("Top it up as it fades, with {left} casts or fewer left, and more feeders come in.", { left: TOPUP_CASTS_LEFT }), run].filter(Boolean).join(" ");
     setHint(
       season === "summer"
         ? `${tossed} ${t("In the summer heat, any left draws them back after three hours but is eaten within a day.")}`
@@ -2394,7 +2400,10 @@ export function useFishingGame(
           ? `${tossed} ${t("In the winter cold, any left takes twelve hours to draw them back but keeps four days.")}`
           : tossed,
     );
-  }, [season]);
+  };
+  const throwGroundbait = useCallback(() => tossHandful(false), [season]);
+  /** Toss a handful with chopped worm in it, as throwGroundbait does. */
+  const throwChoppedWorm = useCallback(() => tossHandful(true), [season]);
 
   /** A handful bought at the shack goes in the bag, which carries no more than GROUNDBAIT_CARRY. */
   const addHandful = useCallback(() => keepHandfuls(Math.min(GROUNDBAIT_CARRY, handfulsRef.current + 1)), []);
@@ -2566,6 +2575,7 @@ export function useFishingGame(
     setNightLine,
     checkNightLine,
     throwGroundbait,
+    throwChoppedWorm,
     addHandful,
     addShiner,
     addWorm,
