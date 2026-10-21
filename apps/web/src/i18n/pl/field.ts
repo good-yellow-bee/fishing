@@ -593,6 +593,7 @@ export const PL_FIELD: PlBook = {
   "Arrow keys move between the days.": "Strzałki przechodzą między dniami.",
   "{n} outings with no fish": ["wyprawa bez ryby", "{n} wyprawy bez ryb", "{n} wypraw bez ryb"],
   "Days on the water in {year}: {count}": "Dni nad wodą w {year}: {count}",
+  "Days on the water in {year}: {count}, {fished} with a fish": "Dni nad wodą w {year}: {count}, z rybą: {fished}",
   "{n} fish an outing on average": "Ryb na wyprawę średnio: {n}",
   "{average}, {blank}": "{average} · {blank}",
   "Lures that took the most: {lures}": "Najskuteczniejsze przynęty: {lures}",
