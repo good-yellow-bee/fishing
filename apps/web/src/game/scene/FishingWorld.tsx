@@ -92,6 +92,7 @@ import { SnappedFloat } from "./SnappedFloat";
 import type { LineState } from "./stakePose";
 import { ShinerTrap } from "./ShinerTrap";
 import type { trapState } from "../minnowTrap";
+import { BaitBag } from "./BaitBag";
 import { BaitBucket } from "./BaitBucket";
 import { weedClumpShape } from "./weedClump";
 import { fishSize, landedScale } from "./fishSize";
@@ -195,6 +196,8 @@ type Props = {
   nightLineState?: LineState | null;
   /** Spare live shiners in the angler's bait bucket. */
   baitBucket?: number;
+  /** Handfuls of groundbait left in the angler's bag. */
+  groundbaitBag?: number;
   /** The shack's aerator is fitted to that bucket. */
   aerated?: boolean;
   /** The angler has a place in the shack's worm bin. */
@@ -2311,7 +2314,7 @@ function Tone({ hour }: { hour: LakeHour }) {
 
 const NO_BANKS: readonly SpotId[] = [];
 
-function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, follow = null, giantBanks = NO_BANKS, lostFloatBanks = NO_BANKS, nightLineSpot = null, nightLineState = null, baitBucket = 0, aerated = false, wormBin = false, breadCrumb = false, worms = 0, topwater = false, hour, sky, season = DEFAULT_SEASON, species, weight, golden = false, released = false, moon, wind, boatSwing = 0, headlamp = false, hotspot, groundbait = null, groundbaitPrimed = false, groundbaitBig = false, shinerTrap = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
+function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, follow = null, giantBanks = NO_BANKS, lostFloatBanks = NO_BANKS, nightLineSpot = null, nightLineState = null, baitBucket = 0, groundbaitBag = 0, aerated = false, wormBin = false, breadCrumb = false, worms = 0, topwater = false, hour, sky, season = DEFAULT_SEASON, species, weight, golden = false, released = false, moon, wind, boatSwing = 0, headlamp = false, hotspot, groundbait = null, groundbaitPrimed = false, groundbaitBig = false, shinerTrap = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
   // How this fish takes the bait: a topwater lure makes every take a hit at the top.
   const take = species !== null ? takeStyle(species.id, topwater) : null;
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
@@ -2390,6 +2393,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       {nightLineSpot && nightLineState && <NightLineStake bank={nightLineSpot} state={nightLineState} />}
       <BaitBucket count={baitBucket} aerated={aerated} />
       <WormPot count={worms} />
+      <BaitBag handfuls={groundbaitBag} />
       {shinerTrap && <ShinerTrap ready={shinerTrap === "ready"} />}
       {species && <FishShadow level={level} phase={phase} weight={weight} bobber={bobberWorld} speciesId={species.id} />}
       <StrikeSplash phase={phase} roll={take === "roll" || (species !== null && topwater)} />

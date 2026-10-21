@@ -1187,6 +1187,7 @@ export function DockPage() {
           nightLineSpot={game.nightLine?.spot ?? null}
           nightLineState={lineState}
           baitBucket={game.bucket}
+          groundbaitBag={game.handfuls}
           aerated={game.aerator}
           wormBin={game.wormBin}
           breadCrumb={game.breadCrumb}
