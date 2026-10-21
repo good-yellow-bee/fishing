@@ -1,4 +1,4 @@
-import { fishCountsByTrip, type Logbook, type Trip } from "@stillwater/shared";
+import { fishCountsByTrip, type CatchEntry, type Logbook, type Trip } from "@stillwater/shared";
 import { countedBook } from "./milestones";
 import { bookFishDay } from "./tripMonths";
 
@@ -15,21 +15,36 @@ export function outingFish(book: Logbook, onItsWater = false): (tripId: string) 
   if (onItsWater)
     for (const entry of book.catches)
       if (entry.tripId && tripsById.get(entry.tripId)?.spotId === entry.spotId) fishByTrip.set(entry.tripId, (fishByTrip.get(entry.tripId) ?? 0) + 1);
+  const loose = looseFishByOuting(book);
+  return (id) => (fishByTrip.get(id) ?? 0) + (loose.get(id)?.length ?? 0);
+}
+
+/** The fish each outing brought, by `outingFish`'s rule: its own, with the loose ones it takes. */
+export function outingCatches(book: Logbook): (tripId: string) => CatchEntry[] {
+  const filed = new Map<string, CatchEntry[]>();
+  for (const entry of book.catches) if (entry.tripId) listUnder(filed, entry.tripId, entry);
+  const loose = looseFishByOuting(book);
+  return (id) => [...(filed.get(id) ?? []), ...(loose.get(id) ?? [])];
+}
+
+/** The angler's fish logged without an outing, by the outing they go to: the day's only one on their water. */
+function looseFishByOuting(book: Logbook): Map<string, CatchEntry[]> {
   const own = countedBook(book);
-  const sameDay = new Map<string, number>();
-  for (const trip of own.trips) sameDay.set(`${trip.date} ${trip.spotId}`, (sameDay.get(`${trip.date} ${trip.spotId}`) ?? 0) + 1);
-  const loose = new Map<string, number>();
+  const onDay = new Map<string, Trip[]>();
+  for (const trip of own.trips) listUnder(onDay, `${trip.date} ${trip.spotId}`, trip);
+  const byOuting = new Map<string, CatchEntry[]>();
   for (const entry of own.catches) {
     if (entry.tripId) continue;
-    const key = `${bookFishDay(own, entry)} ${entry.spotId}`;
-    loose.set(key, (loose.get(key) ?? 0) + 1);
+    const trips = onDay.get(`${bookFishDay(own, entry)} ${entry.spotId}`);
+    if (trips?.length === 1) listUnder(byOuting, trips[0].id, entry);
   }
-  const tripOf = new Map(own.trips.map((trip) => [trip.id, trip]));
-  return (id) => {
-    const trip = tripOf.get(id);
-    const key = trip ? `${trip.date} ${trip.spotId}` : "";
-    return (fishByTrip.get(id) ?? 0) + (trip && sameDay.get(key) === 1 ? (loose.get(key) ?? 0) : 0);
-  };
+  return byOuting;
+}
+
+function listUnder<T>(lists: Map<string, T[]>, key: string, item: T): void {
+  const list = lists.get(key);
+  if (list) list.push(item);
+  else lists.set(key, [item]);
 }
 
 /** The days with fish the angler logged without an outing, as YYYY-MM-DD: each a fished day for a run of outings. */
