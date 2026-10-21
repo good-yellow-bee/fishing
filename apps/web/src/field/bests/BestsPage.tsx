@@ -31,7 +31,7 @@ import { PLAY_LAKE_ID } from "../playLake";
 import { countedSearch } from "../countedSearch";
 import { averagedOutings, countedBook, countedFish, hasOwnEntries } from "../milestones";
 import { hasSampleFish, isSampleCatch, withoutSample } from "../bookCopy";
-import { daysBetween, foldName, waterKeys } from "../spotOrder";
+import { daysBetween, waterKeys } from "../spotOrder";
 import { SameKinds } from "./SameKinds";
 import { tripDaySearch } from "../tripSearch";
 import { gaveWay, outingDay, plainName } from "../tripDates";
@@ -174,8 +174,8 @@ export function BestsPage() {
   const fishDays = new Set(whole.catches.map(dayOf).filter((day) => day.startsWith(`${today.slice(0, 4)}-`))).size;
   const monthOf = (entry: CatchEntry) => dayOf(entry).slice(0, 7);
   const waterOf = waterKeys(whole);
-  // Twin waters are one, as a search reads them; a water with no name is only itself.
-  const waterKey = (spotId: string) => waterOf.get(spotId) || spotId;
+  // Twin waters are one, as a search reads them; a water with no name, or gone from the book, is only itself.
+  const waterKey = (spotId: string) => waterOf.get(spotId) || `\u0000${spotId}`;
   const notYet = notYetThisYear(real.catches, new Date(), undefined, dayOf);
   const newWaters = newWatersThisYear(real.catches, new Date(), dayOf, waterKey).flatMap((id) => whole.spots.filter((spot) => spot.id === id));
   const wholeFishByTrip = fishCountsByTrip(whole);
@@ -230,7 +230,7 @@ export function BestsPage() {
   const twinWaters = new Map<string, typeof bests.waters>();
   for (const water of bests.waters) {
     // Waters no longer in the book are no twins: each keeps its own "Unknown water" card.
-    const key = spotById(book, water.spotId) ? foldName(water.name) : `\u0000${water.spotId}`;
+    const key = waterKey(water.spotId);
     twinWaters.set(key, [...(twinWaters.get(key) ?? []), water]);
   }
   const waterCards = [...twinWaters.values()].map((twins) => ({
@@ -239,7 +239,7 @@ export function BestsPage() {
     fish: twins.length > 1 ? twins.flatMap((water) => bySpot.get(water.spotId) ?? []).sort((a, b) => Date.parse(b.caughtAt) - Date.parse(a.caughtAt)) : (bySpot.get(twins[0]!.spotId) ?? []),
   }))
     .sort((a, b) => b.fish.length - a.fish.length || plainName(a.name).localeCompare(plainName(b.name)));
-  const waterNames = new Set(book.spots.map((spot) => foldName(spot.name))).size;
+  const waterNames = new Set(book.spots.map((spot) => waterKey(spot.id))).size;
   // Counted as the calendar below counts its days, so the tile and the calendar agree: in a season, its fish by the day
   // they count on, with every outing to file a night session's small hours under.
   const dayBook = year ? { ...whole, catches: whole.catches.filter((entry) => dayOf(entry).startsWith(`${year}-`)) } : book;

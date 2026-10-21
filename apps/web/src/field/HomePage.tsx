@@ -225,7 +225,8 @@ export function HomePage() {
   const sampleLeft = !sampleOnly && hasSampleLeft(storedBook);
   const next = upcoming[0];
   // Out now is under way too, as of a dawn and a dusk with a fish loose on their water: no plan to copy beside it.
-  const nextOutNow = next?.date === today && outNow(book, next, now);
+  // Last evening's still on the water in the small hours too, as the Map says it.
+  const nextOutNow = next ? (next.date === today || next === lateOuting) && outNow(book, next, now) : false;
   const nextUnderWay = next ? underWayOn(next, fishOn) || nextOutNow : false;
   const nextFish = nextOutNow ? outingCatches(book)(next.id) : [];
   // The newest outing fished, for a Next with nothing planned: on a water still in the book.
