@@ -52,8 +52,11 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
   const { items } = useTackle();
   useT();
   const spot = spotById(book, trip.spotId);
-  // Under way once anything bit, as the outing's own page and Trips take it: a fish, a lost one or a miss.
-  const fished = underWayOn(trip, outingFish(book));
+  // Today's outing out now, as Home's Next says it: of a dawn and a dusk with a fish loose on their water, either.
+  const out = outNow(book, trip);
+  const going = trip.date === today && out;
+  // Under way once anything bit, as the outing's own page and Trips take it: a fish, a lost one or a miss; or out now.
+  const underWayNow = underWayOn(trip, outingFish(book)) || going;
 
   return (
     <section className="tackle-trip">
@@ -63,7 +66,7 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
           <Link to={`/trips/${trip.id}`}>{outingName(trip, book.spots)}</Link>
         </h3>
         <span className="meta">
-          {tripWhen(trip.date, today, tomorrow, outNow(book, trip))}
+          {going ? t("Out now") : tripWhen(trip.date, today, tomorrow, out)}
           {spot && !sameName(spot.name, outingName(trip, book.spots)) ? ` · ${plainName(spot.name)}` : ""}
         </span>
       </div>
@@ -76,8 +79,8 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
         // Today's outing may already have fish, counted against the pieces as on the outing's page.
         caught={trip.date <= today ? catchesForTrip(book, trip.id) : undefined}
       />
-      {/* The plan and what is still to pack, for whoever is coming along: until the outing's first fish, as Home offers it. */}
-      {fished ? null : <CopySummary text={() => planText(book, trip, items)} file="stillwater-plan.txt" label={t("Copy the plan")} copied={t("Plan copied.")} saved={t("Plan saved as a file.")} />}
+      {/* The plan and what is still to pack, for whoever is coming along: until the outing is under way or out now, as Home offers it. */}
+      {underWayNow ? null : <CopySummary text={() => planText(book, trip, items)} file="stillwater-plan.txt" label={t("Copy the plan")} copied={t("Plan copied.")} saved={t("Plan saved as a file.")} />}
     </section>
   );
 }
@@ -107,7 +110,6 @@ export function orderedRecords(records: readonly PieceRecord[], order: LureOrder
   return rows;
 }
 
-/** Each lure taken on past outings: the outings it went on and the fish it took there, most fish first. */
 /** Outings a lure goes out on without a fish before the record says it may as well stay home. */
 const NEVER_TOOK_OUTINGS = 4;
 

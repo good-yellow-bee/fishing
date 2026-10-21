@@ -1,4 +1,4 @@
-import { localDate } from "@stillwater/shared";
+import { localDate, type LakeSeason } from "@stillwater/shared";
 import { readAngler, writeAngler } from "./anglerStore";
 import { rainedYesterday } from "./logic";
 
@@ -18,28 +18,40 @@ export function wormsDug(now: Date) {
 
 const wormsIn = (n: unknown) => (typeof n === "number" && Number.isFinite(n) ? Math.min(WORM_TIN_WET, Math.max(0, Math.floor(n))) : null);
 
-/** The tin as kept: its worms, and the day it was last topped up. */
-type Tin = { worms: number; day: string };
+/**
+ * The tin as kept: its worms, the day it was last topped up, and the day a worm last went in, which is later when one was bought on a visit past midnight.
+ * That keeps the whole tin fresh in summer, the older worms too, rather than letting a worm just paid for die.
+ */
+type Tin = { worms: number; day: string; kept: string };
 
 function readTin(userId: string): Tin | null {
   return readAngler(wormTinKey(userId), (raw) => {
-    const tin = raw as { worms?: unknown; day?: unknown } | null;
+    const tin = raw as { worms?: unknown; day?: unknown; kept?: unknown } | null;
     const worms = wormsIn(tin?.worms);
-    return worms === null ? null : { worms, day: typeof tin?.day === "string" ? tin.day : "" };
+    const day = typeof tin?.day === "string" ? tin.day : "";
+    return worms === null ? null : { worms, day, kept: typeof tin?.kept === "string" ? tin.kept : day };
   });
 }
 
-/** What the tin holds now: as last seen, topped up to the day's dug worms on the first visit of a day. */
-export function loadTin(userId: string, now = new Date()): number {
+/**
+ * What the tin holds now: as last seen, topped up to the day's dug worms on the first visit of a day.
+ * In summer's heat the worms that went in on an earlier day have died by then, judged by the season when the angler comes back,
+ * so the tin holds only the day's dig; `died` is how many fewer that leaves than the tin held.
+ */
+export function loadTin(userId: string, now = new Date(), season?: LakeSeason): { worms: number; died: number } {
   const today = localDate(now);
   const tin = readTin(userId);
-  if (tin && tin.day === today) return tin.worms;
-  const worms = Math.max(wormsDug(now), tin?.worms ?? 0);
-  writeAngler(wormTinKey(userId), { worms, day: today });
-  return worms;
+  if (tin && tin.day === today) return { worms: tin.worms, died: 0 };
+  const dug = wormsDug(now);
+  const held = tin?.worms ?? 0;
+  const worms = season === "summer" && tin?.kept !== today ? dug : Math.max(dug, held);
+  writeAngler(wormTinKey(userId), { worms, day: today, kept: today });
+  return { worms, died: Math.max(0, held - worms) };
 }
 
 /** Keeps what the tin holds, under the day it was last topped up, so a visit running past midnight doesn't spend the next day's worms. */
 export function saveTin(userId: string, worms: number, now = new Date()) {
-  writeAngler(wormTinKey(userId), { worms, day: readTin(userId)?.day ?? localDate(now) });
+  const tin = readTin(userId);
+  const today = localDate(now);
+  writeAngler(wormTinKey(userId), { worms, day: tin?.day ?? today, kept: tin && worms <= tin.worms ? tin.kept : today });
 }

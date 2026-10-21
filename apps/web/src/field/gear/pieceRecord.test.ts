@@ -96,3 +96,19 @@ describe("pieceRecords in the small hours", () => {
     expect(records[0]).toMatchObject({ outings: 1, fish: 1 });
   });
 });
+
+describe("pieceRecords and a fish logged loose", () => {
+  const trip = (id: string) => ({ id, date: "2026-10-21", spotId: "own", title: "", note: "" });
+  const loose = { id: "f", species: "Pike", measure: { kind: "length" as const, inches: 30 }, lure: "Spinner", spotId: "own", tripId: null, caughtAt: new Date(2026, 9, 21, 10).toISOString(), note: "", weather: null };
+
+  it("counts today's one outing on its water, as Trips does", () => {
+    const book = { spots: [], trips: [trip("solo")], catches: [loose] };
+    expect(pieceRecords(book, [{ id: "a", tripId: "solo", label: "Spinner", packed: true }], "2026-10-21")[0]).toMatchObject({ outings: 1, fish: 1 });
+  });
+
+  it("counts neither of a dawn and a dusk until it is filed", () => {
+    const book = { spots: [], trips: [trip("dawn"), trip("dusk")], catches: [loose] };
+    const items = [{ id: "a", tripId: "dawn", label: "Spinner", packed: true }, { id: "b", tripId: "dusk", label: "Spinner", packed: true }];
+    expect(pieceRecords(book, items, "2026-10-21")).toEqual([]);
+  });
+});

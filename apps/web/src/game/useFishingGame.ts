@@ -465,24 +465,40 @@ export function useFishingGame(
     setNightLineOut(line);
   };
   useTurnsOver(nightLine, nightLineState, nightLineNextChange);
+  // Worms dug for the day: a fresh one on a washed-out hook, or one out on a night line, comes from the tin.
+  const [worms, setWorms] = useState(WORM_TIN_DAILY);
+  const wormsRef = useRef(WORM_TIN_DAILY);
+  const keepWorms = (next: number) => {
+    wormsRef.current = next;
+    setWorms(next);
+    if (anglerIdRef.current) saveTin(anglerIdRef.current, next);
+  };
   /** Spare live shiners in the angler's bait bucket, read from the browser once per angler; the ref is what actions count from. */
   const [bucket, setBucket] = useState(0);
   /** When each spare shiner went in, oldest first: the oldest goes out first, before it dies. */
   const bucketRef = useRef<number[]>([]);
+  /** What died in the bucket and the tin since the last visit, said on sign-in; the primed swim's line adds to it, not over it. */
+  const baitDiedRef = useRef("");
+  // The bait kept from an earlier visit, read when the angler signs in: the bucket's shiners and the tin's worms may have died since.
   useEffect(() => {
     const kept = profile?.userId ? loadBucket(profile.userId, Date.now(), season) : { shiners: [], died: 0 };
     bucketRef.current = kept.shiners;
     setBucket(kept.shiners.length);
-    if (profile?.userId && kept.died > 0) {
-      saveBucket(profile.userId, kept.shiners);
-      setHint(
-        season === "winter"
+    const tin = profile?.userId ? loadTin(profile.userId, new Date(), season) : { worms: WORM_TIN_DAILY, died: 0 };
+    wormsRef.current = tin.worms;
+    setWorms(tin.worms);
+    if (profile?.userId && kept.died > 0) saveBucket(profile.userId, kept.shiners);
+    const shinersDied =
+      kept.died === 0
+        ? ""
+        : season === "winter"
           ? t("{n} of the shiners in your bait bucket died while you were away: in the cold winter water they keep five days.", { n: kept.died })
           : season === "summer"
             ? t("{n} of the shiners in your bait bucket died while you were away: in the summer heat they keep two days.", { n: kept.died })
-            : t("{n} of the shiners in your bait bucket died while you were away: they keep three days.", { n: kept.died }),
-      );
-    }
+            : t("{n} of the shiners in your bait bucket died while you were away: they keep three days.", { n: kept.died });
+    const wormsDied = tin.died > 0 ? t("{n} of the worms left in your tin died in the summer heat while you were away: they keep only the day they are dug or bought.", { n: tin.died }) : "";
+    baitDiedRef.current = [shinersDied, wormsDied].filter(Boolean).join(" ");
+    if (baitDiedRef.current) setHint(baitDiedRef.current);
   }, [profile?.userId]);
   const keepBucket = (userId: string, shiners: number[]) => {
     bucketRef.current = liveShiners(shiners, Date.now(), season);
@@ -699,18 +715,6 @@ export function useFishingGame(
     handfulsRef.current = profile?.userId ? loadBag(profile.userId) : GROUNDBAIT_HANDFULS;
     setHandfuls(handfulsRef.current);
   }, [profile?.userId]);
-  // Worms dug for the day: a fresh one on a washed-out hook, or one out on a night line, comes from the tin.
-  const [worms, setWorms] = useState(WORM_TIN_DAILY);
-  const wormsRef = useRef(WORM_TIN_DAILY);
-  const keepWorms = (next: number) => {
-    wormsRef.current = next;
-    setWorms(next);
-    if (anglerIdRef.current) saveTin(anglerIdRef.current, next);
-  };
-  useEffect(() => {
-    wormsRef.current = profile?.userId ? loadTin(profile.userId) : WORM_TIN_DAILY;
-    setWorms(wormsRef.current);
-  }, [profile?.userId]);
   /** The line came out of a fight over the rocks or round a piling frayed, and snaps sooner until retied. */
   const frayedRef = useRef(false);
   const [frayed, setFrayed] = useState(false);
@@ -787,7 +791,8 @@ export function useFishingGame(
     if (profile?.userId && swim && !now) saveSwim(profile.userId, null);
     if (now?.primedNow && profile?.userId) {
       saveSwim(profile.userId, { spot: now.spot, casts: now.casts, at: now.at, primed: true });
-      setHint(t("The groundbait you left at the {bank} has the feeders gathered there: {casts} casts of it.", { bank: t(SPOT_LABELS[now.spot]), casts: now.casts }));
+      const primed = t("The groundbait you left at the {bank} has the feeders gathered there: {casts} casts of it.", { bank: t(SPOT_LABELS[now.spot]), casts: now.casts });
+      setHint([baitDiedRef.current, primed].filter(Boolean).join(" "));
     }
   }, [profile?.userId]);
   /** The bank whose next cast meets wary fish, for the stance chip to say so before the cast. */
