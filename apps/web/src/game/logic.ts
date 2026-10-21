@@ -803,7 +803,7 @@ export const GROUNDBAIT_FEEDER_SHARE = 0.35;
 
 /** The feeders' share of the bites over a swim topped up this many times. */
 export function feederShare(built: number) {
-  return GROUNDBAIT_FEEDER_SHARE + TOPUP_FEEDER_SHARE * Math.min(TOPUP_MAX, built);
+  return GROUNDBAIT_FEEDER_SHARE + TOPUP_FEEDER_SHARE * built;
 }
 
 /** A feeder drawn to the groundbait for this bite, from the bank's own lure split and weighed as the bank draws them, or none. */

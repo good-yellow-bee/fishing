@@ -370,10 +370,9 @@ describe("groundbait", () => {
     expect(castOverGroundbait({ spot: "reeds", casts: 3, full: 1 }, "reeds").next).toEqual({ spot: "reeds", casts: 2 });
   });
 
-  it("draws more of the bites from the feeders over a built swim, up to its last top-up", () => {
+  it("draws more of the bites from the feeders over a built swim", () => {
     expect(feederShare(0)).toBe(GROUNDBAIT_FEEDER_SHARE);
     expect(feederShare(1)).toBeCloseTo(GROUNDBAIT_FEEDER_SHARE + TOPUP_FEEDER_SHARE);
-    expect(feederShare(TOPUP_MAX + 1)).toBe(feederShare(TOPUP_MAX));
   });
 });
 

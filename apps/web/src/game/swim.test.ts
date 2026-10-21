@@ -38,13 +38,13 @@ describe("a groundbaited swim left for the next visit", () => {
     expect(loadSwim("u")).toEqual(held);
   });
 
-  it("keeps a topped-up swim's casts, top-ups and full fish through a reload, and drops them when it primes", () => {
+  it("keeps a topped-up swim's casts and top-ups through a reload, its full fish hungry again, and drops the top-ups when it primes", () => {
     const kept = new Map<string, string>();
     vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
-    const built = { ...swim, casts: SWIM_MAX_CASTS, built: TOPUP_MAX, full: OVERFED_CASTS };
-    saveSwim("u", built);
+    const built = { ...swim, casts: SWIM_MAX_CASTS, built: TOPUP_MAX };
+    saveSwim("u", { ...built, full: OVERFED_CASTS });
     expect(loadSwim("u")).toEqual(built);
-    saveSwim("u", { ...built, built: TOPUP_MAX + 1, full: 0 });
+    saveSwim("u", { ...built, built: TOPUP_MAX + 1 });
     expect(loadSwim("u")).toEqual({ ...swim, casts: SWIM_MAX_CASTS });
     saveSwim("u", { ...built, casts: SWIM_MAX_CASTS + 1 });
     expect(loadSwim("u")).toBeNull();

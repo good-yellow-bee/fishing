@@ -666,8 +666,8 @@ describe("useFishingGame live shiner", () => {
   });
 
   it.each([
-    ["summer", SWIM_HOT_PRIMED_MS, SWIM_HOT_GONE_MS, "You toss a handful of groundbait. The fish will gather to feed here for the next 5 casts. Top it up as it fades, with two casts or fewer left, and more feeders come in. In the summer heat, any left draws them back after three hours but is eaten within a day."],
-    ["winter", SWIM_COLD_PRIMED_MS, SWIM_COLD_GONE_MS, "You toss a handful of groundbait. The fish will gather to feed here for the next 5 casts. Top it up as it fades, with two casts or fewer left, and more feeders come in. In the winter cold, any left takes twelve hours to draw them back but keeps four days."],
+    ["summer", SWIM_HOT_PRIMED_MS, SWIM_HOT_GONE_MS, "You toss a handful of groundbait. The fish will gather to feed here for the next 5 casts. Top it up as it fades, with 2 casts or fewer left, and more feeders come in. In the summer heat, any left draws them back after three hours but is eaten within a day."],
+    ["winter", SWIM_COLD_PRIMED_MS, SWIM_COLD_GONE_MS, "You toss a handful of groundbait. The fish will gather to feed here for the next 5 casts. Top it up as it fades, with 2 casts or fewer left, and more feeders come in. In the winter cold, any left takes twelve hours to draw them back but keeps four days."],
   ] as const)("times a swim left behind by the season: %s", (season, primed, gone, said) => {
     const kept = new Map<string, string>();
     vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
@@ -3316,8 +3316,10 @@ describe("useFishingGame groundbait", () => {
     toss();
     expect(groundbait()).toBe(`2|dock:${2 + GROUNDBAIT_CASTS}`);
     expect(hint()).toBe(`You top up the swim as it fades: the feeders stay, and more come in. ${2 + GROUNDBAIT_CASTS} casts of it now.`);
-    // The top-up joins the swim already there, so it keeps when that handful went in.
-    expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toEqual({ spot: "dock", casts: 2 + GROUNDBAIT_CASTS, built: 1, at });
+    // The fresh handful restarts how long the swim lasts.
+    const topped = JSON.parse(kept.get(swimKey(profile.userId))!);
+    expect(topped).toMatchObject({ spot: "dock", casts: 2 + GROUNDBAIT_CASTS, built: 1 });
+    expect(topped.at).toBeGreaterThan(at);
     cast(surface);
     expect(groundbaitFeeder).toHaveBeenLastCalledWith("dock", undefined, false, "day", Math.random, feederShare(1));
     expect(hint()).toContain("Over the groundbait.");
