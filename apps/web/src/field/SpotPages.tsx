@@ -27,7 +27,7 @@ import { FishCsv } from "./FishCsv";
 import { TallyBars } from "./TallyBars";
 import { WaterTipsBox } from "./WaterTipsBox";
 import { exactTerm, findWithLink } from "./findLinks";
-import { bookKindName, kindOnPage, speciesLink } from "./speciesLink";
+import { bookKindName, kindKey, kindOnPage, speciesCounts, speciesLink } from "./speciesLink";
 import { SpeciesChips } from "./SpeciesChips";
 import { daysBetween, foldName, lastOutByWater, spotsByLastFish, twinName } from "./spotOrder";
 import { bookFishDay, yearTally } from "./tripMonths";
@@ -49,7 +49,7 @@ import { sunTimes } from "./sunTimes";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { useKeptForm } from "./keptForm";
 import { ChoiceRow } from "./ChoiceRow";
-import { countedBook, ownFish } from "./milestones";
+import { countedBook, hasOwnEntries, ownFish } from "./milestones";
 import { PhotoStrip } from "./SpeciesPage";
 import { formatCoord, placeFor } from "./map/places";
 import { hookTally, hookText } from "./hookTally";
@@ -487,6 +487,17 @@ function SpotView() {
   // no name is no one's twin.
   const twins = foldName(spot.name) ? book.spots.filter((other) => other.id !== spot.id && twinName(other.name, spot.name)) : [];
   const twin = twins[0];
+  // The kinds no other water in the book has given, its twins aside as its links take them: where to come back for
+  // them. Said once another water has a fish, or every kind would be this water's alone; not for the game's lake, nor
+  // for an untouched sample water beside the angler's own fish, whose made-up fish say nothing of theirs.
+  const sameName = new Set([spot.id, ...twins.map((other) => other.id)]);
+  const inBook = new Set(book.spots.map((other) => other.id));
+  const elsewhere = counted.catches.filter((entry) => entry.spotId !== PLAY_LAKE_ID && inBook.has(entry.spotId) && !sameName.has(entry.spotId));
+  const elsewhereKinds = new Set(elsewhere.map((entry) => kindKey(entry.species)));
+  const onlyHere =
+    spot.id === PLAY_LAKE_ID || (keepsAll && hasOwnEntries(book)) || elsewhere.length === 0
+      ? []
+      : speciesCounts(summed).map((row) => row.species).filter((species) => !elsewhereKinds.has(kindKey(species)));
   const lastHere = spot.id === PLAY_LAKE_ID ? undefined : lastOutByWater(counted, fishedBy).get(spot.id);
   // The outing on this water now, as the Map says it: of a dawn and a dusk, the later.
   const outNowHere = outNowAt(book, spot.id);
@@ -583,7 +594,8 @@ function SpotView() {
         {/* When it was last fished, by its last outing or fish: how long it has rested. */}
         {lastHere ? (
           <p className="meta last-here">
-            <LastHereLine rest={restHere} day={lastHere} trip={lastHereTrip} fish={fishOn} catches={catches} loose={lastHereLoose} lureName={lureName} />
+            {/* Last evening's outing still going in the small hours is today's, as Out now below says it. */}
+            <LastHereLine rest={outNowHere?.date === lastHere ? 0 : restHere} day={lastHere} trip={lastHereTrip} fish={fishOn} catches={catches} loose={lastHereLoose} lureName={lureName} />
           </p>
         ) : null}
         {/* How long the angler has known this water: its first fish, once another fish day has followed it. */}
@@ -735,13 +747,14 @@ function SpotView() {
       {notYet.length > 0 ? (
         <p className="meta not-yet">
           <span>
-            {t("Not yet this year:")}{" "}
-            {inReadersOrder(notYet, kindName).map((name, index) => (
-              <Fragment key={name}>
-                {index > 0 ? ", " : null}
-                <Link to={findWithLink(here, exactTerm("species", kindName(name)))}>{kindName(name)}</Link>
-              </Fragment>
-            ))}
+            {t("Not yet this year:")} <KindLinks names={notYet} within={here} kindName={kindName} />
+          </span>
+        </p>
+      ) : null}
+      {onlyHere.length > 0 ? (
+        <p className="meta only-here">
+          <span>
+            {t("Only from this water:")} <KindLinks names={onlyHere} within={here} kindName={kindName} />
           </span>
         </p>
       ) : null}
@@ -1090,6 +1103,16 @@ function SunAtWater({ place }: { place: { lat: number; lng: number } }) {
 
 /** "Water temperature in 2026: Apr 20 52°F → Jun 3 64°F → Sep 9 58°F", from the readings noted with fish. */
 /** "Last fished here 8 days ago · Sat, Oct 10 · 2 fish · Spinner ×1": that day's outing, with what it gave and on what. */
+/** Kinds in readers' order, each opening its fish within `within`: "Tench, Zander". */
+function KindLinks({ names, within, kindName }: { names: readonly string[]; within: string; kindName: (name: string) => string }) {
+  return inReadersOrder(names, kindName).map((name, index) => (
+    <Fragment key={name}>
+      {index > 0 ? ", " : null}
+      <Link to={findWithLink(within, exactTerm("species", kindName(name)))}>{kindName(name)}</Link>
+    </Fragment>
+  ));
+}
+
 function LastHereLine({
   rest,
   day,
