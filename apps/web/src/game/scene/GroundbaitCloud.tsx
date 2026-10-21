@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import type { Groundbait } from "../logic";
-import { CLOUD_RADIUS, DIMPLES, cloudCenter, cloudOpacity, dimpleAt } from "./groundbaitCloud";
+import { CLOUD_RADIUS, DIMPLES, cloudCenter, cloudOpacity, dimpleAt, feedersShow } from "./groundbaitCloud";
 import { useReducedMotion } from "./reducedMotion";
 import { waterHeight } from "./water";
 
@@ -24,7 +24,7 @@ function softEdge() {
   return new THREE.CanvasTexture(canvas);
 }
 
-/** The muddy cloud a handful of groundbait leaves off the bank, thinning as its casts are fished out; with `feeding`, fish dimple over it. */
+/** The muddy cloud a handful of groundbait leaves off the bank, thinning as its casts are fished out; fish dimple over it once `feeding` or topped up, more often the more it was built up. */
 export function GroundbaitCloud({ bait, feeding = false }: { bait: Groundbait; feeding?: boolean }) {
   const still = useReducedMotion();
   const geo = useMemo(() => new THREE.CircleGeometry(CLOUD_RADIUS, 32).rotateX(-Math.PI / 2), []);
@@ -53,8 +53,8 @@ export function GroundbaitCloud({ bait, feeding = false }: { bait: Groundbait; f
     mat.opacity = cloudOpacity(bait.casts);
     rings.current.forEach((ring, i) => {
       if (!ring) return;
-      const dimple = dimpleAt(i, t);
-      ring.visible = feeding && !still && dimple.age < 1;
+      const dimple = dimpleAt(i, t, bait.built);
+      ring.visible = feedersShow(bait, feeding) && !still && dimple.age < 1;
       if (!ring.visible) return;
       const x = at.x + dimple.dx;
       const z = at.z + dimple.dz;
