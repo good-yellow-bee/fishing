@@ -59,7 +59,7 @@ const CRUMBS = [
   [0.005, 0.115],
 ] as const;
 
-/** The angler's sack of bread crumb, tied at the neck, a loaf painted on its front; crumbs spilled before it, or snow on its top in winter. */
+/** The angler's sack of bread crumb, tied at the neck, its top folded in, a loaf painted on its front; crumbs spilled before it, or snow on its top in winter. */
 function sackParts(snowy: boolean): PaintedPart[] {
   const { x, z, radius: r, height: h } = BIN_SACK;
   const neck = h * 0.8;
@@ -80,8 +80,10 @@ function sackParts(snowy: boolean): PaintedPart[] {
     { geometry: new THREE.LatheGeometry(body, 10), position: [x, 0, z], color: BURLAP },
     { geometry: new THREE.LatheGeometry(tuft, 10), position: [x, 0, z], color: BURLAP },
     { geometry: new THREE.TorusGeometry(r * 0.4, 0.005, 4, 12).rotateX(Math.PI / 2), position: [x, neck + 0.003, z], color: TWINE },
-    { geometry: new THREE.CircleGeometry(r * 0.42, 10), position: [x, 0.06, z + r + 0.002], color: PATCH },
-    { geometry: new THREE.CircleGeometry(r * 0.26, 10), position: [x, 0.06, z + r + 0.003], scale: [1, 0.6, 1], color: CRUST },
+    { geometry: new THREE.CircleGeometry(r * 0.56, 10).rotateX(-Math.PI / 2), position: [x, h - 0.012, z], color: BURLAP },
+    // The patch and its loaf wrap the sack's front, where it is about 0.985 of its width.
+    { geometry: new THREE.CylinderGeometry(r * 0.99, r * 0.99, 0.05, 6, 1, true, -0.4, 0.8), position: [x, 0.062, z], color: PATCH },
+    { geometry: new THREE.CylinderGeometry(r, r, 0.022, 4, 1, true, -0.22, 0.44), position: [x, 0.062, z], color: CRUST },
     ...(snowy
       ? [{ geometry: new THREE.SphereGeometry(r * 0.6, 10, 3, 0, Math.PI * 2, 0, Math.PI / 2), position: [x, h - 0.008, z] as const, scale: [1, 0.4, 1] as const, color: SNOW }]
       : CRUMBS.map(([dx, dz], i) => ({ geometry: new THREE.BoxGeometry(0.011, 0.007, 0.009), position: [x + dx, 0.0035, z + dz] as const, rotation: [0, i * 1.1, 0] as const, color: CRUMB }))),
