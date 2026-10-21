@@ -1,16 +1,18 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { BIN_AT, BIN_INSIDE, BIN_WORMS, binWorm } from "./binWorms";
+import type { LakeSeason } from "@stillwater/shared";
+import { BIN_AT, BIN_INSIDE, BIN_WORMS, binSnowy, binWorm } from "./binWorms";
 import { mergePainted } from "./mergeParts";
 import { STILL_TIME, useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
+import { WORM } from "./WormPot";
 
 const SLAT = "#a77a4c";
 const POST = "#6b4a32";
 const SOIL = "#3f2e20";
 const BOARD = "#e4d6b5";
-const WORM = "#d98a8f";
+const SNOW = "#f3f6f8";
 /** The crate's wall height and thickness. */
 const HEIGHT = 0.18;
 const WALL = 0.025;
@@ -25,8 +27,8 @@ function signWorm() {
   return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points), 18, 0.008, 5);
 }
 
-/** The open crate with its soil, and the sign beside it painted with a worm. */
-function binShape() {
+/** The open crate with its soil, snow on it in winter, and the sign beside it painted with a worm. */
+function binShape(snowy: boolean) {
   const { width: w, depth: d } = BIN_INSIDE;
   return mergePainted([
     { geometry: new THREE.BoxGeometry(w + WALL * 2, HEIGHT, WALL), position: [0, HEIGHT / 2, d / 2 + WALL / 2], color: SLAT },
@@ -35,7 +37,7 @@ function binShape() {
     { geometry: new THREE.BoxGeometry(WALL, HEIGHT, d), position: [-w / 2 - WALL / 2, HEIGHT / 2, 0], color: SLAT },
     // A darker band across each long side, where the slats meet.
     { geometry: new THREE.BoxGeometry(w + WALL * 2 + 0.004, 0.012, WALL + 0.004), position: [0, HEIGHT * 0.5, d / 2 + WALL / 2], color: POST },
-    { geometry: new THREE.BoxGeometry(w, 0.02, d), position: [0, HEIGHT - 0.03, 0], color: SOIL },
+    { geometry: new THREE.BoxGeometry(w, 0.02, d), position: [0, HEIGHT - 0.03, 0], color: snowy ? SNOW : SOIL },
     { geometry: new THREE.BoxGeometry(0.03, STAKE_TOP, 0.03), position: [STAKE_X, STAKE_TOP / 2, STAKE_Z], color: POST },
     { geometry: new THREE.BoxGeometry(0.2, 0.12, 0.015), position: [STAKE_X, STAKE_TOP - 0.08, STAKE_Z + 0.025], rotation: [0, 0, 0.06], color: BOARD },
     { geometry: signWorm(), position: [STAKE_X, STAKE_TOP - 0.08, STAKE_Z + 0.036], rotation: [0, 0, 0.06], color: WORM },
@@ -62,11 +64,16 @@ const Y = new THREE.Vector3(0, 1, 0);
 const Z = new THREE.Vector3(0, 0, 1);
 const matrix = new THREE.Matrix4();
 
-/** The shack's worm bin on the deck, worms rising out of its soil and sinking back, with a sign painted with a worm (binWorms.ts). */
-export function WormBin() {
+/** The shack's worm bin by the deck, worms rising out of its soil and sinking back (none under winter snow), with a sign painted with a worm (binWorms.ts). */
+export function WormBin({ season }: { season: LakeSeason }) {
   const worms = useRef<THREE.InstancedMesh>(null);
+  const posed = useRef(false);
   const still = useReducedMotion();
-  const shape = useMemo(binShape, []);
+  const snowy = binSnowy(season);
+  const shape = useMemo(() => binShape(snowy), [snowy]);
+  useEffect(() => {
+    posed.current = false;
+  }, [snowy, still]);
   const worm = useMemo(wormShape, []);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
   const pink = useMemo(() => new THREE.MeshToonMaterial({ color: WORM, gradientMap: toonRamp() }), []);
@@ -78,7 +85,9 @@ export function WormBin() {
   );
   useFrame(({ clock }) => {
     const mesh = worms.current;
-    if (!mesh) return;
+    // Held still, the worms are posed once.
+    if (!mesh || (still && posed.current)) return;
+    posed.current = still;
     const time = still ? STILL_TIME : clock.elapsedTime;
     for (let i = 0; i < BIN_WORMS; i += 1) {
       const pose = binWorm(i, time);
@@ -89,9 +98,9 @@ export function WormBin() {
     mesh.instanceMatrix.needsUpdate = true;
   });
   return (
-    <group name="worm-bin" position={[BIN_AT.x, 0, BIN_AT.z]}>
+    <group name="worm-bin" position={[BIN_AT.x, BIN_AT.y, BIN_AT.z]}>
       <mesh geometry={shape} material={material} castShadow />
-      <instancedMesh ref={worms} args={[worm, pink, BIN_WORMS]} frustumCulled={false} />
+      {!snowy && <instancedMesh ref={worms} args={[worm, pink, BIN_WORMS]} frustumCulled={false} />}
     </group>
   );
 }

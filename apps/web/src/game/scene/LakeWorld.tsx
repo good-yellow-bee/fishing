@@ -2389,7 +2389,7 @@ export const LakeWorld = memo(function LakeWorld({
       {stridersOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Striders />}
       {whirligigsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Whirligigs />}
       <Shack />
-      <WormBin />
+      <WormBin season={season} />
       {rivalOut(hour) && <RivalAngler />}
       <Campfire lit={campfireLit(hour, sky)} hour={hour} wind={wind} />
       <Woodpile season={season} />
