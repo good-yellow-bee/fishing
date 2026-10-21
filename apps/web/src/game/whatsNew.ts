@@ -1,10 +1,12 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-field76";
+export const NEWS_ID = "2026-10-21-pa39";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "On a phone held upright with larger text, the hint over the lake now rises to clear the walking stick, closing up under the note naming where you stand and the lure panel but never covering them. And on more small phones that note stops at three rows, so a long hint, such as a winter night line's, stays clear of the stick too.",
+  "A trophy fish that broke your line, or one the lodge reports lost, now trails the snapped red float on its bank's water, cocked over, now and then dipping under or towed off a little way. And while you stand still, a worm tin sits at your feet, a worm curling over its rim for each one left and bare soil once it is empty.",
   "On a water with a dawn and a dusk outing planned, the catch form now files a new fish on the one you are fishing, the one with a fish lost or missed so far, as Home and Trips take it. Its outing list leaves out the sample week's made-up outings, and the kinds it offers at a water always fill three picks, a kind named two ways counting once.",
   "A night line out on a bank now shows how it is doing: once a fish is on, the stick bows toward the water, the line runs taut and the white tag at its tip knocks now and then; left out too long, its line hangs slack. And while you wait on the bank, the line is ready to bring in the moment its night is out, even if you touch nothing.",
   "Groundbait left on a bank now follows the season: in the summer heat it draws the fish back after three hours but is eaten within a day, and in the winter cold it takes twelve hours but keeps four days. A night line set in summer soaks just three hours but should come in before that evening, as crayfish strip the bait; set in winter it soaks twelve hours and keeps four days.",
