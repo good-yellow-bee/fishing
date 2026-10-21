@@ -3607,13 +3607,14 @@ describe("useFishingGame groundbait", () => {
   });
 
   it.each([
-    ["Spinner", true],
-    ["Nightcrawler", false],
-  ] as const)("names the pike on the top-up that builds the swim when a %s is tied: %s", (lure, named) => {
+    ["Spinner", 5, true],
+    ["Nightcrawler", 5, false],
+    ["Spinner", 1, false],
+  ] as const)("names the pike on the top-up that builds the swim when a %s is tied (strength %s): %s", (lure, strength, named) => {
     const kept = new Map<string, string>([[bagKey(profile.userId), JSON.stringify({ handfuls: 3, day: "2000-01-01" })]]);
     vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
     kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dropoff", casts: 3, built: TOPUP_MAX - 1, at: DOCK_BUBBLES.at - 60_000 }));
-    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, lure);
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700, strength }, "day", false, lure);
     vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "perch")!);
     atDropoff(surface);
     step.mockReturnValueOnce("escaped");

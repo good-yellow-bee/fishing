@@ -2379,9 +2379,9 @@ export function useFishingGame(
       // The big feeders are told of only where they live and would take the tied lure.
       const big = bigFeedersOver(next, lureRef?.current);
       const grew = next.built! > before;
-      // The prowler is named only where it lives and would take the tied lure.
+      // The prowler is named only where it lives, would take the tied lure, and the angler could land it.
       const prowler = next.built! >= TOPUP_MAX ? prowlerAt(spotRef.current, lureRef?.current) : undefined;
-      const prowl = prowler ? t("{fish} prowls round it now, hunting the small feeders: one hooked here scatters them, landed or lost.", { fish: t(prowler.name) }) : "";
+      const prowl = prowler && profile && canLand(profile, prowler) ? t("{fish} prowls round it now, hunting the small feeders: one hooked here scatters them, landed or lost.", { fish: t(prowler.name) }) : "";
       setHint(
         withWorm(
           [big && grew
