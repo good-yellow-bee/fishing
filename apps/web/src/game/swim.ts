@@ -1,6 +1,6 @@
 import { SPOT_IDS, type LakeSeason, type SpotId } from "@stillwater/shared";
 import { readAngler, writeAngler } from "./anglerStore";
-import { GROUNDBAIT_CASTS, type Groundbait } from "./logic";
+import { GROUNDBAIT_CASTS, SWIM_MAX_CASTS, TOPUP_MAX, type Groundbait } from "./logic";
 
 /** Kept per angler: the swim they last groundbaited, so a handful thrown before leaving still works on the next visit. */
 export function swimKey(userId: string) {
@@ -29,16 +29,21 @@ export function swimTimes(season: LakeSeason | undefined): { primedMs: number; g
 /** A groundbaited swim, when the handful went in, whether the feeders have already gathered over it once, and whether bread crumb went in with it. */
 export type Swim = Groundbait & { at: number; primed?: boolean; bread?: boolean };
 
+const upTo = (n: unknown, max: number) => Number.isInteger(n) && (n as number) >= 1 && (n as number) <= max;
+
+/** The swim as kept: fish full from an overfeed are hungry again by the next visit, so only its top-ups are read back. */
 export function loadSwim(userId: string): Swim | null {
   return readAngler(swimKey(userId), (raw) => {
     const swim = raw as Partial<Swim> | null;
-    return swim &&
-      (SPOT_IDS as readonly unknown[]).includes(swim.spot) &&
-      Number.isInteger(swim.casts) &&
-      swim.casts! >= 1 &&
-      swim.casts! <= (swim.bread ? BREAD_SWIM_CASTS : GROUNDBAIT_CASTS) &&
-      typeof swim.at === "number"
-      ? { spot: swim.spot!, casts: swim.casts!, at: swim.at, ...(swim.primed ? { primed: true } : {}), ...(swim.bread ? { bread: true } : {}) }
+    return swim && (SPOT_IDS as readonly unknown[]).includes(swim.spot) && upTo(swim.casts, SWIM_MAX_CASTS) && typeof swim.at === "number"
+      ? {
+          spot: swim.spot!,
+          casts: swim.casts!,
+          at: swim.at,
+          ...(upTo(swim.built, TOPUP_MAX) ? { built: swim.built } : {}),
+          ...(swim.primed ? { primed: true } : {}),
+          ...(swim.bread ? { bread: true } : {}),
+        }
       : null;
   });
 }
@@ -47,7 +52,7 @@ export function saveSwim(userId: string, swim: Swim | null) {
   writeAngler(swimKey(userId), swim);
 }
 
-/** The swim on a new visit: as it was if soon after, freshly baited once when the feeders have gathered (longer with bread crumb in it), gone once the season's days run out. */
+/** The swim on a new visit: as it was if soon after, freshly baited once when the feeders have gathered (longer with bread crumb in it, its top-ups gone), gone once the season's days run out. */
 export function swimNow(swim: Swim | null, now: number, season?: LakeSeason): (Swim & { primedNow: boolean }) | null {
   if (!swim || swim.casts <= 0) return null;
   const age = now - swim.at;
