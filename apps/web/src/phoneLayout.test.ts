@@ -25,6 +25,15 @@ describe("a phone held sideways", () => {
     expect(/html\[data-text-size\] \.scene-wrap\[data-walkthrough="1"\] \.stance-chip \{([^}]*)\}/.exec(sideways)?.[1]).toContain("display: none;");
   });
 
+  it("hides a bank chip the signs leave no room for from sight, not from a screen reader", () => {
+    const sideways = css.slice(css.indexOf(SIDEWAYS));
+    const cramped = /\.scene-wrap\[data-chip-cramped\] > \.stance-chip \{([^}]*)\}/.exec(sideways)?.[1];
+    expect(cramped).toContain("clip: rect(0 0 0 0);");
+    expect(cramped).not.toContain("display: none");
+    const dock = readFileSync(`${import.meta.dirname}/pages/Dock.tsx`, "utf8");
+    expect(dock).toContain('wrap.toggleAttribute("data-chip-cramped", !!chip && signsLeft - chip.getBoundingClientRect().left - 8 < 64);');
+  });
+
   it("keeps the coach and the news card off the signs, which take a second column with larger text", () => {
     const sideways = css.slice(css.indexOf(SIDEWAYS));
     const coach = [...sideways.matchAll(/\n  \.walkthrough \{([^}]*)\}/g)].map((m) => m[1]).find((b) => b.includes("--signs-room"));
