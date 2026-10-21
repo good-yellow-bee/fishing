@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CAST_RANGE, castRangeMultiplier, FISH, LAKE_CENTER_Z, SPOT_IDS, type SpotId, skyAt, skyTurnForDay, weatherForDay } from "@stillwater/shared";
 import { BANK_STANDS } from "./hotspot";
-import { pickBite, lampLit, ANCHOR_SETTLE_MS, ANCHOR_SPLASH_WAIT, anchorSplashWaitMul, COLOUR_WAIT, colourSuits, colourWaitMul, lureColour, isLongCast, LONG_CAST_SHARE, LONG_CAST_SOLID, MIDGE_RISERS, MIDGE_RISER_SHARE, midgeRiser, LIGHT_HUNTERS, LIGHT_HUNTER_SHARE, lightHunter, BUG_SIPPERS, BUG_SIPPER_SHARE, bugSipper, LOG_HOLDERS, LOG_HOLDER_SHARE, logHolder, FRY_HUNTERS, FRY_HUNTER_SHARE, fryHunter, castIntoSchool, castIntoSpooked, castOverGroundbait, throwHandful, feederShare, scatterSwim, SPOOKED_SWIM_CASTS, OVERFED_CASTS, SWIM_MAX_CASTS, TOPUP_CASTS_LEFT, TOPUP_FEEDER_SHARE, TOPUP_MAX, castOnFreshWater, FRESH_WAIT, castUnderPressure, castNewLure, NEW_LURE_RELIEF, fishedHardBanks, PRESSURE_CASTS, PRESSURE_REST, GROUNDBAIT_CASTS, BIG_FEEDERS, hasBigFeeders, GROUNDBAIT_FEEDERS, GROUNDBAIT_FEEDER_SHARE, groundbaitFeeder, GROUNDBAIT_WAIT, canBaitShiner, LIVE_SHINER_SHARE, LIVELY_SHINER_SHARE, SHINER_HUNTERS, shinerHunter, BED_RAIDERS, BED_RAIDER_SHARE, bedRaider, CRAYFISH_HUNTERS, CRAYFISH_HUNTER_SHARE, crayfishHunter, TADPOLE_EATERS, TADPOLE_EATER_SHARE, tadpoleEater, CHOP_WAIT, chopWaitMul, STORM_WAIT, stormWaitMul, PRE_RAIN_WAIT, preRainWaitMul, TWIST_CASTS, TWIST_TANGLE, twistAfterCast, isTwisted, castTangles, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, isWashedOut, FOG_LIFT_WAIT, fogLiftWaitMul, WATER_SWING_F, WARMING_WAIT, COOLING_WAIT, waterSwing, waterSwingWaitMul, waterTempFor, POST_FRONT_WAIT, POST_FRONT_UNTIL, postFrontWaitMul, rainedYesterday, TURNOVER_DAYS, TURNOVER_SPAN, TURNOVER_WAIT, TURNOVER_INLET_WAIT, isTurnover, turnoverStart, turnoverWaitMul, CRANK_ROCK_WAIT, crankRockWaitMul, DULL_SOLID, isSkipCast, SKIP_CAST_SHARE, TOPWATER_NIGHT_WAIT, topwaterNightWaitMul, stackWaitMs, WAIT_FLOOR_MS, SPINNER_THUMP_WAIT, spinnerThumpWaitMul, FLY_HATCH_WAIT, flyHatchWaitMul, WORM_NIGHT_WAIT, wormNightWaitMul, JIG_SOLID, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, GROUNDBAIT_SCHOOL_CASTS, TWILIGHT_SCHOOL_CASTS, WINTER_SCHOOL_CASTS, WINTER_SCHOOLERS, isWinterSchool, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, JIG_WINTER_WAIT, jigWinterWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, RAIN_INLET_WAIT, rainInletWaitMul, FALL_BIG_LURE_WAIT, fallBigLureWaitMul, SUMMER_DEEP_WAIT, summerDeepWaitMul, DOCK_SHADE_WAIT, dockShadeWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WIND_POINT_WAIT, windPointWaitMul, WINDWARD_WAIT, WINDWARD_BANKS, windwardWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, DARK_NIGHT_WAIT, NEW_MOON, darkNightWaitMul, WORM_PILING_WAIT, wormPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, FLASH_SUN_WAIT, FULL_MOON_FLASH, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs, LUCKY_SOLID } from "./logic";
+import { pickBite, lampLit, ANCHOR_SETTLE_MS, ANCHOR_SPLASH_WAIT, anchorSplashWaitMul, COLOUR_WAIT, colourSuits, colourWaitMul, lureColour, isLongCast, LONG_CAST_SHARE, LONG_CAST_SOLID, MIDGE_RISERS, MIDGE_RISER_SHARE, midgeRiser, LIGHT_HUNTERS, LIGHT_HUNTER_SHARE, lightHunter, BUG_SIPPERS, BUG_SIPPER_SHARE, bugSipper, LOG_HOLDERS, LOG_HOLDER_SHARE, logHolder, FRY_HUNTERS, FRY_HUNTER_SHARE, fryHunter, castIntoSchool, castIntoSpooked, castOverGroundbait, throwHandful, canChopWorm, CHOPPED_WORMS, hasWormFeeders, wormFeedersTake, WORM_FEEDERS, feederShare, scatterSwim, SPOOKED_SWIM_CASTS, OVERFED_CASTS, SWIM_MAX_CASTS, TOPUP_CASTS_LEFT, TOPUP_FEEDER_SHARE, TOPUP_MAX, castOnFreshWater, FRESH_WAIT, castUnderPressure, castNewLure, NEW_LURE_RELIEF, fishedHardBanks, PRESSURE_CASTS, PRESSURE_REST, GROUNDBAIT_CASTS, BIG_FEEDERS, hasBigFeeders, GROUNDBAIT_FEEDERS, GROUNDBAIT_FEEDER_SHARE, groundbaitFeeder, GROUNDBAIT_WAIT, canBaitShiner, LIVE_SHINER_SHARE, LIVELY_SHINER_SHARE, SHINER_HUNTERS, shinerHunter, BED_RAIDERS, BED_RAIDER_SHARE, bedRaider, CRAYFISH_HUNTERS, CRAYFISH_HUNTER_SHARE, crayfishHunter, TADPOLE_EATERS, TADPOLE_EATER_SHARE, tadpoleEater, CHOP_WAIT, chopWaitMul, STORM_WAIT, stormWaitMul, PRE_RAIN_WAIT, preRainWaitMul, TWIST_CASTS, TWIST_TANGLE, twistAfterCast, isTwisted, castTangles, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, isWashedOut, FOG_LIFT_WAIT, fogLiftWaitMul, WATER_SWING_F, WARMING_WAIT, COOLING_WAIT, waterSwing, waterSwingWaitMul, waterTempFor, POST_FRONT_WAIT, POST_FRONT_UNTIL, postFrontWaitMul, rainedYesterday, TURNOVER_DAYS, TURNOVER_SPAN, TURNOVER_WAIT, TURNOVER_INLET_WAIT, isTurnover, turnoverStart, turnoverWaitMul, CRANK_ROCK_WAIT, crankRockWaitMul, DULL_SOLID, isSkipCast, SKIP_CAST_SHARE, TOPWATER_NIGHT_WAIT, topwaterNightWaitMul, stackWaitMs, WAIT_FLOOR_MS, SPINNER_THUMP_WAIT, spinnerThumpWaitMul, FLY_HATCH_WAIT, flyHatchWaitMul, WORM_NIGHT_WAIT, wormNightWaitMul, JIG_SOLID, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, GROUNDBAIT_SCHOOL_CASTS, TWILIGHT_SCHOOL_CASTS, WINTER_SCHOOL_CASTS, WINTER_SCHOOLERS, isWinterSchool, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, JIG_WINTER_WAIT, jigWinterWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, RAIN_INLET_WAIT, rainInletWaitMul, FALL_BIG_LURE_WAIT, fallBigLureWaitMul, SUMMER_DEEP_WAIT, summerDeepWaitMul, DOCK_SHADE_WAIT, dockShadeWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WIND_POINT_WAIT, windPointWaitMul, WINDWARD_WAIT, WINDWARD_BANKS, windwardWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, DARK_NIGHT_WAIT, NEW_MOON, darkNightWaitMul, WORM_PILING_WAIT, wormPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, FLASH_SUN_WAIT, FULL_MOON_FLASH, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs, LUCKY_SOLID } from "./logic";
 
 describe("hook window", () => {
   it("leaves a starter over a second to react, and widens with Accuracy", () => {
@@ -336,14 +336,14 @@ describe("groundbait", () => {
   it("feeds the bank it was tossed off for a few casts, and keeps while the angler fishes elsewhere", () => {
     expect(GROUNDBAIT_WAIT).toBeLessThan(1);
     let bait: ReturnType<typeof castOverGroundbait>["next"] = { spot: "reeds", casts: GROUNDBAIT_CASTS };
-    expect(castOverGroundbait(bait, "dock")).toEqual({ baited: false, full: false, spooked: false, built: 0, next: bait });
+    expect(castOverGroundbait(bait, "dock")).toEqual({ baited: false, full: false, spooked: false, built: 0, worm: false, next: bait });
     for (let left = GROUNDBAIT_CASTS; left > 0; left -= 1) {
       const cast = castOverGroundbait(bait, "reeds");
       expect(cast.baited).toBe(true);
       bait = cast.next;
     }
     expect(bait).toBeNull();
-    expect(castOverGroundbait(null, "reeds")).toEqual({ baited: false, full: false, spooked: false, built: 0, next: null });
+    expect(castOverGroundbait(null, "reeds")).toEqual({ baited: false, full: false, spooked: false, built: 0, worm: false, next: null });
   });
 
   it("a handful on a fading swim tops it up and builds it, one on a well-fed swim fills the fish up, and one elsewhere starts afresh", () => {
@@ -377,6 +377,34 @@ describe("groundbait", () => {
     }
     expect(seen).toEqual([...Array<boolean>(OVERFED_CASTS).fill(true), ...Array<boolean>(4 - OVERFED_CASTS).fill(false)]);
     expect(castOverGroundbait({ spot: "reeds", casts: 3, full: 1 }, "reeds").next).toEqual({ spot: "reeds", casts: 2 });
+  });
+
+  it("chopped worm stays in the swim it went in, through its top-ups, overfeeds, scatter and casts, and a plain handful elsewhere starts without it", () => {
+    const fresh = throwHandful(null, "reeds", false, true).next;
+    expect(fresh).toEqual({ spot: "reeds", casts: GROUNDBAIT_CASTS, worm: true });
+    expect(throwHandful({ ...fresh, casts: TOPUP_CASTS_LEFT }, "reeds").next.worm).toBe(true);
+    expect(throwHandful(fresh, "reeds").next.worm).toBe(true);
+    expect(throwHandful({ spot: "reeds", casts: TOPUP_CASTS_LEFT }, "reeds", false, true).next.worm).toBe(true);
+    expect(throwHandful(fresh, "dock").next.worm).toBeUndefined();
+    expect(scatterSwim(fresh, "reeds")?.worm).toBe(true);
+    const cast = castOverGroundbait(fresh, "reeds");
+    expect(cast.worm).toBe(true);
+    expect(cast.next?.worm).toBe(true);
+    expect(castOverGroundbait({ spot: "reeds", casts: 3 }, "reeds").worm).toBe(false);
+  });
+
+  it("chopped worm goes in only with worms enough in the tin, off a bank its perch live at, and not on a swim there with some in already", () => {
+    expect(hasWormFeeders("dock")).toBe(true);
+    expect(hasWormFeeders("point")).toBe(false);
+    expect(canChopWorm(CHOPPED_WORMS, null, "dock")).toBe(true);
+    expect(canChopWorm(CHOPPED_WORMS - 1, null, "dock")).toBe(false);
+    expect(canChopWorm(CHOPPED_WORMS, null, "point")).toBe(false);
+    expect(canChopWorm(CHOPPED_WORMS, { spot: "dock", casts: 3, worm: true }, "dock")).toBe(false);
+    expect(canChopWorm(CHOPPED_WORMS, { spot: "reeds", casts: 3, worm: true }, "dock")).toBe(true);
+    expect(canChopWorm(CHOPPED_WORMS, { spot: "dock", casts: 3 }, "dock")).toBe(true);
+    expect(wormFeedersTake("dock", "Worm")).toBe(true);
+    expect(wormFeedersTake("point", "Worm")).toBe(false);
+    expect(wormFeedersTake("dock", "Crankbait")).toBe(false);
   });
 
   it("a big feeder lost off the swim scatters it: the build is gone, and the next casts over it say so until the feeders are back", () => {
@@ -921,6 +949,19 @@ describe("feeders over the groundbait", () => {
   it("still keeps the big feeders off a small lure and a short cast", () => {
     expect(bigShare("dock", TOPUP_MAX, "Worm")).toBe(0);
     expect(bigShare("dock", TOPUP_MAX, undefined, true)).toBe(0);
+  });
+
+  it("adds the perch to the feeders over chopped worm, only there", () => {
+    const perchOf = (worm: boolean, lure?: string) => {
+      let perch = 0;
+      for (let roll = 0.005; roll < 1; roll += 0.01) if (WORM_FEEDERS.has(groundbaitFeeder("dock", lure, false, "day", rolls(0, roll), 0, worm)!.id)) perch += 1;
+      return perch;
+    };
+    expect(perchOf(false)).toBe(0);
+    expect(perchOf(true)).toBeGreaterThan(0);
+    expect(perchOf(true, "Worm")).toBeGreaterThan(0);
+    // No perch at the point, so chopped worm there brings only its own feeders.
+    expect(WORM_FEEDERS.has(groundbaitFeeder("point", undefined, false, "day", rolls(0, 0.5), 0, true)!.id)).toBe(false);
   });
 
   it("takes the share from how often the swim was topped up", () => {

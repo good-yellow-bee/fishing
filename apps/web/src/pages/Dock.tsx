@@ -108,7 +108,7 @@ import { useEffectsSteppedDown } from "../game/frameWatch";
 import { useEffectsNotice } from "../game/effectsNotice";
 import { saveLogbook } from "../field/storage";
 import { fx } from "../game/fx";
-import { bigFeedersOver, canBaitShiner, GROUNDBAIT_CASTS, OVERFED_CASTS, TOPUP_CASTS_LEFT, hookWindowMs, isMercy, lampLit, longShadowWaitMul, solidStrikeMs } from "../game/logic";
+import { bigFeedersOver, canBaitShiner, canChopWorm, CHOPPED_WORMS, GROUNDBAIT_CASTS, OVERFED_CASTS, TOPUP_CASTS_LEFT, hookWindowMs, isMercy, lampLit, longShadowWaitMul, solidStrikeMs } from "../game/logic";
 import { useBadgeToast } from "../game/useBadgeToast";
 import { lostNewsKey, useNewsToast, useTagNewsToast } from "../game/useTagNewsToast";
 import { bookSeasonNote, bookSessionTitle, loadSession, saveSession, sessionTitle, startSession, withSessionFish, type SessionDraft } from "../game/session";
@@ -1063,6 +1063,7 @@ export function DockPage() {
   const inletOpen = canUseSpot("inlet", me.level);
   const boatOpen = canUseSpot("open", me.level);
   const rowing = boatState === "rowingOut" || boatState === "rowingBack";
+  const choppable = isFishingStance(game.stance) && !rowing && game.handfuls > 0 && canChopWorm(game.worms, game.groundbait, game.stance);
   groundbaitKey.current = () => {
     if (fishing && !rowing && game.handfuls > 0 && !shopOpen) game.throwGroundbait();
   };
@@ -1392,6 +1393,22 @@ export function DockPage() {
                 {/* A phone's sign row has no room for the long word, so it shows the short one; the label keeps the full name. */}
                 <span className="bait-full">{t("Groundbait")}</span>
                 <span className="bait-short" aria-hidden="true">{t("Bait")}</span>
+              </button>
+            )}
+            {/* Beside it, a handful with worms from the tin chopped in, while the tin holds enough, perch live here and the swim here has none in it yet. */}
+            {choppable && (
+              <button
+                className="panel-btn walk-bait"
+                type="button"
+                aria-label={t("Groundbait with chopped worm")}
+                title={t("Toss a handful of groundbait with {n} worms from your tin chopped in: the perch here come in with the feeders.", { n: CHOPPED_WORMS })}
+                onClick={(event) => {
+                  event.currentTarget.blur();
+                  game.throwChoppedWorm();
+                }}
+              >
+                <span className="bait-full">{t("Chopped worm")}</span>
+                <span className="bait-short" aria-hidden="true">{t("Worm")}</span>
               </button>
             )}
             {fishing && !rowing && (

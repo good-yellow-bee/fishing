@@ -38,6 +38,15 @@ describe("a groundbaited swim left for the next visit", () => {
     expect(loadSwim("u")).toEqual(held);
   });
 
+  it("keeps its chopped worm through a reload and when it primes", () => {
+    const wormed = { ...swim, worm: true };
+    expect(swimNow(wormed, SWIM_PRIMED_MS)).toEqual({ spot: "reeds", casts: GROUNDBAIT_CASTS, at: 0, primed: true, worm: true, primedNow: true });
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    saveSwim("u", wormed);
+    expect(loadSwim("u")).toEqual(wormed);
+  });
+
   it("keeps a topped-up swim's casts, top-ups and scattered feeders through a reload, its full fish hungry again, and drops the top-ups and scatter when it primes", () => {
     const kept = new Map<string, string>();
     vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
