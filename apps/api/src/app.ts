@@ -39,6 +39,7 @@ app.use("/api/groundbait", requireSession);
 app.use("/api/shiner", requireSession);
 app.use("/api/worm", requireSession);
 app.use("/api/aerator", requireSession);
+app.use("/api/worm-bin", requireSession);
 app.use("/api/board", requireSession);
 app.use("/api/board/*", requireSession);
 app.use("/api/lodge/*", requireSession);

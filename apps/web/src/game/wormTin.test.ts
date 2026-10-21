@@ -57,6 +57,24 @@ describe("the worm tin", () => {
     expect(loadTin("mara", wet, "summer")).toEqual({ worms: WORM_TIN_WET, died: 0 });
   });
 
+  it("keeps yesterday's worms one day longer in summer with a place in the worm bin, and changes nothing out of summer", () => {
+    const run = dry.findIndex((day, i) => i >= 2 && dry[i - 1].getTime() === day.getTime() - 86_400_000 && dry[i - 2].getTime() === day.getTime() - 2 * 86_400_000);
+    const [first, second, third] = dry.slice(run - 2, run + 1);
+    loadTin("ash", first, "summer", true);
+    saveTin("ash", WORM_TIN_WET, first);
+    expect(loadTin("ash", second, "summer", true)).toEqual({ worms: WORM_TIN_WET, died: 0 });
+    // The worms past the day's dig are still the first day's, so the bin doesn't keep them a second time.
+    expect(loadTin("ash", third, "summer", true)).toEqual({ worms: WORM_TIN_DAILY, died: WORM_TIN_WET - WORM_TIN_DAILY });
+    // Two days away is too long even in the bin.
+    loadTin("mara", first, "summer", true);
+    saveTin("mara", WORM_TIN_WET, first);
+    expect(loadTin("mara", third, "summer", true)).toEqual({ worms: WORM_TIN_DAILY, died: WORM_TIN_WET - WORM_TIN_DAILY });
+    // Out of summer the worms keep anyway.
+    loadTin("kit", first, "spring", true);
+    saveTin("kit", WORM_TIN_WET, first);
+    expect(loadTin("kit", third, "spring", true)).toEqual({ worms: WORM_TIN_WET, died: 0 });
+  });
+
   it("keeps a summer worm bought after midnight on a visit that began the day before, not one spent then", () => {
     const day = dry[1];
     const late = new Date(day.getFullYear(), day.getMonth(), day.getDate() - 1, 23, 50);

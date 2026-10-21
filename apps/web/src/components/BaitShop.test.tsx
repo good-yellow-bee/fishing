@@ -2,7 +2,7 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { AERATOR_PRICE, WORM_PRICE, type LakeSeason } from "@stillwater/shared";
+import { AERATOR_PRICE, WORM_BIN_PRICE, WORM_PRICE, type LakeSeason } from "@stillwater/shared";
 import { BaitShop } from "./BaitShop";
 
 let root: Root | null = null;
@@ -19,7 +19,7 @@ function shop(shinerOn: boolean, bucket: number, onBuyShiner = vi.fn(), onHookFr
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
-  act(() => root!.render(<BaitShop points={points} lifetimePoints={0} handfuls={0} shinerOn={shinerOn} bucket={bucket} busy={false} onBuy={vi.fn()} onBuyShiner={onBuyShiner} onHookFromBucket={onHookFromBucket} aerator={aerator} onBuyAerator={onBuyAerator} worms={0} onBuyWorm={vi.fn()} trap="none" trapCold={false} onSetTrap={vi.fn()} onLiftTrap={vi.fn()} season={season} />));
+  act(() => root!.render(<BaitShop points={points} lifetimePoints={0} handfuls={0} shinerOn={shinerOn} bucket={bucket} busy={false} onBuy={vi.fn()} onBuyShiner={onBuyShiner} onHookFromBucket={onHookFromBucket} aerator={aerator} onBuyAerator={onBuyAerator} worms={0} onBuyWorm={vi.fn()} wormBin={false} onBuyWormBin={vi.fn()} trap="none" trapCold={false} onSetTrap={vi.fn()} onLiftTrap={vi.fn()} season={season} />));
   const button = (start: string) => [...container!.querySelectorAll("button")].find((one) => one.textContent?.startsWith(start));
   return { button, note: () => container!.querySelector("#shiner-shop-note")?.textContent };
 }
@@ -85,7 +85,7 @@ describe("BaitShop's bait bucket", () => {
       document.body.append(container);
       act(() => root?.unmount());
       root = createRoot(container);
-      act(() => root!.render(<BaitShop points={500} lifetimePoints={0} handfuls={handfuls} shinerOn={false} bucket={0} busy={false} onBuy={vi.fn()} onBuyShiner={vi.fn()} onHookFromBucket={vi.fn()} aerator={false} onBuyAerator={vi.fn()} worms={0} onBuyWorm={vi.fn()} trap={trap} trapCold={trapCold} onSetTrap={onSetTrap} onLiftTrap={onLiftTrap} season={undefined} />));
+      act(() => root!.render(<BaitShop points={500} lifetimePoints={0} handfuls={handfuls} shinerOn={false} bucket={0} busy={false} onBuy={vi.fn()} onBuyShiner={vi.fn()} onHookFromBucket={vi.fn()} aerator={false} onBuyAerator={vi.fn()} worms={0} onBuyWorm={vi.fn()} wormBin={false} onBuyWormBin={vi.fn()} trap={trap} trapCold={trapCold} onSetTrap={onSetTrap} onLiftTrap={onLiftTrap} season={undefined} />));
       return (start: string) => [...container!.querySelectorAll("button")].find((one) => one.textContent?.startsWith(start));
     };
     const set = vi.fn();
@@ -117,7 +117,7 @@ describe("BaitShop's worms", () => {
       document.body.append(container);
       act(() => root?.unmount());
       root = createRoot(container);
-      act(() => root!.render(<BaitShop points={500} lifetimePoints={0} handfuls={0} shinerOn={false} bucket={0} busy={false} onBuy={vi.fn()} onBuyShiner={vi.fn()} onHookFromBucket={vi.fn()} aerator={false} onBuyAerator={vi.fn()} worms={worms} onBuyWorm={onBuyWorm} trap="none" trapCold={false} onSetTrap={vi.fn()} onLiftTrap={vi.fn()} season={season} />));
+      act(() => root!.render(<BaitShop points={500} lifetimePoints={0} handfuls={0} shinerOn={false} bucket={0} busy={false} onBuy={vi.fn()} onBuyShiner={vi.fn()} onHookFromBucket={vi.fn()} aerator={false} onBuyAerator={vi.fn()} worms={worms} onBuyWorm={onBuyWorm} wormBin={false} onBuyWormBin={vi.fn()} trap="none" trapCold={false} onSetTrap={vi.fn()} onLiftTrap={vi.fn()} season={season} />));
       return [...container!.querySelectorAll("button")].find((one) => one.textContent?.startsWith("A worm"))!;
     };
     const note = () => container!.querySelector("#worm-shop-note")!.textContent;
@@ -135,5 +135,37 @@ describe("BaitShop's worms", () => {
     expect(note()).toBe("Your worm tin is full: 5 worms.");
     render(2, vi.fn(), "summer");
     expect(note()).toBe("A fresh worm for a washed-out hook or a night line. In your tin: 2 of 5. In the summer heat it keeps only today.");
+  });
+
+  it("sells the tin's place in the worm bin once, and then the summer note says a worm keeps to tomorrow", () => {
+    vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+    const render = (wormBin: boolean, onBuyWormBin = vi.fn(), points = 500) => {
+      container?.remove();
+      container = document.createElement("div");
+      document.body.append(container);
+      act(() => root?.unmount());
+      root = createRoot(container);
+      act(() => root!.render(<BaitShop points={points} lifetimePoints={0} handfuls={0} shinerOn={false} bucket={0} busy={false} onBuy={vi.fn()} onBuyShiner={vi.fn()} onHookFromBucket={vi.fn()} aerator={false} onBuyAerator={vi.fn()} worms={2} onBuyWorm={vi.fn()} wormBin={wormBin} onBuyWormBin={onBuyWormBin} trap="none" trapCold={false} onSetTrap={vi.fn()} onLiftTrap={vi.fn()} season="summer" />));
+      return container!.querySelector<HTMLButtonElement>("[aria-describedby=worm-bin-note]")!;
+    };
+    const note = (id: string) => container!.querySelector(`#${id}`)!.textContent;
+    const buy = vi.fn();
+    const button = render(false, buy);
+    expect(button.textContent).toBe(`A place in the worm bin (${WORM_BIN_PRICE} pts)`);
+    act(() => button.click());
+    expect(buy).toHaveBeenCalledOnce();
+    const short = vi.fn();
+    const poor = render(false, short, WORM_BIN_PRICE - 1);
+    act(() => poor.click());
+    expect(short).not.toHaveBeenCalled();
+    const again = vi.fn();
+    // It stays in place, so a keyboard user's focus isn't dropped when the purchase goes through.
+    const owned = render(true, again);
+    expect(owned.textContent).toBe("Your place in the worm bin");
+    expect(owned.getAttribute("aria-disabled")).toBe("true");
+    act(() => owned.click());
+    expect(again).not.toHaveBeenCalled();
+    expect(note("worm-bin-note")).toBe("Your worm tin keeps in the cool worm bin, so in summer its worms last to the next day.");
+    expect(note("worm-shop-note")).toBe("A fresh worm for a washed-out hook or a night line. In your tin: 2 of 5. In the summer heat your place in the worm bin keeps it to tomorrow.");
   });
 });
