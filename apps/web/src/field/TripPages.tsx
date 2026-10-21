@@ -66,7 +66,7 @@ import { findCatches, isTimePhrase, isTimeWord } from "./CatchSearch";
 import { findTrips } from "./tripSearch";
 import { LATE_NIGHT_UNTIL, fishOnOutingDay } from "./suggestions";
 import { looseFishFor } from "./looseFish";
-import { countedBook, countedFish, ownFish } from "./milestones";
+import { countedBook, countedFish, hasOwnEntries, ownFish } from "./milestones";
 import { isSampleOnly, isSamplePlan, isSampleSpot, isSampleOuting, upcomingRealTrips } from "./bookCopy";
 import { looseFishDays, outingFish, underWayOn } from "./outingFish";
 import { bookLureName, pieceTally } from "./pieceTally";
@@ -137,7 +137,8 @@ const QUICK_FINDS = ["this year|search word", "weekend|search word", "night|sear
 /** Read the evening before, when the bag is packed: what has worked on the outing's water, and what isn't in it yet. */
 export function calendarNotes(book: Logbook, trip: Trip, tackleItems: TackleItem[]): string[] {
   // Grouped as the page's "What works here" box groups them: one lure written two ways is one.
-  const works = pieceTally(countedFish(catchesForSpot(book, trip.spotId)), 3).map((row) => bookLureName(book.catches)(row.lure));
+  // The fish the water's page counts: an own outing there leaves the sample week's invented ones out.
+  const works = pieceTally(countedFish(catchesForSpot(countedBook(book), trip.spotId)), 3).map((row) => bookLureName(book.catches)(row.lure));
   // In the reader's language, as the list on the page and "Copy the list" name them.
   const toPack = itemsForTrip(tackleItems, trip.id).filter((item) => !item.packed).map((item) => pieceName(item.label));
   // When to leave: the day's light at the water, and the moon that night, as the outing's page gives them.
@@ -386,8 +387,8 @@ export function TripsPage() {
               </Link>
             </p>
           ) : null}
-          {/* Not the sample week's invented outings alone, as Home's book box leaves them out. */}
-          {sheetOutings(book, fishedBy).trips.length > 0 && !isSampleOnly(book) ? (
+          {/* Not the sample week's invented outings, alone or beside a water of the angler's own, as Home's book box leaves them out. */}
+          {sheetOutings(book, fishedBy).trips.length > 0 && hasOwnEntries(book) ? (
             <p className="fish-csv">
               <button type="button" className="text-button" onClick={() => downloadFile(tripsCsv(book, fishedBy), "text/csv;charset=utf-8", datedName("stillwater-outings.csv"))}>
                 {t("Download the outings as a spreadsheet")}
@@ -806,7 +807,7 @@ function TripView() {
       {/* A hard day is worth telling too: a past blank outing with a note, or fish lost or missed. Today's plan with only a note isn't a day yet. */}
       {catches.length > 0 || (!samplePlan && (pastDay || trip.lost || trip.missed) && (trip.note.trim() || trip.lost || trip.missed)) ? <CopySummary text={() => tripSummary(trip, spot ? plainName(spot.name) : null, catches, (id) => { const name = spotById(book, id)?.name; return name === undefined ? null : plainName(name); }, countedFish(book.catches))} file="stillwater-outing.txt" /> : null}
       {/* Planning ahead: what has worked on this water before. */}
-      {!fished && spot && !play ? <WaterTipsBox catches={countedFish(catchesForSpot(book, spot.id))} on={trip.date} within={countedSearch(book, exactTerm("water", plainName(spot.name)), catchesForSpot(book, spot.id))} /> : null}
+      {!fished && spot && !play ? <WaterTipsBox catches={countedFish(catchesForSpot(countedBook(book), spot.id))} on={trip.date} within={countedSearch(book, exactTerm("water", plainName(spot.name)), catchesForSpot(book, spot.id))} /> : null}
       <TripWeather catches={catches} />
       {/* Once the day comes, the fish lead; before that, the bag does. */}
       {fishFirst ? fish : tackle}

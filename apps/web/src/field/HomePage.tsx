@@ -24,7 +24,7 @@ import { findLink } from "./CatchSearch";
 import { bookFishDay, daysOut } from "./tripMonths";
 import { bookLureName, pieceTally } from "./pieceTally";
 import { pieceName } from "./gear/pieceKey";
-import { countedBook, countedFish, nextBookMark, ownFish } from "./milestones";
+import { countedBook, countedFish, hasOwnEntries, nextBookMark, ownFish } from "./milestones";
 import { FROM_LIST } from "./leaveDeleted";
 import { thisWeekInPastYears, yearsBack } from "./yearsAgo";
 import { GOAL_PARAM, goalPace, readYearGoal } from "./YearGoal";
@@ -188,8 +188,7 @@ export function HomePage() {
   // The goal counts a night session's small hours on its outing's day, as Bests does.
   const yearRows = book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${thisYear}-`));
   const yearFish = yearRows.filter((entry) => counted.has(entry.id)).length;
-  // An outing or a fish of the angler's own: until then the counts above are the sample week's.
-  const ownAny = countedOwn.trips.some((trip) => !isSampleOuting(trip)) || countedOwn.catches.some((entry) => !isSampleCatch(entry.id));
+  const ownAny = hasOwnEntries(book);
   // The goal is the angler's own: the sample week's invented fish don't fill it, so a book of only those shows none,
   // a water of their own beside them too, as Bests counts it.
   const goal = ownAny ? readYearGoal(thisYear) : null;

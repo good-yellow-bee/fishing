@@ -12,6 +12,8 @@ import { countedBook } from "./milestones";
 import { HomePage } from "./HomePage";
 import { LogbookProvider } from "./LogbookState";
 import { TackleProvider } from "./gear/TackleState";
+import { seasonCopy } from "./bests/SeasonRecap";
+import { planText } from "./TripPages";
 import { LOGBOOK_STORAGE_KEY } from "./storage";
 import { setLang } from "../i18n";
 
@@ -68,6 +70,25 @@ describe("round 120: a dawn and a dusk today with a fish loose on their water", 
   it("keep their order when neither has one", () => {
     const book: Logbook = { spots: [water("own")], trips: [trip("dawn", TODAY), trip("dusk", TODAY)], catches: [fish("1", null, 10)] };
     expect(upcomingRealTrips(book, TODAY).map((each) => each.id)).toEqual(["dawn", "dusk"]);
+  });
+});
+
+describe("round 120: the exports beside a water of the angler's own with nothing logged on it", () => {
+  it("leave the goal out of the copied year, as the goal box does", () => {
+    stored.set("stillwater.field-log.year-goal.v1", JSON.stringify({ "2026": 50 }));
+    const book = countedBook(weekOldSampleWithOwnWater());
+    expect(seasonCopy(book, "2026", TODAY)).not.toContain("50");
+    const own: Logbook = { ...book, trips: [...book.trips, trip("mine", "2026-10-01")], catches: [...book.catches, fish("m", "mine", 8, 1)] };
+    expect(seasonCopy(countedBook(own), "2026", TODAY)).toContain("50");
+  });
+
+  it("name no sample lures as working at a sample water a first own outing goes to", () => {
+    const sample = sampleLogbook(new Date(2026, 9, 14, 12));
+    const water = sample.trips[0]!.spotId;
+    const mine = trip("mine", "2026-10-25", { spotId: water });
+    const book: Logbook = { ...sample, trips: [...sample.trips, mine] };
+    expect(sample.catches.some((each) => each.spotId === water)).toBe(true);
+    expect(planText(book, mine, [])).not.toContain("Works here");
   });
 });
 

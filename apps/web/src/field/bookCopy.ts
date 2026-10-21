@@ -87,7 +87,7 @@ export function upcomingRealTrips(book: Logbook, today: string) {
   // Of a dawn and a dusk both under way by a fish loose on their water, the one with a fish, a lost one or a miss of its
   // own: the catch form files the next fish there.
   const filed = new Set(book.catches.map((entry) => entry.tripId));
-  const rank = (trip: Trip) => (going(trip) ? 1 : 0) + (filed.has(trip.id) || trip.lost || trip.missed ? 1 : 0);
+  const rank = (trip: Trip) => (going(trip) ? 1 + Number(Boolean(filed.has(trip.id) || trip.lost || trip.missed)) : 0);
   return real.sort((a, b) => a.date.localeCompare(b.date) || rank(b) - rank(a));
 }
 

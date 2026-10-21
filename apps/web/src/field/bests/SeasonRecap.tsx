@@ -4,14 +4,13 @@ import { locale, t, tn, useT } from "../../i18n";
 import { CopySummary } from "../CopySummary";
 import { yearSummary } from "../summaries";
 import { readYearGoal } from "../YearGoal";
-import { isSampleOnly } from "../bookCopy";
 import { seasonRecap } from "./seasonRecap";
 import { newWatersThisYear } from "./notYet";
 import { bestFishDay, bookFishDay } from "../tripMonths";
 import { formatDay } from "../format";
 import { kindNames, mostWritten } from "../speciesLink";
 import { bookLureName, pieceTally } from "../pieceTally";
-import { countedFish } from "../milestones";
+import { countedFish, hasOwnEntries } from "../milestones";
 import { plainName } from "../tripDates";
 import { foldName, waterKeys } from "../spotOrder";
 
@@ -43,8 +42,9 @@ function seasonFirsts(book: Logbook, year: string, today: string) {
 
 /** "{year} in the book" as copied, the same from All time and from the season picked, with its goal and its firsts. */
 export function seasonCopy(book: Logbook, year: string, today: string): string {
-  // The goal is the angler's own: the sample week's invented fish don't fill it, as Home and the goal box say.
-  const goal = isSampleOnly(book) ? null : readYearGoal(year);
+  // The goal is the angler's own: the sample week's invented fish don't fill it, as Home and the goal box say, a water
+  // of the angler's own beside them too.
+  const goal = hasOwnEntries(book) ? readYearGoal(year) : null;
   return [yearSummary(book, year, today, goal), ...seasonFirsts(book, year, today).firsts].join("\n");
 }
 
