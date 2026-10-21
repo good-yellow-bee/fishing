@@ -38,6 +38,7 @@ import { gaveWay, outingDay, plainName } from "../tripDates";
 import { outingFish } from "../outingFish";
 import { pieceName } from "../gear/pieceKey";
 import { kindKey } from "../speciesLink";
+import { inSentence } from "../MonthBars";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {
   const parts: string[] = [];
@@ -115,17 +116,19 @@ function waterBestLine(book: Logbook, catches: readonly CatchEntry[], kindName: 
 /** "?year=2025": one season's fish and outings, or the whole book when it is left out. */
 const YEAR_PARAM = "year";
 
-/** A kind's best lure and best water, once one of each took two or more: where and on what to go for it. */
+/** A kind's best lure, best water and best time of day, once one of each took two or more: where, on what and when to go for it. */
 function KindLeaders({ book, species, lureName }: { book: Logbook; species: string; lureName: (lure: string) => string }) {
   const key = kindKey(species);
   const fish = book.catches.filter((entry) => kindKey(entry.species) === key);
   const [lure, nextLure] = pieceTally(fish, 2);
   // Twin waters together, as the water's search the line names opens them.
   const [water, nextWater] = speciesWaters(book, fish);
+  const [time, nextTime] = [...biteTimes({ ...book, catches: fish })].sort((a, b) => b.count - a.count);
   // A tie has no leader, as the catch search's own "Most on" line takes it.
   const parts = [
     lure && lure.count >= 2 && lure.count > (nextLure?.count ?? 0) ? t("Most on {lure} ({count})", { lure: lureName(lure.lure), count: lure.count }) : null,
     water && water.name && water.count >= 2 && water.count > (nextWater?.count ?? 0) ? t("Most from {water} ({count})", { water: plainName(water.name), count: water.count }) : null,
+    time && time.count >= 2 && time.count > (nextTime?.count ?? 0) ? t("Best time of day: {time} ({count})", { time: inSentence(t(time.label)), count: time.count }) : null,
   ].filter(Boolean);
   return parts.length > 0 ? <p className="meta kind-leaders">{parts.join(" · ")}</p> : null;
 }

@@ -1051,6 +1051,7 @@ export const PL_FIELD: PlBook = {
   "Waters with fish: {count}": "Łowiska z rybami: {count}",
   "A bigger dot marks a water with more fish, a pale one a water with none yet.": "Większa kropka to łowisko z większą liczbą ryb, blada to łowisko jeszcze bez ryb.",
   "Most on {lure} ({count})": "Najczęściej na: {lure} ({count})",
+  "Best time of day: {time} ({count})": "Najczęściej o tej porze: {time} ({count})",
   "Most from {water} ({count})": "Najwięcej z łowiska {water} ({count})",
   "Fish in these conditions: {count}": "Ryby w takich warunkach: {count}",
 };
