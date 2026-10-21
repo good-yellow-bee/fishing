@@ -439,6 +439,9 @@ export function useFishingGame(
   /** Read live in the frame loop, which outlives a render's profile. */
   const anglerIdRef = useRef(profile?.userId);
   anglerIdRef.current = profile?.userId;
+  /** The angler as last rendered, for handlers memoized across profile changes. */
+  const profileRef = useRef(profile);
+  profileRef.current = profile;
   /** The lures this week's giants broke free of: read from the browser once per angler, then kept here, and shown to the Dock. */
   const [giantShy, setGiantShy] = useState<GiantShy | null>(null);
   const giantShyRef = useRef<{ userId: string; shy: GiantShy } | null>(null);
@@ -2381,7 +2384,7 @@ export function useFishingGame(
       const grew = next.built! > before;
       // The prowler is named only where it lives, would take the tied lure, and the angler could land it.
       const prowler = next.built! >= TOPUP_MAX ? prowlerAt(spotRef.current, lureRef?.current) : undefined;
-      const prowl = prowler && profile && canLand(profile, prowler) ? t("{fish} prowls round it now, hunting the small feeders: one hooked here scatters them, landed or lost.", { fish: t(prowler.name) }) : "";
+      const prowl = prowler && profileRef.current && canLand(profileRef.current, prowler) ? t("{fish} prowls round it now, hunting the small feeders: one hooked here scatters them, landed or lost.", { fish: t(prowler.name) }) : "";
       setHint(
         withWorm(
           [big && grew
