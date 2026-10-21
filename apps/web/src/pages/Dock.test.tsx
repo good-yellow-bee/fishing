@@ -3,7 +3,7 @@ import { JSDOM } from "jsdom";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
-import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { badgeProgress, catchPoints, CLEAN_RUN_BONUS, DAY_RUN_BONUS, GOLDEN_BONUS, LODGE_RECORD_BONUS, PB_BONUS, isGolden, weeklyBonus, dailyConditions, skyTurnForDay, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky, type SpotId, MASTER_BONUS, localDate } from "@stillwater/shared";
 import { buyAerator, buyBreadCrumb, buyGroundbait, buyShiner, buyWorm, buyWormBin, getGiants, getLodgeLost, getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
@@ -741,6 +741,9 @@ describe("touch play", () => {
     const page = await openDock("/?hour=day&sky=clear");
     const scroll = vi.fn();
     Element.prototype.scrollIntoView = scroll;
+    onTestFinished(() => {
+      delete (Element.prototype as Partial<Element>).scrollIntoView;
+    });
     const sign = (name: string) => [...page.querySelectorAll<HTMLButtonElement>(".walk-signs button")].find((button) => button.textContent === name)!;
     act(() => {
       document.body.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
@@ -753,7 +756,6 @@ describe("touch play", () => {
       sign("Reeds").focus();
     });
     expect(scroll).not.toHaveBeenCalled();
-    delete (Element.prototype as Partial<Element>).scrollIntoView;
   });
 
   it("opens the shop from the HUD button at the shack", async () => {
