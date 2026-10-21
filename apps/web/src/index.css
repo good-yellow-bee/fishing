@@ -2510,15 +2510,15 @@ html[data-input="pad"] .fight-bar .on-pad {
   /* High contrast's 2 px borders added 8 px to the header, lure panel and hint, so the hint's last line ran under the
      stick ring (24 px of it on a 360 x 640 phone with larger text): the borders come out of their padding instead. */
   html[data-contrast="high"] .hud {
-    padding-block: 9px;
+    padding: 9px 11px;
   }
 
   html[data-contrast="high"] .lure-choice {
-    padding-block: 5px 7px;
+    padding: 5px 7px 7px;
   }
 
   html[data-contrast="high"] .hint {
-    padding-block: 8px;
+    padding: 8px 11px 8px 13px;
   }
 }
 
