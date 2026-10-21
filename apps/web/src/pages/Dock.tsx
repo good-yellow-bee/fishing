@@ -1186,6 +1186,7 @@ export function DockPage() {
           nightLineSpot={game.nightLine?.spot ?? null}
           nightLineState={lineState}
           baitBucket={game.bucket}
+          aerated={game.aerator}
           worms={game.worms}
           shinerTrap={game.trap ? trapState(game.trap, Date.now()) : null}
           topwater={isTopwater(lure)}

@@ -1,10 +1,12 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-21-game72";
+export const NEWS_ID = "2026-10-21-pa40";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "With high contrast on a touch phone, the header, the lure panel and the hint over the lake now keep their usual size, so a long hint, such as a winter night line's, no longer runs its last line under the walking stick. And with larger text on a phone held sideways, the note naming where you stand, when the shore signs leave it no room, now goes from sight instead of showing as a sliver under them; a screen reader still reads it, and the pressed sign still names the bank.",
+  "On Bests, this year's days on the water now say how many of them gave a fish, and in a season picked, a water whose first fish came that season says New this season. Beside the sample week with only a water of your own, Bests' runs of outings and its calendar now leave the made-up plans out.",
   "In the summer heat, worms left in your tin from an earlier day have died by the time you come back, so the tin holds only the day's dig, and worms bought ahead at the shack don't keep to the next day either. And the shack now sells an aerator for your bait bucket, bought once for 150 points, 120 from level 17: every spare shiner then keeps a day longer in any season, three days in summer and six in winter.",
   "Tackle's recent outings now say under each month which lure took most of its fish. Today's outing under Coming up says Out now once a fish is in on its water, with no plan to copy beside it, as Home does, and the lure record counts it.",
   "By the shack's deck now stands a worm bin: a wooden crate of soil with worms slowly rising out of it, and beside it a little sign painted with a worm; in winter snow lies on the soil. And now and then, on a dry day from spring to fall, a blackbird flies down onto its rim, tugs a worm up out of the soil and flies off with it.",
