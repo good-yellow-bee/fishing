@@ -206,7 +206,7 @@ export const PL_GAME: PlBook = {
   "In the cold winter water it keeps five days there.": "Zimą, w zimnej wodzie, przeżyje tam pięć dni.",
   "In the summer heat it keeps two days there.": "W letnim upale przeżyje tam dwa dni.",
   "In the summer heat it keeps only today.": "W letnim upale przeżyje tylko dzisiaj.",
-  "{n} of the worms left in your tin died overnight in the summer heat: they keep only the day they are dug or bought.": "Część robaków z puszki padła w nocy w letnim upale ({n}): przeżywają tylko dzień, w którym się je wykopie lub kupi.",
+  "{n} of the worms left in your tin died in the summer heat while you were away: they keep only the day they are dug or bought.": "Część robaków z puszki padła w letnim upale pod twoją nieobecność ({n}): przeżywają tylko dzień, w którym się je wykopie lub kupi.",
   "It keeps three days there.": "Przeżyje tam trzy dni.",
   "foe about": "rywal w pobliżu",
   "lost trophy": "zgubione trofeum",

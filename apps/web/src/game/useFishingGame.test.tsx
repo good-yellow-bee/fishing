@@ -863,7 +863,7 @@ describe("useFishingGame frayed line", () => {
     const worms = season === "summer" ? dug : WORM_TIN_WET;
     expect(container!.querySelector("[data-testid=worms]")?.textContent).toBe(String(worms));
     expect(JSON.parse(kept.get(wormTinKey(profile.userId))!).worms).toBe(worms);
-    const wormsSaid = `${WORM_TIN_WET - dug} of the worms left in your tin died overnight in the summer heat: they keep only the day they are dug or bought.`;
+    const wormsSaid = `${WORM_TIN_WET - dug} of the worms left in your tin died in the summer heat while you were away: they keep only the day they are dug or bought.`;
     const shinerSaid = "1 of the shiners in your bait bucket died while you were away: in the summer heat they keep two days.";
     if (season === "spring") expect(hint()).not.toContain("worms left in your tin");
     else expect(hint()).toBe(shinerDied ? `${shinerSaid} ${wormsSaid}` : wormsSaid);

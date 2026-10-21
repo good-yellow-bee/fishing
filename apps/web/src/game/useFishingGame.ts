@@ -494,7 +494,7 @@ export function useFishingGame(
           : season === "summer"
             ? t("{n} of the shiners in your bait bucket died while you were away: in the summer heat they keep two days.", { n: kept.died })
             : t("{n} of the shiners in your bait bucket died while you were away: they keep three days.", { n: kept.died });
-    const wormsDied = tin.died > 0 ? t("{n} of the worms left in your tin died overnight in the summer heat: they keep only the day they are dug or bought.", { n: tin.died }) : "";
+    const wormsDied = tin.died > 0 ? t("{n} of the worms left in your tin died in the summer heat while you were away: they keep only the day they are dug or bought.", { n: tin.died }) : "";
     if (shinersDied || wormsDied) setHint([shinersDied, wormsDied].filter(Boolean).join(" "));
   }, [profile?.userId]);
   const keepBucket = (userId: string, shiners: number[]) => {
