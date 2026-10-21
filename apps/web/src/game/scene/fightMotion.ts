@@ -244,12 +244,12 @@ export function fightRodPitch(input: RodInput) {
 
 /**
  * A tiring arm shakes the rod: radians added to its pitch, nothing until the fight card says the arm tires,
- * growing to full as it reaches its slowest. Two slow beats, so it reads as an arm, not a run's shiver.
+ * growing to full as it reaches its slowest. A quick tremor that swells and fades, faster than a run's shiver.
  */
 export function armTremble(pace: number, time: number) {
   const k = Math.min(1, Math.max(0, (ARM_TELL - pace) / (ARM_TELL - ARM_FLOOR)));
   if (k <= 0) return 0;
-  return Math.sin(time * 7.3) * Math.sin(time * 11.9 + 0.6) * 0.05 * k;
+  return Math.sin(time * 41) * (0.6 + 0.4 * Math.sin(time * 3.7)) * 0.04 * k;
 }
 
 /** The rod swept over against a run: added to the roll, so it fights the twist the run puts in it. */

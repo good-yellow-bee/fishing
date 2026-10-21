@@ -280,18 +280,18 @@ describe("the wind on a slack fight line", () => {
 });
 
 describe("tired arm", () => {
-  const peak = (pace: number) => Math.max(...Array.from({ length: 400 }, (_, i) => Math.abs(armTremble(pace, i * 0.013))));
+  const at = 0.4;
 
   it("keeps the rod steady until the arm tires", () => {
-    expect(peak(1)).toBe(0);
-    expect(peak(ARM_TELL)).toBe(0);
+    expect(armTremble(1, at)).toBe(0);
+    expect(armTremble(ARM_TELL, at)).toBe(0);
   });
 
   it("shakes it harder the slower the arm reels", () => {
-    const tiring = peak((ARM_TELL + ARM_FLOOR) / 2);
-    const spent = peak(ARM_FLOOR);
-    expect(tiring).toBeGreaterThan(0);
-    expect(spent).toBeGreaterThan(tiring);
-    expect(spent).toBeLessThanOrEqual(0.05);
+    const spent = armTremble(ARM_FLOOR, at);
+    expect(Math.abs(spent)).toBeGreaterThan(0);
+    expect(Math.abs(spent)).toBeLessThanOrEqual(0.05);
+    expect(armTremble((ARM_TELL + ARM_FLOOR) / 2, at)).toBeCloseTo(spent / 2);
+    expect(armTremble(ARM_FLOOR - 0.1, at)).toBe(spent);
   });
 });

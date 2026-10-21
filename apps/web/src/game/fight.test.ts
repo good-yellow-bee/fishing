@@ -2126,6 +2126,25 @@ describe("the angler's arm in a long fight", () => {
     expect(f.sim.armPace).toBeUndefined();
   });
 
+  it("rests the arm while the fish waits at the net", () => {
+    const f = makeFight(fish("pike"), 4, 8, () => 0, 1, "open", undefined, false, false, false, false, false, false, false, 1, 1, true);
+    let now = 0;
+    // Line held out, so the reeling tires the arm before the fish comes in.
+    for (; now < (ARM_FRESH_SEC + 15) * 1000; now += 50) {
+      f.sim.line = 0.5;
+      f.step(now, 0.05, true);
+    }
+    f.sim.line = 0.01;
+    f.sim.stamina = 0;
+    for (; !f.sim.netting && now < 60_000; now += 50) f.step(now, 0.05, true);
+    expect(f.sim.netting).toBe(true);
+    const atNet = f.sim.armPace ?? 1;
+    expect(atNet).toBeLessThan(1);
+    for (const end = now + 2_000; now < end; now += 50) f.step(now, 0.05, false);
+    expect(f.sim.netting).toBe(true);
+    expect(f.sim.armPace ?? 1).toBeGreaterThan(atNet);
+  });
+
   it("gives the arm no rest while a run is held on a heavy drag", () => {
     const tiredAfter = (drag: Drag) => {
       const f = makeFight(fish("pike"), 14.5, 8, () => 0.5);
