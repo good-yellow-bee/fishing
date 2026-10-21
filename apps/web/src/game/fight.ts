@@ -14,6 +14,8 @@ export type SurgeState = 0 | 1 | 2; // 0 calm, 1 warning (telegraph), 2 surging
 export type FightSim = {
   /** The angler's arm is tiring in a long fight, so the reel wins less line. */
   armTired?: boolean;
+  /** How fast the tiring arm still reels, from ARM_FLOOR up to just under 1; unset while it is fresh. */
+  armPace?: number;
   /** A slippery fish on a slack line, slithering toward slipping the hook. */
   slipping?: boolean;
   /** It slipped the hook on a slack line. */
@@ -950,7 +952,10 @@ export function makeFight(
     performance.fightSec = (performance.fightSec ?? 0) + dtSec;
     // Holding a run against a heavy drag works the arm as reeling does, so it gets no rest.
     reelSec = reeling || heavyRun ? reelSec + dtSec : Math.max(0, reelSec - dtSec * ARM_REST_RECOVER);
-    if (armMul(reelSec) < ARM_TELL) sim.armTired = true;
+    const armPace = armMul(reelSec);
+    if (armPace < 1) sim.armPace = armPace;
+    else delete sim.armPace;
+    if (armPace < ARM_TELL) sim.armTired = true;
     else delete sim.armTired;
     // Fought too long, a pike chews the line it swallowed down to frayed.
     if (toothed && !sim.frayed && performance.fightSec >= TEETH_SEC) {

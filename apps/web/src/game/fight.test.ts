@@ -2116,10 +2116,14 @@ describe("the angler's arm in a long fight", () => {
     const reelFor = (sec: number) => {
       for (const end = now + sec * 1000; now < end; now += 50) f.step(now, 0.05, true);
     };
+    expect(f.sim.armPace).toBeUndefined();
     reelFor(ARM_FRESH_SEC + 15);
     expect(f.sim.armTired).toBe(true);
+    expect(f.sim.armPace).toBeLessThan(1);
+    expect(f.sim.armPace).toBeGreaterThanOrEqual(ARM_FLOOR);
     for (const end = now + 40_000; now < end; now += 50) f.step(now, 0.05, false);
     expect(f.sim.armTired).toBeUndefined();
+    expect(f.sim.armPace).toBeUndefined();
   });
 
   it("gives the arm no rest while a run is held on a heavy drag", () => {
