@@ -195,6 +195,14 @@ export function validateWormBinBuy(profile: Profile): PurchaseResult {
   return shackSale(profile, WORM_BIN_PRICE);
 }
 
+/** A sack of bread crumb for the groundbait costs this many points, bought once; a swim left baited then holds the gathered feeders longer. */
+export const BREAD_CRUMB_PRICE = 120;
+
+export function validateBreadCrumbBuy(profile: Profile): PurchaseResult {
+  if (profile.breadCrumb) return { ok: false, error: "bread crumb already yours", status: 409 };
+  return shackSale(profile, BREAD_CRUMB_PRICE);
+}
+
 export function rollWeight(species: FishSpecies, patience: number, random = Math.random, level = 1): number {
   const trophyBoost = level >= 8 ? 0.1 : 0;
   const t = Math.min(1, Math.max(0, random() + patience * 0.015 + trophyBoost));

@@ -37,6 +37,8 @@ export type Profile = {
   aerator?: boolean;
   /** The worm tin keeps in the shack's cool worm bin: bought once, its worms keep a day longer in summer. */
   wormBin?: boolean;
+  /** Bread crumb goes in the angler's groundbait: bought once, a swim left baited holds the gathered feeders longer. */
+  breadCrumb?: boolean;
 };
 
 export type CatchRecord = {

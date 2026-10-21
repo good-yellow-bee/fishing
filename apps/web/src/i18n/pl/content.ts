@@ -350,6 +350,7 @@ export const PL_CONTENT: PlBook = {
   "not enough points": "za mało punktów",
   "aerator already fitted": "napowietrzacz jest już zamontowany",
   "worm bin already yours": "miejsce w skrzynce na robaki jest już twoje",
+  "bread crumb already yours": "worek bułki tartej jest już twój",
 
   // Sentences rebuilt in i18n/content.ts
   "A {fish}": "1 × {fish}",

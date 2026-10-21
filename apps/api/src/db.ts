@@ -153,6 +153,10 @@ if (!profileColumns.some((column) => column.name === "aerator")) {
 if (!profileColumns.some((column) => column.name === "worm_bin")) {
   db.exec(`ALTER TABLE profile ADD COLUMN worm_bin INTEGER NOT NULL DEFAULT 0`);
 }
+// The angler's sack of bread crumb for the groundbait, bought once.
+if (!profileColumns.some((column) => column.name === "bread_crumb")) {
+  db.exec(`ALTER TABLE profile ADD COLUMN bread_crumb INTEGER NOT NULL DEFAULT 0`);
+}
 const catchColumns = db.prepare(`PRAGMA table_info(catch)`).all() as { name: string }[];
 if (!catchColumns.some((column) => column.name === "request_id")) {
   db.exec(`ALTER TABLE catch ADD COLUMN request_id TEXT`);
@@ -217,6 +221,7 @@ export type ProfileRow = {
   patience: number;
   aerator: number;
   worm_bin: number;
+  bread_crumb: number;
 };
 
 export type CatchRow = {
@@ -771,7 +776,7 @@ export function spendPoints(userId: string, cost: number) {
 }
 
 /** Spends the points and sets a one-time shack purchase in one step, so a second purchase, from another tab or a double click, finds it set and fails. */
-const buyOnce = (column: "aerator" | "worm_bin") => {
+const buyOnce = (column: "aerator" | "worm_bin" | "bread_crumb") => {
   const update = db.prepare(`UPDATE profile SET points = points - ?, ${column} = 1 WHERE user_id = ? AND points >= ? AND ${column} = 0`);
   return (userId: string, cost: number) => {
     if (update.run(cost, userId, cost).changes !== 1) throw new Error("purchase failed");
@@ -779,6 +784,7 @@ const buyOnce = (column: "aerator" | "worm_bin") => {
 };
 export const fitAerator = buyOnce("aerator");
 export const takeWormBin = buyOnce("worm_bin");
+export const takeBreadCrumb = buyOnce("bread_crumb");
 
 export function toProfile(row: ProfileRow) {
   return {
@@ -791,6 +797,7 @@ export function toProfile(row: ProfileRow) {
     patience: row.patience,
     aerator: row.aerator === 1,
     wormBin: row.worm_bin === 1,
+    breadCrumb: row.bread_crumb === 1,
   };
 }
 
