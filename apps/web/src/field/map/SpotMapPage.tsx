@@ -38,7 +38,7 @@ import {
   type SamplePlace,
 } from "./places";
 import { LABEL_HEIGHT, OWN_HEIGHT, type Box, OWN_WIDTH, PHONE_LABEL_HEIGHT, fitFrame, gridLines, labelShifts, projectIn, scaleBar, scaleSpot } from "./ownSheet";
-import { hasSampleWaters, isSampleSpot, nextRealTrips } from "../bookCopy";
+import { hasSampleWaters, isSampleSpot, nextRealTrips, withoutSamplePlans } from "../bookCopy";
 import { PLAY_LAKE_ID } from "../playLake";
 import { daysBetween, kmBetween, lastOutByWater, spotsByLastFish } from "../spotOrder";
 import { NearestWater, canFindNearest, distanceText } from "../NearestWater";
@@ -324,7 +324,8 @@ function PlanHere({ spot }: { spot: Spot }) {
 }
 
 export function SpotMapPage() {
-  const { book } = useLogbook();
+  // The sample week's blank plans stay out beside a water of the angler's own, as Trips and Waters leave them out.
+  const book = withoutSamplePlans(useLogbook().book);
   const tackle = useTackleItems();
   useT();
   // A first visit loads the page after the shell has moved focus, so it landed on the page itself; Back from a water's
