@@ -54,9 +54,10 @@ function waterStamps(box: HTMLElement): Record<string, boolean> {
 
 describe("round 122 ideas: Bests", () => {
   // Old Pond and Sniardwy gave fish in 2025; in 2026 New Lake gave its first, and Śniardwy, Sniardwy's twin, its first.
+  // Night Pond's first came in the small hours of New Year's Day, on the evening's outing: a 2025 fish.
   const book: Logbook = {
-    spots: [spot("old", "Old Pond"), spot("sn", "Sniardwy"), spot("sn2", "Śniardwy"), spot("new", "New Lake")],
-    trips: [],
+    spots: [spot("old", "Old Pond"), spot("sn", "Sniardwy"), spot("sn2", "Śniardwy"), spot("new", "New Lake"), spot("night", "Night Pond")],
+    trips: [trip("eve", "2025-12-31", "night")],
     catches: [
       fish("1", "old", new Date(2025, 5, 1, 10)),
       fish("2", "sn", new Date(2025, 5, 2, 10)),
@@ -64,11 +65,13 @@ describe("round 122 ideas: Bests", () => {
       fish("4", "sn2", new Date(2026, 5, 2, 10)),
       fish("5", "sn2", new Date(2026, 5, 3, 10)),
       fish("6", "new", new Date(2026, 5, 4, 10)),
+      { ...fish("7", "night", new Date(2026, 0, 1, 1)), tripId: "eve" },
+      fish("8", "night", new Date(2026, 5, 5, 10)),
     ],
   };
 
   it("stamps a water whose first fish came in the season picked, twins as one", async () => {
-    expect(waterStamps(await bests(book, "/bests?year=2026"))).toEqual({ "Śniardwy": false, "New Lake": true, "Old Pond": false });
+    expect(waterStamps(await bests(book, "/bests?year=2026"))).toEqual({ "Śniardwy": false, "Night Pond": false, "New Lake": true, "Old Pond": false });
   });
 
   it("stamps none in the book's first season, nor all time", async () => {
@@ -77,20 +80,26 @@ describe("round 122 ideas: Bests", () => {
   });
 
   it("says how many of this year's days on the water gave a fish", async () => {
-    const box = await bests({ ...book, trips: [trip("blank", "2026-03-01", "old")] });
-    expect(box.textContent).toContain("Days on the water in 2026: 5, 4 with a fish");
+    const box = await bests({ ...book, trips: [...book.trips, trip("blank", "2026-03-01", "old")] });
+    expect(box.textContent).toContain("Days on the water in 2026: 6, 5 with a fish");
   });
 
   it("leaves that out when every day gave one", async () => {
     const text = (await bests(book)).textContent!;
-    expect(text).toContain("Days on the water in 2026: 4");
-    expect(text).not.toContain("Days on the water in 2026: 4,");
+    expect(text).toContain("Days on the water in 2026: 5");
+    expect(text).not.toContain("Days on the water in 2026: 5,");
+  });
+
+  it("leaves it out of a year with no fish yet", async () => {
+    const text = (await bests({ ...book, catches: book.catches.filter((entry) => entry.caughtAt < "2025-12"), trips: [...book.trips, trip("blank", "2026-03-01", "old")] })).textContent!;
+    expect(text).toContain("Days on the water in 2026: 1");
+    expect(text).not.toContain("Days on the water in 2026: 1,");
   });
 
   it("says it in Polish", async () => {
     setLang("pl");
-    const box = await bests({ ...book, trips: [trip("blank", "2026-03-01", "old")] });
-    expect(box.textContent).toContain("Dni nad wodą w 2026: 5, z rybą: 4");
+    const box = await bests({ ...book, trips: [...book.trips, trip("blank", "2026-03-01", "old")] });
+    expect(box.textContent).toContain("Dni nad wodą w 2026: 6, z rybą: 5");
     const season = await bests(book, "/bests?year=2026");
     expect([...season.querySelectorAll(".spot-card")].find((card) => card.querySelector("h3")?.textContent === "New Lake")?.textContent).toContain("Nowość sezonu");
   });
