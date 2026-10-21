@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { GROUNDBAIT_CASTS } from "./logic";
-import { SWIM_COLD_GONE_MS, SWIM_COLD_PRIMED_MS, SWIM_GONE_MS, SWIM_HOT_GONE_MS, SWIM_HOT_PRIMED_MS, SWIM_PRIMED_MS, swimNow, swimTimes } from "./swim";
+import { BREAD_PRIMED_CASTS, loadSwim, saveSwim, SWIM_COLD_GONE_MS, SWIM_COLD_PRIMED_MS, SWIM_GONE_MS, SWIM_HOT_GONE_MS, SWIM_HOT_PRIMED_MS, SWIM_PRIMED_MS, swimNow, swimTimes } from "./swim";
 
 const swim = { spot: "reeds" as const, casts: 2, at: 0 };
 
@@ -26,4 +26,18 @@ describe("a groundbaited swim left for the next visit", () => {
     expect(swimNow({ ...swim, primed: true }, SWIM_GONE_MS + 1, "winter")).toEqual({ ...swim, primed: true, primedNow: false });
     expect(swimNow(swim, SWIM_COLD_GONE_MS + 1, "winter")).toBeNull();
   });
+
+  it("with bread crumb in it, holds the gathered feeders longer, and a reload keeps those casts", () => {
+    expect(swimNow(swim, SWIM_PRIMED_MS, undefined, true)).toEqual({ spot: "reeds", casts: GROUNDBAIT_CASTS + BREAD_PRIMED_CASTS, at: 0, primed: true, primedNow: true });
+    expect(swimNow(swim, SWIM_PRIMED_MS - 1, undefined, true)).toEqual({ ...swim, primedNow: false });
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    const held = { ...swim, casts: GROUNDBAIT_CASTS + BREAD_PRIMED_CASTS, primed: true };
+    saveSwim("u", held);
+    expect(loadSwim("u")).toEqual(held);
+    saveSwim("u", { ...held, casts: held.casts + 1 });
+    expect(loadSwim("u")).toBeNull();
+  });
 });
+
+afterEach(() => vi.unstubAllGlobals());

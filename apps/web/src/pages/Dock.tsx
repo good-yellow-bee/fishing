@@ -77,7 +77,7 @@ import {
   type SkillId,
   type StanceId,
 } from "@stillwater/shared";
-import { buyAerator, buyGroundbait, buyShiner, buyUpgrade, buyWorm, buyWormBin, errorText, getBankWeek, getGiants, getLodgeLost, reportLost, type GiantStatus, getLodgeReleased, getMe, getSpeciesRecords, getWeeklyChallenges, releaseCatch, type Me, type WeeklyBoard } from "../api";
+import { buyAerator, buyBreadCrumb, buyGroundbait, buyShiner, buyUpgrade, buyWorm, buyWormBin, errorText, getBankWeek, getGiants, getLodgeLost, reportLost, type GiantStatus, getLodgeReleased, getMe, getSpeciesRecords, getWeeklyChallenges, releaseCatch, type Me, type WeeklyBoard } from "../api";
 import { DailyRequestsPanel } from "../components/DailyRequestsPanel";
 import { WeeklyChallengesPanel } from "../components/WeeklyChallengesPanel";
 import { FightBar } from "../components/FightBar";
@@ -1051,6 +1051,7 @@ export function DockPage() {
   };
   const onBuyAerator = buyOnce(buyAerator);
   const onBuyWormBin = buyOnce(buyWormBin);
+  const onBuyBreadCrumb = buyOnce(buyBreadCrumb);
 
   if (!me) {
     return <main className="dock-page">{error || t("Walking the planks…")}</main>;
@@ -1723,7 +1724,7 @@ export function DockPage() {
               {t("The shack")}
             </h2>
             <UpgradePanel profile={me.profile} busy={busy || scenePhase !== "idle"} onBuy={onBuy} />
-            <BaitShop points={me.profile.points} lifetimePoints={me.profile.lifetimePoints} handfuls={game.handfuls} shinerOn={game.liveShiner} bucket={game.bucket} busy={busy || scenePhase !== "idle"} onBuy={onBuyBait} onBuyShiner={onBuyShiner} onHookFromBucket={game.hookFromBucket} aerator={game.aerator} onBuyAerator={onBuyAerator} worms={game.worms} onBuyWorm={onBuyWorm} wormBin={game.wormBin} onBuyWormBin={onBuyWormBin} trap={game.trap ? trapState(game.trap, Date.now()) : "none"} trapCold={game.trap ? game.trap.cold === true : trapIsCold(season)} onSetTrap={game.setTrap} onLiftTrap={game.liftTrap} season={season} />
+            <BaitShop points={me.profile.points} lifetimePoints={me.profile.lifetimePoints} handfuls={game.handfuls} shinerOn={game.liveShiner} bucket={game.bucket} busy={busy || scenePhase !== "idle"} onBuy={onBuyBait} onBuyShiner={onBuyShiner} onHookFromBucket={game.hookFromBucket} aerator={game.aerator} onBuyAerator={onBuyAerator} worms={game.worms} onBuyWorm={onBuyWorm} wormBin={game.wormBin} onBuyWormBin={onBuyWormBin} breadCrumb={game.breadCrumb} onBuyBreadCrumb={onBuyBreadCrumb} trap={game.trap ? trapState(game.trap, Date.now()) : "none"} trapCold={game.trap ? game.trap.cold === true : trapIsCold(season)} onSetTrap={game.setTrap} onLiftTrap={game.liftTrap} season={season} />
             <DailyRequestsPanel key={userId} catchKey={me.catches[0]?.id} onClaimed={refresh} />
             <WeeklyChallengesPanel key={`week-${userId}`} catchKey={me.catches[0]?.id} onClaimed={refresh} />
             <ForecastBoard />

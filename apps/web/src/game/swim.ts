@@ -16,6 +16,8 @@ export const SWIM_HOT_GONE_MS = 24 * 3_600_000;
 /** Winter's slow fish take longer to gather over it, but it keeps four days in the cold. */
 export const SWIM_COLD_PRIMED_MS = 12 * 3_600_000;
 export const SWIM_COLD_GONE_MS = 96 * 3_600_000;
+/** Bread crumb in the groundbait holds the feeders gathered over a swim left behind this many casts longer. */
+export const BREAD_PRIMED_CASTS = 3;
 
 /** When a swim left behind primes and when it is gone, judged by the lake's season when the angler comes back. */
 export function swimTimes(season: LakeSeason | undefined): { primedMs: number; goneMs: number } {
@@ -34,7 +36,7 @@ export function loadSwim(userId: string): Swim | null {
       (SPOT_IDS as readonly unknown[]).includes(swim.spot) &&
       Number.isInteger(swim.casts) &&
       swim.casts! >= 1 &&
-      swim.casts! <= GROUNDBAIT_CASTS &&
+      swim.casts! <= GROUNDBAIT_CASTS + BREAD_PRIMED_CASTS &&
       typeof swim.at === "number"
       ? { spot: swim.spot!, casts: swim.casts!, at: swim.at, ...(swim.primed ? { primed: true } : {}) }
       : null;
@@ -45,11 +47,11 @@ export function saveSwim(userId: string, swim: Swim | null) {
   writeAngler(swimKey(userId), swim);
 }
 
-/** The swim on a new visit: as it was if soon after, freshly baited once when the feeders have gathered, gone once the season's days run out. */
-export function swimNow(swim: Swim | null, now: number, season?: LakeSeason): (Swim & { primedNow: boolean }) | null {
+/** The swim on a new visit: as it was if soon after, freshly baited once when the feeders have gathered (longer with bread crumb in it), gone once the season's days run out. */
+export function swimNow(swim: Swim | null, now: number, season?: LakeSeason, breadCrumb = false): (Swim & { primedNow: boolean }) | null {
   if (!swim || swim.casts <= 0) return null;
   const age = now - swim.at;
   const { primedMs, goneMs } = swimTimes(season);
   if (age > goneMs) return null;
-  return age >= primedMs && !swim.primed ? { spot: swim.spot as SpotId, casts: GROUNDBAIT_CASTS, at: swim.at, primed: true, primedNow: true } : { ...swim, primedNow: false };
+  return age >= primedMs && !swim.primed ? { spot: swim.spot as SpotId, casts: GROUNDBAIT_CASTS + (breadCrumb ? BREAD_PRIMED_CASTS : 0), at: swim.at, primed: true, primedNow: true } : { ...swim, primedNow: false };
 }

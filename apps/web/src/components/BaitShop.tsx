@@ -1,7 +1,8 @@
-import { AERATOR_PRICE, GROUNDBAIT_CARRY, GROUNDBAIT_PRICE, shackPrice, SHINER_PRICE, WORM_BIN_PRICE, WORM_PRICE, type LakeSeason } from "@stillwater/shared";
+import { AERATOR_PRICE, BREAD_CRUMB_PRICE, GROUNDBAIT_CARRY, GROUNDBAIT_PRICE, shackPrice, SHINER_PRICE, WORM_BIN_PRICE, WORM_PRICE, type LakeSeason } from "@stillwater/shared";
 import { t, useT } from "../i18n";
 import { GROUNDBAIT_CASTS } from "../game/logic";
 import { BUCKET_SIZE } from "../game/baitBucket";
+import { BREAD_PRIMED_CASTS } from "../game/swim";
 import { WORM_TIN_WET } from "../game/wormTin";
 
 type Props = {
@@ -27,6 +28,9 @@ type Props = {
   /** The worm tin has its place in the shack's cool worm bin already. */
   wormBin: boolean;
   onBuyWormBin: () => void;
+  /** Bread crumb goes in the angler's groundbait already. */
+  breadCrumb: boolean;
+  onBuyBreadCrumb: () => void;
   /** The shiner trap by the shack: not set, soaking, ready to lift, or sat too long. */
   trap: "none" | "soaking" | "ready" | "stale";
   /** The trap soaks in winter's cold water: the one down already, or one baited today. */
@@ -37,8 +41,8 @@ type Props = {
   season: LakeSeason | undefined;
 };
 
-/** The shack's bait tin: points buy a handful of groundbait, up to what the bag carries, a live shiner for the hook, the bait bucket's aerator once, a worm for the tin, or the tin's place in the worm bin once. */
-export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, busy, onBuy, onBuyShiner, onHookFromBucket, aerator, onBuyAerator, worms, onBuyWorm, wormBin, onBuyWormBin, trap, trapCold, onSetTrap, onLiftTrap, season }: Props) {
+/** The shack's bait tin: points buy a handful of groundbait, up to what the bag carries, a live shiner for the hook, the bait bucket's aerator once, a worm for the tin, the tin's place in the worm bin once, or a sack of bread crumb for the groundbait once. */
+export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, busy, onBuy, onBuyShiner, onHookFromBucket, aerator, onBuyAerator, worms, onBuyWorm, wormBin, onBuyWormBin, breadCrumb, onBuyBreadCrumb, trap, trapCold, onSetTrap, onLiftTrap, season }: Props) {
   useT();
   const full = handfuls >= GROUNDBAIT_CARRY;
   // aria-disabled, as on the skills: a disabled button would drop keyboard focus the moment a purchase starts.
@@ -54,6 +58,8 @@ export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, b
   const wormOff = busy || tinFull || points < wormCost;
   const wormBinCost = shackPrice(WORM_BIN_PRICE, lifetimePoints);
   const wormBinOff = busy || wormBin || points < wormBinCost;
+  const breadCrumbCost = shackPrice(BREAD_CRUMB_PRICE, lifetimePoints);
+  const breadCrumbOff = busy || breadCrumb || points < breadCrumbCost;
   return (
     <section className="bait-shop">
       <div className="panel-heading">
@@ -155,6 +161,23 @@ export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, b
             {wormBin
               ? t("Your worm tin keeps in the cool worm bin, so in summer its worms last to the next day.")
               : t("Keep your worm tin in the shack's cool worm bin, so in summer its worms last to the next day. Bought once.")}
+          </p>
+        </div>
+        <div className="upgrade-skill">
+          <button
+            type="button"
+            aria-disabled={breadCrumbOff || undefined}
+            aria-describedby="bread-crumb-note"
+            onClick={() => {
+              if (!breadCrumbOff) onBuyBreadCrumb();
+            }}
+          >
+            {breadCrumb ? t("Your sack of bread crumb") : t("A sack of bread crumb ({cost} pts)", { cost: breadCrumbCost })}
+          </button>
+          <p id="bread-crumb-note">
+            {breadCrumb
+              ? t("Bread crumb goes in every handful, so a swim you leave baited holds the feeders gathered there for {casts} casts.", { casts: GROUNDBAIT_CASTS + BREAD_PRIMED_CASTS })
+              : t("Mix bread crumb into your groundbait, so a swim you leave baited holds the feeders gathered there for {casts} casts, not {base}. Bought once.", { casts: GROUNDBAIT_CASTS + BREAD_PRIMED_CASTS, base: GROUNDBAIT_CASTS })}
           </p>
         </div>
         <div className="upgrade-skill">

@@ -485,6 +485,10 @@ export function useFishingGame(
   const wormBin = profile?.wormBin === true;
   const wormBinRef = useRef(wormBin);
   wormBinRef.current = wormBin;
+  /** Bread crumb in the groundbait: a swim left behind holds the gathered feeders longer. */
+  const breadCrumb = profile?.breadCrumb === true;
+  const breadCrumbRef = useRef(breadCrumb);
+  breadCrumbRef.current = breadCrumb;
   /** What died in the bucket and the tin since the last visit, said on sign-in; the primed swim's line adds to it, not over it. */
   const baitDiedRef = useRef("");
   // The bait kept from an earlier visit, read when the angler signs in: the bucket's shiners and the tin's worms may have died since.
@@ -797,7 +801,7 @@ export function useFishingGame(
   // The angler's swim from an earlier visit, read when they sign in: left long enough for the season, the feeders have gathered over it, once.
   useEffect(() => {
     const swim = profile?.userId ? loadSwim(profile.userId) : null;
-    const now = swimNow(swim, Date.now(), season);
+    const now = swimNow(swim, Date.now(), season, breadCrumbRef.current);
     groundbaitRef.current = now ? { spot: now.spot, casts: now.casts } : null;
     swimRef.current = { at: now?.at ?? 0, primed: !!now?.primed };
     setSwimPrimed(!!now?.primed);
@@ -805,7 +809,9 @@ export function useFishingGame(
     if (profile?.userId && swim && !now) saveSwim(profile.userId, null);
     if (now?.primedNow && profile?.userId) {
       saveSwim(profile.userId, { spot: now.spot, casts: now.casts, at: now.at, primed: true });
-      const primed = t("The groundbait you left at the {bank} has the feeders gathered there: {casts} casts of it.", { bank: t(SPOT_LABELS[now.spot]), casts: now.casts });
+      const primed = breadCrumbRef.current
+        ? t("The groundbait and bread crumb you left at the {bank} have the feeders gathered there: {casts} casts of it.", { bank: t(SPOT_LABELS[now.spot]), casts: now.casts })
+        : t("The groundbait you left at the {bank} has the feeders gathered there: {casts} casts of it.", { bank: t(SPOT_LABELS[now.spot]), casts: now.casts });
       setHint([baitDiedRef.current, primed].filter(Boolean).join(" "));
     }
   }, [profile?.userId]);
@@ -2506,6 +2512,7 @@ export function useFishingGame(
     bucket,
     aerator,
     wormBin,
+    breadCrumb,
     hookFromBucket,
     setNightLine,
     checkNightLine,
