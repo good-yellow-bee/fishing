@@ -81,7 +81,7 @@ import { loadBag, loadShiner, saveBag, saveShiner, type HookedShiner } from "./g
 import { loadTin, saveTin, WORM_TIN_DAILY, WORM_TIN_WET } from "./wormTin";
 import { BACKLASH_POWER, BED_RAIDERS, COLD_WORK_WAIT, tooQuickForCold, isLongCast, castIntoSchool, castOverGroundbait, canChopWorm, CHOPPED_WORMS, wormFeedersTake, scatterSwim, SPOOKED_SWIM_CASTS, isBigFeeder, isWary, landBigFeeder, bigFeedersOver, prowlerAt, PROWLERS, scattersSwim, TOPUP_MAX, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, OVERFED_WAIT, throwHandful, TOPUP_CASTS_LEFT, canBaitShiner, shinerHunter, bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, type Groundbait, castIntoSpooked, castUnderPressure, castNewLure, type LuresShown, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, colourSuits, colourWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, anchorSplashWaitMul, openGlareWaitMul, frenzyHunter, FRENZY_WAIT, lampLit, LAMP_WAIT, LAMP_WINDOW, longShadowWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, waterSwingWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
 import { localId } from "./localId";
-import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
+import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealChance, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
 
 /** Milliseconds as seconds with two decimals, in the angler's own number format. */
@@ -1385,7 +1385,9 @@ export function useFishingGame(
     const topwater = isTopwater(lureRef?.current);
     const style = takeStyle(species.id, topwater);
     const nibbles = nibblePlan(wait, Math.random, style);
-    const stolen = carriesBait(lureRef?.current) && stealsBait(species.id, nibbles.length);
+    // A swim whose feeders were scattered has no thieves crowding it either, however little built it is left.
+    const thiefSwim = bait.baited && !bait.spooked ? bait.built : null;
+    const stolen = carriesBait(lureRef?.current) && stealsBait(species.id, nibbles.length, Math.random, stealChance(thiefSwim));
     const arm = () => {
       let secondTake = false;
       let followed = false;
@@ -1422,7 +1424,7 @@ export function useFishingGame(
         if (stolen) {
           setSoak(0);
           setOutcome({ kind: "miss", message: t("{fish} nibbled the bait clean off the hook.", { fish: t(species.name) }), fish: bitten });
-          resetToIdle(t("Little fish steal bait. Cast again."), "result");
+          resetToIdle(thiefSwim === 0 ? t("Shiners crowd a fresh swim and steal bait until it's topped up. Cast again.") : t("Little fish steal bait. Cast again."), "result");
           return;
         }
         // A pike on a flashing lure may follow it to the bank instead of taking: the angler figure-eights it as it turns.

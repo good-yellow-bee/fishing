@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { BAIT_THIEVES, biteStyle, takeStyle, LIFT_RISE, liftTilt, nibblePlan, RUN_PLUNGE, RUN_SLIDE, runSlide, STEAL_CHANCE, stealsBait } from "./nibblePlan";
+import { BAIT_THIEVES, BUILT_SWIM_STEAL_CHANCE, FRESH_SWIM_STEAL_CHANCE, biteStyle, takeStyle, LIFT_RISE, liftTilt, nibblePlan, RUN_PLUNGE, RUN_SLIDE, runSlide, STEAL_CHANCE, stealChance, stealsBait } from "./nibblePlan";
+import { TOPUP_MAX } from "./logic";
 
 function seeded(seed: number) {
   let s = (seed * 48271 + 12345) % 2147483647;
@@ -117,6 +118,14 @@ describe("stealsBait", () => {
     expect(stealsBait("golden-shiner", 2, () => STEAL_CHANCE + 0.01)).toBe(false);
     expect(stealsBait("golden-shiner", 0, () => 0)).toBe(false);
     expect(stealsBait("perch", 2, () => 0)).toBe(false);
+  });
+
+  it("strips the hook twice as often over a fresh swim, half as often over one built all the way", () => {
+    expect([null, 0, 1, TOPUP_MAX, TOPUP_MAX + 1].map(stealChance)).toEqual([STEAL_CHANCE, FRESH_SWIM_STEAL_CHANCE, STEAL_CHANCE, BUILT_SWIM_STEAL_CHANCE, BUILT_SWIM_STEAL_CHANCE]);
+    expect(FRESH_SWIM_STEAL_CHANCE).toBe(STEAL_CHANCE * 2);
+    expect(BUILT_SWIM_STEAL_CHANCE).toBe(STEAL_CHANCE / 2);
+    expect(stealsBait("golden-shiner", 2, () => 0.4, stealChance(0))).toBe(true);
+    expect(stealsBait("golden-shiner", 2, () => 0.2, stealChance(TOPUP_MAX))).toBe(false);
   });
 });
 

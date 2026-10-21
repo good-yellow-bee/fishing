@@ -730,6 +730,7 @@ export const PL_GAME: PlBook = {
   "{fish} snapped the line.": "{fish} — żyłka zerwana.",
   "{fish} nibbled the bait clean off the hook.": "{fish} — przynęta objedzona, haczyk pusty.",
   "Little fish steal bait. Cast again.": "Małe ryby kradną przynętę. Zarzuć jeszcze raz.",
+  "Shiners crowd a fresh swim and steal bait until it's topped up. Cast again.": "Złotawce tłoczą się na świeżej zanęcie i kradną przynętę, dopóki nie dosypiesz zanęty. Zarzuć jeszcze raz.",
   "Line parted. Spend points on Strength.": "Żyłka pękła. Wydaj punkty na Siłę.",
   "Line parted. Spend points on Accuracy.": "Żyłka pękła. Wydaj punkty na Celność.",
   "{line}. Ease off when it runs.": "{line}. Odpuść, gdy odjeżdża.",

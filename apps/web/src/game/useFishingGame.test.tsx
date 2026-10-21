@@ -6,7 +6,7 @@ import { canLand, localDate, DOCK_STAND_X, DOCK_STAND_Z, FISH, type Giant, type 
 import { floodedInlet, makeFight, springRunTireMul, SPRING_RUN_TIRE, currentTireMul, CURRENT_FIGHTER_TIRE, type FightOutcome, type FightPerformance, type FightSim } from "./fight";
 import { FRENZY_SLOT_MS, HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt, slotFrenzy } from "./hotspot";
 import { bedRaider, CHOPPED_WORMS, COLD_WORK_GAP_MS, LONG_CAST_SOLID, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, castIntoSpooked, isSkipCast, castOnFreshWater, TWIST_CASTS, twistAfterCast, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, PRESSURE_CASTS, GROUNDBAIT_CASTS, OVERFED_CASTS, SPOOKED_SWIM_CASTS, TOPUP_MAX, WARY_LANDED, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WARMING_WAIT, COOLING_WAIT, waterSwingWaitMul, anchorSplashWaitMul, ANCHOR_SPLASH_WAIT, LAMP_WINDOW } from "./logic";
-import { LIGHT_HOLD, stealsBait } from "./nibblePlan";
+import { BUILT_SWIM_STEAL_CHANCE, FRESH_SWIM_STEAL_CHANCE, LIGHT_HOLD, STEAL_CHANCE, stealsBait } from "./nibblePlan";
 import { castForReleased } from "./releasedFish";
 
 const step = vi.fn<() => FightOutcome>(() => {
@@ -2582,6 +2582,42 @@ describe("level unlock integration", () => {
     expect(phase()).toBe("result:miss");
     expect(container!.querySelector("[data-testid=miss-message]")?.textContent).toBe("Golden shiner nibbled the bait clean off the hook.");
     expect(hint()).toBe("Little fish steal bait. Cast again.");
+  });
+
+  it.each([
+    [0, FRESH_SWIM_STEAL_CHANCE, "Shiners crowd a fresh swim and steal bait until it's topped up. Cast again."],
+    [1, STEAL_CHANCE, "Little fish steal bait. Cast again."],
+    [TOPUP_MAX, BUILT_SWIM_STEAL_CHANCE, "Little fish steal bait. Cast again."],
+  ] as const)("lets a golden shiner steal over a swim topped up %s times at its own chance, and says so", (built, chance, said) => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 6, ...(built ? { built } : {}), at: DOCK_BUBBLES.at - 60_000 }));
+    const surface = mount();
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "golden-shiner")!);
+    vi.mocked(stealsBait).mockReturnValueOnce(true);
+    cast(surface);
+    expect(vi.mocked(stealsBait).mock.lastCall?.[3]).toBe(chance);
+    for (let waited = 0; phase() !== "result:miss" && waited < 20_000; waited += 100) act(() => vi.advanceTimersByTime(100));
+    expect(phase()).toBe("result:miss");
+    expect(hint()).toBe(said);
+  });
+
+  it("keeps the plain chance and hint over a swim whose feeders were scattered", () => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 6, spooked: 2, at: DOCK_BUBBLES.at - 60_000 }));
+    const surface = mount();
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "golden-shiner")!);
+    vi.mocked(stealsBait).mockReturnValueOnce(true);
+    cast(surface);
+    expect(vi.mocked(stealsBait).mock.lastCall?.[3]).toBe(STEAL_CHANCE);
+    for (let waited = 0; phase() !== "result:miss" && waited < 20_000; waited += 100) act(() => vi.advanceTimersByTime(100));
+    expect(hint()).toBe("Little fish steal bait. Cast again.");
+  });
+
+  it("keeps the plain chance off the groundbait", () => {
+    cast(mount());
+    expect(vi.mocked(stealsBait).mock.lastCall?.[3]).toBe(STEAL_CHANCE);
   });
 
   it("calls a bluegill's pull after its pecks", () => {
