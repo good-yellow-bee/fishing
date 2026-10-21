@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-21-pa39";
+export const NEWS_ID = "2026-10-21-game71";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "Worms now come from a worm tin, topped up to three each day, or five after a night that ended in rain: a fresh worm for a washed-out hook or a worm on the night line takes one. With the tin empty the washed-out worm stays on, and the shack sells worms for 15 points each, 12 from level 17, until the tin holds five.",
   "On a phone held upright with larger text, the hint over the lake now rises to clear the walking stick, closing up under the note naming where you stand and the lure panel but never covering them. And on more small phones that note stops at three rows, so a long hint, such as a winter night line's, stays clear of the stick too.",
   "A trophy fish that broke your line, or one the lodge reports lost, now trails the snapped red float on its bank's water, cocked over, now and then dipping under or towed off a little way. And while you stand still, a worm tin sits at your feet, a worm curling over its rim for each one left and bare soil once it is empty.",
   "On a water with a dawn and a dusk outing planned, the catch form now files a new fish on the one you are fishing, the one with a fish lost or missed so far, as Home and Trips take it. Its outing list leaves out the sample week's made-up outings, and the kinds it offers at a water always fill three picks, a kind named two ways counting once.",
