@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { sampleLogbook, type CatchEntry, type Logbook, type Spot, type Trip } from "@stillwater/shared";
 import { outingFish, underWayOn } from "./outingFish";
-import { averagedOutings, placeOnWater } from "./TripPages";
+import { placeOnWater } from "./TripPages";
+import { averagedOutings } from "./milestones";
 
 const TODAY = "2026-10-15";
 const water = (id: string) => ({ id, name: "Own Lake", waterType: "lake", notes: "", bestConditions: "" }) as Spot;

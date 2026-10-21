@@ -29,8 +29,8 @@ import { MonthYearTable } from "./MonthYearTable";
 import { recordStood } from "./recordStood";
 import { PLAY_LAKE_ID } from "../playLake";
 import { countedSearch } from "../countedSearch";
-import { countedBook, countedFish } from "../milestones";
-import { isSampleCatch, isSampleOnly, isSampleOuting, withoutSample } from "../bookCopy";
+import { countedBook, countedFish, hasOwnEntries } from "../milestones";
+import { hasSampleFish, isSampleCatch, withoutSample } from "../bookCopy";
 import { daysBetween, foldName, waterKeys } from "../spotOrder";
 import { SameKinds } from "./SameKinds";
 import { tripDaySearch } from "../tripSearch";
@@ -158,7 +158,7 @@ export function BestsPage() {
   // or a streak is never one of its made-up days.
   const counted = countedBook(all);
   // The sample's waters go with its fish and outings, as taking the sample week out would take them.
-  const ownAny = counted.catches.some((entry) => !isSampleCatch(entry.id)) || counted.trips.some((trip) => !isSampleOuting(trip));
+  const ownAny = hasOwnEntries(all);
   // But a sample water keeps its name while a fish or outing still counted here is on it: an outing planned before the
   // first own fish leaves the sample's fish counted, and their waters would read "Unknown water".
   const used = new Set([...counted.catches.map((entry) => entry.spotId), ...counted.trips.map((trip) => trip.spotId)]);
@@ -309,7 +309,7 @@ export function BestsPage() {
         {/* The goal is the angler's own: with nothing of theirs yet, the sample week's invented fish don't fill it. */}
         <YearGoal key={today.slice(0, 4)} book={ownAny ? whole : withoutSample(whole)} openAtStart={params.get(GOAL_PARAM) === "set"} />
         {/* The days and runs below are the sample's, as the page shows them: say why its fish leave the goal empty. */}
-        {isSampleOnly(all) ? <p className="meta">{t("The sample week's fish don't count toward a goal.")}</p> : null}
+        {!ownAny && hasSampleFish(all) ? <p className="meta">{t("The sample week's fish don't count toward a goal.")}</p> : null}
         {days > 0 ? <p className="meta">{t("Days on the water in {year}: {count}", { year: today.slice(0, 4), count: days })}</p> : null}
         {/* Last year's kinds still to show up this year, each opening its page. */}
         {notYet.length > 0 ? (

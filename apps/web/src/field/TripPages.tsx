@@ -66,7 +66,7 @@ import { findCatches, isTimePhrase, isTimeWord } from "./CatchSearch";
 import { findTrips } from "./tripSearch";
 import { LATE_NIGHT_UNTIL, fishOnOutingDay } from "./suggestions";
 import { looseFishFor } from "./looseFish";
-import { countedBook, countedFish, hasOwnEntries, ownFish } from "./milestones";
+import { averagedOutings, countedBook, countedFish, hasOwnEntries, ownFish } from "./milestones";
 import { isSampleOnly, isSamplePlan, isSampleSpot, isSampleOuting, upcomingRealTrips } from "./bookCopy";
 import { looseFishDays, outingFish, underWayOn } from "./outingFish";
 import { bookLureName, pieceTally } from "./pieceTally";
@@ -191,11 +191,6 @@ export function tripLists(book: Logbook, now = new Date()): { upcoming: Trip[]; 
     ...recentTrips(book, today).filter((trip) => !going.has(trip.id) && !isSamplePlan(book, trip)).sort(newestOutingFirst(book)),
   ];
   return { upcoming, recent };
-}
-
-/** The outings Trips' average and streaks count: the angler's own, not the sample week's blank plans Recent leaves out. */
-export function averagedOutings(book: Logbook): Trip[] {
-  return countedBook(book).trips.filter((trip) => !isSamplePlan(book, trip));
 }
 
 /** Where an outing falls among those fished on its water, counted from the first; null for a plan. */

@@ -7,8 +7,7 @@ import { sampleLogbook, type CatchEntry, type Logbook, type Spot, type Trip } fr
 import { upcomingRealTrips } from "./bookCopy";
 import { sheetOutings, tripsCsv } from "./catchCsv";
 import { daysOut } from "./tripMonths";
-import { averagedOutings } from "./TripPages";
-import { countedBook } from "./milestones";
+import { averagedOutings, countedBook } from "./milestones";
 import { HomePage } from "./HomePage";
 import { LogbookProvider } from "./LogbookState";
 import { TackleProvider } from "./gear/TackleState";
