@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { spotAt, SPOT_IDS, walkableAt } from "@stillwater/shared";
-import { GROUNDBAIT_CASTS } from "../logic";
-import { cloudCenter, cloudOpacity, CLOUD_RADIUS, DIMPLES, dimpleAt } from "./groundbaitCloud";
+import { GROUNDBAIT_CASTS, SWIM_MAX_CASTS, throwHandful, TOPUP_MAX } from "../logic";
+import { cloudCenter, cloudOpacity, CLOUD_RADIUS, DIMPLES, dimpleAt, feedersShow } from "./groundbaitCloud";
 
 describe("groundbait cloud", () => {
   it.each(SPOT_IDS)("lands on the %s's own open water", (spot) => {
@@ -14,6 +14,13 @@ describe("groundbait cloud", () => {
     const fading = Array.from({ length: GROUNDBAIT_CASTS }, (_, i) => cloudOpacity(GROUNDBAIT_CASTS - i));
     expect([...fading].sort((a, b) => b - a)).toEqual(fading);
     expect(cloudOpacity(1)).toBeGreaterThan(0);
+  });
+
+  it("thickens on a swim topped up past a fresh handful, up to its most casts", () => {
+    expect(cloudOpacity(GROUNDBAIT_CASTS + 2)).toBeGreaterThan(cloudOpacity(GROUNDBAIT_CASTS));
+    expect(cloudOpacity(SWIM_MAX_CASTS)).toBeGreaterThan(cloudOpacity(SWIM_MAX_CASTS - 1));
+    expect(cloudOpacity(SWIM_MAX_CASTS + 3)).toBe(cloudOpacity(SWIM_MAX_CASTS));
+    expect(cloudOpacity(SWIM_MAX_CASTS)).toBeLessThan(0.6);
   });
 });
 
@@ -29,6 +36,28 @@ describe("feeders dimpling over a gathered swim", () => {
     // On average one to three rings at a time.
     expect(shown / 1200).toBeGreaterThan(1);
     expect(shown / 1200).toBeLessThan(3.2);
+  });
+
+  it("show over a swim left to prime or topped up as it faded, not over a fresh handful", () => {
+    const fresh = throwHandful(null, "dock").next;
+    expect(feedersShow(fresh, false)).toBe(false);
+    expect(feedersShow(fresh, true)).toBe(true);
+    const topped = throwHandful({ spot: "dock", casts: 2 }, "dock");
+    expect(topped.kind).toBe("topped");
+    expect(feedersShow(topped.next, false)).toBe(true);
+    expect(feedersShow(throwHandful({ spot: "dock", casts: 4 }, "dock").next, false)).toBe(false);
+  });
+
+  it("ring more often over a swim built up, still one ring each", () => {
+    const shown = (built: number) => {
+      let live = 0;
+      for (let t = 0; t < 60; t += 0.05) live += Array.from({ length: DIMPLES }, (_, i) => dimpleAt(i, t, built)).filter((d) => d.age < 1).length;
+      return live / 1200;
+    };
+    expect(shown(1)).toBeGreaterThan(shown(0));
+    expect(shown(TOPUP_MAX)).toBeGreaterThan(shown(1));
+    expect(shown(TOPUP_MAX + 1)).toBe(shown(TOPUP_MAX));
+    expect(shown(TOPUP_MAX)).toBeLessThan(DIMPLES);
   });
 
   it("moves each ring to a new place every round", () => {
