@@ -3419,6 +3419,18 @@ describe("useFishingGame groundbait", () => {
     expect(hint()).toContain("Over the groundbait, but its feeders are still scattered.");
   });
 
+  it("scatters a built swim when a carp drawn the usual way over it snaps off", () => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 6, built: TOPUP_MAX, at: DOCK_BUBBLES.at - 60_000 }));
+    const surface = mount();
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "carp")!);
+    step.mockReturnValueOnce("snapped");
+    castAndFight(surface, 1);
+    expect(container!.querySelector("[data-testid=broke]")?.textContent).toContain("Its thrashing scattered the feeders off the swim");
+    expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ casts: 5, spooked: SPOOKED_SWIM_CASTS });
+  });
+
   it("leaves a built swim as it was when the fish lost over it is not a big feeder", () => {
     const kept = new Map<string, string>();
     vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });

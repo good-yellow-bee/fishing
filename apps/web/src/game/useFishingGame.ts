@@ -613,6 +613,8 @@ export function useFishingGame(
   const castWeedRef = useRef<"topwater" | "fouled" | null>(null);
   /** This cast went in over the groundbait, so a school landed from it stays to feed. */
   const castBaitedRef = useRef(false);
+  /** How often the swim this cast went in over was topped up, so a big feeder lost from it scatters a built one. */
+  const castBuiltRef = useRef(0);
   /** The hook went in solid on a quick strike. */
   const hookedSolidRef = useRef(false);
   /** A pike waiting to hit the shiner on the line, and the angler it was rolled for. */
@@ -1119,6 +1121,7 @@ export function useFishingGame(
     // A beginner is spared the overfed swim's slow bites, and told only of the groundbait.
     const full = bait.full && !mercyRef.current;
     castBaitedRef.current = bait.baited;
+    castBuiltRef.current = bait.built;
     if (bait.baited) keepGroundbait(bait.next);
     const schoolFish = school.schoolId ? FISH.find((fish) => fish.id === school.schoolId) : undefined;
     setSchooled(!!schoolFish);
@@ -1957,8 +1960,8 @@ export function useFishingGame(
       return ` ${t("{name} knows the {lure} now, and won't take one again this week.", { name: t(giant), lure: t(lure) })}`;
     };
     // A big feeder lost off the built-up swim scatters the rest: the build is gone and the feeders stay off it a few casts.
-    const feedersScattered = () => {
-      const scattered = fedRef.current === "big" ? scatterSwim(groundbaitRef.current, spotRef.current) : null;
+    const feedersScattered = (species: FishSpecies) => {
+      const scattered = isBigFeeder(species.id, castBuiltRef.current) ? scatterSwim(groundbaitRef.current, spotRef.current) : null;
       if (!scattered) return "";
       keepGroundbait(scattered);
       return ` ${t("Its thrashing scattered the feeders off the swim: none take for the next {n} casts, and it needs building up again.", { n: SPOOKED_SWIM_CASTS })}`;
@@ -2207,7 +2210,7 @@ export function useFishingGame(
             spookRef.current = spotRef.current;
             schoolRef.current = null;
             gotAwayRef.current = gotAwayAfterLoss(current.species, current.weight, spotRef.current, recaughtRef.current);
-            const trophy = lostTrophy(current.species, current.weight) + giantLost() + foeLost(current) + feedersScattered();
+            const trophy = lostTrophy(current.species, current.weight) + giantLost() + foeLost(current) + feedersScattered(current.species);
             // How close it came, so a break near the net reads as nearly there rather than as a wasted fight.
             const reeledIn = Math.round((1 - sim.line) * 100);
             // A break gives the angler a fresh knot to tie on, so the line is sound again.
@@ -2229,7 +2232,7 @@ export function useFishingGame(
             schoolRef.current = null;
             gotAwayRef.current = gotAwayAfterLoss(current.species, current.weight, spotRef.current, recaughtRef.current);
             const frays = runtime.performance.scuffed || runtime.performance.bitten;
-            const trophy = lostTrophy(current.species, current.weight) + giantLost() + foeLost(current) + feedersScattered() + (frays && !frayedRef.current ? ` ${scuffNote(current.water, !runtime.performance.scuffed, current.farRock)}` : "");
+            const trophy = lostTrophy(current.species, current.weight) + giantLost() + foeLost(current) + feedersScattered(current.species) + (frays && !frayedRef.current ? ` ${scuffNote(current.water, !runtime.performance.scuffed, current.farRock)}` : "");
             if (frays) markFrayed(true);
             if (sim.tornOut && sim.lightHook && !SOFT_MOUTHS.has(current.species.id)) {
               setOutcome({ kind: "broke", message: t("The light hook pulled out of the {fish}.", { fish: t(current.species.name) }) + trophy });
