@@ -49,6 +49,7 @@ describe("round 122: Bests beside the sample week with only a water of the angle
     expect(text).toContain("Outings in a row with a fish: 5, and still going");
     expect(text).not.toContain("without a fish");
     expect(text).not.toContain("Outings since your last fish");
+    expect(text).toContain("Fish an outing: 2 on weekends, 2 on weekdays.");
   });
 
   it("leaves them out of the calendar, as the days on the water count", async () => {
