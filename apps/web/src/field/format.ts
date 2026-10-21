@@ -42,6 +42,11 @@ export function outingName(trip: { title: string; spotId: string }, spots: reado
   return trip.title.trim() || (water ? plainName(water) : "") || t("Outing");
 }
 
+/** A water's name as shown: one imported with no name reads "Water with no name", never an empty heading or link. */
+export function waterName(name: string): string {
+  return plainName(name) || t("Water with no name");
+}
+
 /** The shown name of the outing with this id, or null when the book has none such. */
 export function outingNameById(book: { trips: readonly { id: string; title: string; spotId: string }[]; spots: readonly { id: string; name: string }[] }, id: string): string | null {
   const trip = book.trips.find((each) => each.id === id);

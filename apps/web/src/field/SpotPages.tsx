@@ -38,7 +38,7 @@ import { mostKindsDay } from "./bests/mostKinds";
 import { CopySummary } from "./CopySummary";
 import { spotSummary } from "./summaries";
 import { EditDelete } from "./EditDelete";
-import { fishCountLabel, formatDay, formatTimeOfDay, messageText, outingName, outingNameById, tripWhen } from "./format";
+import { fishCountLabel, formatDay, formatTimeOfDay, messageText, outingName, outingNameById, tripWhen, waterName } from "./format";
 import { outingCounted, outingDay, outNow, outNowAt, plainName } from "./tripDates";
 import { newestOutingFirst } from "./catchNeighbors";
 import { useLogbook } from "./LogbookState";
@@ -212,7 +212,7 @@ export function SpotsPage() {
   // Each card's own count, as "Most fish" orders them.
   const shownCount = (row: { spot: { id: string }; fishCount: number }) => (ownHere(row.spot.id) ? ownRow.get(row.spot.id)?.fishCount ?? 0 : row.fishCount);
   // Ties by name under every order, so two waters never fished keep one place.
-  const tidyOrder = (a: { spot: { name: string } }, b: { spot: { name: string } }) => plainName(a.spot.name).localeCompare(plainName(b.spot.name), locale());
+  const tidyOrder = (a: { spot: { name: string } }, b: { spot: { name: string } }) => waterName(a.spot.name).localeCompare(waterName(b.spot.name), locale());
   if (order === "name") rows.sort(tidyOrder);
   if (order === "most") rows.sort((a, b) => shownCount(b) - shownCount(a) || tidyOrder(a, b));
   if (order === "rested") {
@@ -434,9 +434,9 @@ function SpotView() {
         <h1>{t("Missing water")}</h1>
         {into ? (
           <>
-            <p className="lede">{t("This water was merged into {name}.", { name: plainName(into.name) })}</p>
+            <p className="lede">{t("This water was merged into {name}.", { name: waterName(into.name) })}</p>
             <p className="lone-link">
-              <Link to={`/spots/${into.id}`}>{t("Open {name}", { name: plainName(into.name) })}</Link>
+              <Link to={`/spots/${into.id}`}>{t("Open {name}", { name: waterName(into.name) })}</Link>
             </p>
           </>
         ) : (
@@ -566,7 +566,7 @@ function SpotView() {
         <p className="eyebrow">
           <Link to="/spots">{t("Spots")}</Link>
         </p>
-        <h1>{plainName(spot.name)}</h1>
+        <h1>{waterName(spot.name)}</h1>
         <span className={`stamp stamp-${spot.waterType}`}>{t(WATER_LABELS[spot.waterType])}</span>
         {twin ? (
           <p className="meta twin-note">
@@ -928,7 +928,7 @@ function SpotForm() {
       <header className="sheet-head">
         <div>
           <p className="eyebrow">{existing ? t("Edit water") : t("New water")}</p>
-          <h1 data-title={existing ? t("Editing {name}", { name: plainName(existing.name) }) : undefined}>{existing ? plainName(existing.name) : t("Add a spot")}</h1>
+          <h1 data-title={existing ? t("Editing {name}", { name: waterName(existing.name) }) : undefined}>{existing ? waterName(existing.name) : t("Add a spot")}</h1>
         </div>
         <Link
           to={then === "map" ? "/map" : existing ? `/spots/${existing.id}` : "/spots"}

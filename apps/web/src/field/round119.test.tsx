@@ -77,7 +77,7 @@ describe("round 119 fixes: catch pages", () => {
     const catches = [fish("1", "a", "2026-06-01T08:00:00"), fish("2", "a", "2026-06-02T08:00:00"), fish("3", "a", "2026-06-03T08:00:00"), fish("4", "c", "2026-06-04T08:00:00"), fish("5", "b", "2026-06-05T08:00:00")];
     const text = (await draw("/catches?find=zander", spots, catches)).textContent;
     expect(text).toContain("Most from Home Lake (4).");
-    expect(text).not.toContain("home lake");
+    expect(text).toContain("By water: Home Lake 4 · Deep Lake 1");
   });
 
   it("offers a water's kinds and lures on the Polish form once each, named as the catch cards name them", async () => {

@@ -62,7 +62,7 @@ import { outNow, ownTitle, plainName } from "./tripDates";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { ChoiceRow } from "./ChoiceRow";
 import { lengthText, measureText, measuresText, tempText, weatherText, weightText } from "../i18n/content";
-import { fishCountLabel, formatCatchDay, formatClock, formatDay, formatTimeOfDay, messageText, noteText, outingName, outingNameById, toLocalInput } from "./format";
+import { fishCountLabel, formatCatchDay, formatClock, formatDay, formatTimeOfDay, messageText, noteText, outingName, outingNameById, toLocalInput, waterName } from "./format";
 import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
 import { catchNews } from "./catchNews";
@@ -1836,7 +1836,7 @@ function CatchView() {
           {spot ? (
             <>
               {" · "}
-              <Link to={`/spots/${spot.id}`}>{plainName(spot.name)}</Link>
+              <Link to={`/spots/${spot.id}`}>{waterName(spot.name)}</Link>
             </>
           ) : null}
           {" · "}

@@ -6,7 +6,7 @@ import { BookFile, SET_ASIDE_ID } from "./BookFile";
 import { readUnreadableBook } from "./storage";
 import { CatchSearch } from "./CatchSearch";
 import { CatchCard, TripCard } from "./cards";
-import { fishCountLabel, fishSum, formatDay, formatLongDay, formatTimeOfDay, outingName, outingNameById, tripWhen } from "./format";
+import { fishCountLabel, fishSum, formatDay, formatLongDay, formatTimeOfDay, outingName, outingNameById, tripWhen, waterName } from "./format";
 import { useLogbook } from "./LogbookState";
 import { countedSearch } from "./countedSearch";
 import { RESUME_PARAM } from "./anotherCatch";
@@ -413,7 +413,7 @@ export function HomePage() {
                   <>
                     {" · "}
                     {!sameName(outingName(next, book.spots), nextSpot.name) ? (
-                      <Link to={`/spots/${nextSpot.id}`}>{plainName(nextSpot.name)}</Link>
+                      <Link to={`/spots/${nextSpot.id}`}>{waterName(nextSpot.name)}</Link>
                     ) : (
                       <Link to={`/spots/${nextSpot.id}`} aria-label={t("{water}: water page", { water: plainName(nextSpot.name) })}>
                         {t("Water page")}

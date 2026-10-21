@@ -4,7 +4,7 @@ import { formatCoord } from "./map/places";
 import { osmLink } from "./osmLink";
 import { t, tn } from "../i18n";
 import { measureText, measuresText, weatherText } from "../i18n/content";
-import { fishCountLabel, fishSum, formatDatedDay, formatDay, formatTimeOfDay, noteText, outingName } from "./format";
+import { fishCountLabel, fishSum, formatDatedDay, formatDay, formatTimeOfDay, noteText, outingName, waterName } from "./format";
 import { bookFishDay, daysOut } from "./tripMonths";
 import { parseExactTerm } from "./findLinks";
 import { splitLeftOut } from "./CatchSearch";
@@ -80,7 +80,7 @@ export function spotSummary(
     .map((row) => `${lureName(row.lure)} (${row.count})`)
     .join(", ");
   return [
-    `${plainName(spot.name)} · ${t(WATER_LABELS[spot.waterType])}`,
+    `${waterName(spot.name)} · ${t(WATER_LABELS[spot.waterType])}`,
     // Where it is, for "meet me here": the numbers and a map that opens on any phone.
     ...(spot.place ? [`${formatCoord(spot.place.lat, spot.place.lng)} · ${osmLink(spot.place.lat, spot.place.lng)}`] : []),
     // Beside its outings, a count: "2 outings · 0 fish", not "Nothing logged" when two were.
