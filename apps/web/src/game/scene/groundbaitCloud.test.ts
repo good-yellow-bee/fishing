@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { spotAt, SPOT_IDS, walkableAt } from "@stillwater/shared";
-import { GROUNDBAIT_CASTS, SWIM_MAX_CASTS, throwHandful, TOPUP_MAX } from "../logic";
-import { cloudCenter, cloudOpacity, CLOUD_RADIUS, DIMPLES, dimpleAt, feedersShow } from "./groundbaitCloud";
+import { bigFeedersOver, GROUNDBAIT_CASTS, SWIM_MAX_CASTS, throwHandful, TOPUP_MAX } from "../logic";
+import { cloudCenter, cloudOpacity, CLOUD_RADIUS, DIMPLES, dimpleAt, feedersShow, ROLL_GAP_SEC, ROLL_SEC, ROLL_SPAN, rollAt } from "./groundbaitCloud";
 
 describe("groundbait cloud", () => {
   it.each(SPOT_IDS)("lands on the %s's own open water", (spot) => {
@@ -64,5 +64,43 @@ describe("feeders dimpling over a gathered swim", () => {
     const first = dimpleAt(0, 0.1);
     const later = dimpleAt(0, 0.1 + 2.5);
     expect(Math.hypot(first.dx - later.dx, first.dz - later.dz)).toBeGreaterThan(0.01);
+  });
+});
+
+describe("big feeders rolling over a built swim", () => {
+  const swim = (spot: "dock" | "point", built: number) => ({ spot, casts: 8, built });
+
+  it("come only to a swim topped up all the way, at a bank where the tied lure takes them", () => {
+    expect(bigFeedersOver(swim("dock", TOPUP_MAX), undefined)).toBe(true);
+    expect(bigFeedersOver(swim("dock", TOPUP_MAX - 1), undefined)).toBe(false);
+    expect(bigFeedersOver(swim("point", TOPUP_MAX), undefined)).toBe(false);
+  });
+
+  it("roll now and then at the cloud's edge, never two at once", () => {
+    let rolling = 0;
+    const slots = new Set<number>();
+    for (let t = 0; t < 600; t += 0.05) {
+      const roll = rollAt(t);
+      if (!roll) continue;
+      rolling += 1;
+      slots.add(Math.floor(t / ROLL_GAP_SEC));
+      const out = Math.hypot(roll.dx, roll.dz);
+      expect(out).toBeGreaterThan(CLOUD_RADIUS * 0.75);
+      expect(out).toBeLessThan(CLOUD_RADIUS);
+      expect(roll.age).toBeGreaterThanOrEqual(0);
+      expect(roll.age).toBeLessThan(ROLL_SPAN);
+    }
+    // One roll in every gap, each about ROLL_SPAN roll lengths long.
+    expect(slots.size).toBe(600 / ROLL_GAP_SEC);
+    expect(Math.abs(rolling * 0.05 - (600 / ROLL_GAP_SEC) * ROLL_SEC * ROLL_SPAN)).toBeLessThan(1);
+  });
+
+  it("heads round the edge, not in or out", () => {
+    for (let t = 0; t < 300; t += 0.5) {
+      const roll = rollAt(t);
+      if (!roll) continue;
+      const along = { x: Math.sin(roll.yaw), z: Math.cos(roll.yaw) };
+      expect(Math.abs(along.x * roll.dx + along.z * roll.dz)).toBeLessThan(1e-9);
+    }
   });
 });

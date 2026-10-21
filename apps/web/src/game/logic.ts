@@ -820,6 +820,11 @@ export function hasBigFeeders(spot: SpotId, lure: string | undefined) {
   return poolForLure(FISH.filter((fish) => fish.spots.includes(spot)), lure).some((fish) => BIG_FEEDERS.has(fish.id));
 }
 
+/** Whether this swim is built up enough to have drawn in big feeders the tied lure would take. */
+export function bigFeedersOver(bait: Groundbait, lure: string | undefined) {
+  return (bait.built ?? 0) >= TOPUP_MAX && hasBigFeeders(bait.spot, lure);
+}
+
 /** A feeder drawn to the groundbait for this bite, from the bank's own lure split and weighed as the bank draws them (the big ones more over a built-up swim), or none. */
 export function groundbaitFeeder(spot: SpotId, lure: string | undefined, shortCast: boolean, hour: LakeHour, random = Math.random, built = 0): FishSpecies | null {
   if (random() >= feederShare(built)) return null;

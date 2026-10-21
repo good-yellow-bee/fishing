@@ -49,3 +49,26 @@ export function dimpleAt(i: number, time: number, built = 0): { dx: number; dz: 
   const out = DIMPLE_REACH * Math.sqrt(Math.abs(Math.cos(turn)));
   return { dx: Math.cos(angle) * out, dz: Math.sin(angle) * out, age };
 }
+
+/** A big feeder rolls at the cloud's edge at most once in this many seconds, its back and tail over in this long. */
+export const ROLL_GAP_SEC = 15;
+export const ROLL_SEC = 1.6;
+/** Its swirl spreads on after the tail goes under, to this many roll lengths. */
+export const ROLL_SPAN = 1.8;
+
+function hash(i: number) {
+  const s = Math.sin(i * 91.7 + 17.3) * 43758.5453;
+  return s - Math.floor(s);
+}
+
+/** The roll under way at `time`, if any: where by the cloud's middle, which way it heads round the edge, and how far through (0..ROLL_SPAN; the fish shows below 1). Pure. */
+export function rollAt(time: number): { dx: number; dz: number; yaw: number; age: number } | null {
+  const slot = Math.floor(time / ROLL_GAP_SEC);
+  const start = slot * ROLL_GAP_SEC + hash(slot) * (ROLL_GAP_SEC - ROLL_SEC * ROLL_SPAN);
+  const age = (time - start) / ROLL_SEC;
+  if (age < 0 || age >= ROLL_SPAN) return null;
+  const angle = hash(slot + 0.5) * Math.PI * 2;
+  const out = CLOUD_RADIUS * (0.8 + 0.15 * hash(slot + 0.25));
+  const turn = hash(slot + 0.75) < 0.5 ? 1 : -1;
+  return { dx: Math.cos(angle) * out, dz: Math.sin(angle) * out, yaw: Math.atan2(-Math.sin(angle) * turn, Math.cos(angle) * turn), age };
+}

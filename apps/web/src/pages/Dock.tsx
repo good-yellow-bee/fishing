@@ -108,7 +108,7 @@ import { useEffectsSteppedDown } from "../game/frameWatch";
 import { useEffectsNotice } from "../game/effectsNotice";
 import { saveLogbook } from "../field/storage";
 import { fx } from "../game/fx";
-import { canBaitShiner, GROUNDBAIT_CASTS, OVERFED_CASTS, TOPUP_CASTS_LEFT, hookWindowMs, isMercy, lampLit, longShadowWaitMul, solidStrikeMs } from "../game/logic";
+import { bigFeedersOver, canBaitShiner, GROUNDBAIT_CASTS, OVERFED_CASTS, TOPUP_CASTS_LEFT, hookWindowMs, isMercy, lampLit, longShadowWaitMul, solidStrikeMs } from "../game/logic";
 import { useBadgeToast } from "../game/useBadgeToast";
 import { lostNewsKey, useNewsToast, useTagNewsToast } from "../game/useTagNewsToast";
 import { bookSeasonNote, bookSessionTitle, loadSession, saveSession, sessionTitle, startSession, withSessionFish, type SessionDraft } from "../game/session";
@@ -1206,6 +1206,7 @@ export function DockPage() {
           hotspot={game.hotspot}
           groundbait={game.groundbait}
           groundbaitPrimed={game.swimPrimed}
+          groundbaitBig={game.groundbait ? bigFeedersOver(game.groundbait, lure) : false}
           rising={rising}
           storm={storm}
           tracks={tracks}
