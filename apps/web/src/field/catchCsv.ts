@@ -5,7 +5,7 @@ import { lureNames } from "./pieceTally";
 import { outingCounted, plainName } from "./tripDates";
 import { newestOutingFirst } from "./catchNeighbors";
 import { noteText, outingName, outingNameById } from "./format";
-import { countedBook } from "./milestones";
+import { averagedOutings, countedBook } from "./milestones";
 import { outingFish } from "./outingFish";
 import { bookFishDay } from "./tripMonths";
 import { kindNames } from "./speciesLink";
@@ -96,7 +96,8 @@ export function sheet(rows: string[][], separator: string): string {
  * until its first fish), which would read as a blank one.
  */
 export function sheetOutings(book: Logbook, today: string): Logbook {
-  const counted = countedBook(book);
+  // Not the sample week's blank plans Recent hides beside a water of the angler's own.
+  const counted = { ...countedBook(book), trips: averagedOutings(book) };
   // Today's outing once it is under way, as Trips' "planned" takes it: a fish (filed, or loose there on its day's one
   // outing), a fish lost or a strike missed. Before that it is still ahead.
   const fishOn = outingFish(book);
