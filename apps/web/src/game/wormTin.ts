@@ -18,7 +18,7 @@ export function wormsDug(now: Date) {
 
 const wormsIn = (n: unknown) => (typeof n === "number" && Number.isFinite(n) ? Math.min(WORM_TIN_WET, Math.max(0, Math.floor(n))) : null);
 
-/** The tin as kept: its worms, the day it was last topped up, and the day it was last kept, which is later when a visit ran past midnight. */
+/** The tin as kept: its worms, the day it was last topped up, and the day a worm last went in, which is later when one was bought on a visit past midnight. */
 type Tin = { worms: number; day: string; kept: string };
 
 function readTin(userId: string): Tin | null {
@@ -32,7 +32,7 @@ function readTin(userId: string): Tin | null {
 
 /**
  * What the tin holds now: as last seen, topped up to the day's dug worms on the first visit of a day.
- * In summer's heat the worms last kept on an earlier day have died by then, judged by the season when the angler comes back,
+ * In summer's heat the worms that went in on an earlier day have died by then, judged by the season when the angler comes back,
  * so the tin holds only the day's dig; `died` is how many fewer that leaves than the tin held.
  */
 export function loadTin(userId: string, now = new Date(), season?: LakeSeason): { worms: number; died: number } {
@@ -48,5 +48,7 @@ export function loadTin(userId: string, now = new Date(), season?: LakeSeason): 
 
 /** Keeps what the tin holds, under the day it was last topped up, so a visit running past midnight doesn't spend the next day's worms. */
 export function saveTin(userId: string, worms: number, now = new Date()) {
-  writeAngler(wormTinKey(userId), { worms, day: readTin(userId)?.day ?? localDate(now), kept: localDate(now) });
+  const tin = readTin(userId);
+  const today = localDate(now);
+  writeAngler(wormTinKey(userId), { worms, day: tin?.day ?? today, kept: tin && worms <= tin.worms ? tin.kept : today });
 }

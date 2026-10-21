@@ -57,12 +57,16 @@ describe("the worm tin", () => {
     expect(loadTin("mara", wet, "summer")).toEqual({ worms: WORM_TIN_WET, died: 0 });
   });
 
-  it("keeps a summer worm bought after midnight on a visit that began the day before", () => {
+  it("keeps a summer worm bought after midnight on a visit that began the day before, not one spent then", () => {
     const day = dry[1];
     const late = new Date(day.getFullYear(), day.getMonth(), day.getDate() - 1, 23, 50);
     loadTin("ash", late, "summer");
     saveTin("ash", WORM_TIN_WET, new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, 5));
     expect(loadTin("ash", day, "summer")).toEqual({ worms: WORM_TIN_WET, died: 0 });
+    // Spending one past midnight doesn't keep the rest fresh.
+    const next = new Date(day.getTime() + 86_400_000);
+    saveTin("ash", WORM_TIN_WET - 1, new Date(next.getFullYear(), next.getMonth(), next.getDate(), 0, 5));
+    expect(loadTin("ash", next, "summer").worms).toBe(wormsDug(next));
   });
 
   it("doesn't spend the next day's worms when a visit runs past midnight, and reads a broken tin as a new one", () => {
