@@ -170,10 +170,14 @@ export function BestsPage() {
   const days = daysOut(whole, today.slice(0, 4), fishedBy);
   // A night session's small hours on its outing's day, as the calendar and the goal count them.
   const dayOf = (entry: CatchEntry) => bookFishDay(whole, entry);
+  // Of those days, the ones that gave a fish: how many came home blank.
+  const fishDays = new Set(whole.catches.map(dayOf).filter((day) => day.startsWith(`${today.slice(0, 4)}-`))).size;
   const monthOf = (entry: CatchEntry) => dayOf(entry).slice(0, 7);
   const waterOf = waterKeys(whole);
+  // Twin waters are one, as a search reads them; a water with no name is only itself.
+  const waterKey = (spotId: string) => waterOf.get(spotId) || spotId;
   const notYet = notYetThisYear(real.catches, new Date(), undefined, dayOf);
-  const newWaters = newWatersThisYear(real.catches, new Date(), dayOf, (id) => waterOf.get(id) ?? id).flatMap((id) => whole.spots.filter((spot) => spot.id === id));
+  const newWaters = newWatersThisYear(real.catches, new Date(), dayOf, waterKey).flatMap((id) => whole.spots.filter((spot) => spot.id === id));
   const wholeFishByTrip = fishCountsByTrip(whole);
   // An outing's fish with those logged loose on its water that day, as Trips and the outings link count them.
   const fishOn = outingFish(whole);
@@ -257,6 +261,8 @@ export function BestsPage() {
     else kindFish.set(key, [entry]);
   }
   const freshKinds = year ? new Set(seasonRecap(whole, year, today).newKinds.map(kindKey)) : null;
+  // And the waters whose first fish came that season, twins as one, as the goal's "New waters this year" takes them.
+  const freshWaters = year ? new Set(newWatersThisYear(whole.catches, new Date(Number(year), 0, 1), dayOf, waterKey).map(waterKey)) : null;
   // In a picked season, the kinds whose longest or heaviest beat every season before it: what an angler asks of a year.
   const earlier = year ? new Map(personalBests({ ...whole, catches: countedFish(whole.catches).filter((entry) => dayOf(entry) < `${year}-01-01`) }, kindKey).species.map((row) => [kindKey(row.species), row])) : null;
   // Each record it beat, as it stood before: how far the season moved it on.
@@ -311,7 +317,13 @@ export function BestsPage() {
         <YearGoal key={today.slice(0, 4)} book={ownAny ? whole : withoutSample(whole)} openAtStart={params.get(GOAL_PARAM) === "set"} />
         {/* The days and runs below are the sample's, as the page shows them: say why its fish leave the goal empty. */}
         {!ownAny && hasSampleFish(all) ? <p className="meta">{t("The sample week's fish don't count toward a goal.")}</p> : null}
-        {days > 0 ? <p className="meta">{t("Days on the water in {year}: {count}", { year: today.slice(0, 4), count: days })}</p> : null}
+        {days > 0 ? (
+          <p className="meta">
+            {fishDays > 0 && fishDays < days
+              ? t("Days on the water in {year}: {count}, {fished} with a fish", { year: today.slice(0, 4), count: days, fished: fishDays })
+              : t("Days on the water in {year}: {count}", { year: today.slice(0, 4), count: days })}
+          </p>
+        ) : null}
         {/* Last year's kinds still to show up this year, each opening its page. */}
         {notYet.length > 0 ? (
           <p className="meta not-yet">
@@ -683,6 +695,7 @@ export function BestsPage() {
                 <Link key={water.spotId} to={year || water.twins ? linkFor(exactTerm("water", plainName(water.name))) : `/spots/${water.spotId}`} className="spot-card">
                   <div className="spot-card-top">
                     <h3>{water.name === "Unknown water" ? t(water.name) : plainName(water.name)}</h3>
+                    {freshWaters?.has(waterKey(water.spotId)) ? <span className="stamp">{t("New this season")}</span> : null}
                   </div>
                   <p className="meta">{waterFishLine(water.fish, kindName)}</p>
                   {/* When it last gave one: a water gone quiet is worth a visit, or a rest. */}
