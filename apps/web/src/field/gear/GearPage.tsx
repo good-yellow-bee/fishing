@@ -12,7 +12,7 @@ import {
   tripById,
   type Trip,
 } from "@stillwater/shared";
-import { fishCountLabel, formatDay, outingName, tripWhen } from "../format";
+import { fishCountLabel, formatDay, outingName, tripWhen, waterName } from "../format";
 import { bookFishDay } from "../tripMonths";
 import { useLogbook } from "../LogbookState";
 import { TackleList, tipProps } from "./TackleList";
@@ -68,7 +68,7 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
         </h3>
         <span className="meta">
           {going ? t("Out now") : tripWhen(trip.date, today, tomorrow, out)}
-          {spot && !sameName(spot.name, outingName(trip, book.spots)) ? ` · ${plainName(spot.name)}` : ""}
+          {spot && !sameName(spot.name, outingName(trip, book.spots)) ? ` · ${waterName(spot.name)}` : ""}
         </span>
       </div>
       <TackleList
@@ -209,7 +209,7 @@ function LureRecord({ today }: { today: string }) {
             wrap
             label={t("Water")}
             value={water ? water.id : "all"}
-            options={[{ id: "all", label: t("All waters") }, ...waters.map((spot) => ({ id: spot.id, label: plainName(spot.name) }))]}
+            options={[{ id: "all", label: t("All waters") }, ...waters.map((spot) => ({ id: spot.id, label: waterName(spot.name) }))]}
             onChange={setWaterId}
           />
         </div>
@@ -477,7 +477,7 @@ function PastTripTackle({ trip, today, tomorrow, fishCount, open, onToggle }: { 
         <span className="tackle-past-title">{outingName(trip, book.spots)}</span>
         <span className="meta">
           {tripWhen(trip.date, today, tomorrow, outNow(book, trip))}
-          {spot && !sameName(spot.name, outingName(trip, book.spots)) ? ` · ${plainName(spot.name)}` : ""}
+          {spot && !sameName(spot.name, outingName(trip, book.spots)) ? ` · ${waterName(spot.name)}` : ""}
           {` · ${fishCountLabel(fishCount)}`}
         </span>
       </summary>
@@ -535,7 +535,7 @@ export function GearPage() {
               {spot ? (
                 <>
                   {" · "}
-                  <Link to={`/spots/${spot.id}`}>{plainName(spot.name)}</Link>
+                  <Link to={`/spots/${spot.id}`}>{waterName(spot.name)}</Link>
                   {" · "}
                   {t(WATER_LABELS[spot.waterType])}
                 </>

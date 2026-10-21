@@ -47,6 +47,7 @@ export const PL_FIELD: PlBook = {
   "Just back": "Świeżo po powrocie",
   "No past outings yet.": "Jeszcze żadnych minionych wypraw.",
   "Unknown water": "Nieznane łowisko",
+  "Water with no name": "Łowisko bez nazwy",
   Today: "Dziś",
   Tomorrow: "Jutro",
   "Nothing logged": "Nic nie zapisano",

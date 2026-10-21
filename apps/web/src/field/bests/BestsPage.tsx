@@ -7,7 +7,7 @@ import { sheetOutings } from "../catchCsv";
 import { CatchCard } from "../cards";
 import { num, t, tn, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
-import { fishCountLabel, formatDay, outingNameById } from "../format";
+import { fishCountLabel, formatDay, outingNameById, waterName } from "../format";
 import { hookTally, hookText } from "../hookTally";
 import { useLogbook } from "../LogbookState";
 import { TallyBars } from "../TallyBars";
@@ -286,7 +286,7 @@ export function BestsPage() {
     const stood = year ? "" : recordStood(day, today);
     return stood ? ` · ${stood}` : "";
   };
-  const nameOf = (spotId: string) => { const name = spotById(book, spotId)?.name; return name === undefined ? t("Unknown water") : plainName(name); };
+  const nameOf = (spotId: string) => { const name = spotById(book, spotId)?.name; return name === undefined ? t("Unknown water") : waterName(name); };
   const titleOf = (tripId: string | null) => (tripId ? outingNameById(book, tripId) : null);
 
   // A book with no fish and no outings yet: one line and the way to the first, not a page of empty tiles. Outings
@@ -350,7 +350,7 @@ export function BestsPage() {
               {newWaters.map((spot, index) => (
                 <Fragment key={spot.id}>
                   {index > 0 ? ", " : null}
-                  <Link to={`/spots/${spot.id}`}>{plainName(spot.name)}</Link>
+                  <Link to={`/spots/${spot.id}`}>{waterName(spot.name)}</Link>
                 </Fragment>
               ))}
             </span>
@@ -697,7 +697,7 @@ export function BestsPage() {
               {waterCards.map((water) => (
                 <Link key={water.spotId} to={year || water.twins ? linkFor(exactTerm("water", plainName(water.name))) : `/spots/${water.spotId}`} className="spot-card">
                   <div className="spot-card-top">
-                    <h3>{water.name === "Unknown water" ? t(water.name) : plainName(water.name)}</h3>
+                    <h3>{water.name === "Unknown water" ? t(water.name) : waterName(water.name)}</h3>
                     {freshWaters?.has(waterKey(water.spotId)) ? <span className="stamp">{t("New this season")}</span> : null}
                   </div>
                   <p className="meta">{waterFishLine(water.fish, kindName)}</p>
