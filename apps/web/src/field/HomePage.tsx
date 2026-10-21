@@ -11,8 +11,9 @@ import { useLogbook } from "./LogbookState";
 import { countedSearch } from "./countedSearch";
 import { RESUME_PARAM } from "./anotherCatch";
 import { hasSampleLeft, isSampleCatch, isSampleOnly, isSamplePlan, isSampleSpot, isSampleOuting, upcomingRealTrips, withoutSample } from "./bookCopy";
-import { outingFish, underWayOn } from "./outingFish";
-import { lateOutings, outNow, outingDay, plainName, sameName } from "./tripDates";
+import { outingFish } from "./outingFish";
+import { lateOutings, outNow, outingDay, plainName, sameName, underWay } from "./tripDates";
+import { dateWords } from "./dateWords";
 import { sheetOutings } from "./catchCsv";
 import { NEWS_ITEMS } from "../game/whatsNew";
 import { FIELD_NEWS, fieldNewsDue, markFieldNewsSeen } from "./fieldNews";
@@ -184,6 +185,12 @@ export function HomePage() {
   // By the outing's day, as the year below: a New Year's Eve night's small hours are December's, not January's.
   const monthRows = book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${thisMonth}-`));
   const monthFish = monthRows.filter((entry) => counted.has(entry.id)).length;
+  // This week's from Monday, as the catch search reads "this week": said only when it isn't the month's fish over again.
+  const week = dateWords("this week", now);
+  const weekRows = week ? book.catches.filter((entry) => bookFishDay(book, entry) >= week.from && bookFishDay(book, entry) <= week.to) : [];
+  const weekCounted = weekRows.filter((entry) => counted.has(entry.id));
+  const weekFish = weekCounted.length;
+  const weekNew = weekFish > 0 && (weekFish < monthFish || weekCounted.some((entry) => !bookFishDay(book, entry).startsWith(`${thisMonth}-`)));
   const thisYear = today.slice(0, 4);
   // The goal counts a night session's small hours on its outing's day, as Bests does.
   const yearRows = book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${thisYear}-`));
@@ -217,7 +224,8 @@ export function HomePage() {
   // Fish of their own logged beside the sample week: the invented part can go on its own.
   const sampleLeft = !sampleOnly && hasSampleLeft(storedBook);
   const next = upcoming[0];
-  const nextUnderWay = next ? underWayOn(next, fishOn) : false;
+  // Under way by the rule Out now and Next's order take: a fish loose on its water that day too, of a dawn and a dusk.
+  const nextUnderWay = next ? underWay(book, next) : false;
   // The newest outing fished, for a Next with nothing planned: on a water still in the book.
   const lastOut = next ? undefined : [...sheetOutings(book, fishedBy).trips].filter((trip) => spotById(book, trip.spotId) && !isSampleOuting(trip)).sort(newestOutingFirst(book))[0];
   const lastOutRest = lastOut ? daysBetween(lastOut.date, today) : 0;
@@ -328,6 +336,12 @@ export function HomePage() {
           {real.length > 0 ? (
             <small>
               <Link to="/bests">{tn(kinds, "{n} species", "{n} species")}</Link>
+              {weekNew ? (
+                <>
+                  {" · "}
+                  <Link to={findLink(countedSearch(book, t("this week|search word"), weekRows, "book"))}>{t("{n} this week", { n: weekFish })}</Link>
+                </>
+              ) : null}
               {monthFish > 0 ? (
                 <>
                   {" · "}

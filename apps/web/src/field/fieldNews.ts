@@ -5,6 +5,7 @@ import { NEWS_ID, NEWS_ITEMS, markNewsSeen, readSeenNews } from "../game/whatsNe
  * Each new field-log line goes in here too, newest first, word for word as in `NEWS_ITEMS`.
  */
 export const FIELD_NEWS: ReadonlySet<string> = new Set([
+  "Home now gives this week's fish beside the month's, and today's outing stops offering its plan to copy or add to the calendar once a fish is in on its water, as Out now says. Beside the sample week with only a water of your own, the outing and day counts, the outings sheet and the year goal now leave its made-up plans and fish out.",
   "On a water with a dawn and a dusk outing planned, the catch form now files a new fish on the one you are fishing, the one with a fish lost or missed so far, as Home and Trips take it. Its outing list leaves out the sample week's made-up outings, and the kinds it offers at a water always fill three picks, a kind named two ways counting once.",
   "An outing's page says where it falls among the outings on its water, such as outing 4 of 12. Streaks, the weekend split and a water's best outing now count an outing with only a lost fish or a missed strike, as the average does, and last evening's blank outing reads as a past day once today's plan takes over.",
   "On a kind's page, a water spelled two ways says how often its outings took the kind, as other waters do, and the water lists on the catch and outing forms tell two such waters apart by their fish. A water's outings now count those with only a lost fish or a missed strike, as Trips does.",
