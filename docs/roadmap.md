@@ -1959,7 +1959,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT464~~ | ~~News card 2026-10-20-game70 covers GT462-GT463: the groundbaited swim and the night line by season~~ (#1708) | ui | S |
 | ~~GT465~~ | ~~A worm tin: worms are dug each day (three, five after a night that ended in rain, topped up on the day's first visit, kept across reloads), and a fresh worm on a washed-out hook or a worm out on the night line takes one, so a worm spent on the line (at 60% of a shiner's odds) is one less for rebaiting; with the tin empty the washed-out worm stays on and no worm line goes out, and the stance chip says the tin is empty while a worm is tied on; a landed fish, a stolen bait or a break still puts a free fresh worm on~~ (#1711) | gameplay | S |
 | ~~GT466~~ | ~~Worms at the shack: a worm costs 15 points (a fifth off from level 17, like the shack's other bait) and goes in the worm tin, up to the five a wet morning digs; the shack's row shows the tin's count and turns off when it is full, and the empty-tin hint says the shack sells one~~ (#1714) | gameplay | S |
-| GT467 | News card 2026-10-21-game71 covers GT465-GT466: the worm tin dug each day and the shack's worms (#1719) | ui | S |
+| ~~GT467~~ | ~~News card 2026-10-21-game71 covers GT465-GT466: the worm tin dug each day and the shack's worms~~ (#1719) | ui | S |
+| GT468 | Worms in the summer heat: worms left in the tin from an earlier day have died by the first visit of a summer day, so the tin holds only that day's dig (judged by the season when the angler comes back, like the bait bucket), and worms bought ahead at the shack don't carry over; the sign-in hint says how many died, beside a dead-shiner line, and the shack's worm note says a worm keeps only today in summer (#1723) | gameplay | S |
 
 ## Risks / open questions for the owner
 
