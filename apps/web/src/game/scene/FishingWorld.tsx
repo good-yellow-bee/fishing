@@ -228,6 +228,8 @@ type Props = {
   groundbait?: Groundbait | null;
   /** That groundbait was left on an earlier visit and the feeders have gathered over it. */
   groundbaitPrimed?: boolean;
+  /** That swim is built up enough to have drawn the big feeders the tied lure would take. */
+  groundbaitBig?: boolean;
   /** The shiner trap by the shack while it is set (minnowTrap.ts trapState), or null when it is not. */
   shinerTrap?: ReturnType<typeof trapState> | null;
   /** An evening rise is on: rings dimple the water in reach of the bank. */
@@ -2309,7 +2311,7 @@ function Tone({ hour }: { hour: LakeHour }) {
 
 const NO_BANKS: readonly SpotId[] = [];
 
-function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, follow = null, giantBanks = NO_BANKS, lostFloatBanks = NO_BANKS, nightLineSpot = null, nightLineState = null, baitBucket = 0, aerated = false, wormBin = false, breadCrumb = false, worms = 0, topwater = false, hour, sky, season = DEFAULT_SEASON, species, weight, golden = false, released = false, moon, wind, boatSwing = 0, headlamp = false, hotspot, groundbait = null, groundbaitPrimed = false, shinerTrap = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
+function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, follow = null, giantBanks = NO_BANKS, lostFloatBanks = NO_BANKS, nightLineSpot = null, nightLineState = null, baitBucket = 0, aerated = false, wormBin = false, breadCrumb = false, worms = 0, topwater = false, hour, sky, season = DEFAULT_SEASON, species, weight, golden = false, released = false, moon, wind, boatSwing = 0, headlamp = false, hotspot, groundbait = null, groundbaitPrimed = false, groundbaitBig = false, shinerTrap = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
   // How this fish takes the bait: a topwater lure makes every take a hit at the top.
   const take = species !== null ? takeStyle(species.id, topwater) : null;
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
@@ -2345,7 +2347,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       <Precompile />
       <LakeWorld spot={spot} hour={hour} sky={sky} season={season} hotspot={hotspot} moon={moon} wind={wind} wormBin={wormBin} breadCrumb={breadCrumb} />
       {tracks && tracks.length > 0 && <ShoreTracks tracks={tracks} />}
-      {groundbait && <GroundbaitCloud bait={groundbait} feeding={groundbaitPrimed} />}
+      {groundbait && <GroundbaitCloud bait={groundbait} feeding={groundbaitPrimed} bigFeeders={groundbaitBig} />}
       {rising && <RiseRings spot={spot} />}
       {rising && <Mayflies spot={spot} />}
       <Windsock wind={wind ?? NO_WIND} />

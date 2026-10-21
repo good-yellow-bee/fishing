@@ -115,6 +115,7 @@ import { bookSeasonNote, bookSessionTitle, loadSession, saveSession, sessionTitl
 import { TripRecap } from "../components/TripRecap";
 import { useLodgeTracks } from "../game/useLodgeTracks";
 import { trackLabel } from "../game/scene/shoreTracks";
+import { bigFeedersOver } from "../game/scene/groundbaitCloud";
 import { useLevelToast } from "../game/useLevelToast";
 import { defaultLure, lureCanChange, nextLure } from "../game/lureChoice";
 import { FishingWorld } from "../game/scene/FishingWorld";
@@ -1206,6 +1207,7 @@ export function DockPage() {
           hotspot={game.hotspot}
           groundbait={game.groundbait}
           groundbaitPrimed={game.swimPrimed}
+          groundbaitBig={game.groundbait ? bigFeedersOver(game.groundbait, lure) : false}
           rising={rising}
           storm={storm}
           tracks={tracks}
