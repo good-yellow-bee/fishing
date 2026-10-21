@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { spotAt, SPOT_IDS, walkableAt } from "@stillwater/shared";
-import { GROUNDBAIT_CASTS, SWIM_MAX_CASTS, TOPUP_MAX } from "../logic";
-import { cloudCenter, cloudOpacity, CLOUD_RADIUS, DIMPLES, dimpleAt } from "./groundbaitCloud";
+import { GROUNDBAIT_CASTS, SWIM_MAX_CASTS, throwHandful, TOPUP_MAX } from "../logic";
+import { cloudCenter, cloudOpacity, CLOUD_RADIUS, DIMPLES, dimpleAt, feedersShow } from "./groundbaitCloud";
 
 describe("groundbait cloud", () => {
   it.each(SPOT_IDS)("lands on the %s's own open water", (spot) => {
@@ -36,6 +36,16 @@ describe("feeders dimpling over a gathered swim", () => {
     // On average one to three rings at a time.
     expect(shown / 1200).toBeGreaterThan(1);
     expect(shown / 1200).toBeLessThan(3.2);
+  });
+
+  it("show over a swim left to prime or topped up as it faded, not over a fresh handful", () => {
+    const fresh = throwHandful(null, "dock").next;
+    expect(feedersShow(fresh, false)).toBe(false);
+    expect(feedersShow(fresh, true)).toBe(true);
+    const topped = throwHandful({ spot: "dock", casts: 2 }, "dock");
+    expect(topped.kind).toBe("topped");
+    expect(feedersShow(topped.next, false)).toBe(true);
+    expect(feedersShow(throwHandful({ spot: "dock", casts: 4 }, "dock").next, false)).toBe(false);
   });
 
   it("ring more often over a swim built up, still one ring each", () => {

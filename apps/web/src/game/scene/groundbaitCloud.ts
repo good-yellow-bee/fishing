@@ -1,6 +1,6 @@
 import { LAKE_CENTER_Z, type SpotId } from "@stillwater/shared";
 import { BANK_STANDS, PLACES } from "../hotspot";
-import { GROUNDBAIT_CASTS, SWIM_MAX_CASTS, TOPUP_MAX } from "../logic";
+import { GROUNDBAIT_CASTS, SWIM_MAX_CASTS, TOPUP_MAX, type Groundbait } from "../logic";
 
 /** How wide the cloud of groundbait spreads on the water, in metres. */
 export const CLOUD_RADIUS = 1.1;
@@ -32,6 +32,11 @@ export function cloudOpacity(casts: number): number {
 export const DIMPLES = 4;
 export const DIMPLE_SEC = 1.8;
 const DIMPLE_REACH = 0.75;
+
+/** Feeders show over a swim they gathered at while it was left, or over one topped up as it faded. */
+export function feedersShow(bait: Groundbait, primed: boolean): boolean {
+  return primed || (bait.built ?? 0) > 0;
+}
 
 /** Dimple `i` at `time` over a swim topped up `built` times: where over the cloud's middle it rings and how far through its spread (0..1). Pure. */
 export function dimpleAt(i: number, time: number, built = 0): { dx: number; dz: number; age: number } {
