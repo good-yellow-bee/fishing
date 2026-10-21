@@ -650,6 +650,7 @@ describe("validateAeratorBuy", () => {
     const profile = { userId: "u", displayName: "A", points: AERATOR_PRICE, lifetimePoints: 500, strength: 1, accuracy: 1, patience: 1 };
     expect(validateAeratorBuy(profile)).toEqual({ ok: true, cost: AERATOR_PRICE });
     expect(validateAeratorBuy({ ...profile, points: AERATOR_PRICE - 1 })).toMatchObject({ ok: false, error: "not enough points", status: 409 });
+    expect(validateAeratorBuy({ ...profile, aerator: true })).toMatchObject({ ok: false, error: "aerator already fitted", status: 409 });
   });
 });
 

@@ -1,6 +1,6 @@
 import { Hono, type Context } from "hono";
 import { validateAeratorBuy, validateGroundbaitBuy, validateShinerBuy, validateUpgrade, validateWormBuy, type SkillId } from "@stillwater/shared";
-import { applyUpgrade, getProfile, spendPoints, toProfile } from "../db.ts";
+import { applyUpgrade, fitAerator, getProfile, spendPoints, toProfile } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
 const skills: SkillId[] = ["strength", "accuracy", "patience"];
@@ -33,7 +33,7 @@ upgradeRoutes.post("/upgrades", async (c) => {
 });
 
 // A handful of groundbait, a live shiner, a worm or the bucket's aerator from the shack: the server takes the points, and what was bought lives in the game.
-const shackSale = (validate: typeof validateGroundbaitBuy) => (c: Context) => {
+const shackSale = (validate: typeof validateGroundbaitBuy, spend = spendPoints) => (c: Context) => {
   const user = c.get("user") as SessionUser;
   const row = getProfile(user.id);
   if (!row) return c.json({ error: "profile missing" }, 404);
@@ -41,7 +41,7 @@ const shackSale = (validate: typeof validateGroundbaitBuy) => (c: Context) => {
   const result = validate(profile);
   if (!result.ok) return c.json({ error: result.error }, result.status);
   try {
-    spendPoints(user.id, result.cost);
+    spend(user.id, result.cost);
   } catch {
     return c.json({ error: "not enough points" }, 409);
   }
@@ -51,4 +51,4 @@ const shackSale = (validate: typeof validateGroundbaitBuy) => (c: Context) => {
 upgradeRoutes.post("/groundbait", shackSale(validateGroundbaitBuy));
 upgradeRoutes.post("/shiner", shackSale(validateShinerBuy));
 upgradeRoutes.post("/worm", shackSale(validateWormBuy));
-upgradeRoutes.post("/aerator", shackSale(validateAeratorBuy));
+upgradeRoutes.post("/aerator", shackSale(validateAeratorBuy, fitAerator));

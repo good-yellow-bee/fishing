@@ -64,7 +64,7 @@ import { DUCKWEED_FOUL_WAIT, DUCKWEED_TOPWATER_WAIT, duckweedCast, inDuckweed } 
 import { FAR_ROCK_WAIT, tightToFarRock } from "./farRock";
 import { castSnags, onRockEdge, onShoreIce, ROCK_EDGE_WAIT, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { FLUTTER_SEC, flutterGrabberFor, flutterTip, followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
-import { BUCKET_SIZE, liveShiners, loadAerator, loadBucket, saveAerator, saveBucket } from "./baitBucket";
+import { BUCKET_SIZE, liveShiners, loadBucket, saveBucket } from "./baitBucket";
 import { loadSwim, saveSwim, swimNow } from "./swim";
 import { loadTrap, saveTrap, trapCatch, trapIsCold, trapNextChange, trapState, type Trap } from "./minnowTrap";
 import { castForFoe, foeGone, isOldFoe, loadOldFoe, saveOldFoe } from "./oldFoe";
@@ -477,15 +477,14 @@ export function useFishingGame(
   const [bucket, setBucket] = useState(0);
   /** When each spare shiner went in, oldest first: the oldest goes out first, before it dies. */
   const bucketRef = useRef<number[]>([]);
-  /** The shack's aerator fitted to the bait bucket, read with it on sign-in: its spare shiners keep a day longer. */
-  const [aerator, setAerator] = useState(false);
-  const aeratorRef = useRef(false);
+  /** The shack's aerator fitted to the bait bucket: its spare shiners keep a day longer. */
+  const aerator = profile?.aerator === true;
+  const aeratorRef = useRef(aerator);
+  aeratorRef.current = aerator;
   /** What died in the bucket and the tin since the last visit, said on sign-in; the primed swim's line adds to it, not over it. */
   const baitDiedRef = useRef("");
   // The bait kept from an earlier visit, read when the angler signs in: the bucket's shiners and the tin's worms may have died since.
   useEffect(() => {
-    aeratorRef.current = profile?.userId ? loadAerator(profile.userId) : false;
-    setAerator(aeratorRef.current);
     const kept = profile?.userId ? loadBucket(profile.userId, Date.now(), season, aeratorRef.current) : { shiners: [], died: 0 };
     bucketRef.current = kept.shiners;
     setBucket(kept.shiners.length);
@@ -2354,15 +2353,6 @@ export function useFishingGame(
     setHint(t("The shiner goes in your bait bucket: {n} of {max}.", { n: bucketRef.current.length, max: BUCKET_SIZE }));
   };
 
-  /** The aerator bought at the shack goes on the bait bucket for good. */
-  const fitAerator = () => {
-    if (!profile) return;
-    aeratorRef.current = true;
-    saveAerator(profile.userId);
-    setAerator(true);
-    setHint(t("You fit the aerator to your bait bucket: its shiners keep a day longer now."));
-  };
-
   /** Bait the shiner trap by the shack with a handful of groundbait, for a later visit to lift. */
   const setTrap = () => {
     if (!profile || trapRef.current || handfulsRef.current <= 0 || phaseRef.current !== "idle") return;
@@ -2506,7 +2496,6 @@ export function useFishingGame(
     livelyShiner,
     bucket,
     aerator,
-    fitAerator,
     hookFromBucket,
     setNightLine,
     checkNightLine,

@@ -11,7 +11,7 @@ import { fx } from "../game/fx";
 import { bagKey, shinerKey } from "../game/groundbaitBag";
 import { nightLineKey } from "../game/nightLine";
 import { oldFoeKey } from "../game/oldFoe";
-import { aeratorKey, baitBucketKey } from "../game/baitBucket";
+import { baitBucketKey } from "../game/baitBucket";
 import { WORM_TIN_WET, wormTinKey } from "../game/wormTin";
 import { sessionKey, startSession } from "../game/session";
 import type { Outcome } from "../game/useFishingGame";
@@ -837,19 +837,22 @@ describe("the shack's bait tin", () => {
     localStorage.removeItem(wormTinKey("u1"));
   });
 
-  it("fits the aerator to the bait bucket once, and keeps it for a reload", async () => {
+  it("buys the aerator once, and the bucket shows it fitted from the profile the server sends back", async () => {
     vi.mocked(getMe).mockResolvedValue({ ...me, profile: { ...me.profile, points: 500 } });
     vi.mocked(buyAerator).mockClear();
-    vi.mocked(buyAerator).mockResolvedValue({ profile: { ...me.profile, points: 350 } });
+    vi.mocked(buyAerator).mockImplementation(async () => {
+      vi.mocked(getMe).mockResolvedValue({ ...me, profile: { ...me.profile, points: 350, aerator: true } });
+      return { profile: { ...me.profile, points: 350, aerator: true } };
+    });
     const page = await openDock("/?hour=day&sky=clear");
     act(() => page.querySelector<HTMLButtonElement>(".walk-shop")!.click());
-    const aeratorButton = () => [...page.querySelectorAll<HTMLButtonElement>(".bait-shop button")].find((button) => button.textContent?.startsWith("A bucket aerator"));
-    await act(async () => aeratorButton()!.click());
+    const aeratorButton = () => page.querySelector<HTMLButtonElement>("[aria-describedby=aerator-note]")!;
+    await act(async () => aeratorButton().click());
     expect(buyAerator).toHaveBeenCalledTimes(1);
-    expect(aeratorButton()).toBeUndefined();
+    expect(aeratorButton().textContent).toBe("Bucket aerator fitted");
     expect(page.querySelector("#aerator-note")?.textContent).toBe("The aerator on your bait bucket keeps each spare shiner a day longer.");
-    expect(localStorage.getItem(aeratorKey("u1"))).toBe("true");
-    localStorage.removeItem(aeratorKey("u1"));
+    await act(async () => aeratorButton().click());
+    expect(buyAerator).toHaveBeenCalledTimes(1);
   });
 });
 

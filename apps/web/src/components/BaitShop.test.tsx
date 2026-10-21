@@ -59,10 +59,14 @@ describe("BaitShop's bait bucket", () => {
     expect(short).not.toHaveBeenCalled();
     act(() => root!.unmount());
     container!.remove();
-    const fitted = shop(true, 1, vi.fn(), vi.fn(), "summer", true);
-    expect(fitted.button("A bucket aerator")).toBeUndefined();
+    const again = vi.fn();
+    const fitted = shop(true, 1, vi.fn(), vi.fn(), "summer", true, again);
+    // It stays in place, so a keyboard user's focus isn't dropped when the purchase goes through.
+    const done = fitted.button("Bucket aerator fitted")!;
+    expect(done.getAttribute("aria-disabled")).toBe("true");
+    act(() => done.click());
+    expect(again).not.toHaveBeenCalled();
     expect(container!.querySelector("#aerator-note")!.textContent).toBe("The aerator on your bait bucket keeps each spare shiner a day longer.");
-    expect(fitted.note()).toBe("A shiner is on your hook, so another goes in your bait bucket, which holds 1 of 3. In the summer heat it keeps two days there. Your aerator keeps it a day longer.");
   });
 
   it("hooks a spare from the bucket when the hook is empty", () => {

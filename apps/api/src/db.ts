@@ -144,6 +144,11 @@ db.exec(`
   );
 `);
 
+// The shack's aerator, bought once and fitted to the angler's bait bucket for good.
+const profileColumns = db.prepare(`PRAGMA table_info(profile)`).all() as { name: string }[];
+if (!profileColumns.some((column) => column.name === "aerator")) {
+  db.exec(`ALTER TABLE profile ADD COLUMN aerator INTEGER NOT NULL DEFAULT 0`);
+}
 const catchColumns = db.prepare(`PRAGMA table_info(catch)`).all() as { name: string }[];
 if (!catchColumns.some((column) => column.name === "request_id")) {
   db.exec(`ALTER TABLE catch ADD COLUMN request_id TEXT`);
@@ -206,6 +211,7 @@ export type ProfileRow = {
   strength: number;
   accuracy: number;
   patience: number;
+  aerator: number;
 };
 
 export type CatchRow = {
@@ -759,6 +765,12 @@ export function spendPoints(userId: string, cost: number) {
   if (result.changes !== 1) throw new Error("purchase failed");
 }
 
+/** Spends the points and fits the aerator in one step, so a second purchase, from another tab or a double click, finds it fitted and fails. */
+export function fitAerator(userId: string, cost: number) {
+  const result = db.prepare(`UPDATE profile SET points = points - ?, aerator = 1 WHERE user_id = ? AND points >= ? AND aerator = 0`).run(cost, userId, cost);
+  if (result.changes !== 1) throw new Error("purchase failed");
+}
+
 export function toProfile(row: ProfileRow) {
   return {
     userId: row.user_id,
@@ -768,6 +780,7 @@ export function toProfile(row: ProfileRow) {
     strength: row.strength,
     accuracy: row.accuracy,
     patience: row.patience,
+    aerator: row.aerator === 1,
   };
 }
 

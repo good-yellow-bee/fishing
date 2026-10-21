@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { AERATOR_EXTRA_MS, BUCKET_COLD_LIFE_MS, BUCKET_HOT_LIFE_MS, BUCKET_LIFE_MS, aeratorKey, baitBucketKey, bucketLifeMs, liveShiners, loadAerator, loadBucket, saveAerator, saveBucket } from "./baitBucket";
+import { AERATOR_EXTRA_MS, BUCKET_COLD_LIFE_MS, BUCKET_HOT_LIFE_MS, BUCKET_LIFE_MS, baitBucketKey, bucketLifeMs, liveShiners, loadBucket, saveBucket } from "./baitBucket";
 
 let kept: Map<string, string>;
 beforeEach(() => {
@@ -48,14 +48,5 @@ describe("the bait bucket", () => {
     saveBucket("ash", [0, BUCKET_LIFE_MS]);
     expect(loadBucket("ash", BUCKET_HOT_LIFE_MS + 1, "summer", true)).toEqual({ shiners: [0, BUCKET_LIFE_MS], died: 0 });
     expect(loadBucket("ash", BUCKET_LIFE_MS + 1, "summer", true)).toEqual({ shiners: [BUCKET_LIFE_MS], died: 1 });
-  });
-
-  it("remembers the aerator per angler once bought", () => {
-    expect(loadAerator("ash")).toBe(false);
-    saveAerator("ash");
-    expect(loadAerator("ash")).toBe(true);
-    expect(loadAerator("mara")).toBe(false);
-    kept.set(aeratorKey("mara"), "\"yes\"");
-    expect(loadAerator("mara")).toBe(false);
   });
 });

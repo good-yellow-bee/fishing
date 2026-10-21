@@ -1029,13 +1029,10 @@ export function DockPage() {
   };
 
   const onBuyAerator = async () => {
-    // Bought once: the server doesn't see the bucket, so a second click must not be charged for.
-    if (game.aerator) return;
     setBusy(true);
     setError("");
     try {
       await buyAerator();
-      game.fitAerator();
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? errorText(err.message) : t("purchase failed"));

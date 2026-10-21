@@ -51,16 +51,3 @@ export function loadBucket(userId: string, now = Date.now(), season?: LakeSeason
 export function saveBucket(userId: string, shiners: readonly number[]) {
   writeAngler(baitBucketKey(userId), shiners.length > 0 ? shiners : null);
 }
-
-/** Kept per angler, as the bucket is: whether the shack's aerator is fitted to it. */
-export function aeratorKey(userId: string) {
-  return `stillwater.aerator.${userId}.v1`;
-}
-
-export function loadAerator(userId: string): boolean {
-  return readAngler(aeratorKey(userId), (raw) => (raw === true ? true : null)) ?? false;
-}
-
-export function saveAerator(userId: string) {
-  writeAngler(aeratorKey(userId), true);
-}

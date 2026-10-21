@@ -183,6 +183,7 @@ export function validateWormBuy(profile: Profile): PurchaseResult {
 export const AERATOR_PRICE = 150;
 
 export function validateAeratorBuy(profile: Profile): PurchaseResult {
+  if (profile.aerator) return { ok: false, error: "aerator already fitted", status: 409 };
   return shackSale(profile, AERATOR_PRICE);
 }
 
