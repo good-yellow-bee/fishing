@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SPAWN_X, SPAWN_Z } from "@stillwater/shared";
-import { BIN_AT, BIN_HALF, BIN_INSIDE, BIN_WORMS, RISE_MAX, RISE_MIN, WORM_LEAN, WORM_REACH, binSnowy, binWorm } from "./binWorms";
+import { BIN_AT, BIN_HALF, BIN_INSIDE, BIN_TIN, BIN_WORMS, RISE_MAX, RISE_MIN, WORM_LEAN, WORM_REACH, binSnowy, binWorm } from "./binWorms";
 import { bucketSpot, tinSpot } from "./bucketSpot";
 
 describe("the worms in the shack's worm bin", () => {
@@ -40,6 +40,15 @@ describe("the worms in the shack's worm bin", () => {
   it("lies under snow in winter only", () => {
     expect(binSnowy("winter")).toBe(true);
     for (const season of ["spring", "summer", "fall"] as const) expect(binSnowy(season)).toBe(false);
+  });
+
+  it("leaves the angler's tin room inside the walls, out of every worm's reach", () => {
+    expect(BIN_TIN.x + BIN_TIN.radius).toBeLessThan(BIN_INSIDE.width / 2);
+    expect(-BIN_TIN.z + BIN_TIN.radius).toBeLessThan(BIN_INSIDE.depth / 2);
+    for (let i = 0; i < BIN_WORMS; i += 1) {
+      const worm = binWorm(i, 0);
+      expect(Math.hypot(worm.x - BIN_TIN.x, worm.z - BIN_TIN.z)).toBeGreaterThan(BIN_TIN.radius + WORM_REACH);
+    }
   });
 });
 
