@@ -18,7 +18,10 @@ export function wormsDug(now: Date) {
 
 const wormsIn = (n: unknown) => (typeof n === "number" && Number.isFinite(n) ? Math.min(WORM_TIN_WET, Math.max(0, Math.floor(n))) : null);
 
-/** The tin as kept: its worms, the day it was last topped up, and the day a worm last went in, which is later when one was bought on a visit past midnight. */
+/**
+ * The tin as kept: its worms, the day it was last topped up, and the day a worm last went in, which is later when one was bought on a visit past midnight.
+ * That keeps the whole tin fresh in summer, the older worms too, rather than letting a worm just paid for die.
+ */
 type Tin = { worms: number; day: string; kept: string };
 
 function readTin(userId: string): Tin | null {
