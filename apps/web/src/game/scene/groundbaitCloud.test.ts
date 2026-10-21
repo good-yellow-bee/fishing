@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { spotAt, SPOT_IDS, walkableAt } from "@stillwater/shared";
-import { GROUNDBAIT_CASTS, SWIM_MAX_CASTS, throwHandful, TOPUP_MAX } from "../logic";
-import { bigFeedersOver, cloudCenter, cloudOpacity, CLOUD_RADIUS, DIMPLES, dimpleAt, feedersShow, ROLL_GAP_SEC, ROLL_SEC, ROLL_SPAN, rollAt } from "./groundbaitCloud";
+import { bigFeedersOver, GROUNDBAIT_CASTS, SWIM_MAX_CASTS, throwHandful, TOPUP_MAX } from "../logic";
+import { cloudCenter, cloudOpacity, CLOUD_RADIUS, DIMPLES, dimpleAt, feedersShow, ROLL_GAP_SEC, ROLL_SEC, ROLL_SPAN, rollAt } from "./groundbaitCloud";
 
 describe("groundbait cloud", () => {
   it.each(SPOT_IDS)("lands on the %s's own open water", (spot) => {
@@ -92,7 +92,7 @@ describe("big feeders rolling over a built swim", () => {
     }
     // One roll in every gap, each about ROLL_SPAN roll lengths long.
     expect(slots.size).toBe(600 / ROLL_GAP_SEC);
-    expect(rolling * 0.05).toBeCloseTo((600 / ROLL_GAP_SEC) * ROLL_SEC * ROLL_SPAN, -1);
+    expect(Math.abs(rolling * 0.05 - (600 / ROLL_GAP_SEC) * ROLL_SEC * ROLL_SPAN)).toBeLessThan(1);
   });
 
   it("heads round the edge, not in or out", () => {

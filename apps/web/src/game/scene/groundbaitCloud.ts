@@ -1,6 +1,6 @@
 import { LAKE_CENTER_Z, type SpotId } from "@stillwater/shared";
 import { BANK_STANDS, PLACES } from "../hotspot";
-import { GROUNDBAIT_CASTS, hasBigFeeders, SWIM_MAX_CASTS, TOPUP_MAX, type Groundbait } from "../logic";
+import { GROUNDBAIT_CASTS, SWIM_MAX_CASTS, TOPUP_MAX, type Groundbait } from "../logic";
 
 /** How wide the cloud of groundbait spreads on the water, in metres. */
 export const CLOUD_RADIUS = 1.1;
@@ -48,11 +48,6 @@ export function dimpleAt(i: number, time: number, built = 0): { dx: number; dz: 
   const angle = (turn - Math.floor(turn)) * Math.PI * 2;
   const out = DIMPLE_REACH * Math.sqrt(Math.abs(Math.cos(turn)));
   return { dx: Math.cos(angle) * out, dz: Math.sin(angle) * out, age };
-}
-
-/** The big feeders a swim built up all the way has drawn in (GT475), when the tied lure would take them. */
-export function bigFeedersOver(bait: Groundbait, lure: string | undefined): boolean {
-  return (bait.built ?? 0) >= TOPUP_MAX && hasBigFeeders(bait.spot, lure);
 }
 
 /** A big feeder rolls at the cloud's edge at most once in this many seconds, its back and tail over in this long. */

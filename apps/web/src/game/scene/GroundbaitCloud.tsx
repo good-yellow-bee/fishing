@@ -13,6 +13,8 @@ const CARP = "#6b5524";
 /** The roll turns the fish over a point this far under the water, so its head, back and then tail break the surface in turn. */
 const ROLL_DEPTH = 0.45;
 const ROLL_ARC = 1.4;
+/** Sunk this much further at the roll's start and end, so the nose and tail come up out of the water and go back under it. */
+const ROLL_SINK = 0.45;
 
 /** A +z-facing carp's body, dorsal fin and tail in one mesh. */
 function carpShape() {
@@ -91,7 +93,7 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false }: {
         const along = ROLL_DEPTH * Math.sin(tip);
         const x = at.x + roll.dx + Math.sin(roll.yaw) * along;
         const z = at.z + roll.dz + Math.cos(roll.yaw) * along;
-        carp.current.position.set(x, waterHeight(x, z, t) - ROLL_DEPTH * (1 - Math.cos(tip)) - 0.03, z);
+        carp.current.position.set(x, waterHeight(x, z, t) - ROLL_DEPTH * (1 - Math.cos(tip)) - ROLL_SINK * Math.abs(2 * roll.age - 1) ** 3 - 0.03, z);
         // A +z-facing fish: nose up is a negative turn about x, so it rolls from nose up to nose down.
         carp.current.rotation.set(tip, roll.yaw, 0, "YXZ");
       }
