@@ -902,8 +902,9 @@ describe("feeders over the groundbait", () => {
     expect(groundbaitFeeder("dock", undefined, false, "day", rolls(feederShare(0), 0.5), 1)).not.toBeNull();
   });
 
-  it("knows which banks the big feeders live at", () => {
-    expect((["dock", "reeds", "dropoff", "point", "inlet", "open"] as const).filter(hasBigFeeders)).toEqual(["dock", "reeds", "dropoff"]);
+  it("knows which banks the big feeders live at, and that a small lure keeps them off", () => {
+    expect((["dock", "reeds", "dropoff", "point", "inlet", "open"] as const).filter((spot) => hasBigFeeders(spot, undefined))).toEqual(["dock", "reeds", "dropoff"]);
+    expect(hasBigFeeders("dock", "Worm")).toBe(false);
   });
 });
 

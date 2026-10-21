@@ -810,14 +810,14 @@ export function feederShare(built: number) {
 export const BIG_FEEDERS: ReadonlySet<string> = new Set(["carp", "catfish"]);
 export const BIG_FEEDER_PULL = 3;
 
-/** Whether a swim topped up this many times has drawn in the big feeders. */
-export function bigFeedersIn(built: number) {
-  return built >= TOPUP_MAX;
+/** Whether this feeder is one of the big ones moved in on a swim topped up this many times. */
+export function isBigFeeder(id: string, built: number) {
+  return built >= TOPUP_MAX && BIG_FEEDERS.has(id);
 }
 
-/** Whether any of the big feeders live at this bank. */
-export function hasBigFeeders(spot: SpotId) {
-  return FISH.some((fish) => fish.spots.includes(spot) && BIG_FEEDERS.has(fish.id));
+/** Whether a big feeder at this bank would take this lure on a full cast. */
+export function hasBigFeeders(spot: SpotId, lure: string | undefined) {
+  return poolForLure(FISH.filter((fish) => fish.spots.includes(spot)), lure).some((fish) => BIG_FEEDERS.has(fish.id));
 }
 
 /** A feeder drawn to the groundbait for this bite, from the bank's own lure split and weighed as the bank draws them (the big ones more over a built-up swim), or none. */
@@ -825,7 +825,7 @@ export function groundbaitFeeder(spot: SpotId, lure: string | undefined, shortCa
   if (random() >= feederShare(built)) return null;
   const home = FISH.filter((fish) => fish.spots.includes(spot) && (!shortCast || fish.rarity === "common"));
   const feeders = poolForLure(home, lure).filter((fish) => GROUNDBAIT_FEEDERS.has(fish.id));
-  const pull = (fish: FishSpecies) => appeal(fish, hour) * (bigFeedersIn(built) && BIG_FEEDERS.has(fish.id) ? BIG_FEEDER_PULL : 1);
+  const pull = (fish: FishSpecies) => appeal(fish, hour) * (isBigFeeder(fish.id, built) ? BIG_FEEDER_PULL : 1);
   let roll = random() * feeders.reduce((sum, fish) => sum + pull(fish), 0);
   for (const fish of feeders) {
     roll -= pull(fish);

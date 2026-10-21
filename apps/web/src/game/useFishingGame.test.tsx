@@ -3375,6 +3375,15 @@ describe("useFishingGame groundbait", () => {
     expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toBe("Common carp: the big feeders have moved in on the built-up swim.");
   });
 
+  it("keeps the big feeders on a swim already built, when topped up again", () => {
+    const kept = new Map<string, string>([[bagKey(profile.userId), JSON.stringify({ handfuls: 3, day: "2000-01-01" })]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 2, built: TOPUP_MAX, at: DOCK_BUBBLES.at - 60_000 }));
+    mount();
+    toss();
+    expect(hint()).toBe(`You top up the swim as it fades: the feeders stay, the big ones too. ${2 + GROUNDBAIT_CASTS} casts of it now.`);
+  });
+
   it("casts the tied lure at the bank's let-go fish, so one shy of it stays down", () => {
     cast(mount(DOCK_BUBBLES.at, profile, "day", false, "Mepps spinner"));
     expect(castForReleased).toHaveBeenLastCalledWith([], "dock", expect.any(Number), expect.any(Number), "Mepps spinner");

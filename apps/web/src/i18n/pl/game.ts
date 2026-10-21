@@ -95,6 +95,7 @@ export const PL_GAME: PlBook = {
   "Top up the swim here as it fades: more feeders come in.": "Dosyp zanęty, zanim się skończy: podpłynie więcej ryb.",
   "You top up the swim as it fades: the feeders stay, and more come in. {casts} casts of it now.": "Dosypujesz zanęty, zanim się skończy: ryby zostają i podpływa ich więcej. Starczy jej teraz na {casts} rzutów.",
   "You top up the swim again as it fades: the feeders stay, and the big ones move in. {casts} casts of it now.": "Znów dosypujesz zanęty, zanim się skończy: ryby zostają i podpływają te duże. Starczy jej teraz na {casts} rzutów.",
+  "You top up the swim as it fades: the feeders stay, the big ones too. {casts} casts of it now.": "Dosypujesz zanęty, zanim się skończy: ryby zostają, te duże też. Starczy jej teraz na {casts} rzutów.",
   "You top up the swim as it fades: the feeders stay. {casts} casts of it now.": "Dosypujesz zanęty, zanim się skończy: ryby zostają. Starczy jej teraz na {casts} rzutów.",
   "Too much too soon: the fish fill up on it, so the next {full} casts bite slower and no feeders take. {casts} casts of it now.": "Za dużo, za wcześnie: ryby się najadają, więc przez kolejne rzuty ({full}) brania są wolniejsze i nie biorą ryby z zanęty. Starczy jej teraz na {casts} rzutów.",
   "Toss the groundbait": "Rzuć zanętę",

@@ -78,7 +78,7 @@ import { weightText } from "../i18n/content";
 import { FRENZY_SLOT_MS, frenzyOn, HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, slotFrenzy, type Hotspot } from "./hotspot";
 import { loadBag, loadShiner, saveBag, saveShiner, type HookedShiner } from "./groundbaitBag";
 import { loadTin, saveTin, WORM_TIN_DAILY, WORM_TIN_WET } from "./wormTin";
-import { BACKLASH_POWER, BED_RAIDERS, COLD_WORK_WAIT, tooQuickForCold, isLongCast, castIntoSchool, castOverGroundbait, BIG_FEEDERS, bigFeedersIn, hasBigFeeders, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, OVERFED_WAIT, throwHandful, TOPUP_CASTS_LEFT, canBaitShiner, shinerHunter, bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, type Groundbait, castIntoSpooked, castUnderPressure, castNewLure, type LuresShown, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, colourSuits, colourWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, anchorSplashWaitMul, openGlareWaitMul, frenzyHunter, FRENZY_WAIT, lampLit, LAMP_WAIT, LAMP_WINDOW, longShadowWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, waterSwingWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
+import { BACKLASH_POWER, BED_RAIDERS, COLD_WORK_WAIT, tooQuickForCold, isLongCast, castIntoSchool, castOverGroundbait, isBigFeeder, hasBigFeeders, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, OVERFED_WAIT, throwHandful, TOPUP_CASTS_LEFT, TOPUP_MAX, canBaitShiner, shinerHunter, bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, type Groundbait, castIntoSpooked, castUnderPressure, castNewLure, type LuresShown, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, colourSuits, colourWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, anchorSplashWaitMul, openGlareWaitMul, frenzyHunter, FRENZY_WAIT, lampLit, LAMP_WAIT, LAMP_WINDOW, longShadowWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, waterSwingWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -1361,7 +1361,7 @@ export function useFishingGame(
     const riser = castMidgeRef.current && !lost.again && !recaughtRef.current && !hunter && !raider && !crayHunter && !gorger && !fryChaser && !logFish && !sipper && !lightFish && !mercyNow ? midgeRiser(spotRef.current, lureRef?.current, current, hour) : null;
     const frenzyFish = castFrenzyRef.current && !lost.again && !recaughtRef.current && !hunter && !mercyNow ? frenzyHunter(spotRef.current, lureRef?.current, current, hour) : null;
     const species = lost.again ? lost.again.species : recaughtRef.current ? recaughtRef.current.species : hunter ? hunter : raider ? raider : crayHunter ? crayHunter : gorger ? gorger : fryChaser ? fryChaser : logFish ? logFish : sipper ? sipper : lightFish ? lightFish : riser ? riser : frenzyFish ? frenzyFish : schoolFish && Math.random() < SCHOOL_SAME ? schoolFish : (feeder ?? drawn);
-    fedRef.current = !feeder || species !== feeder ? null : bigFeedersIn(bait.built) && BIG_FEEDERS.has(feeder.id) ? "big" : "fed";
+    fedRef.current = !feeder || species !== feeder ? null : isBigFeeder(feeder.id, bait.built) ? "big" : "fed";
     const bitten = lost.again ? { species, weight: lost.again.weight } : recaughtRef.current ? { species, weight: recaughtRef.current.weight } : downAtBank(makeCatch(species, current.patience, anglerLevel(current.lifetimePoints)), fishedDownRef.current.has(spotRef.current) && !mercyNow);
     biteRef.current = bitten;
     setBite(bitten);
@@ -2348,12 +2348,17 @@ export function useFishingGame(
     keepHandfuls(handfulsRef.current - 1);
     fx.plop();
     if (kind === "topped") {
+      // The big feeders are told of only where they live and would take the tied lure.
+      const big = next.built! >= TOPUP_MAX && hasBigFeeders(next.spot, lureRef?.current);
+      const grew = next.built! > before;
       setHint(
-        next.built! > before && bigFeedersIn(next.built!) && hasBigFeeders(next.spot)
+        big && grew
           ? t("You top up the swim again as it fades: the feeders stay, and the big ones move in. {casts} casts of it now.", { casts: next.casts })
-          : next.built! > before
-          ? t("You top up the swim as it fades: the feeders stay, and more come in. {casts} casts of it now.", { casts: next.casts })
-          : t("You top up the swim as it fades: the feeders stay. {casts} casts of it now.", { casts: next.casts }),
+          : big
+            ? t("You top up the swim as it fades: the feeders stay, the big ones too. {casts} casts of it now.", { casts: next.casts })
+            : grew
+              ? t("You top up the swim as it fades: the feeders stay, and more come in. {casts} casts of it now.", { casts: next.casts })
+              : t("You top up the swim as it fades: the feeders stay. {casts} casts of it now.", { casts: next.casts }),
       );
       return;
     }
