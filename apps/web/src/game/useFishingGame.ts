@@ -1371,7 +1371,7 @@ export function useFishingGame(
     const riser = castMidgeRef.current && !lost.again && !recaughtRef.current && !hunter && !raider && !crayHunter && !gorger && !fryChaser && !logFish && !sipper && !lightFish && !mercyNow ? midgeRiser(spotRef.current, lureRef?.current, current, hour) : null;
     const frenzyFish = castFrenzyRef.current && !lost.again && !recaughtRef.current && !hunter && !mercyNow ? frenzyHunter(spotRef.current, lureRef?.current, current, hour) : null;
     const species = lost.again ? lost.again.species : recaughtRef.current ? recaughtRef.current.species : hunter ? hunter : raider ? raider : crayHunter ? crayHunter : gorger ? gorger : fryChaser ? fryChaser : logFish ? logFish : sipper ? sipper : lightFish ? lightFish : riser ? riser : frenzyFish ? frenzyFish : schoolFish && Math.random() < SCHOOL_SAME ? schoolFish : (feeder ?? drawn);
-    fedRef.current = !feeder || species !== feeder ? null : isBigFeeder(feeder.id, bait.built) ? "big" : "fed";
+    fedRef.current = !feeder || species !== feeder ? null : isBigFeeder(feeder.id, bait.built) && !bait.wary ? "big" : "fed";
     const bitten = lost.again ? { species, weight: lost.again.weight } : recaughtRef.current ? { species, weight: recaughtRef.current.weight } : downAtBank(makeCatch(species, current.patience, anglerLevel(current.lifetimePoints)), fishedDownRef.current.has(spotRef.current) && !mercyNow);
     biteRef.current = bitten;
     setBite(bitten);
@@ -2385,11 +2385,12 @@ export function useFishingGame(
     const withWorm = (said: string) => [said, worm].filter(Boolean).join(" ");
     if (kind === "topped") {
       // The big feeders are told of only where they live and would take the tied lure; wary of the swim, they no longer move in.
-      const big = bigFeedersOver(next, lureRef?.current) && !isWary(next);
+      const takesBig = bigFeedersOver(next, lureRef?.current);
+      const big = takesBig && !isWary(next);
       const grew = next.built! > before;
       // The prowler is named only where it lives, would take the tied lure, and the angler could land it.
       const prowler = next.built! >= TOPUP_MAX ? prowlerAt(spotRef.current, lureRef?.current) : undefined;
-      const wary = bigFeedersOver(next, lureRef?.current) && isWary(next) ? t("The big feeders here are wary of this swim now: let it fade and build a fresh one to bring them back.") : "";
+      const wary = takesBig && isWary(next) ? t("The big feeders here are wary of this swim now: let it fade and build a fresh one to bring them back.") : "";
       const prowl = prowler && profileRef.current && canLand(profileRef.current, prowler) ? t("{fish} prowls round it now, hunting the small feeders: one hooked here scatters them, landed or lost.", { fish: t(prowler.name) }) : "";
       setHint(
         withWorm(
