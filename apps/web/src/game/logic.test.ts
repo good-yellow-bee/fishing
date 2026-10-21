@@ -357,6 +357,15 @@ describe("groundbait", () => {
     expect(throwHandful({ spot: "reeds", casts: SWIM_MAX_CASTS }, "reeds").next.casts).toBe(SWIM_MAX_CASTS);
   });
 
+  it("a fresh handful on a regular feeding spot lands built once, so one top-up brings the big feeders in", () => {
+    const fresh = throwHandful(null, "reeds", true);
+    expect(fresh).toEqual({ next: { spot: "reeds", casts: GROUNDBAIT_CASTS, built: 1 }, kind: "fresh" });
+    expect(throwHandful({ ...fresh.next, casts: TOPUP_CASTS_LEFT }, "reeds").next.built).toBe(TOPUP_MAX);
+    // Only a fresh swim: a top-up or an overfeed builds as it always does.
+    expect(throwHandful({ spot: "reeds", casts: TOPUP_CASTS_LEFT }, "reeds", true).next.built).toBe(1);
+    expect(throwHandful({ spot: "reeds", casts: TOPUP_CASTS_LEFT + 1 }, "reeds", true).next.built).toBeUndefined();
+  });
+
   it("casts over fish still full say so until they are hungry again, and keep the swim's top-ups", () => {
     let bait: ReturnType<typeof castOverGroundbait>["next"] = { spot: "reeds", casts: 4, built: 2, full: OVERFED_CASTS };
     const seen: boolean[] = [];

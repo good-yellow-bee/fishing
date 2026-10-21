@@ -793,12 +793,12 @@ describe("the shack's bait tin", () => {
     const tin = page.querySelector(".bait-shop")!;
     const buy = tin.querySelector("button")!;
     expect(buy.textContent).toBe("A handful (60 pts)");
-    expect(tin.querySelector("p")!.textContent).toBe("Keeps the fish feeding at a bank for 5 casts. In your bag: 1 of 3.");
+    expect(tin.querySelector("p")!.textContent).toBe("Keeps the fish feeding at a bank for 5 casts. In your bag: 1 of 3. Bait one bank 3 days running and its feeders expect it: the day's first handful there draws them in as after a top-up.");
     await act(async () => buy.click());
     expect(buyGroundbait).toHaveBeenCalledTimes(1);
-    expect(tin.querySelector("p")!.textContent).toBe("Keeps the fish feeding at a bank for 5 casts. In your bag: 2 of 3.");
+    expect(tin.querySelector("p")!.textContent).toBe("Keeps the fish feeding at a bank for 5 casts. In your bag: 2 of 3. Bait one bank 3 days running and its feeders expect it: the day's first handful there draws them in as after a top-up.");
     await act(async () => buy.click());
-    expect(tin.querySelector("p")!.textContent).toBe("Your bag is full: 3 handfuls.");
+    expect(tin.querySelector("p")!.textContent).toBe("Your bag is full: 3 handfuls. Bait one bank 3 days running and its feeders expect it: the day's first handful there draws them in as after a top-up.");
     expect(buy.getAttribute("aria-disabled")).toBe("true");
     await act(async () => buy.click());
     expect(buyGroundbait).toHaveBeenCalledTimes(2);
