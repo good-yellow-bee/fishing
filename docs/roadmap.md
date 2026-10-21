@@ -1485,6 +1485,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | SC290 | The night line's state seen on the bank: once a fish is on, the stake's top bows toward the water, the line runs taut and the tag knocks now and then (held still under reduced motion); left too long, the line hangs slack; still one draw | scene | S |
 | SC291 | News card scene70 covers SC289 and SC290: the night line's stick bows, runs taut and knocks once a fish is on, hangs slack when left too long, and turns ready on time while you wait on the bank | scene | S |
 | SC292 | The lost trophy seen: at each bank a trophy that broke a line is still about (the angler's old foe, or one the lodge reports lost), the snapped float it trails drifts on the water, cocked over, now and then dipping under or towed off a little way (held still under reduced motion); the live float's model, painted red, one draw | scene | S |
+| SC293 | The worm tin seen: while the angler stands still, a small open tin stands on the deck or bank at their right, its lid off beside it, a worm curling over the rim for each worm left (up to five), slowly wriggling (held still under reduced motion), bare soil when the tin is empty; never where the bait bucket stands; two draws | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
