@@ -83,6 +83,7 @@ import { hareCoat, hareOut } from "./hareRounds";
 import { Wildflowers } from "./Wildflowers";
 import { beesOut } from "./meadowFlowers";
 import { Woodpile } from "./Woodpile";
+import { WormBin } from "./WormBin";
 import { pedaloOut } from "./pedalBoat";
 import { sailingOut } from "./sailingTrip";
 import { TireSwing } from "./TireSwing";
@@ -2388,6 +2389,7 @@ export const LakeWorld = memo(function LakeWorld({
       {stridersOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Striders />}
       {whirligigsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Whirligigs />}
       <Shack />
+      <WormBin season={season} />
       {rivalOut(hour) && <RivalAngler />}
       <Campfire lit={campfireLit(hour, sky)} hour={hour} wind={wind} />
       <Woodpile season={season} />
