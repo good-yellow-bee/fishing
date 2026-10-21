@@ -90,7 +90,7 @@ describe("round 127: a water with no name", () => {
     document.body.innerHTML = "";
     const kind = [...(await show("/species/Roach")).querySelectorAll('a[href="/spots/b"]')].map((link) => link.textContent);
     expect(kind).toContain("Water with no name");
-    expect(spotSummary(book.spots[1]!, 0, [])).toMatch(/^Water with no name · Lake/);
+    expect(spotSummary(book.spots[1]!, 0, [], null, null)).toMatch(/^Water with no name · Lake/);
   });
 
   it("names its link in the Map's list of waters with no place", async () => {
