@@ -781,9 +781,9 @@ export const SWIM_MAX_CASTS = 2 * GROUNDBAIT_CASTS;
 export const OVERFED_CASTS = 2;
 export const OVERFED_WAIT = 1.3;
 
-/** A handful tossed off a bank: a fresh swim, a fading swim there topped up, or one still well fed overfed. */
-export function throwHandful(bait: Groundbait | null, spot: SpotId): { next: Groundbait; kind: "fresh" | "topped" | "overfed" } {
-  if (!bait || bait.spot !== spot || bait.casts <= 0) return { next: { spot, casts: GROUNDBAIT_CASTS }, kind: "fresh" };
+/** A handful tossed off a bank: a fresh swim (built once already on a regular feeding spot), a fading swim there topped up, or one still well fed overfed. */
+export function throwHandful(bait: Groundbait | null, spot: SpotId, regular = false): { next: Groundbait; kind: "fresh" | "topped" | "overfed" } {
+  if (!bait || bait.spot !== spot || bait.casts <= 0) return { next: { spot, casts: GROUNDBAIT_CASTS, ...(regular ? { built: 1 } : {}) }, kind: "fresh" };
   const casts = Math.min(SWIM_MAX_CASTS, bait.casts + GROUNDBAIT_CASTS);
   if (bait.casts <= TOPUP_CASTS_LEFT) return { next: { ...bait, casts, built: Math.min(TOPUP_MAX, (bait.built ?? 0) + 1) }, kind: "topped" };
   return { next: { ...bait, casts, full: OVERFED_CASTS }, kind: "overfed" };

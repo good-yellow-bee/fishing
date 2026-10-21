@@ -3,6 +3,7 @@ import { t, useT } from "../i18n";
 import { GROUNDBAIT_CASTS } from "../game/logic";
 import { BUCKET_SIZE } from "../game/baitBucket";
 import { BREAD_SWIM_CASTS } from "../game/swim";
+import { PREBAIT_DAYS } from "../game/prebait";
 import { WORM_TIN_WET } from "../game/wormTin";
 
 type Props = {
@@ -81,7 +82,8 @@ export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, bucket, b
           <p id="bait-shop-note">
             {full
               ? t("Your bag is full: {max} handfuls.", { max: GROUNDBAIT_CARRY })
-              : t("Keeps the fish feeding at a bank for {casts} casts. In your bag: {n} of {max}.", { casts: GROUNDBAIT_CASTS, n: handfuls, max: GROUNDBAIT_CARRY })}
+              : t("Keeps the fish feeding at a bank for {casts} casts. In your bag: {n} of {max}.", { casts: GROUNDBAIT_CASTS, n: handfuls, max: GROUNDBAIT_CARRY })}{" "}
+            {t("Bait one bank {days} days running and its feeders expect it: the day's first handful there draws them in as after a top-up.", { days: PREBAIT_DAYS })}
           </p>
         </div>
         <div className="upgrade-skill">

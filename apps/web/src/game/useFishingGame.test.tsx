@@ -123,6 +123,7 @@ import { WORM_TIN_WET, wormsDug, wormTinKey } from "./wormTin";
 import { BUCKET_COLD_LIFE_MS, BUCKET_HOT_LIFE_MS, BUCKET_LIFE_MS, baitBucketKey } from "./baitBucket";
 import { TRAP_COLD_SOAK_MS, TRAP_SOAK_MS, TRAP_STALE_MS, trapKey, trapState } from "./minnowTrap";
 import { bagKey, shinerKey } from "./groundbaitBag";
+import { PREBAIT_DAYS, prebaitKey } from "./prebait";
 import { oldFoeKey } from "./oldFoe";
 import { BREAD_SWIM_CASTS, SWIM_COLD_GONE_MS, SWIM_COLD_PRIMED_MS, SWIM_HOT_GONE_MS, SWIM_HOT_PRIMED_MS, SWIM_PRIMED_MS, swimKey } from "./swim";
 import { carriesBait, FALSE_STRIKE_MS, FIGURE_EIGHT_ODDS, FIGURE_TURN_MS, FIGURE_WINDOW_MS, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TIRE_REASONS, TOPWATER_POPS, useFishingGame, WAIT_REASONS } from "./useFishingGame";
@@ -3354,6 +3355,62 @@ describe("useFishingGame groundbait", () => {
     act(() => frames.at(-1)!(now));
     expect(phase()).toBe("result:landed");
     expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toBe("Common carp: it came in to feed on the groundbait.");
+  });
+
+  it("lands the day's first handful on a bank baited days running as built once, and says how many days it has been", () => {
+    const kept = new Map<string, string>([[bagKey(profile.userId), JSON.stringify({ handfuls: 3, day: "2000-01-01" })]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    const daysAgo = (n: number) => {
+      const day = new Date(DOCK_BUBBLES.at);
+      day.setDate(day.getDate() - n);
+      return localDate(day);
+    };
+    kept.set(prebaitKey(profile.userId), JSON.stringify({ spot: "dock", day: daysAgo(1), days: 1 }));
+    mount();
+    toss();
+    expect(hint()).toContain(`Day 2 running you bait this bank: from day ${PREBAIT_DAYS} its feeders start to expect it.`);
+    expect(JSON.parse(kept.get(swimKey(profile.userId))!).built).toBeUndefined();
+    expect(JSON.parse(kept.get(prebaitKey(profile.userId))!)).toEqual({ spot: "dock", day: daysAgo(0), days: 2 });
+
+    act(() => root!.unmount());
+    root = null;
+    container!.remove();
+    kept.delete(swimKey(profile.userId));
+    kept.set(prebaitKey(profile.userId), JSON.stringify({ spot: "dock", day: daysAgo(1), days: PREBAIT_DAYS - 1 }));
+    const surface = mount();
+    toss();
+    expect(hint()).toContain(`Day ${PREBAIT_DAYS} running you bait this bank: its feeders expect it now and come straight in, as after a top-up.`);
+    expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ spot: "dock", casts: GROUNDBAIT_CASTS, built: 1 });
+    cast(surface);
+    expect(groundbaitFeeder).toHaveBeenLastCalledWith("dock", undefined, false, "day", Math.random, 1);
+    // A second fresh handful the same day is not the day's first: it lands as any other.
+    kept.delete(swimKey(profile.userId));
+    act(() => root!.unmount());
+    root = null;
+    container!.remove();
+    mount();
+    toss();
+    expect(hint()).not.toContain("running you bait this bank");
+    expect(JSON.parse(kept.get(swimKey(profile.userId))!).built).toBeUndefined();
+
+    // A day's first handful that tops up a swim left from yesterday leaves the build for the day's first fresh one.
+    act(() => root!.unmount());
+    root = null;
+    container!.remove();
+    kept.set(bagKey(profile.userId), JSON.stringify({ handfuls: 3, day: daysAgo(0) }));
+    kept.set(prebaitKey(profile.userId), JSON.stringify({ spot: "dock", day: daysAgo(1), days: PREBAIT_DAYS - 1 }));
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 1, at: DOCK_BUBBLES.at - 60_000 }));
+    mount();
+    toss();
+    expect(JSON.parse(kept.get(swimKey(profile.userId))!).built).toBe(1);
+    kept.delete(swimKey(profile.userId));
+    act(() => root!.unmount());
+    root = null;
+    container!.remove();
+    mount();
+    toss();
+    expect(hint()).toContain(`Day ${PREBAIT_DAYS} running you bait this bank: its feeders expect it now`);
+    expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ casts: GROUNDBAIT_CASTS, built: 1 });
   });
 
   it("draws the big feeders in on the swim's last top-up, and says so on the card", () => {

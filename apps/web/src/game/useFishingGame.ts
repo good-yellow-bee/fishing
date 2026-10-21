@@ -66,6 +66,7 @@ import { castSnags, onRockEdge, onShoreIce, ROCK_EDGE_WAIT, SNAG_AT_MS, SNAG_TAP
 import { FLUTTER_SEC, flutterGrabberFor, flutterTip, followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { BUCKET_SIZE, liveShiners, loadBucket, saveBucket } from "./baitBucket";
 import { loadSwim, saveSwim, swimNow } from "./swim";
+import { baitDay, loadPrebait, PREBAIT_DAYS, savePrebait } from "./prebait";
 import { loadTrap, saveTrap, trapCatch, trapIsCold, trapNextChange, trapState, type Trap } from "./minnowTrap";
 import { castForFoe, foeGone, isOldFoe, loadOldFoe, saveOldFoe } from "./oldFoe";
 import { loadNightLine, nightLineCatch, nightLineKinds, nightLineNextChange, nightLineSeason, nightLineState, nightSkyFor, saveNightLine, wormLineHour, type NightLine } from "./nightLine";
@@ -2353,7 +2354,11 @@ export function useFishingGame(
   const throwGroundbait = useCallback(() => {
     if (phaseRef.current !== "idle" || handfulsRef.current <= 0) return;
     const before = groundbaitRef.current?.built ?? 0;
-    const { next, kind } = throwHandful(groundbaitRef.current, spotRef.current);
+    const angler = anglerIdRef.current;
+    const day = angler ? baitDay(loadPrebait(angler), spotRef.current, new Date()) : null;
+    const { next, kind } = throwHandful(groundbaitRef.current, spotRef.current, day?.regular);
+    const builtFresh = kind === "fresh" && !!day?.regular;
+    if (angler && day) savePrebait(angler, builtFresh ? { ...day.next, built: day.next.day } : day.next);
     keepGroundbait(next, Date.now());
     keepHandfuls(handfulsRef.current - 1);
     fx.plop();
@@ -2376,7 +2381,12 @@ export function useFishingGame(
       setHint(t("Too much too soon: the fish fill up on it, so the next {full} casts bite slower and no feeders take. {casts} casts of it now.", { full: next.full!, casts: next.casts }));
       return;
     }
-    const tossed = `${t("You toss a handful of groundbait. The fish will gather to feed here for the next {casts} casts.", { casts: GROUNDBAIT_CASTS })} ${t("Top it up as it fades, with {left} casts or fewer left, and more feeders come in.", { left: TOPUP_CASTS_LEFT })}`;
+    const run = builtFresh
+      ? t("Day {days} running you bait this bank: its feeders expect it now and come straight in, as after a top-up.", { days: day!.next.days })
+      : day?.newDay && day.next.days >= 2
+        ? t("Day {days} running you bait this bank: from day {need} its feeders start to expect it.", { days: day.next.days, need: PREBAIT_DAYS })
+        : "";
+    const tossed = [t("You toss a handful of groundbait. The fish will gather to feed here for the next {casts} casts.", { casts: GROUNDBAIT_CASTS }), t("Top it up as it fades, with {left} casts or fewer left, and more feeders come in.", { left: TOPUP_CASTS_LEFT }), run].filter(Boolean).join(" ");
     setHint(
       season === "summer"
         ? `${tossed} ${t("In the summer heat, any left draws them back after three hours but is eaten within a day.")}`
