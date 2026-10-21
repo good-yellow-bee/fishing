@@ -77,6 +77,16 @@ describe("round 124 ideas: what got away beside how an outing on the water went"
     expect(await page(book, "/trips?find=Own")).toContain("Outings: 2 · 1 fish · 2 lost · 2 missed");
   });
 
+  it("leaves a plan's out of the search's outing count, as it leaves the plan", async () => {
+    const planned: Logbook = { ...book, trips: [...book.trips, outing("ahead", "2026-10-25", { lost: 3 })] };
+    expect(await page(planned, "/trips?find=Own")).toContain("Outings: 2 · 1 fish · 2 lost · 2 missed · 1 planned");
+  });
+
+  it("is said for the other outing of the same day", async () => {
+    const dawnDusk: Logbook = { ...book, trips: [...book.trips, outing("dusk", "2026-10-18", { title: "Dusk", lost: 1 })] };
+    expect(await page(dawnDusk, "/trips/good")).toContain("Also here that day: Dusk, 0 fish · 1 lost");
+  });
+
   it("leaves the counts as they were when nothing got away", async () => {
     const clean: Logbook = { ...book, trips: book.trips.map(({ lost: _lost, missed: _missed, ...trip }) => trip) };
     expect(await page(clean, "/trips/good")).toMatch(/Last time here, Wed, Oct 14: 0 fish(?! ·)/);
