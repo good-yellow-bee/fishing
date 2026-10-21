@@ -443,6 +443,7 @@ function SpotView() {
   }
 
   const trips = tripsForSpot(book, spot.id);
+  const storedTrips = tripsForSpot(whole, spot.id).length;
   const catches = catchesForSpot(book, spot.id);
   // An untitled outing goes by this water's name, which the page already says: its link reads as the day's outing.
   const outingHere = (tripId: string) => {
@@ -526,13 +527,13 @@ function SpotView() {
       <EditDelete
         editTo={`/spots/${spot.id}/edit`}
         ask={
-          // How much goes with it, since a water with a season on it takes a lot.
-          trips.length + catches.length === 0
+          // How much goes with it, since a water with a season on it takes a lot: the sample week's blank plans too.
+          storedTrips + catches.length === 0
             ? t("Delete this water?")
-            : trips.length > 0 && catches.length > 0
-              ? t("Delete this water? Its {outings} and {fish} leave the book too.", { outings: tn(trips.length, "{n} outing", "{n} outings"), fish: tn(catches.length, "{n} fish", "{n} fish") })
+            : storedTrips > 0 && catches.length > 0
+              ? t("Delete this water? Its {outings} and {fish} leave the book too.", { outings: tn(storedTrips, "{n} outing", "{n} outings"), fish: tn(catches.length, "{n} fish", "{n} fish") })
               : // Only outings or only fish: "and Nothing logged" would read mid-sentence.
-                t("Delete this water? Also leaving the book: {what}.", { what: trips.length > 0 ? tn(trips.length, "{n} outing", "{n} outings") : tn(catches.length, "{n} fish", "{n} fish") })
+                t("Delete this water? Also leaving the book: {what}.", { what: storedTrips > 0 ? tn(storedTrips, "{n} outing", "{n} outings") : tn(catches.length, "{n} fish", "{n} fish") })
         }
         onDelete={() => {
           if (deleteSpot(spot.id)) leaveDeleted(navigate, location.state, "/spots");
@@ -553,11 +554,11 @@ function SpotView() {
         <span className={`stamp stamp-${spot.waterType}`}>{t(WATER_LABELS[spot.waterType])}</span>
         {twin ? (
           <p className="meta twin-note">
-            {/* The other water's spelling, which is the one the angler may not know about: "Śniardwy" beside "Sniardwy". */}
+            {/* The other waters' spellings, which the angler may not know about: "Śniardwy" beside "Sniardwy". */}
             {twins.length > 1
               ? twins.every((other) => plainName(other.name) === plainName(spot.name))
                 ? t("Other waters are also called {name}, so the links on this page open the fish of all of them.", { name: plainName(spot.name) })
-                : t("Other waters have the same or nearly the same name ({names}), so the links on this page open the fish of all of them.", { names: twins.map((other) => plainName(other.name)).join(", ") })
+                : t("Other waters have the same or nearly the same name ({names}), so the links on this page open the fish of all of them.", { names: [...new Set(twins.map((other) => plainName(other.name)))].join(", ") })
               : plainName(twin.name) === plainName(spot.name)
                 ? t("Another water is also called {name}, so the links on this page open the fish of both.", { name: plainName(spot.name) })
                 : t("Another water has nearly the same name, {name}, so the links on this page open the fish of both.", { name: plainName(twin.name) })}{" "}

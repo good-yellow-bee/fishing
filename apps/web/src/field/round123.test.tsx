@@ -65,6 +65,13 @@ describe("round 123: Waters beside the sample week with only a water of the angl
     expect(text).toContain("Last fished here 10 days ago · Sun, Oct 11 · 2 fish");
   });
 
+  it("still counts it in what deleting the water takes", async () => {
+    await page(book, "/spots/spot-cedar");
+    const remove = [...document.querySelectorAll("button")].find((button) => button.textContent === "Delete")!;
+    await act(async () => remove.click());
+    expect(document.querySelector(".confirm-ask")?.textContent).toContain("Its 2 outings and 2 fish leave the book too.");
+  });
+
   it("leaves it out of the Map's rest", async () => {
     const text = await page(book, "/map");
     expect(text).toContain("Cedar BendLake2 fish, last Sun, Oct 11 · rested 10 days");
@@ -84,6 +91,11 @@ describe("round 123: twin waters and waters with no name", () => {
     const book = { ...base, spots: [spot("a", "Śniardwy"), spot("b", "Sniardwy"), spot("c", "ŚNIARDWY")], catches: [fish("f1", "a")] };
     const text = await page(book, "/spots/a");
     expect(text).toContain("Other waters have the same or nearly the same name (Sniardwy, ŚNIARDWY), so the links on this page open the fish of all of them.");
+  });
+
+  it("names a spelling shared by two twins once", async () => {
+    const book = { ...base, spots: [spot("a", "Śniardwy"), spot("b", "Sniardwy"), spot("c", "Sniardwy")], catches: [fish("f1", "a")] };
+    expect(await page(book, "/spots/a")).toContain("nearly the same name (Sniardwy), so");
   });
 
   it("says one name when every twin is spelled alike", async () => {

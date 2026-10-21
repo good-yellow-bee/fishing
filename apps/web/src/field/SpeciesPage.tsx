@@ -385,7 +385,7 @@ function NewWaters({ catches, name, waters }: { catches: readonly CatchEntry[]; 
   const { book } = useLogbook();
   // Twin waters as one, as the list above and the search each name opens take them.
   const waterOf = waterKeys(book);
-  const found = newWatersThisYear(catches, new Date(), (entry) => bookFishDay(book, entry), (id) => waterOf.get(id) ?? id).flatMap((id) => waters.filter((water) => water.spotIds.includes(id) && water.name));
+  const found = newWatersThisYear(catches, new Date(), (entry) => bookFishDay(book, entry), (id) => waterOf.get(id) || id).flatMap((id) => waters.filter((water) => water.spotIds.includes(id) && water.name));
   if (found.length === 0) return null;
   return (
     <p className="meta new-waters">
