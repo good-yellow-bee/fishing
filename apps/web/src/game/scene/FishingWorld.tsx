@@ -197,6 +197,8 @@ type Props = {
   baitBucket?: number;
   /** The shack's aerator is fitted to that bucket. */
   aerated?: boolean;
+  /** The angler has a place in the shack's worm bin. */
+  wormBin?: boolean;
   /** Worms left in the angler's worm tin. */
   worms?: number;
   /** A topwater lure is tied on: every fish hits it at the top, like an ambush, in a big splash. */
@@ -2305,7 +2307,7 @@ function Tone({ hour }: { hour: LakeHour }) {
 
 const NO_BANKS: readonly SpotId[] = [];
 
-function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, follow = null, giantBanks = NO_BANKS, lostFloatBanks = NO_BANKS, nightLineSpot = null, nightLineState = null, baitBucket = 0, aerated = false, worms = 0, topwater = false, hour, sky, season = DEFAULT_SEASON, species, weight, golden = false, released = false, moon, wind, boatSwing = 0, headlamp = false, hotspot, groundbait = null, groundbaitPrimed = false, shinerTrap = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
+function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, follow = null, giantBanks = NO_BANKS, lostFloatBanks = NO_BANKS, nightLineSpot = null, nightLineState = null, baitBucket = 0, aerated = false, wormBin = false, worms = 0, topwater = false, hour, sky, season = DEFAULT_SEASON, species, weight, golden = false, released = false, moon, wind, boatSwing = 0, headlamp = false, hotspot, groundbait = null, groundbaitPrimed = false, shinerTrap = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
   // How this fish takes the bait: a topwater lure makes every take a hit at the top.
   const take = species !== null ? takeStyle(species.id, topwater) : null;
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
@@ -2339,7 +2341,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       <FrameWatch />
       <FrameCap />
       <Precompile />
-      <LakeWorld spot={spot} hour={hour} sky={sky} season={season} hotspot={hotspot} moon={moon} wind={wind} />
+      <LakeWorld spot={spot} hour={hour} sky={sky} season={season} hotspot={hotspot} moon={moon} wind={wind} wormBin={wormBin} />
       {tracks && tracks.length > 0 && <ShoreTracks tracks={tracks} />}
       {groundbait && <GroundbaitCloud bait={groundbait} feeding={groundbaitPrimed} />}
       {rising && <RiseRings spot={spot} />}

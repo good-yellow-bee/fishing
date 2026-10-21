@@ -2,11 +2,11 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import type { LakeSeason } from "@stillwater/shared";
-import { BIN_AT, BIN_HEIGHT as HEIGHT, BIN_INSIDE, BIN_SOIL, BIN_WALL as WALL, BIN_WORMS, binSnowy, binWorm } from "./binWorms";
-import { mergePainted } from "./mergeParts";
+import { BIN_AT, BIN_HEIGHT as HEIGHT, BIN_INSIDE, BIN_SOIL, BIN_TIN, BIN_WALL as WALL, BIN_WORMS, TIN_WORM, binSnowy, binWorm } from "./binWorms";
+import { mergePainted, type PaintedPart } from "./mergeParts";
 import { STILL_TIME, useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
-import { WORM } from "./WormPot";
+import { BAND, RIM, TIN, WORM } from "./WormPot";
 
 const SLAT = "#a77a4c";
 const POST = "#6b4a32";
@@ -24,8 +24,29 @@ function signWorm() {
   return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points), 18, 0.008, 5);
 }
 
-/** The open crate with its soil, snow on it in winter, and the sign beside it painted with a worm. */
-function binShape(snowy: boolean) {
+/** The angler's keeping tin sunk into the soil, its rim and band standing over it, its own soil near its rim and snowed on in winter. */
+function tinParts(snowy: boolean): PaintedPart[] {
+  const { x, z, radius: r, rim, lip } = BIN_TIN;
+  const sunk = 0.02;
+  return [
+    { geometry: new THREE.CylinderGeometry(r, r, sunk + rim, 12, 1, true), position: [x, BIN_SOIL + (rim - sunk) / 2, z], color: TIN },
+    { geometry: new THREE.CylinderGeometry(r * 1.02, r * 1.02, rim * 0.45, 12, 1, true), position: [x, BIN_SOIL + rim * 0.45, z], color: BAND },
+    { geometry: new THREE.TorusGeometry(r, lip, 4, 14).rotateX(Math.PI / 2), position: [x, BIN_SOIL + rim, z], color: RIM },
+    { geometry: new THREE.CircleGeometry(r * 0.98, 12).rotateX(-Math.PI / 2), position: [x, BIN_SOIL + rim - 0.004, z], color: snowy ? SNOW : SOIL },
+    ...(snowy ? [] : [{ geometry: tinWorm(), position: [x, BIN_SOIL, z] as const, color: WORM }]),
+  ];
+}
+
+/** A worm out of the tin's soil, over its rim toward the bin's middle and down onto the bin's soil. */
+function tinWorm() {
+  const { radius: r, rim } = BIN_TIN;
+  const out = (reach: number, y: number) => new THREE.Vector3(reach * r * TIN_WORM.x, y, reach * r * TIN_WORM.z);
+  const curve = new THREE.CatmullRomCurve3([out(0.3, rim - 0.006), out(0.7, rim + 0.01), out(1, rim + 0.007), out((1 + TIN_WORM.out) / 2, rim * 0.45), out(TIN_WORM.out, 0.006)]);
+  return new THREE.TubeGeometry(curve, 12, 0.007, 5);
+}
+
+/** The open crate with its soil, snow on it in winter, the sign beside it painted with a worm, and the angler's keeping tin in it once they have a place. */
+function binShape(snowy: boolean, owned: boolean) {
   const { width: w, depth: d } = BIN_INSIDE;
   return mergePainted([
     { geometry: new THREE.BoxGeometry(w + WALL * 2, HEIGHT, WALL), position: [0, HEIGHT / 2, d / 2 + WALL / 2], color: SLAT },
@@ -38,6 +59,7 @@ function binShape(snowy: boolean) {
     { geometry: new THREE.BoxGeometry(0.03, STAKE_TOP, 0.03), position: [STAKE_X, STAKE_TOP / 2, STAKE_Z], color: POST },
     { geometry: new THREE.BoxGeometry(0.2, 0.12, 0.015), position: [STAKE_X, STAKE_TOP - 0.08, STAKE_Z + 0.025], rotation: [0, 0, 0.06], color: BOARD },
     { geometry: signWorm(), position: [STAKE_X, STAKE_TOP - 0.08, STAKE_Z + 0.036], rotation: [0, 0, 0.06], color: WORM },
+    ...(owned ? tinParts(snowy) : []),
   ]);
 }
 
@@ -61,13 +83,13 @@ const Y = new THREE.Vector3(0, 1, 0);
 const Z = new THREE.Vector3(0, 0, 1);
 const matrix = new THREE.Matrix4();
 
-/** The shack's worm bin by the deck, worms rising out of its soil and sinking back (none under winter snow), with a sign painted with a worm (binWorms.ts). */
-export function WormBin({ season }: { season: LakeSeason }) {
+/** The shack's worm bin by the deck, worms rising out of its soil and sinking back (none under winter snow), with a sign painted with a worm and, once `owned`, the angler's keeping tin (binWorms.ts). */
+export function WormBin({ season, owned = false }: { season: LakeSeason; owned?: boolean }) {
   const worms = useRef<THREE.InstancedMesh>(null);
   const posed = useRef(false);
   const still = useReducedMotion();
   const snowy = binSnowy(season);
-  const shape = useMemo(() => binShape(snowy), [snowy]);
+  const shape = useMemo(() => binShape(snowy, owned), [snowy, owned]);
   useEffect(() => {
     posed.current = false;
   }, [snowy, still]);

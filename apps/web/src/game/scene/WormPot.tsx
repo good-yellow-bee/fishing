@@ -9,9 +9,9 @@ import { STILL_TIME, useReducedMotion } from "./reducedMotion";
 import { TIN_WORMS_SHOWN, tinWorm } from "./tinWormPose";
 import { toonRamp } from "./toon";
 
-const TIN = "#9aa3a8";
-const BAND = "#a8553f";
-const RIM = "#6b757b";
+export const TIN = "#9aa3a8";
+export const BAND = "#a8553f";
+export const RIM = "#6b757b";
 const SOIL = "#4a3726";
 export const WORM = "#d98a8f";
 /** The tin's height and its rim's radius. */
