@@ -1972,7 +1972,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT470~~ | ~~News card 2026-10-21-game72 covers GT468-GT469: worms in the summer heat and the bucket aerator~~ (#1732) | ui | S |
 | ~~GT471~~ | ~~Worm bin: the shack sells the worm tin a place in its cool worm bin, bought once (100 pts, a fifth off from level 17), and from then on in summer the tin's worms from yesterday are still alive (two days away still kills them); the shack's worm note and the sign-in dead-worm hint say so~~ (#1736) | gameplay | M |
 | ~~GT472~~ | ~~Bread crumb: the shack sells a sack of bread crumb for the groundbait, bought once (120 pts, a fifth off from level 17), and from then on a swim baited with it (flag kept on the swim at the throw) that primes while the angler is away holds the gathered feeders 8 casts, not 5 (kept through a reload); the shack's note and the primed-swim sign-in hint say so~~ (#1739) | gameplay | M |
-| GT473 | News card 2026-10-21-game73 covers GT471-GT472: the worm bin and the bread crumb (#TBD) | ui | S |
+| GT473 | News card 2026-10-21-game73 covers GT471-GT472: the worm bin and the bread crumb (#1743) | ui | S |
 
 ## Risks / open questions for the owner
 
