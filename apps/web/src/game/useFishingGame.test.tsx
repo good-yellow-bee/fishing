@@ -119,7 +119,7 @@ vi.mock("./fight", async (importOriginal) => {
 import { updateSettings } from "./settings";
 import { giantShyKey } from "./giantShy";
 import { NIGHT_LINE_STALE_MS, nightLineKey, nightLineReadyAt, nightLineState } from "./nightLine";
-import { wormsDug, wormTinKey } from "./wormTin";
+import { WORM_TIN_WET, wormsDug, wormTinKey } from "./wormTin";
 import { BUCKET_COLD_LIFE_MS, BUCKET_HOT_LIFE_MS, BUCKET_LIFE_MS, baitBucketKey } from "./baitBucket";
 import { TRAP_COLD_SOAK_MS, TRAP_SOAK_MS, TRAP_STALE_MS, trapKey, trapState } from "./minnowTrap";
 import { bagKey, shinerKey } from "./groundbaitBag";
@@ -202,6 +202,7 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <button type="button" onClick={game.toggleLamp}>lamp</button>
       <button type="button" onClick={game.baitShiner}>bait shiner</button>
       <button type="button" onClick={game.addShiner}>buy shiner</button>
+      <button type="button" onClick={game.addWorm}>buy worm</button>
       <button type="button" onClick={game.setNightLine}>set night line</button>
       <button type="button" onClick={game.hookFromBucket}>hook from bucket</button>
       <button type="button" onClick={game.setTrap}>set trap</button>
@@ -796,7 +797,7 @@ describe("useFishingGame frayed line", () => {
   });
 
   it.each([
-    ["the tin is empty", 0, "Nightcrawler", "true", `You cut off the frayed line and tie the lure on again. The line holds full strain. Your worm tin is empty, so the washed-out worm stays on. More worms are dug each day.`],
+    ["the tin is empty", 0, "Nightcrawler", "true", `You cut off the frayed line and tie the lure on again. The line holds full strain. Your worm tin is empty, so the washed-out worm stays on. More worms are dug each day, or the shack sells one.`],
     ["a spinner is tied on instead", 2, "Inline spinner", "false", "You cut off the frayed line and tie the lure on again. The line holds full strain."],
   ] as const)("retying a frayed line over a washed-out worm spends no worm when %s", (_, worms, lure, washed, said) => {
     const kept = new Map<string, string>([[wormTinKey("test"), JSON.stringify({ worms, day: localDate(new Date(DOCK_BUBBLES.at)) })]]);
@@ -831,7 +832,19 @@ describe("useFishingGame frayed line", () => {
     dismiss();
     retie();
     expect(container!.querySelector("[data-testid=washed]")?.textContent).toBe("true");
-    expect(hint()).toBe("Your worm tin is empty, so the washed-out worm stays on. More worms are dug each day.");
+    expect(hint()).toBe("Your worm tin is empty, so the washed-out worm stays on. More worms are dug each day, or the shack sells one.");
+  });
+
+  it("puts a worm bought at the shack in the tin, up to a wet morning's dig", () => {
+    const kept = new Map<string, string>([[wormTinKey("test"), JSON.stringify({ worms: WORM_TIN_WET - 1, day: localDate(new Date(DOCK_BUBBLES.at)) })]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    mount(DOCK_BUBBLES.at, profile, "day", false, "Nightcrawler");
+    const buy = [...container!.querySelectorAll("button")].find((button) => button.textContent === "buy worm")!;
+    act(() => buy.click());
+    expect(hint()).toBe(`The worm goes in your tin: ${WORM_TIN_WET} of ${WORM_TIN_WET}.`);
+    expect(JSON.parse(kept.get(wormTinKey("test"))!).worms).toBe(WORM_TIN_WET);
+    act(() => buy.click());
+    expect(container!.querySelector("[data-testid=worms]")?.textContent).toBe(String(WORM_TIN_WET));
   });
 
   it("puts a fresh worm on after a landed fish", () => {

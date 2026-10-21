@@ -77,7 +77,7 @@ import {
   type SkillId,
   type StanceId,
 } from "@stillwater/shared";
-import { buyGroundbait, buyShiner, buyUpgrade, errorText, getBankWeek, getGiants, getLodgeLost, reportLost, type GiantStatus, getLodgeReleased, getMe, getSpeciesRecords, getWeeklyChallenges, releaseCatch, type Me, type WeeklyBoard } from "../api";
+import { buyGroundbait, buyShiner, buyUpgrade, buyWorm, errorText, getBankWeek, getGiants, getLodgeLost, reportLost, type GiantStatus, getLodgeReleased, getMe, getSpeciesRecords, getWeeklyChallenges, releaseCatch, type Me, type WeeklyBoard } from "../api";
 import { DailyRequestsPanel } from "../components/DailyRequestsPanel";
 import { WeeklyChallengesPanel } from "../components/WeeklyChallengesPanel";
 import { FightBar } from "../components/FightBar";
@@ -130,6 +130,7 @@ import { nightLineKinds, nightLineState, wormLineHour } from "../game/nightLine"
 import { trapIsCold, trapState } from "../game/minnowTrap";
 import { foeAbout, isOldFoe, loadOldFoe, saveOldFoe } from "../game/oldFoe";
 import { BUCKET_SIZE } from "../game/baitBucket";
+import { WORM_TIN_WET } from "../game/wormTin";
 import { isLiveBait, isTopwater, touchScreen, useFishingGame, type Outcome } from "../game/useFishingGame";
 import { useCatchSync } from "../game/useCatchSync";
 import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
@@ -1011,6 +1012,22 @@ export function DockPage() {
     }
   };
 
+  const onBuyWorm = async () => {
+    // The server doesn't see the tin, so a full one must not reach it and be charged for.
+    if (game.worms >= WORM_TIN_WET) return;
+    setBusy(true);
+    setError("");
+    try {
+      await buyWorm();
+      game.addWorm();
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? errorText(err.message) : t("purchase failed"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   if (!me) {
     return <main className="dock-page">{error || t("Walking the planks…")}</main>;
   }
@@ -1377,7 +1394,7 @@ export function DockPage() {
                         ? t("Touch up the dull hook, so it sets solid again.")
                         : game.worms > 0
                           ? t("Put a fresh worm from your tin on, so its scent draws the fish again. Worms in the tin: {worms}.", { worms: game.worms })
-                          : t("Your worm tin is empty, so the washed-out worm stays on. More worms are dug each day.")
+                          : t("Your worm tin is empty, so the washed-out worm stays on. More worms are dug each day, or the shack sells one.")
                 }
                 onClick={(event) => {
                   // Leave Space free for casting.
@@ -1682,7 +1699,7 @@ export function DockPage() {
               {t("The shack")}
             </h2>
             <UpgradePanel profile={me.profile} busy={busy || scenePhase !== "idle"} onBuy={onBuy} />
-            <BaitShop points={me.profile.points} lifetimePoints={me.profile.lifetimePoints} handfuls={game.handfuls} shinerOn={game.liveShiner} bucket={game.bucket} busy={busy || scenePhase !== "idle"} onBuy={onBuyBait} onBuyShiner={onBuyShiner} onHookFromBucket={game.hookFromBucket} trap={game.trap ? trapState(game.trap, Date.now()) : "none"} trapCold={game.trap ? game.trap.cold === true : trapIsCold(season)} onSetTrap={game.setTrap} onLiftTrap={game.liftTrap} season={season} />
+            <BaitShop points={me.profile.points} lifetimePoints={me.profile.lifetimePoints} handfuls={game.handfuls} shinerOn={game.liveShiner} bucket={game.bucket} busy={busy || scenePhase !== "idle"} onBuy={onBuyBait} onBuyShiner={onBuyShiner} onHookFromBucket={game.hookFromBucket} worms={game.worms} onBuyWorm={onBuyWorm} trap={game.trap ? trapState(game.trap, Date.now()) : "none"} trapCold={game.trap ? game.trap.cold === true : trapIsCold(season)} onSetTrap={game.setTrap} onLiftTrap={game.liftTrap} season={season} />
             <DailyRequestsPanel key={userId} catchKey={me.catches[0]?.id} onClaimed={refresh} />
             <WeeklyChallengesPanel key={`week-${userId}`} catchKey={me.catches[0]?.id} onClaimed={refresh} />
             <ForecastBoard />

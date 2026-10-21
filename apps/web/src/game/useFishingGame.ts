@@ -77,7 +77,7 @@ import { castForLodgeLost, castForLodgeTag, castForReleased, loadReleased, saveR
 import { weightText } from "../i18n/content";
 import { FRENZY_SLOT_MS, frenzyOn, HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, slotFrenzy, type Hotspot } from "./hotspot";
 import { loadBag, loadShiner, saveBag, saveShiner, type HookedShiner } from "./groundbaitBag";
-import { loadTin, saveTin, WORM_TIN_DAILY } from "./wormTin";
+import { loadTin, saveTin, WORM_TIN_DAILY, WORM_TIN_WET } from "./wormTin";
 import { BACKLASH_POWER, BED_RAIDERS, COLD_WORK_WAIT, tooQuickForCold, isLongCast, castIntoSchool, castOverGroundbait, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, canBaitShiner, shinerHunter, bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, type Groundbait, castIntoSpooked, castUnderPressure, castNewLure, type LuresShown, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, colourSuits, colourWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, anchorSplashWaitMul, openGlareWaitMul, frenzyHunter, FRENZY_WAIT, lampLit, LAMP_WAIT, LAMP_WINDOW, longShadowWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, waterSwingWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
@@ -2283,7 +2283,7 @@ export function useFishingGame(
     // A fresh worm for a washed-out one on the hook comes from the tin; with none left the washed-out one stays on.
     const washedOn = isWashedOut(soakRef.current) && isLiveBait(lureRef?.current);
     const tinEmpty = washedOn && wormsRef.current === 0;
-    const emptyTin = t("Your worm tin is empty, so the washed-out worm stays on. More worms are dug each day.");
+    const emptyTin = t("Your worm tin is empty, so the washed-out worm stays on. More worms are dug each day, or the shack sells one.");
     if (tinEmpty && !wasFrayed && !wasTwisted && !wasDull) {
       setHint(emptyTin);
       return;
@@ -2324,6 +2324,12 @@ export function useFishingGame(
 
   /** A handful bought at the shack goes in the bag, which carries no more than GROUNDBAIT_CARRY. */
   const addHandful = useCallback(() => keepHandfuls(Math.min(GROUNDBAIT_CARRY, handfulsRef.current + 1)), []);
+
+  /** A worm bought at the shack goes in the tin, which holds no more than a wet morning's dig. */
+  const addWorm = useCallback(() => {
+    keepWorms(Math.min(WORM_TIN_WET, wormsRef.current + 1));
+    setHint(t("The worm goes in your tin: {n} of {max}.", { n: wormsRef.current, max: WORM_TIN_WET }));
+  }, []);
 
   /** A live shiner bought at the shack goes on the hook for the next cast, or, with one on it already, into the bait bucket. */
   const addShiner = () => {
@@ -2485,6 +2491,7 @@ export function useFishingGame(
     throwGroundbait,
     addHandful,
     addShiner,
+    addWorm,
     frayed,
     twisted,
     dulled,

@@ -37,7 +37,7 @@ import {
 } from "./lake.ts";
 import { anglerLevel, canUseSpot, INLET_LEVEL, skillCost, SPOT_IDS } from "./progression.ts";
 import { DAY_RUN_BONUS } from "./streak.ts";
-import { canLand, catchPoints, cleanRunBonus, GROUNDBAIT_PRICE, LODGE_RECORD_BONUS, lodgeRecordBonus, PB_BONUS, personalBestBonus, SHACK_DISCOUNT_LEVEL, shackPrice, SHINER_PRICE, validateGroundbaitBuy, validateShinerBuy, CLEAN_RUN_BONUS, CLEAN_RUN_FROM, legendaryCanBite, skillUnlock, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
+import { canLand, catchPoints, cleanRunBonus, GROUNDBAIT_PRICE, LODGE_RECORD_BONUS, lodgeRecordBonus, PB_BONUS, personalBestBonus, SHACK_DISCOUNT_LEVEL, shackPrice, SHINER_PRICE, validateGroundbaitBuy, validateShinerBuy, validateWormBuy, WORM_PRICE, CLEAN_RUN_BONUS, CLEAN_RUN_FROM, legendaryCanBite, skillUnlock, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
 import type { Profile } from "./types.ts";
 import { weeklyFish } from "./weeklyFish.ts";
 
@@ -621,6 +621,7 @@ describe("shackPrice", () => {
     expect(shackPrice(GROUNDBAIT_PRICE, 56_999)).toBe(60);
     expect(shackPrice(GROUNDBAIT_PRICE, 57_000)).toBe(48);
     expect(shackPrice(SHINER_PRICE, 57_000)).toBe(40);
+    expect(shackPrice(WORM_PRICE, 57_000)).toBe(12);
     const elder = { userId: "u", displayName: "A", points: 48, lifetimePoints: 57_000, strength: 1, accuracy: 1, patience: 1 };
     expect(validateGroundbaitBuy(elder)).toEqual({ ok: true, cost: 48 });
     expect(validateShinerBuy({ ...elder, points: 39 })).toMatchObject({ ok: false, status: 409 });
@@ -633,6 +634,14 @@ describe("validateShinerBuy", () => {
     const profile = { userId: "u", displayName: "A", points: SHINER_PRICE, lifetimePoints: 500, strength: 1, accuracy: 1, patience: 1 };
     expect(validateShinerBuy(profile)).toEqual({ ok: true, cost: SHINER_PRICE });
     expect(validateShinerBuy({ ...profile, points: SHINER_PRICE - 1 })).toMatchObject({ ok: false, error: "not enough points", status: 409 });
+  });
+});
+
+describe("validateWormBuy", () => {
+  it("sells a worm for its price, and not to an angler short of points", () => {
+    const profile = { userId: "u", displayName: "A", points: WORM_PRICE, lifetimePoints: 500, strength: 1, accuracy: 1, patience: 1 };
+    expect(validateWormBuy(profile)).toEqual({ ok: true, cost: WORM_PRICE });
+    expect(validateWormBuy({ ...profile, points: WORM_PRICE - 1 })).toMatchObject({ ok: false, error: "not enough points", status: 409 });
   });
 });
 

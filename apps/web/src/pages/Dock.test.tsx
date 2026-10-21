@@ -5,13 +5,14 @@ import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { badgeProgress, catchPoints, CLEAN_RUN_BONUS, DAY_RUN_BONUS, GOLDEN_BONUS, LODGE_RECORD_BONUS, PB_BONUS, isGolden, weeklyBonus, dailyConditions, skyTurnForDay, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky, type SpotId, MASTER_BONUS, localDate } from "@stillwater/shared";
-import { buyGroundbait, buyShiner, getGiants, getLodgeLost, getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
+import { buyGroundbait, buyShiner, buyWorm, getGiants, getLodgeLost, getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { bagKey, shinerKey } from "../game/groundbaitBag";
 import { nightLineKey } from "../game/nightLine";
 import { oldFoeKey } from "../game/oldFoe";
 import { baitBucketKey } from "../game/baitBucket";
+import { WORM_TIN_WET, wormTinKey } from "../game/wormTin";
 import { sessionKey, startSession } from "../game/session";
 import type { Outcome } from "../game/useFishingGame";
 
@@ -32,6 +33,7 @@ vi.mock("../api", async (importOriginal) => ({
   releaseCatch: vi.fn(),
   buyGroundbait: vi.fn(),
   buyShiner: vi.fn(),
+  buyWorm: vi.fn(),
 }));
 // The real game loop, with a landed fish slipped in so the page saves it without playing a fight.
 vi.mock("../game/useFishingGame", async (importOriginal) => {
@@ -793,7 +795,7 @@ describe("the shack's bait tin", () => {
     vi.mocked(getMe).mockResolvedValue({ ...me, level: 17, profile: { ...me.profile, points: 500, lifetimePoints: 57_000 } });
     const page = await openDock("/?hour=day&sky=clear");
     act(() => page.querySelector<HTMLButtonElement>(".walk-shop")!.click());
-    expect([...page.querySelectorAll(".bait-shop button")].map((button) => button.textContent)).toEqual(["A handful (48 pts)", "A live shiner (40 pts)", "Bait the shiner trap (1 handful)"]);
+    expect([...page.querySelectorAll(".bait-shop button")].map((button) => button.textContent)).toEqual(["A handful (48 pts)", "A live shiner (40 pts)", "A worm (12 pts)", "Bait the shiner trap (1 handful)"]);
   });
 
   it("sells a live shiner onto the hook, then into the bait bucket, and keeps it for a reload", async () => {
@@ -815,6 +817,23 @@ describe("the shack's bait tin", () => {
     expect(localStorage.getItem(shinerKey("u1"))).toBe("live");
     expect(JSON.parse(localStorage.getItem(baitBucketKey("u1"))!)).toHaveLength(1);
     localStorage.removeItem(shinerKey("u1"));
+  });
+
+  it("sells a worm into the tin until it is full, and keeps it for a reload", async () => {
+    vi.mocked(getMe).mockResolvedValue({ ...me, profile: { ...me.profile, points: 500 } });
+    vi.mocked(buyWorm).mockClear();
+    vi.mocked(buyWorm).mockResolvedValue({ profile: { ...me.profile, points: 485 } });
+    localStorage.setItem(wormTinKey("u1"), JSON.stringify({ worms: WORM_TIN_WET - 1, day: localDate(new Date()) }));
+    const page = await openDock("/?hour=day&sky=clear");
+    act(() => page.querySelector<HTMLButtonElement>(".walk-shop")!.click());
+    const buy = [...page.querySelectorAll<HTMLButtonElement>(".bait-shop button")].find((button) => button.textContent?.startsWith("A worm"))!;
+    await act(async () => buy.click());
+    expect(buyWorm).toHaveBeenCalledTimes(1);
+    expect(page.querySelector("#worm-shop-note")?.textContent).toBe(`Your worm tin is full: ${WORM_TIN_WET} worms.`);
+    expect(JSON.parse(localStorage.getItem(wormTinKey("u1"))!).worms).toBe(WORM_TIN_WET);
+    await act(async () => buy.click());
+    expect(buyWorm).toHaveBeenCalledTimes(1);
+    localStorage.removeItem(wormTinKey("u1"));
   });
 });
 
