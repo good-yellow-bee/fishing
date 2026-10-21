@@ -213,6 +213,12 @@ export const PL_GAME: PlBook = {
   "The aerator on your bait bucket keeps each spare shiner a day longer.": "Napowietrzacz w wiaderku przedłuża życie każdego zapasowego złotawca o dzień.",
   "Bubbles air through your bait bucket, so each spare shiner keeps a day longer, in any season. Bought once.": "Tłoczy powietrze do wiaderka, więc każdy zapasowy złotawiec żyje o dzień dłużej, o każdej porze roku. Kupujesz raz.",
   "Bucket aerator fitted": "Napowietrzacz zamontowany",
+  "A place in the worm bin ({cost} pts)": "Miejsce w skrzynce na robaki ({cost} pkt)",
+  "Your place in the worm bin": "Twoje miejsce w skrzynce na robaki",
+  "Your worm tin keeps in the cool worm bin, so in summer its worms last to the next day.": "Puszka z robakami stoi w chłodnej skrzynce, więc latem robaki przeżywają do następnego dnia.",
+  "Keep your worm tin in the shack's cool worm bin, so in summer its worms last to the next day. Bought once.": "Postaw puszkę z robakami w chłodnej skrzynce przy szopie, a latem robaki przeżyją do następnego dnia. Kupujesz raz.",
+  "In the summer heat your place in the worm bin keeps it to tomorrow.": "W letnim upale skrzynka na robaki przechowa go do jutra.",
+  "{n} of the worms left in your tin died in the summer heat while you were away: even in the worm bin they keep only to the next day.": "Część robaków z puszki padła w letnim upale pod twoją nieobecność ({n}): nawet w skrzynce przeżywają tylko do następnego dnia.",
   "foe about": "rywal w pobliżu",
   "lost trophy": "zgubione trofeum",
   "You leave a worm out on a night line here. Come back to check it once the night is out, and within two days.": "Zostawiasz robaka na nocnej lince. Wróć ją sprawdzić, gdy minie noc, ale przed upływem dwóch dni.",
@@ -1067,6 +1073,8 @@ export const PL_GAME: PlBook = {
     "W szare, pochmurne dni w chmurach co jakiś czas otwiera się prześwit i przez jezioro przesuwa się plama słońca, a w dół ukośnie schodzą do niej blade promienie. W wietrzne zimowe dni wiatr zrywa śnieg ze wzgórz za drugim brzegiem i niesie go wzdłuż nich długimi białymi smugami.",
   "On winter days snow lies white on the hills behind the lake, and two children take turns sledging down a run between the far trees, rushing down in a spray of snow and trudging back up pulling their sleds.":
     "W zimowe dni na wzgórzach za jeziorem leży biały śnieg, a dwoje dzieci na zmianę zjeżdża na sankach po torze między drzewami na drugim brzegu, pędząc w obłoku śniegu i wspinając się z powrotem z sankami na sznurku.",
+  "On Bests, this year's days on the water now say how many of them gave a fish, and in a season picked, a water whose first fish came that season says New this season. Beside the sample week with only a water of your own, Bests' runs of outings and its calendar now leave the made-up plans out.":
+    "W Rekordach dni nad wodą w tym roku mówią teraz, ile z nich dało rybę, a w wybranym sezonie łowisko, które dało w nim pierwszą rybę, ma znaczek „Nowość sezonu”. Obok przykładowego tygodnia z samym własnym łowiskiem serie wypraw i kalendarz w Rekordach pomijają teraz jego wymyślone plany.",
   "Tackle's recent outings now say under each month which lure took most of its fish. Today's outing under Coming up says Out now once a fish is in on its water, with no plan to copy beside it, as Home does, and the lure record counts it.":
     "W „Sprzęcie” pod każdym miesiącem ostatnich wypraw widać teraz, na jaką przynętę złowiono najwięcej ryb. Dzisiejsza wyprawa w „Wkrótce” mówi „Teraz na wodzie”, gdy na jej łowisku jest już ryba, i nie proponuje skopiowania planu, tak jak strona główna, a bilans przynęt ją liczy.",
   "Home now gives this week's fish beside the month's, and today's outing stops offering its plan to copy or add to the calendar once a fish is in on its water, as Out now says. Beside the sample week with only a water of your own, the outing and day counts, the outings sheet and the year goal now leave its made-up plans and fish out.":

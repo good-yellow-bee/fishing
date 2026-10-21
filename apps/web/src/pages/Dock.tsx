@@ -77,7 +77,7 @@ import {
   type SkillId,
   type StanceId,
 } from "@stillwater/shared";
-import { buyAerator, buyGroundbait, buyShiner, buyUpgrade, buyWorm, errorText, getBankWeek, getGiants, getLodgeLost, reportLost, type GiantStatus, getLodgeReleased, getMe, getSpeciesRecords, getWeeklyChallenges, releaseCatch, type Me, type WeeklyBoard } from "../api";
+import { buyAerator, buyGroundbait, buyShiner, buyUpgrade, buyWorm, buyWormBin, errorText, getBankWeek, getGiants, getLodgeLost, reportLost, type GiantStatus, getLodgeReleased, getMe, getSpeciesRecords, getWeeklyChallenges, releaseCatch, type Me, type WeeklyBoard } from "../api";
 import { DailyRequestsPanel } from "../components/DailyRequestsPanel";
 import { WeeklyChallengesPanel } from "../components/WeeklyChallengesPanel";
 import { FightBar } from "../components/FightBar";
@@ -413,21 +413,29 @@ export function DockPage() {
   }, [padConnected]);
   // On a short screen the coach and the news card sit beside the shore signs, which take a second column with larger
   // text: the scene keeps the signs' reach from its right edge, so the cards stop short of them. The lake mounts only once
-  // the profile is in, so that is a dependency too.
+  // the profile is in, so that is a dependency too. Where the signs leave the bank chip under 64 px, the scene says so.
   const lakeShown = me !== null;
   useEffect(() => {
     const wrap = game.surfaceRef.current;
     const signs = wrap?.querySelector<HTMLElement>(":scope > .walk-signs");
     if (!wrap || !signs) {
       wrap?.style.removeProperty("--signs-room");
+      wrap?.removeAttribute("data-chip-cramped");
       return;
     }
-    const sync = () => wrap.style.setProperty("--signs-room", `${Math.ceil(wrap.getBoundingClientRect().right - signs.getBoundingClientRect().left)}px`);
+    const chip = wrap.querySelector<HTMLElement>(":scope > .stance-chip");
+    const sync = () => {
+      const signsLeft = signs.getBoundingClientRect().left;
+      wrap.style.setProperty("--signs-room", `${Math.ceil(wrap.getBoundingClientRect().right - signsLeft)}px`);
+      wrap.toggleAttribute("data-chip-cramped", !!chip && signsLeft - chip.getBoundingClientRect().left - 8 < 64);
+    };
     sync();
     if (typeof ResizeObserver === "undefined") return;
     const observer = new ResizeObserver(sync);
     observer.observe(signs);
     observer.observe(wrap);
+    // The chip is hidden while the coach shows, and measures again when the coach goes.
+    if (chip) observer.observe(chip);
     return () => observer.disconnect();
   }, [game.surfaceRef, scenePhase, shopOpen, photo, lakeShown]);
   // On an upright phone the hint hangs under the bank chip, which wraps tall in its narrow column when it
@@ -1028,11 +1036,12 @@ export function DockPage() {
     }
   };
 
-  const onBuyAerator = async () => {
+  /** A one-time shack purchase the server keeps on the profile: the refreshed profile shows it bought. */
+  const buyOnce = (buy: typeof buyAerator) => async () => {
     setBusy(true);
     setError("");
     try {
-      await buyAerator();
+      await buy();
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? errorText(err.message) : t("purchase failed"));
@@ -1040,6 +1049,8 @@ export function DockPage() {
       setBusy(false);
     }
   };
+  const onBuyAerator = buyOnce(buyAerator);
+  const onBuyWormBin = buyOnce(buyWormBin);
 
   if (!me) {
     return <main className="dock-page">{error || t("Walking the planks…")}</main>;
@@ -1713,7 +1724,7 @@ export function DockPage() {
               {t("The shack")}
             </h2>
             <UpgradePanel profile={me.profile} busy={busy || scenePhase !== "idle"} onBuy={onBuy} />
-            <BaitShop points={me.profile.points} lifetimePoints={me.profile.lifetimePoints} handfuls={game.handfuls} shinerOn={game.liveShiner} bucket={game.bucket} busy={busy || scenePhase !== "idle"} onBuy={onBuyBait} onBuyShiner={onBuyShiner} onHookFromBucket={game.hookFromBucket} aerator={game.aerator} onBuyAerator={onBuyAerator} worms={game.worms} onBuyWorm={onBuyWorm} trap={game.trap ? trapState(game.trap, Date.now()) : "none"} trapCold={game.trap ? game.trap.cold === true : trapIsCold(season)} onSetTrap={game.setTrap} onLiftTrap={game.liftTrap} season={season} />
+            <BaitShop points={me.profile.points} lifetimePoints={me.profile.lifetimePoints} handfuls={game.handfuls} shinerOn={game.liveShiner} bucket={game.bucket} busy={busy || scenePhase !== "idle"} onBuy={onBuyBait} onBuyShiner={onBuyShiner} onHookFromBucket={game.hookFromBucket} aerator={game.aerator} onBuyAerator={onBuyAerator} worms={game.worms} onBuyWorm={onBuyWorm} wormBin={game.wormBin} onBuyWormBin={onBuyWormBin} trap={game.trap ? trapState(game.trap, Date.now()) : "none"} trapCold={game.trap ? game.trap.cold === true : trapIsCold(season)} onSetTrap={game.setTrap} onLiftTrap={game.liftTrap} season={season} />
             <DailyRequestsPanel key={userId} catchKey={me.catches[0]?.id} onClaimed={refresh} />
             <WeeklyChallengesPanel key={`week-${userId}`} catchKey={me.catches[0]?.id} onClaimed={refresh} />
             <ForecastBoard />

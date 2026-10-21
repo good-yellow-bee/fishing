@@ -871,6 +871,20 @@ describe("useFishingGame frayed line", () => {
     else expect(hint()).toBe([shinerDied ? shinerSaid : "", wormsSaid, swimPrimed ? `The groundbait you left at the Dock has the feeders gathered there: ${GROUNDBAIT_CASTS} casts of it.` : ""].filter(Boolean).join(" "));
   });
 
+  it.each([
+    [1, WORM_TIN_WET, ""],
+    [2, null, "even in the worm bin they keep only to the next day."],
+  ] as const)("keeps the summer tin's worms a day longer with a place in the worm bin: left %i days ago", (daysAgo, worms, said) => {
+    const left = new Date(DOCK_BUBBLES.at - daysAgo * 86_400_000);
+    const kept = new Map<string, string>([[wormTinKey(profile.userId), JSON.stringify({ worms: WORM_TIN_WET, day: localDate(left) })]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    mount(DOCK_BUBBLES.at, { ...profile, wormBin: true }, "day", false, undefined, undefined, undefined, "summer");
+    const dug = wormsDug(new Date(DOCK_BUBBLES.at));
+    expect(container!.querySelector("[data-testid=worms]")?.textContent).toBe(String(worms ?? dug));
+    if (said) expect(hint()).toBe(`${WORM_TIN_WET - dug} of the worms left in your tin died in the summer heat while you were away: ${said}`);
+    else expect(hint()).not.toContain("worms left in your tin");
+  });
+
   it("puts a fresh worm on after a landed fish", () => {
     const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Nightcrawler");
     vi.mocked(soakAfterCast).mockReturnValueOnce(WORM_SOAK_CASTS);

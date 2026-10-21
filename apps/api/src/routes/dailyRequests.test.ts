@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Hono } from "hono";
-import { AERATOR_PRICE, BOARD_BONUS, boardReward, dailyRequestsForDay, type DailyRequest } from "@stillwater/shared";
+import { AERATOR_PRICE, WORM_BIN_PRICE, BOARD_BONUS, boardReward, dailyRequestsForDay, type DailyRequest } from "@stillwater/shared";
 import type { SessionUser } from "../session.ts";
 
 const testDir = mkdtempSync(join(tmpdir(), "stillwater-daily-"));
@@ -115,11 +115,12 @@ describe("daily requests auth", () => {
 });
 
 describe("shack purchases auth", () => {
-  it("turns away a groundbait, shiner, aerator or skill purchase from anyone not signed in", async () => {
+  it("turns away a groundbait, shiner, aerator, worm bin or skill purchase from anyone not signed in", async () => {
     session.user = null;
     expect((await app.request("http://test/api/groundbait", { method: "POST" })).status).toBe(401);
     expect((await app.request("http://test/api/shiner", { method: "POST" })).status).toBe(401);
     expect((await app.request("http://test/api/aerator", { method: "POST" })).status).toBe(401);
+    expect((await app.request("http://test/api/worm-bin", { method: "POST" })).status).toBe(401);
     expect((await app.request("http://test/api/upgrades", { method: "POST", body: JSON.stringify({ skill: "strength" }) })).status).toBe(401);
   });
 });
@@ -134,6 +135,19 @@ describe("POST /api/aerator", () => {
     expect(again.status).toBe(409);
     expect(await again.json()).toEqual({ error: "aerator already fitted" });
     expect(profile()).toMatchObject({ points: 400 - AERATOR_PRICE });
+  });
+});
+
+describe("POST /api/worm-bin", () => {
+  it("takes the place in the worm bin once, charging for it only the first time", async () => {
+    db.prepare(`UPDATE profile SET points = 400 WHERE user_id = ?`).run(user.id);
+    const first = await app.request("http://test/api/worm-bin", { method: "POST" });
+    expect(first.status).toBe(200);
+    expect(((await first.json()) as { profile: { points: number; wormBin: boolean } }).profile).toMatchObject({ points: 400 - WORM_BIN_PRICE, wormBin: true });
+    const again = await app.request("http://test/api/worm-bin", { method: "POST" });
+    expect(again.status).toBe(409);
+    expect(await again.json()).toEqual({ error: "worm bin already yours" });
+    expect(profile()).toMatchObject({ points: 400 - WORM_BIN_PRICE });
   });
 });
 
