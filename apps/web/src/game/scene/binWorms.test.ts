@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { SPAWN_X, SPAWN_Z } from "@stillwater/shared";
-import { BIN_AT, BIN_HALF, BIN_INSIDE, BIN_TIN, BIN_WORMS, RISE_MAX, RISE_MIN, TIN_WORM, WORM_LEAN, WORM_REACH, binSnowy, binWorm } from "./binWorms";
-import { bucketSpot, tinSpot } from "./bucketSpot";
+import { BIN_AT, BIN_HALF, BIN_INSIDE, BIN_SACK, BIN_TIN, BIN_WORMS, RISE_MAX, RISE_MIN, TIN_WORM, WORM_LEAN, WORM_REACH, binSnowy, binWorm } from "./binWorms";
+import { TIN_CLEAR, bucketSpot, tinSpot } from "./bucketSpot";
 
 describe("the worms in the shack's worm bin", () => {
   it("each comes up at its own spot, far enough in that its tip never reaches a wall", () => {
@@ -56,11 +56,17 @@ describe("the worms in the shack's worm bin", () => {
 });
 
 describe("the worm bin by the shack", () => {
+  it("has the bread crumb sack stand off its right wall, in front of the sign's stake", () => {
+    expect(BIN_SACK.x - BIN_SACK.radius).toBeGreaterThan(BIN_INSIDE.width / 2 + 0.025);
+    expect(BIN_SACK.z - BIN_SACK.radius).toBeGreaterThan(-BIN_INSIDE.depth / 2);
+    expect(Math.hypot(BIN_AT.x + BIN_SACK.x - SPAWN_X, BIN_AT.z + BIN_SACK.z - SPAWN_Z)).toBeGreaterThan(BIN_SACK.radius + 0.3);
+  });
+
   it("stands clear of where the angler waits at the shack", () => {
     expect(Math.hypot(BIN_AT.x - SPAWN_X, BIN_AT.z - SPAWN_Z)).toBeGreaterThan(BIN_HALF + 0.3);
   });
 
-  it("never has the bait bucket or the worm tin put down inside it", () => {
+  it("never has the bait bucket or the worm tin put down inside it or by its sack", () => {
     for (let dx = -1; dx <= 1; dx += 0.1)
       for (let dz = -1; dz <= 1; dz += 0.1)
         for (let k = 0; k < 8; k += 1) {
@@ -68,7 +74,10 @@ describe("the worm bin by the shack", () => {
           const z = BIN_AT.z + dz;
           const yaw = (k * Math.PI) / 4;
           for (const spot of [bucketSpot(x, z, yaw), tinSpot(x, z, yaw)])
-            if (spot) expect(Math.hypot(spot.x - BIN_AT.x, spot.z - BIN_AT.z)).toBeGreaterThan(BIN_HALF);
+            if (spot) {
+              expect(Math.hypot(spot.x - BIN_AT.x, spot.z - BIN_AT.z)).toBeGreaterThan(BIN_HALF);
+              expect(Math.hypot(spot.x - BIN_AT.x - BIN_SACK.x, spot.z - BIN_AT.z - BIN_SACK.z)).toBeGreaterThanOrEqual(TIN_CLEAR + BIN_SACK.radius - 1e-9);
+            }
         }
   });
 });
