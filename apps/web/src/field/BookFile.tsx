@@ -4,7 +4,7 @@ import { FIELD_ARCHIVE_KIND, FIELD_ARCHIVE_REFUSAL, FIELD_ARCHIVE_VERSION, catch
 import { commitFieldArchive } from "./archiveStore";
 import { catchesCsv, sheetOutings, tripsCsv } from "./catchCsv";
 import { bookSignature, changedDaysSince, clearCopiedAt, copyNudge, hasSampleLeft, hasSampleWaters, isSampleCatch, isSampleOnly, isSampleSpot, isSampleOuting, ownCatches, readCopiedAt, readCopyMark, lowerCopiedAt, readCopyRecord, restoreCopyRecord, saveCopiedAt, withoutSample } from "./bookCopy";
-import { countedBook } from "./milestones";
+import { countedBook, hasOwnEntries } from "./milestones";
 import { keepBookStorage } from "./keepStorage";
 import { forgetRemovedPhotos, readRemovedPhotos, restoreRemovedPhotos } from "./removedPhotos";
 import { forgetUnreadableBook, readUnreadableBook, salvageStored, setAsideCatchIds, unreadableHeldOnly } from "./storage";
@@ -380,6 +380,8 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
   // This year's fish by their outing's day, as Bests and the goal count them: a New Year's Eve night's small hours are December's.
   const now = new Date();
   const ownFish = countedBook(book).catches;
+  // No sheet of the sample week's invented fish, alone or beside a water of the angler's own with nothing logged on it.
+  const ownAny = hasOwnEntries(book);
   const thisYear = localDate(now).slice(0, 4);
   // A year's sheet names kinds and lures, and dates a night fish, as the whole book does.
   const wholeBookNames = { kindName: bookKindName(book.catches), lureName: bookLureName(book.catches), dayOf: (entry: CatchEntry) => bookFishDay(book, entry) };
@@ -478,8 +480,7 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
           </button>
         ) : null}
         {/* Only when the file would hold a fish: a book of game rounds alone has none of the angler's own to give. */}
-        {/* Not for the sample week alone: its invented fish are no sheet of the angler's. */}
-        {ownFish.length > 0 && !isSampleOnly(storedBook) ? (
+        {ownFish.length > 0 && ownAny ? (
           <button
             type="button"
             className="text-button"
@@ -493,7 +494,7 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
           </button>
         ) : null}
         {/* This year's alone, for a club's or a permit's return, once the book holds another year too. */}
-        {thisYearFish.length > 0 && thisYearFish.length < ownFish.length && !isSampleOnly(storedBook) ? (
+        {thisYearFish.length > 0 && thisYearFish.length < ownFish.length && ownAny ? (
           <button
             type="button"
             className="text-button"
@@ -505,7 +506,7 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
             {t("This year's catches ({year})", { year: thisYear })}
           </button>
         ) : null}
-        {lastYearFish.length > 0 && !isSampleOnly(storedBook) ? (
+        {lastYearFish.length > 0 && ownAny ? (
           <button
             type="button"
             className="text-button"
@@ -519,7 +520,7 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
         ) : null}
         {/* The outings beside the fish, as the Trips page gives them: the angler's own, up to today. */}
         {/* In the small hours, last evening's outing is still going, as the Trips page sheets it. */}
-        {sheetOutings(book, outingDay(localDate(new Date()))).trips.length > 0 && !isSampleOnly(storedBook) ? (
+        {sheetOutings(book, outingDay(localDate(new Date()))).trips.length > 0 && ownAny ? (
           <button
             type="button"
             className="text-button"

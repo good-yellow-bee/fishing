@@ -13,7 +13,7 @@ const TIN = "#9aa3a8";
 const BAND = "#a8553f";
 const RIM = "#6b757b";
 const SOIL = "#4a3726";
-const WORM = "#d98a8f";
+export const WORM = "#d98a8f";
 /** The tin's height and its rim's radius. */
 const HEIGHT = 0.09;
 const RIM_R = 0.085;

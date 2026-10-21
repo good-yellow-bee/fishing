@@ -13,6 +13,7 @@ import { RESUME_PARAM } from "./anotherCatch";
 import { hasSampleLeft, isSampleCatch, isSampleOnly, isSamplePlan, isSampleSpot, isSampleOuting, upcomingRealTrips, withoutSample } from "./bookCopy";
 import { outingFish, underWayOn } from "./outingFish";
 import { lateOutings, outNow, outingDay, plainName, sameName } from "./tripDates";
+import { dateWords } from "./dateWords";
 import { sheetOutings } from "./catchCsv";
 import { NEWS_ITEMS } from "../game/whatsNew";
 import { FIELD_NEWS, fieldNewsDue, markFieldNewsSeen } from "./fieldNews";
@@ -24,7 +25,7 @@ import { findLink } from "./CatchSearch";
 import { bookFishDay, daysOut } from "./tripMonths";
 import { bookLureName, pieceTally } from "./pieceTally";
 import { pieceName } from "./gear/pieceKey";
-import { countedBook, countedFish, nextBookMark, ownFish } from "./milestones";
+import { countedBook, countedFish, hasOwnEntries, nextBookMark, ownFish } from "./milestones";
 import { FROM_LIST } from "./leaveDeleted";
 import { thisWeekInPastYears, yearsBack } from "./yearsAgo";
 import { GOAL_PARAM, goalPace, readYearGoal } from "./YearGoal";
@@ -184,12 +185,20 @@ export function HomePage() {
   // By the outing's day, as the year below: a New Year's Eve night's small hours are December's, not January's.
   const monthRows = book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${thisMonth}-`));
   const monthFish = monthRows.filter((entry) => counted.has(entry.id)).length;
+  // This week's from Monday, as the catch search reads "this week": said only when it isn't the month's fish over again.
+  const week = dateWords("this week", now)!;
+  const weekRows = book.catches.filter((entry) => bookFishDay(book, entry) >= week.from && bookFishDay(book, entry) <= week.to);
+  const weekCounted = weekRows.filter((entry) => counted.has(entry.id));
+  const weekFish = weekCounted.length;
+  const weekNew = weekFish > 0 && (weekFish < monthFish || weekCounted.some((entry) => !bookFishDay(book, entry).startsWith(`${thisMonth}-`)));
   const thisYear = today.slice(0, 4);
   // The goal counts a night session's small hours on its outing's day, as Bests does.
   const yearRows = book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${thisYear}-`));
   const yearFish = yearRows.filter((entry) => counted.has(entry.id)).length;
-  // The goal is the angler's own: the sample week's invented fish don't fill it, so a book of only those shows none.
-  const goal = sampleOnly ? null : readYearGoal(thisYear);
+  const ownAny = hasOwnEntries(book);
+  // The goal is the angler's own: the sample week's invented fish don't fill it, so a book of only those shows none,
+  // a water of their own beside them too, as Bests counts it.
+  const goal = ownAny ? readYearGoal(thisYear) : null;
   const pace = goal !== null ? goalPace(yearFish, goal, now) : null;
   // Last year up to this same date, once last year has any fish: is this year on pace?
   const lastYear = String(Number(thisYear) - 1);
@@ -200,8 +209,7 @@ export function HomePage() {
   const firstDay = real.reduce((first, entry) => (bookFishDay(book, entry) < first ? bookFishDay(book, entry) : first), "9999");
   const comparable = lastYearDays.length > 0 && firstDay <= `${lastYear}-${today.slice(5)}`;
   // Early January: how last year's goal ended, before the new year's count says much.
-  const lastGoal = today.slice(5) <= "01-14" ? readYearGoal(lastYear) : null;
-  const ownAny = countedOwn.trips.some((trip) => !isSampleOuting(trip)) || countedOwn.catches.some((entry) => !isSampleCatch(entry.id));
+  const lastGoal = ownAny && today.slice(5) <= "01-14" ? readYearGoal(lastYear) : null;
   const ownWaters = (ownAny ? withoutSample(book) : book).spots.filter((spot) => spot.id !== PLAY_LAKE_ID).length;
   // Today's outing counts once it has a fish, as the averages take it.
   const daysThisYear = daysOut(countedOwn, thisYear, fishedBy);
@@ -216,7 +224,9 @@ export function HomePage() {
   // Fish of their own logged beside the sample week: the invented part can go on its own.
   const sampleLeft = !sampleOnly && hasSampleLeft(storedBook);
   const next = upcoming[0];
-  const nextUnderWay = next ? underWayOn(next, fishOn) : false;
+  // Out now is under way too, as of a dawn and a dusk with a fish loose on their water: no plan to copy beside it.
+  const nextOutNow = next?.date === today && outNow(book, next, now);
+  const nextUnderWay = next ? underWayOn(next, fishOn) || nextOutNow : false;
   // The newest outing fished, for a Next with nothing planned: on a water still in the book.
   const lastOut = next ? undefined : [...sheetOutings(book, fishedBy).trips].filter((trip) => spotById(book, trip.spotId) && !isSampleOuting(trip)).sort(newestOutingFirst(book))[0];
   const lastOutRest = lastOut ? daysBetween(lastOut.date, today) : 0;
@@ -327,6 +337,12 @@ export function HomePage() {
           {real.length > 0 ? (
             <small>
               <Link to="/bests">{tn(kinds, "{n} species", "{n} species")}</Link>
+              {weekNew ? (
+                <>
+                  {" · "}
+                  <Link to={findLink(countedSearch(book, t("this week|search word"), weekRows, "book"))}>{t("{n} this week", { n: weekFish })}</Link>
+                </>
+              ) : null}
               {monthFish > 0 ? (
                 <>
                   {" · "}
@@ -342,7 +358,7 @@ export function HomePage() {
                 </>
               ) : null}
               {/* A year with fish but no goal yet: one tap to Bests with the goal's form open. */}
-              {goal === null && yearFish > 0 && !sampleOnly ? (
+              {goal === null && yearFish > 0 && ownAny ? (
                 <>
                   {" · "}
                   <Link to={`/bests?${GOAL_PARAM}=set`}>{t("Set a goal for {year}", { year: thisYear })}</Link>
@@ -389,7 +405,7 @@ export function HomePage() {
             {next ? (
               <>
                 {/* Today's outing with a fish these twelve hours is the one out on the water now, as the Map says it. */}
-                {next.date === today && outNow(book, next, now) ? t("Out now") : tripWhen(next.date, today, tomorrow)}
+                {nextOutNow ? t("Out now") : tripWhen(next.date, today, tomorrow)}
                 {/* The water opens too, for what works there; an untitled outing already goes by its name above, so not again. */}
                 {nextSpot ? (
                   <>

@@ -2,6 +2,7 @@ import { LATE_NIGHT_UNTIL, tripForFish } from "./suggestions";
 import { localDate, type CatchEntry, type Logbook, type Trip } from "@stillwater/shared";
 import { locale } from "../i18n";
 import { gaveWay } from "./tripDates";
+import { isSamplePlan } from "./bookCopy";
 
 export type TripMonth = { month: string; trips: Trip[] };
 
@@ -135,8 +136,8 @@ export function daysOut(book: Logbook, year: string, today: string): number {
     if (day.startsWith(`${year}-`)) days.add(day);
   }
   // An outing planned for today counts once it has a fish, through the catches above; last evening's blank one that
-  // gave way to today's plan is a past day out already.
-  for (const trip of book.trips) if (trip.date.startsWith(`${year}-`) && (trip.date < today || gaveWay(book, trip))) days.add(trip.date);
+  // gave way to today's plan is a past day out already. The sample week's blank plans Recent hides are no day out.
+  for (const trip of book.trips) if (trip.date.startsWith(`${year}-`) && (trip.date < today || gaveWay(book, trip)) && !isSamplePlan(book, trip)) days.add(trip.date);
   return days.size;
 }
 
