@@ -124,7 +124,7 @@ import { BUCKET_COLD_LIFE_MS, BUCKET_HOT_LIFE_MS, BUCKET_LIFE_MS, baitBucketKey 
 import { TRAP_COLD_SOAK_MS, TRAP_SOAK_MS, TRAP_STALE_MS, trapKey, trapState } from "./minnowTrap";
 import { bagKey, shinerKey } from "./groundbaitBag";
 import { oldFoeKey } from "./oldFoe";
-import { SWIM_COLD_GONE_MS, SWIM_COLD_PRIMED_MS, SWIM_HOT_GONE_MS, SWIM_HOT_PRIMED_MS, SWIM_PRIMED_MS, swimKey } from "./swim";
+import { BREAD_SWIM_CASTS, SWIM_COLD_GONE_MS, SWIM_COLD_PRIMED_MS, SWIM_HOT_GONE_MS, SWIM_HOT_PRIMED_MS, SWIM_PRIMED_MS, swimKey } from "./swim";
 import { carriesBait, FALSE_STRIKE_MS, FIGURE_EIGHT_ODDS, FIGURE_TURN_MS, FIGURE_WINDOW_MS, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TIRE_REASONS, TOPWATER_POPS, useFishingGame, WAIT_REASONS } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
@@ -706,6 +706,33 @@ describe("useFishingGame live shiner", () => {
     mount();
     expect(bait()).toBe(`dock:${GROUNDBAIT_CASTS}`);
     expect(hint()).toMatch(/^The groundbait you left at the Dock has the feeders gathered there/);
+  });
+
+  it("holds the feeders gathered over a swim baited with bread crumb and left behind longer, and keeps that through a reload", () => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    const crumb = { ...profile, breadCrumb: true };
+    const remount = () => {
+      act(() => root!.unmount());
+      root = null;
+      container!.remove();
+      mount(DOCK_BUBBLES.at, crumb);
+    };
+    // A swim baited before the sack was bought has no bread crumb in it.
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 1, at: DOCK_BUBBLES.at - SWIM_PRIMED_MS - 60_000 }));
+    mount(DOCK_BUBBLES.at, crumb);
+    const bait = () => container!.querySelector("[data-testid=groundbait]")?.textContent?.split("|")[1];
+    expect(bait()).toBe(`dock:${GROUNDBAIT_CASTS}`);
+    act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === "groundbait") as HTMLButtonElement).click());
+    const thrown = JSON.parse(kept.get(swimKey(profile.userId))!);
+    expect(thrown).toMatchObject({ spot: "dock", casts: GROUNDBAIT_CASTS, bread: true });
+    kept.set(swimKey(profile.userId), JSON.stringify({ ...thrown, casts: 1, at: DOCK_BUBBLES.at - SWIM_PRIMED_MS - 60_000 }));
+    remount();
+    expect(bait()).toBe(`dock:${BREAD_SWIM_CASTS}`);
+    expect(hint()).toBe(`The groundbait and bread crumb you left at the Dock have the feeders gathered there: ${BREAD_SWIM_CASTS} casts of it.`);
+    expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ casts: BREAD_SWIM_CASTS, primed: true, bread: true });
+    remount();
+    expect(bait()).toBe(`dock:${BREAD_SWIM_CASTS}`);
   });
 
   it("leaves any other landed fish on the card", () => {
