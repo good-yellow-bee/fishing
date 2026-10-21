@@ -1488,6 +1488,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | SC292 | The lost trophy seen: at each bank a trophy that broke a line is still about (the angler's old foe, or one the lodge reports lost), the snapped float it trails drifts on the water, cocked over, now and then dipping under or towed off a little way (held still under reduced motion); the live float's model, painted red, one draw | scene | S |
 | SC293 | The worm tin seen: while the angler stands still, a small open tin stands on the deck or bank at their right, its lid off beside it, a worm curling over the rim for each worm left (up to five), slowly wriggling (held still under reduced motion), bare soil when the tin is empty; never where the bait bucket stands; two draws | scene | S |
 | SC294 | News card scene71 covers SC292 and SC293: a trophy that broke a line trails a snapped red float on its bank's water, dipping and towed now and then, and the worm tin at the angler's feet shows a worm over the rim per worm left, bare soil when empty | scene | S |
+| SC295 | The shack's worms seen: an open wooden crate of soil stands on the shack's deck at the angler's front left, a few worms slowly rising out of it and sinking back as they sway (held still under reduced motion), and a little sign on a stake beside it painted with a pink worm, no words; two draws, only by the shack | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
