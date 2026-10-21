@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { GROUNDBAIT_CASTS, OVERFED_CASTS, SPOOKED_SWIM_CASTS, SWIM_MAX_CASTS, TOPUP_MAX } from "./logic";
+import { GROUNDBAIT_CASTS, OVERFED_CASTS, SPOOKED_SWIM_CASTS, SWIM_MAX_CASTS, TOPUP_MAX, WARY_LANDED } from "./logic";
 import { BREAD_SWIM_CASTS, loadSwim, saveSwim, SWIM_COLD_GONE_MS, SWIM_COLD_PRIMED_MS, SWIM_GONE_MS, SWIM_HOT_GONE_MS, SWIM_HOT_PRIMED_MS, SWIM_PRIMED_MS, swimNow, swimTimes } from "./swim";
 
 const swim = { spot: "reeds" as const, casts: 2, at: 0 };
@@ -45,6 +45,17 @@ describe("a groundbaited swim left for the next visit", () => {
     vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
     saveSwim("u", wormed);
     expect(loadSwim("u")).toEqual(wormed);
+  });
+
+  it("keeps its count of big feeders landed through a reload and when it primes", () => {
+    const wary = { ...swim, built: TOPUP_MAX, landedBig: WARY_LANDED };
+    expect(swimNow(wary, SWIM_PRIMED_MS)).toEqual({ spot: "reeds", casts: GROUNDBAIT_CASTS, at: 0, primed: true, landedBig: WARY_LANDED, primedNow: true });
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    saveSwim("u", wary);
+    expect(loadSwim("u")).toEqual(wary);
+    saveSwim("u", { ...wary, landedBig: WARY_LANDED + 1 });
+    expect(loadSwim("u")).toEqual({ ...swim, built: TOPUP_MAX });
   });
 
   it("keeps a topped-up swim's casts, top-ups and scattered feeders through a reload, its full fish hungry again, and drops the top-ups and scatter when it primes", () => {
