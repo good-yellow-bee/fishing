@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { DOCK_PLANKS, DOCK_STAND_X, DOCK_STAND_Z, inLake, onDockPlanks, walkableAt } from "@stillwater/shared";
 import { DROPOFF_STAND, INLET_STAND, REEDS_STAND } from "./bankWalk";
-import { BUCKET_SIDE, bagSpot, bucketSpot, tinSpot } from "./bucketSpot";
+import { BAG_REACH, BUCKET_SIDE, bagSpot, bucketSpot, tinSpot } from "./bucketSpot";
 import { stakeAt } from "./stakeSpot";
 import { CUP_SPOT, THERMOS_SPOT } from "./steamWisp";
 
@@ -99,10 +99,11 @@ describe("the groundbait bag at the angler's feet", () => {
     }
   });
 
-  it("sits on the boards, never in the water, on the narrow walk out to the dock", () => {
+  it("sits nowhere rather than hanging off the narrow walk out to the dock", () => {
     for (const z of [8.6, 9.1, 9.8, 10.3]) {
       const spot = bagSpot(0, z, Math.PI);
-      if (spot) expect(!inLake(spot.x, spot.z) || walkableAt(spot.x, spot.z)).toBe(true);
+      if (spot) for (const dx of [-BAG_REACH, 0, BAG_REACH]) expect(!inLake(spot.x + dx, spot.z) || walkableAt(spot.x + dx, spot.z)).toBe(true);
     }
+    expect(bagSpot(0, 9.1, Math.PI)).toBeNull();
   });
 });

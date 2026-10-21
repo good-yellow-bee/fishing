@@ -21,6 +21,8 @@ export const TIN_BEHIND = 0.05;
 /** The groundbait bag sits a little to the side of, and behind, the angler's feet. */
 export const BAG_SIDE = 0.25;
 export const BAG_BEHIND = 0.3;
+/** How far the slumped bag's neck reaches from its middle: all of it must lie on dry ground or boards. */
+export const BAG_REACH = 0.13;
 /** How near the bucket, the thermos and its cup, or a stake the tin may not stand; further by a spot's `r` from anything wider. */
 export const TIN_CLEAR = 0.25;
 
@@ -33,15 +35,17 @@ const SACK: Spot = { x: BIN_AT.x + BIN_SACK.x, z: BIN_AT.z + BIN_SACK.z, r: BIN_
 /** Where things stand for good: the thermos and its cup, the worm bin and its sack, and the night line's stake at each bank, whether or not a line is out. */
 const FIXED: readonly Spot[] = [THERMOS_SPOT, CUP_SPOT, BIN, SACK, ...(["dock", "point", "reeds", "dropoff", "inlet"] as SpotId[]).flatMap((bank) => stakeAt(bank) ?? [])];
 
-/** The first of `tries` (each [right, ahead] of the angler's feet) that is dry and clear of everything `taken`, at its foot height. */
-function firstDry(x: number, z: number, yaw: number, tries: readonly (readonly [number, number])[], taken: readonly Spot[] = []) {
+const dryAt = (x: number, z: number) => !inLake(x, z) || walkableAt(x, z);
+
+/** The first of `tries` (each [right, ahead] of the angler's feet) that is dry `reach` all round and clear of everything `taken`, at its foot height. */
+function firstDry(x: number, z: number, yaw: number, tries: readonly (readonly [number, number])[], taken: readonly Spot[] = [], reach = 0) {
   const fx = Math.sin(yaw);
   const fz = Math.cos(yaw);
   for (const [side, ahead] of tries) {
     // Their right, facing (fx, fz) with y up, is (-fz, fx).
     const px = x - fz * side + fx * ahead;
     const pz = z + fx * side + fz * ahead;
-    const dry = !inLake(px, pz) || walkableAt(px, pz);
+    const dry = dryAt(px, pz) && (reach === 0 || (dryAt(px + reach, pz) && dryAt(px - reach, pz) && dryAt(px, pz + reach) && dryAt(px, pz - reach)));
     if (dry && taken.every((spot) => Math.hypot(px - spot.x, pz - spot.z) >= TIN_CLEAR + (spot.r ?? 0))) return { x: px, y: footHeight(px, pz), z: pz };
   }
   return null;
@@ -89,5 +93,6 @@ export function bagSpot(x: number, z: number, yaw: number) {
       [-BAG_SIDE, -BAG_BEHIND - 0.4],
     ],
     [...FIXED, ...(bucket ? [bucket] : []), ...(tin ? [tin] : [])],
+    BAG_REACH,
   );
 }
