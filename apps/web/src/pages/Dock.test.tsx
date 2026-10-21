@@ -737,6 +737,25 @@ describe("touch play", () => {
     anglerPose.route = [];
   });
 
+  it("scrolls a sign reached by Tab whole into the row, but leaves a tapped one where it is", async () => {
+    const page = await openDock("/?hour=day&sky=clear");
+    const scroll = vi.fn();
+    Element.prototype.scrollIntoView = scroll;
+    const sign = (name: string) => [...page.querySelectorAll<HTMLButtonElement>(".walk-signs button")].find((button) => button.textContent === name)!;
+    act(() => {
+      document.body.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
+      sign("Drop-off").focus();
+    });
+    expect(scroll).toHaveBeenCalledWith({ block: "nearest", inline: "nearest" });
+    scroll.mockClear();
+    act(() => {
+      sign("Reeds").dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      sign("Reeds").focus();
+    });
+    expect(scroll).not.toHaveBeenCalled();
+    delete (Element.prototype as Partial<Element>).scrollIntoView;
+  });
+
   it("opens the shop from the HUD button at the shack", async () => {
     const page = await openDock("/?hour=day&sky=clear");
     const open = page.querySelector<HTMLButtonElement>(".walk-shop")!;
