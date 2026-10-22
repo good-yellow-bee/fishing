@@ -518,8 +518,9 @@ function SpotView() {
   // The next outing planned here, as the Waters card names it; today's once it has a fish is under way, not ahead.
   const nextHere = nextRealTrips(book, today).find((trip) => trip.spotId === spot.id);
   const restHere = lastHere ? daysBetween(lastHere, today) : 0;
-  // The nearest of the angler's other pinned waters, as the Map says it: which water to try next door.
-  const neighbour = spot.place && spot.id !== PLAY_LAKE_ID ? nearestPinned(spot.place, book.spots.filter((other) => other.id !== spot.id && other.id !== PLAY_LAKE_ID && !isSampleSpot(other.id))) : null;
+  // The nearest of the angler's other pinned waters, as the Map says it: which water to try next door. A sample water
+  // has a place only once the angler pins it.
+  const neighbour = spot.place && spot.id !== PLAY_LAKE_ID ? nearestPinned(spot.place, book.spots.filter((other) => other.id !== spot.id && other.id !== PLAY_LAKE_ID)) : null;
   // Its first fish and its last, by the days they count on: the first said once a later fish day has followed it.
   const fishDays = spot.id === PLAY_LAKE_ID ? [] : summed.map((entry) => bookFishDay(book, entry)).filter((day) => day <= today).sort();
   const firstHere = fishDays[0] !== fishDays.at(-1) ? fishDays[0] : undefined;

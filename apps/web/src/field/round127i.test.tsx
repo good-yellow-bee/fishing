@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import type { CatchEntry, Logbook, Spot } from "@stillwater/shared";
+import { sampleLogbook, type CatchEntry, type Logbook, type Spot } from "@stillwater/shared";
 import { SpotPage, SpotsPage } from "./SpotPages";
 import { LogbookProvider } from "./LogbookState";
 import { TackleProvider } from "./gear/TackleState";
@@ -73,6 +73,16 @@ describe("round 127: Waters ideas", () => {
     const line = (await show("/spots/a")).querySelector(".nearest-water");
     expect(line?.textContent).toBe("Nearest water: 0.7 mi from Mill Pond");
     expect(line?.querySelector("a")?.getAttribute("href")).toBe("/spots/b");
+  });
+
+  it("counts a sample water the angler pinned", async () => {
+    const pinned = { ...sampleLogbook(new Date()).spots[0]!, place: { lat: 46.851, lng: -94.24 } };
+    book.spots.push(pinned);
+    try {
+      expect((await show("/spots/a")).querySelector(".nearest-water a")?.getAttribute("href")).toBe(`/spots/${pinned.id}`);
+    } finally {
+      book.spots.pop();
+    }
   });
 
   it("says nothing on a water with no pin", async () => {
