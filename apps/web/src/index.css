@@ -611,6 +611,11 @@ a:focus-visible {
   .hint-tail:not([data-open]) + .hint-tail-more {
     display: inline;
   }
+
+  /* A folded wait hint's "2 more reasons" waits for Read more, rather than standing beside it. */
+  .hint-tail:not([data-open]) ~ .hint-more:not(.hint-tail-more) {
+    display: none;
+  }
 }
 
 /* In a fight the hint would overlap the fight card, which shows the hookset's message itself for a while. */
