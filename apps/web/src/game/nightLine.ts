@@ -1,5 +1,5 @@
 import { canLand, FISH, rollWeight, skyAt, type FishSpecies, type LakeSeason, type Profile, type Sky, type SpotId } from "@stillwater/shared";
-import { bestHourFor } from "./logic";
+import { afterDark, bestHourFor } from "./logic";
 
 /** Kept per angler, so another angler on the same browser finds no line of theirs out. */
 export function nightLineKey(userId: string) {
@@ -35,7 +35,7 @@ export const WORM_LINE_ODDS = 0.6;
 
 /** A worm goes out on a line as the light goes, at dusk or night; a bought or landed shiner may go out any time. */
 export function wormLineHour(hour: string): boolean {
-  return hour === "dusk" || hour === "night";
+  return afterDark(hour);
 }
 
 /** A bait left out on a set line at a bank, and when; lines from before worms were left out carry a shiner. season: set in summer or winter, fixed when it goes out. */

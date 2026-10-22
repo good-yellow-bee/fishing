@@ -3676,6 +3676,24 @@ describe("useFishingGame groundbait", () => {
     expect(hint()).toBe(`You top up the swim as it fades: the feeders stay, the big ones too. ${2 + GROUNDBAIT_CASTS} casts of it now.`);
   });
 
+  const afterDarkSaid = "Channel catfish come to it most after dark: a night over this swim is the time for one.";
+  it.each([
+    ["dusk", TOPUP_MAX - 1, 0, undefined, `You top up the swim again as it fades: the feeders stay, and the big ones move in. ${2 + GROUNDBAIT_CASTS} casts of it now. ${afterDarkSaid}`],
+    ["night", TOPUP_MAX, 1, undefined, `You top up the swim as it fades: the feeders stay, the big ones too. ${2 + GROUNDBAIT_CASTS} casts of it now. ${afterDarkSaid} 1 big feeder landed off this swim so far: ${WARY_LANDED - 1} more and the rest grow wary of it.`],
+    ["day", TOPUP_MAX - 1, 0, undefined, ""],
+    ["night", TOPUP_MAX, WARY_LANDED, undefined, ""],
+    ["night", TOPUP_MAX - 1, 0, "Worm", ""],
+    ["night", TOPUP_MAX - 1, 0, undefined, "", 1],
+  ] as const)("names the catfish on a built swim's top-up at %s (built %s, %s landed, lure %s)", (hour, built, landedBig, lure, said, strength: number = profile.strength) => {
+    const kept = new Map<string, string>([[bagKey(profile.userId), JSON.stringify({ handfuls: 3, day: "2000-01-01" })]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 2, built, ...(landedBig ? { landedBig } : {}), at: DOCK_BUBBLES.at - 60_000 }));
+    mount(DOCK_BUBBLES.at, { ...profile, strength }, hour, false, lure);
+    toss();
+    if (said) expect(hint()).toBe(said);
+    else expect(hint()).not.toContain("Channel catfish");
+  });
+
   it("counts the big feeders landed off a swim on its top-up, and how many more before the rest grow wary", () => {
     const kept = new Map<string, string>([[bagKey(profile.userId), JSON.stringify({ handfuls: 3, day: "2000-01-01" })]]);
     vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });

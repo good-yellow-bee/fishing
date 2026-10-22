@@ -861,6 +861,20 @@ export function isBigFeeder(id: string, built: number) {
   return built >= TOPUP_MAX && BIG_FEEDERS.has(id);
 }
 
+/** The light is going or gone: dusk or night. */
+export function afterDark(hour: string) {
+  return hour === "dusk" || hour === "night";
+}
+
+/** After dark the catfish lead the big feeders on a built swim where they live: their pull doubles while the carp's halves. */
+export const AFTER_DARK_PULL: Readonly<Record<string, number>> = { catfish: 2, carp: 0.5 };
+const leadsAfterDark = (fish: FishSpecies) => (AFTER_DARK_PULL[fish.id] ?? 1) > 1;
+
+/** The catfish at this bank that would take this lure, if any: after dark they lead the big feeders on a built swim. */
+export function afterDarkLeaderAt(spot: SpotId, lure: string | undefined) {
+  return poolForLure(FISH.filter((fish) => fish.spots.includes(spot)), lure).find(leadsAfterDark);
+}
+
 /** Whether a big feeder at this bank would take this lure on a full cast. */
 export function hasBigFeeders(spot: SpotId, lure: string | undefined) {
   return poolForLure(FISH.filter((fish) => fish.spots.includes(spot)), lure).some((fish) => BIG_FEEDERS.has(fish.id));
@@ -885,12 +899,14 @@ export function scattersSwim(id: string, built: number) {
   return isBigFeeder(id, built) || (built >= TOPUP_MAX && PROWLERS.has(id));
 }
 
-/** A feeder drawn to the groundbait for this bite, from the bank's own lure split and weighed as the bank draws them (the big ones more over a built-up swim unless wary of it, the perch too over chopped worm), or none. */
+/** A feeder drawn to the groundbait for this bite, from the bank's own lure split and weighed as the bank draws them (the big ones more over a built-up swim unless wary of it, led by the catfish after dark where they come, the perch too over chopped worm), or none. */
 export function groundbaitFeeder(spot: SpotId, lure: string | undefined, shortCast: boolean, hour: LakeHour, random = Math.random, built = 0, worm = false, wary = false): FishSpecies | null {
   if (random() >= feederShare(built)) return null;
   const home = FISH.filter((fish) => fish.spots.includes(spot) && (!shortCast || fish.rarity === "common"));
   const feeders = poolForLure(home, lure).filter((fish) => GROUNDBAIT_FEEDERS.has(fish.id) || (worm && WORM_FEEDERS.has(fish.id)));
-  const pull = (fish: FishSpecies) => appeal(fish, hour) * (isBigFeeder(fish.id, built) && !wary ? BIG_FEEDER_PULL : 1);
+  // Where no catfish come, the carp keep their full pull after dark.
+  const led = afterDark(hour) && feeders.some(leadsAfterDark);
+  const pull = (fish: FishSpecies) => appeal(fish, hour) * (isBigFeeder(fish.id, built) && !wary ? BIG_FEEDER_PULL * (led ? (AFTER_DARK_PULL[fish.id] ?? 1) : 1) : 1);
   let roll = random() * feeders.reduce((sum, fish) => sum + pull(fish), 0);
   for (const fish of feeders) {
     roll -= pull(fish);
