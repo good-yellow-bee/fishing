@@ -1260,7 +1260,8 @@ export function DockPage() {
           <PowerMeter phase={scenePhase} powerRef={game.powerRef} lastCastRef={game.lastCastRef} accuracy={me.profile.accuracy} level={me.level} />
         )}
         {prefs.walkStick && !shopOpen && scenePhase === "idle" && <WalkStick />}
-        <p className="hint" aria-live="polite" ref={hintRef}>
+        {/* data-camera-control: an opened hint on a phone scrolls (index.css), and a finger on it mustn't strike. */}
+        <p className="hint" aria-live="polite" ref={hintRef} data-camera-control>
           {scenePhase !== "hookset" &&
             (game.hintLead ? (
               <>
