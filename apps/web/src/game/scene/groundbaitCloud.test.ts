@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { spotAt, SPOT_IDS, walkableAt } from "@stillwater/shared";
 import { bigFeedersOver, GROUNDBAIT_CASTS, SWIM_MAX_CASTS, throwHandful, TOPUP_MAX } from "../logic";
 import { BANK_STANDS } from "../hotspot";
-import { cloudCenter, cloudOpacity, CLOUD_RADIUS, DIMPLES, dimpleAt, feedersShow, openWaterYaw, ROLL_GAP_SEC, ROLL_SEC, ROLL_SPAN, rollAt, SCATTER_SEC, SCATTER_WAKES, scatterWakeAt } from "./groundbaitCloud";
+import { cloudCenter, cloudOpacity, CLOUD_RADIUS, DIMPLES, dimpleAt, feedersShow, openWaterYaw, ROLL_GAP_SEC, ROLL_SEC, ROLL_SPAN, rollAt, SCATTER_SEC, SCATTER_WAKES, scatterWakeAt, THIEF_OUT, thiefAt, thiefCount, THIEVES } from "./groundbaitCloud";
 
 describe("groundbait cloud", () => {
   it.each(SPOT_IDS)("lands on the %s's own open water", (spot) => {
@@ -145,6 +145,44 @@ describe("a scattered swim", () => {
       const end = scatterWakeAt(i, SCATTER_SEC - 0.01, openWaterYaw(spot))!;
       const reach = end.run + end.size;
       expect(walkableAt(at.x + Math.sin(end.yaw) * reach, at.z + Math.cos(end.yaw) * reach)).toBe(false);
+    }
+  });
+});
+
+describe("bait thieves at the cloud", () => {
+  it("crowd a fresh swim, fewer once topped up, none once built all the way", () => {
+    expect(thiefCount(0)).toBe(THIEVES);
+    expect(thiefCount(1)).toBeGreaterThan(0);
+    expect(thiefCount(1)).toBeLessThan(THIEVES);
+    expect(thiefCount(TOPUP_MAX)).toBe(0);
+  });
+
+  it("dart in past the cloud's edge, turn away and flicker out between darts", () => {
+    const poses = Array.from({ length: 200 }, (_, n) => thiefAt(0, n * 0.05));
+    expect(poses.some((pose) => pose === null)).toBe(true);
+    const shown = poses.filter((pose) => pose !== null);
+    const reach = shown.map((pose) => Math.hypot(pose.dx, pose.dz));
+    expect(Math.min(...reach)).toBeLessThan(CLOUD_RADIUS);
+    expect(Math.max(...reach)).toBeLessThanOrEqual(THIEF_OUT + 1e-9);
+    expect(Math.min(...shown.map((pose) => pose.show))).toBeLessThan(0.5);
+    // Heading in, then away: its heading swings round within a dart.
+    expect(new Set(shown.map((pose) => pose.yaw.toFixed(2))).size).toBeGreaterThan(2);
+  });
+
+  it("hold still, all shown, under reduced motion", () => {
+    for (let i = 0; i < THIEVES; i++) {
+      expect(thiefAt(i, 0, true)).toEqual(thiefAt(i, 9.3, true));
+      expect(thiefAt(i, 0, true)!.show).toBe(1);
+    }
+  });
+
+  it.each(SPOT_IDS)("stay on the %s's water", (spot) => {
+    const at = cloudCenter(spot);
+    for (let n = 0; n < 16; n++) {
+      const angle = (n / 16) * Math.PI * 2;
+      // The shiner's nose or tail just past the farthest it darts.
+      const reach = THIEF_OUT + 0.25;
+      expect(walkableAt(at.x + Math.cos(angle) * reach, at.z + Math.sin(angle) * reach)).toBe(false);
     }
   });
 });

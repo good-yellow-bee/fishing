@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { BAIT_THIEVES, BUILT_SWIM_STEAL_CHANCE, FRESH_SWIM_STEAL_CHANCE, biteStyle, takeStyle, LIFT_RISE, liftTilt, nibblePlan, RUN_PLUNGE, RUN_SLIDE, runSlide, STEAL_CHANCE, stealChance, stealsBait } from "./nibblePlan";
+import { BAIT_THIEVES, baitThievesOver, BUILT_SWIM_STEAL_CHANCE, FRESH_SWIM_STEAL_CHANCE, biteStyle, takeStyle, LIFT_RISE, liftTilt, nibblePlan, RUN_PLUNGE, RUN_SLIDE, runSlide, STEAL_CHANCE, stealChance, stealsBait } from "./nibblePlan";
 import { TOPUP_MAX } from "./logic";
 
 function seeded(seed: number) {
@@ -126,6 +126,14 @@ describe("stealsBait", () => {
     expect(BUILT_SWIM_STEAL_CHANCE).toBe(STEAL_CHANCE / 2);
     expect(stealsBait("golden-shiner", 2, () => 0.4, stealChance(0))).toBe(true);
     expect(stealsBait("golden-shiner", 2, () => 0.2, stealChance(TOPUP_MAX))).toBe(false);
+  });
+
+  it("crowd a swim at a bank where they would take the tied lure, until its feeders are scattered", () => {
+    expect(baitThievesOver({ spot: "dock", casts: 4 }, "Worm")).toBe(true);
+    expect(baitThievesOver({ spot: "reeds", casts: 4, built: 1 }, undefined)).toBe(true);
+    expect(baitThievesOver({ spot: "dock", casts: 4 }, "Crankbait")).toBe(false);
+    expect(baitThievesOver({ spot: "point", casts: 4 }, "Worm")).toBe(false);
+    expect(baitThievesOver({ spot: "dock", casts: 4, spooked: 2 }, "Worm")).toBe(false);
   });
 });
 

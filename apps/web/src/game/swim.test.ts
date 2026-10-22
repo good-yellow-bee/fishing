@@ -67,6 +67,15 @@ describe("a groundbaited swim left for the next visit", () => {
     expect(loadSwim("u")).toEqual({ ...swim, built: TOPUP_MAX });
   });
 
+  it("keeps a lure having ripped through it through a reload and when it primes, so the cast's hint is not told again", () => {
+    const ripped = { ...swim, ripped: true };
+    expect(swimNow(ripped, SWIM_PRIMED_MS)).toEqual({ spot: "reeds", casts: GROUNDBAIT_CASTS, at: 0, primed: true, ripped: true, primedNow: true });
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    saveSwim("u", ripped);
+    expect(loadSwim("u")).toEqual(ripped);
+  });
+
   it("keeps a topped-up swim's casts, top-ups and scattered feeders through a reload, its full fish hungry again, and drops the top-ups and scatter when it primes", () => {
     const kept = new Map<string, string>();
     vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
