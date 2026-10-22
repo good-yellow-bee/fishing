@@ -9,7 +9,7 @@ function length(points: Float32Array, n: number) {
 
 describe("gearOpacity", () => {
   it("keeps the standard line and the wire leader's line as they were, in any water", () => {
-    for (const [bright, winter] of [[false, false], [true, false], [false, true]]) {
+    for (const [bright, winter] of [[false, false], [true, false], [false, true], [true, true]]) {
       expect(gearOpacity(0.55, "standard", bright, winter)).toBe(0.55);
       expect(gearOpacity(0.55, "wire", bright, winter)).toBe(0.55);
     }
