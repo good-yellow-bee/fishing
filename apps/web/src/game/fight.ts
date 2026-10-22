@@ -250,10 +250,9 @@ export const DRAG_RUN_LINE: Record<Drag, number> = { light: 1.35, normal: 1, hea
 export const DRAG_RUN_PULL: Record<Drag, number> = { light: 0.7, normal: 1, heavy: 1.3 };
 /** A light drag slips under a turning reel: a run still takes this share of the line it takes off a slack one. */
 export const LIGHT_DRAG_SLIP = 0.5;
-/** A run against a heavy drag loads the line even with the reel let go, at this share of its pull on a turning reel, up to the cap: a strong fresh run reaches the red (and tears a soft mouth) but never snaps a sound line, except light line, whose cap is past its snap. */
+/** A run against a heavy drag loads the line even with the reel let go, at this share of its pull on a turning reel, up to the cap: a strong fresh run reaches the red (and tears a soft mouth) but never snaps a sound line. Light line has no cap short of its snap, so a strong fresh run snaps it. */
 export const HEAVY_DRAG_LOAD = 1.2;
 export const HEAVY_DRAG_CAP = 0.85;
-export const LIGHT_LINE_HEAVY_DRAG_CAP = 1;
 /** On light line a run against a light drag slips line this far short of the snap, even as the reel turns, rather than break it. */
 export const LIGHT_LINE_SLIP_SHORT = 0.05;
 
@@ -953,7 +952,7 @@ export function makeFight(
         if (lightRun) sim.line += driftSurge * DRAG_RUN_LINE.light * LIGHT_DRAG_SLIP * dtSec;
       }
     } else if (heavyRun) {
-      const cap = lightLine ? LIGHT_LINE_HEAVY_DRAG_CAP : HEAVY_DRAG_CAP;
+      const cap = lightLine ? Infinity : HEAVY_DRAG_CAP;
       sim.tension = sim.tension < cap ? Math.min(cap, sim.tension + eff * rockPull * DRAG_RUN_PULL.heavy * HEAVY_DRAG_LOAD * dtSec) : Math.max(cap, sim.tension - tensionDecay * dtSec);
       sim.line += runDrift * dtSec;
     } else {

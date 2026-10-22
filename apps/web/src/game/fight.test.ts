@@ -1311,8 +1311,8 @@ describe("the line on the reel", () => {
 describe("light line on the drag", () => {
   const LIGHT: FightCover = { lineSnap: LINE_SNAP.light, lightLine: true };
   /** Plays to the first run on the given drag, then through it reeling or let go, and says how it went. */
-  const firstRun = (drag: Drag, reeling: boolean, cover: FightCover, id = "pike", weight = 6) => {
-    const f = makeFight(fish(id), weight, 3, () => 0.5, 1, "open", undefined, false, false, false, false, false, false, false, 1, 1, false, cover);
+  const firstRun = (drag: Drag, reeling: boolean, cover: FightCover, id = "pike", weight = 6, frayed = false) => {
+    const f = makeFight(fish(id), weight, 3, () => 0.5, 1, "open", undefined, false, false, false, false, false, frayed, false, 1, 1, false, cover);
     let now = 0;
     let outcome: FightOutcome = "fighting";
     while (f.sim.surge !== 2) f.step((now += 50), 0.05, false, 0, drag);
@@ -1332,6 +1332,9 @@ describe("light line on the drag", () => {
     expect(light.line).toBeGreaterThan(0);
     expect(firstRun("normal", true, LIGHT, "carp", 20).outcome).toBe("snapped");
     expect(firstRun("light", true, { lineSnap: 1 }, "carp", 20).outcome).toBe("snapped");
+    const frayed = firstRun("light", true, LIGHT, "carp", 20, true);
+    expect(frayed.outcome).toBe("fighting");
+    expect(frayed.peak).toBeCloseTo(FRAYED_SNAP * LINE_SNAP.light - LIGHT_LINE_SLIP_SHORT);
   });
 
   it("snaps light line on a strong fresh run let go against a heavy drag, though a sound standard line holds", () => {
