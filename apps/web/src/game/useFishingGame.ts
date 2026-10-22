@@ -311,8 +311,7 @@ export const STREAMER_CHASERS: ReadonlySet<string> = new Set(["pike", "ghost-pik
 
 /** At most this many reasons for a sooner or slower bite are told on a cast, so the hint stays readable. */
 export const WAIT_REASONS = 2;
-/** A wait hint longer than this folds after its first sentence on a phone: with larger text a longer one ran under the
- * Strike button on a 320 x 568 phone, and up over the header on one held sideways. */
+/** A wait hint longer than this folds after its first sentence on a phone, clear of the Strike button. */
 export const WAIT_FOLD_CHARS = 140;
 
 /** The wait hint's first sentence, which a phone shows alone until the rest is asked for; "" when it is short enough to show whole. */

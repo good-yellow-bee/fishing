@@ -597,9 +597,11 @@ a:focus-visible {
 
 /* On a touch screen up to 900 px tall the walking stick stands over the hint's corner (on a tablet the lure panel above
    it), and a window held sideways leaves it only the room under the HUD. A groundbait toss ran five sentences up past both, so there a long hint shows what
-   happened and folds the rest behind "Read more"; a screen reader still reads it all. */
+   happened and folds the rest, with a wait hint's left-out reasons, behind "Read more"; a screen reader still reads it all. */
 @media (pointer: coarse) and (max-height: 900px), (max-height: 500px) {
-  .hint-tail:not([data-open]) {
+  .hint-tail:not([data-open]),
+  .hint-tail:not([data-open]) ~ .hint-more:not(.hint-tail-more),
+  .hint-tail:not([data-open]) ~ .hint-reasons {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -610,11 +612,6 @@ a:focus-visible {
 
   .hint-tail:not([data-open]) + .hint-tail-more {
     display: inline;
-  }
-
-  /* A folded wait hint's "2 more reasons" waits for Read more, rather than standing beside it. */
-  .hint-tail:not([data-open]) ~ .hint-more:not(.hint-tail-more) {
-    display: none;
   }
 }
 
