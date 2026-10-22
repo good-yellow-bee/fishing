@@ -3860,6 +3860,29 @@ describe("useFishingGame groundbait", () => {
     }
   });
 
+  it.each([
+    ["heavy", "dock", "summer", "Heavy line: in the murky rain water the fish can't see it, so the bites come as quick as on standard line, and a line wrapped round the wood comes free in half the time."],
+    ["heavy", "pads", "summer", "Heavy line: in the murky rain water the fish can't see it, so the bites come as quick as on standard line, and it pulls a fish out of the weeds in half the time."],
+    ["heavy", "dropoff", "summer", "Heavy line: in the murky rain water the fish can't see it, so the bites come as quick as on standard line."],
+    ["heavy", "dropoff", "winter", "Heavy line: in the murky rain water the fish can't see it, so the bites come as quick as on standard line."],
+    ["light", "dropoff", "winter", "Light line: the fish can't see it, so the bites come sooner."],
+  ] as const)("tells %s line at the %s in murky rain water in %s", (line, stance, season, said) => {
+    updateSettings({ line });
+    try {
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, "Nightcrawler", "calm", "rain", season);
+      if (stance === "dropoff") atDropoff(surface);
+      if (stance === "pads") Object.assign(surface.dataset, { stance: "point", angler: "-5.6,12.2", aim: "-6.8,4.8" });
+      cast(surface);
+      expect(vi.mocked(stackWaitMs).mock.lastCall?.at(-2)).toBe(line === "heavy" ? LINE_WAIT.standard : LINE_WAIT.light);
+      const told = `${hint()} ${container!.querySelector("[data-testid=more-reasons]")?.textContent}`;
+      expect(told).toContain(said);
+      expect(told).not.toContain("slower");
+      expect(told).not.toContain("clear winter water");
+    } finally {
+      updateSettings({ line: "standard" });
+    }
+  });
+
   it("hands the fight heavy line's shorter hold in cover", () => {
     updateSettings({ line: "heavy" });
     try {
