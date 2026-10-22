@@ -7,14 +7,16 @@ import { bookFishDay } from "../tripMonths";
 import { gaveWay, stillGoing } from "../tripDates";
 import { pieceTally } from "../pieceTally";
 import { outingFish } from "../outingFish";
+import { speciesCounts } from "../speciesLink";
 
 /**
  * `lure`: the name the fish were logged under, for opening them; `lastAt`: when the newest of them was caught, and
  * `lastDay` the day it counts on (a night session's small hours on its outing's); `since`: the outings it went on after that day. All three set when the piece took any. `largest`: its biggest fish, by
- * weight when any was weighed, else by length, once it took two or more.
+ * weight when any was weighed, else by length, once it took two or more. `kind`: the kind it took most, once it took three
+ * or more and one kind leads; `only` when every fish was that kind.
  */
 /** `label` is the piece as its list wrote it, what Pack adds; `name` as most of its fish were logged, what the record shows. */
-export type PieceRecord = { label: string; name: string; outings: number; lastPacked?: string; fish: number; lure?: string; lastAt?: string; lastDay?: string; since?: number; largest?: { entry: CatchEntry; by: "weight" | "length" } };
+export type PieceRecord = { label: string; name: string; outings: number; lastPacked?: string; fish: number; lure?: string; lastAt?: string; lastDay?: string; since?: number; largest?: { entry: CatchEntry; by: "weight" | "length" }; kind?: { species: string; count: number; only: boolean } };
 
 /**
  * Each lure packed for outings up to `today`: how many lists it was on, and the fish in the book logged under any
@@ -81,9 +83,11 @@ export function pieceRecords(book: Logbook, items: readonly TackleItem[], today:
       // Across every spelling, as "last fish" is: one fish is its own biggest and says nothing.
       const bests = all.length >= 2 ? personalBests({ spots: [], trips: [], catches: all }) : null;
       const largest = bests?.heaviest ? { entry: bests.heaviest, by: "weight" as const } : bests?.longest ? { entry: bests.longest, by: "length" as const } : undefined;
+      const [top, next] = speciesCounts(all);
+      const kind = top && all.length >= 3 && top.count > (next?.count ?? 0) ? { species: top.species, count: top.count, only: !next } : undefined;
       // Every spelling's fish, as its last fish and its largest count them, so the row agrees with itself.
       // Shown as most of its fish were logged ("Spinner"), not as the first list wrote it ("spinners").
-      return { label: row.label, name: pieceTally(all, 1)[0]?.lure ?? row.label, outings: row.trips.size, ...(row.lastPacked ? { lastPacked: row.lastPacked } : {}), fish: all.length, ...(took[0] && lastAt ? { lure: took[0].lure, lastAt, lastDay, since } : {}), ...(largest ? { largest } : {}) };
+      return { label: row.label, name: pieceTally(all, 1)[0]?.lure ?? row.label, outings: row.trips.size, ...(row.lastPacked ? { lastPacked: row.lastPacked } : {}), fish: all.length, ...(took[0] && lastAt ? { lure: took[0].lure, lastAt, lastDay, since } : {}), ...(largest ? { largest } : {}), ...(kind ? { kind } : {}) };
     })
     .sort((a, b) => b.fish - a.fish || b.outings - a.outings || a.label.localeCompare(b.label));
 }
