@@ -96,9 +96,9 @@ export function stealChance(built: number | null) {
   return built >= TOPUP_MAX ? BUILT_SWIM_STEAL_CHANCE : STEAL_CHANCE;
 }
 
-/** Whether bait thieves crowd this swim: ones at its bank that would take this lure, while it is not built all the way and its feeders are not scattered. */
+/** Whether bait thieves crowd this swim: ones at its bank that would take this lure, while its feeders are not scattered. */
 export function baitThievesOver(bait: Groundbait, lure: string | undefined) {
-  return !bait.spooked && (bait.built ?? 0) < TOPUP_MAX && poolForLure(FISH.filter((fish) => fish.spots.includes(bait.spot)), lure).some((fish) => BAIT_THIEVES.has(fish.id));
+  return !bait.spooked && poolForLure(FISH.filter((fish) => fish.spots.includes(bait.spot)), lure).some((fish) => BAIT_THIEVES.has(fish.id));
 }
 
 /** Whether this wait ends with the bait stolen; only a thief that nibbles first can steal it. */

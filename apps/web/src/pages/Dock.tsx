@@ -132,7 +132,7 @@ import { trapIsCold, trapState } from "../game/minnowTrap";
 import { foeAbout, isOldFoe, loadOldFoe, saveOldFoe } from "../game/oldFoe";
 import { BUCKET_SIZE } from "../game/baitBucket";
 import { WORM_TIN_WET } from "../game/wormTin";
-import { isLiveBait, isTopwater, touchScreen, useFishingGame, type Outcome } from "../game/useFishingGame";
+import { carriesBait, isLiveBait, isTopwater, touchScreen, useFishingGame, type Outcome } from "../game/useFishingGame";
 import { useCatchSync } from "../game/useCatchSync";
 import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
 import { rarityLabel } from "../game/logic";
@@ -1210,7 +1210,7 @@ export function DockPage() {
           groundbait={game.groundbait}
           groundbaitPrimed={game.swimPrimed}
           groundbaitBig={game.groundbait ? bigFeedersOver(game.groundbait, lure) : false}
-          groundbaitThieves={game.groundbait ? baitThievesOver(game.groundbait, lure) : false}
+          groundbaitThieves={game.groundbait && carriesBait(lure) ? baitThievesOver(game.groundbait, lure) : false}
           rising={rising}
           storm={storm}
           tracks={tracks}

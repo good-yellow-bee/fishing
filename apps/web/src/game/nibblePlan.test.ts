@@ -128,12 +128,11 @@ describe("stealsBait", () => {
     expect(stealsBait("golden-shiner", 2, () => 0.2, stealChance(TOPUP_MAX))).toBe(false);
   });
 
-  it("crowd a swim at a bank where they would take the tied lure, until it is built all the way or its feeders are scattered", () => {
+  it("crowd a swim at a bank where they would take the tied lure, until its feeders are scattered", () => {
     expect(baitThievesOver({ spot: "dock", casts: 4 }, "Worm")).toBe(true);
     expect(baitThievesOver({ spot: "reeds", casts: 4, built: 1 }, undefined)).toBe(true);
     expect(baitThievesOver({ spot: "dock", casts: 4 }, "Crankbait")).toBe(false);
     expect(baitThievesOver({ spot: "point", casts: 4 }, "Worm")).toBe(false);
-    expect(baitThievesOver({ spot: "dock", casts: 4, built: TOPUP_MAX }, "Worm")).toBe(false);
     expect(baitThievesOver({ spot: "dock", casts: 4, spooked: 2 }, "Worm")).toBe(false);
   });
 });

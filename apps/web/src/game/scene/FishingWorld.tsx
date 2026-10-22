@@ -233,7 +233,7 @@ type Props = {
   groundbaitPrimed?: boolean;
   /** That swim is built up enough to have drawn the big feeders the tied lure would take. */
   groundbaitBig?: boolean;
-  /** Bait thieves at that swim's bank would take the tied lure, and it is neither built all the way nor scattered. */
+  /** Bait thieves at that swim's bank would strip the tied bait, and its feeders are not scattered; fewer show as it is built up. */
   groundbaitThieves?: boolean;
   /** The shiner trap by the shack while it is set (minnowTrap.ts trapState), or null when it is not. */
   shinerTrap?: ReturnType<typeof trapState> | null;
