@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-22-scene77";
+export const NEWS_ID = "2026-10-22-game79";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "Over a swim topped up twice, the big feeders now lean to catfish from dusk through the night, so a night over it is the time for one, and each spinner or crankbait cast over a swim spends two of its casts, not one. And the Line button now goes on to a wire leader: the fish see it, so the bites come slower, but where your lure would take pike they come to it twice as often, and one that swallows the bait can't fray the line; on light line a pike or muskie bites through it at the strike one time in five.",
   "A swim's feeders scattered by a lost carp or catfish now bolt: the dimples stop, a few bow wakes fan out toward open water and the cloud thins. Over a fresh swim, where your lure would take golden shiners, small shiners dart in at the cloud's edge, fewer once it is topped up. And over a swim topped up all the way, where your lure would take pike, a pike glides along its open-water side, a bow wave ahead of its snout, slashing in at the feeders once a pass.",
   "An outing's page now names its longest wait between fish and when it began, when one stands out among three fish or more, and a past outing's Last time here says how many days the water had rested before it, from two days on. And a water with no name now reads Water with no name on its outings' cards, the catch form and a search's Most from, and in copied plans and summaries.",
   "On a touch screen or a short window, the hint for a handful of groundbait now shows its first sentence and folds the rest behind Read more, so on a phone with larger text it no longer runs over the walking stick. And on a touch tablet the hint over the lake now stands beside the walking stick instead of behind it, above the cast meter and short of the strike button; left-handed, it takes the other side.",
