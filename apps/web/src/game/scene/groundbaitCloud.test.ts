@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { FISH, spotAt, SPOT_IDS, walkableAt } from "@stillwater/shared";
-import { bigFeedersOver, PROWLERS, prowlerOver, GROUNDBAIT_CASTS, SWIM_MAX_CASTS, throwHandful, TOPUP_MAX } from "../logic";
+import { bigFeedersOver, hasWormFeeders, PROWLERS, prowlerOver, GROUNDBAIT_CASTS, SWIM_MAX_CASTS, throwHandful, TOPUP_MAX } from "../logic";
 import { BANK_STANDS } from "../hotspot";
-import { cloudCenter, cloudOpacity, CLOUD_RADIUS, DIMPLES, dimpleAt, feedersShow, openWaterYaw, PIKE_REACH, PROWL_IN, PROWL_LEG_SEC, PROWL_OUT, prowlAt, ROLL_GAP_SEC, ROLL_SEC, ROLL_SPAN, rollAt, SCATTER_SEC, SCATTER_WAKES, scatterWakeAt, THIEF_OUT, thiefAt, thiefCount, THIEVES } from "./groundbaitCloud";
+import { cloudCenter, cloudOpacity, CLOUD_RADIUS, DIMPLES, dimpleAt, feedersShow, openWaterYaw, PERCH, PERCH_FAR, PERCH_NEAR, PERCH_REACH, perchAt, perchShow, PIKE_REACH, PROWL_IN, PROWL_LEG_SEC, PROWL_OUT, prowlAt, ROLL_GAP_SEC, ROLL_SEC, ROLL_SPAN, rollAt, SCATTER_SEC, SCATTER_WAKES, scatterWakeAt, THIEF_IN, THIEF_OUT, thiefAt, thiefCount, THIEVES } from "./groundbaitCloud";
 
 describe("groundbait cloud", () => {
   it.each(SPOT_IDS)("lands on the %s's own open water", (spot) => {
@@ -182,6 +182,66 @@ describe("bait thieves at the cloud", () => {
       const angle = (n / 16) * Math.PI * 2;
       // The shiner's nose or tail just past the farthest it darts.
       const reach = THIEF_OUT + 0.25;
+      expect(walkableAt(at.x + Math.cos(angle) * reach, at.z + Math.sin(angle) * reach)).toBe(false);
+    }
+  });
+});
+
+describe("perch under a swim with chopped worm in it", () => {
+  it("hang there whatever lure is tied on, and bolt with the feeders when they scatter", () => {
+    expect(perchShow({ spot: "dock", casts: 6, worm: true })).toBe(true);
+    expect(perchShow({ spot: "dock", casts: 6, worm: true, built: TOPUP_MAX })).toBe(true);
+    expect(perchShow({ spot: "dock", casts: 6 })).toBe(false);
+    expect(perchShow({ spot: "dock", casts: 6, worm: true, spooked: 2 })).toBe(false);
+  });
+
+  it("hang under the cloud, well inside the shiners' darts, and dart to a fresh spot now and then", () => {
+    for (let i = 0; i < PERCH; i++) {
+      const poses = Array.from({ length: 400 }, (_, n) => perchAt(i, n * 0.05));
+      const reach = poses.map((pose) => Math.hypot(pose.dx, pose.dz));
+      // It hangs off the middle, though a dart may cross it.
+      const hangs = poses.filter((pose) => pose.dart === 0).map((pose) => Math.hypot(pose.dx, pose.dz));
+      expect(Math.min(...hangs)).toBeGreaterThan(PERCH_NEAR - 0.05);
+      expect(Math.max(...reach)).toBeLessThan(PERCH_FAR + 0.05);
+      expect(Math.max(...reach) + PERCH_REACH).toBeLessThan(THIEF_IN);
+      expect(poses.some((pose) => pose.dart > 0)).toBe(true);
+      expect(poses.filter((pose) => pose.dart === 0).length).toBeGreaterThan(poses.length / 2);
+      expect(new Set(poses.map((pose) => pose.yaw.toFixed(1))).size).toBeGreaterThan(3);
+    }
+  });
+
+  it("move and turn without a snap", () => {
+    for (let i = 0; i < PERCH; i++) {
+      let last = perchAt(i, 0);
+      for (let t = 0.01; t < 30; t += 0.01) {
+        const pose = perchAt(i, t);
+        expect(Math.hypot(pose.dx - last.dx, pose.dz - last.dz)).toBeLessThan(0.1);
+        expect(Math.abs(Math.atan2(Math.sin(pose.yaw - last.yaw), Math.cos(pose.yaw - last.yaw)))).toBeLessThan(0.25);
+        last = pose;
+      }
+    }
+  });
+
+  it("stay put across exact cycle ends", () => {
+    for (const t of [13, 26, 39, 52]) {
+      const at = perchAt(0, t);
+      const near = perchAt(0, t - 1e-6);
+      expect(Math.hypot(at.dx - near.dx, at.dz - near.dz)).toBeLessThan(0.01);
+    }
+  });
+
+  it("hold still, apart, under reduced motion", () => {
+    const held = Array.from({ length: PERCH }, (_, i) => perchAt(i, 0, true));
+    held.forEach((pose, i) => expect(perchAt(i, 8.1, true)).toEqual(pose));
+    expect(held.every((pose) => pose.dart === 0)).toBe(true);
+    for (let i = 1; i < PERCH; i++) expect(Math.hypot(held[i].dx - held[0].dx, held[i].dz - held[0].dz)).toBeGreaterThan(2 * PERCH_REACH);
+  });
+
+  it.each(SPOT_IDS.filter(hasWormFeeders))("stay on the %s's water, nose to tail", (spot) => {
+    const at = cloudCenter(spot);
+    for (let n = 0; n < 16; n++) {
+      const angle = (n / 16) * Math.PI * 2;
+      const reach = PERCH_FAR + PERCH_REACH;
       expect(walkableAt(at.x + Math.cos(angle) * reach, at.z + Math.sin(angle) * reach)).toBe(false);
     }
   });

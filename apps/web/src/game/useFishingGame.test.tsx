@@ -117,6 +117,7 @@ vi.mock("./fight", async (importOriginal) => {
 });
 
 import { updateSettings } from "./settings";
+import { LINE_COVER } from "./lineWeight";
 import { giantShyKey } from "./giantShy";
 import { NIGHT_LINE_STALE_MS, nightLineKey, nightLineReadyAt, nightLineState } from "./nightLine";
 import { WORM_TIN_WET, wormsDug, wormTinKey } from "./wormTin";
@@ -3699,6 +3700,35 @@ describe("useFishingGame groundbait", () => {
       expect(vi.mocked(pickBite).mock.lastCall?.[12]).toBeUndefined();
       expect(hint()).toContain(said);
       if (lure === "Nightcrawler") expect(hint()).not.toContain("bite through");
+    } finally {
+      updateSettings({ line: "standard" });
+    }
+  });
+
+  it.each([
+    ["dock", "Heavy line: the fish can see it, so the bites come slower, but a line wrapped round the wood comes free in half the time."],
+    ["dropoff", "Heavy line: the fish can see it, so the bites come slower."],
+  ] as const)("tells heavy line's pull out of cover at the %s", (stance, said) => {
+    updateSettings({ line: "heavy" });
+    try {
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 });
+      if (stance === "dropoff") atDropoff(surface);
+      cast(surface);
+      expect(hint()).toContain(said);
+    } finally {
+      updateSettings({ line: "standard" });
+    }
+  });
+
+  it("hands the fight heavy line's shorter hold in cover", () => {
+    updateSettings({ line: "heavy" });
+    try {
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 });
+      vi.mocked(waitMs).mockReturnValueOnce(1_000);
+      step.mockReturnValueOnce("fighting");
+      castAndFight(surface, 1);
+      expect(phase()).toBe("fight:none");
+      expect(vi.mocked(makeFight).mock.calls.at(-1)?.[17]).toMatchObject({ lineCover: LINE_COVER.heavy });
     } finally {
       updateSettings({ line: "standard" });
     }
