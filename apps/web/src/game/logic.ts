@@ -767,8 +767,8 @@ export const GROUNDBAIT_WAIT = 0.8;
 /** The free handfuls of groundbait the bag is topped up to on a day's first visit. */
 export const GROUNDBAIT_HANDFULS = 1;
 
-/** A groundbaited swim: its bank, the casts left, how often it was topped up as it faded, the casts its fish are still full for, the casts its feeders stay scattered for, whether chopped worm went in it, and how many big feeders were landed off it built up. */
-export type Groundbait = { spot: SpotId; casts: number; built?: number; full?: number; spooked?: number; worm?: boolean; landedBig?: number };
+/** A groundbaited swim: its bank, the casts left, how often it was topped up as it faded, the casts its fish are still full for, the casts its feeders stay scattered for, whether chopped worm went in it, how many big feeders were landed off it built up, and whether a lure has ripped through it yet. */
+export type Groundbait = { spot: SpotId; casts: number; built?: number; full?: number; spooked?: number; worm?: boolean; landedBig?: number; ripped?: boolean };
 
 /** A handful onto a swim at its bank with this many casts or fewer left tops it up as it fades: the feeders stay and more come in. */
 export const TOPUP_CASTS_LEFT = 2;
@@ -835,11 +835,22 @@ export function landBigFeeder(bait: Groundbait | null, spot: SpotId): Groundbait
   return { ...bait, landedBig: Math.min(WARY_LANDED, (bait.landedBig ?? 0) + 1) };
 }
 
-/** Whether a cast at this bank lands over the groundbait (and on fish still full from it, on feeders scattered off it, on a swim built up, on chopped worm, or on big feeders wary of it), and what is left of it after the cast. */
-export function castOverGroundbait(bait: Groundbait | null, spot: SpotId): { baited: boolean; full: boolean; spooked: boolean; built: number; worm: boolean; wary: boolean; next: Groundbait | null } {
-  if (!bait || bait.spot !== spot || bait.casts <= 0) return { baited: false, full: false, spooked: false, built: 0, worm: false, wary: false, next: bait };
+/** The lures whose flash and thump push the feeders off a swim: each cast of one over it costs it this many casts. */
+export const RIPPING_LURES: ReadonlySet<string> = new Set(["spinner", "crank"]);
+export const RIPPED_CASTS = 2;
+
+/** Whether a cast of this lure rips through a swim. */
+export function ripsSwim(lure: string | undefined) {
+  return !!lure?.trim() && RIPPING_LURES.has(lureClass(lure).id);
+}
+
+/** Whether a cast at this bank lands over the groundbait (and on fish still full from it, on feeders scattered off it, on a swim built up, on chopped worm, or on big feeders wary of it), whether this lure ripped through it for the first time, and what is left of it after the cast. */
+export function castOverGroundbait(bait: Groundbait | null, spot: SpotId, lure?: string): { baited: boolean; full: boolean; spooked: boolean; built: number; worm: boolean; wary: boolean; ripped: boolean; next: Groundbait | null } {
+  if (!bait || bait.spot !== spot || bait.casts <= 0) return { baited: false, full: false, spooked: false, built: 0, worm: false, wary: false, ripped: false, next: bait };
   const { full = 0, spooked = 0, ...rest } = bait;
-  return { baited: true, full: full > 0, spooked: spooked > 0, built: bait.built ?? 0, worm: !!bait.worm, wary: isWary(bait), next: bait.casts > 1 ? { ...rest, casts: bait.casts - 1, ...(full > 1 ? { full: full - 1 } : {}), ...(spooked > 1 ? { spooked: spooked - 1 } : {}) } : null };
+  const rips = ripsSwim(lure);
+  const cost = rips ? RIPPED_CASTS : 1;
+  return { baited: true, full: full > 0, spooked: spooked > 0, built: bait.built ?? 0, worm: !!bait.worm, wary: isWary(bait), ripped: rips && !bait.ripped, next: bait.casts > cost ? { ...rest, casts: bait.casts - cost, ...(rips ? { ripped: true } : {}), ...(full > 1 ? { full: full - 1 } : {}), ...(spooked > 1 ? { spooked: spooked - 1 } : {}) } : null };
 }
 
 /** Fish that crowd in to feed on groundbait: the panfish, baitfish and bottom feeders. */

@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { canLand, localDate, DOCK_STAND_X, DOCK_STAND_Z, FISH, type Giant, type LodgeLost, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind, type SpotId } from "@stillwater/shared";
 import { floodedInlet, makeFight, springRunTireMul, SPRING_RUN_TIRE, currentTireMul, CURRENT_FIGHTER_TIRE, type FightOutcome, type FightPerformance, type FightSim } from "./fight";
 import { FRENZY_SLOT_MS, HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt, slotFrenzy } from "./hotspot";
-import { bedRaider, CHOPPED_WORMS, COLD_WORK_GAP_MS, LONG_CAST_SOLID, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, castIntoSpooked, isSkipCast, castOnFreshWater, TWIST_CASTS, twistAfterCast, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, PRESSURE_CASTS, GROUNDBAIT_CASTS, OVERFED_CASTS, SPOOKED_SWIM_CASTS, TOPUP_MAX, WARY_LANDED, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WARMING_WAIT, COOLING_WAIT, waterSwingWaitMul, anchorSplashWaitMul, ANCHOR_SPLASH_WAIT, LAMP_WINDOW } from "./logic";
+import { bedRaider, CHOPPED_WORMS, COLD_WORK_GAP_MS, LONG_CAST_SOLID, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, castIntoSpooked, isSkipCast, castOnFreshWater, RIPPED_CASTS, TWIST_CASTS, twistAfterCast, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, PRESSURE_CASTS, GROUNDBAIT_CASTS, OVERFED_CASTS, SPOOKED_SWIM_CASTS, TOPUP_MAX, WARY_LANDED, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WARMING_WAIT, COOLING_WAIT, waterSwingWaitMul, anchorSplashWaitMul, ANCHOR_SPLASH_WAIT, LAMP_WINDOW } from "./logic";
 import { BUILT_SWIM_STEAL_CHANCE, FRESH_SWIM_STEAL_CHANCE, LIGHT_HOLD, STEAL_CHANCE, stealsBait } from "./nibblePlan";
 import { castForReleased } from "./releasedFish";
 
@@ -175,11 +175,11 @@ const harnessLegend: { current: { legendId: string; spot: SpotId } | null } = { 
 const harnessGiants: { current: Giant[] } = { current: [] };
 const harnessLost: { current: LodgeLost[] } = { current: [] };
 
-function Harness({ current = profile, hour = "day", rising = false, lure, wind, sky, season }: { current?: Profile; hour?: LakeHour; rising?: boolean; lure?: string; wind?: Wind; sky?: Sky; season?: LakeSeason }) {
+function Harness({ current = profile, hour = "day", rising = false, lure, wind, sky, season, mercy = false }: { current?: Profile; hour?: LakeHour; rising?: boolean; lure?: string; wind?: Wind; sky?: Sky; season?: LakeSeason; mercy?: boolean }) {
   // A stable ref, as Dock's tied lure is, so a re-render with another lure reaches callbacks made earlier.
   const lureRef = useRef(lure ?? "");
   lureRef.current = lure ?? "";
-  const game = useFishingGame(current, hour, lure === undefined ? undefined : lureRef, sky, false, season, undefined, rising, wind, undefined, harnessLegend.current, undefined, undefined, undefined, harnessGiants.current, harnessLost.current);
+  const game = useFishingGame(current, hour, lure === undefined ? undefined : lureRef, sky, mercy, season, undefined, rising, wind, undefined, harnessLegend.current, undefined, undefined, undefined, harnessGiants.current, harnessLost.current);
   return (
     <>
       <div ref={game.surfaceRef} data-stance="dock" data-aim="0.5,3" data-angler="0.15,7.42">
@@ -254,7 +254,7 @@ afterEach(() => {
 });
 
 /** Pins the clock so a bubble move never lands inside a test by accident. */
-function mount(at = DOCK_BUBBLES.at, current = profile, hour: LakeHour = "day", rising = false, lure?: string, wind?: Wind, sky?: Sky, season?: LakeSeason) {
+function mount(at = DOCK_BUBBLES.at, current = profile, hour: LakeHour = "day", rising = false, lure?: string, wind?: Wind, sky?: Sky, season?: LakeSeason, mercy = false) {
   vi.useFakeTimers();
   vi.setSystemTime(at);
   vi.spyOn(performance, "now").mockImplementation(() => now);
@@ -268,7 +268,7 @@ function mount(at = DOCK_BUBBLES.at, current = profile, hour: LakeHour = "day", 
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
-  act(() => root!.render(<Harness current={current} hour={hour} rising={rising} lure={lure} wind={wind} sky={sky} season={season} />));
+  act(() => root!.render(<Harness current={current} hour={hour} rising={rising} lure={lure} wind={wind} sky={sky} season={season} mercy={mercy} />));
   return container.querySelector("div")!;
 }
 
@@ -3377,6 +3377,37 @@ describe("useFishingGame groundbait", () => {
     expect(groundbait()).toBe(`0|dock:${GROUNDBAIT_CASTS - 1}`);
   });
 
+  it("says a spinner cast over the swim spends two casts of it the first time, and spends two again untold", () => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    const ripSaid = `The lure's flash and thump push the feeders off: each cast of a spinner or crankbait over the swim spends ${RIPPED_CASTS} casts of it, where other lures and bait spend 1.`;
+    let surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Spinner");
+    toss();
+    cast(surface);
+    expect(hint()).toContain(`Over the groundbait. ${ripSaid}`);
+    expect(groundbait()).toBe(`0|dock:${GROUNDBAIT_CASTS - RIPPED_CASTS}`);
+    expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ casts: GROUNDBAIT_CASTS - RIPPED_CASTS, ripped: true });
+
+    // Back after a reload, the swim remembers it was told.
+    act(() => root!.unmount());
+    root = null;
+    container!.remove();
+    surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Spinner");
+    cast(surface);
+    expect(hint()).toContain("Over the groundbait.");
+    expect(hint()).not.toContain(ripSaid);
+    expect(groundbait()).toBe(`0|dock:${GROUNDBAIT_CASTS - 2 * RIPPED_CASTS}`);
+  });
+
+  it("spares a beginner's spinner the rip: one cast of the swim, and nothing told", () => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Spinner", undefined, undefined, undefined, true);
+    toss();
+    cast(surface);
+    expect(hint()).toContain("Over the groundbait.");
+    expect(hint()).not.toContain("flash and thump");
+    expect(groundbait()).toBe(`0|dock:${GROUNDBAIT_CASTS - 1}`);
+  });
+
   it("tops up a fading swim so more feeders come in, and overfeeds one still well fed", () => {
     const kept = new Map<string, string>([[bagKey(profile.userId), JSON.stringify({ handfuls: 3, day: "2000-01-01" })]]);
     vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
@@ -3614,7 +3645,8 @@ describe("useFishingGame groundbait", () => {
     expect(phase()).toBe("result:landed");
     expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toBe(`Northern pike: it was hunting the feeders on the built-up swim. Its thrashing scattered the feeders off the swim: none take for the next ${SPOOKED_SWIM_CASTS} casts, and it needs building up again.`);
     const scattered = JSON.parse(kept.get(swimKey(profile.userId))!);
-    expect(scattered).toMatchObject({ spot: "dropoff", casts: 5, spooked: SPOOKED_SWIM_CASTS });
+    // Chasing the pike with a crankbait spent the swim twice as fast.
+    expect(scattered).toMatchObject({ spot: "dropoff", casts: 6 - RIPPED_CASTS, spooked: SPOOKED_SWIM_CASTS, ripped: true });
     expect(scattered.built).toBeUndefined();
   });
 
@@ -3629,7 +3661,7 @@ describe("useFishingGame groundbait", () => {
     castAndFight(surface, 1);
     expect(phase()).toBe("idle:broke");
     expect(container!.querySelector("[data-testid=broke]")?.textContent).toContain("Its thrashing scattered the feeders off the swim");
-    expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ casts: 5, spooked: SPOOKED_SWIM_CASTS });
+    expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ casts: 6 - RIPPED_CASTS, spooked: SPOOKED_SWIM_CASTS });
   });
 
   it("leaves a swim not yet built as it was when a pike is landed over it", () => {
@@ -3643,7 +3675,7 @@ describe("useFishingGame groundbait", () => {
     castAndFight(surface, 1);
     expect(phase()).toBe("result:landed");
     expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toBe("");
-    expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ casts: 5, built: TOPUP_MAX - 1 });
+    expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ casts: 6 - RIPPED_CASTS, built: TOPUP_MAX - 1 });
   });
 
   it.each([
