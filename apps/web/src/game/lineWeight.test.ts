@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { HEAVY_BRIGHT_WAIT, LINE_SNAP, LINE_WAIT, lineWaitMul, nextLine } from "./lineWeight";
+import { brightCalm, HEAVY_BRIGHT_WAIT, LINE_SNAP, LINE_WAIT, lineWaitMul, nextLine } from "./lineWeight";
 
 describe("the line on the reel", () => {
   it("goes round from light to heavy and back", () => {
@@ -22,9 +22,8 @@ describe("the line on the reel", () => {
     expect(LINE_WAIT.wire).toBeGreaterThan(LINE_WAIT.heavy);
   });
 
-  it("shows heavy line plainer in bright, calm water from dawn to dusk", () => {
-    expect(HEAVY_BRIGHT_WAIT).toBeGreaterThan(LINE_WAIT.heavy);
-    for (const hour of ["dawn", "day", "dusk"] as const) expect(lineWaitMul("heavy", hour, "clear", "calm")).toBe(HEAVY_BRIGHT_WAIT);
+  it("finds the water bright and calm under a clear sky with no wind, from dawn to dusk", () => {
+    for (const hour of ["dawn", "day", "dusk"] as const) expect(brightCalm(hour, "clear", "calm")).toBe(true);
   });
 
   it.each([
@@ -36,11 +35,14 @@ describe("the line on the reel", () => {
     ["in a light ripple", "day", "clear", "light-north"],
     ["in a breeze", "day", "clear", "breezy"],
     ["with no weather known", "day", undefined, undefined],
-  ] as const)("keeps heavy line's usual wait %s", (_, hour, sky, wind) => {
-    expect(lineWaitMul("heavy", hour, sky, wind)).toBe(LINE_WAIT.heavy);
+  ] as const)("doesn't find the water bright and calm %s", (_, hour, sky, wind) => {
+    expect(brightCalm(hour, sky, wind)).toBe(false);
   });
 
-  it("leaves the other lines as they are in bright, calm water", () => {
-    for (const line of ["light", "standard", "wire"] as const) expect(lineWaitMul(line, "day", "clear", "calm")).toBe(LINE_WAIT[line]);
+  it("shows heavy line plainer in bright, calm water, and leaves the other lines as they are", () => {
+    expect(lineWaitMul("heavy", true)).toBe(HEAVY_BRIGHT_WAIT);
+    expect(HEAVY_BRIGHT_WAIT).toBeGreaterThan(LINE_WAIT.heavy);
+    for (const line of ["light", "standard", "heavy", "wire"] as const) expect(lineWaitMul(line, false)).toBe(LINE_WAIT[line]);
+    for (const line of ["light", "standard", "wire"] as const) expect(lineWaitMul(line, true)).toBe(LINE_WAIT[line]);
   });
 });

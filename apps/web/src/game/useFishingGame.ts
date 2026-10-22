@@ -72,7 +72,7 @@ import { castForFoe, foeGone, isOldFoe, loadOldFoe, saveOldFoe } from "./oldFoe"
 import { loadNightLine, nightLineCatch, nightLineKinds, nightLineNextChange, nightLineSeason, nightLineState, nightSkyFor, saveNightLine, wormLineHour, type NightLine } from "./nightLine";
 import { markShy, loadGiantShy, rollGiantShy, saveGiantShy, shyOf, type GiantShy } from "./giantShy";
 import { AGAIN_CASTS, backAgain, castForGotAway, gotAwayAfterDrop, PATIENT_DROP_RANK, gotAwayAfterLoss, type GotAway } from "./gotAway";
-import { HEAVY_BRIGHT_WAIT, LIGHT_BITE_THROUGH, LINE_COVER, LINE_SNAP, lineWaitMul, type LineWeight } from "./lineWeight";
+import { brightCalm, LIGHT_BITE_THROUGH, LINE_COVER, LINE_SNAP, lineWaitMul, type LineWeight } from "./lineWeight";
 import { countAtBank, loadBankMemory, rollBankMemory, saveBankMemory, waryFromYesterday, YESTERDAY_WAIT, type BankMemory } from "./bankMemory";
 import { castForLodgeLost, castForLodgeTag, castForReleased, loadReleased, saveReleased, type Recaught } from "./releasedFish";
 import { weightText } from "../i18n/content";
@@ -1326,7 +1326,8 @@ export function useFishingGame(
     // The line on the reel holds for the cast and its fight. Heavy line is a slow side told with the others the angler can
     // switch off; light line's speed-up is told last, after the bank's own reasons.
     castLineRef.current = settings.line;
-    const lineWait = lineWaitMul(castLineRef.current, hour, sky, windRef.current);
+    const bright = brightCalm(hour, sky, windRef.current);
+    const lineWait = lineWaitMul(castLineRef.current, bright);
     // The small feeders on a swim built all the way, or a wire leader, draw the bank's pike, when the tied lure would take one the angler can land.
     const wire = castLineRef.current === "wire";
     const builtUp = bait.built >= TOPUP_MAX;
@@ -1345,7 +1346,6 @@ export function useFishingGame(
       // Where a fish hooked here could run into the weeds or wrap the line round wood, heavy line's pull is told with it.
       // In bright, calm water the fish see it plainer, and that is told in its place.
       const castWater = fightWater(spotRef.current, castPadsRef.current, castLogRef.current);
-      const bright = lineWait === HEAVY_BRIGHT_WAIT;
       reasons.unshift(
         castWater === "weeds"
           ? bright

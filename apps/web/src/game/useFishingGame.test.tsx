@@ -3722,13 +3722,15 @@ describe("useFishingGame groundbait", () => {
 
   it.each([
     ["dock", "clear", HEAVY_BRIGHT_WAIT, "Heavy line: in the bright, calm water the fish see it plainer, so the bites come slower still, but a line wrapped round the wood comes free in half the time."],
+    ["pads", "clear", HEAVY_BRIGHT_WAIT, "Heavy line: in the bright, calm water the fish see it plainer, so the bites come slower still, but it pulls a fish out of the weeds in half the time."],
     ["dropoff", "clear", HEAVY_BRIGHT_WAIT, "Heavy line: in the bright, calm water the fish see it plainer, so the bites come slower still."],
     ["dropoff", "overcast", LINE_WAIT.heavy, "Heavy line: the fish can see it, so the bites come slower."],
   ] as const)("slows and tells heavy line at the %s on a calm day under a %s sky", (stance, sky, slower, said) => {
     updateSettings({ line: "heavy" });
     try {
-      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, undefined, "calm", sky);
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, undefined, "calm", sky, "summer");
       if (stance === "dropoff") atDropoff(surface);
+      if (stance === "pads") Object.assign(surface.dataset, { stance: "point", angler: "-5.6,12.2", aim: "-6.8,4.8" });
       cast(surface);
       // The line's wait goes second to last into the stack, ahead of the frenzy's.
       expect(vi.mocked(stackWaitMs).mock.lastCall?.at(-2)).toBe(slower);
