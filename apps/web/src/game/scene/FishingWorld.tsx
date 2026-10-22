@@ -21,6 +21,7 @@ import {
   type Sky,
   type SpotId,
   type StanceId,
+  type Wind,
 } from "@stillwater/shared";
 import { JUMP_MS, ROLL_MS, SHAKE_MS, type FightSim } from "../fight";
 import { fx } from "../fx";
@@ -148,6 +149,7 @@ import { aimInputs, listenForWaterAim, sameAim } from "./pointerAim";
 import { fishBuild, type FishBuild } from "./fishBuild";
 import { useReducedMotion } from "./reducedMotion";
 import { GLOW_TIP, lineLook } from "./lineLook";
+import { brightCalm, winterClear } from "../lineWeight";
 import { gearOpacity, LEADER_DULL, LEADER_GLINT, LEADER_LEN, LEADER_STEEL, leaderGlint, leaderTail } from "./lineGear";
 import { castRing, CAST_RING_COLORS } from "./castRing";
 import { LIFT_START_AGE, liftDepth, liftFlop } from "./catchLift";
@@ -221,8 +223,8 @@ type Props = {
   released?: boolean;
   /** The real moon's phase for the night sky, 0 new to 0.5 full. */
   moon?: number;
-  /** The day's wind as a downwind drift on a sitting float, meters a second. */
-  wind?: { x: number; z: number };
+  /** The day's wind as a downwind drift on a sitting float, meters a second, and its name (dailyWind). */
+  wind?: { x: number; z: number; wind?: Wind };
   /** How far the anchored hull swings toward a run, as a share of its full swing (fight.ts boatSwingShare). */
   boatSwing?: number;
   /** The angler's headlamp lit on the water (logic.ts lampLit). */
@@ -930,7 +932,7 @@ function FightMotion({ phase, sim, ambush, light, lift, run, boatSwing }: { phas
   return null;
 }
 
-type LineAndBobberProps = Omit<Props, "sky" | "season" | "spot" | "hotspot" | "tracks" | "accuracy"> & { rodTip: THREE.Vector3; aim: AimState; lookAt: THREE.Vector3 };
+type LineAndBobberProps = Omit<Props, "spot" | "hotspot" | "tracks" | "accuracy"> & { rodTip: THREE.Vector3; aim: AimState; lookAt: THREE.Vector3 };
 
 function SurfaceRipple({ active, sim, sunk }: { active: boolean; sim: SimRef; sunk: boolean }) {
   const group = useRef<THREE.Group>(null);
@@ -1405,12 +1407,14 @@ function RisingFish({ phase, color, accent, size, build }: { phase: ScenePhase; 
   );
 }
 
-function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, species, weight, level, hour, wind = NO_WIND, topwater = false }: LineAndBobberProps) {
+function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, species, weight, level, hour, sky, season, wind = NO_WIND, topwater = false }: LineAndBobberProps) {
   const look = lineLook(hour);
   const gear = useSettings().line;
+  const bright = brightCalm(hour, sky, wind.wind);
+  const winter = winterClear(hour, season);
   const still = useReducedMotion();
   const restOpacity = useRef(look.opacity);
-  restOpacity.current = gearOpacity(look.opacity, gear);
+  restOpacity.current = gearOpacity(look.opacity, gear, bright, winter);
   const bobber = useRef<THREE.Group>(null);
   const hooked = useRef<THREE.Group>(null);
   const weedBall = useRef<THREE.Mesh>(null);
@@ -2427,6 +2431,8 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
         aim={aim}
         lookAt={lookAt}
         hour={hour}
+        sky={sky}
+        season={season}
         wind={wind}
         topwater={topwater}
       />

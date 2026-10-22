@@ -8,15 +8,30 @@ function length(points: Float32Array, n: number) {
 }
 
 describe("gearOpacity", () => {
-  it("keeps the standard line and the wire leader's line as they were", () => {
-    expect(gearOpacity(0.55, "standard")).toBe(0.55);
-    expect(gearOpacity(0.55, "wire")).toBe(0.55);
+  it("keeps the standard line and the wire leader's line as they were, in any water", () => {
+    for (const [bright, winter] of [[false, false], [true, false], [false, true]]) {
+      expect(gearOpacity(0.55, "standard", bright, winter)).toBe(0.55);
+      expect(gearOpacity(0.55, "wire", bright, winter)).toBe(0.55);
+    }
   });
 
   it("shows light line fainter and heavy line plainer, under a hard run's pull", () => {
-    expect(gearOpacity(0.55, "light")).toBeLessThan(0.55);
-    expect(gearOpacity(0.55, "heavy")).toBeGreaterThan(0.7);
-    expect(gearOpacity(0.72, "heavy")).toBeLessThan(0.9);
+    expect(gearOpacity(0.55, "light", false, false)).toBeLessThan(0.55);
+    expect(gearOpacity(0.55, "heavy", false, false)).toBeGreaterThan(0.7);
+    expect(gearOpacity(0.72, "heavy", false, false)).toBeLessThan(0.9);
+  });
+
+  it("shows heavy line plainer still in bright, calm water or winter's clear water", () => {
+    const plain = gearOpacity(0.55, "heavy", false, false);
+    expect(gearOpacity(0.55, "heavy", true, false)).toBeGreaterThan(plain + 0.08);
+    expect(gearOpacity(0.55, "heavy", false, true)).toBeGreaterThan(plain + 0.08);
+    expect(gearOpacity(0.72, "heavy", true, true)).toBeLessThan(0.9);
+  });
+
+  it("all but loses light line in winter's clear water, not on a bright, calm day", () => {
+    const faint = gearOpacity(0.55, "light", false, false);
+    expect(gearOpacity(0.55, "light", false, true)).toBeLessThan(faint * 0.7);
+    expect(gearOpacity(0.55, "light", true, false)).toBe(faint);
   });
 });
 

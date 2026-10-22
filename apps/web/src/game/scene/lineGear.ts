@@ -2,10 +2,14 @@ import type { LineWeight } from "../lineWeight";
 
 /** How plain each line shows on the water, as a share of the standard line's opacity: the fish can't see light line, and see heavy line plainer. */
 export const LINE_SHOW: Record<LineWeight, number> = { light: 0.65, standard: 1, heavy: 1.4, wire: 1 };
+/** In bright, calm water or winter's clear water heavy line shows plainer still, and in winter light line is nearly lost. */
+export const HEAVY_BRIGHT_SHOW = 1.6;
+export const LIGHT_WINTER_SHOW = 0.4;
 
-/** The line's resting opacity on this reel, kept under the full pull of a hard run. */
-export function gearOpacity(base: number, line: LineWeight) {
-  return Math.min(0.88, base * LINE_SHOW[line]);
+/** The line's resting opacity on this reel, kept under the full pull of a hard run; mirrors lineWaitMul's bright and winter water. */
+export function gearOpacity(base: number, line: LineWeight, bright: boolean, winter: boolean) {
+  const show = line === "heavy" && (bright || winter) ? HEAVY_BRIGHT_SHOW : line === "light" && winter ? LIGHT_WINTER_SHOW : LINE_SHOW[line];
+  return Math.min(0.88, base * show);
 }
 
 /** How long the wire leader's steel trace is at the lure end of the line, in meters. */
