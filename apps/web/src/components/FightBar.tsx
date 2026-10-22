@@ -297,7 +297,13 @@ export function FightBar({ fight, sim, performance, best = null, note = null, cl
           {fight.water === "current" && <p className="fight-water">{t("Inlet: the current takes line while you rest, and helps a run downstream")}</p>}
           {fight.water === "deep" && <p className="fight-water">{t("Drop-off: runs dive and pull harder, but tire the fish faster")}</p>}
           {fight.water === "rocks" && !fight.edge && <p className="fight-water">{t("Point: turn every run; reeling while it drags over the rocks frays the line")}</p>}
-          {fight.line === "light" && <p className="fight-water">{t("Light line: it snaps sooner, so keep out of the red")}</p>}
+          {fight.line === "light" && (
+            <p className="fight-water">
+              {canTurnRuns(fight.species.challenge) && fight.weedFrays
+                ? t("Light line: it snaps sooner, and the weed stems fray it if the fish goes in, so turn every run")
+                : t("Light line: it snaps sooner, so keep out of the red")}
+            </p>
+          )}
           {fight.line === "heavy" && (
             <p className="fight-water">
               {canTurnRuns(fight.species.challenge) && fight.water === "weeds"

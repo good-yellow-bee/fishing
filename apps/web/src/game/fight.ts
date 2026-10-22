@@ -77,6 +77,8 @@ export type FightSim = {
   frayed?: boolean;
   /** A pike that swallowed the bait has worn the line through to frayed with its teeth, mid-fight. */
   bitten?: boolean;
+  /** A fish on light line ran into the weeds, and the stems sawed the line to frayed, mid-fight. */
+  sawn?: boolean;
   /** A smallmouth's or a rainbow's run straight at the angler, coming and while it lasts: the line goes slack unless it is reeled fast. */
   charge?: boolean;
   /** Hooked through the duckweed, it comes in under a ball of weed until its first run strips it off. */
@@ -202,6 +204,8 @@ export type FightPerformance = {
   scuffed?: boolean;
   /** A pike's teeth frayed the line during this fight, and it stays frayed until retied. */
   bitten?: boolean;
+  /** The weed stems sawed a light line to frayed during this fight, and it stays frayed until retied. */
+  sawn?: boolean;
   /** A charge was left slack instead of reeled up: the clean bonus goes. */
   slackCharge?: boolean;
 };
@@ -494,9 +498,10 @@ export function fightWind(wind: string | undefined): FightWind | undefined {
  * foam lane (a slack line drifts out faster still), `lantern` in the dock lantern's light at night (it sees the net and
  * bolts from it once, as a carp does), `fired` chasing the kingfisher's fry (fired up, its first run doesn't tire it).
  * `lineSnap` scales the strain the line snaps at, sound or frayed, for a light or heavy line on the reel, and `lineCover`
- * how long a fish holds in the weeds or a line stays wrapped round wood.
+ * how long a fish holds in the weeds or a line stays wrapped round wood; `weedFrays` a light line the weed stems saw to
+ * frayed once a fish runs into them.
  */
-export type FightCover = { farRock?: boolean; weedBall?: boolean; edge?: boolean; bed?: boolean; foam?: boolean; lantern?: boolean; fired?: boolean; lineSnap?: number; lineCover?: number };
+export type FightCover = { farRock?: boolean; weedBall?: boolean; edge?: boolean; bed?: boolean; foam?: boolean; lantern?: boolean; fired?: boolean; lineSnap?: number; lineCover?: number; weedFrays?: boolean };
 /** In a foam lane on a breezy or strong day the wind's drift is at its strongest: a slack line drifts out this much faster still. */
 export const FOAM_DRIFT = 1.3;
 export type FightWater = "open" | "weeds" | "current" | "deep" | "rocks" | "boat" | "pilings" | "log";
@@ -625,7 +630,7 @@ export function makeFight(
   /** What the fish was hooked by, on top of the spot's water. */
   cover: FightCover = {},
 ): FightRuntime {
-  const { farRock = false, weedBall = false, edge = false, bed = false, foam = false, lantern = false, fired = false, lineSnap = 1, lineCover = 1 } = cover;
+  const { farRock = false, weedBall = false, edge = false, bed = false, foam = false, lantern = false, fired = false, lineSnap = 1, lineCover = 1, weedFrays = false } = cover;
   /** The strain the line snaps at right now: a frayed one sooner, both scaled by the line on the reel. */
   const snapNow = () => (sim.frayed ? FRAYED_SNAP : snapAt) * lineSnap;
   const weedy = water === "weeds";
@@ -807,6 +812,12 @@ export function makeFight(
         if (weedy && turnable && !sim.jump && !sim.roll && !sim.charge && !turnedThisRun && sim.line > 0) {
           sim.weeded = true;
           weedUntil = nowMs + WEED_MS * coverHold * lineCover;
+          // The stems saw a light line it went in on: frayed from here, as a pike's teeth leave it.
+          if (weedFrays && !sim.frayed) {
+            sim.frayed = true;
+            sim.sawn = true;
+            performance.sawn = true;
+          }
         }
         // At the dock it wraps the line round a piling instead, and by the sunken log round the log.
         if (wrapsLine(water) && turnable && !sim.jump && !sim.roll && !sim.charge && !turnedThisRun && sim.line > 0) {

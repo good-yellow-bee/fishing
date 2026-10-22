@@ -176,6 +176,8 @@ export type Fight = {
   wired?: boolean;
   /** A pike or muskie struck on light line bit through it, so the line parts as the fight starts. */
   bitThrough?: boolean;
+  /** Fought on light line in the weeds, so a run into them saws the line to frayed. */
+  weedFrays?: boolean;
   /** Hooked tight to the lily pads, so it dives for the pad stems like a fish in the reeds' weeds. */
   pads?: boolean;
   /** Hooked from the boat tight to the far rock, so an unturned run drags the line over the rock. */
@@ -347,8 +349,8 @@ export const SECOND_TAKE_NIBBLE_MS = 300;
 export const FOLLOW_MS = 1200;
 
 /** Said once, when a fight first frays the line: what did it, and what to do. */
-function scuffNote(water: FightWater | undefined, teeth = false, farRock = false) {
-  if (teeth) return t("Its teeth frayed your line: it snaps sooner until you retie it.");
+function scuffNote(water: FightWater | undefined, performance: FightPerformance, farRock = false) {
+  if (!performance.scuffed) return performance.sawn ? t("The weed stems frayed your light line: it snaps sooner until you retie it.") : t("Its teeth frayed your line: it snaps sooner until you retie it.");
   if (farRock) return t("The far rock frayed your line: it snaps sooner until you retie it.");
   if (water === "log") return t("Rubbing round the sunken log frayed your line: it snaps sooner until you retie it.");
   return water === "pilings"
@@ -972,6 +974,8 @@ export function useFishingGame(
     const bitThrough = !!strike && !underpowered && !mercyRef.current && castLineRef.current === "light" && TOOTHY.has(species.id) && Math.random() < LIGHT_BITE_THROUGH;
     const pads = castPadsRef.current;
     const water = fightWater(spotRef.current, pads, castLogRef.current);
+    // Light line run into the weeds is sawn on the stems, unless already frayed; a beginner is spared.
+    const weedFrays = water === "weeds" && castLineRef.current === "light" && !mercyRef.current && !frayedRef.current;
     const windy = fightWind(windRef.current);
     // One hooked tight to the far rock from the boat runs round the rock, dragging the line over it unless turned.
     const farRock = castFarRockRef.current && water === "boat";
@@ -990,7 +994,7 @@ export function useFishingGame(
     // One hooked chasing the kingfisher's fry is fired up.
     const fired = castFryRef.current;
     const hookWise = !!(recaughtRef.current?.foe || recaughtRef.current?.lost);
-    const next = { species, weight, underpowered, water, windy, lightHook, line: castLineRef.current, wired, bitThrough, pads, farRock, weedBall, edge, bed, foam, rising, lantern, fired, hookWise, strongLift: liftsStickerInOne(species.id, current.strength) };
+    const next = { species, weight, underpowered, water, windy, lightHook, line: castLineRef.current, wired, bitThrough, weedFrays, pads, farRock, weedBall, edge, bed, foam, rising, lantern, fired, hookWise, strongLift: liftsStickerInOne(species.id, current.strength) };
     fightRef.current = next;
     setFight(next);
     setPhaseBoth("fight");
@@ -1003,7 +1007,7 @@ export function useFishingGame(
         resetToIdle(current.strength < species.minStrength ? t("Line parted. Spend points on Strength.") : t("Line parted. Spend points on Accuracy."));
       }, 1400);
     } else {
-      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)) * seasonTireMul(season, species.id) * warmTireMul(season, species.id, sky, spotRef.current) * runTireMul(season, species.id) * nestTireMul(season, species.id, spotRef.current) * nightTireMul(hourRef.current, species.id) * spentTireMul(season, species.id) * twilightTireMul(hourRef.current, species.id) * springRunTireMul(season, species.id, spotRef.current) * currentTireMul(species.id, spotRef.current) * fallFeedTireMul(season, species.id) * rainHunterTireMul(sky, species.id) * summerStrengthTireMul(season, species.id), water, windy, isTopwater(lureRef?.current) || rising, hasTrebles(lureRef?.current) || deep, seasonTireMul(season, species.id) > 1, isTrophyWeight(species, weight), floodedInlet(spotRef.current, season, sky), frayedRef.current, deep && !wired, lineSnapForLevel(anglerLevel(current.lifetimePoints)), turnCutMulForLevel(anglerLevel(current.lifetimePoints)), netsFish(species, mercyRef.current), { farRock, weedBall, edge, bed, foam, lantern, fired: fired || hookWise, lineSnap: LINE_SNAP[castLineRef.current], lineCover: LINE_COVER[castLineRef.current] });
+      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)) * seasonTireMul(season, species.id) * warmTireMul(season, species.id, sky, spotRef.current) * runTireMul(season, species.id) * nestTireMul(season, species.id, spotRef.current) * nightTireMul(hourRef.current, species.id) * spentTireMul(season, species.id) * twilightTireMul(hourRef.current, species.id) * springRunTireMul(season, species.id, spotRef.current) * currentTireMul(species.id, spotRef.current) * fallFeedTireMul(season, species.id) * rainHunterTireMul(sky, species.id) * summerStrengthTireMul(season, species.id), water, windy, isTopwater(lureRef?.current) || rising, hasTrebles(lureRef?.current) || deep, seasonTireMul(season, species.id) > 1, isTrophyWeight(species, weight), floodedInlet(spotRef.current, season, sky), frayedRef.current, deep && !wired, lineSnapForLevel(anglerLevel(current.lifetimePoints)), turnCutMulForLevel(anglerLevel(current.lifetimePoints)), netsFish(species, mercyRef.current), { farRock, weedBall, edge, bed, foam, lantern, fired: fired || hookWise, lineSnap: LINE_SNAP[castLineRef.current], lineCover: LINE_COVER[castLineRef.current], weedFrays });
       runtimeRef.current = runtime;
       simRef.current = runtime.sim;
       performanceRef.current = runtime.performance;
@@ -1341,6 +1345,7 @@ export function useFishingGame(
     const builtUp = bait.built >= TOPUP_MAX;
     const prowling = (builtUp || wire) && !mercyRef.current ? prowlerAt(spotRef.current, lureRef?.current) : undefined;
     const prowler = prowling && canLand(current, prowling) ? prowling.id : undefined;
+    const castWater = fightWater(spotRef.current, castPadsRef.current, castLogRef.current);
     if (wire) {
       reasons.unshift(
         !prowler
@@ -1353,7 +1358,6 @@ export function useFishingGame(
     else if (lineWait > 1) {
       // Where a fish hooked here could run into the weeds or wrap the line round wood, heavy line's pull is told with it.
       // In bright, calm water the fish see it plainer, and that is told in its place.
-      const castWater = fightWater(spotRef.current, castPadsRef.current, castLogRef.current);
       reasons.unshift(
         castWater === "weeds"
           ? bright
@@ -1369,9 +1373,12 @@ export function useFishingGame(
       );
     }
     else if (lineWait < 1) {
-      // Only the warning is told up front; it draws no pike to the light line.
+      // Only the warnings are told up front; it draws no pike to the light line.
       const toothy = !mercyRef.current && poolForLure(FISH.filter((fish) => fish.spots.includes(spotRef.current)), lureRef?.current).some((fish) => TOOTHY.has(fish.id) && canLand(current, fish));
-      if (toothy) reasons.unshift(t("Light line: the fish can't see it, so the bites come sooner, but a pike here can bite through it at the strike."));
+      const weeds = !mercyRef.current && !frayedRef.current && castWater === "weeds";
+      if (toothy && weeds) reasons.unshift(t("Light line: the fish can't see it, so the bites come sooner, but a pike here can bite through it at the strike, and the weed stems fray it if a fish runs in."));
+      else if (toothy) reasons.unshift(t("Light line: the fish can't see it, so the bites come sooner, but a pike here can bite through it at the strike."));
+      else if (weeds) reasons.unshift(t("Light line: the fish can't see it, so the bites come sooner, but the weed stems fray it if a fish runs in."));
       else reasons.push(t("Light line: the fish can't see it, so the bites come sooner."));
     }
     // Told last, so the two-reason cap always keeps it: waiting a few seconds is the fix.
@@ -1996,6 +2003,7 @@ export function useFishingGame(
     let wasWeeded = false;
     let wasWrapped = false;
     let wasBitten = false;
+    let wasSawn = false;
     let wasShaking = false;
     let wasLifting = false;
     let wasNetting = false;
@@ -2142,6 +2150,9 @@ export function useFishingGame(
             setHint(t("Its teeth have frayed the line! It snaps sooner now, so land it quick."));
           }
           wasBitten = !!sim.bitten;
+          // The weed stems saw a light line the fish ran in on to frayed, and the card says so.
+          if (sim.sawn && !wasSawn) setHint(t("The weed stems have frayed your light line! It snaps sooner now, so ease it out of the weeds."));
+          wasSawn = !!sim.sawn;
           // A walleye shaking its head knocks up the rod.
           if (sim.shake && !wasShaking) {
             fx.headShake();
@@ -2210,8 +2221,8 @@ export function useFishingGame(
             // A prowler is fought through the swim even when landed, so it scatters the feeders as a lost big feeder does.
             const prowlerScattered = PROWLERS.has(current.species.id) ? feedersScattered(current.species).trim() : "";
             const prowled = prowlerScattered ? `${t("{fish}: it was hunting the feeders on the built-up swim.", { fish: t(current.species.name) })} ${prowlerScattered}` : "";
-            const frays = runtime.performance.scuffed || runtime.performance.bitten;
-            const scuffed = frays && !frayedRef.current ? scuffNote(current.water, !runtime.performance.scuffed, current.farRock) : "";
+            const frays = runtime.performance.scuffed || runtime.performance.bitten || runtime.performance.sawn;
+            const scuffed = frays && !frayedRef.current ? scuffNote(current.water, runtime.performance, current.farRock) : "";
             if (frays) markFrayed(true);
             // The fish took the worm, so a fresh one goes on.
             setSoak(0);
@@ -2309,8 +2320,8 @@ export function useFishingGame(
             spookRef.current = spotRef.current;
             schoolRef.current = null;
             gotAwayRef.current = gotAwayAfterLoss(current.species, current.weight, spotRef.current, recaughtRef.current);
-            const frays = runtime.performance.scuffed || runtime.performance.bitten;
-            const trophy = lostTrophy(current.species, current.weight) + giantLost() + foeLost(current) + feedersScattered(current.species) + (frays && !frayedRef.current ? ` ${scuffNote(current.water, !runtime.performance.scuffed, current.farRock)}` : "");
+            const frays = runtime.performance.scuffed || runtime.performance.bitten || runtime.performance.sawn;
+            const trophy = lostTrophy(current.species, current.weight) + giantLost() + foeLost(current) + feedersScattered(current.species) + (frays && !frayedRef.current ? ` ${scuffNote(current.water, runtime.performance, current.farRock)}` : "");
             if (frays) markFrayed(true);
             if (sim.tornOut && sim.lightHook && !SOFT_MOUTHS.has(current.species.id)) {
               setOutcome({ kind: "broke", message: t("The light hook pulled out of the {fish}.", { fish: t(current.species.name) }) + trophy });
