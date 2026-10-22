@@ -60,7 +60,7 @@ async function show(path: string): Promise<HTMLElement> {
   return box;
 }
 
-describe("round 128: Waters ideas", () => {
+describe("round 127: Waters ideas", () => {
   it("finds the nearest pinned water, skipping unpinned ones", () => {
     const near = nearestPinned(book.spots[0]!.place!, book.spots.slice(1));
     expect(near?.spot.id).toBe("b");

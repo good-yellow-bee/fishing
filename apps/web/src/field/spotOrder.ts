@@ -92,13 +92,7 @@ export function kmBetween(a: { lat: number; lng: number }, b: { lat: number; lng
 
 /** The water with a pin nearest to where the player stands, and how far it is; null when no water has a pin. */
 export function nearestWater(book: Logbook, here: { lat: number; lng: number }): { spot: Spot; km: number } | null {
-  let best: { spot: Spot; km: number } | null = null;
-  for (const spot of book.spots) {
-    if (!spot.place || spot.id === PLAY_LAKE_ID) continue;
-    const km = kmBetween(here, spot.place);
-    if (!best || km < best.km) best = { spot, km };
-  }
-  return best;
+  return nearestPinned(here, book.spots.filter((spot) => spot.id !== PLAY_LAKE_ID));
 }
 
 /** The pinned water among `spots` nearest to `from`, and how far it is; null when none has a pin. */

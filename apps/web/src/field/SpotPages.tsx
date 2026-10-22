@@ -212,6 +212,7 @@ export function SpotsPage() {
   };
   // Each card's own count, as "Most fish" orders them.
   const shownCount = (row: { spot: { id: string }; fishCount: number }) => (ownHere(row.spot.id) ? ownRow.get(row.spot.id)?.fishCount ?? 0 : row.fishCount);
+  const shownLastFish = (row: { spot: { id: string }; lastFishDay: string | null }) => (ownHere(row.spot.id) ? ownRow.get(row.spot.id)?.lastFishDay ?? null : row.lastFishDay);
   // Ties by name under every order, so two waters never fished keep one place.
   const tidyOrder = (a: { spot: { name: string } }, b: { spot: { name: string } }) => waterName(a.spot.name).localeCompare(waterName(b.spot.name), locale());
   if (order === "name") rows.sort(tidyOrder);
@@ -366,7 +367,7 @@ export function SpotsPage() {
                   spot={row.spot}
                   fishCount={shownCount(row)}
                   tripCount={fishedHere(row.spot.id)}
-                  lastFishDay={ownHere(row.spot.id) ? ownRow.get(row.spot.id)?.lastFishDay ?? null : row.lastFishDay}
+                  lastFishDay={shownLastFish(row)}
                   // Under any order once it has rested a week, as the Map says it: a water left alone is worth a look.
                   restDays={lastOut.has(row.spot.id) && (order === "rested" || daysBetween(lastOut.get(row.spot.id)!, today) >= 7) ? restOf(row.spot.id) : null}
                   nextOuting={nextOutingLine(upcoming.find((trip) => trip.spotId === row.spot.id), today, tomorrow)}
@@ -385,7 +386,7 @@ export function SpotsPage() {
         {/* The angler's own waters as listed, to paste into a message: which water to fish, and how each has gone. */}
         {ownShown.length > 1 ? (
           <CopySummary
-            text={() => watersSummary(ownShown.map((row) => ({ spot: row.spot, fish: shownCount(row), outings: fishedHere(row.spot.id), lastFishDay: ownHere(row.spot.id) ? ownRow.get(row.spot.id)?.lastFishDay ?? null : row.lastFishDay })))}
+            text={() => watersSummary(ownShown.map((row) => ({ spot: row.spot, fish: shownCount(row), outings: fishedHere(row.spot.id), lastFishDay: shownLastFish(row) })))}
             file="stillwater-waters.txt"
           />
         ) : null}
