@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { brightCalm, HEAVY_BRIGHT_WAIT, LIGHT_WINTER_WAIT, LINE_SNAP, LINE_WAIT, lineWaitMul, nextLine } from "./lineWeight";
+import { brightCalm, HEAVY_BRIGHT_WAIT, LIGHT_WINTER_WAIT, LINE_SNAP, LINE_WAIT, lineWaitMul, nextLine, winterClear } from "./lineWeight";
 
 describe("the line on the reel", () => {
   it("goes round from light to heavy and back", () => {
@@ -44,6 +44,12 @@ describe("the line on the reel", () => {
     expect(HEAVY_BRIGHT_WAIT).toBeGreaterThan(LINE_WAIT.heavy);
     for (const line of ["light", "standard", "heavy", "wire"] as const) expect(lineWaitMul(line, false, false)).toBe(LINE_WAIT[line]);
     for (const line of ["light", "standard", "wire"] as const) expect(lineWaitMul(line, true, false)).toBe(LINE_WAIT[line]);
+  });
+
+  it("finds winter's water clear from dawn to dusk, and not at night or in the other seasons", () => {
+    for (const hour of ["dawn", "day", "dusk"] as const) expect(winterClear(hour, "winter")).toBe(true);
+    expect(winterClear("night", "winter")).toBe(false);
+    for (const season of ["spring", "summer", "fall", undefined] as const) expect(winterClear("day", season)).toBe(false);
   });
 
   it("makes the line-shy winter fish come sooner to light line and slower to heavy, without stacking on bright, calm water", () => {

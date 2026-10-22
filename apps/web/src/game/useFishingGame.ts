@@ -72,7 +72,7 @@ import { castForFoe, foeGone, isOldFoe, loadOldFoe, saveOldFoe } from "./oldFoe"
 import { loadNightLine, nightLineCatch, nightLineKinds, nightLineNextChange, nightLineSeason, nightLineState, nightSkyFor, saveNightLine, wormLineHour, type NightLine } from "./nightLine";
 import { markShy, loadGiantShy, rollGiantShy, saveGiantShy, shyOf, type GiantShy } from "./giantShy";
 import { AGAIN_CASTS, backAgain, castForGotAway, gotAwayAfterDrop, PATIENT_DROP_RANK, gotAwayAfterLoss, type GotAway } from "./gotAway";
-import { brightCalm, LIGHT_BITE_THROUGH, LINE_COVER, LINE_SNAP, lineWaitMul, type LineWeight } from "./lineWeight";
+import { brightCalm, LIGHT_BITE_THROUGH, LINE_COVER, LINE_SNAP, lineWaitMul, type LineWeight, winterClear } from "./lineWeight";
 import { countAtBank, loadBankMemory, rollBankMemory, saveBankMemory, waryFromYesterday, YESTERDAY_WAIT, type BankMemory } from "./bankMemory";
 import { castForLodgeLost, castForLodgeTag, castForReleased, loadReleased, saveReleased, type Recaught } from "./releasedFish";
 import { weightText } from "../i18n/content";
@@ -1339,7 +1339,7 @@ export function useFishingGame(
     // switch off; light line's speed-up is told last, after the bank's own reasons.
     castLineRef.current = settings.line;
     const bright = brightCalm(hour, sky, windRef.current);
-    const winter = season === "winter";
+    const winter = winterClear(hour, season);
     const lineWait = lineWaitMul(castLineRef.current, bright, winter);
     // The small feeders on a swim built all the way, or a wire leader, draw the bank's pike, when the tied lure would take one the angler can land.
     const wire = castLineRef.current === "wire";
@@ -1359,25 +1359,25 @@ export function useFishingGame(
     else if (lineWait > 1) {
       // Where a fish hooked here could run into the weeds or wrap the line round wood, heavy line's pull is told with it.
       // In winter's clear water, or bright, calm water, the fish see it plainer, and that is told in its place (winter first).
-      reasons.unshift(
-        castWater === "weeds"
-          ? winter
-            ? t("Heavy line: in the clear winter water the fish see it plainer, so the bites come slower still, but it pulls a fish out of the weeds in half the time.")
-            : bright
-              ? t("Heavy line: in the bright, calm water the fish see it plainer, so the bites come slower still, but it pulls a fish out of the weeds in half the time.")
-              : t("Heavy line: the fish can see it, so the bites come slower, but it pulls a fish out of the weeds in half the time.")
-          : wrapsLine(castWater)
-            ? winter
-              ? t("Heavy line: in the clear winter water the fish see it plainer, so the bites come slower still, but a line wrapped round the wood comes free in half the time.")
-              : bright
-                ? t("Heavy line: in the bright, calm water the fish see it plainer, so the bites come slower still, but a line wrapped round the wood comes free in half the time.")
-                : t("Heavy line: the fish can see it, so the bites come slower, but a line wrapped round the wood comes free in half the time.")
-            : winter
-              ? t("Heavy line: in the clear winter water the fish see it plainer, so the bites come slower still.")
-              : bright
-                ? t("Heavy line: in the bright, calm water the fish see it plainer, so the bites come slower still.")
-                : t("Heavy line: the fish can see it, so the bites come slower."),
-      );
+      const cover = castWater === "weeds" ? "weeds" : wrapsLine(castWater) ? "wood" : "open";
+      const said = winter
+        ? {
+            weeds: t("Heavy line: in the clear winter water the fish see it plainer, so the bites come slower still, but it pulls a fish out of the weeds in half the time."),
+            wood: t("Heavy line: in the clear winter water the fish see it plainer, so the bites come slower still, but a line wrapped round the wood comes free in half the time."),
+            open: t("Heavy line: in the clear winter water the fish see it plainer, so the bites come slower still."),
+          }
+        : bright
+          ? {
+              weeds: t("Heavy line: in the bright, calm water the fish see it plainer, so the bites come slower still, but it pulls a fish out of the weeds in half the time."),
+              wood: t("Heavy line: in the bright, calm water the fish see it plainer, so the bites come slower still, but a line wrapped round the wood comes free in half the time."),
+              open: t("Heavy line: in the bright, calm water the fish see it plainer, so the bites come slower still."),
+            }
+          : {
+              weeds: t("Heavy line: the fish can see it, so the bites come slower, but it pulls a fish out of the weeds in half the time."),
+              wood: t("Heavy line: the fish can see it, so the bites come slower, but a line wrapped round the wood comes free in half the time."),
+              open: t("Heavy line: the fish can see it, so the bites come slower."),
+            };
+      reasons.unshift(said[cover]);
     }
     else if (lineWait < 1) {
       // Only the warnings are told up front; it draws no pike to the light line.

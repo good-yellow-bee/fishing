@@ -1,4 +1,4 @@
-import type { LakeHour, Sky, Wind } from "@stillwater/shared";
+import type { LakeHour, LakeSeason, Sky, Wind } from "@stillwater/shared";
 
 /** The line on the reel: light line the fish can't see but that snaps sooner, heavy line that holds more but that they see, or standard line on a wire leader a pike's teeth can't fray. */
 export type LineWeight = "light" | "standard" | "heavy" | "wire";
@@ -6,7 +6,7 @@ export const LINE_WEIGHTS: readonly LineWeight[] = ["light", "standard", "heavy"
 /** How long a bite takes on each line, and the strain it snaps at as a share of a standard line's. */
 export const LINE_WAIT: Record<LineWeight, number> = { light: 0.85, standard: 1, heavy: 1.15, wire: 1.2 };
 export const LINE_SNAP: Record<LineWeight, number> = { light: 0.9, standard: 1, heavy: 1.1, wire: 1 };
-/** On a clear, calm day the fish see heavy line plainer, so its bites come slower still; a ripple, cloud, rain or night hide it. */
+/** On a clear, calm day, or in winter's clear water, the fish see heavy line plainer, so its bites come slower still; outside winter a ripple, cloud, rain or night hide it. */
 export const HEAVY_BRIGHT_WAIT = 1.3;
 /** Whether the water is bright and calm: a clear sky with no wind, from dawn to dusk. */
 export function brightCalm(hour: LakeHour, sky: Sky | undefined, wind: Wind | undefined) {
@@ -14,6 +14,10 @@ export function brightCalm(hour: LakeHour, sky: Sky | undefined, wind: Wind | un
 }
 /** In winter the cold water runs clear and the fish grow line-shy, so light line's bites come sooner still, and heavy line's come as slow as in bright, calm water. */
 export const LIGHT_WINTER_WAIT = 0.75;
+/** Whether the water is winter's clear water: from dawn to dusk in winter, as the night hides the line. */
+export function winterClear(hour: LakeHour, season: LakeSeason | undefined) {
+  return season === "winter" && hour !== "night";
+}
 /** How long a bite takes on this line: heavy line shows plainer in bright, calm water or winter's clear water, where light line's bites come sooner. */
 export function lineWaitMul(line: LineWeight, bright: boolean, winter: boolean) {
   if (line === "heavy" && (bright || winter)) return HEAVY_BRIGHT_WAIT;

@@ -3827,14 +3827,34 @@ describe("useFishingGame groundbait", () => {
     ["heavy", "dropoff", "Spinner", "clear", HEAVY_BRIGHT_WAIT, "Heavy line: in the clear winter water the fish see it plainer, so the bites come slower still."],
     ["light", "dropoff", "Spinner", "overcast", LIGHT_WINTER_WAIT, "Light line: in the clear winter water the line-shy fish can't see it, so the bites come sooner still, but a pike here can bite through it at the strike."],
     ["light", "dropoff", "Nightcrawler", "overcast", LIGHT_WINTER_WAIT, "Light line: in the clear winter water the line-shy fish can't see it, so the bites come sooner still."],
+    ["heavy", "reeds", "Spinner", "overcast", HEAVY_BRIGHT_WAIT, "Heavy line: in the clear winter water the fish see it plainer, so the bites come slower still, but it pulls a fish out of the weeds in half the time."],
+    ["light", "reeds", "Spinner", "overcast", LIGHT_WINTER_WAIT, "Light line: in the clear winter water the line-shy fish can't see it, so the bites come sooner still, but a pike here can bite through it at the strike, and the weed stems fray it if a fish runs in."],
+    ["light", "reeds", "Nightcrawler", "overcast", LIGHT_WINTER_WAIT, "Light line: in the clear winter water the line-shy fish can't see it, so the bites come sooner still, but the weed stems fray it if a fish runs in."],
   ] as const)("tells %s line at the %s on a %s in winter's clear water under a %s sky", (line, stance, lure, sky, wait, said) => {
     updateSettings({ line });
     try {
       const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, lure, "calm", sky, "winter");
       if (stance === "dropoff") atDropoff(surface);
+      if (stance === "reeds") Object.assign(surface.dataset, { stance: "reeds", angler: "-13.6,10.7", aim: "-11,5" });
       cast(surface);
       expect(vi.mocked(stackWaitMs).mock.lastCall?.at(-2)).toBe(wait);
       expect(hint()).toContain(said);
+    } finally {
+      updateSettings({ line: "standard" });
+    }
+  });
+
+  it.each([
+    ["heavy", LINE_WAIT.heavy, "Heavy line: the fish can see it, so the bites come slower."],
+    ["light", LINE_WAIT.light, "Light line: the fish can't see it, so the bites come sooner."],
+  ] as const)("leaves %s line as it is on a winter night, as the dark hides it", (line, wait, said) => {
+    updateSettings({ line });
+    try {
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "night", false, "Nightcrawler", "calm", "clear", "winter");
+      atDropoff(surface);
+      cast(surface);
+      expect(vi.mocked(stackWaitMs).mock.lastCall?.at(-2)).toBe(wait);
+      expect(`${hint()} ${container!.querySelector("[data-testid=more-reasons]")?.textContent}`).toContain(said);
     } finally {
       updateSettings({ line: "standard" });
     }
