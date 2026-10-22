@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import type { Groundbait } from "../logic";
-import { CLOUD_RADIUS, DIMPLES, ROLL_SPAN, SCATTER_SEC, SCATTER_WAKES, THIEVES, WAKE_ARC, cloudCenter, cloudOpacity, dimpleAt, feedersShow, openWaterYaw, rollAt, scatterWakeAt, thiefAt, thiefCount } from "./groundbaitCloud";
+import { CLOUD_RADIUS, DIMPLES, ROLL_SPAN, SCATTER_SEC, SCATTER_WAKES, THIEVES, WAKE_ARC, cloudCenter, cloudOpacity, dimpleAt, feedersShow, openWaterYaw, PIKE_REACH, prowlAt, rollAt, scatterWakeAt, thiefAt, thiefCount } from "./groundbaitCloud";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
@@ -11,6 +11,7 @@ import { waterHeight } from "./water";
 const CLOUD = "#7a5a32";
 const CARP = "#6b5524";
 const SHINER = "#c8d2d6";
+const PIKE = "#4a6b48";
 /** The roll turns the fish over a point this far under the water, so its head, back and then tail break the surface in turn. */
 const ROLL_DEPTH = 0.45;
 const ROLL_ARC = 1.4;
@@ -37,6 +38,17 @@ function shinerShape() {
   return merged;
 }
 
+/** A +z-facing pike, PIKE_REACH from nose to middle and tail to middle: a long low body, a flat snout, its dorsal fin set far back by the tail. */
+function pikeShape() {
+  const body = new THREE.SphereGeometry(1, 12, 8).scale(0.07, 0.07, 0.38);
+  const snout = new THREE.ConeGeometry(0.045, 0.2, 6).scale(1, 0.5, 1).rotateX(Math.PI / 2).translate(0, -0.01, PIKE_REACH - 0.1);
+  const fin = new THREE.ConeGeometry(0.04, 0.1, 4).scale(0.25, 1, 1.6).translate(0, 0.08, -0.24);
+  const tail = new THREE.ConeGeometry(0.1, 0.19, 4).scale(0.25, 1, 1).rotateX(Math.PI / 2).translate(0, 0, 0.095 - PIKE_REACH);
+  const merged = mergeGeometries([body, snout, fin, tail]);
+  [body, snout, fin, tail].forEach((part) => part.dispose());
+  return merged;
+}
+
 /** The front of a ring, facing +z: the bow wave of a fish that bolts. */
 function wakeShape() {
   return new THREE.RingGeometry(0.8, 1, 12, 1, -Math.PI / 2 - WAKE_ARC / 2, WAKE_ARC).rotateX(-Math.PI / 2);
@@ -58,8 +70,8 @@ function softEdge() {
   return new THREE.CanvasTexture(canvas);
 }
 
-/** The muddy cloud a handful of groundbait leaves off the bank, thinning as its casts are fished out; fish dimple over it once `feeding` or topped up, more often the more it was built up, with `bigFeeders` in a carp now and then rolls at its edge, and with `thieves` shiners dart in at its edge and turn away, fewer as it is topped up. When a lost big feeder scatters the feeders the dimples stop, bow wakes fan out toward open water and the cloud thins. */
-export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, thieves = false }: { bait: Groundbait; feeding?: boolean; bigFeeders?: boolean; thieves?: boolean }) {
+/** The muddy cloud a handful of groundbait leaves off the bank, thinning as its casts are fished out; fish dimple over it once `feeding` or topped up, more often the more it was built up, with `bigFeeders` in a carp now and then rolls at its edge, and with `thieves` shiners dart in at its edge and turn away, fewer as it is topped up, and with `prowler` a pike glides along its open-water side, slashing in at the feeders once a pass. When a lost big feeder scatters the feeders the dimples stop, bow wakes fan out toward open water and the cloud thins. */
+export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, thieves = false, prowler = false }: { bait: Groundbait; feeding?: boolean; bigFeeders?: boolean; thieves?: boolean; prowler?: boolean }) {
   const still = useReducedMotion();
   const geo = useMemo(() => new THREE.CircleGeometry(CLOUD_RADIUS, 32).rotateX(-Math.PI / 2), []);
   const edge = useMemo(() => softEdge(), []);
@@ -74,6 +86,9 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, thi
   const shinerGeo = useMemo(() => shinerShape(), []);
   const shinerMat = useMemo(() => new THREE.MeshToonMaterial({ color: SHINER, gradientMap: toonRamp() }), []);
   const shiners = useRef<THREE.InstancedMesh>(null);
+  const pikeGeo = useMemo(() => pikeShape(), []);
+  const pike = useRef<THREE.Mesh>(null);
+  const bow = useRef<THREE.Mesh>(null);
   const place = useMemo(() => new THREE.Object3D(), []);
   // Whether the swim was scattered last frame, and when the feeders last bolted; a swim that comes in already scattered (a reload) has no bolt to show.
   const scattered = useRef(!!bait.spooked);
@@ -90,8 +105,9 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, thi
       mat.dispose();
       shinerGeo.dispose();
       shinerMat.dispose();
+      pikeGeo.dispose();
     },
-    [geo, ringGeo, wake, carpGeo, edge, mat, shinerGeo, shinerMat],
+    [geo, ringGeo, wake, carpGeo, edge, mat, shinerGeo, shinerMat, pikeGeo],
   );
   useFrame((state, dt) => {
     const mesh = cloud.current;
@@ -173,6 +189,29 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, thi
       school.count = crowd;
       school.instanceMatrix.needsUpdate = true;
     }
+    const prowl = prowler ? prowlAt(t, out, still) : null;
+    if (pike.current) {
+      pike.current.visible = prowl !== null;
+      if (prowl) {
+        const x = at.x + prowl.dx;
+        const z = at.z + prowl.dz;
+        // Its back just under the surface, breaking it as it slashes, with a slow tail-beat sway.
+        pike.current.position.set(x, waterHeight(x, z, t) - 0.05 + 0.03 * prowl.slash, z);
+        pike.current.rotation.set(0, prowl.yaw + (still ? 0 : (0.05 + 0.1 * prowl.slash) * Math.sin(t * (4 + 8 * prowl.slash))), 0);
+      }
+    }
+    if (bow.current) {
+      bow.current.visible = prowl !== null && !still;
+      if (prowl && !still) {
+        // The bow wave pushed ahead of its snout, swelling as it slashes.
+        const x = at.x + prowl.dx + Math.sin(prowl.yaw) * PIKE_REACH * 0.8;
+        const z = at.z + prowl.dz + Math.cos(prowl.yaw) * PIKE_REACH * 0.8;
+        bow.current.position.set(x, waterHeight(x, z, t) + 0.03, z);
+        bow.current.rotation.y = prowl.yaw;
+        bow.current.scale.setScalar(0.16 + 0.14 * prowl.slash);
+        (bow.current.material as THREE.MeshBasicMaterial).opacity = 0.3 * prowl.speed + 0.45 * prowl.slash;
+      }
+    }
   });
   return (
     <>
@@ -186,6 +225,12 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, thi
         <meshToonMaterial color={CARP} gradientMap={toonRamp()} />
       </mesh>
       <instancedMesh ref={shiners} name="bait-thieves" args={[shinerGeo, shinerMat, THIEVES]} visible={false} frustumCulled={false} />
+      <mesh ref={pike} name="prowling-pike" geometry={pikeGeo} visible={false}>
+        <meshToonMaterial color={PIKE} gradientMap={toonRamp()} />
+      </mesh>
+      <mesh ref={bow} geometry={wake} visible={false} renderOrder={4}>
+        <meshBasicMaterial color="#e4efea" transparent opacity={0} depthWrite={false} />
+      </mesh>
       <mesh ref={swirl} geometry={ringGeo} visible={false} renderOrder={4}>
         <meshBasicMaterial color="#e4efea" transparent opacity={0} depthWrite={false} />
       </mesh>

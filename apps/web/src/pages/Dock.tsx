@@ -70,6 +70,7 @@ import {
   NEST_RELEASE_BONUS,
   TROPHY_RELEASE_BONUS,
   backToItsNest,
+  canLand,
   type CatchSubmission,
   type LakeHour,
   type LakeSeason,
@@ -108,7 +109,7 @@ import { useEffectsSteppedDown } from "../game/frameWatch";
 import { useEffectsNotice } from "../game/effectsNotice";
 import { saveLogbook } from "../field/storage";
 import { fx } from "../game/fx";
-import { bigFeedersOver, canBaitShiner, canChopWorm, CHOPPED_WORMS, GROUNDBAIT_CASTS, OVERFED_CASTS, TOPUP_CASTS_LEFT, hookWindowMs, isMercy, lampLit, longShadowWaitMul, solidStrikeMs } from "../game/logic";
+import { bigFeedersOver, prowlerOver, canBaitShiner, canChopWorm, CHOPPED_WORMS, GROUNDBAIT_CASTS, OVERFED_CASTS, TOPUP_CASTS_LEFT, hookWindowMs, isMercy, lampLit, longShadowWaitMul, solidStrikeMs } from "../game/logic";
 import { baitThievesOver } from "../game/nibblePlan";
 import { useBadgeToast } from "../game/useBadgeToast";
 import { lostNewsKey, useNewsToast, useTagNewsToast } from "../game/useTagNewsToast";
@@ -470,6 +471,8 @@ export function DockPage() {
   const lure = tiedLure.current;
   // A worm soaked through many casts, still tied on: the stance chip says so and the Retie button puts a fresh one on.
   const washedWorm = game.washed && isLiveBait(lure);
+  // The pike shows prowling a built swim only where the toss hint names it: one the angler could land.
+  const prowling = game.groundbait ? prowlerOver(game.groundbait, lure) : undefined;
   const lureLocked = !lureCanChange(scenePhase);
   // Read by the Q and R keys, whose listener is set up once.
   const scenePhaseRef = useRef(scenePhase);
@@ -1214,6 +1217,7 @@ export function DockPage() {
           groundbaitPrimed={game.swimPrimed}
           groundbaitBig={game.groundbait ? bigFeedersOver(game.groundbait, lure) : false}
           groundbaitThieves={game.groundbait && carriesBait(lure) ? baitThievesOver(game.groundbait, lure) : false}
+          groundbaitProwler={prowling !== undefined && !!me && canLand(me.profile, prowling)}
           rising={rising}
           storm={storm}
           tracks={tracks}
