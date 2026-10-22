@@ -17,14 +17,13 @@ import { dateWords } from "./dateWords";
 import { sheetOutings } from "./catchCsv";
 import { NEWS_ITEMS } from "../game/whatsNew";
 import { FIELD_NEWS, fieldNewsDue, markFieldNewsSeen } from "./fieldNews";
-import { readKeptDraft } from "./catchDraft";
+import { dropKeptDraft, readKeptDraft } from "./catchDraft";
 import { t, tn, useT } from "../i18n";
 import { daysBetween } from "./spotOrder";
-import { speciesCounts } from "./speciesLink";
+import { bookKindName, speciesCounts } from "./speciesLink";
 import { findLink } from "./CatchSearch";
 import { bookFishDay, daysOut } from "./tripMonths";
 import { bookLureName, pieceTally } from "./pieceTally";
-import { pieceName } from "./gear/pieceKey";
 import { countedBook, countedFish, hasOwnEntries, nextBookMark, ownFish } from "./milestones";
 import { FROM_LIST } from "./leaveDeleted";
 import { thisWeekInPastYears, yearsBack } from "./yearsAgo";
@@ -179,8 +178,9 @@ export function HomePage() {
   // The month, the year and the goal count as Bests does: a planned outing of their own already leaves the sample's fish out.
   const counted = new Set(countedOwn.catches.map((entry) => entry.id));
   const kinds = speciesCounts(real).length;
-  // A look back: what came out of the water this same week in earlier years.
-  const yearsAgo = thisWeekInPastYears(real, now);
+  // A look back: what came out of the water this same week in earlier years, a night's small hours on its outing's day.
+  const fishDay = (entry: CatchEntry) => bookFishDay(book, entry);
+  const yearsAgo = thisWeekInPastYears(real, now, 3, 3, fishDay);
   // "Every fish that day" once a day, on its newest fish: a night's small hours on its outing's day.
   const linkedDays = new Set<string>();
   const dayLinkOn = new Set(yearsAgo.filter((entry) => !linkedDays.has(bookFishDay(book, entry)) && linkedDays.add(bookFishDay(book, entry))).map((entry) => entry.id));
@@ -237,7 +237,7 @@ export function HomePage() {
   const lastOutRest = lastOut ? daysBetween(lastOut.date, today) : 0;
   const nextSpot = next ? spotById(book, next.spotId) : undefined;
   // A fish started on the catch form and never saved: the first thing worth finishing.
-  const kept = readKeptDraft(now);
+  const [kept, setKept] = useState(() => readKeptDraft(now));
 
   return (
     <div className="sheet">
@@ -300,12 +300,20 @@ export function HomePage() {
         <div className="kept-draft" role="status">
           <p>
             {kept.species.trim()
-              ? t("A fish you started logging was not saved: {species}.", { species: pieceName(kept.species) })
+              ? t("A fish you started logging was not saved: {species}.", { species: bookKindName(book.catches)(kept.species) })
               : t("A fish you started logging was not saved.")}
           </p>
           <Link to={`/catches/new?${RESUME_PARAM}=1`} className="field-primary inline">
             {t("Pick it up")}
           </Link>
+          {/* As on the catch form: a fish not worth finishing goes from here, not a day later. */}
+          <button type="button" className="text-button" onClick={() => {
+              dropKeptDraft();
+              setKept(null);
+              heading.current?.focus();
+            }}>
+            {t("Let it go")}
+          </button>
         </div>
       ) : null}
 
@@ -510,7 +518,7 @@ export function HomePage() {
                   <div key={entry.id} className="years-ago">
                     {/* Say plainly how long ago, beside the date on the card. */}
                     <p className="meta">
-                      {tn(yearsBack(entry, now) ?? 1, "{n} year ago", "{n} years ago")}
+                      {tn(yearsBack(entry, now, 3, fishDay) ?? 1, "{n} year ago", "{n} years ago")}
                       {/* The whole day it came from, in the catch search. */}
                       {!dayLinkOn.has(entry.id) ? null : (
                         <>
