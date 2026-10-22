@@ -72,7 +72,7 @@ import { castForFoe, foeGone, isOldFoe, loadOldFoe, saveOldFoe } from "./oldFoe"
 import { loadNightLine, nightLineCatch, nightLineKinds, nightLineNextChange, nightLineSeason, nightLineState, nightSkyFor, saveNightLine, wormLineHour, type NightLine } from "./nightLine";
 import { markShy, loadGiantShy, rollGiantShy, saveGiantShy, shyOf, type GiantShy } from "./giantShy";
 import { AGAIN_CASTS, backAgain, castForGotAway, gotAwayAfterDrop, PATIENT_DROP_RANK, gotAwayAfterLoss, type GotAway } from "./gotAway";
-import { brightCalm, LIGHT_BITE_THROUGH, LINE_COVER, LINE_SNAP, lineWaitMul, type LineWeight, winterClear } from "./lineWeight";
+import { brightCalm, LIGHT_BITE_THROUGH, LINE_COVER, LINE_SNAP, lineWaitMul, type LineWeight, murkyRain, winterClear } from "./lineWeight";
 import { countAtBank, loadBankMemory, rollBankMemory, saveBankMemory, waryFromYesterday, YESTERDAY_WAIT, type BankMemory } from "./bankMemory";
 import { castForLodgeLost, castForLodgeTag, castForReleased, loadReleased, saveReleased, type Recaught } from "./releasedFish";
 import { weightText } from "../i18n/content";
@@ -1335,12 +1335,13 @@ export function useFishingGame(
     castLampRef.current = lampLit(lampRef.current, hour) && !mercyRef.current;
     const lampWait = castLampRef.current ? LAMP_WAIT : 1;
     if (lampWait > 1) reasons.unshift(t("Your headlamp shows the float plainly, but its light on the water puts the fish off."));
-    // The line on the reel holds for the cast and its fight. Heavy line is a slow side told with the others the angler can
-    // switch off; light line's speed-up is told last, after the bank's own reasons.
+    // The line on the reel holds for the cast and its fight. Heavy line is told with the slow sides the angler can switch
+    // off, in the rain too, where it is no slower; light line's speed-up is told last, after the bank's own reasons.
     castLineRef.current = settings.line;
     const bright = brightCalm(hour, sky, windRef.current);
     const winter = winterClear(hour, season);
-    const lineWait = lineWaitMul(castLineRef.current, bright, winter);
+    const murky = murkyRain(sky, season);
+    const lineWait = lineWaitMul(castLineRef.current, bright, winter, murky);
     // The small feeders on a swim built all the way, or a wire leader, draw the bank's pike, when the tied lure would take one the angler can land.
     const wire = castLineRef.current === "wire";
     const builtUp = bait.built >= TOPUP_MAX;
@@ -1356,27 +1357,33 @@ export function useFishingGame(
             : t("Wire leader: the fish see it, so the bites come slower, but pike come to it twice as often."),
       );
     }
-    else if (lineWait > 1) {
+    else if (castLineRef.current === "heavy") {
       // Where a fish hooked here could run into the weeds or wrap the line round wood, heavy line's pull is told with it.
       // In winter's clear water, or bright, calm water, the fish see it plainer, and that is told in its place (winter first).
       const cover = castWater === "weeds" ? "weeds" : wrapsLine(castWater) ? "wood" : "open";
-      const said = winter
+      const said = murky
         ? {
-            weeds: t("Heavy line: in the clear winter water the fish see it plainer, so the bites come slower still, but it pulls a fish out of the weeds in half the time."),
-            wood: t("Heavy line: in the clear winter water the fish see it plainer, so the bites come slower still, but a line wrapped round the wood comes free in half the time."),
-            open: t("Heavy line: in the clear winter water the fish see it plainer, so the bites come slower still."),
+            weeds: t("Heavy line: in the murky rain water the fish can't see it, so the bites come as quick as on standard line, and it pulls a fish out of the weeds in half the time."),
+            wood: t("Heavy line: in the murky rain water the fish can't see it, so the bites come as quick as on standard line, and a line wrapped round the wood comes free in half the time."),
+            open: t("Heavy line: in the murky rain water the fish can't see it, so the bites come as quick as on standard line."),
           }
-        : bright
+        : winter
           ? {
-              weeds: t("Heavy line: in the bright, calm water the fish see it plainer, so the bites come slower still, but it pulls a fish out of the weeds in half the time."),
-              wood: t("Heavy line: in the bright, calm water the fish see it plainer, so the bites come slower still, but a line wrapped round the wood comes free in half the time."),
-              open: t("Heavy line: in the bright, calm water the fish see it plainer, so the bites come slower still."),
+              weeds: t("Heavy line: in the clear winter water the fish see it plainer, so the bites come slower still, but it pulls a fish out of the weeds in half the time."),
+              wood: t("Heavy line: in the clear winter water the fish see it plainer, so the bites come slower still, but a line wrapped round the wood comes free in half the time."),
+              open: t("Heavy line: in the clear winter water the fish see it plainer, so the bites come slower still."),
             }
-          : {
-              weeds: t("Heavy line: the fish can see it, so the bites come slower, but it pulls a fish out of the weeds in half the time."),
-              wood: t("Heavy line: the fish can see it, so the bites come slower, but a line wrapped round the wood comes free in half the time."),
-              open: t("Heavy line: the fish can see it, so the bites come slower."),
-            };
+          : bright
+            ? {
+                weeds: t("Heavy line: in the bright, calm water the fish see it plainer, so the bites come slower still, but it pulls a fish out of the weeds in half the time."),
+                wood: t("Heavy line: in the bright, calm water the fish see it plainer, so the bites come slower still, but a line wrapped round the wood comes free in half the time."),
+                open: t("Heavy line: in the bright, calm water the fish see it plainer, so the bites come slower still."),
+              }
+            : {
+                weeds: t("Heavy line: the fish can see it, so the bites come slower, but it pulls a fish out of the weeds in half the time."),
+                wood: t("Heavy line: the fish can see it, so the bites come slower, but a line wrapped round the wood comes free in half the time."),
+                open: t("Heavy line: the fish can see it, so the bites come slower."),
+              };
       reasons.unshift(said[cover]);
     }
     else if (lineWait < 1) {
