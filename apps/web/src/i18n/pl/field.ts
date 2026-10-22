@@ -667,6 +667,7 @@ export const PL_FIELD: PlBook = {
   "The game's lake": "Jezioro z gry",
   "The game's lake is called that too; your water is kept apart from it.": "Jezioro z gry też tak się nazywa; to łowisko jest liczone osobno.",
   "Best here: {species}, {size}": "Największa tutaj: {species}, {size}",
+  "Best here: {species}, {size} · {heavier}, {weight}": "Największe tutaj: {species}, {size} · {heavier}, {weight}",
   "New best": "Nowy rekord",
   "Beat last year ({n})": "Więcej niż w zeszłym roku ({n})",
   "Best lure: {lure} ({count})": "Najlepsza przynęta: {lure} ({count})",

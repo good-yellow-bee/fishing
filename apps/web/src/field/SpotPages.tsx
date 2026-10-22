@@ -254,11 +254,8 @@ export function SpotsPage() {
   const byName = (row: { spot: { name: string } }) => !needle || foldText(row.spot.name).toLowerCase().includes(needle);
   const shownRows = (shownKind === "all" ? rows : rows.filter((row) => row.spot.id !== PLAY_LAKE_ID && row.spot.waterType === shownKind)).filter(byName);
   // Waters of that name under another kind: the kind picked hides them, so say so and offer them.
-  // A water's longest fish, or its heaviest when none was measured: what the card names as its best.
-  const biggestAt = (catches: readonly CatchEntry[], spotId: string) => {
-    const bests = personalBests({ ...book, catches: catches.filter((entry) => entry.spotId === spotId) });
-    return bests.longest ? { entry: bests.longest, kind: "length" as const } : bests.heaviest ? { entry: bests.heaviest, kind: "weight" as const } : null;
-  };
+  // A water's longest and heaviest fish: what the card names as its best.
+  const bestsAt = (catches: readonly CatchEntry[], spotId: string) => personalBests({ ...book, catches: catches.filter((entry) => entry.spotId === spotId) });
   const ownShown = shownRows.filter((row) => row.spot.id !== PLAY_LAKE_ID && !invented(row));
   const sampleShown = shownRows.filter((row) => row.spot.id !== PLAY_LAKE_ID && invented(row));
   const gameShown = shownRows.filter((row) => row.spot.id === PLAY_LAKE_ID);
@@ -370,7 +367,7 @@ export function SpotsPage() {
                   nextOuting={nextOutingLine(upcoming.find((trip) => trip.spotId === row.spot.id), today, tomorrow)}
                   // The angler's own fish where the card counts theirs; the game's lake and an untouched sample water what they have.
                   bestLure={bestLureAt(ownHere(row.spot.id) ? countedCatches : book.catches, row.spot.id)}
-                  biggest={biggestAt(ownHere(row.spot.id) ? countedCatches : book.catches, row.spot.id)}
+                  bests={bestsAt(ownHere(row.spot.id) ? countedCatches : book.catches, row.spot.id)}
                   waterTemp={recentTemp(ownHere(row.spot.id) ? countedCatches : book.catches, row.spot.id, today, (entry) => bookFishDay(book, entry))}
                   kindName={kindName}
                   lureName={lureName}

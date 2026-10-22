@@ -5,6 +5,7 @@ import { biteTimes, catchesNewestFirst, fishCountsByTrip, localDate, measureOf, 
 import { bookLureName, pieceTally } from "../pieceTally";
 import { sheetOutings } from "../catchCsv";
 import { CatchCard } from "../cards";
+import { bestHereText } from "../bestHere";
 import { num, t, tn, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
 import { fishCountLabel, formatDay, outingNameById, waterName } from "../format";
@@ -105,12 +106,10 @@ function sizeOf(entry: CatchEntry | null, kind: "length" | "weight"): number {
   return !measure ? 0 : measure.kind === "length" ? measure.inches : measure.pounds;
 }
 
-/** "Best here: Northern pike, 33 in": a water's longest fish, or its heaviest when none was measured. */
+/** "Best here: Northern pike, 33 in": a water's longest fish, and its heaviest when that is another. */
 function waterBestLine(book: Logbook, catches: readonly CatchEntry[], kindName: (species: string) => string) {
-  const bests = personalBests({ ...book, catches: [...catches] });
-  const kind = bests.longest ? "length" : "weight";
-  const entry = bests.longest ?? bests.heaviest;
-  return entry ? <p className="meta">{t("Best here: {species}, {size}", { species: kindName(entry.species), size: measureText(measureOf(entry, kind)!) })}</p> : null;
+  const text = bestHereText(personalBests({ ...book, catches: [...catches] }), kindName);
+  return text ? <p className="meta">{text}</p> : null;
 }
 
 /** "?year=2025": one season's fish and outings, or the whole book when it is left out. */
