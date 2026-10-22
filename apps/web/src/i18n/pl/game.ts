@@ -187,7 +187,14 @@ export const PL_GAME: PlBook = {
   "Thick": "Gruba",
   "Line: standard": "Żyłka: zwykła",
   "Line: heavy": "Żyłka: gruba",
-  "Change the line: light line brings more bites but snaps sooner, heavy line holds more but the fish see it.": "Zmień żyłkę: cienka daje więcej brań, ale pęka szybciej, gruba wytrzymuje więcej, ale ryby ją widzą.",
+  "Line: wire leader": "Żyłka: przypon stalowy",
+  "Wire": "Stalka",
+  "Change the line: light line brings more bites but snaps sooner, heavy line holds more but the fish see it, and a wire leader draws pike and stands up to their teeth, though the fish see it too.": "Zmień żyłkę: cienka daje więcej brań, ale pęka szybciej, gruba wytrzymuje więcej, ale ryby ją widzą, a przypon stalowy przyciąga szczupaki i wytrzymuje ich zęby, choć ryby też go widzą.",
+  "Wire leader: the fish see it, so the bites come slower, but pike come to it twice as often.": "Przypon stalowy: ryby go widzą, więc brania przychodzą wolniej, ale szczupaki przypływają do niego dwa razy częściej.",
+  "Wire leader: the fish see it, so the bites come slower, and no pike here would come to it now.": "Przypon stalowy: ryby go widzą, więc brania przychodzą wolniej, a żaden szczupak stąd teraz do niego nie przypłynie.",
+  "Wire leader: the fish see it, so the bites come slower, and the pike already prowl the built-up swim.": "Przypon stalowy: ryby go widzą, więc brania przychodzą wolniej, a szczupaki i tak już krążą wokół obficie zanęconego łowiska.",
+  "Wire leader: its teeth can't fray the line": "Przypon stalowy: zęby ryby nie przetrą żyłki",
+  "It swallowed the bait: hooked deep in {time} s, its teeth on the wire leader, not the line. {line}. Ease off when it runs.": "Ryba połknęła przynętę: zacięta głęboko po {time} s, a zęby trzymają przypon stalowy, nie żyłkę. {line}. Odpuść, gdy odjeżdża.",
   "Heavy line: the fish can see it, so the bites come slower.": "Gruba żyłka: ryby ją widzą, więc brania przychodzą wolniej.",
   "Light line: the fish can't see it, so the bites come sooner.": "Cienka żyłka: ryby jej nie widzą, więc brania przychodzą szybciej.",
   "Light line: it snaps sooner, so keep out of the red": "Cienka żyłka: pęka szybciej, więc nie wchodź na czerwone",
@@ -1003,6 +1010,8 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "On a touch screen or a short window, the hint for a handful of groundbait now shows its first sentence and folds the rest behind Read more, so on a phone with larger text it no longer runs over the walking stick. And on a touch tablet the hint over the lake now stands beside the walking stick instead of behind it, above the cast meter and short of the strike button; left-handed, it takes the other side.":
+    "Na ekranie dotykowym lub w niskim oknie podpowiedź do garści zanęty pokazuje teraz pierwsze zdanie, a resztę chowa pod „Czytaj dalej”, więc na telefonie z większym tekstem nie zasłania już drążka chodzenia. A na tablecie dotykowym podpowiedź nad jeziorem stoi teraz obok drążka chodzenia, a nie za nim, nad miernikiem rzutu i przed przyciskiem zacięcia; dla leworęcznych przechodzi na drugą stronę.",
   "With larger text on a phone held sideways, the shore signs now stop beside the lure panel instead of running under it, and their row scrolls sideways with each label on one line. And in a row of signs that scrolls sideways, reaching a half-hidden sign with Tab now scrolls it whole into view, its focus ring inside; a tap leaves the row still, so the sign doesn't slide from under your finger.":
     "Przy większym tekście na telefonie trzymanym poziomo tabliczki na brzegu kończą się teraz obok panelu przynęt, zamiast wchodzić pod niego, a ich rząd przewija się w bok, z każdym podpisem w jednym wierszu. A w rzędzie tabliczek przewijanym w bok przejście klawiszem Tab do częściowo ukrytej tabliczki przewija ją teraz w całości do widoku, razem z obwódką fokusu; dotknięcie nie przesuwa rzędu, więc tabliczka nie ucieka spod palca.",
   "With high contrast on a touch phone, the header, the lure panel and the hint over the lake now keep their usual size, so a long hint, such as a winter night line's, no longer runs its last line under the walking stick. And with larger text on a phone held sideways, the note naming where you stand, when the shore signs leave it no room, now goes from sight instead of showing as a sliver under them; a screen reader still reads it, and the pressed sign still names the bank.":

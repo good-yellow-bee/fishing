@@ -19,7 +19,7 @@ import { csvName } from "./FishCsv";
 import { FishSum } from "./FishSum";
 import { PagedCatches } from "./PagedCatches";
 import { bookFishDay, monthName } from "./tripMonths";
-import { formatDay, noteText, outingNameById, toLocalInput } from "./format";
+import { formatDay, noteText, outingNameById, toLocalInput, waterName } from "./format";
 import { tripForFish } from "./suggestions";
 import { useLogbook } from "./LogbookState";
 import "./search.css";
@@ -962,7 +962,7 @@ export function CatchSearch() {
           ) : null}
           {matches.length > 0 ? (
             // The angler's own fish, as the count above sums them: a pasted copy doesn't credit them with the sample's.
-            <CopySummary text={() => searchSummary(searchParts(book, settled), mine.length > 0 ? mine : matches, (id) => { const name = spotById(book, id)?.name; return name === undefined ? null : plainName(name); }, largest, countedFish(book.catches))} file="stillwater-search.txt" />
+            <CopySummary text={() => searchSummary(searchParts(book, settled), mine.length > 0 ? mine : matches, (id) => { const name = spotById(book, id)?.name; return name === undefined ? null : waterName(name); }, largest, countedFish(book.catches))} file="stillwater-search.txt" />
           ) : null}
           {matches.length > 1 ? (
             // "Which was my biggest pike at Cedar": the same matches, largest first.
@@ -1152,18 +1152,19 @@ function TopLure({ catches }: { catches: readonly CatchEntry[] }) {
   });
   // Waters that read the same are one, as "By water" and the search take them.
   const shownWater = useMemo(() => twinWaterNames(book), [book]);
+  // Waters with no name stay apart by id: two of them are two waters, each read "Water with no name".
   const water = leader(catches, (entry) => {
     const name = spotById(book, entry.spotId)?.name;
-    return name ? foldText(name) : null;
+    return name === undefined ? null : plainName(name) ? foldText(name) : `\u0000${entry.spotId}`;
   });
-  const waterName = water ? (shownWater.get(water.value) ?? "") : "";
+  const leadWater = water ? waterName(shownWater.get(water.value) ?? "") : "";
   // As the book writes the lure most, as Gear and the catch cards name it.
   const lureName = lure ? bookLureName(book.catches)(catches.find((entry) => lureKey(entry) === lure.value)!.lure) : "";
   const lines = [
     lure ? t("Most on {lure}.", { lure: `${lureName} (${lure.count})` }) : null,
     // Polish writes the part of the day in lower case inside a sentence: "Najczęściej o tej porze: świt (2)."
     time ? t("Best time of day: {time}.", { time: `${inSentence(t(BITE_TIMES.find((row) => row.id === time.value)!.label))} (${time.count})` }) : null,
-    water ? t("Most from {water}.", { water: `${waterName} (${water.count})` }) : null,
+    water ? t("Most from {water}.", { water: `${leadWater} (${water.count})` }) : null,
   ].filter(Boolean);
   return lines.length > 0 ? <p className="meta top-lure">{lines.join(" ")}</p> : null;
 }

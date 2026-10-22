@@ -21,10 +21,10 @@ export function sameWater(keys: ReadonlyMap<string, string>, a: string, b: strin
   return a === b || (!!key && key === keys.get(b));
 }
 
-/** The names two or more of these waters share, folded: a list reads those alike. */
+/** The names two or more of these waters share, folded: a list reads those alike, waters with no name too. */
 export function twinNamesAmong(spots: readonly Pick<Spot, "name">[]): Set<string> {
   const names = spots.map((spot) => foldName(spot.name));
-  return new Set(names.filter((name, index) => name && names.indexOf(name) !== index));
+  return new Set(names.filter((name, index) => names.indexOf(name) !== index));
 }
 
 /** Two waters a search can't tell apart by name. */
