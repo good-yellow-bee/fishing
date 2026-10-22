@@ -227,6 +227,7 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <i data-testid="groundbait">{game.handfuls}|{game.groundbait ? `${game.groundbait.spot}:${game.groundbait.casts}` : ""}</i>
       <p data-testid="hint">{game.hint}</p>
       <p data-testid="more-reasons">{game.moreReasons.join(" | ")}</p>
+      <p data-testid="hint-lead">{game.hintLead}</p>
       <b data-testid="bite">{game.bite ? `${game.bite.species.id}|${game.bite.weight}` : ""}</b>
       <b data-testid="fight">{game.fight ? `${game.fight.species.id}|${game.fight.weight}` : ""}</b>
       <i data-testid="miss-message">{game.outcome?.kind === "miss" ? game.outcome.message : ""}</i>
@@ -686,6 +687,8 @@ describe("useFishingGame live shiner", () => {
     expect(kept.has(swimKey(profile.userId))).toBe(false);
     act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === "groundbait") as HTMLButtonElement).click());
     expect(hint()).toBe(said.replace("5 casts", `${GROUNDBAIT_CASTS} casts`));
+    // A phone shows the toss alone and folds the rest.
+    expect(container!.querySelector("[data-testid=hint-lead]")?.textContent).toBe(`You toss a handful of groundbait. The fish will gather to feed here for the next ${GROUNDBAIT_CASTS} casts.`);
   });
 
   it("keeps a groundbaited swim for the next visit, primed once the feeders have gathered overnight", () => {
@@ -757,6 +760,7 @@ describe("useFishingGame live shiner", () => {
     expect(worms()).toBe(String(3 - CHOPPED_WORMS));
     expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ spot: "dock", casts: GROUNDBAIT_CASTS, worm: true });
     expect(hint()).toContain(`${CHOPPED_WORMS} chopped worms went in with it: the perch here come in to feed with the feeders while the swim lasts. Worms left in your tin: ${3 - CHOPPED_WORMS}.`);
+    expect(container!.querySelector("[data-testid=hint-lead]")?.textContent).toBe(`You toss a handful of groundbait. The fish will gather to feed here for the next ${GROUNDBAIT_CASTS} casts.`);
     act(() => root!.unmount());
     root = null;
     container!.remove();

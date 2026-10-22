@@ -381,6 +381,9 @@ export function DockPage() {
   // The cast's left-out reasons, opened from its hint; each cast's list starts closed.
   const [reasonsOpenFor, setReasonsOpenFor] = useState<readonly string[] | null>(null);
   const reasonsOpen = reasonsOpenFor === game.moreReasons;
+  // A folded hint's rest, opened from it; each hint starts folded.
+  const [tailOpenFor, setTailOpenFor] = useState<string | null>(null);
+  useEffect(() => setTailOpenFor(null), [game.hint]);
   const scenePhase = game.outcome ? "result" : game.phase;
   // The hint is hidden in a fight, so the fight card holds the hookset's message (or a mid-fight call) for a while instead.
   const [hookNote, setHookNote] = useState<string | null>(null);
@@ -1250,7 +1253,23 @@ export function DockPage() {
         )}
         {prefs.walkStick && !shopOpen && scenePhase === "idle" && <WalkStick />}
         <p className="hint" aria-live="polite" ref={hintRef}>
-          {scenePhase !== "hookset" && game.hint}
+          {scenePhase !== "hookset" &&
+            (game.hintLead ? (
+              <>
+                {game.hintLead}
+                {/* Folded only where the phone layouts leave the hint short of room (index.css). */}
+                <span className="hint-tail" data-open={tailOpenFor === game.hint || undefined}>{game.hint.slice(game.hintLead.length)}</span>{" "}
+                <button className="hint-more hint-tail-more" type="button" data-camera-control onClick={(event) => {
+                  // Hidden once open, so the focus steps off it rather than vanishing with it.
+                  event.currentTarget.blur();
+                  setTailOpenFor(game.hint);
+                }}>
+                  {t("Read more")}
+                </button>
+              </>
+            ) : (
+              game.hint
+            ))}
           {/* The call to strike can't wait for a screen reader to finish a long hint before it (the strike lasts a second
               or two): it alone is said at once. Kept mounted, so the reader is listening before the bite. */}
           <span aria-live="assertive">{scenePhase === "hookset" ? game.hint : ""}</span>
