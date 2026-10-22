@@ -4,7 +4,7 @@ import { createRoot } from "react-dom/client";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { CatchEntry } from "@stillwater/shared";
-import { CatchesPage, CatchFormPage } from "./CatchPages";
+import { CatchesPage, CatchFormPage, CatchPage } from "./CatchPages";
 import { LogbookProvider } from "./LogbookState";
 import { LOGBOOK_STORAGE_KEY } from "./storage";
 import { markFieldNewsSeen } from "./fieldNews";
@@ -51,6 +51,7 @@ const draw = async (url: string) => {
           <Routes>
             <Route path="/catches" element={<CatchesPage />} />
             <Route path="/catches/new" element={<CatchFormPage />} />
+            <Route path="/catches/:catchId" element={<CatchPage />} />
           </Routes>
         </LogbookProvider>
       </MemoryRouter>,
@@ -86,5 +87,13 @@ describe("round 129: catch pages with a water of no name", () => {
     await act(async () => copy.click());
     const rows = (writeText.mock.calls[0] as unknown as [string])[0].split("\n").filter((line) => line.startsWith("- "));
     expect(rows.map((row) => row.split(", ").at(-1))).toEqual([...Array(5).fill("Water with no name"), "Own Lake"]);
+  });
+
+  it("offers no water search from a fish on a water of no name, which a search can't open", async () => {
+    // The first Roach on the bare water, after others elsewhere, with another Jig fish there.
+    const text = (await draw("/catches/4")).textContent;
+    expect(text).toContain("Water with no name");
+    expect(text).not.toContain("First Roach here.");
+    expect(text).not.toMatch(/On Jig at/);
   });
 });
