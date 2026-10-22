@@ -84,7 +84,7 @@ export function pieceRecords(book: Logbook, items: readonly TackleItem[], today:
       const bests = all.length >= 2 ? personalBests({ spots: [], trips: [], catches: all }) : null;
       const largest = bests?.heaviest ? { entry: bests.heaviest, by: "weight" as const } : bests?.longest ? { entry: bests.longest, by: "length" as const } : undefined;
       const [top, next] = speciesCounts(all);
-      const kind = top && all.length >= 3 && top.count >= 2 && top.count > (next?.count ?? 0) ? { species: top.species, count: top.count, only: !next } : undefined;
+      const kind = top && all.length >= 3 && top.count > (next?.count ?? 0) ? { species: top.species, count: top.count, only: !next } : undefined;
       // Every spelling's fish, as its last fish and its largest count them, so the row agrees with itself.
       // Shown as most of its fish were logged ("Spinner"), not as the first list wrote it ("spinners").
       return { label: row.label, name: pieceTally(all, 1)[0]?.lure ?? row.label, outings: row.trips.size, ...(row.lastPacked ? { lastPacked: row.lastPacked } : {}), fish: all.length, ...(took[0] && lastAt ? { lure: took[0].lure, lastAt, lastDay, since } : {}), ...(largest ? { largest } : {}), ...(kind ? { kind } : {}) };

@@ -189,7 +189,13 @@ function LureRecord({ today }: { today: string }) {
     if (!searchable) return text;
     const terms = [exactTerm("lure", lureName(row.name)), exactTerm("species", kindName(kind.species)), ...(water ? [exactTerm("water", plainName(water.name))] : [])];
     const fish = atWater.catches.filter((entry) => onPiece(entry, row.lure!) && kindKey(entry.species) === kindKey(kind.species));
-    return <Link to={findLink(countedSearch(book, terms.join(" + "), fish))}>{text}</Link>;
+    return (
+      <Link to={findLink(countedSearch(book, terms.join(" + "), fish))}>
+        {text}
+        {/* Which lure, for a list of links that would otherwise read alike. */}
+        <span className="sr-only">: {lureName(row.name)}</span>
+      </Link>
+    );
   };
   // Each row's best water worked out once, with all waters shown.
   const mostAt = new Map(water ? [] : records.flatMap((row) => (row.lure ? [[row.label, bestWater(row.lure)] as const] : [])).filter(([, best]) => best !== null));

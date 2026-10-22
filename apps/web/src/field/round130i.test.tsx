@@ -64,7 +64,7 @@ describe("round 130 ideas: the kind a lure takes most", () => {
   it("names the kind that led, opening the lure's fish of that kind", async () => {
     const catches = [fish("1", "t1", "a", sept(1), "Spinner"), fish("2", "t2", "a", sept(5), "spinner", "perch"), fish("3", "t2", "a", sept(5), "Spinner", "Pike"), fish("4", "t1", "a", sept(1), "Jig")];
     const box = await show(<GearPage />, { spots, trips, catches }, items);
-    const link = [...lureRow(box, "Spinner").querySelectorAll("a")].find((a) => a.textContent === "mostly Perch (2)")!;
+    const link = [...lureRow(box, "Spinner").querySelectorAll("a")].find((a) => a.textContent === "mostly Perch (2): Spinner")!;
     expect(new URLSearchParams(link.getAttribute("href")!.split("?")[1]).get("find")).toBe('lure:"Spinner" + species:"Perch"');
   });
 

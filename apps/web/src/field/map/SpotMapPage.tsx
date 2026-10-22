@@ -386,8 +386,8 @@ export function SpotMapPage() {
   const lureName = bookLureName(book.catches);
   const bestLure = (spotId: string) => bestLureAt(ownHere(spotId) ? counted.catches : book.catches, spotId);
   // The month it gives most, said while it is that month: where to go now. Once its fish came in two months or more, three
-  // in the leader, none tying it; a night fish in its outing's month, as the water's page counts them.
-  const monthNow = Number(fishedBy.slice(5, 7));
+  // in the leader, none tying it; a night fish in its outing's month, as the water's month bars tally it.
+  const monthNow = Number(today.slice(5, 7));
   const bestMonthNow = (spotId: string) => {
     const here = (ownHere(spotId) ? counted.catches : book.catches).filter((entry) => entry.spotId === spotId);
     const [top, next] = monthOfYearTally(here, (entry) => bookFishDay(book, entry).slice(0, 7)).sort((a, b) => b.count - a.count);
