@@ -39,7 +39,7 @@ import {
   fishById,
   legendaryCanBite,
 } from "@stillwater/shared";
-import { locale, t } from "../i18n";
+import { locale, t, tn } from "../i18n";
 import { fightLines, liftsStickerInOne, LINE_SPINNERS, netsFish, SPIN_TWIST, TOOTHY, fightWater, fightWind, isCleanFight, isCloseCall, LEAPERS, makeFight, seasonTireMul, thrivesInCold, floodedInlet, warmTireMul, rainCooled, deepCooled, runTireMul, nestTireMul, nightTireMul, spentTireMul, twilightTireMul, springRunTireMul, currentTireMul, fallFeedTireMul, rainHunterTireMul, summerStrengthTireMul, SOFT_MOUTHS, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type FightWater, type FightWind, type Steer, type SurgeState } from "./fight";
 import { boat } from "./scene/boat";
 import { fightInput } from "./scene/fightMotion";
@@ -79,7 +79,7 @@ import { weightText } from "../i18n/content";
 import { FRENZY_SLOT_MS, frenzyOn, HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, slotFrenzy, type Hotspot } from "./hotspot";
 import { loadBag, loadShiner, saveBag, saveShiner, type HookedShiner } from "./groundbaitBag";
 import { loadTin, saveTin, WORM_TIN_DAILY, WORM_TIN_WET } from "./wormTin";
-import { BACKLASH_POWER, BED_RAIDERS, COLD_WORK_WAIT, tooQuickForCold, isLongCast, castIntoSchool, castOverGroundbait, canChopWorm, CHOPPED_WORMS, wormFeedersTake, scatterSwim, SPOOKED_SWIM_CASTS, isBigFeeder, isWary, landBigFeeder, bigFeedersOver, prowlerAt, PROWLERS, scattersSwim, TOPUP_MAX, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, OVERFED_WAIT, throwHandful, TOPUP_CASTS_LEFT, canBaitShiner, shinerHunter, bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, type Groundbait, castIntoSpooked, castUnderPressure, castNewLure, type LuresShown, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, colourSuits, colourWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, anchorSplashWaitMul, openGlareWaitMul, frenzyHunter, FRENZY_WAIT, lampLit, LAMP_WAIT, LAMP_WINDOW, longShadowWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, waterSwingWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
+import { BACKLASH_POWER, BED_RAIDERS, COLD_WORK_WAIT, tooQuickForCold, isLongCast, castIntoSchool, castOverGroundbait, canChopWorm, CHOPPED_WORMS, wormFeedersTake, scatterSwim, SPOOKED_SWIM_CASTS, isBigFeeder, isWary, WARY_LANDED, landBigFeeder, bigFeedersOver, prowlerAt, PROWLERS, scattersSwim, TOPUP_MAX, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, OVERFED_WAIT, throwHandful, TOPUP_CASTS_LEFT, canBaitShiner, shinerHunter, bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, type Groundbait, castIntoSpooked, castUnderPressure, castNewLure, type LuresShown, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, colourSuits, colourWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, anchorSplashWaitMul, openGlareWaitMul, frenzyHunter, FRENZY_WAIT, lampLit, LAMP_WAIT, LAMP_WINDOW, longShadowWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, waterSwingWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealChance, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -2395,9 +2395,14 @@ export function useFishingGame(
       setHint(said);
       setHintFold({ hint: said, lead });
     };
-    // The big feeders are told of only where they live and would take the tied lure; wary of the swim, they no longer move in.
+    // The big feeders are told of only where they live and would take the tied lure; those landed off the swim are counted up to the point the rest grow wary.
     const takesBig = bigFeedersOver(next, lureRef?.current);
-    const wary = takesBig && isWary(next) ? t("The big feeders here are wary of this swim now: let it fade and build a fresh one to bring them back.") : "";
+    const landed = next.landedBig ?? 0;
+    const bigRead = !takesBig || !landed
+      ? ""
+      : isWary(next)
+        ? t("Once {n} big feeders were landed off this swim, the rest grew wary of it: they come no more than the other feeders. Let it fade and build a fresh one to bring them back.", { n: WARY_LANDED })
+        : tn(landed, "{n} big feeder landed off this swim so far: {left} more and the rest grow wary of it.", "{n} big feeders landed off this swim so far: {left} more and the rest grow wary of it.", { left: WARY_LANDED - landed });
     if (kind === "topped") {
       const big = takesBig && !isWary(next);
       const grew = next.built! > before;
@@ -2412,12 +2417,12 @@ export function useFishingGame(
             : grew
               ? t("You top up the swim as it fades: the feeders stay, and more come in. {casts} casts of it now.", { casts: next.casts })
               : t("You top up the swim as it fades: the feeders stay. {casts} casts of it now.", { casts: next.casts }),
-        [wary, prowl, ...worm],
+        [bigRead, prowl, ...worm],
       );
       return;
     }
     if (kind === "washed") {
-      foldHint(t("The rain washes the handful through before more feeders settle on it: the swim keeps going but builds no further. {casts} casts of it now.", { casts: next.casts }), [t("Top it up once the rain stops."), wary, ...worm]);
+      foldHint(t("The rain washes the handful through before more feeders settle on it: the swim keeps going but builds no further. {casts} casts of it now.", { casts: next.casts }), [t("Top it up once the rain stops."), bigRead, ...worm]);
       return;
     }
     if (kind === "overfed") {
