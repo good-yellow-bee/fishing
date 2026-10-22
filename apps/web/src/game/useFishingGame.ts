@@ -989,7 +989,7 @@ export function useFishingGame(
         resetToIdle(current.strength < species.minStrength ? t("Line parted. Spend points on Strength.") : t("Line parted. Spend points on Accuracy."));
       }, 1400);
     } else {
-      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)) * seasonTireMul(season, species.id) * warmTireMul(season, species.id, sky, spotRef.current) * runTireMul(season, species.id) * nestTireMul(season, species.id, spotRef.current) * nightTireMul(hourRef.current, species.id) * spentTireMul(season, species.id) * twilightTireMul(hourRef.current, species.id) * springRunTireMul(season, species.id, spotRef.current) * currentTireMul(species.id, spotRef.current) * fallFeedTireMul(season, species.id) * rainHunterTireMul(sky, species.id) * summerStrengthTireMul(season, species.id), water, windy, isTopwater(lureRef?.current) || rising, hasTrebles(lureRef?.current) || deep, seasonTireMul(season, species.id) > 1, isTrophyWeight(species, weight), floodedInlet(spotRef.current, season, sky), frayedRef.current, deep, lineSnapForLevel(anglerLevel(current.lifetimePoints)), turnCutMulForLevel(anglerLevel(current.lifetimePoints)), netsFish(species, mercyRef.current), { farRock, weedBall, edge, bed, foam, lantern, fired: fired || hookWise, lineSnap: LINE_SNAP[castLineRef.current] });
+      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)) * seasonTireMul(season, species.id) * warmTireMul(season, species.id, sky, spotRef.current) * runTireMul(season, species.id) * nestTireMul(season, species.id, spotRef.current) * nightTireMul(hourRef.current, species.id) * spentTireMul(season, species.id) * twilightTireMul(hourRef.current, species.id) * springRunTireMul(season, species.id, spotRef.current) * currentTireMul(species.id, spotRef.current) * fallFeedTireMul(season, species.id) * rainHunterTireMul(sky, species.id) * summerStrengthTireMul(season, species.id), water, windy, isTopwater(lureRef?.current) || rising, hasTrebles(lureRef?.current) || deep, seasonTireMul(season, species.id) > 1, isTrophyWeight(species, weight), floodedInlet(spotRef.current, season, sky), frayedRef.current, deep && castLineRef.current !== "wire", lineSnapForLevel(anglerLevel(current.lifetimePoints)), turnCutMulForLevel(anglerLevel(current.lifetimePoints)), netsFish(species, mercyRef.current), { farRock, weedBall, edge, bed, foam, lantern, fired: fired || hookWise, lineSnap: LINE_SNAP[castLineRef.current] });
       runtimeRef.current = runtime;
       simRef.current = runtime.sim;
       performanceRef.current = runtime.performance;
@@ -1047,6 +1047,8 @@ export function useFishingGame(
             ? t("Hooked solid in {time} s! {line}. Ease off when it runs.", { time: seconds(strike.elapsedMs), line })
             : lightHook
               ? t("Hooked light in {time} s, it only just caught. Keep it out of the red. {line}.", { time: seconds(strike.elapsedMs), line })
+            : deep && TOOTHY.has(species.id) && castLineRef.current === "wire"
+              ? t("It swallowed the bait: hooked deep in {time} s, its teeth on the wire leader, not the line. {line}. Ease off when it runs.", { time: seconds(strike.elapsedMs), line })
             : deep && TOOTHY.has(species.id)
               ? t("It swallowed the bait: hooked deep in {time} s, with its teeth on the line. Land it quick. {line}. Ease off when it runs.", { time: seconds(strike.elapsedMs), line })
             : deep
@@ -1319,7 +1321,11 @@ export function useFishingGame(
     // switch off; light line's speed-up is told last, after the bank's own reasons.
     castLineRef.current = settings.line;
     const lineWait = LINE_WAIT[castLineRef.current];
-    if (lineWait > 1) reasons.unshift(t("Heavy line: the fish can see it, so the bites come slower."));
+    // A wire leader draws the bank's pike the way a built swim does, when the tied lure would take one the angler can land.
+    const wirePike = castLineRef.current === "wire" && !mercyRef.current ? prowlerAt(spotRef.current, lureRef?.current) : undefined;
+    const wireProwler = wirePike && canLand(current, wirePike) ? wirePike.id : undefined;
+    if (castLineRef.current === "wire") reasons.unshift(wireProwler ? t("Wire leader: the fish see it, so the bites come slower, but pike come to it twice as often.") : t("Wire leader: the fish see it, so the bites come slower, and no pike here would come to it now."));
+    else if (lineWait > 1) reasons.unshift(t("Heavy line: the fish can see it, so the bites come slower."));
     else if (lineWait < 1) reasons.push(t("Light line: the fish can't see it, so the bites come sooner."));
     // Told last, so the two-reason cap always keeps it: waiting a few seconds is the fix.
     if (anchorWait > 1) reasons.unshift(t("The anchor's splash put the fish down, so the bites come slow: give it a few seconds before you cast."));
@@ -1331,7 +1337,7 @@ export function useFishingGame(
     const hunted = legendRef.current?.spot === spotRef.current ? legendRef.current.legendId : undefined;
     // The small feeders on a swim built all the way draw the bank's pike, when the tied lure would take one the angler can land.
     const prowling = bait.built >= TOPUP_MAX && !mercyNow ? prowlerAt(spotRef.current, lureRef?.current) : undefined;
-    const prowler = prowling && canLand(current, prowling) ? prowling.id : undefined;
+    const prowler = (prowling && canLand(current, prowling) ? prowling.id : undefined) ?? wireProwler;
     const drawn = pickBite(spotRef.current, current, short, Math.random, hour, lureRef?.current, sky, castHotspotRef.current, mercyNow, season, moon, hunted, prowler);
     // The fish that broke off here may come back, at the same weight; while it's about this bank its shadow circles the float.
     setLurking(gotAwayRef.current?.spot === spotRef.current);
