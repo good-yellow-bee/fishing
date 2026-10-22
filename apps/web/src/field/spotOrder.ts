@@ -101,6 +101,17 @@ export function nearestWater(book: Logbook, here: { lat: number; lng: number }):
   return best;
 }
 
+/** The pinned water among `spots` nearest to `from`, and how far it is; null when none has a pin. */
+export function nearestPinned(from: { lat: number; lng: number }, spots: readonly Spot[]): { spot: Spot; km: number } | null {
+  let best: { spot: Spot; km: number } | null = null;
+  for (const spot of spots) {
+    if (!spot.place) continue;
+    const km = kmBetween(from, spot.place);
+    if (!best || km < best.km) best = { spot, km };
+  }
+  return best;
+}
+
 /** The last day each water was fished, by an outing before today or a fish logged there, whichever is later; not the game's lake. */
 export function lastOutByWater(book: Logbook, today: string): Map<string, string> {
   const last = new Map<string, string>();
