@@ -265,6 +265,16 @@ describe("FightBar for screen readers", () => {
     expect(water("log")).toBeNull();
     act(() => root!.render(<FightBar fight={{ species: perch, weight: 0.8, underpowered: false, line: "light" }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
     expect([...container!.querySelectorAll(".fight-water")].map((line) => line.textContent)).toContain("Light line: it snaps sooner, so keep out of the red");
+    // Heavy line says it pulls a fish out of cover only where a turnable fish can go in.
+    const heavyLine = (species: typeof perch, w?: "weeds" | "pilings" | "log" | "deep") => {
+      act(() => root!.render(<FightBar fight={{ species, weight: 2, underpowered: false, line: "heavy", water: w }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
+      return [...container!.querySelectorAll(".fight-water")].map((line) => line.textContent ?? "").find((line) => line.startsWith("Heavy line"));
+    };
+    expect(heavyLine(trout, "weeds")).toBe("Heavy line: it holds more strain before it snaps, and pulls the fish out of the weeds in half the time");
+    expect(heavyLine(trout, "pilings")).toBe("Heavy line: it holds more strain before it snaps, and a wrapped line comes free in half the time");
+    expect(heavyLine(trout, "log")).toBe("Heavy line: it holds more strain before it snaps, and a wrapped line comes free in half the time");
+    expect(heavyLine(trout, "deep")).toBe("Heavy line: it holds more strain before it snaps");
+    expect(heavyLine(perch, "weeds")).toBe("Heavy line: it holds more strain before it snaps");
     // A wire leader is named only when a swallowing fish has its teeth on it.
     act(() => root!.render(<FightBar fight={{ species: FISH.find((fish) => fish.id === "pike")!, weight: 4, underpowered: false, line: "wire", wired: true }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
     expect([...container!.querySelectorAll(".fight-water")].map((line) => line.textContent)).toContain("Wire leader: its teeth can't fray the line");
