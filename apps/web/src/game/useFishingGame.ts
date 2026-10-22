@@ -72,7 +72,7 @@ import { castForFoe, foeGone, isOldFoe, loadOldFoe, saveOldFoe } from "./oldFoe"
 import { loadNightLine, nightLineCatch, nightLineKinds, nightLineNextChange, nightLineSeason, nightLineState, nightSkyFor, saveNightLine, wormLineHour, type NightLine } from "./nightLine";
 import { markShy, loadGiantShy, rollGiantShy, saveGiantShy, shyOf, type GiantShy } from "./giantShy";
 import { AGAIN_CASTS, backAgain, castForGotAway, gotAwayAfterDrop, PATIENT_DROP_RANK, gotAwayAfterLoss, type GotAway } from "./gotAway";
-import { LINE_SNAP, LINE_WAIT, type LineWeight } from "./lineWeight";
+import { LIGHT_BITE_THROUGH, LINE_SNAP, LINE_WAIT, type LineWeight } from "./lineWeight";
 import { countAtBank, loadBankMemory, rollBankMemory, saveBankMemory, waryFromYesterday, YESTERDAY_WAIT, type BankMemory } from "./bankMemory";
 import { castForLodgeLost, castForLodgeTag, castForReleased, loadReleased, saveReleased, type Recaught } from "./releasedFish";
 import { weightText } from "../i18n/content";
@@ -958,6 +958,16 @@ export function useFishingGame(
     // A pike's teeth on a swallowed hook sit on a wire leader, not the line, so they can't fray it.
     const wired = deep && TOOTHY.has(species.id) && castLineRef.current === "wire";
     const underpowered = !canLand(current, species);
+    if (!underpowered && strike && castLineRef.current === "light" && TOOTHY.has(species.id) && Math.random() < LIGHT_BITE_THROUGH) {
+      // Its teeth close on the light line at the strike and part it; a fresh knot goes on, nothing lost from the bag.
+      fx.snap();
+      fx.haptic("snap");
+      markFrayed(false);
+      setTwist(0);
+      setOutcome({ kind: "broke", message: t("The {fish} bit through the light line at the strike.", { fish: t(species.name) }) });
+      resetToIdle(t("A fresh knot goes on. Heavy line or a wire leader stands up to a pike's teeth."));
+      return;
+    }
     // A fish hooked tight to the lily pads dives for the stems, so the fight there is a weed fight whatever the bank;
     // one hooked tight to the sunken log from the bank runs for the log and can wrap the line round it (out on the boat, the hull swings clear).
     const pads = castPadsRef.current;
@@ -1340,7 +1350,12 @@ export function useFishingGame(
       );
     }
     else if (lineWait > 1) reasons.unshift(t("Heavy line: the fish can see it, so the bites come slower."));
-    else if (lineWait < 1) reasons.push(t("Light line: the fish can't see it, so the bites come sooner."));
+    else if (lineWait < 1) {
+      // Only the warning is told up front; the pike it names isn't drawn to the light line.
+      const biter = prowlerAt(spotRef.current, lureRef?.current);
+      if (biter && canLand(current, biter)) reasons.unshift(t("Light line: the fish can't see it, so the bites come sooner, but a pike here can bite through it at the strike."));
+      else reasons.push(t("Light line: the fish can't see it, so the bites come sooner."));
+    }
     // Told last, so the two-reason cap always keeps it: waiting a few seconds is the fix.
     if (anchorWait > 1) reasons.unshift(t("The anchor's splash put the fish down, so the bites come slow: give it a few seconds before you cast."));
     waitHintRef.current = [...reasons.slice(0, WAIT_REASONS), waitHintRef.current].join(" ");

@@ -1655,6 +1655,35 @@ describe("useFishingGame strike timing", () => {
     }
   });
 
+  it.each([
+    ["pike", "light", 0, true],
+    ["pike", "light", 0.2, false],
+    ["pike", "standard", 0, false],
+    ["perch", "light", 0, false],
+  ] as const)("bites a %s through the %s line at the strike on a roll of %s: %s", (id, line, roll, bitten) => {
+    updateSettings({ line });
+    try {
+      const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Nightcrawler");
+      vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === id)!);
+      cast(surface);
+      for (let waited = 0; phase() !== "hookset:none" && waited < 20_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+      vi.mocked(Math.random).mockReturnValue(roll);
+      const fights = vi.mocked(makeFight).mock.calls.length;
+      act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+      if (bitten) {
+        expect(phase()).toBe("idle:broke");
+        expect(container!.querySelector("[data-testid=broke]")?.textContent).toBe("The Northern pike bit through the light line at the strike.");
+        expect(hint()).toBe("A fresh knot goes on. Heavy line or a wire leader stands up to a pike's teeth.");
+        expect(vi.mocked(makeFight).mock.calls.length).toBe(fights);
+      } else {
+        expect(phase()).toBe("fight:none");
+        expect(vi.mocked(makeFight).mock.calls.length).toBe(fights + 1);
+      }
+    } finally {
+      updateSettings({ line: "standard" });
+    }
+  });
+
   it("blames the teeth when a pike snaps the line they frayed", () => {
     const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Nightcrawler");
     vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "pike")!);
@@ -3652,6 +3681,23 @@ describe("useFishingGame groundbait", () => {
       cast(surface);
       expect(vi.mocked(pickBite).mock.lastCall?.[12]).toBe(prowler);
       expect(hint()).toContain(said);
+    } finally {
+      updateSettings({ line: "standard" });
+    }
+  });
+
+  it.each([
+    ["Spinner", "Light line: the fish can't see it, so the bites come sooner, but a pike here can bite through it at the strike."],
+    ["Nightcrawler", "Light line: the fish can't see it, so the bites come sooner."],
+  ] as const)("warns light line on a %s where a pike would take it, drawing no pike to it", (lure, said) => {
+    updateSettings({ line: "light" });
+    try {
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, lure);
+      atDropoff(surface);
+      cast(surface);
+      expect(vi.mocked(pickBite).mock.lastCall?.[12]).toBeUndefined();
+      expect(hint()).toContain(said);
+      if (lure === "Nightcrawler") expect(hint()).not.toContain("bite through");
     } finally {
       updateSettings({ line: "standard" });
     }
