@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import type { Groundbait } from "../logic";
-import { CLOUD_RADIUS, DIMPLES, ROLL_SPAN, SCATTER_SEC, SCATTER_WAKES, THIEVES, WAKE_ARC, cloudCenter, cloudOpacity, dimpleAt, feedersShow, openWaterYaw, PERCH, perchAt, perchShow, PIKE_REACH, prowlAt, rollAt, scatterWakeAt, thiefAt, thiefCount } from "./groundbaitCloud";
+import { CLOUD_RADIUS, DIMPLES, laneLeft, puffAt, RIP_PUFFS, ROLL_SPAN, SCATTER_SEC, SCATTER_WAKES, THIEVES, WAKE_ARC, cloudCenter, cloudOpacity, dimpleAt, feedersShow, openWaterYaw, PERCH, perchAt, perchShow, PIKE_REACH, prowlAt, rollAt, scatterWakeAt, thiefAt, thiefCount } from "./groundbaitCloud";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
@@ -107,27 +107,42 @@ function wakeShape() {
   return new THREE.RingGeometry(0.8, 1, 12, 1, -Math.PI / 2 - WAKE_ARC / 2, WAKE_ARC).rotateX(-Math.PI / 2);
 }
 
-/** A soft round edge, so the cloud fades into the water instead of ending in a hard disc. */
-function softEdge() {
+/** A soft round edge, so the cloud fades into the water instead of ending in a hard disc; `torn` clears a ragged lane down it, along the cloud's +z. */
+function softEdge(torn = false) {
+  const size = torn ? 128 : 64;
+  const half = size / 2;
   const canvas = document.createElement("canvas");
-  canvas.width = canvas.height = 64;
+  canvas.width = canvas.height = size;
   const paint = canvas.getContext("2d");
   if (paint) {
-    const fade = paint.createRadialGradient(32, 32, 4, 32, 32, 32);
+    const fade = paint.createRadialGradient(half, half, size / 16, half, half, half);
     fade.addColorStop(0, "#fff");
     fade.addColorStop(0.55, "#bbb");
     fade.addColorStop(1, "#000");
     paint.fillStyle = fade;
-    paint.fillRect(0, 0, 64, 64);
+    paint.fillRect(0, 0, size, size);
+    if (torn) {
+      const pixels = paint.getImageData(0, 0, size, size);
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          const left = laneLeft((x + 0.5) / half - 1, (y + 0.5) / half - 1);
+          for (let c = 0; c < 3; c++) pixels.data[(y * size + x) * 4 + c] *= left;
+        }
+      }
+      paint.putImageData(pixels, 0, 0);
+    }
   }
   return new THREE.CanvasTexture(canvas);
 }
 
-/** The muddy cloud a handful of groundbait leaves off the bank, thinning as its casts are fished out; fish dimple over it once `feeding` or topped up, more often the more it was built up, with `bigFeeders` in a carp now and then rolls at its edge (a catfish instead with `catfish`), and with `thieves` shiners dart in at its edge and turn away, fewer as it is topped up, with chopped worm in it perch hang under it and dart about, and with `prowler` a pike glides along its open-water side, slashing in at the feeders once a pass. When a lost big feeder scatters the feeders the dimples stop, bow wakes fan out toward open water and the cloud thins. */
+/** The muddy cloud a handful of groundbait leaves off the bank, thinning as its casts are fished out; fish dimple over it once `feeding` or topped up, more often the more it was built up, with `bigFeeders` in a carp now and then rolls at its edge (a catfish instead with `catfish`), and with `thieves` shiners dart in at its edge and turn away, fewer as it is topped up, with chopped worm in it perch hang under it and dart about, and with `prowler` a pike glides along its open-water side, slashing in at the feeders once a pass. Once a lure has ripped through it a lane is torn down it along the cast line, crumbs drifting off down it toward open water. When a lost big feeder scatters the feeders the dimples stop, bow wakes fan out toward open water and the cloud thins. */
 export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, catfish = false, thieves = false, prowler = false }: { bait: Groundbait; feeding?: boolean; bigFeeders?: boolean; catfish?: boolean; thieves?: boolean; prowler?: boolean }) {
   const still = useReducedMotion();
   const geo = useMemo(() => new THREE.CircleGeometry(CLOUD_RADIUS, 32).rotateX(-Math.PI / 2), []);
   const edge = useMemo(() => softEdge(), []);
+  const torn = useMemo(() => softEdge(true), []);
+  const puffGeo = useMemo(() => new THREE.CircleGeometry(1, 16).rotateX(-Math.PI / 2), []);
+  const puffs = useRef<(THREE.Mesh | null)[]>([]);
   const mat = useMemo(() => new THREE.MeshBasicMaterial({ color: CLOUD, alphaMap: edge, transparent: true, depthWrite: false }), [edge]);
   const cloud = useRef<THREE.Mesh>(null);
   const rings = useRef<(THREE.Mesh | null)[]>([]);
@@ -160,6 +175,8 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, cat
       carpGeo.dispose();
       catfishGeo.dispose();
       edge.dispose();
+      torn.dispose();
+      puffGeo.dispose();
       mat.dispose();
       shinerGeo.dispose();
       shinerMat.dispose();
@@ -167,7 +184,7 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, cat
       perchMat.dispose();
       pikeGeo.dispose();
     },
-    [geo, ringGeo, wake, carpGeo, catfishGeo, edge, mat, shinerGeo, shinerMat, perchGeo, perchMat, pikeGeo],
+    [geo, ringGeo, wake, carpGeo, catfishGeo, edge, torn, puffGeo, mat, shinerGeo, shinerMat, perchGeo, perchMat, pikeGeo],
   );
   useFrame((state, dt) => {
     const mesh = cloud.current;
@@ -176,10 +193,13 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, cat
     mesh.position.set(at.x, waterHeight(at.x, at.z, t) + 0.02, at.z);
     // A slow swell as the crumbs drift and settle.
     mesh.scale.setScalar(still ? 1 : 1 + 0.06 * Math.sin(t * 0.8));
+    // Turned so a torn lane runs out along the cast line; the plain cloud is round either way.
+    mesh.rotation.y = out;
+    mat.alphaMap = bait.ripped ? torn : edge;
     const spooked = !!bait.spooked;
     if (!scattered.current && spooked) bolted.current = t;
     scattered.current = spooked;
-    const thick = cloudOpacity(bait.casts, spooked);
+    const thick = cloudOpacity(bait.casts, spooked, bait.ripped);
     // The cloud thins over the bolt; every other change shows at once.
     mat.opacity = still || t - bolted.current >= SCATTER_SEC ? thick : mat.opacity + (thick - mat.opacity) * Math.min(1, dt * 2);
     rings.current.forEach((ring, i) => {
@@ -204,6 +224,17 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, cat
       ring.position.set(x, waterHeight(x, z, t) + 0.03, z);
       ring.scale.setScalar(0.08 + 0.5 * (1 - (1 - dimple.age) ** 2));
       (ring.material as THREE.MeshBasicMaterial).opacity = 0.55 * (1 - dimple.age);
+    });
+    puffs.current.forEach((puff, i) => {
+      if (!puff) return;
+      puff.visible = !!bait.ripped;
+      if (!puff.visible) return;
+      const drift = puffAt(i, t, still);
+      const x = at.x + Math.sin(out) * drift.run + Math.cos(out) * drift.side;
+      const z = at.z + Math.cos(out) * drift.run - Math.sin(out) * drift.side;
+      puff.position.set(x, waterHeight(x, z, t) + 0.02, z);
+      puff.scale.setScalar(drift.size);
+      (puff.material as THREE.MeshBasicMaterial).opacity = 1.8 * mat.opacity * drift.show;
     });
     const roll = bigFeeders && !still ? rollAt(t) : null;
     if (carp.current) {
@@ -293,6 +324,11 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, cat
   return (
     <>
       <mesh ref={cloud} geometry={geo} material={mat} renderOrder={1} />
+      {Array.from({ length: RIP_PUFFS }, (_, i) => (
+        <mesh key={i} ref={(mesh) => void (puffs.current[i] = mesh)} name="ripped-crumbs" geometry={puffGeo} visible={false} renderOrder={1}>
+          <meshBasicMaterial color={CLOUD} alphaMap={edge} transparent opacity={0} depthWrite={false} />
+        </mesh>
+      ))}
       {Array.from({ length: DIMPLES }, (_, i) => (
         <mesh key={i} ref={(mesh) => void (rings.current[i] = mesh)} geometry={ringGeo} visible={false} renderOrder={4}>
           <meshBasicMaterial color="#e4efea" transparent opacity={0} depthWrite={false} />

@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { FISH, spotAt, SPOT_IDS, walkableAt } from "@stillwater/shared";
-import { bigFeedersOver, hasWormFeeders, PROWLERS, prowlerOver, GROUNDBAIT_CASTS, SWIM_MAX_CASTS, throwHandful, TOPUP_MAX } from "../logic";
+import { bigFeedersOver, castOverGroundbait, hasWormFeeders, PROWLERS, prowlerOver, GROUNDBAIT_CASTS, SWIM_MAX_CASTS, throwHandful, TOPUP_MAX } from "../logic";
 import { BANK_STANDS } from "../hotspot";
-import { catfishRolls, cloudCenter, cloudOpacity, CLOUD_RADIUS, DIMPLES, dimpleAt, feedersShow, openWaterYaw, PERCH, PERCH_FAR, PERCH_NEAR, PERCH_REACH, perchAt, perchShow, PIKE_REACH, PROWL_IN, PROWL_LEG_SEC, PROWL_OUT, prowlAt, ROLL_GAP_SEC, ROLL_SEC, ROLL_SPAN, rollAt, SCATTER_SEC, SCATTER_WAKES, scatterWakeAt, THIEF_IN, THIEF_OUT, thiefAt, thiefCount, THIEVES } from "./groundbaitCloud";
+import { catfishRolls, cloudCenter, cloudOpacity, CLOUD_RADIUS, DIMPLES, dimpleAt, feedersShow, LANE_HALF, laneLeft, openWaterYaw, PUFF_TO, puffAt, RIP_PUFF_SEC, RIP_PUFFS, PERCH, PERCH_FAR, PERCH_NEAR, PERCH_REACH, perchAt, perchShow, PIKE_REACH, PROWL_IN, PROWL_LEG_SEC, PROWL_OUT, prowlAt, ROLL_GAP_SEC, ROLL_SEC, ROLL_SPAN, rollAt, SCATTER_SEC, SCATTER_WAKES, scatterWakeAt, THIEF_IN, THIEF_OUT, thiefAt, thiefCount, THIEVES } from "./groundbaitCloud";
 
 describe("groundbait cloud", () => {
   it.each(SPOT_IDS)("lands on the %s's own open water", (spot) => {
@@ -159,6 +159,58 @@ describe("a scattered swim", () => {
       const reach = end.run + end.size;
       expect(walkableAt(at.x + Math.sin(end.yaw) * reach, at.z + Math.cos(end.yaw) * reach)).toBe(false);
     }
+  });
+});
+
+describe("a swim a lure ripped through", () => {
+  it("thins its cloud a touch, but no more once its feeders are scattered", () => {
+    const ripped = castOverGroundbait({ spot: "dock", casts: GROUNDBAIT_CASTS }, "dock", "Spinner").next!;
+    expect(ripped.ripped).toBe(true);
+    expect(cloudOpacity(ripped.casts, false, true)).toBeLessThan(cloudOpacity(ripped.casts));
+    expect(cloudOpacity(ripped.casts, false, true)).toBeGreaterThan(cloudOpacity(ripped.casts, true));
+    expect(cloudOpacity(ripped.casts, true, true)).toBe(cloudOpacity(ripped.casts, true));
+  });
+
+  it("tears a ragged lane down the cloud, cleared down its middle and fraying back into it", () => {
+    for (let along = -1; along <= 1; along += 0.05) {
+      expect(laneLeft(0, along)).toBeLessThan(0.3);
+      expect(laneLeft(0, along)).toBeGreaterThan(0);
+      expect(laneLeft(LANE_HALF * 0.5, along)).toBeGreaterThan(laneLeft(0, along));
+      expect(laneLeft(LANE_HALF * 1.5, along)).toBe(1);
+      expect(laneLeft(-LANE_HALF * 0.5, along)).toBe(laneLeft(LANE_HALF * 0.5, along));
+    }
+    const edges = Array.from({ length: 40 }, (_, i) => laneLeft(LANE_HALF * 0.9, i / 20 - 1));
+    expect(Math.max(...edges) - Math.min(...edges)).toBeGreaterThan(0.2);
+  });
+
+  it("trails crumbs off down the lane, each drifting out and fading as it goes", () => {
+    for (let t = 0; t < 2 * RIP_PUFF_SEC; t += 0.1) {
+      const trail = Array.from({ length: RIP_PUFFS }, (_, i) => puffAt(i, t));
+      expect(trail.filter((puff) => puff.show > 0.3).length).toBeGreaterThan(0);
+      for (const puff of trail) {
+        expect(puff.run).toBeLessThanOrEqual(PUFF_TO);
+        expect(Math.abs(puff.side)).toBeLessThan(LANE_HALF * CLOUD_RADIUS);
+      }
+    }
+    const early = puffAt(0, 0.2 * RIP_PUFF_SEC);
+    const late = puffAt(0, 0.8 * RIP_PUFF_SEC);
+    expect(late.run).toBeGreaterThan(early.run);
+    expect(late.size).toBeGreaterThan(early.size);
+    expect(late.show).toBeLessThan(early.show);
+    expect(puffAt(1, 3)).toEqual(puffAt(1, 3 + RIP_PUFF_SEC));
+  });
+
+  it("holds the trail strung down the lane when still", () => {
+    const runs = Array.from({ length: RIP_PUFFS }, (_, i) => puffAt(i, 7, true));
+    expect(runs).toEqual(Array.from({ length: RIP_PUFFS }, (_, i) => puffAt(i, 0, true)));
+    expect(new Set(runs.map((puff) => puff.run)).size).toBe(RIP_PUFFS);
+  });
+
+  it.each(SPOT_IDS)("trails its crumbs over the %s's open water", (spot) => {
+    const at = cloudCenter(spot);
+    const yaw = openWaterYaw(spot);
+    const reach = PUFF_TO + puffAt(0, RIP_PUFF_SEC * 0.999).size;
+    expect(walkableAt(at.x + Math.sin(yaw) * reach, at.z + Math.cos(yaw) * reach)).toBe(false);
   });
 });
 

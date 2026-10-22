@@ -24,11 +24,43 @@ export function cloudCenter(spot: SpotId): { x: number; z: number } {
 /** A swim whose feeders were scattered (GT477) shows this much of its cloud, until they come back. */
 const SCATTERED_THIN = 0.6;
 
-/** The cloud thins as its casts are fished out: faint on the last cast, full at a fresh handful's casts, and thicker still on a swim topped up past them; thinner while its feeders are scattered. */
-export function cloudOpacity(casts: number, scattered = false): number {
+/** A swim a spinner or crankbait ripped through (GT490) shows this much of its cloud; a scattered one is thin enough already. */
+const RIPPED_THIN = 0.85;
+
+/** The cloud thins as its casts are fished out: faint on the last cast, full at a fresh handful's casts, and thicker still on a swim topped up past them; thinner while its feeders are scattered, and a touch thinner once a lure has ripped through it. */
+export function cloudOpacity(casts: number, scattered = false, ripped = false): number {
   const fresh = Math.max(0, Math.min(1, casts / GROUNDBAIT_CASTS));
   const topped = Math.max(0, Math.min(1, (casts - GROUNDBAIT_CASTS) / (SWIM_MAX_CASTS - GROUNDBAIT_CASTS)));
-  return (0.1 + 0.3 * fresh + 0.15 * topped) * (scattered ? SCATTERED_THIN : 1);
+  return (0.1 + 0.3 * fresh + 0.15 * topped) * (scattered ? SCATTERED_THIN : ripped ? RIPPED_THIN : 1);
+}
+
+/** The lane a ripping lure tears through the cloud along the cast line: this wide either side of its middle, as a share of the cloud's radius, and this much of the cloud cleared along its middle. */
+export const LANE_HALF = 0.22;
+const LANE_CLEAR = 0.8;
+
+/** How much of the cloud is left (0..1) at `across` and `along` the lane a ripping lure tore through it, both as shares of the cloud's radius: cleared down its middle, its ragged edges fraying back into the cloud. Pure. */
+export function laneLeft(across: number, along: number): number {
+  const half = LANE_HALF * (1 + 0.3 * Math.sin(along * 9 + 0.7) + 0.15 * Math.sin(along * 23));
+  const k = Math.abs(across) / half;
+  return k >= 1 ? 1 : 1 - LANE_CLEAR * (1 - k * k) ** 2;
+}
+
+/** Crumbs the lure dragged loose drift off down the lane toward open water: this many puffs, each over this long, from this far out from the cloud's middle to this far, past its edge. */
+export const RIP_PUFFS = 3;
+export const RIP_PUFF_SEC = 5;
+const PUFF_FROM = 0.5 * CLOUD_RADIUS;
+export const PUFF_TO = 1.7 * CLOUD_RADIUS;
+
+/** Puff `i` at `time`: how far down the lane from the cloud's middle, how far to one side of it, its radius and how much of it shows (0..1). Strung down the lane, held, when `still`. Pure. */
+export function puffAt(i: number, time: number, still = false): { run: number; side: number; size: number; show: number } {
+  // Spaced evenly through the drift, so a trail of them always leads off the cloud.
+  const k = still ? (i + 0.5) / RIP_PUFFS : (time / RIP_PUFF_SEC + i / RIP_PUFFS) % 1;
+  return {
+    run: PUFF_FROM + (PUFF_TO - PUFF_FROM) * k,
+    side: (i % 2 === 0 ? 1 : -1) * 0.06 * (1 + k),
+    size: 0.18 + 0.22 * k,
+    show: Math.min(1, k / 0.15) * (1 - k),
+  };
 }
 
 /** Feeders dimpling over a swim they have gathered at (GT442): rings at a time, each this long, and how far out over the cloud. */
