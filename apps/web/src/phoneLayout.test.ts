@@ -414,3 +414,33 @@ describe("the bank chip on a small upright phone with larger text", () => {
     expect(/html\[data-contrast="high"\] \.hint \{([^}]*)\}/.exec(block)?.[1]).toContain("padding: 8px 11px 8px 13px;");
   });
 });
+
+describe("a wait hint opened on a touch phone", () => {
+  const opened = '.scene-wrap[data-phase="waiting"]:not([data-walkthrough="1"]) .hint:has(.hint-tail[data-open], .hint-reasons) {';
+
+  it("stops 8 px above the Strike button when held upright, and scrolls", () => {
+    const media = "@media (pointer: coarse) and (max-width: 800px) and (min-height: 501px) {";
+    const block = css.slice(css.indexOf(media), css.indexOf("\n}\n", css.indexOf(media)));
+    const rule = block.slice(block.indexOf(opened), block.indexOf("}", block.indexOf(opened)));
+    expect(rule).toContain("max-height: calc(100% - var(--hud-bottom, 140px) - 10px - max(var(--stance-h, 0px), var(--lure-h, 80px)) - 120px);");
+    expect(rule).toContain("overflow-y: auto;");
+    expect(rule).toContain("pointer-events: auto;");
+  });
+
+  it("takes the stick's corner held sideways, up to the Strike button and down from the bank chip, and scrolls", () => {
+    const media = "@media (pointer: coarse) and (max-height: 500px) {";
+    const block = css.slice(css.indexOf(media), css.indexOf("\n}\n", css.indexOf(media)));
+    const sideways = '\n  .scene-wrap[data-phase="waiting"] .hint:has(.hint-tail[data-open], .hint-reasons) {';
+    const rule = block.slice(block.indexOf(sideways), block.indexOf("}", block.indexOf(sideways)));
+    expect(rule).toContain("left: 10px;");
+    expect(rule).toContain("max-width: calc(100vw / var(--text-zoom, 1) - 122px);");
+    expect(rule).toContain("max-height: calc(100% - var(--hud-bottom, 52px) - 22px - var(--stance-h, 0px));");
+    expect(rule).toContain("pointer-events: auto;");
+    expect(block).toMatch(/html\[data-hand="left"\] \.scene-wrap\[data-phase="waiting"\] \.hint:has\(\.hint-tail\[data-open\], \.hint-reasons\) \{\n    right: 10px;\n    left: auto;/);
+  });
+
+  it("keeps a finger on the hint from striking", () => {
+    const dock = readFileSync(`${import.meta.dirname}/pages/Dock.tsx`, "utf8");
+    expect(dock).toContain('<p className="hint" aria-live="polite" ref={hintRef} data-camera-control>');
+  });
+});
