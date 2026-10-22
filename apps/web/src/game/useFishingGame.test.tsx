@@ -1637,6 +1637,24 @@ describe("useFishingGame strike timing", () => {
     expect(container!.querySelector("[data-testid=frayed]")?.textContent).toBe("true");
   });
 
+  it("keeps a swallowing pike's teeth on the wire leader, off the line", () => {
+    updateSettings({ line: "wire" });
+    try {
+      const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Nightcrawler");
+      vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "pike")!);
+      cast(surface);
+      act(() => vi.advanceTimersByTime(2_201));
+      now += 1_100;
+      act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+      expect(hint()).toMatch(/^It swallowed the bait: hooked deep in 1\.10 s, its teeth on the wire leader, not the line\. .*Ease off when it runs\.$/);
+      // Still hooked deep, so the hook holds like a treble, but the teeth never reach the line.
+      expect(vi.mocked(makeFight).mock.calls.at(-1)![8]).toBe(true);
+      expect(vi.mocked(makeFight).mock.calls.at(-1)![13]).toBe(false);
+    } finally {
+      updateSettings({ line: "standard" });
+    }
+  });
+
   it("blames the teeth when a pike snaps the line they frayed", () => {
     const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Nightcrawler");
     vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "pike")!);
@@ -3621,6 +3639,51 @@ describe("useFishingGame groundbait", () => {
     cast(surface);
     expect(phase()).toBe("waiting:none");
     expect(vi.mocked(pickBite).mock.lastCall?.[12]).toBe(prowler);
+  });
+
+  it.each([
+    ["Spinner", "pike", "Wire leader: the fish see it, so the bites come slower, but pike come to it twice as often."],
+    ["Nightcrawler", undefined, "Wire leader: the fish see it, so the bites come slower, and no pike here would come to it now."],
+  ] as const)("draws the pike to a wire leader on a %s: %s", (lure, prowler, said) => {
+    updateSettings({ line: "wire" });
+    try {
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, lure);
+      atDropoff(surface);
+      cast(surface);
+      expect(vi.mocked(pickBite).mock.lastCall?.[12]).toBe(prowler);
+      expect(hint()).toContain(said);
+    } finally {
+      updateSettings({ line: "standard" });
+    }
+  });
+
+  it("tells a wire leader over a built swim that the pike prowl it already, drawing them no more", () => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dropoff", casts: 6, built: TOPUP_MAX, at: DOCK_BUBBLES.at - 60_000 }));
+    updateSettings({ line: "wire" });
+    try {
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, "Spinner");
+      atDropoff(surface);
+      cast(surface);
+      expect(vi.mocked(pickBite).mock.lastCall?.[12]).toBe("pike");
+      expect(hint()).toContain("Wire leader: the fish see it, so the bites come slower, and the pike already prowl the built-up swim.");
+    } finally {
+      updateSettings({ line: "standard" });
+    }
+  });
+
+  it("keeps the pike off a wire leader when the angler can't land one", () => {
+    updateSettings({ line: "wire" });
+    try {
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700, strength: 1 }, "day", false, "Spinner");
+      atDropoff(surface);
+      cast(surface);
+      expect(vi.mocked(pickBite).mock.lastCall?.[12]).toBeUndefined();
+      expect(hint()).toContain("no pike here would come to it now");
+    } finally {
+      updateSettings({ line: "standard" });
+    }
   });
 
   it("keeps the pike off a swim when the angler can't land one", () => {
