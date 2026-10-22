@@ -4,7 +4,6 @@ import {
   WATER_LABELS,
   itemsForTrip,
   localDate,
-  measureOf,
   packedCount,
   type CatchEntry,
   type Spot,
@@ -12,7 +11,8 @@ import {
   type WaterType,
 } from "@stillwater/shared";
 import { tn, useT } from "../i18n";
-import { measureText, measuresText, tempText } from "../i18n/content";
+import { measuresText, tempText } from "../i18n/content";
+import { bestHereText } from "./bestHere";
 import { daysAheadLabel, fishCountLabel, fishSum, formatClock, formatDay, formatTimeOfDay, noteText, outingName, tripWhen, waterName } from "./format";
 import { useLogbook } from "./LogbookState";
 import { catchBadge } from "./catchBadge";
@@ -168,7 +168,7 @@ export function SpotCard({
   nextOuting = null,
   bestLure = null,
   waterTemp = null,
-  biggest = null,
+  bests = null,
   kindName = (species: string) => species,
   lureName,
   outNow = null,
@@ -185,8 +185,8 @@ export function SpotCard({
   nextOuting?: string | null;
   /** The water's last temperature noted with a fish, while it is recent enough to go by. */
   waterTemp?: { fahrenheit: number; day: string; trend?: "warming" | "cooling" } | null;
-  /** The water's best fish and the measure it is best by. */
-  biggest?: { entry: CatchEntry; kind: "length" | "weight" } | null;
+  /** The water's longest and heaviest fish. */
+  bests?: { longest: CatchEntry | null; heaviest: CatchEntry | null } | null;
   /** How the book names a kind, for its best fish. */
   kindName?: (species: string) => string;
   /** How the book names a lure, for its best lure. */
@@ -195,6 +195,7 @@ export function SpotCard({
   outNow?: string | null;
 }) {
   const t = useT();
+  const best = bests && bestHereText(bests, kindName);
   return (
     <Link to={`/spots/${spot.id}`} className="spot-card" state={FROM_LIST}>
       <div className="spot-card-top">
@@ -211,7 +212,7 @@ export function SpotCard({
         {bestLure ? ` · ${t("best on {lure}", { lure: lureName(bestLure) })}` : ""}
       </p>
       {restDays !== null ? <p className="meta">{restDays === 0 ? t("Fished here today") : restDays === 1 ? t("Last fished here yesterday") : tn(restDays, "Last fished here {n} day ago", "Last fished here {n} days ago")}</p> : null}
-      {biggest ? <p className="meta">{t("Best here: {species}, {size}", { species: kindName(biggest.entry.species), size: measureText(measureOf(biggest.entry, biggest.kind)!) })}</p> : null}
+      {best ? <p className="meta">{best}</p> : null}
       {/* Plain words: the whole card is the link. */}
       {outNow ? <p className="meta out-now">{t("Out now: {outing}", { outing: outNow })}</p> : null}
       {nextOuting ? <p className="meta next-outing">{nextOuting}</p> : null}
