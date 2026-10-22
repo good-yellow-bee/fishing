@@ -383,6 +383,7 @@ export function DockPage() {
   const reasonsOpen = reasonsOpenFor === game.moreReasons;
   // A folded hint's rest, opened from it; each hint starts folded.
   const [tailOpenFor, setTailOpenFor] = useState<string | null>(null);
+  useEffect(() => setTailOpenFor(null), [game.hint]);
   const scenePhase = game.outcome ? "result" : game.phase;
   // The hint is hidden in a fight, so the fight card holds the hookset's message (or a mid-fight call) for a while instead.
   const [hookNote, setHookNote] = useState<string | null>(null);
@@ -1259,6 +1260,7 @@ export function DockPage() {
                 {/* Folded only where the phone layouts leave the hint short of room (index.css). */}
                 <span className="hint-tail" data-open={tailOpenFor === game.hint || undefined}>{game.hint.slice(game.hintLead.length)}</span>{" "}
                 <button className="hint-more hint-tail-more" type="button" data-camera-control onClick={(event) => {
+                  // Hidden once open, so the focus steps off it rather than vanishing with it.
                   event.currentTarget.blur();
                   setTailOpenFor(game.hint);
                 }}>

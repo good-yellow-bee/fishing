@@ -846,7 +846,7 @@ export function useFishingGame(
   }, [hour]);
   /** The reasons past WAIT_REASONS the cast's hint left out, with the hint they belong to. */
   const [moreReasons, setMoreReasons] = useState<{ hint: string; more: readonly string[] }>({ hint: "", more: NO_REASONS });
-  /** The first sentence a long hint can fold the rest behind on a phone, with the hint it belongs to. */
+  /** What happened, which a long hint can fold the rest behind on a phone, with the hint it belongs to. */
   const [hintFold, setHintFold] = useState({ hint: "", lead: "" });
   const [stance, setStance] = useState<StanceId>("shop");
   const [shopTap, setShopTap] = useState(0);
@@ -2417,7 +2417,7 @@ export function useFishingGame(
       return;
     }
     if (kind === "washed") {
-      foldHint(t("The rain washes the handful through before more feeders settle on it: the swim keeps going but builds no further. {casts} casts of it now. Top it up once the rain stops.", { casts: next.casts }), [wary, ...worm]);
+      foldHint(t("The rain washes the handful through before more feeders settle on it: the swim keeps going but builds no further. {casts} casts of it now.", { casts: next.casts }), [t("Top it up once the rain stops."), wary, ...worm]);
       return;
     }
     if (kind === "overfed") {
@@ -2593,7 +2593,7 @@ export function useFishingGame(
     hint,
     /** Reasons the hint left out, while the hint is still the cast's own. */
     moreReasons: moreReasons.hint === hint ? moreReasons.more : NO_REASONS,
-    /** The hint's first sentence, which a phone shows alone until the rest is asked for; "" when the hint doesn't fold. */
+    /** The start of the hint saying what happened, which a phone shows alone until the rest is asked for; "" when the hint doesn't fold. */
     hintLead: hintFold.hint === hint && hintFold.lead !== hint ? hintFold.lead : "",
     nibble,
     schooled,
