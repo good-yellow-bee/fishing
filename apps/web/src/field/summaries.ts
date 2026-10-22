@@ -96,6 +96,20 @@ export function spotSummary(
   ].join("\n");
 }
 
+/** The waters of the Waters list as plain text for a message: their count, then each with its kind, fish, outings and last fish. */
+export function watersSummary(rows: readonly { spot: Spot; fish: number; outings: number; lastFishDay: string | null }[]): string {
+  const lines = rows.map(({ spot, fish, outings, lastFishDay }) =>
+    [
+      waterName(spot.name),
+      t(WATER_LABELS[spot.waterType]),
+      outings > 0 ? tn(fish, "{n} fish", "{n} fish") : fishCountLabel(fish),
+      tn(outings, "{n} outing", "{n} outings"),
+      ...(lastFishDay ? [t("Last fish: {day}", { day: formatDatedDay(new Date(`${lastFishDay}T12:00:00`)) })] : []),
+    ].join(" · "),
+  );
+  return [tn(rows.length, "{n} water", "{n} waters"), ...lines.map((line) => `- ${line}`)].join("\n");
+}
+
 /**
  * One kind of fish as plain text: how many and how many went back, its longest and heaviest,
  * its first and newest day, the waters that gave it, and the lures that took it.

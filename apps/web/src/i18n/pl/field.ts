@@ -111,6 +111,7 @@ export const PL_FIELD: PlBook = {
   "Use the photo's time ({time})": "Weź godzinę ze zdjęcia ({time})",
   "That time is still to come. Is the day right?": "Ta godzina jeszcze nie nadeszła. Czy dzień się zgadza?",
   "Nearest water to me": "Najbliższe łowisko",
+  "Nearest water:": "Najbliższe łowisko:",
   "Share": "Udostępnij",
   "Save photo": "Zapisz zdjęcie",
   "Which seasons": "Które sezony",
