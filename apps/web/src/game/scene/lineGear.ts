@@ -2,13 +2,14 @@ import type { LineWeight } from "../lineWeight";
 
 /** How plain each line shows on the water, as a share of the standard line's opacity: the fish can't see light line, and see heavy line plainer. */
 export const LINE_SHOW: Record<LineWeight, number> = { light: 0.65, standard: 1, heavy: 1.4, wire: 1 };
-/** In bright, calm water or winter's clear water heavy line shows plainer still, and in winter light line is nearly lost. */
+/** In bright, calm water or winter's clear water heavy line shows plainer still, and in winter light line is nearly lost; murky rain water hides heavy line like standard line. */
 export const HEAVY_BRIGHT_SHOW = 1.6;
 export const LIGHT_WINTER_SHOW = 0.4;
 
-/** The line's resting opacity on this reel, kept under the full pull of a hard run; mirrors lineWaitMul's bright and winter water. */
-export function gearOpacity(base: number, line: LineWeight, bright: boolean, winter: boolean) {
-  const show = line === "heavy" && (bright || winter) ? HEAVY_BRIGHT_SHOW : line === "light" && winter ? LIGHT_WINTER_SHOW : LINE_SHOW[line];
+/** The line's resting opacity on this reel, kept under the full pull of a hard run; mirrors lineWaitMul's bright, winter and murky water. */
+export function gearOpacity(base: number, line: LineWeight, bright: boolean, winter: boolean, murky: boolean) {
+  const show =
+    line === "heavy" && murky ? LINE_SHOW.standard : line === "heavy" && (bright || winter) ? HEAVY_BRIGHT_SHOW : line === "light" && winter ? LIGHT_WINTER_SHOW : LINE_SHOW[line];
   return Math.min(0.88, base * show);
 }
 
