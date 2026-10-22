@@ -29,20 +29,20 @@ import { WaterTipsBox } from "./WaterTipsBox";
 import { exactTerm, findWithLink } from "./findLinks";
 import { bookKindName, kindKey, kindOnPage, speciesCounts, speciesLink } from "./speciesLink";
 import { SpeciesChips } from "./SpeciesChips";
-import { daysBetween, foldName, lastOutByWater, spotsByLastFish, twinName } from "./spotOrder";
+import { daysBetween, foldName, lastOutByWater, nearestPinned, spotsByLastFish, twinName } from "./spotOrder";
 import { bookFishDay, yearTally } from "./tripMonths";
 import { PagedTrips } from "./PagedTrips";
 import { outingAverage, outingStreak, topOuting, weekendSplit } from "./outingAverage";
 import { inReadersOrder, notYetThisYear } from "./bests/notYet";
 import { mostKindsDay } from "./bests/mostKinds";
 import { CopySummary } from "./CopySummary";
-import { spotSummary } from "./summaries";
+import { spotSummary, watersSummary } from "./summaries";
 import { EditDelete } from "./EditDelete";
 import { fishCountLabel, formatDay, formatTimeOfDay, messageText, outingName, outingNameById, tripWhen, waterName } from "./format";
 import { outingCounted, outingDay, outNow, outNowAt, plainName } from "./tripDates";
 import { newestOutingFirst } from "./catchNeighbors";
 import { useLogbook } from "./LogbookState";
-import { locale, num, t, tn, useT } from "../i18n";
+import { getUnits, locale, num, t, tn, useT } from "../i18n";
 import { tempText } from "../i18n/content";
 import { lastReading, readingBefore, tempThroughYear } from "./waterTips";
 import { sunTimes } from "./sunTimes";
@@ -67,6 +67,7 @@ import { noteAddedWater } from "./addedWater";
 import { bestLureAt } from "./waterLure";
 import { useTypedParam } from "./typedParam";
 import { CopyPlace } from "./CopyPlace";
+import { distanceText } from "./NearestWater";
 import { seasonWaters } from "./seasonWaters";
 import { datedName, downloadFile } from "./download";
 import { fileSlug, gpxFor } from "./gpx";
@@ -211,6 +212,7 @@ export function SpotsPage() {
   };
   // Each card's own count, as "Most fish" orders them.
   const shownCount = (row: { spot: { id: string }; fishCount: number }) => (ownHere(row.spot.id) ? ownRow.get(row.spot.id)?.fishCount ?? 0 : row.fishCount);
+  const shownLastFish = (row: { spot: { id: string }; lastFishDay: string | null }) => (ownHere(row.spot.id) ? ownRow.get(row.spot.id)?.lastFishDay ?? null : row.lastFishDay);
   // Ties by name under every order, so two waters never fished keep one place.
   const tidyOrder = (a: { spot: { name: string } }, b: { spot: { name: string } }) => waterName(a.spot.name).localeCompare(waterName(b.spot.name), locale());
   if (order === "name") rows.sort(tidyOrder);
@@ -365,7 +367,7 @@ export function SpotsPage() {
                   spot={row.spot}
                   fishCount={shownCount(row)}
                   tripCount={fishedHere(row.spot.id)}
-                  lastFishDay={ownHere(row.spot.id) ? ownRow.get(row.spot.id)?.lastFishDay ?? null : row.lastFishDay}
+                  lastFishDay={shownLastFish(row)}
                   // Under any order once it has rested a week, as the Map says it: a water left alone is worth a look.
                   restDays={lastOut.has(row.spot.id) && (order === "rested" || daysBetween(lastOut.get(row.spot.id)!, today) >= 7) ? restOf(row.spot.id) : null}
                   nextOuting={nextOutingLine(upcoming.find((trip) => trip.spotId === row.spot.id), today, tomorrow)}
@@ -381,6 +383,13 @@ export function SpotsPage() {
             </div>
           </Fragment>
         ))}
+        {/* The angler's own waters as listed, to paste into a message: which water to fish, and how each has gone. */}
+        {ownShown.length > 1 ? (
+          <CopySummary
+            text={() => watersSummary(ownShown.map((row) => ({ spot: row.spot, fish: shownCount(row), outings: fishedHere(row.spot.id), lastFishDay: shownLastFish(row) })))}
+            file="stillwater-waters.txt"
+          />
+        ) : null}
         {/* Every water with a place in one file, for a new GPS or sounder: the sample week's only while there are no others. */}
         {placed.length > 1 ? (
           <p className="fish-csv">
@@ -509,6 +518,9 @@ function SpotView() {
   // The next outing planned here, as the Waters card names it; today's once it has a fish is under way, not ahead.
   const nextHere = nextRealTrips(book, today).find((trip) => trip.spotId === spot.id);
   const restHere = lastHere ? daysBetween(lastHere, today) : 0;
+  // The nearest of the angler's other pinned waters, as the Map says it: which water to try next door. A sample water
+  // has a place only once the angler pins it.
+  const neighbour = spot.place && spot.id !== PLAY_LAKE_ID ? nearestPinned(spot.place, book.spots.filter((other) => other.id !== spot.id && other.id !== PLAY_LAKE_ID)) : null;
   // Its first fish and its last, by the days they count on: the first said once a later fish day has followed it.
   const fishDays = spot.id === PLAY_LAKE_ID ? [] : summed.map((entry) => bookFishDay(book, entry)).filter((day) => day <= today).sort();
   const firstHere = fishDays[0] !== fishDays.at(-1) ? fishDays[0] : undefined;
@@ -642,6 +654,11 @@ function SpotView() {
         ) : null}
         {/* When the light comes and goes there: the page counts the fish that came within an hour of either. */}
         {spot.place ? <SunAtWater place={spot.place} /> : null}
+        {neighbour ? (
+          <p className="meta nearest-water">
+            {t("Nearest water:")} <Link to={`/spots/${neighbour.spot.id}`}>{t("{distance} from {water}", { distance: distanceText(neighbour.km, getUnits()), water: waterName(neighbour.spot.name) })}</Link>
+          </p>
+        ) : null}
         {spot.place ? null : placeFor(spot.id) ? (
           // A sample water has its pin on the sample sheet: its row there, as an own water's place leads to its own.
           <p className="meta spot-place">
