@@ -92,7 +92,7 @@ export const PL_GAME: PlBook = {
   "Over the groundbait.": "Nad zanętą.",
   "Over the groundbait, but the fish are still full from it.": "Nad zanętą, ale ryby są jeszcze najedzone.",
   "Over the groundbait, but its feeders are still scattered.": "Nad zanętą, ale ryby z niej wciąż są rozpłoszone.",
-  "The lure's flash and thump push the feeders off: each cast of a spinner or crankbait over the swim spends {n} casts of it, where bait spends 1.": "Błysk i pulsowanie przynęty odpychają ryby od zanęty: każdy rzut obrotówką albo woblerem nad nią zużywa jej tyle, co {n} rzuty, a rzut z naturalną przynętą tylko tyle, co 1.",
+  "The lure's flash and thump push the feeders off: each cast of a spinner or crankbait over the swim spends {n} casts of it, where other lures and bait spend 1.": "Błysk i pulsowanie przynęty odpychają ryby od zanęty: każdy rzut obrotówką albo woblerem nad nią zużywa jej tyle, co {n} rzuty, a rzut inną przynętą albo naturalną tylko tyle, co 1.",
   "Its thrashing scattered the feeders off the swim: none take for the next {n} casts, and it needs building up again.": "Szamotanina rozpłoszyła ryby z zanęty: przez kolejne rzuty ({n}) żadna z nich nie weźmie, a łowisko trzeba zanęcić od nowa.",
   "Top it up as it fades, with {left} casts or fewer left, and more feeders come in.": "Dosyp zanęty, gdy zostanie jej najwyżej na {left} rzuty, a podpłynie więcej ryb.",
   "Chopped worm": "Siekany robak",

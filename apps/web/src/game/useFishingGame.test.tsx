@@ -175,11 +175,11 @@ const harnessLegend: { current: { legendId: string; spot: SpotId } | null } = { 
 const harnessGiants: { current: Giant[] } = { current: [] };
 const harnessLost: { current: LodgeLost[] } = { current: [] };
 
-function Harness({ current = profile, hour = "day", rising = false, lure, wind, sky, season }: { current?: Profile; hour?: LakeHour; rising?: boolean; lure?: string; wind?: Wind; sky?: Sky; season?: LakeSeason }) {
+function Harness({ current = profile, hour = "day", rising = false, lure, wind, sky, season, mercy = false }: { current?: Profile; hour?: LakeHour; rising?: boolean; lure?: string; wind?: Wind; sky?: Sky; season?: LakeSeason; mercy?: boolean }) {
   // A stable ref, as Dock's tied lure is, so a re-render with another lure reaches callbacks made earlier.
   const lureRef = useRef(lure ?? "");
   lureRef.current = lure ?? "";
-  const game = useFishingGame(current, hour, lure === undefined ? undefined : lureRef, sky, false, season, undefined, rising, wind, undefined, harnessLegend.current, undefined, undefined, undefined, harnessGiants.current, harnessLost.current);
+  const game = useFishingGame(current, hour, lure === undefined ? undefined : lureRef, sky, mercy, season, undefined, rising, wind, undefined, harnessLegend.current, undefined, undefined, undefined, harnessGiants.current, harnessLost.current);
   return (
     <>
       <div ref={game.surfaceRef} data-stance="dock" data-aim="0.5,3" data-angler="0.15,7.42">
@@ -254,7 +254,7 @@ afterEach(() => {
 });
 
 /** Pins the clock so a bubble move never lands inside a test by accident. */
-function mount(at = DOCK_BUBBLES.at, current = profile, hour: LakeHour = "day", rising = false, lure?: string, wind?: Wind, sky?: Sky, season?: LakeSeason) {
+function mount(at = DOCK_BUBBLES.at, current = profile, hour: LakeHour = "day", rising = false, lure?: string, wind?: Wind, sky?: Sky, season?: LakeSeason, mercy = false) {
   vi.useFakeTimers();
   vi.setSystemTime(at);
   vi.spyOn(performance, "now").mockImplementation(() => now);
@@ -268,7 +268,7 @@ function mount(at = DOCK_BUBBLES.at, current = profile, hour: LakeHour = "day", 
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
-  act(() => root!.render(<Harness current={current} hour={hour} rising={rising} lure={lure} wind={wind} sky={sky} season={season} />));
+  act(() => root!.render(<Harness current={current} hour={hour} rising={rising} lure={lure} wind={wind} sky={sky} season={season} mercy={mercy} />));
   return container.querySelector("div")!;
 }
 
@@ -3380,7 +3380,7 @@ describe("useFishingGame groundbait", () => {
   it("says a spinner cast over the swim spends two casts of it the first time, and spends two again untold", () => {
     const kept = new Map<string, string>();
     vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
-    const ripSaid = `The lure's flash and thump push the feeders off: each cast of a spinner or crankbait over the swim spends ${RIPPED_CASTS} casts of it, where bait spends 1.`;
+    const ripSaid = `The lure's flash and thump push the feeders off: each cast of a spinner or crankbait over the swim spends ${RIPPED_CASTS} casts of it, where other lures and bait spend 1.`;
     let surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Spinner");
     toss();
     cast(surface);
@@ -3397,6 +3397,15 @@ describe("useFishingGame groundbait", () => {
     expect(hint()).toContain("Over the groundbait.");
     expect(hint()).not.toContain(ripSaid);
     expect(groundbait()).toBe(`0|dock:${GROUNDBAIT_CASTS - 2 * RIPPED_CASTS}`);
+  });
+
+  it("spares a beginner's spinner the rip: one cast of the swim, and nothing told", () => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Spinner", undefined, undefined, undefined, true);
+    toss();
+    cast(surface);
+    expect(hint()).toContain("Over the groundbait.");
+    expect(hint()).not.toContain("flash and thump");
+    expect(groundbait()).toBe(`0|dock:${GROUNDBAIT_CASTS - 1}`);
   });
 
   it("tops up a fading swim so more feeders come in, and overfeeds one still well fed", () => {

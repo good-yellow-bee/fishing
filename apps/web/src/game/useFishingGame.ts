@@ -1126,7 +1126,8 @@ export function useFishingGame(
     const rainCover = spookedBank && sky === "rain";
     const spooked = spookedBank && !rainCover;
     spookRef.current = null;
-    const bait = castOverGroundbait(groundbaitRef.current, spotRef.current, lureRef?.current);
+    // A beginner's lure doesn't rip through the swim.
+    const bait = castOverGroundbait(groundbaitRef.current, spotRef.current, mercyRef.current ? undefined : lureRef?.current);
     // A beginner is spared the overfed swim's slow bites, and told only of the groundbait.
     const full = bait.full && !mercyRef.current;
     castBaitedRef.current = bait.baited;
@@ -1140,7 +1141,7 @@ export function useFishingGame(
     if (huntedFish && !short && legendaryCanBite(current, huntedFish, spotRef.current)) waitHintRef.current = `${t("The {fish} your hunt tracked down haunts this water.", { fish: t(huntedFish.name) })} ${waitHintRef.current}`;
     if (castFrenzyRef.current) waitHintRef.current = `${t("Into the frenzy! The baitfish boil and the hunters are slashing through them.")} ${waitHintRef.current}`;
     // The first spinner or crankbait cast over a swim says what it costs it.
-    if (bait.ripped) waitHintRef.current = `${t("The lure's flash and thump push the feeders off: each cast of a spinner or crankbait over the swim spends {n} casts of it, where bait spends 1.", { n: RIPPED_CASTS })} ${waitHintRef.current}`;
+    if (bait.ripped) waitHintRef.current = `${t("The lure's flash and thump push the feeders off: each cast of a spinner or crankbait over the swim spends {n} casts of it, where other lures and bait spend 1.", { n: RIPPED_CASTS })} ${waitHintRef.current}`;
     if (bait.baited) waitHintRef.current = `${full ? t("Over the groundbait, but the fish are still full from it.") : bait.spooked ? t("Over the groundbait, but its feeders are still scattered.") : t("Over the groundbait.")} ${waitHintRef.current}`;
     if (spooked) waitHintRef.current = `${t("The lost fish spooked this water, so the next bite is slower.")} ${waitHintRef.current}`;
     else if (rainCover) waitHintRef.current = `${t("The rain on the water covered the lost fish's splash, so this water isn't spooked.")} ${waitHintRef.current}`;
