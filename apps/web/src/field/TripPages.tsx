@@ -47,7 +47,7 @@ import { packingTipRows } from "./waterTips";
 import { datedName, downloadFile } from "./download";
 import { tripIcs, tripIcsName, tripsIcs } from "./tripIcs";
 import { tripSummary } from "./summaries";
-import { busiestHour, fishPace, sinceLastFish, totalWeight } from "./tripPace";
+import { busiestHour, fishPace, longestWait, minutesText, sinceLastFish, totalWeight } from "./tripPace";
 import { averageParts, bestOutingHere, lastOutingBefore, outingMean, outingStreak } from "./outingAverage";
 import { RecordHere, recordHere } from "./RecordHere";
 import { placeFor } from "./map/places";
@@ -482,6 +482,7 @@ function TripView() {
   // Each new kind once, however it was typed, under the spelling most of its fish carry.
   const newKinds = before.length > 0 ? speciesCounts(ownHere.filter((entry) => !known.has(kindKey(entry.species)))).map((row) => row.species) : [];
   const rush = busiestHour(catches.map((entry) => entry.caughtAt));
+  const lull = longestWait(catches.map((entry) => entry.caughtAt));
   const weighed = totalWeight(
     catches.map((entry) => {
       const weight = measureOf(entry, "weight");
@@ -515,6 +516,7 @@ function TripView() {
   const sizeHere = trip.spotId === PLAY_LAKE_ID ? null : recordHere(catches.filter((entry) => countedIds.has(entry.id)), countedHere);
   // The outing on this water before this one, to set the two side by side.
   const lastHere = lastOutingBefore(tripsHere, trip.date, fishedBy, fishHere, book);
+  const restDays = lastHere ? daysBetween(lastHere.date, trip.date >= today ? today : trip.date) : 0;
   const sameDayHere = tripsHere.filter((other) => other.date === trip.date && other.id !== trip.id);
   // And the one after it there, looking back from a day already fished: how the water did the next time.
   const nextHere = fished ? tripsHere.filter((other) => other.date > trip.date).sort((a, b) => a.date.localeCompare(b.date))[0] : undefined;
@@ -570,6 +572,8 @@ function TripView() {
         </p>
       ) : null}
       {rush && !play ? <p className="meta busiest-hour">{t("Most in one hour: {count}, from {time}", { count: rush.count, time: formatTimeOfDay(rush.from) })}</p> : null}
+      {/* And the lull: when the fish went off, and for how long. */}
+      {lull && !play ? <p className="meta longest-wait">{t("Longest wait between fish: {gap}, from {time}", { gap: minutesText(lull.minutes), time: formatTimeOfDay(lull.from) })}</p> : null}
       {weighed && !play ? <p className="meta total-weight">{t("Total weight: {weight} ({count} weighed)", { weight: measureText({ kind: "weight", pounds: weighed.pounds }), count: weighed.count })}</p> : null}
       {/* Against every other outing on the same water. */}
       {best ? <p className="meta best-outing">{best}</p> : null}
@@ -589,8 +593,8 @@ function TripView() {
           <Link to={`/trips/${lastHere.id}`}>
             {t("Last time here, {day}: {fish}", { day: formatDay(lastHere.date), fish: gotAwayToo(fishHere(lastHere.id), lastHere) })}
           </Link>
-          {/* Before going back: how long the water has rested. */}
-          {trip.date >= today && daysBetween(lastHere.date, today) >= 2 ? ` · ${tn(daysBetween(lastHere.date, today), "{n} day ago", "{n} days ago")}` : null}
+          {/* How long the water has rested: before going back, to today; looking back, to this day. */}
+          {restDays >= 2 ? ` · ${trip.date >= today ? tn(restDays, "{n} day ago", "{n} days ago") : tn(restDays, "{n} day before", "{n} days before")}` : null}
         </p>
       ) : null}
       {/* Every outing on this water, listed on the water's own page: how it has done, outing by outing. */}
