@@ -125,7 +125,7 @@ import { TRAP_COLD_SOAK_MS, TRAP_SOAK_MS, TRAP_STALE_MS, trapKey, trapState } fr
 import { bagKey, shinerKey } from "./groundbaitBag";
 import { PREBAIT_DAYS, prebaitKey } from "./prebait";
 import { oldFoeKey } from "./oldFoe";
-import { BREAD_SWIM_CASTS, SWIM_COLD_GONE_MS, SWIM_COLD_PRIMED_MS, SWIM_HOT_GONE_MS, SWIM_HOT_PRIMED_MS, SWIM_PRIMED_MS, swimKey } from "./swim";
+import { BREAD_SWIM_CASTS, RAIN_WASHED_CASTS, SWIM_COLD_GONE_MS, SWIM_COLD_PRIMED_MS, SWIM_HOT_GONE_MS, SWIM_HOT_PRIMED_MS, SWIM_PRIMED_MS, swimKey } from "./swim";
 import { carriesBait, FALSE_STRIKE_MS, FIGURE_EIGHT_ODDS, FIGURE_TURN_MS, FIGURE_WINDOW_MS, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TIRE_REASONS, TOPWATER_POPS, useFishingGame, WAIT_REASONS } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
@@ -3725,6 +3725,38 @@ describe("useFishingGame groundbait", () => {
     toss();
     expect(hint()).toBe(`You top up the swim as it fades: the feeders stay. ${2 + GROUNDBAIT_CASTS} casts of it now. The big feeders here are wary of this swim now: let it fade and build a fresh one to bring them back.`);
     expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ landedBig: WARY_LANDED });
+  });
+
+  it("washes a handful through a fading swim in the rain: it keeps the swim going but builds it no further", () => {
+    const kept = new Map<string, string>([[bagKey(profile.userId), JSON.stringify({ handfuls: 3, day: "2000-01-01" })]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 2, built: 1, at: DOCK_BUBBLES.at - 60_000 }));
+    mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, "clear");
+    // The rain starts while the angler is at the water.
+    act(() => root!.render(<Harness sky="rain" />));
+    toss();
+    expect(groundbait()).toBe(`2|dock:${2 + GROUNDBAIT_CASTS}`);
+    expect(hint()).toBe(`The rain washes the handful through before more feeders settle on it: the swim keeps going but builds no further. ${2 + GROUNDBAIT_CASTS} casts of it now. Top it up once the rain stops.`);
+    expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ casts: 2 + GROUNDBAIT_CASTS, built: 1 });
+  });
+
+  it("still says the big feeders are wary when the rain washes a handful through their swim", () => {
+    const kept = new Map<string, string>([[bagKey(profile.userId), JSON.stringify({ handfuls: 3, day: "2000-01-01" })]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 2, built: TOPUP_MAX, landedBig: WARY_LANDED, at: DOCK_BUBBLES.at - 60_000 }));
+    mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, "rain");
+    toss();
+    expect(hint()).toMatch(/Top it up once the rain stops\. The big feeders here are wary of this swim now/);
+  });
+
+  it("primes a swim left behind with fewer casts when it is raining on the next visit", () => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 1, at: DOCK_BUBBLES.at - SWIM_PRIMED_MS - 60_000 }));
+    mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, "rain");
+    expect(groundbait()).toBe(`${GROUNDBAIT_HANDFULS}|dock:${GROUNDBAIT_CASTS - RAIN_WASHED_CASTS}`);
+    expect(hint()).toContain(`has the feeders gathered there: ${GROUNDBAIT_CASTS - RAIN_WASHED_CASTS} casts of it. The rain washed ${RAIN_WASHED_CASTS} casts of it away.`);
+    expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ casts: GROUNDBAIT_CASTS - RAIN_WASHED_CASTS, primed: true });
   });
 
   it("casts the tied lure at the bank's let-go fish, so one shy of it stays down", () => {

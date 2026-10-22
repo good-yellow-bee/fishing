@@ -1,4 +1,4 @@
-import { SPOT_IDS, type LakeSeason, type SpotId } from "@stillwater/shared";
+import { SPOT_IDS, type LakeSeason, type Sky, type SpotId } from "@stillwater/shared";
 import { readAngler, writeAngler } from "./anglerStore";
 import { GROUNDBAIT_CASTS, SPOOKED_SWIM_CASTS, SWIM_MAX_CASTS, TOPUP_MAX, WARY_LANDED, type Groundbait } from "./logic";
 
@@ -18,6 +18,9 @@ export const SWIM_COLD_PRIMED_MS = 12 * 3_600_000;
 export const SWIM_COLD_GONE_MS = 96 * 3_600_000;
 /** Bread crumb in the groundbait holds the feeders gathered over a swim left behind for this many casts. */
 export const BREAD_SWIM_CASTS = GROUNDBAIT_CASTS + 3;
+
+/** A swim left behind over a wet day, raining when the angler comes back, primes with this many fewer casts: the rain washed some of it away. */
+export const RAIN_WASHED_CASTS = 2;
 
 /** When a swim left behind primes and when it is gone, judged by the lake's season when the angler comes back. */
 export function swimTimes(season: LakeSeason | undefined): { primedMs: number; goneMs: number } {
@@ -55,11 +58,12 @@ export function saveSwim(userId: string, swim: Swim | null) {
   writeAngler(swimKey(userId), swim);
 }
 
-/** The swim on a new visit: as it was if soon after, freshly baited once when the feeders have gathered (longer with bread crumb in it, its top-ups gone, its chopped worm and wary big feeders kept), gone once the season's days run out. */
-export function swimNow(swim: Swim | null, now: number, season?: LakeSeason): (Swim & { primedNow: boolean }) | null {
+/** The swim on a new visit: as it was if soon after, freshly baited once when the feeders have gathered (longer with bread crumb in it, shorter when it is raining, its top-ups gone, its chopped worm and wary big feeders kept), gone once the season's days run out. */
+export function swimNow(swim: Swim | null, now: number, season?: LakeSeason, sky?: Sky): (Swim & { primedNow: boolean }) | null {
   if (!swim || swim.casts <= 0) return null;
   const age = now - swim.at;
   const { primedMs, goneMs } = swimTimes(season);
   if (age > goneMs) return null;
-  return age >= primedMs && !swim.primed ? { spot: swim.spot as SpotId, casts: swim.bread ? BREAD_SWIM_CASTS : GROUNDBAIT_CASTS, at: swim.at, primed: true, ...(swim.bread ? { bread: true } : {}), ...(swim.worm ? { worm: true } : {}), ...(swim.landedBig ? { landedBig: swim.landedBig } : {}), primedNow: true } : { ...swim, primedNow: false };
+  const casts = (swim.bread ? BREAD_SWIM_CASTS : GROUNDBAIT_CASTS) - (sky === "rain" ? RAIN_WASHED_CASTS : 0);
+  return age >= primedMs && !swim.primed ? { spot: swim.spot as SpotId, casts, at: swim.at, primed: true, ...(swim.bread ? { bread: true } : {}), ...(swim.worm ? { worm: true } : {}), ...(swim.landedBig ? { landedBig: swim.landedBig } : {}), primedNow: true } : { ...swim, primedNow: false };
 }

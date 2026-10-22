@@ -65,7 +65,7 @@ import { FAR_ROCK_WAIT, tightToFarRock } from "./farRock";
 import { castSnags, onRockEdge, onShoreIce, ROCK_EDGE_WAIT, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { FLUTTER_SEC, flutterGrabberFor, flutterTip, followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { BUCKET_SIZE, liveShiners, loadBucket, saveBucket } from "./baitBucket";
-import { loadSwim, saveSwim, swimNow } from "./swim";
+import { loadSwim, RAIN_WASHED_CASTS, saveSwim, swimNow } from "./swim";
 import { baitDay, loadPrebait, PREBAIT_DAYS, savePrebait } from "./prebait";
 import { loadTrap, saveTrap, trapCatch, trapIsCold, trapNextChange, trapState, type Trap } from "./minnowTrap";
 import { castForFoe, foeGone, isOldFoe, loadOldFoe, saveOldFoe } from "./oldFoe";
@@ -559,6 +559,8 @@ export function useFishingGame(
   windDriftRef.current = windDrift;
   const hourRef = useRef(hour);
   hourRef.current = hour;
+  const skyRef = useRef(sky);
+  skyRef.current = sky;
   const castRiseRef = useRef(false);
   /** The school a landed panfish left at its bank, for the next casts there. */
   const schoolRef = useRef<School | null>(null);
@@ -804,10 +806,10 @@ export function useFishingGame(
     setGroundbait(next);
     if (anglerIdRef.current) saveSwim(anglerIdRef.current, next ? { ...next, at: swimRef.current.at, ...(swimRef.current.primed ? { primed: true } : {}), ...(swimRef.current.bread ? { bread: true } : {}) } : null);
   };
-  // The angler's swim from an earlier visit, read when they sign in: left long enough for the season, the feeders have gathered over it, once.
+  // The angler's swim from an earlier visit, read when they sign in: left long enough for the season, the feeders have gathered over it, once, fewer of them in the rain.
   useEffect(() => {
     const swim = profile?.userId ? loadSwim(profile.userId) : null;
-    const now = swimNow(swim, Date.now(), season);
+    const now = swimNow(swim, Date.now(), season, sky);
     groundbaitRef.current = now ? { spot: now.spot, casts: now.casts, ...(now.built ? { built: now.built } : {}), ...(now.spooked ? { spooked: now.spooked } : {}), ...(now.worm ? { worm: true } : {}), ...(now.landedBig ? { landedBig: now.landedBig } : {}) } : null;
     swimRef.current = { at: now?.at ?? 0, primed: !!now?.primed, bread: !!now?.bread };
     setSwimPrimed(!!now?.primed);
@@ -819,7 +821,8 @@ export function useFishingGame(
       const primed = now.bread
         ? t("The groundbait and bread crumb you left at the {bank} have the feeders gathered there: {casts} casts of it.", left)
         : t("The groundbait you left at the {bank} has the feeders gathered there: {casts} casts of it.", left);
-      setHint([baitDiedRef.current, primed].filter(Boolean).join(" "));
+      const washed = sky === "rain" ? t("The rain washed {n} casts of it away.", { n: RAIN_WASHED_CASTS }) : "";
+      setHint([baitDiedRef.current, primed, washed].filter(Boolean).join(" "));
     }
   }, [profile?.userId]);
   /** The bank whose next cast meets wary fish, for the stance chip to say so before the cast. */
@@ -2373,7 +2376,7 @@ export function useFishingGame(
     const before = groundbaitRef.current?.built ?? 0;
     const angler = anglerIdRef.current;
     const day = angler ? baitDay(loadPrebait(angler), spotRef.current, new Date()) : null;
-    const { next, kind } = throwHandful(groundbaitRef.current, spotRef.current, day?.regular, chopped);
+    const { next, kind } = throwHandful(groundbaitRef.current, spotRef.current, day?.regular, chopped, skyRef.current === "rain");
     const builtFresh = kind === "fresh" && !!day?.regular;
     if (angler && day) savePrebait(angler, builtFresh ? { ...day.next, built: day.next.day } : day.next);
     keepGroundbait(next, Date.now());
@@ -2385,14 +2388,14 @@ export function useFishingGame(
       : t("{n} chopped worms went in with it: the perch here come in to feed while the swim lasts, though not to the lure you have tied on.", { n: CHOPPED_WORMS });
     const worm = chopped ? `${perch} ${t("Worms left in your tin: {worms}.", { worms: wormsRef.current })}` : "";
     const withWorm = (said: string) => [said, worm].filter(Boolean).join(" ");
+    // The big feeders are told of only where they live and would take the tied lure; wary of the swim, they no longer move in.
+    const takesBig = bigFeedersOver(next, lureRef?.current);
+    const wary = takesBig && isWary(next) ? t("The big feeders here are wary of this swim now: let it fade and build a fresh one to bring them back.") : "";
     if (kind === "topped") {
-      // The big feeders are told of only where they live and would take the tied lure; wary of the swim, they no longer move in.
-      const takesBig = bigFeedersOver(next, lureRef?.current);
       const big = takesBig && !isWary(next);
       const grew = next.built! > before;
       // The prowler is named only where it lives, would take the tied lure, and the angler could land it.
       const prowler = next.built! >= TOPUP_MAX ? prowlerAt(spotRef.current, lureRef?.current) : undefined;
-      const wary = takesBig && isWary(next) ? t("The big feeders here are wary of this swim now: let it fade and build a fresh one to bring them back.") : "";
       const prowl = prowler && profileRef.current && canLand(profileRef.current, prowler) ? t("{fish} prowls round it now, hunting the small feeders: one hooked here scatters them, landed or lost.", { fish: t(prowler.name) }) : "";
       setHint(
         withWorm(
@@ -2405,6 +2408,10 @@ export function useFishingGame(
                 : t("You top up the swim as it fades: the feeders stay. {casts} casts of it now.", { casts: next.casts }), wary, prowl].filter(Boolean).join(" "),
         ),
       );
+      return;
+    }
+    if (kind === "washed") {
+      setHint(withWorm([t("The rain washes the handful through before more feeders settle on it: the swim keeps going but builds no further. {casts} casts of it now. Top it up once the rain stops.", { casts: next.casts }), wary].filter(Boolean).join(" ")));
       return;
     }
     if (kind === "overfed") {
