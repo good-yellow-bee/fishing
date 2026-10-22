@@ -63,7 +63,7 @@ const draw = async (url: string) => {
 describe("round 129: catch pages with a water of no name", () => {
   it("says which water the form's picks come from", async () => {
     const box = await draw("/catches/new?spot=blank");
-    expect(box.querySelector(".lure-tips")?.textContent).toMatch(/^From Water with no name: /);
+    expect(box.querySelector(".lure-tips")?.textContent).toMatch(/^From a water with no name: /);
   });
 
   it("tells two waters of no name apart in the form's water list", async () => {
@@ -76,7 +76,7 @@ describe("round 129: catch pages with a water of no name", () => {
   it("names the leading water of a search, keeping two waters of no name apart", async () => {
     const text = (await draw("/catches?find=roach")).textContent;
     // The two blank waters' 5 fish are not one water's.
-    expect(text).toContain("Most from Water with no name (3).");
+    expect(text).toContain("Most from a water with no name (3).");
   });
 
   it("names a water of no name in a search's copied summary", async () => {
