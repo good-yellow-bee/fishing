@@ -18,15 +18,22 @@ export function sinceLastFish(caughtAt: string, now: Date = new Date()): string 
 
 /** "40 min", "1.5 h": a stretch of an outing in the words its lines say it in. */
 export function minutesText(minutes: number): string {
-  return minutes < 90 ? t("{n} min", { n: Math.round(minutes) }) : t("{n} h", { n: num(minutes / 60) });
+  const rounded = Math.round(minutes);
+  return rounded < 90 ? t("{n} min", { n: rounded }) : t("{n} h", { n: num(minutes / 60) });
+}
+
+/** An outing's fish times, earliest first, leaving out any that can't be read. */
+function inOrder(times: readonly string[]): { time: string; at: number }[] {
+  return times.map((time) => ({ time, at: Date.parse(time) })).filter((each) => Number.isFinite(each.at)).sort((a, b) => a.at - b.at);
 }
 
 /**
- * The longest wait between two fish of one day's outing, in minutes, and when the fish before it came; null under three
- * fish, over a 12-hour span, or under half an hour or half again the usual wait: then the pace already says it.
+ * The longest wait between two fish of one session (first to last fish within 12 hours), in minutes, and when the fish
+ * before it came. Null under three fish, or unless the wait is at least half an hour and at least 1.5 times the usual
+ * one: shorter, the pace already says it.
  */
 export function longestWait(times: readonly string[]): { minutes: number; from: string } | null {
-  const sorted = times.map((time) => ({ time, at: Date.parse(time) })).filter((each) => Number.isFinite(each.at)).sort((a, b) => a.at - b.at);
+  const sorted = inOrder(times);
   if (sorted.length < 3) return null;
   const span = sorted.at(-1)!.at - sorted[0]!.at;
   if (span > 12 * 3_600_000) return null;
@@ -41,7 +48,7 @@ export function longestWait(times: readonly string[]): { minutes: number; from: 
 
 /** The busiest hour of an outing: the most fish in any 60 minutes and when that hour began; null under three fish in it, or when it held them all. */
 export function busiestHour(times: readonly string[]): { count: number; from: string } | null {
-  const sorted = times.map((time) => ({ time, at: Date.parse(time) })).filter((each) => Number.isFinite(each.at)).sort((a, b) => a.at - b.at);
+  const sorted = inOrder(times);
   let best: { count: number; from: string } | null = null;
   for (let start = 0, end = 0; start < sorted.length; start++) {
     while (end < sorted.length && sorted[end]!.at - sorted[start]!.at <= 60 * 60000) end++;

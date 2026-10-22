@@ -516,6 +516,7 @@ function TripView() {
   const sizeHere = trip.spotId === PLAY_LAKE_ID ? null : recordHere(catches.filter((entry) => countedIds.has(entry.id)), countedHere);
   // The outing on this water before this one, to set the two side by side.
   const lastHere = lastOutingBefore(tripsHere, trip.date, fishedBy, fishHere, book);
+  const restDays = lastHere ? daysBetween(lastHere.date, trip.date >= today ? today : trip.date) : 0;
   const sameDayHere = tripsHere.filter((other) => other.date === trip.date && other.id !== trip.id);
   // And the one after it there, looking back from a day already fished: how the water did the next time.
   const nextHere = fished ? tripsHere.filter((other) => other.date > trip.date).sort((a, b) => a.date.localeCompare(b.date))[0] : undefined;
@@ -592,10 +593,8 @@ function TripView() {
           <Link to={`/trips/${lastHere.id}`}>
             {t("Last time here, {day}: {fish}", { day: formatDay(lastHere.date), fish: gotAwayToo(fishHere(lastHere.id), lastHere) })}
           </Link>
-          {/* Before going back: how long the water has rested. */}
-          {trip.date >= today && daysBetween(lastHere.date, today) >= 2 ? ` · ${tn(daysBetween(lastHere.date, today), "{n} day ago", "{n} days ago")}` : null}
-          {/* Looking back: how long the water had rested before this day. */}
-          {trip.date < today && daysBetween(lastHere.date, trip.date) >= 2 ? ` · ${tn(daysBetween(lastHere.date, trip.date), "{n} day before", "{n} days before")}` : null}
+          {/* How long the water has rested: before going back, to today; looking back, to this day. */}
+          {restDays >= 2 ? ` · ${trip.date >= today ? tn(restDays, "{n} day ago", "{n} days ago") : tn(restDays, "{n} day before", "{n} days before")}` : null}
         </p>
       ) : null}
       {/* Every outing on this water, listed on the water's own page: how it has done, outing by outing. */}

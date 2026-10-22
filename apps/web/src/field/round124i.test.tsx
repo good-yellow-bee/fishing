@@ -89,7 +89,7 @@ describe("round 124 ideas: what got away beside how an outing on the water went"
 
   it("leaves the counts as they were when nothing got away", async () => {
     const clean: Logbook = { ...book, trips: book.trips.map(({ lost: _lost, missed: _missed, ...trip }) => trip) };
-    expect(await page(clean, "/trips/good")).toMatch(/Last time here, Wed, Oct 14: 0 fish(?! · \d+ (lost|missed))/);
+    expect(await page(clean, "/trips/good")).toMatch(/Last time here, Wed, Oct 14: 0 fish · 4 days before(?! ·)/);
     expect(await page(clean, "/trips?find=Own")).toMatch(/Outings: 2 · 1 fish(?! ·)/);
   });
 });
