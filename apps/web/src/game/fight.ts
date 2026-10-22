@@ -493,9 +493,10 @@ export function fightWind(wind: string | undefined): FightWind | undefined {
  * sunfish beds (an egg raider bolts from the guarding sunfish, so its first run is the long one), `foam` in a wind's
  * foam lane (a slack line drifts out faster still), `lantern` in the dock lantern's light at night (it sees the net and
  * bolts from it once, as a carp does), `fired` chasing the kingfisher's fry (fired up, its first run doesn't tire it).
- * `lineSnap` scales the strain the line snaps at, sound or frayed, for a light or heavy line on the reel.
+ * `lineSnap` scales the strain the line snaps at, sound or frayed, for a light or heavy line on the reel, and `lineCover`
+ * how long a fish holds in the weeds or a line stays wrapped round wood.
  */
-export type FightCover = { farRock?: boolean; weedBall?: boolean; edge?: boolean; bed?: boolean; foam?: boolean; lantern?: boolean; fired?: boolean; lineSnap?: number };
+export type FightCover = { farRock?: boolean; weedBall?: boolean; edge?: boolean; bed?: boolean; foam?: boolean; lantern?: boolean; fired?: boolean; lineSnap?: number; lineCover?: number };
 /** In a foam lane on a breezy or strong day the wind's drift is at its strongest: a slack line drifts out this much faster still. */
 export const FOAM_DRIFT = 1.3;
 export type FightWater = "open" | "weeds" | "current" | "deep" | "rocks" | "boat" | "pilings" | "log";
@@ -503,8 +504,14 @@ export type FightWater = "open" | "weeds" | "current" | "deep" | "rocks" | "boat
 export function wrapsLine(water: FightWater | undefined): water is "pilings" | "log" {
   return water === "pilings" || water === "log";
 }
-/** The water a spot gives the fight. */
-export function fightWater(spot: string): FightWater {
+/**
+ * The water a spot gives the fight. A fish hooked tight to the lily pads dives for the stems, so the fight there is a weed
+ * fight whatever the bank; one hooked tight to the sunken log from the bank runs for the log and can wrap the line round
+ * it (out on the boat, the hull swings clear).
+ */
+export function fightWater(spot: string, pads = false, log = false): FightWater {
+  if (pads) return "weeds";
+  if (log && spot !== "open") return "log";
   return spot === "reeds" ? "weeds" : spot === "inlet" ? "current" : spot === "dropoff" ? "deep" : spot === "point" ? "rocks" : spot === "open" ? "boat" : spot === "dock" ? "pilings" : "open";
 }
 
@@ -618,7 +625,7 @@ export function makeFight(
   /** What the fish was hooked by, on top of the spot's water. */
   cover: FightCover = {},
 ): FightRuntime {
-  const { farRock = false, weedBall = false, edge = false, bed = false, foam = false, lantern = false, fired = false, lineSnap = 1 } = cover;
+  const { farRock = false, weedBall = false, edge = false, bed = false, foam = false, lantern = false, fired = false, lineSnap = 1, lineCover = 1 } = cover;
   /** The strain the line snaps at right now: a frayed one sooner, both scaled by the line on the reel. */
   const snapNow = () => (sim.frayed ? FRAYED_SNAP : snapAt) * lineSnap;
   const weedy = water === "weeds";
@@ -799,12 +806,12 @@ export function makeFight(
         // At the reeds a run nobody turned carries the fish into the weeds; a leap goes up, not in.
         if (weedy && turnable && !sim.jump && !sim.roll && !sim.charge && !turnedThisRun && sim.line > 0) {
           sim.weeded = true;
-          weedUntil = nowMs + WEED_MS * coverHold;
+          weedUntil = nowMs + WEED_MS * coverHold * lineCover;
         }
         // At the dock it wraps the line round a piling instead, and by the sunken log round the log.
         if (wrapsLine(water) && turnable && !sim.jump && !sim.roll && !sim.charge && !turnedThisRun && sim.line > 0) {
           sim.wrapped = true;
-          wrapUntil = nowMs + WRAP_MS * coverHold;
+          wrapUntil = nowMs + WRAP_MS * coverHold * lineCover;
         }
         // A clean run at the reeds or the point counts toward the landed card's note; one that went in spoils it.
         if ((weedy || rockWater || wrapsLine(water)) && turnable && !sim.jump && !sim.roll && !sim.charge) {

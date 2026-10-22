@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { FISH, NEST_GUARDERS, type FishSpecies } from "@stillwater/shared";
 import { DIVERS, FRAYED_SNAP, LINE_SPINNERS, NET_SHY_MS, SLIPPERS, THRASH_HEAD_MS, NET_BOLT_LINE, NET_WAIT_MS, NET_HEAD_EVERY_MS, NET_HEAD_MS, netsFish, liftsStickerInOne, STRONG_LIFT_STRENGTH, TEETH_SEC, TOOTHY, CHARGERS, CHARGE_SLACK_SEC, BREACHERS, BROADSIDE_REEL, BROADSIDERS, QUIT_TIRE, QUITTERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, FLOOD_DRIFT, floodedInlet, BOAT_RUN, STRONG_WIND_BOAT_RUN, boatSwingShare, WIND_SLACK, WINTER_TIRE, seasonTireMul, thrivesInCold, COLD_LOVERS, SUMMER_TIRE, COLDWATER, warmTireMul, rainCooled, deepCooled, FALL_RUN_TIRE, FALL_RUNNERS, runTireMul, SPRING_RUN_TIRE, SPRING_RUNNERS, springRunTireMul, CURRENT_FIGHTER_TIRE, CURRENT_FIGHTERS, currentTireMul, FALL_FEED_TIRE, FALL_FEEDERS, fallFeedTireMul, RAIN_HUNTER_TIRE, SCENT_HUNTERS, rainHunterTireMul, SUMMER_STRENGTH_TIRE, WARM_LOVERS, summerStrengthTireMul, NEST_TIRE, nestTireMul, NIGHT_HUNTER_TIRE, NIGHT_HUNTERS, nightTireMul, SPAWN_SPENT_TIRE, EARLY_SPAWNERS, spentTireMul, TWILIGHT_HUNTER_TIRE, TWILIGHT_HUNTERS, twilightTireMul, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, TREBLE_HOLD, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD, SHAKE_MS, SHAKE_GRACE_SEC, WITH_RUN_DRIFT, WITH_RUN_GRACE_SEC, WITH_RUN_REEL, TURNED_HEAD_MS, TURNED_HEAD_REEL, DRAG_RUN_LINE, DRAG_RUN_PULL, HEAVY_DRAG_CAP, WEED_BALL_REEL, FOAM_DRIFT, findsSecondWind, SECOND_WIND_AT, SECOND_WIND_GAIN, SECOND_WIND_GATHER_MS, ARM_FLOOR, ARM_FRESH_SEC, ARM_TIRE_PER_SEC, armMul } from "./fight";
+import { LINE_COVER, type LineWeight } from "./lineWeight";
 import { nextDrag, type Drag } from "./drag";
 
 function fish(id: string) {
@@ -827,6 +828,13 @@ describe("the inlet's current", () => {
     expect(fightWater("shore")).toBe("open");
     expect(fightWater("open")).toBe("boat");
   });
+
+  it("makes a fight tight to the lily pads a weed fight, and one tight to the log a log fight from the bank", () => {
+    expect(fightWater("dropoff", true)).toBe("weeds");
+    expect(fightWater("shore", false, true)).toBe("log");
+    expect(fightWater("point", true, true)).toBe("weeds");
+    expect(fightWater("open", false, true)).toBe("boat");
+  });
 });
 
 describe("a run from the boat", () => {
@@ -1445,6 +1453,53 @@ describe("a largemouth bass in cover", () => {
     const end = firstRunEnd(smallmouth);
     smallmouth.step(end + ms + 50, 0.05, false);
     expect(smallmouth.sim[flag]).toBe(false);
+  });
+});
+
+describe("heavy line in cover", () => {
+  /** Lets the first run go unturned and returns when it ends. */
+  function firstRunEnd(runtime: FightRuntime) {
+    let was = runtime.sim.surge;
+    for (let now = 0; now < 60_000; now += 50) {
+      runtime.step(now, 0.05, false);
+      if (was === 2 && runtime.sim.surge === 0) return now;
+      was = runtime.sim.surge;
+    }
+    throw new Error("never ran");
+  }
+  const onLine = (line: LineWeight, water: "weeds" | "pilings" | "log", id = "smallmouth-bass") =>
+    makeFight(fish(id), 4, 3, () => 0, 1, water, undefined, false, false, false, false, false, false, false, 1, 1, false, { lineCover: LINE_COVER[line] });
+
+  it.each([
+    ["weeds", "weeded", WEED_MS],
+    ["pilings", "wrapped", WRAP_MS],
+    ["log", "wrapped", WRAP_MS],
+  ] as const)("pulls a fish out of the %s in half the time a standard line takes", (water, flag, ms) => {
+    const heavy = onLine("heavy", water);
+    const standard = onLine("standard", water);
+    const at = firstRunEnd(heavy);
+    expect(firstRunEnd(standard)).toBe(at);
+    expect(heavy.sim[flag]).toBe(true);
+    heavy.step(at + ms * LINE_COVER.heavy - 100, 0.05, false);
+    expect(heavy.sim[flag]).toBe(true);
+    heavy.step(at + ms * LINE_COVER.heavy + 50, 0.05, false);
+    expect(heavy.sim[flag]).toBe(false);
+    standard.step(at + ms * LINE_COVER.heavy + 50, 0.05, false);
+    expect(standard.sim[flag]).toBe(true);
+  });
+
+  it("keeps a largemouth's longer hold in cover, halved too", () => {
+    const bass = onLine("heavy", "weeds", "largemouth-bass");
+    const at = firstRunEnd(bass);
+    bass.step(at + WEED_MS * COVER_HOLD * LINE_COVER.heavy - 100, 0.05, false);
+    expect(bass.sim.weeded).toBe(true);
+    bass.step(at + WEED_MS * COVER_HOLD * LINE_COVER.heavy + 50, 0.05, false);
+    expect(bass.sim.weeded).toBe(false);
+  });
+
+  it("leaves the other lines to hold in cover as a standard line does", () => {
+    expect([LINE_COVER.light, LINE_COVER.standard, LINE_COVER.wire]).toEqual([1, 1, 1]);
+    expect(LINE_COVER.heavy).toBeLessThan(1);
   });
 });
 
