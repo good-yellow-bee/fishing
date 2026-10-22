@@ -2004,7 +2004,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT487~~ | ~~A wary swim is read: the toss hint over a wary swim (GT483) says how many big feeders it has seen landed and how many are left to draw, so the angler can tell a wary swim from a thin one before casting~~ (#1781) | gameplay | S |
 | ~~GT488~~ | ~~News card 2026-10-22-game78 covers GT486-GT487: rain washing a swim and the wary swim read from its hint~~ (#1784) | ui | S |
 | ~~GT489~~ | ~~Catfish come to a built swim after dark: over a swim topped up twice, from dusk through the night the big feeders it draws lean to catfish (their share of the big-feeder pull doubles while carp's halves; by day as now), so a night session over a built swim is the way to a catfish; the top-up hint at dusk or night names them where the tied lure would take them~~ (#1785) | gameplay | M |
-| GT490 | A lure ripped through a swim: each spinner or crankbait cast over a swim costs it two casts, not one (the flash and thump push the feeders off), so fishing bait over a built swim keeps it while chasing its prowling pike (GT481) spends it; the cast's hint says so the first time per swim | gameplay | M |
+| ~~GT490~~ | ~~A lure ripped through a swim: each spinner or crankbait cast over a swim costs it two casts, not one (the flash and thump push the feeders off), so fishing bait over a built swim keeps it while chasing its prowling pike (GT481) spends it; the cast's hint says so the first time per swim~~ (#1787) | gameplay | M |
 | GT491 | News card game79 covers GT489-GT490: catfish to a built swim after dark and a lure ripped through a swim | ui | S |
 
 ## Risks / open questions for the owner
