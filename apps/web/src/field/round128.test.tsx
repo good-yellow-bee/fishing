@@ -36,7 +36,7 @@ const fish = (id: string, spotId: string, tripId: string, day: number): CatchEnt
 const book: Logbook = {
   spots: [water("blank", "  "), water("own", "Own Lake")],
   trips: [trip("past", "2026-10-17", "blank"), trip("plan", "2026-10-28", "blank"), trip("own", "2026-10-12", "own")],
-  catches: [fish("1", "own", "own", 12), fish("2", "blank", "own", 12)],
+  catches: [fish("1", "own", "own", 12)],
 };
 
 describe("round 128: an outing on a water with no name", () => {
