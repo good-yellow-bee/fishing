@@ -10,6 +10,7 @@ import { waterHeight } from "./water";
 
 const CLOUD = "#7a5a32";
 const CARP = "#6b5524";
+const CATFISH = "#45403a";
 const SHINER = "#c8d2d6";
 const PIKE = "#4a6b48";
 const PERCH_BACK = "#9aa848";
@@ -30,6 +31,31 @@ function carpShape() {
   // Drawn a little larger than life so it reads from the bank.
   const merged = mergeGeometries([body, fin, tail]).scale(1.25, 1.25, 1.25);
   [body, fin, tail].forEach((part) => part.dispose());
+  return merged;
+}
+
+/** A whisker reaching `len` from a corner of the mouth at (`x`, `y`, `z`), out to that side and `back` radians round toward the tail, drooping `down` radians. */
+function barbel(x: number, y: number, z: number, len: number, back: number, down: number) {
+  const side = Math.sign(x);
+  return new THREE.CylinderGeometry(0.007, 0.003, len, 4)
+    .rotateZ((-side * Math.PI) / 2)
+    .translate((side * len) / 2, 0, 0)
+    .rotateZ(-side * down)
+    .rotateY(side * back)
+    .translate(x, y, z);
+}
+
+/** A +z-facing catfish: a long dark body, a broad flat head with whiskers trailing from the mouth, a small dorsal fin and a broad tail. */
+function catfishShape() {
+  const body = new THREE.SphereGeometry(1, 12, 8).scale(0.1, 0.08, 0.36);
+  const head = new THREE.SphereGeometry(1, 12, 6).scale(0.13, 0.06, 0.13).translate(0, -0.01, 0.24);
+  const fin = new THREE.ConeGeometry(0.04, 0.1, 4).scale(0.25, 1, 1.4).translate(0, 0.1, 0.08);
+  const tail = new THREE.ConeGeometry(0.11, 0.16, 4).scale(0.25, 1, 1).rotateX(Math.PI / 2).translate(0, 0.01, -0.4);
+  const whiskers = [-1, 1].flatMap((side) => [barbel(side * 0.09, 0, 0.33, 0.22, 0.4, 0.1), barbel(side * 0.04, -0.04, 0.33, 0.09, 0.2, 0.6)]);
+  const parts = [body, head, fin, tail, ...whiskers];
+  // Drawn a little larger than life so it reads from the bank.
+  const merged = mergeGeometries(parts).scale(1.3, 1.3, 1.3);
+  parts.forEach((part) => part.dispose());
   return merged;
 }
 
@@ -97,8 +123,8 @@ function softEdge() {
   return new THREE.CanvasTexture(canvas);
 }
 
-/** The muddy cloud a handful of groundbait leaves off the bank, thinning as its casts are fished out; fish dimple over it once `feeding` or topped up, more often the more it was built up, with `bigFeeders` in a carp now and then rolls at its edge, and with `thieves` shiners dart in at its edge and turn away, fewer as it is topped up, with chopped worm in it perch hang under it and dart about, and with `prowler` a pike glides along its open-water side, slashing in at the feeders once a pass. When a lost big feeder scatters the feeders the dimples stop, bow wakes fan out toward open water and the cloud thins. */
-export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, thieves = false, prowler = false }: { bait: Groundbait; feeding?: boolean; bigFeeders?: boolean; thieves?: boolean; prowler?: boolean }) {
+/** The muddy cloud a handful of groundbait leaves off the bank, thinning as its casts are fished out; fish dimple over it once `feeding` or topped up, more often the more it was built up, with `bigFeeders` in a carp now and then rolls at its edge (a catfish after dark where they lead them, with `catfish`), and with `thieves` shiners dart in at its edge and turn away, fewer as it is topped up, with chopped worm in it perch hang under it and dart about, and with `prowler` a pike glides along its open-water side, slashing in at the feeders once a pass. When a lost big feeder scatters the feeders the dimples stop, bow wakes fan out toward open water and the cloud thins. */
+export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, catfish = false, thieves = false, prowler = false }: { bait: Groundbait; feeding?: boolean; bigFeeders?: boolean; catfish?: boolean; thieves?: boolean; prowler?: boolean }) {
   const still = useReducedMotion();
   const geo = useMemo(() => new THREE.CircleGeometry(CLOUD_RADIUS, 32).rotateX(-Math.PI / 2), []);
   const edge = useMemo(() => softEdge(), []);
@@ -108,6 +134,7 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, thi
   const ringGeo = useMemo(() => new THREE.RingGeometry(0.85, 1, 24).rotateX(-Math.PI / 2), []);
   const wake = useMemo(() => wakeShape(), []);
   const carpGeo = useMemo(() => carpShape(), []);
+  const catfishGeo = useMemo(() => catfishShape(), []);
   const carp = useRef<THREE.Mesh>(null);
   const swirl = useRef<THREE.Mesh>(null);
   const shinerGeo = useMemo(() => shinerShape(), []);
@@ -131,6 +158,7 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, thi
       ringGeo.dispose();
       wake.dispose();
       carpGeo.dispose();
+      catfishGeo.dispose();
       edge.dispose();
       mat.dispose();
       shinerGeo.dispose();
@@ -139,7 +167,7 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, thi
       perchMat.dispose();
       pikeGeo.dispose();
     },
-    [geo, ringGeo, wake, carpGeo, edge, mat, shinerGeo, shinerMat, perchGeo, perchMat, pikeGeo],
+    [geo, ringGeo, wake, carpGeo, catfishGeo, edge, mat, shinerGeo, shinerMat, perchGeo, perchMat, pikeGeo],
   );
   useFrame((state, dt) => {
     const mesh = cloud.current;
@@ -270,8 +298,8 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, thi
           <meshBasicMaterial color="#e4efea" transparent opacity={0} depthWrite={false} />
         </mesh>
       ))}
-      <mesh ref={carp} geometry={carpGeo} visible={false}>
-        <meshToonMaterial color={CARP} gradientMap={toonRamp()} />
+      <mesh ref={carp} name={catfish ? "rolling-catfish" : "rolling-carp"} geometry={catfish ? catfishGeo : carpGeo} visible={false}>
+        <meshToonMaterial color={catfish ? CATFISH : CARP} gradientMap={toonRamp()} />
       </mesh>
       <instancedMesh ref={shiners} name="bait-thieves" args={[shinerGeo, shinerMat, THIEVES]} visible={false} frustumCulled={false} />
       <instancedMesh ref={perch} name="worm-perch" args={[perchGeo, perchMat, PERCH]} visible={false} frustumCulled={false} />

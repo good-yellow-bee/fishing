@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { FISH, spotAt, SPOT_IDS, walkableAt } from "@stillwater/shared";
 import { bigFeedersOver, hasWormFeeders, PROWLERS, prowlerOver, GROUNDBAIT_CASTS, SWIM_MAX_CASTS, throwHandful, TOPUP_MAX } from "../logic";
 import { BANK_STANDS } from "../hotspot";
-import { cloudCenter, cloudOpacity, CLOUD_RADIUS, DIMPLES, dimpleAt, feedersShow, openWaterYaw, PERCH, PERCH_FAR, PERCH_NEAR, PERCH_REACH, perchAt, perchShow, PIKE_REACH, PROWL_IN, PROWL_LEG_SEC, PROWL_OUT, prowlAt, ROLL_GAP_SEC, ROLL_SEC, ROLL_SPAN, rollAt, SCATTER_SEC, SCATTER_WAKES, scatterWakeAt, THIEF_IN, THIEF_OUT, thiefAt, thiefCount, THIEVES } from "./groundbaitCloud";
+import { catfishRolls, cloudCenter, cloudOpacity, CLOUD_RADIUS, DIMPLES, dimpleAt, feedersShow, openWaterYaw, PERCH, PERCH_FAR, PERCH_NEAR, PERCH_REACH, perchAt, perchShow, PIKE_REACH, PROWL_IN, PROWL_LEG_SEC, PROWL_OUT, prowlAt, ROLL_GAP_SEC, ROLL_SEC, ROLL_SPAN, rollAt, SCATTER_SEC, SCATTER_WAKES, scatterWakeAt, THIEF_IN, THIEF_OUT, thiefAt, thiefCount, THIEVES } from "./groundbaitCloud";
 
 describe("groundbait cloud", () => {
   it.each(SPOT_IDS)("lands on the %s's own open water", (spot) => {
@@ -75,6 +75,18 @@ describe("big feeders rolling over a built swim", () => {
     expect(bigFeedersOver(swim("dock", TOPUP_MAX), undefined)).toBe(true);
     expect(bigFeedersOver(swim("dock", TOPUP_MAX - 1), undefined)).toBe(false);
     expect(bigFeedersOver(swim("point", TOPUP_MAX), undefined)).toBe(false);
+  });
+
+  it("roll as a catfish after dark where the catfish lead them, a carp by day or where none come", () => {
+    const built = (spot: "dock" | "dropoff" | "reeds", times = TOPUP_MAX) => ({ spot, casts: 8, built: times });
+    expect(catfishRolls(built("dock"), undefined, "dusk")).toBe(true);
+    expect(catfishRolls(built("dropoff"), undefined, "night")).toBe(true);
+    expect(catfishRolls(built("dock"), undefined, "day")).toBe(false);
+    expect(catfishRolls(built("dock", TOPUP_MAX - 1), undefined, "night")).toBe(false);
+    expect(catfishRolls(built("dock"), "Worm", "night")).toBe(false);
+    // The reeds have carp but no catfish: the carp still roll there after dark.
+    expect(bigFeedersOver(built("reeds"), undefined)).toBe(true);
+    expect(catfishRolls(built("reeds"), undefined, "night")).toBe(false);
   });
 
   it("roll now and then at the cloud's edge, never two at once", () => {

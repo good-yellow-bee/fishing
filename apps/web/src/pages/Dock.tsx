@@ -117,6 +117,7 @@ import { bookSeasonNote, bookSessionTitle, loadSession, saveSession, sessionTitl
 import { TripRecap } from "../components/TripRecap";
 import { useLodgeTracks } from "../game/useLodgeTracks";
 import { trackLabel } from "../game/scene/shoreTracks";
+import { catfishRolls } from "../game/scene/groundbaitCloud";
 import { useLevelToast } from "../game/useLevelToast";
 import { defaultLure, lureCanChange, nextLure } from "../game/lureChoice";
 import { FishingWorld } from "../game/scene/FishingWorld";
@@ -1216,6 +1217,7 @@ export function DockPage() {
           groundbait={game.groundbait}
           groundbaitPrimed={game.swimPrimed}
           groundbaitBig={game.groundbait ? bigFeedersOver(game.groundbait, lure) : false}
+          groundbaitCatfish={game.groundbait ? catfishRolls(game.groundbait, lure, hour) : false}
           groundbaitThieves={game.groundbait && carriesBait(lure) ? baitThievesOver(game.groundbait, lure) : false}
           groundbaitProwler={prowling !== undefined && !mercy && !!me && canLand(me.profile, prowling)}
           rising={rising}

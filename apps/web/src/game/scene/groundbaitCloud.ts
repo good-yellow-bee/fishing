@@ -1,6 +1,6 @@
 import { LAKE_CENTER_Z, type SpotId } from "@stillwater/shared";
 import { BANK_STANDS, PLACES } from "../hotspot";
-import { GROUNDBAIT_CASTS, SWIM_MAX_CASTS, TOPUP_MAX, type Groundbait } from "../logic";
+import { afterDark, afterDarkLeaderAt, bigFeedersOver, GROUNDBAIT_CASTS, SWIM_MAX_CASTS, TOPUP_MAX, type Groundbait } from "../logic";
 
 /** How wide the cloud of groundbait spreads on the water, in metres. */
 export const CLOUD_RADIUS = 1.1;
@@ -97,6 +97,11 @@ export function rollAt(time: number): { dx: number; dz: number; yaw: number; age
   const out = CLOUD_RADIUS * (0.8 + 0.15 * hash(slot + 0.25));
   const turn = hash(slot + 0.75) < 0.5 ? 1 : -1;
   return { dx: Math.cos(angle) * out, dz: Math.sin(angle) * out, yaw: Math.atan2(-Math.sin(angle) * turn, Math.cos(angle) * turn), age };
+}
+
+/** After dark a catfish rolls in the carp's place over a built swim at a bank where they lead the big feeders and would take the tied lure (GT489). */
+export function catfishRolls(bait: Groundbait, lure: string | undefined, hour: string): boolean {
+  return afterDark(hour) && bigFeedersOver(bait, lure) && afterDarkLeaderAt(bait.spot, lure) !== undefined;
 }
 
 /** Bait thieves crowding a swim (GT484): this many shiners over a fresh one, fewer once topped up, none once built all the way. */
