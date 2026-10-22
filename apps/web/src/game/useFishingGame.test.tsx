@@ -127,7 +127,7 @@ import { bagKey, shinerKey } from "./groundbaitBag";
 import { PREBAIT_DAYS, prebaitKey } from "./prebait";
 import { oldFoeKey } from "./oldFoe";
 import { BREAD_SWIM_CASTS, RAIN_WASHED_CASTS, SWIM_COLD_GONE_MS, SWIM_COLD_PRIMED_MS, SWIM_HOT_GONE_MS, SWIM_HOT_PRIMED_MS, SWIM_PRIMED_MS, swimKey } from "./swim";
-import { carriesBait, FALSE_STRIKE_MS, FIGURE_EIGHT_ODDS, FIGURE_TURN_MS, FIGURE_WINDOW_MS, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TIRE_REASONS, TOPWATER_POPS, useFishingGame, WAIT_REASONS } from "./useFishingGame";
+import { carriesBait, FALSE_STRIKE_MS, FIGURE_EIGHT_ODDS, FIGURE_TURN_MS, FIGURE_WINDOW_MS, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TIRE_REASONS, TOPWATER_POPS, useFishingGame, WAIT_FOLD_CHARS, WAIT_REASONS, waitHintLead } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { CLOUD_SHADE_WAIT, cloudShadeWaitMul } from "./sunCover";
@@ -3380,6 +3380,16 @@ describe("level unlock integration", () => {
     expect(hint()).not.toContain("The jig hops down the ledge.");
     // The reasons left out wait behind the hint's "more reasons" button.
     expect(container!.querySelector("[data-testid=more-reasons]")?.textContent).toContain("The jig hops down the ledge.");
+    // So long a hint folds after its first sentence on a phone.
+    expect(container!.querySelector("[data-testid=hint-lead]")?.textContent).toBe("The cold water slows the fish, but they still chase a slow jig.");
+  });
+
+  it("folds only a wait hint too long to show whole, after its first sentence", () => {
+    expect(waitHintLead("Perfect cast. Watch the bobber. Strike on the real dip, not a nibble.")).toBe("");
+    const long = `Over the groundbait. ${"The lure's flash pushes the feeders off. ".repeat(4)}Watch the bobber.`;
+    expect(long.length).toBeGreaterThan(WAIT_FOLD_CHARS);
+    expect(waitHintLead(long)).toBe("Over the groundbait.");
+    expect(waitHintLead(`Your lure is in the bubbles! ${"x".repeat(WAIT_FOLD_CHARS)}`)).toBe("Your lure is in the bubbles!");
   });
 
   it.each([[350, "idle:none"], [700, "casting:none"]] as const)("uses the level range at %i lifetime points", (points, expected) => {

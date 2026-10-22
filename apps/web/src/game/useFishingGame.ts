@@ -311,6 +311,14 @@ export const STREAMER_CHASERS: ReadonlySet<string> = new Set(["pike", "ghost-pik
 
 /** At most this many reasons for a sooner or slower bite are told on a cast, so the hint stays readable. */
 export const WAIT_REASONS = 2;
+/** A wait hint longer than this folds after its first sentence on a phone, clear of the Strike button. */
+export const WAIT_FOLD_CHARS = 140;
+
+/** The wait hint's first sentence, which a phone shows alone until the rest is asked for; "" when it is short enough to show whole. */
+export function waitHintLead(hint: string) {
+  return hint.length > WAIT_FOLD_CHARS ? (hint.match(/^.*?[.!?](?=\s)/)?.[0] ?? "") : "";
+}
+
 const NO_REASONS: readonly string[] = [];
 
 /** At most this many reasons a hooked fish tires slower or sooner are told at the hookset, so the hint stays readable. */
@@ -1370,6 +1378,7 @@ export function useFishingGame(
     if (anchorWait > 1) reasons.unshift(t("The anchor's splash put the fish down, so the bites come slow: give it a few seconds before you cast."));
     waitHintRef.current = [...reasons.slice(0, WAIT_REASONS), waitHintRef.current].join(" ");
     setHint(waitHintRef.current);
+    setHintFold({ hint: waitHintRef.current, lead: waitHintLead(waitHintRef.current) });
     setMoreReasons({ hint: waitHintRef.current, more: reasons.slice(WAIT_REASONS) });
     // Roll the fish as the lure sits, so the one rising under the bobber is the one that bites.
     const mercyNow = mercyRef.current;
