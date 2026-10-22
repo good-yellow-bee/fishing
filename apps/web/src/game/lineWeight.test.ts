@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { brightCalm, HEAVY_BRIGHT_WAIT, LINE_SNAP, LINE_WAIT, lineWaitMul, nextLine } from "./lineWeight";
+import { brightCalm, HEAVY_BRIGHT_WAIT, LIGHT_WINTER_WAIT, LINE_SNAP, LINE_WAIT, lineWaitMul, nextLine } from "./lineWeight";
 
 describe("the line on the reel", () => {
   it("goes round from light to heavy and back", () => {
@@ -40,9 +40,18 @@ describe("the line on the reel", () => {
   });
 
   it("shows heavy line plainer in bright, calm water, and leaves the other lines as they are", () => {
-    expect(lineWaitMul("heavy", true)).toBe(HEAVY_BRIGHT_WAIT);
+    expect(lineWaitMul("heavy", true, false)).toBe(HEAVY_BRIGHT_WAIT);
     expect(HEAVY_BRIGHT_WAIT).toBeGreaterThan(LINE_WAIT.heavy);
-    for (const line of ["light", "standard", "heavy", "wire"] as const) expect(lineWaitMul(line, false)).toBe(LINE_WAIT[line]);
-    for (const line of ["light", "standard", "wire"] as const) expect(lineWaitMul(line, true)).toBe(LINE_WAIT[line]);
+    for (const line of ["light", "standard", "heavy", "wire"] as const) expect(lineWaitMul(line, false, false)).toBe(LINE_WAIT[line]);
+    for (const line of ["light", "standard", "wire"] as const) expect(lineWaitMul(line, true, false)).toBe(LINE_WAIT[line]);
+  });
+
+  it("makes the line-shy winter fish come sooner to light line and slower to heavy, without stacking on bright, calm water", () => {
+    expect(lineWaitMul("light", false, true)).toBe(LIGHT_WINTER_WAIT);
+    expect(LIGHT_WINTER_WAIT).toBeLessThan(LINE_WAIT.light);
+    expect(lineWaitMul("heavy", false, true)).toBe(HEAVY_BRIGHT_WAIT);
+    expect(lineWaitMul("heavy", true, true)).toBe(HEAVY_BRIGHT_WAIT);
+    expect(lineWaitMul("light", true, true)).toBe(LIGHT_WINTER_WAIT);
+    for (const line of ["standard", "wire"] as const) expect(lineWaitMul(line, true, true)).toBe(LINE_WAIT[line]);
   });
 });

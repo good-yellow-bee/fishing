@@ -117,7 +117,7 @@ vi.mock("./fight", async (importOriginal) => {
 });
 
 import { updateSettings } from "./settings";
-import { HEAVY_BRIGHT_WAIT, LINE_COVER, LINE_WAIT } from "./lineWeight";
+import { HEAVY_BRIGHT_WAIT, LIGHT_WINTER_WAIT, LINE_COVER, LINE_WAIT } from "./lineWeight";
 import { giantShyKey } from "./giantShy";
 import { NIGHT_LINE_STALE_MS, nightLineKey, nightLineReadyAt, nightLineState } from "./nightLine";
 import { WORM_TIN_WET, wormsDug, wormTinKey } from "./wormTin";
@@ -3816,6 +3816,24 @@ describe("useFishingGame groundbait", () => {
       cast(surface);
       // The line's wait goes second to last into the stack, ahead of the frenzy's.
       expect(vi.mocked(stackWaitMs).mock.lastCall?.at(-2)).toBe(slower);
+      expect(hint()).toContain(said);
+    } finally {
+      updateSettings({ line: "standard" });
+    }
+  });
+
+  it.each([
+    ["heavy", "dock", "Spinner", "overcast", HEAVY_BRIGHT_WAIT, "Heavy line: in the clear winter water the fish see it plainer, so the bites come slower still, but a line wrapped round the wood comes free in half the time."],
+    ["heavy", "dropoff", "Spinner", "clear", HEAVY_BRIGHT_WAIT, "Heavy line: in the clear winter water the fish see it plainer, so the bites come slower still."],
+    ["light", "dropoff", "Spinner", "overcast", LIGHT_WINTER_WAIT, "Light line: in the clear winter water the line-shy fish can't see it, so the bites come sooner still, but a pike here can bite through it at the strike."],
+    ["light", "dropoff", "Nightcrawler", "overcast", LIGHT_WINTER_WAIT, "Light line: in the clear winter water the line-shy fish can't see it, so the bites come sooner still."],
+  ] as const)("tells %s line at the %s on a %s in winter's clear water under a %s sky", (line, stance, lure, sky, wait, said) => {
+    updateSettings({ line });
+    try {
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, lure, "calm", sky, "winter");
+      if (stance === "dropoff") atDropoff(surface);
+      cast(surface);
+      expect(vi.mocked(stackWaitMs).mock.lastCall?.at(-2)).toBe(wait);
       expect(hint()).toContain(said);
     } finally {
       updateSettings({ line: "standard" });

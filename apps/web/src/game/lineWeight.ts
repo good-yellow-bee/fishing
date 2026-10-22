@@ -12,9 +12,13 @@ export const HEAVY_BRIGHT_WAIT = 1.3;
 export function brightCalm(hour: LakeHour, sky: Sky | undefined, wind: Wind | undefined) {
   return sky === "clear" && wind === "calm" && hour !== "night";
 }
-/** How long a bite takes on this line: heavy line shows plainer in bright, calm water. */
-export function lineWaitMul(line: LineWeight, bright: boolean) {
-  return line === "heavy" && bright ? HEAVY_BRIGHT_WAIT : LINE_WAIT[line];
+/** In winter the cold water runs clear and the fish grow line-shy, so light line's bites come sooner still, and heavy line's come as slow as in bright, calm water. */
+export const LIGHT_WINTER_WAIT = 0.75;
+/** How long a bite takes on this line: heavy line shows plainer in bright, calm water or winter's clear water, where light line's bites come sooner. */
+export function lineWaitMul(line: LineWeight, bright: boolean, winter: boolean) {
+  if (line === "heavy" && (bright || winter)) return HEAVY_BRIGHT_WAIT;
+  if (line === "light" && winter) return LIGHT_WINTER_WAIT;
+  return LINE_WAIT[line];
 }
 /** How long a fish holds in the weeds or a line stays wrapped round wood, as a share: heavy line pulls it out in half the time. */
 export const LINE_COVER: Record<LineWeight, number> = { light: 1, standard: 1, heavy: 0.5, wire: 1 };
