@@ -7,9 +7,12 @@ function dayNumber(date: Date): number {
   return Math.round(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / DAY_MS);
 }
 
-/** How many years back from `now` the fish came within `days` of the same date, or null: a fish from 30 December is a year ago on 1 January, not two. */
-export function yearsBack(entry: CatchEntry, now: Date = new Date(), days = 3): number | null {
-  const at = new Date(entry.caughtAt);
+/**
+ * How many years back from `now` the fish came within `days` of the same date, or null: a fish from 30 December is a
+ * year ago on 1 January, not two. `dayOf` gives the day it counts on, as a night's small hours count on its outing's day.
+ */
+export function yearsBack(entry: CatchEntry, now: Date = new Date(), days = 3, dayOf?: (entry: CatchEntry) => string): number | null {
+  const at = dayOf ? new Date(`${dayOf(entry)}T12:00:00`) : new Date(entry.caughtAt);
   if (Number.isNaN(at.getTime())) return null;
   const gap = now.getFullYear() - at.getFullYear();
   // The same date in the fish's own year, or in the year either side of it when the week runs across New Year.
@@ -27,7 +30,7 @@ export function yearsBack(entry: CatchEntry, now: Date = new Date(), days = 3): 
 export const SAME_TIME_DAYS = 14;
 
 /** Fish from earlier years caught within `days` of today's date in their own year, newest first: this week, years ago. */
-export function thisWeekInPastYears(catches: readonly CatchEntry[], now: Date = new Date(), days = 3, limit = 3): CatchEntry[] {
-  const found = catches.filter((entry) => yearsBack(entry, now, days) !== null);
+export function thisWeekInPastYears(catches: readonly CatchEntry[], now: Date = new Date(), days = 3, limit = 3, dayOf?: (entry: CatchEntry) => string): CatchEntry[] {
+  const found = catches.filter((entry) => yearsBack(entry, now, days, dayOf) !== null);
   return found.sort((a, b) => b.caughtAt.localeCompare(a.caughtAt)).slice(0, limit);
 }
