@@ -21,11 +21,14 @@ export function cloudCenter(spot: SpotId): { x: number; z: number } {
   return PLACES[spot].reduce((best, place) => (away(place) < away(best) ? place : best));
 }
 
-/** The cloud thins as its casts are fished out: faint on the last cast, full at a fresh handful's casts, and thicker still on a swim topped up past them. */
-export function cloudOpacity(casts: number): number {
+/** A swim whose feeders were scattered (GT477) shows this much of its cloud, until they come back. */
+const SCATTERED_THIN = 0.6;
+
+/** The cloud thins as its casts are fished out: faint on the last cast, full at a fresh handful's casts, and thicker still on a swim topped up past them; thinner while its feeders are scattered. */
+export function cloudOpacity(casts: number, scattered = false): number {
   const fresh = Math.max(0, Math.min(1, casts / GROUNDBAIT_CASTS));
   const topped = Math.max(0, Math.min(1, (casts - GROUNDBAIT_CASTS) / (SWIM_MAX_CASTS - GROUNDBAIT_CASTS)));
-  return 0.1 + 0.3 * fresh + 0.15 * topped;
+  return (0.1 + 0.3 * fresh + 0.15 * topped) * (scattered ? SCATTERED_THIN : 1);
 }
 
 /** Feeders dimpling over a swim they have gathered at (GT442): rings at a time, each this long, and how far out over the cloud. */
@@ -33,9 +36,32 @@ export const DIMPLES = 4;
 export const DIMPLE_SEC = 1.8;
 const DIMPLE_REACH = 0.75;
 
-/** Feeders show over a swim they gathered at while it was left, or over one topped up as it faded. */
+/** Feeders show over a swim they gathered at while it was left, or over one topped up as it faded, until a lost big feeder scatters them. */
 export function feedersShow(bait: Groundbait, primed: boolean): boolean {
-  return primed || (bait.built ?? 0) > 0;
+  return !bait.spooked && (primed || (bait.built ?? 0) > 0);
+}
+
+/** A lost big feeder scatters the feeders: this many wakes fan out toward open water over this long, in a spread of this many radians. */
+export const SCATTER_WAKES = 3;
+export const SCATTER_SEC = 2;
+const SCATTER_FAN = 1.1;
+/** How far from the cloud's middle a wake has gone by its end, and the span of the bow arc it draws. */
+const SCATTER_RUN = 1.3;
+export const WAKE_ARC = 1.8;
+
+/** The way out over open water from a bank, as a heading (a +z-facing figure turned by it): from the stand through the cloud. */
+export function openWaterYaw(spot: SpotId): number {
+  const stand = BANK_STANDS[spot];
+  const at = cloudCenter(spot);
+  return Math.atan2(at.x - stand.x, at.z - stand.z);
+}
+
+/** Wake `i` of the scatter, `age` seconds on, fanning from the cloud's middle along `yaw`: its heading, how far it has run, how big its bow arc is and how bright (0..1); null once it has faded. Pure. */
+export function scatterWakeAt(i: number, age: number, yaw: number): { yaw: number; run: number; size: number; glow: number } | null {
+  const k = age / SCATTER_SEC;
+  if (k < 0 || k >= 1) return null;
+  const fan = SCATTER_WAKES > 1 ? i / (SCATTER_WAKES - 1) - 0.5 : 0;
+  return { yaw: yaw + fan * SCATTER_FAN, run: SCATTER_RUN * (1 - (1 - k) ** 2), size: 0.18 + 0.4 * k, glow: (1 - k) ** 2 };
 }
 
 /** Dimple `i` at `time` over a swim topped up `built` times: where over the cloud's middle it rings and how far through its spread (0..1). Pure. */
