@@ -1399,7 +1399,9 @@ export function DockPage() {
                     ? t("Toss a handful of groundbait here: the next {casts} casts bite sooner.", { casts: GROUNDBAIT_CASTS })
                     : game.groundbait.casts > TOPUP_CASTS_LEFT
                       ? t("The fish here are still feeding: another handful now fills them up, and the next {full} casts bite slower.", { full: OVERFED_CASTS })
-                      : t("Top up the swim here as it fades: more feeders come in.")
+                      : sky === "rain"
+                        ? t("The rain washes a handful through now: it keeps the swim going, but wait for the rain to stop to top it up.")
+                        : t("Top up the swim here as it fades: more feeders come in.")
                 }
                 onClick={(event) => {
                   // Leave Space free for casting.

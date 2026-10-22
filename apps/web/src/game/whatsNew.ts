@@ -1,10 +1,12 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-21-scene76";
+export const NEWS_ID = "2026-10-22-field84";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "A water's page now names the nearest other water pinned on the Map and how far off it is, opening it, and Waters copies its list, with each water's fish, outings and last fish, as text for a message. And a water imported with no name now reads Water with no name on Waters, its page, the Map and Bests, never an empty heading.",
+  "On a swim topped up twice, the big feeders now wise up: from the second carp or catfish you land off it, the rest are wary and come no more than the other feeders, until you let it fade and build a fresh swim. And golden shiners crowd a fresh swim, stripping a baited hook off it twice as often, until the swim is topped up twice and the big feeders shoulder them off.",
   "Your groundbait bag now sits behind your feet while you stand still on a bank or the dock, plump with a handful or more left and slumped flat once it is empty. And in spring, a bass now hovers over a wider pale bed it has fanned in the shallows at the Reeds and beside the dock's sunfish beds, now and then turning to face off a sunfish that strays too near.",
   "On Bests, a kind's card now names the time of day it came at most, beside its best lure and water, and two waters with no name keep a card each. And in the small hours, Home's Next says Out now, with its fish so far, for last evening's outing still on the water.",
   "With two worms or more in your tin, a handful of groundbait at the Dock, the Reeds or the Drop-off can now go in with chopped worm, from the Chopped worm sign beside Groundbait: that swim then draws the perch in with its feeders while it lasts. And over a swim topped up twice, the small feeders draw the bank's pike: on a lure pike take, they come there twice as often, and a pike hooked there, landed or lost, scatters the feeders as a lost carp does.",

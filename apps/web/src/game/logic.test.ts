@@ -357,6 +357,16 @@ describe("groundbait", () => {
     expect(throwHandful({ spot: "reeds", casts: SWIM_MAX_CASTS }, "reeds").next.casts).toBe(SWIM_MAX_CASTS);
   });
 
+  it("in the rain a handful on a fading swim is washed through: it adds its casts but builds the swim no further", () => {
+    const fading = { spot: "reeds" as const, casts: TOPUP_CASTS_LEFT, built: 1, worm: true };
+    expect(throwHandful(fading, "reeds", false, false, true)).toEqual({ next: { ...fading, casts: TOPUP_CASTS_LEFT + GROUNDBAIT_CASTS }, kind: "washed" });
+    expect(throwHandful({ spot: "reeds", casts: 1 }, "reeds", false, true, true)).toEqual({ next: { spot: "reeds", casts: 1 + GROUNDBAIT_CASTS, worm: true }, kind: "washed" });
+    // A fresh swim and an overfeed are as on a dry day.
+    expect(throwHandful(null, "reeds", true, false, true)).toEqual(throwHandful(null, "reeds", true));
+    const fed = { spot: "reeds" as const, casts: TOPUP_CASTS_LEFT + 1 };
+    expect(throwHandful(fed, "reeds", false, false, true)).toEqual(throwHandful(fed, "reeds"));
+  });
+
   it("a fresh handful on a regular feeding spot lands built once, so one top-up brings the big feeders in", () => {
     const fresh = throwHandful(null, "reeds", true);
     expect(fresh).toEqual({ next: { spot: "reeds", casts: GROUNDBAIT_CASTS, built: 1 }, kind: "fresh" });
