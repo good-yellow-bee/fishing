@@ -10,7 +10,6 @@ import {
   catchesForSpot,
   fishCountsByTrip,
   localDate,
-  personalBests,
   shiftDate,
   spotById,
   tripsForSpot,
@@ -54,7 +53,7 @@ import { PhotoStrip } from "./SpeciesPage";
 import { formatCoord, placeFor } from "./map/places";
 import { hookTally, hookText } from "./hookTally";
 import { MonthBars } from "./MonthBars";
-import { BiggestHere } from "./BiggestHere";
+import { BiggestHere, biggestOf } from "./BiggestHere";
 import { MERGE_PARAM, MergeWater } from "./MergeWater";
 import { mergedInto, readMergedWaters } from "./waterMerge";
 import { notesHere } from "./outingNotes";
@@ -255,7 +254,7 @@ export function SpotsPage() {
   const shownRows = (shownKind === "all" ? rows : rows.filter((row) => row.spot.id !== PLAY_LAKE_ID && row.spot.waterType === shownKind)).filter(byName);
   // Waters of that name under another kind: the kind picked hides them, so say so and offer them.
   // A water's longest and heaviest fish: what the card names as its best.
-  const bestsAt = (catches: readonly CatchEntry[], spotId: string) => personalBests({ ...book, catches: catches.filter((entry) => entry.spotId === spotId) });
+  const bestsAt = (catches: readonly CatchEntry[], spotId: string) => biggestOf(catches.filter((entry) => entry.spotId === spotId));
   const ownShown = shownRows.filter((row) => row.spot.id !== PLAY_LAKE_ID && !invented(row));
   const sampleShown = shownRows.filter((row) => row.spot.id !== PLAY_LAKE_ID && invented(row));
   const gameShown = shownRows.filter((row) => row.spot.id === PLAY_LAKE_ID);

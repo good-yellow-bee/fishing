@@ -6,6 +6,7 @@ import { bookLureName, pieceTally } from "../pieceTally";
 import { sheetOutings } from "../catchCsv";
 import { CatchCard } from "../cards";
 import { bestHereText } from "../bestHere";
+import { biggestOf } from "../BiggestHere";
 import { num, t, tn, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
 import { fishCountLabel, formatDay, outingNameById, waterName } from "../format";
@@ -107,8 +108,8 @@ function sizeOf(entry: CatchEntry | null, kind: "length" | "weight"): number {
 }
 
 /** "Best here: Northern pike, 33 in": a water's longest fish, and its heaviest when that is another. */
-function waterBestLine(book: Logbook, catches: readonly CatchEntry[], kindName: (species: string) => string) {
-  const text = bestHereText(personalBests({ ...book, catches: [...catches] }), kindName);
+function waterBestLine(catches: readonly CatchEntry[], kindName: (species: string) => string) {
+  const text = bestHereText(biggestOf(catches), kindName);
   return text ? <p className="meta">{text}</p> : null;
 }
 
@@ -703,7 +704,7 @@ export function BestsPage() {
                   <p className="meta">{waterFishLine(water.fish, kindName)}</p>
                   {/* When it last gave one: a water gone quiet is worth a visit, or a rest. */}
                   {lastFishLine(whole, water.fish)}
-                  {waterBestLine(book, water.fish, kindName)}
+                  {waterBestLine(water.fish, kindName)}
                 </Link>
               ))}
             </div>
