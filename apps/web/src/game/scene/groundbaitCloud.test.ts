@@ -199,14 +199,14 @@ describe("a pike prowling a built swim", () => {
   });
 
   it("glides along the cloud's edge, slashing in at the feeders once a pass", () => {
-    const poses = Array.from({ length: 360 }, (_, n) => prowlAt(n * 0.05, 0));
+    const poses = Array.from({ length: (2 * PROWL_LEG_SEC) / 0.05 }, (_, n) => prowlAt(n * 0.05, 0));
     const reach = poses.map((pose) => Math.hypot(pose.dx, pose.dz));
     expect(Math.max(...reach)).toBeCloseTo(PROWL_OUT, 6);
     expect(Math.min(...reach)).toBeCloseTo(PROWL_IN, 2);
     expect(Math.min(...reach)).toBeLessThan(CLOUD_RADIUS);
     // One slash a pass: two passes, two slashes.
     const slashes = poses.filter((pose, n) => pose.slash > 0 && !(poses[n - 1]?.slash > 0)).length;
-    expect(slashes).toBe(Math.ceil((360 * 0.05) / PROWL_LEG_SEC));
+    expect(slashes).toBe(2);
     // It keeps to the open-water side: never round behind the cloud toward the bank.
     expect(Math.min(...poses.map((pose) => pose.dz))).toBeGreaterThan(0);
   });

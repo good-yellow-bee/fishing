@@ -41,7 +41,7 @@ function shinerShape() {
 /** A +z-facing pike, PIKE_REACH from nose to middle and tail to middle: a long low body, a flat snout, its dorsal fin set far back by the tail. */
 function pikeShape() {
   const body = new THREE.SphereGeometry(1, 12, 8).scale(0.07, 0.07, 0.38);
-  const snout = new THREE.ConeGeometry(0.045, 0.2, 6).scale(1, 0.5, 1).rotateX(Math.PI / 2).translate(0, -0.01, PIKE_REACH - 0.1);
+  const snout = new THREE.ConeGeometry(0.045, 0.2, 6).rotateX(Math.PI / 2).scale(1, 0.5, 1).translate(0, -0.01, PIKE_REACH - 0.1);
   const fin = new THREE.ConeGeometry(0.04, 0.1, 4).scale(0.25, 1, 1.6).translate(0, 0.08, -0.24);
   const tail = new THREE.ConeGeometry(0.1, 0.19, 4).scale(0.25, 1, 1).rotateX(Math.PI / 2).translate(0, 0, 0.095 - PIKE_REACH);
   const merged = mergeGeometries([body, snout, fin, tail]);
@@ -195,9 +195,9 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, thi
       if (prowl) {
         const x = at.x + prowl.dx;
         const z = at.z + prowl.dz;
-        // Its back just under the surface, breaking it as it slashes, with a slow tail-beat sway.
+        // Its back just under the surface, breaking it as it slashes, with a tail-beat sway that swings wider as it slashes.
         pike.current.position.set(x, waterHeight(x, z, t) - 0.05 + 0.03 * prowl.slash, z);
-        pike.current.rotation.set(0, prowl.yaw + (still ? 0 : (0.05 + 0.1 * prowl.slash) * Math.sin(t * (4 + 8 * prowl.slash))), 0);
+        pike.current.rotation.set(0, prowl.yaw + (still ? 0 : (0.05 + 0.1 * prowl.slash) * Math.sin(t * 6)), 0);
       }
     }
     if (bow.current) {

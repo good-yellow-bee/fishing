@@ -471,7 +471,7 @@ export function DockPage() {
   const lure = tiedLure.current;
   // A worm soaked through many casts, still tied on: the stance chip says so and the Retie button puts a fresh one on.
   const washedWorm = game.washed && isLiveBait(lure);
-  // The pike shows prowling a built swim only where the toss hint names it: one the angler could land.
+  // The pike shows prowling a built swim only where it bites more there: one the angler could land, past the beginner's mercy.
   const prowling = game.groundbait ? prowlerOver(game.groundbait, lure) : undefined;
   const lureLocked = !lureCanChange(scenePhase);
   // Read by the Q and R keys, whose listener is set up once.
@@ -1217,7 +1217,7 @@ export function DockPage() {
           groundbaitPrimed={game.swimPrimed}
           groundbaitBig={game.groundbait ? bigFeedersOver(game.groundbait, lure) : false}
           groundbaitThieves={game.groundbait && carriesBait(lure) ? baitThievesOver(game.groundbait, lure) : false}
-          groundbaitProwler={prowling !== undefined && !!me && canLand(me.profile, prowling)}
+          groundbaitProwler={prowling !== undefined && !mercy && !!me && canLand(me.profile, prowling)}
           rising={rising}
           storm={storm}
           tracks={tracks}
