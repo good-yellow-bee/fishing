@@ -125,7 +125,7 @@ import { TRAP_COLD_SOAK_MS, TRAP_SOAK_MS, TRAP_STALE_MS, trapKey, trapState } fr
 import { bagKey, shinerKey } from "./groundbaitBag";
 import { PREBAIT_DAYS, prebaitKey } from "./prebait";
 import { oldFoeKey } from "./oldFoe";
-import { BREAD_SWIM_CASTS, SWIM_COLD_GONE_MS, SWIM_COLD_PRIMED_MS, SWIM_HOT_GONE_MS, SWIM_HOT_PRIMED_MS, SWIM_PRIMED_MS, swimKey } from "./swim";
+import { BREAD_SWIM_CASTS, RAIN_WASHED_CASTS, SWIM_COLD_GONE_MS, SWIM_COLD_PRIMED_MS, SWIM_HOT_GONE_MS, SWIM_HOT_PRIMED_MS, SWIM_PRIMED_MS, swimKey } from "./swim";
 import { carriesBait, FALSE_STRIKE_MS, FIGURE_EIGHT_ODDS, FIGURE_TURN_MS, FIGURE_WINDOW_MS, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TIRE_REASONS, TOPWATER_POPS, useFishingGame, WAIT_REASONS } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
@@ -227,6 +227,7 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <i data-testid="groundbait">{game.handfuls}|{game.groundbait ? `${game.groundbait.spot}:${game.groundbait.casts}` : ""}</i>
       <p data-testid="hint">{game.hint}</p>
       <p data-testid="more-reasons">{game.moreReasons.join(" | ")}</p>
+      <p data-testid="hint-lead">{game.hintLead}</p>
       <b data-testid="bite">{game.bite ? `${game.bite.species.id}|${game.bite.weight}` : ""}</b>
       <b data-testid="fight">{game.fight ? `${game.fight.species.id}|${game.fight.weight}` : ""}</b>
       <i data-testid="miss-message">{game.outcome?.kind === "miss" ? game.outcome.message : ""}</i>
@@ -686,6 +687,8 @@ describe("useFishingGame live shiner", () => {
     expect(kept.has(swimKey(profile.userId))).toBe(false);
     act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === "groundbait") as HTMLButtonElement).click());
     expect(hint()).toBe(said.replace("5 casts", `${GROUNDBAIT_CASTS} casts`));
+    // A phone shows the toss alone and folds the rest.
+    expect(container!.querySelector("[data-testid=hint-lead]")?.textContent).toBe(`You toss a handful of groundbait. The fish will gather to feed here for the next ${GROUNDBAIT_CASTS} casts.`);
   });
 
   it("keeps a groundbaited swim for the next visit, primed once the feeders have gathered overnight", () => {
@@ -757,6 +760,7 @@ describe("useFishingGame live shiner", () => {
     expect(worms()).toBe(String(3 - CHOPPED_WORMS));
     expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ spot: "dock", casts: GROUNDBAIT_CASTS, worm: true });
     expect(hint()).toContain(`${CHOPPED_WORMS} chopped worms went in with it: the perch here come in to feed with the feeders while the swim lasts. Worms left in your tin: ${3 - CHOPPED_WORMS}.`);
+    expect(container!.querySelector("[data-testid=hint-lead]")?.textContent).toBe(`You toss a handful of groundbait. The fish will gather to feed here for the next ${GROUNDBAIT_CASTS} casts.`);
     act(() => root!.unmount());
     root = null;
     container!.remove();
@@ -3672,6 +3676,33 @@ describe("useFishingGame groundbait", () => {
     expect(hint()).toBe(`You top up the swim as it fades: the feeders stay, the big ones too. ${2 + GROUNDBAIT_CASTS} casts of it now.`);
   });
 
+  const afterDarkSaid = "Channel catfish come to it most after dark: a night over this swim is the time for one.";
+  it.each([
+    ["dusk", TOPUP_MAX - 1, 0, undefined, `You top up the swim again as it fades: the feeders stay, and the big ones move in. ${2 + GROUNDBAIT_CASTS} casts of it now. ${afterDarkSaid}`],
+    ["night", TOPUP_MAX, 1, undefined, `You top up the swim as it fades: the feeders stay, the big ones too. ${2 + GROUNDBAIT_CASTS} casts of it now. ${afterDarkSaid} 1 big feeder landed off this swim so far: ${WARY_LANDED - 1} more and the rest grow wary of it.`],
+    ["day", TOPUP_MAX - 1, 0, undefined, ""],
+    ["night", TOPUP_MAX, WARY_LANDED, undefined, ""],
+    ["night", TOPUP_MAX - 1, 0, "Worm", ""],
+    ["night", TOPUP_MAX - 1, 0, undefined, "", 1],
+  ] as const)("names the catfish on a built swim's top-up at %s (built %s, %s landed, lure %s)", (hour, built, landedBig, lure, said, strength: number = profile.strength) => {
+    const kept = new Map<string, string>([[bagKey(profile.userId), JSON.stringify({ handfuls: 3, day: "2000-01-01" })]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 2, built, ...(landedBig ? { landedBig } : {}), at: DOCK_BUBBLES.at - 60_000 }));
+    mount(DOCK_BUBBLES.at, { ...profile, strength }, hour, false, lure);
+    toss();
+    if (said) expect(hint()).toBe(said);
+    else expect(hint()).not.toContain("Channel catfish");
+  });
+
+  it("counts the big feeders landed off a swim on its top-up, and how many more before the rest grow wary", () => {
+    const kept = new Map<string, string>([[bagKey(profile.userId), JSON.stringify({ handfuls: 3, day: "2000-01-01" })]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 2, built: TOPUP_MAX, landedBig: 1, at: DOCK_BUBBLES.at - 60_000 }));
+    mount();
+    toss();
+    expect(hint()).toBe(`You top up the swim as it fades: the feeders stay, the big ones too. ${2 + GROUNDBAIT_CASTS} casts of it now. 1 big feeder landed off this swim so far: ${WARY_LANDED - 1} more and the rest grow wary of it.`);
+  });
+
   it.each([
     [0, 1, ""],
     [1, WARY_LANDED, "Common carp: that's the second big one off this swim, so the rest are wary of it now: they come no more than the other feeders until a fresh swim is built."],
@@ -3723,8 +3754,40 @@ describe("useFishingGame groundbait", () => {
     kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 2, built: TOPUP_MAX, landedBig: WARY_LANDED, at: DOCK_BUBBLES.at - 60_000 }));
     mount();
     toss();
-    expect(hint()).toBe(`You top up the swim as it fades: the feeders stay. ${2 + GROUNDBAIT_CASTS} casts of it now. The big feeders here are wary of this swim now: let it fade and build a fresh one to bring them back.`);
+    expect(hint()).toBe(`You top up the swim as it fades: the feeders stay. ${2 + GROUNDBAIT_CASTS} casts of it now. Once ${WARY_LANDED} big feeders were landed off this swim, the rest grew wary of it: they come no more than the other feeders. Let it fade and build a fresh one to bring them back.`);
     expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ landedBig: WARY_LANDED });
+  });
+
+  it("washes a handful through a fading swim in the rain: it keeps the swim going but builds it no further", () => {
+    const kept = new Map<string, string>([[bagKey(profile.userId), JSON.stringify({ handfuls: 3, day: "2000-01-01" })]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 2, built: 1, at: DOCK_BUBBLES.at - 60_000 }));
+    mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, "clear");
+    // The rain starts while the angler is at the water.
+    act(() => root!.render(<Harness sky="rain" />));
+    toss();
+    expect(groundbait()).toBe(`2|dock:${2 + GROUNDBAIT_CASTS}`);
+    expect(hint()).toBe(`The rain washes the handful through before more feeders settle on it: the swim keeps going but builds no further. ${2 + GROUNDBAIT_CASTS} casts of it now. Top it up once the rain stops.`);
+    expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ casts: 2 + GROUNDBAIT_CASTS, built: 1 });
+  });
+
+  it("still says the big feeders are wary when the rain washes a handful through their swim", () => {
+    const kept = new Map<string, string>([[bagKey(profile.userId), JSON.stringify({ handfuls: 3, day: "2000-01-01" })]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 2, built: TOPUP_MAX, landedBig: WARY_LANDED, at: DOCK_BUBBLES.at - 60_000 }));
+    mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, "rain");
+    toss();
+    expect(hint()).toMatch(new RegExp(`Top it up once the rain stops\\. Once ${WARY_LANDED} big feeders were landed off this swim, the rest grew wary of it`));
+  });
+
+  it("primes a swim left behind with fewer casts when it is raining on the next visit", () => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 1, at: DOCK_BUBBLES.at - SWIM_PRIMED_MS - 60_000 }));
+    mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, "rain");
+    expect(groundbait()).toBe(`${GROUNDBAIT_HANDFULS}|dock:${GROUNDBAIT_CASTS - RAIN_WASHED_CASTS}`);
+    expect(hint()).toContain(`has the feeders gathered there: ${GROUNDBAIT_CASTS - RAIN_WASHED_CASTS} casts of it. The rain washed ${RAIN_WASHED_CASTS} casts of it away.`);
+    expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ casts: GROUNDBAIT_CASTS - RAIN_WASHED_CASTS, primed: true });
   });
 
   it("casts the tied lure at the bank's let-go fish, so one shy of it stays down", () => {

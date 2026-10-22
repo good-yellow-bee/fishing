@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { GROUNDBAIT_CASTS, OVERFED_CASTS, SPOOKED_SWIM_CASTS, SWIM_MAX_CASTS, TOPUP_MAX, WARY_LANDED } from "./logic";
-import { BREAD_SWIM_CASTS, loadSwim, saveSwim, SWIM_COLD_GONE_MS, SWIM_COLD_PRIMED_MS, SWIM_GONE_MS, SWIM_HOT_GONE_MS, SWIM_HOT_PRIMED_MS, SWIM_PRIMED_MS, swimNow, swimTimes } from "./swim";
+import { BREAD_SWIM_CASTS, loadSwim, RAIN_WASHED_CASTS, saveSwim, SWIM_COLD_GONE_MS, SWIM_COLD_PRIMED_MS, SWIM_GONE_MS, SWIM_HOT_GONE_MS, SWIM_HOT_PRIMED_MS, SWIM_PRIMED_MS, swimNow, swimTimes } from "./swim";
 
 const swim = { spot: "reeds" as const, casts: 2, at: 0 };
 
@@ -25,6 +25,15 @@ describe("a groundbaited swim left for the next visit", () => {
     expect(swimNow(swim, SWIM_COLD_PRIMED_MS, "winter")?.primedNow).toBe(true);
     expect(swimNow({ ...swim, primed: true }, SWIM_GONE_MS + 1, "winter")).toEqual({ ...swim, primed: true, primedNow: false });
     expect(swimNow(swim, SWIM_COLD_GONE_MS + 1, "winter")).toBeNull();
+  });
+
+  it("primes with fewer casts when it is raining on the next visit, the rain having washed some of it away", () => {
+    expect(swimNow(swim, SWIM_PRIMED_MS, undefined, "rain")).toEqual({ spot: "reeds", casts: GROUNDBAIT_CASTS - RAIN_WASHED_CASTS, at: 0, primed: true, primedNow: true });
+    expect(swimNow({ ...swim, bread: true }, SWIM_PRIMED_MS, undefined, "rain")?.casts).toBe(BREAD_SWIM_CASTS - RAIN_WASHED_CASTS);
+    expect(swimNow(swim, SWIM_PRIMED_MS, undefined, "overcast")?.casts).toBe(GROUNDBAIT_CASTS);
+    // Only as it primes: one soon after, or primed already, keeps its casts.
+    expect(swimNow(swim, SWIM_PRIMED_MS - 1, undefined, "rain")).toEqual({ ...swim, primedNow: false });
+    expect(swimNow({ ...swim, primed: true }, SWIM_PRIMED_MS, undefined, "rain")).toEqual({ ...swim, primed: true, primedNow: false });
   });
 
   it("with bread crumb in it, holds the gathered feeders longer, and a reload keeps those casts only for a swim baited with it", () => {
