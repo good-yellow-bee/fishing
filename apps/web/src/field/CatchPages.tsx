@@ -1054,7 +1054,7 @@ function CatchForm() {
           {hereSpecies.length > 0 ? (
             <p className="wide form-note lure-tips">
               {/* Which water these come from, with a way to it: on a phone the water's own field is further down. */}
-              {t("From {water}:", { water: plainName(spotById(book, spotId)?.name ?? "") })}{" "}
+              {t("From {water}:", { water: waterName(spotById(book, spotId)?.name ?? "") })}{" "}
               <button type="button" className="text-button" aria-label={t("Change water")} onClick={() => document.querySelector<HTMLSelectElement>('select[name="spot"]')?.focus()}>
                 {t("change")}
               </button>{" "}
@@ -1672,7 +1672,7 @@ function CatchView() {
   const photo = photoFor(entry.id);
   // Opened from a list (a search, a kind, an outing, a water): the steps keep to it, and lead back to it.
   const list = catchList(book, params.get(LIST_PARAM), entry.id, t, (id) => photoFor(id) !== null);
-  const photoCaption = (fish: CatchEntry) => [kindName(fish.species), measuresText(fish), formatDay(bookFishDay(book, fish)), ...(spotById(book, fish.spotId) ? [plainName(spotById(book, fish.spotId)!.name)] : [])].join(" · ");
+  const photoCaption = (fish: CatchEntry) => [kindName(fish.species), measuresText(fish), formatDay(bookFishDay(book, fish)), ...(spotById(book, fish.spotId) ? [waterName(spotById(book, fish.spotId)!.name)] : [])].join(" · ");
   // Opened from a list, the full-size view steps through the list's other photos too.
   const listPhotos: ListPhoto[] = (list?.rows ?? []).flatMap((fish) => {
     const src = photoFor(fish.id);
@@ -1721,7 +1721,8 @@ function CatchView() {
   const sizeSearch = [exactTerm("species", kindName(entry.species)), `${withoutPlayLake(book, sameSizeSearch(entry.measure, getUnits() === "metric"), kind)}${noSample}`] as const;
   const sameSize = isCounted && counted.length > 1 ? findCatches(book, `${sizeSearch[0]} + ${sizeSearch[1]}`, t, (id) => photoFor(id) !== null).filter((other) => countedIds.has(other.id)).length : 0;
   // The fish this lure has taken at this water, this one among them: whether it is the water's lure.
-  const lureHere = spot && entry.lure.trim() ? ([exactTerm("lure", pieceName(entry.lure)), exactTerm("water", plainName(spot.name))] as const) : null;
+  // Not at a water with no name, which a water search can't open.
+  const lureHere = spot && plainName(spot.name) && entry.lure.trim() ? ([exactTerm("lure", pieceName(entry.lure)), exactTerm("water", plainName(spot.name))] as const) : null;
   const lureHereRows = lureHere ? findCatches(book, `${lureHere[0]} + ${lureHere[1]}`, t, (id) => photoFor(id) !== null) : [];
   // On the angler's own fish, counted as the book counts them and opened the same way: no sample fish in either.
   const lureHereSearch = lureHere && isCounted ? countedSearch(book, `${lureHere[0]} + ${lureHere[1]}`, lureHereRows, "book") : null;
@@ -1755,7 +1756,7 @@ function CatchView() {
   const twinKeys = waterKeys(book);
   const atWater = spot && isCounted ? counted.filter((other) => sameWater(twinKeys, other.spotId, entry.spotId)) : [];
   // Two fish logged in the same minute go by id, as the milestones order them.
-  const firstHere = !(milestone?.of === "kind" && milestone.n === 1) && atWater.length > 1 && atWater.every((other) => other.id === entry.id || byTime(entry, other) < 0);
+  const firstHere = !!spot && !!plainName(spot.name) && !(milestone?.of === "kind" && milestone.n === 1) && atWater.length > 1 && atWater.every((other) => other.id === entry.id || byTime(entry, other) < 0);
   // The fish of its kind that year, through the catch search.
   // A night fish's small hours count in its outing's year, as the search reads a year.
   const caughtYear = caughtDay.slice(0, 4);
