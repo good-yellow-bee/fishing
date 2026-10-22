@@ -256,7 +256,7 @@ export const PL_GAME: PlBook = {
   "{name} is out again for the week": "{name} znów czeka do końca tygodnia",
   "Your arm is tiring — rest it a moment between pumps.": "Ręka ci słabnie — daj jej chwilę odpocząć między pompowaniami.",
   "The groundbait you left at the {bank} has the feeders gathered there: {casts} casts of it.": "Zanęta zostawiona na łowisku {bank} zwabiła tam ryby: starczy jej na {casts} rzutów.",
-  "The rain washed {n} casts of it away.": "Deszcz wypłukał część zanęty: o {n} rzuty mniej.",
+  "The rain washed {n} casts of it away.": "Deszcz wypłukał część zanęty: liczba rzutów mniejsza o {n}.",
   "In the summer heat, any left draws them back after three hours but is eaten within a day.": "W letnim upale resztki zanęty zwabią je z powrotem już po trzech godzinach, ale znikną w ciągu doby.",
   "In the winter cold, any left takes twelve hours to draw them back but keeps four days.": "W zimowym chłodzie resztki zanęty zwabią je z powrotem dopiero po dwunastu godzinach, ale przetrwają cztery dni.",
   "Your lost trophy was found": "Twoje zgubione trofeum się znalazło",

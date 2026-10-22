@@ -3740,6 +3740,15 @@ describe("useFishingGame groundbait", () => {
     expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ casts: 2 + GROUNDBAIT_CASTS, built: 1 });
   });
 
+  it("still says the big feeders are wary when the rain washes a handful through their swim", () => {
+    const kept = new Map<string, string>([[bagKey(profile.userId), JSON.stringify({ handfuls: 3, day: "2000-01-01" })]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 2, built: TOPUP_MAX, landedBig: WARY_LANDED, at: DOCK_BUBBLES.at - 60_000 }));
+    mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, "rain");
+    toss();
+    expect(hint()).toMatch(/Top it up once the rain stops\. The big feeders here are wary of this swim now/);
+  });
+
   it("primes a swim left behind with fewer casts when it is raining on the next visit", () => {
     const kept = new Map<string, string>();
     vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });

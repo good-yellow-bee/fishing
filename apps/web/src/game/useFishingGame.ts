@@ -2388,14 +2388,14 @@ export function useFishingGame(
       : t("{n} chopped worms went in with it: the perch here come in to feed while the swim lasts, though not to the lure you have tied on.", { n: CHOPPED_WORMS });
     const worm = chopped ? `${perch} ${t("Worms left in your tin: {worms}.", { worms: wormsRef.current })}` : "";
     const withWorm = (said: string) => [said, worm].filter(Boolean).join(" ");
+    // The big feeders are told of only where they live and would take the tied lure; wary of the swim, they no longer move in.
+    const takesBig = bigFeedersOver(next, lureRef?.current);
+    const wary = takesBig && isWary(next) ? t("The big feeders here are wary of this swim now: let it fade and build a fresh one to bring them back.") : "";
     if (kind === "topped") {
-      // The big feeders are told of only where they live and would take the tied lure; wary of the swim, they no longer move in.
-      const takesBig = bigFeedersOver(next, lureRef?.current);
       const big = takesBig && !isWary(next);
       const grew = next.built! > before;
       // The prowler is named only where it lives, would take the tied lure, and the angler could land it.
       const prowler = next.built! >= TOPUP_MAX ? prowlerAt(spotRef.current, lureRef?.current) : undefined;
-      const wary = takesBig && isWary(next) ? t("The big feeders here are wary of this swim now: let it fade and build a fresh one to bring them back.") : "";
       const prowl = prowler && profileRef.current && canLand(profileRef.current, prowler) ? t("{fish} prowls round it now, hunting the small feeders: one hooked here scatters them, landed or lost.", { fish: t(prowler.name) }) : "";
       setHint(
         withWorm(
@@ -2411,7 +2411,7 @@ export function useFishingGame(
       return;
     }
     if (kind === "washed") {
-      setHint(withWorm(t("The rain washes the handful through before more feeders settle on it: the swim keeps going but builds no further. {casts} casts of it now. Top it up once the rain stops.", { casts: next.casts })));
+      setHint(withWorm([t("The rain washes the handful through before more feeders settle on it: the swim keeps going but builds no further. {casts} casts of it now. Top it up once the rain stops.", { casts: next.casts }), wary].filter(Boolean).join(" ")));
       return;
     }
     if (kind === "overfed") {
