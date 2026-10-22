@@ -115,7 +115,7 @@ const THIEF_TURN = 0.3;
 const THIEF_GONE = 0.7;
 /** It starts and ends its dart this far out from the cloud's middle, and turns away this far in. */
 export const THIEF_OUT = 1.15 * CLOUD_RADIUS;
-const THIEF_IN = 0.8 * CLOUD_RADIUS;
+export const THIEF_IN = 0.8 * CLOUD_RADIUS;
 /** How far round the cloud it slips while turning in, and by the end of the dart. */
 const THIEF_SLIP = 0.25;
 const THIEF_SWING = 0.9;
@@ -187,4 +187,55 @@ export function prowlAt(time: number, out: number, still = false): { dx: number;
     speed: still ? 0 : 4 * k * (1 - k),
     slash,
   };
+}
+
+/** Perch come in to a swim with chopped worm in it (GT480) whatever lure is tied on, and bolt with the feeders when they scatter: this many hang under the cloud. */
+export const PERCH = 3;
+
+/** Whether perch hang under this swim's cloud. */
+export function perchShow(bait: Groundbait): boolean {
+  return !!bait.worm && !bait.spooked;
+}
+
+/** Each perch hangs under the cloud for about this long, then darts to a fresh spot over the last share of it. */
+const PERCH_SEC = 2.6;
+const PERCH_DART = 0.25;
+/** It hangs between this near and this far from the cloud's middle, well inside the shiners' darts. */
+export const PERCH_NEAR = 0.15 * CLOUD_RADIUS;
+export const PERCH_FAR = 0.5 * CLOUD_RADIUS;
+/** It turns to face its next spot over this share of each hang. */
+const PERCH_TURN = 0.3;
+/** A perch's nose and tail are this far from its middle. */
+export const PERCH_REACH = 0.23;
+
+function perchSpot(i: number, round: number) {
+  const angle = hash(round * 5.3 + i * 17.9) * Math.PI * 2;
+  return edgePoint(angle, PERCH_NEAR + (PERCH_FAR - PERCH_NEAR) * hash(round * 5.3 + i * 17.9 + 0.5));
+}
+
+/** Perch `i` at `time`: where by the cloud's middle, its heading (a +z-facing fish turned by it) and how fast it darts (0..1). Held mid-hang, spread round the cloud, when `still`. Pure. */
+export function perchAt(i: number, time: number, still = false): { dx: number; dz: number; yaw: number; dart: number } {
+  if (still) {
+    const at = edgePoint((i / PERCH) * Math.PI * 2 + 0.9, (PERCH_NEAR + PERCH_FAR) / 2);
+    return { dx: at.x, dz: at.z, yaw: (i / PERCH) * Math.PI * 2, dart: 0 };
+  }
+  const cycle = PERCH_SEC + 0.47 * i;
+  const laps = (time + i * 1.3) / cycle;
+  const round = Math.floor(laps);
+  const k = laps - round;
+  const here = perchSpot(i, round);
+  const next = perchSpot(i, round + 1);
+  const hang = 1 - PERCH_DART;
+  const nextYaw = heading(here, next);
+  if (k >= hang) {
+    const v = (k - hang) / PERCH_DART;
+    const u = 1 - (1 - v) ** 2;
+    return { dx: here.x + (next.x - here.x) * u, dz: here.z + (next.z - here.z) * u, yaw: nextYaw, dart: 1 - v };
+  }
+  // It finishes the turn from its last dart toward the next spot, drifting a little and back as it hangs.
+  const lastYaw = heading(perchSpot(i, round - 1), here);
+  const turn = Math.atan2(Math.sin(nextYaw - lastYaw), Math.cos(nextYaw - lastYaw));
+  const yaw = lastYaw + turn * Math.min(1, k / hang / PERCH_TURN);
+  const drift = 0.03 * Math.sin((Math.PI * k) / hang);
+  return { dx: here.x + Math.sin(yaw) * drift, dz: here.z + Math.cos(yaw) * drift, yaw, dart: 0 };
 }
