@@ -72,14 +72,14 @@ import { castForFoe, foeGone, isOldFoe, loadOldFoe, saveOldFoe } from "./oldFoe"
 import { loadNightLine, nightLineCatch, nightLineKinds, nightLineNextChange, nightLineSeason, nightLineState, nightSkyFor, saveNightLine, wormLineHour, type NightLine } from "./nightLine";
 import { markShy, loadGiantShy, rollGiantShy, saveGiantShy, shyOf, type GiantShy } from "./giantShy";
 import { AGAIN_CASTS, backAgain, castForGotAway, gotAwayAfterDrop, PATIENT_DROP_RANK, gotAwayAfterLoss, type GotAway } from "./gotAway";
-import { LINE_SNAP, LINE_WAIT, type LineWeight } from "./lineWeight";
+import { LIGHT_BITE_THROUGH, LINE_SNAP, LINE_WAIT, type LineWeight } from "./lineWeight";
 import { countAtBank, loadBankMemory, rollBankMemory, saveBankMemory, waryFromYesterday, YESTERDAY_WAIT, type BankMemory } from "./bankMemory";
 import { castForLodgeLost, castForLodgeTag, castForReleased, loadReleased, saveReleased, type Recaught } from "./releasedFish";
 import { weightText } from "../i18n/content";
 import { FRENZY_SLOT_MS, frenzyOn, HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, slotFrenzy, type Hotspot } from "./hotspot";
 import { loadBag, loadShiner, saveBag, saveShiner, type HookedShiner } from "./groundbaitBag";
 import { loadTin, saveTin, WORM_TIN_DAILY, WORM_TIN_WET } from "./wormTin";
-import { BACKLASH_POWER, BED_RAIDERS, COLD_WORK_WAIT, tooQuickForCold, isLongCast, castIntoSchool, castOverGroundbait, RIPPED_CASTS, canChopWorm, CHOPPED_WORMS, wormFeedersTake, scatterSwim, SPOOKED_SWIM_CASTS, isBigFeeder, isWary, WARY_LANDED, landBigFeeder, bigFeedersOver, afterDark, afterDarkLeaderAt, prowlerAt, PROWLERS, scattersSwim, TOPUP_MAX, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, OVERFED_WAIT, throwHandful, TOPUP_CASTS_LEFT, canBaitShiner, shinerHunter, bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, type Groundbait, castIntoSpooked, castUnderPressure, castNewLure, type LuresShown, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, colourSuits, colourWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, anchorSplashWaitMul, openGlareWaitMul, frenzyHunter, FRENZY_WAIT, lampLit, LAMP_WAIT, LAMP_WINDOW, longShadowWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, waterSwingWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
+import { BACKLASH_POWER, BED_RAIDERS, COLD_WORK_WAIT, tooQuickForCold, isLongCast, castIntoSchool, castOverGroundbait, RIPPED_CASTS, canChopWorm, CHOPPED_WORMS, wormFeedersTake, scatterSwim, SPOOKED_SWIM_CASTS, isBigFeeder, isWary, WARY_LANDED, landBigFeeder, bigFeedersOver, afterDark, afterDarkLeaderAt, prowlerAt, PROWLERS, scattersSwim, TOPUP_MAX, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, OVERFED_WAIT, throwHandful, TOPUP_CASTS_LEFT, canBaitShiner, shinerHunter, bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, type Groundbait, castIntoSpooked, castUnderPressure, castNewLure, type LuresShown, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, colourSuits, colourWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, anchorSplashWaitMul, openGlareWaitMul, frenzyHunter, FRENZY_WAIT, lampLit, LAMP_WAIT, LAMP_WINDOW, longShadowWaitMul, pickBite, poolForLure, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, waterSwingWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealChance, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -174,6 +174,8 @@ export type Fight = {
   line?: LineWeight;
   /** A pike or muskie swallowed the bait on a wire leader, so its teeth sit on the wire, not the line. */
   wired?: boolean;
+  /** A pike or muskie struck on light line bit through it, so the line parts as the fight starts. */
+  bitThrough?: boolean;
   /** Hooked tight to the lily pads, so it dives for the pad stems like a fish in the reeds' weeds. */
   pads?: boolean;
   /** Hooked from the boat tight to the far rock, so an unturned run drags the line over the rock. */
@@ -958,6 +960,8 @@ export function useFishingGame(
     // A pike's teeth on a swallowed hook sit on a wire leader, not the line, so they can't fray it.
     const wired = deep && TOOTHY.has(species.id) && castLineRef.current === "wire";
     const underpowered = !canLand(current, species);
+    // A pike's teeth close on light line at the strike, parting it on the fight's first frame; a beginner is spared.
+    const bitThrough = !!strike && !underpowered && !mercyRef.current && castLineRef.current === "light" && TOOTHY.has(species.id) && Math.random() < LIGHT_BITE_THROUGH;
     // A fish hooked tight to the lily pads dives for the stems, so the fight there is a weed fight whatever the bank;
     // one hooked tight to the sunken log from the bank runs for the log and can wrap the line round it (out on the boat, the hull swings clear).
     const pads = castPadsRef.current;
@@ -980,7 +984,7 @@ export function useFishingGame(
     // One hooked chasing the kingfisher's fry is fired up.
     const fired = castFryRef.current;
     const hookWise = !!(recaughtRef.current?.foe || recaughtRef.current?.lost);
-    const next = { species, weight, underpowered, water, windy, lightHook, line: castLineRef.current, wired, pads, farRock, weedBall, edge, bed, foam, rising, lantern, fired, hookWise, strongLift: liftsStickerInOne(species.id, current.strength) };
+    const next = { species, weight, underpowered, water, windy, lightHook, line: castLineRef.current, wired, bitThrough, pads, farRock, weedBall, edge, bed, foam, rising, lantern, fired, hookWise, strongLift: liftsStickerInOne(species.id, current.strength) };
     fightRef.current = next;
     setFight(next);
     setPhaseBoth("fight");
@@ -1340,7 +1344,12 @@ export function useFishingGame(
       );
     }
     else if (lineWait > 1) reasons.unshift(t("Heavy line: the fish can see it, so the bites come slower."));
-    else if (lineWait < 1) reasons.push(t("Light line: the fish can't see it, so the bites come sooner."));
+    else if (lineWait < 1) {
+      // Only the warning is told up front; it draws no pike to the light line.
+      const toothy = !mercyRef.current && poolForLure(FISH.filter((fish) => fish.spots.includes(spotRef.current)), lureRef?.current).some((fish) => TOOTHY.has(fish.id) && canLand(current, fish));
+      if (toothy) reasons.unshift(t("Light line: the fish can't see it, so the bites come sooner, but a pike here can bite through it at the strike."));
+      else reasons.push(t("Light line: the fish can't see it, so the bites come sooner."));
+    }
     // Told last, so the two-reason cap always keeps it: waiting a few seconds is the fix.
     if (anchorWait > 1) reasons.unshift(t("The anchor's splash put the fish down, so the bites come slow: give it a few seconds before you cast."));
     waitHintRef.current = [...reasons.slice(0, WAIT_REASONS), waitHintRef.current].join(" ");
@@ -2036,7 +2045,7 @@ export function useFishingGame(
           const keys = steerKeysRef.current;
           const steer: Steer = steerPointerRef.current?.side ?? (keys.left === keys.right ? 0 : keys.left ? -1 : 1);
           fightInput.steer = steer;
-          const result = runtime.step(now, dt, reeling, steer, settings.drag);
+          const result = current.bitThrough ? "snapped" : runtime.step(now, dt, reeling, steer, settings.drag);
           const sim = runtime.sim;
           // Left to flutter on a slack line out past halfway, the small fish draws the hunter in. Only its calm spells count,
           // since easing off for a run is no pause, and a pump of the reel starts the pause again.
@@ -2256,7 +2265,9 @@ export function useFishingGame(
             // How close it came, so a break near the net reads as nearly there rather than as a wasted fight.
             const reeledIn = Math.round((1 - sim.line) * 100);
             // A break gives the angler a fresh knot to tie on, so the line is sound again.
-            const snapped = sim.bitten
+            const snapped = current.bitThrough
+              ? t("The {fish} bit through the light line at the strike.", { fish: t(current.species.name) })
+              : sim.bitten
               ? t("The {fish}'s teeth wore through the line before you could land it.", { fish: t(current.species.name) })
               : sim.frayed ? t("{fish} snapped the frayed line, short of the usual strain.", { fish: t(current.species.name) }) : t("{fish} snapped the line — too much tension.", { fish: t(current.species.name) });
             markFrayed(false);
@@ -2264,7 +2275,7 @@ export function useFishingGame(
             markDull(false);
             setSoak(0);
             setOutcome({ kind: "broke", message: (reeledIn >= 10 ? `${snapped} ${t("It was {n}% of the way in.", { n: reeledIn })}` : snapped) + trophy });
-            resetToIdle((sim.bitten ? t("Given time, a pike or muskie swallows the bait: strike sooner, or land it quick.") : t("Too much tension — let go when the bar turns red or the fish is about to run.")) + stillAbout());
+            resetToIdle((current.bitThrough ? t("A fresh knot goes on. Heavy line or a wire leader stands up to its teeth.") : sim.bitten ? t("Given time, a pike or muskie swallows the bait: strike sooner, or land it quick.") : t("Too much tension — let go when the bar turns red or the fish is about to run.")) + stillAbout());
           } else if (result === "escaped") {
             fx.snap();
             fx.haptic("snap");

@@ -905,6 +905,11 @@ export function prowlerAt(spot: SpotId, lure: string | undefined) {
   return poolForLure(FISH.filter((fish) => fish.spots.includes(spot)), lure).find((fish) => PROWLERS.has(fish.id));
 }
 
+/** The prowler drawn to this swim, if it is built all the way and the tied lure would take one at its bank. */
+export function prowlerOver(bait: Groundbait, lure: string | undefined) {
+  return (bait.built ?? 0) >= TOPUP_MAX ? prowlerAt(bait.spot, lure) : undefined;
+}
+
 /** Whether a fish hooked over a swim topped up this many times scatters it when lost: a big feeder, or a prowler (landed too). */
 export function scattersSwim(id: string, built: number) {
   return isBigFeeder(id, built) || (built >= TOPUP_MAX && PROWLERS.has(id));
