@@ -148,6 +148,7 @@ import { aimInputs, listenForWaterAim, sameAim } from "./pointerAim";
 import { fishBuild, type FishBuild } from "./fishBuild";
 import { useReducedMotion } from "./reducedMotion";
 import { GLOW_TIP, lineLook } from "./lineLook";
+import { gearOpacity, LEADER_DULL, LEADER_GLINT, LEADER_LEN, LEADER_STEEL, leaderGlint, leaderTail } from "./lineGear";
 import { castRing, CAST_RING_COLORS } from "./castRing";
 import { LIFT_START_AGE, liftDepth, liftFlop } from "./catchLift";
 import { sweetBand } from "../logic";
@@ -1406,8 +1407,10 @@ function RisingFish({ phase, color, accent, size, build }: { phase: ScenePhase; 
 
 function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, species, weight, level, hour, wind = NO_WIND, topwater = false }: LineAndBobberProps) {
   const look = lineLook(hour);
+  const gear = useSettings().line;
+  const still = useReducedMotion();
   const restOpacity = useRef(look.opacity);
-  restOpacity.current = look.opacity;
+  restOpacity.current = gearOpacity(look.opacity, gear);
   const bobber = useRef<THREE.Group>(null);
   const hooked = useRef<THREE.Group>(null);
   const weedBall = useRef<THREE.Mesh>(null);
@@ -1466,6 +1469,37 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
     mesh.frustumCulled = false;
     return mesh;
   }, []);
+  // The wire leader's steel trace: a child of the line, so it hides and shows with it.
+  const leader = useMemo(() => {
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(LINE_CAP * 3), 3));
+    geometry.setDrawRange(0, 0);
+    const mesh = new THREE.Line(geometry, new THREE.LineBasicMaterial({ color: LEADER_STEEL, transparent: true }));
+    mesh.frustumCulled = false;
+    // Drawn after the see-through line it lies along, so the line doesn't dull it.
+    mesh.renderOrder = 1;
+    return mesh;
+  }, []);
+  const steel = useMemo(() => new THREE.Color(LEADER_STEEL), []);
+  const dull = useMemo(() => new THREE.Color(LEADER_DULL), []);
+  const glint = useMemo(() => new THREE.Color(LEADER_GLINT), []);
+  const wired = gear === "wire";
+  const fillLeader = (count: number, t: number) => {
+    if (!wired) return;
+    const attr = leader.geometry.getAttribute("position");
+    const points = attr.array as Float32Array;
+    const n = leaderTail(line.geometry.getAttribute("position").array, count, LEADER_LEN, points);
+    // The line's belly dips under the water by the float; the stiff wire lies along the top instead.
+    for (let i = 0; i < n; i += 1) points[i * 3 + 1] = Math.max(points[i * 3 + 1], waterHeight(points[i * 3], points[i * 3 + 2], t) + 0.015);
+    leader.geometry.setDrawRange(0, n);
+    attr.needsUpdate = true;
+    const material = leader.material as THREE.LineBasicMaterial;
+    // Fades with the line as a landed fish swings in.
+    material.opacity = Math.min(1, (line.material as THREE.LineBasicMaterial).opacity / restOpacity.current);
+    // The steel catches the light by day; at dusk and night it stays dull.
+    if (look.glowTip) material.color.copy(dull);
+    else material.color.lerpColors(steel, glint, still ? 0 : leaderGlint(t));
+  };
   const dipped = isFighting(phase);
   const lifting = species !== null && takeStyle(species.id, topwater) === "lift";
   const running = species !== null && takeStyle(species.id, topwater) === "run";
@@ -1476,6 +1510,19 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
       line.material.dispose();
     };
   }, [line]);
+
+  useEffect(() => {
+    leader.visible = wired;
+  }, [leader, wired]);
+
+  useEffect(() => {
+    line.add(leader);
+    return () => {
+      line.remove(leader);
+      leader.geometry.dispose();
+      (leader.material as THREE.LineBasicMaterial).dispose();
+    };
+  }, [line, leader]);
 
   useEffect(() => {
     (line.material as THREE.LineBasicMaterial).color.set(look.line);
@@ -1550,6 +1597,7 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
       }
       line.geometry.setDrawRange(0, count);
       attr.needsUpdate = true;
+      fillLeader(count, t);
       return;
     }
     line.visible = showLure;
@@ -1876,6 +1924,7 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
     }
     line.geometry.setDrawRange(0, count);
     attr.needsUpdate = true;
+    fillLeader(count, t);
   });
 
   return (
