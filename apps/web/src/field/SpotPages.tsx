@@ -227,7 +227,7 @@ export function SpotsPage() {
   // or above, the angler's own.
   const ownAny = hasOwnEntries(book);
   const invented = (row: { spot: { id: string } }) => ownAny && isSampleSpot(row.spot.id) && !ownHere(row.spot.id);
-  rows.sort((a, b) => Number(invented(a)) - Number(invented(b)));
+  if (ownAny) rows.sort((a, b) => Number(invented(a)) - Number(invented(b)));
   rows.sort((a, b) => Number(a.spot.id === PLAY_LAKE_ID) - Number(b.spot.id === PLAY_LAKE_ID));
   // With rivers and lakes both in the book, the list can narrow to one kind of water; the game's lake shows under all.
   const types = WATER_TYPES.filter((type) => rows.some((row) => row.spot.id !== PLAY_LAKE_ID && row.spot.waterType === type));

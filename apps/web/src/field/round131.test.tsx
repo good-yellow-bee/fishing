@@ -106,4 +106,21 @@ describe("round 131 fixes: Home's This week in years past", () => {
     expect(links[0]).toContain("2025-10-23");
     expect(links[1]).toContain("2025-10-20");
   });
+
+  it("offers a night's day once when a fish of the next day sorts between its fish", async () => {
+    const book: Logbook = {
+      spots: [water("a", "Cedar Bend"), water("b", "Mill Pond")],
+      trips: [trip("night", "2025-10-20", "a", "Night carp")],
+      catches: [
+        fish("dusk", "night", new Date(2025, 9, 20, 22), "a"),
+        fish("loose", null, new Date(2025, 9, 21, 0, 30), "b"),
+        fish("small", "night", new Date(2025, 9, 21, 2), "a"),
+      ],
+    };
+    const box = await show(book, <HomePage />);
+    const links = [...box.querySelectorAll(".years-ago > .meta")].map((line) => decodeURIComponent(line.querySelector("a")?.getAttribute("href") ?? ""));
+    expect(links[0]).toContain("2025-10-20");
+    expect(links[1]).toContain("2025-10-21");
+    expect(links[2]).toBe("");
+  });
 });
