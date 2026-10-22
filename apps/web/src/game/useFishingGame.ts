@@ -974,8 +974,8 @@ export function useFishingGame(
     const bitThrough = !!strike && !underpowered && !mercyRef.current && castLineRef.current === "light" && TOOTHY.has(species.id) && Math.random() < LIGHT_BITE_THROUGH;
     const pads = castPadsRef.current;
     const water = fightWater(spotRef.current, pads, castLogRef.current);
-    // Light line run into the weeds is sawn on the stems; a beginner is spared.
-    const weedFrays = water === "weeds" && castLineRef.current === "light" && !mercyRef.current;
+    // Light line run into the weeds is sawn on the stems, unless already frayed; a beginner is spared.
+    const weedFrays = water === "weeds" && castLineRef.current === "light" && !mercyRef.current && !frayedRef.current;
     const windy = fightWind(windRef.current);
     // One hooked tight to the far rock from the boat runs round the rock, dragging the line over it unless turned.
     const farRock = castFarRockRef.current && water === "boat";
@@ -1345,6 +1345,7 @@ export function useFishingGame(
     const builtUp = bait.built >= TOPUP_MAX;
     const prowling = (builtUp || wire) && !mercyRef.current ? prowlerAt(spotRef.current, lureRef?.current) : undefined;
     const prowler = prowling && canLand(current, prowling) ? prowling.id : undefined;
+    const castWater = fightWater(spotRef.current, castPadsRef.current, castLogRef.current);
     if (wire) {
       reasons.unshift(
         !prowler
@@ -1357,7 +1358,6 @@ export function useFishingGame(
     else if (lineWait > 1) {
       // Where a fish hooked here could run into the weeds or wrap the line round wood, heavy line's pull is told with it.
       // In bright, calm water the fish see it plainer, and that is told in its place.
-      const castWater = fightWater(spotRef.current, castPadsRef.current, castLogRef.current);
       reasons.unshift(
         castWater === "weeds"
           ? bright
@@ -1375,7 +1375,7 @@ export function useFishingGame(
     else if (lineWait < 1) {
       // Only the warnings are told up front; it draws no pike to the light line.
       const toothy = !mercyRef.current && poolForLure(FISH.filter((fish) => fish.spots.includes(spotRef.current)), lureRef?.current).some((fish) => TOOTHY.has(fish.id) && canLand(current, fish));
-      const weeds = !mercyRef.current && fightWater(spotRef.current, castPadsRef.current, castLogRef.current) === "weeds";
+      const weeds = !mercyRef.current && !frayedRef.current && castWater === "weeds";
       if (toothy && weeds) reasons.unshift(t("Light line: the fish can't see it, so the bites come sooner, but a pike here can bite through it at the strike, and the weed stems fray it if a fish runs in."));
       else if (toothy) reasons.unshift(t("Light line: the fish can't see it, so the bites come sooner, but a pike here can bite through it at the strike."));
       else if (weeds) reasons.unshift(t("Light line: the fish can't see it, so the bites come sooner, but the weed stems fray it if a fish runs in."));

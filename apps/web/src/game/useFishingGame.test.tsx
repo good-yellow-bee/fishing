@@ -1659,6 +1659,16 @@ describe("useFishingGame strike timing", () => {
       act(() => frames.at(-1)!(now));
       expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toContain("The weed stems frayed your light line: it snaps sooner until you retie it.");
       expect(container!.querySelector("[data-testid=frayed]")?.textContent).toBe("true");
+      // Already frayed, the stems have nothing more to do to it, and the hint doesn't warn of them.
+      act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
+      vi.mocked(waitMs).mockReturnValueOnce(1_000);
+      step.mockReturnValueOnce("fighting");
+      cast(surface);
+      expect(hint()).not.toContain("weed stems");
+      act(() => vi.advanceTimersByTime(2_201));
+      act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+      expect(phase()).toBe("fight:none");
+      expect(vi.mocked(makeFight).mock.calls.at(-1)?.[17]).toMatchObject({ weedFrays: false });
     } finally {
       updateSettings({ line: "standard" });
     }
