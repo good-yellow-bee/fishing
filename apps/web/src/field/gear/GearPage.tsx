@@ -46,7 +46,7 @@ import { focusPageHeading } from "../pageFocus";
 import { bookLureName, onPiece } from "../pieceTally";
 import { newestOutingFirst } from "../catchNeighbors";
 import { kindNames, mostWritten } from "../speciesLink";
-import { foldName, twinName } from "../spotOrder";
+import { foldName, twinName, twinNamesAmong } from "../spotOrder";
 
 function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
   const { book } = useLogbook();
@@ -149,9 +149,9 @@ function LureRecord({ today }: { today: string }) {
     .filter((spot) => counted.trips.some((trip) => trip.spotId === spot.id && trip.date <= today && packedFor.has(trip.id)) && pieceRecords(bookAt(spot.id), items, today).length > 0)
     .filter((spot, index, all) => all.findIndex((other) => oneWater(other, spot)) === index);
   // Two waters with no name read alike among the choices: each says how many fish it holds, as the water pickers do.
-  const blankChoices = waters.filter((spot) => !foldName(spot.name)).length;
+  const twinNames = twinNamesAmong(waters);
   const choiceName = (spot: { id: string; name: string }) =>
-    !foldName(spot.name) && blankChoices > 1 ? `${waterName(spot.name)} · ${tn(book.catches.filter((entry) => entry.spotId === spot.id).length, "{n} fish", "{n} fish")}` : waterName(spot.name);
+    twinNames.has(foldName(spot.name)) ? `${waterName(spot.name)} · ${tn(book.catches.filter((entry) => entry.spotId === spot.id).length, "{n} fish", "{n} fish")}` : waterName(spot.name);
 
   const [waterId, setWaterId] = useState("all");
   const water = waters.find((spot) => spot.id === waterId) ?? null;
