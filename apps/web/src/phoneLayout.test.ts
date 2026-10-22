@@ -307,7 +307,8 @@ describe("the hint on a touch tablet", () => {
     expect(hint).toContain("bottom: 72px;");
     expect(hint).toContain("max-width: min(46ch, calc((100vw - 136px) / var(--text-zoom, 1) - 116px));");
     expect(/html\[data-hand="left"\] \.hint \{([^}]*)\}/.exec(block)?.[1]).toContain("right: calc(136px / var(--text-zoom, 1));");
-    expect(/\.lodge-tracks \{([^}]*)\}/.exec(block)?.[1]).toContain("bottom: calc(80px + var(--hint-h, 54px));");
+    expect(/html:not\(\[data-hand="left"\]\) \.lodge-tracks \{([^}]*)\}/.exec(block)?.[1]).toContain("bottom: calc(80px + var(--hint-h, 54px));");
+    expect(/html\[data-hand="left"\] \.lodge-tracks \{([^}]*)\}/.exec(block)?.[1]).toContain("bottom: 124px;");
   });
 });
 
