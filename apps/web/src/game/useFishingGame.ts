@@ -79,7 +79,7 @@ import { weightText } from "../i18n/content";
 import { FRENZY_SLOT_MS, frenzyOn, HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, slotFrenzy, type Hotspot } from "./hotspot";
 import { loadBag, loadShiner, saveBag, saveShiner, type HookedShiner } from "./groundbaitBag";
 import { loadTin, saveTin, WORM_TIN_DAILY, WORM_TIN_WET } from "./wormTin";
-import { BACKLASH_POWER, BED_RAIDERS, COLD_WORK_WAIT, tooQuickForCold, isLongCast, castIntoSchool, castOverGroundbait, canChopWorm, CHOPPED_WORMS, wormFeedersTake, scatterSwim, SPOOKED_SWIM_CASTS, isBigFeeder, isWary, WARY_LANDED, landBigFeeder, bigFeedersOver, afterDark, afterDarkLeaderAt, prowlerAt, PROWLERS, scattersSwim, TOPUP_MAX, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, OVERFED_WAIT, throwHandful, TOPUP_CASTS_LEFT, canBaitShiner, shinerHunter, bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, type Groundbait, castIntoSpooked, castUnderPressure, castNewLure, type LuresShown, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, colourSuits, colourWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, anchorSplashWaitMul, openGlareWaitMul, frenzyHunter, FRENZY_WAIT, lampLit, LAMP_WAIT, LAMP_WINDOW, longShadowWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, waterSwingWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
+import { BACKLASH_POWER, BED_RAIDERS, COLD_WORK_WAIT, tooQuickForCold, isLongCast, castIntoSchool, castOverGroundbait, RIPPED_CASTS, canChopWorm, CHOPPED_WORMS, wormFeedersTake, scatterSwim, SPOOKED_SWIM_CASTS, isBigFeeder, isWary, WARY_LANDED, landBigFeeder, bigFeedersOver, afterDark, afterDarkLeaderAt, prowlerAt, PROWLERS, scattersSwim, TOPUP_MAX, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, OVERFED_WAIT, throwHandful, TOPUP_CASTS_LEFT, canBaitShiner, shinerHunter, bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, type Groundbait, castIntoSpooked, castUnderPressure, castNewLure, type LuresShown, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, colourSuits, colourWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, anchorSplashWaitMul, openGlareWaitMul, frenzyHunter, FRENZY_WAIT, lampLit, LAMP_WAIT, LAMP_WINDOW, longShadowWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, waterSwingWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealChance, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -810,13 +810,13 @@ export function useFishingGame(
   useEffect(() => {
     const swim = profile?.userId ? loadSwim(profile.userId) : null;
     const now = swimNow(swim, Date.now(), season, sky);
-    groundbaitRef.current = now ? { spot: now.spot, casts: now.casts, ...(now.built ? { built: now.built } : {}), ...(now.spooked ? { spooked: now.spooked } : {}), ...(now.worm ? { worm: true } : {}), ...(now.landedBig ? { landedBig: now.landedBig } : {}) } : null;
+    groundbaitRef.current = now ? { spot: now.spot, casts: now.casts, ...(now.built ? { built: now.built } : {}), ...(now.spooked ? { spooked: now.spooked } : {}), ...(now.worm ? { worm: true } : {}), ...(now.landedBig ? { landedBig: now.landedBig } : {}), ...(now.ripped ? { ripped: true } : {}) } : null;
     swimRef.current = { at: now?.at ?? 0, primed: !!now?.primed, bread: !!now?.bread };
     setSwimPrimed(!!now?.primed);
     setGroundbait(groundbaitRef.current);
     if (profile?.userId && swim && !now) saveSwim(profile.userId, null);
     if (now?.primedNow && profile?.userId) {
-      saveSwim(profile.userId, { spot: now.spot, casts: now.casts, at: now.at, primed: true, ...(now.bread ? { bread: true } : {}), ...(now.worm ? { worm: true } : {}), ...(now.landedBig ? { landedBig: now.landedBig } : {}) });
+      saveSwim(profile.userId, { spot: now.spot, casts: now.casts, at: now.at, primed: true, ...(now.bread ? { bread: true } : {}), ...(now.worm ? { worm: true } : {}), ...(now.landedBig ? { landedBig: now.landedBig } : {}), ...(now.ripped ? { ripped: true } : {}) });
       const left = { bank: t(SPOT_LABELS[now.spot]), casts: now.casts };
       const primed = now.bread
         ? t("The groundbait and bread crumb you left at the {bank} have the feeders gathered there: {casts} casts of it.", left)
@@ -1126,7 +1126,7 @@ export function useFishingGame(
     const rainCover = spookedBank && sky === "rain";
     const spooked = spookedBank && !rainCover;
     spookRef.current = null;
-    const bait = castOverGroundbait(groundbaitRef.current, spotRef.current);
+    const bait = castOverGroundbait(groundbaitRef.current, spotRef.current, lureRef?.current);
     // A beginner is spared the overfed swim's slow bites, and told only of the groundbait.
     const full = bait.full && !mercyRef.current;
     castBaitedRef.current = bait.baited;
@@ -1139,6 +1139,8 @@ export function useFishingGame(
     const huntedFish = legendRef.current?.spot === spotRef.current ? fishById(legendRef.current.legendId) : undefined;
     if (huntedFish && !short && legendaryCanBite(current, huntedFish, spotRef.current)) waitHintRef.current = `${t("The {fish} your hunt tracked down haunts this water.", { fish: t(huntedFish.name) })} ${waitHintRef.current}`;
     if (castFrenzyRef.current) waitHintRef.current = `${t("Into the frenzy! The baitfish boil and the hunters are slashing through them.")} ${waitHintRef.current}`;
+    // The first spinner or crankbait cast over a swim says what it costs it.
+    if (bait.ripped) waitHintRef.current = `${t("The lure's flash and thump push the feeders off: each cast of a spinner or crankbait over the swim spends {n} casts of it, where bait spends 1.", { n: RIPPED_CASTS })} ${waitHintRef.current}`;
     if (bait.baited) waitHintRef.current = `${full ? t("Over the groundbait, but the fish are still full from it.") : bait.spooked ? t("Over the groundbait, but its feeders are still scattered.") : t("Over the groundbait.")} ${waitHintRef.current}`;
     if (spooked) waitHintRef.current = `${t("The lost fish spooked this water, so the next bite is slower.")} ${waitHintRef.current}`;
     else if (rainCover) waitHintRef.current = `${t("The rain on the water covered the lost fish's splash, so this water isn't spooked.")} ${waitHintRef.current}`;
