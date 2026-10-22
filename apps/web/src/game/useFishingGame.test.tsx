@@ -3723,7 +3723,7 @@ describe("useFishingGame groundbait", () => {
     kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 2, built: TOPUP_MAX, landedBig: WARY_LANDED, at: DOCK_BUBBLES.at - 60_000 }));
     mount();
     toss();
-    expect(hint()).toBe(`You top up the swim as it fades: the feeders stay. ${2 + GROUNDBAIT_CASTS} casts of it now. ${WARY_LANDED} big feeders landed off this swim, none left to draw: the rest are wary of it. Let it fade and build a fresh one to bring them back.`);
+    expect(hint()).toBe(`You top up the swim as it fades: the feeders stay. ${2 + GROUNDBAIT_CASTS} casts of it now. Once ${WARY_LANDED} big feeders were landed off this swim, the rest grew wary of it: none left to draw. Let it fade and build a fresh one to bring them back.`);
     expect(JSON.parse(kept.get(swimKey(profile.userId))!)).toMatchObject({ landedBig: WARY_LANDED });
   });
 
@@ -3746,7 +3746,7 @@ describe("useFishingGame groundbait", () => {
     kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dock", casts: 2, built: TOPUP_MAX, landedBig: WARY_LANDED, at: DOCK_BUBBLES.at - 60_000 }));
     mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, "rain");
     toss();
-    expect(hint()).toMatch(new RegExp(`Top it up once the rain stops\\. ${WARY_LANDED} big feeders landed off this swim, none left to draw`));
+    expect(hint()).toMatch(new RegExp(`Top it up once the rain stops\\. Once ${WARY_LANDED} big feeders were landed off this swim, the rest grew wary of it`));
   });
 
   it("primes a swim left behind with fewer casts when it is raining on the next visit", () => {
