@@ -180,10 +180,10 @@ export function HomePage() {
   const kinds = speciesCounts(real).length;
   // A look back: what came out of the water this same week in earlier years, a night's small hours on its outing's day.
   const fishDay = (entry: CatchEntry) => bookFishDay(book, entry);
-  const yearsAgo = thisWeekInPastYears(real, now, 3, 3, fishDay);
+  const yearsAgo = thisWeekInPastYears(real, now, undefined, undefined, fishDay);
   // "Every fish that day" once a day, on its newest fish: a night's small hours on its outing's day.
   const linkedDays = new Set<string>();
-  const dayLinkOn = new Set(yearsAgo.filter((entry) => !linkedDays.has(bookFishDay(book, entry)) && linkedDays.add(bookFishDay(book, entry))).map((entry) => entry.id));
+  const dayLinkOn = new Set(yearsAgo.filter((entry) => !linkedDays.has(fishDay(entry)) && linkedDays.add(fishDay(entry))).map((entry) => entry.id));
   const thisMonth = today.slice(0, 7);
   // By the outing's day, as the year below: a New Year's Eve night's small hours are December's, not January's.
   const monthRows = book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${thisMonth}-`));
@@ -237,7 +237,8 @@ export function HomePage() {
   const lastOutRest = lastOut ? daysBetween(lastOut.date, today) : 0;
   const nextSpot = next ? spotById(book, next.spotId) : undefined;
   // A fish started on the catch form and never saved: the first thing worth finishing.
-  const [kept, setKept] = useState(() => readKeptDraft(now));
+  const [letGo, setLetGo] = useState(false);
+  const kept = letGo ? null : readKeptDraft(now);
 
   return (
     <div className="sheet">
@@ -309,7 +310,7 @@ export function HomePage() {
           {/* As on the catch form: a fish not worth finishing goes from here, not a day later. */}
           <button type="button" className="text-button" onClick={() => {
               dropKeptDraft();
-              setKept(null);
+              setLetGo(true);
               heading.current?.focus();
             }}>
             {t("Let it go")}
@@ -518,7 +519,7 @@ export function HomePage() {
                   <div key={entry.id} className="years-ago">
                     {/* Say plainly how long ago, beside the date on the card. */}
                     <p className="meta">
-                      {tn(yearsBack(entry, now, 3, fishDay) ?? 1, "{n} year ago", "{n} years ago")}
+                      {tn(yearsBack(entry, now, undefined, fishDay) ?? 1, "{n} year ago", "{n} years ago")}
                       {/* The whole day it came from, in the catch search. */}
                       {!dayLinkOn.has(entry.id) ? null : (
                         <>
