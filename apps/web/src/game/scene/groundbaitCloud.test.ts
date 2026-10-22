@@ -138,4 +138,13 @@ describe("a scattered swim", () => {
     expect(scatterWakeAt(1, -1, 0)).toBeNull();
     expect(SCATTER_WAKES).toBeLessThanOrEqual(DIMPLES);
   });
+
+  it.each(SPOT_IDS)("keeps the %s's wakes on the water to their ends", (spot) => {
+    const at = cloudCenter(spot);
+    for (let i = 0; i < SCATTER_WAKES; i++) {
+      const end = scatterWakeAt(i, SCATTER_SEC - 0.01, openWaterYaw(spot))!;
+      const reach = end.run + end.size;
+      expect(walkableAt(at.x + Math.sin(end.yaw) * reach, at.z + Math.cos(end.yaw) * reach)).toBe(false);
+    }
+  });
 });

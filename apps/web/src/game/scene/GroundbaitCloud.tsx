@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import type { Groundbait } from "../logic";
-import { CLOUD_RADIUS, DIMPLES, ROLL_SPAN, SCATTER_WAKES, WAKE_ARC, cloudCenter, cloudOpacity, dimpleAt, feedersShow, openWaterYaw, rollAt, scatterWakeAt } from "./groundbaitCloud";
+import { CLOUD_RADIUS, DIMPLES, ROLL_SPAN, SCATTER_SEC, SCATTER_WAKES, WAKE_ARC, cloudCenter, cloudOpacity, dimpleAt, feedersShow, openWaterYaw, rollAt, scatterWakeAt } from "./groundbaitCloud";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
@@ -61,8 +61,8 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false }: {
   const carpGeo = useMemo(() => carpShape(), []);
   const carp = useRef<THREE.Mesh>(null);
   const swirl = useRef<THREE.Mesh>(null);
-  // Whether the swim was scattered last frame (null before the first), and when the feeders last bolted.
-  const scattered = useRef<boolean | null>(null);
+  // Whether the swim was scattered last frame, and when the feeders last bolted; a swim that comes in already scattered (a reload) has no bolt to show.
+  const scattered = useRef(!!bait.spooked);
   const bolted = useRef(-Infinity);
   const at = cloudCenter(bait.spot);
   const out = openWaterYaw(bait.spot);
@@ -84,13 +84,12 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false }: {
     mesh.position.set(at.x, waterHeight(at.x, at.z, t) + 0.02, at.z);
     // A slow swell as the crumbs drift and settle.
     mesh.scale.setScalar(still ? 1 : 1 + 0.06 * Math.sin(t * 0.8));
-    const spooked = (bait.spooked ?? 0) > 0;
-    // A swim that comes in already scattered (a reload) has no bolt to show.
-    if (scattered.current === false && spooked) bolted.current = t;
-    const first = scattered.current === null;
+    const spooked = !!bait.spooked;
+    if (!scattered.current && spooked) bolted.current = t;
     scattered.current = spooked;
     const thick = cloudOpacity(bait.casts, spooked);
-    mat.opacity = still || first ? thick : mat.opacity + (thick - mat.opacity) * Math.min(1, dt * 2);
+    // The cloud thins over the bolt; every other change shows at once.
+    mat.opacity = still || t - bolted.current >= SCATTER_SEC ? thick : mat.opacity + (thick - mat.opacity) * Math.min(1, dt * 2);
     rings.current.forEach((ring, i) => {
       if (!ring) return;
       const bolt = i < SCATTER_WAKES && !still ? scatterWakeAt(i, t - bolted.current, out) : null;
