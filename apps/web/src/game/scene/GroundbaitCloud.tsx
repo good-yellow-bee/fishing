@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import type { Groundbait } from "../logic";
-import { CLOUD_RADIUS, DIMPLES, ROLL_SPAN, SCATTER_SEC, SCATTER_WAKES, THIEVES, WAKE_ARC, cloudCenter, cloudOpacity, dimpleAt, feedersShow, openWaterYaw, PIKE_REACH, prowlAt, rollAt, scatterWakeAt, thiefAt, thiefCount } from "./groundbaitCloud";
+import { CLOUD_RADIUS, DIMPLES, ROLL_SPAN, SCATTER_SEC, SCATTER_WAKES, THIEVES, WAKE_ARC, cloudCenter, cloudOpacity, dimpleAt, feedersShow, openWaterYaw, PERCH, perchAt, perchShow, PIKE_REACH, prowlAt, rollAt, scatterWakeAt, thiefAt, thiefCount } from "./groundbaitCloud";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
@@ -12,6 +12,10 @@ const CLOUD = "#7a5a32";
 const CARP = "#6b5524";
 const SHINER = "#c8d2d6";
 const PIKE = "#4a6b48";
+const PERCH_BACK = "#9aa848";
+const PERCH_BAR = "#2e3a1e";
+const PERCH_BELLY = "#e6e2c4";
+const PERCH_FIN = "#d0602c";
 /** The roll turns the fish over a point this far under the water, so its head, back and then tail break the surface in turn. */
 const ROLL_DEPTH = 0.45;
 const ROLL_ARC = 1.4;
@@ -35,6 +39,29 @@ function shinerShape() {
   const tail = new THREE.ConeGeometry(0.035, 0.06, 4).scale(0.3, 1, 1).rotateX(Math.PI / 2).translate(0, 0, -0.12);
   const merged = mergeGeometries([body, tail]).scale(1.4, 1.4, 1.4);
   [body, tail].forEach((part) => part.dispose());
+  return merged;
+}
+
+/** Gives every vertex of `part` the colour `paint` picks for its position. */
+function painted(part: THREE.BufferGeometry, paint: (x: number, y: number, z: number) => string) {
+  const at = part.getAttribute("position");
+  const colors = new Float32Array(at.count * 3);
+  const color = new THREE.Color();
+  for (let v = 0; v < at.count; v++) color.set(paint(at.getX(v), at.getY(v), at.getZ(v))).toArray(colors, v * 3);
+  part.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+  return part;
+}
+
+/** A +z-facing perch: a deep body barred dark over its back above a pale belly, a dark spiny dorsal fin and an orange tail, drawn a little larger than life so it reads from the bank. */
+function perchShape() {
+  // Poles turned to nose and tail, so the body's rings run round it where the bars go.
+  const body = painted(new THREE.SphereGeometry(1, 10, 24).rotateX(Math.PI / 2).scale(0.035, 0.045, 0.1), (_x, y, z) =>
+    y < -0.015 ? PERCH_BELLY : Math.abs(z) < 0.08 && Math.sin((z / 0.1) * Math.PI * 3.5) > 0.2 ? PERCH_BAR : PERCH_BACK,
+  );
+  const fin = painted(new THREE.ConeGeometry(0.03, 0.035, 4).scale(0.25, 1, 1.8).translate(0, 0.05, 0.01), () => PERCH_BAR);
+  const tail = painted(new THREE.ConeGeometry(0.035, 0.06, 4).scale(0.3, 1, 1).rotateX(Math.PI / 2).translate(0, 0, -0.12), () => PERCH_FIN);
+  const merged = mergeGeometries([body, fin, tail]).scale(1.5, 1.5, 1.5);
+  [body, fin, tail].forEach((part) => part.dispose());
   return merged;
 }
 
@@ -70,7 +97,7 @@ function softEdge() {
   return new THREE.CanvasTexture(canvas);
 }
 
-/** The muddy cloud a handful of groundbait leaves off the bank, thinning as its casts are fished out; fish dimple over it once `feeding` or topped up, more often the more it was built up, with `bigFeeders` in a carp now and then rolls at its edge, and with `thieves` shiners dart in at its edge and turn away, fewer as it is topped up, and with `prowler` a pike glides along its open-water side, slashing in at the feeders once a pass. When a lost big feeder scatters the feeders the dimples stop, bow wakes fan out toward open water and the cloud thins. */
+/** The muddy cloud a handful of groundbait leaves off the bank, thinning as its casts are fished out; fish dimple over it once `feeding` or topped up, more often the more it was built up, with `bigFeeders` in a carp now and then rolls at its edge, and with `thieves` shiners dart in at its edge and turn away, fewer as it is topped up, with chopped worm in it perch hang under it and dart about, and with `prowler` a pike glides along its open-water side, slashing in at the feeders once a pass. When a lost big feeder scatters the feeders the dimples stop, bow wakes fan out toward open water and the cloud thins. */
 export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, thieves = false, prowler = false }: { bait: Groundbait; feeding?: boolean; bigFeeders?: boolean; thieves?: boolean; prowler?: boolean }) {
   const still = useReducedMotion();
   const geo = useMemo(() => new THREE.CircleGeometry(CLOUD_RADIUS, 32).rotateX(-Math.PI / 2), []);
@@ -86,6 +113,9 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, thi
   const shinerGeo = useMemo(() => shinerShape(), []);
   const shinerMat = useMemo(() => new THREE.MeshToonMaterial({ color: SHINER, gradientMap: toonRamp() }), []);
   const shiners = useRef<THREE.InstancedMesh>(null);
+  const perchGeo = useMemo(() => perchShape(), []);
+  const perchMat = useMemo(() => new THREE.MeshToonMaterial({ vertexColors: true, gradientMap: toonRamp() }), []);
+  const perch = useRef<THREE.InstancedMesh>(null);
   const pikeGeo = useMemo(() => pikeShape(), []);
   const pike = useRef<THREE.Mesh>(null);
   const bow = useRef<THREE.Mesh>(null);
@@ -105,9 +135,11 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, thi
       mat.dispose();
       shinerGeo.dispose();
       shinerMat.dispose();
+      perchGeo.dispose();
+      perchMat.dispose();
       pikeGeo.dispose();
     },
-    [geo, ringGeo, wake, carpGeo, edge, mat, shinerGeo, shinerMat, pikeGeo],
+    [geo, ringGeo, wake, carpGeo, edge, mat, shinerGeo, shinerMat, perchGeo, perchMat, pikeGeo],
   );
   useFrame((state, dt) => {
     const mesh = cloud.current;
@@ -189,6 +221,23 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, thi
       school.count = crowd;
       school.instanceMatrix.needsUpdate = true;
     }
+    if (perch.current) {
+      perch.current.visible = perchShow(bait);
+      if (perch.current.visible) {
+        for (let i = 0; i < PERCH; i++) {
+          const fish = perchAt(i, t, still);
+          const x = at.x + fish.dx;
+          const z = at.z + fish.dz;
+          // Its back just under the cloud, a faint sway as it hangs and a wide tail-beat as it darts.
+          place.position.set(x, waterHeight(x, z, t) - 0.06, z);
+          place.rotation.set(0, fish.yaw + (still ? 0 : (0.04 + 0.16 * fish.dart) * Math.sin(t * 12 + i)), 0);
+          place.scale.setScalar(1);
+          place.updateMatrix();
+          perch.current.setMatrixAt(i, place.matrix);
+        }
+        perch.current.instanceMatrix.needsUpdate = true;
+      }
+    }
     const prowl = prowler ? prowlAt(t, out, still) : null;
     if (pike.current) {
       pike.current.visible = prowl !== null;
@@ -225,6 +274,7 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, thi
         <meshToonMaterial color={CARP} gradientMap={toonRamp()} />
       </mesh>
       <instancedMesh ref={shiners} name="bait-thieves" args={[shinerGeo, shinerMat, THIEVES]} visible={false} frustumCulled={false} />
+      <instancedMesh ref={perch} name="worm-perch" args={[perchGeo, perchMat, PERCH]} visible={false} frustumCulled={false} />
       <mesh ref={pike} name="prowling-pike" geometry={pikeGeo} visible={false}>
         <meshToonMaterial color={PIKE} gradientMap={toonRamp()} />
       </mesh>
