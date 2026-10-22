@@ -2532,6 +2532,18 @@ html[data-input="pad"] .fight-bar .on-pad {
     );
   }
 
+  /* A wait hint opened past Read more ran on under the Strike button (20 px of it on a 320 x 568 phone with larger
+     text, 81 px in Polish), with "1 more reason" under the thumb: it stops 8 px above the button and scrolls, and a
+     finger on it scrolls rather than strikes. */
+  .scene-wrap[data-phase="waiting"]:not([data-walkthrough="1"]) .hint:has(.hint-tail[data-open], .hint-reasons) {
+    max-height: calc(100% - var(--hud-bottom, 140px) - 10px - max(var(--stance-h, 0px), var(--lure-h, 80px)) - 120px);
+    /* Room for the reasons' 9 px reach, which would otherwise scroll it a pixel or two. */
+    padding-bottom: 9px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    pointer-events: auto;
+  }
+
   /* High contrast's 2 px borders added 8 px to the header, lure panel and hint, so the hint's last line ran under the
      stick ring (24 px of it on a 360 x 640 phone with larger text): the borders come out of their padding instead. */
   html[data-contrast="high"] .hud {
@@ -4072,6 +4084,24 @@ html[data-contrast="high"] .sound-captions li {
 
   html[data-hand="left"] .fight-bar {
     right: 8px;
+    left: auto;
+  }
+
+  /* A wait hint opened past Read more ran up over the bank chip and the header (at 640 x 300 with larger text). The stick
+     and the cast meter are gone in the wait, so it takes their corner and the width up to 8 px short of the Strike
+     button, stops 6 px under the chip, and scrolls past that; a finger on it scrolls rather than strikes. */
+  .scene-wrap[data-phase="waiting"] .hint:has(.hint-tail[data-open], .hint-reasons) {
+    left: 10px;
+    max-width: calc(100vw / var(--text-zoom, 1) - 122px);
+    max-height: calc(100% - var(--hud-bottom, 52px) - 22px - var(--stance-h, 0px));
+    padding-bottom: 9px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    pointer-events: auto;
+  }
+
+  html[data-hand="left"] .scene-wrap[data-phase="waiting"] .hint:has(.hint-tail[data-open], .hint-reasons) {
+    right: 10px;
     left: auto;
   }
 

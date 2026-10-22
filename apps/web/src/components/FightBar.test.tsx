@@ -4,6 +4,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { FISH } from "@stillwater/shared";
 import type { FightPerformance, FightSim } from "../game/fight";
+import { updateSettings } from "../game/settings";
 import { FightBar } from "./FightBar";
 
 const perch = FISH.find((fish) => fish.id === "perch")!;
@@ -621,5 +622,26 @@ describe("FightBar for screen readers", () => {
     frame();
     expect(status()).toBe("BOW — it's jumping!");
     expect(container!.querySelector(".fight-bar")!.getAttribute("data-jump")).toBe("1");
+  });
+});
+
+describe("FightBar drag line", () => {
+  it("tells an angler on light line to set the drag light, and what each setting does to it", () => {
+    const dragLine = (line: "light" | "standard") => {
+      act(() => root!.render(<FightBar fight={{ species: perch, weight: 0.8, underpowered: false, line }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
+      return container!.querySelector(".fight-drag-line")?.textContent;
+    };
+    mount(null);
+    try {
+      expect(dragLine("light")).toBe("On light line set it light: it slips before the line breaks");
+      expect(dragLine("standard")).toBe("Light lets a run go easy; heavy holds it short");
+      act(() => updateSettings({ drag: "heavy" }));
+      expect(dragLine("light")).toBe("On light line a strong run snaps it, even let go: set it light");
+      act(() => updateSettings({ drag: "light" }));
+      expect(dragLine("light")).toBe("On light line it slips before the line breaks, even as you reel: the run takes line instead");
+      expect(dragLine("standard")).toBe("A run takes more line, even as you reel, but pulls softly");
+    } finally {
+      act(() => updateSettings({ drag: "normal" }));
+    }
   });
 });

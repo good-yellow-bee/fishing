@@ -32,6 +32,12 @@ const DRAG_LINE: Record<Drag, string> = {
   normal: "Light lets a run go easy; heavy holds it short",
   heavy: "A run takes less line, but loads it even let go, and tires your arm: a strong one goes red",
 };
+/** On light line the drag decides whether a strong run breaks it: a light one slips first, a heavy one snaps it. */
+const LIGHT_LINE_DRAG: Record<Drag, string> = {
+  light: "On light line it slips before the line breaks, even as you reel: the run takes line instead",
+  normal: "On light line set it light: it slips before the line breaks",
+  heavy: "On light line a strong run snaps it, even let go: set it light",
+};
 
 export function FightBar({ fight, sim, performance, best = null, note = null, cleanRun = 0 }: Props) {
   const { reelMode, drag } = useSettings();
@@ -357,7 +363,7 @@ export function FightBar({ fight, sim, performance, best = null, note = null, cl
               {t(DRAG_WORD[drag])}
               <span className="on-pointer"> (F)</span>
             </button>{" "}
-            <span className="fight-drag-line">{t(DRAG_LINE[drag])}</span>
+            <span className="fight-drag-line">{t((fight.line === "light" ? LIGHT_LINE_DRAG : DRAG_LINE)[drag])}</span>
           </p>
           <p ref={clean} className="fight-clean">{cleanLine}</p>
           {reelMode === "toggle" ? (
