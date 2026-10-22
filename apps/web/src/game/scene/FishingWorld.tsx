@@ -1484,13 +1484,13 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
   const dull = useMemo(() => new THREE.Color(LEADER_DULL), []);
   const glint = useMemo(() => new THREE.Color(LEADER_GLINT), []);
   const wired = gear === "wire";
-  const fillLeader = (count: number, t: number) => {
+  const fillLeader = (count: number, t: number, onTop: boolean) => {
     if (!wired) return;
     const attr = leader.geometry.getAttribute("position");
     const points = attr.array as Float32Array;
     const n = leaderTail(line.geometry.getAttribute("position").array, count, LEADER_LEN, points);
-    // The line's belly dips under the water by the float; the stiff wire lies along the top instead.
-    for (let i = 0; i < n; i += 1) points[i * 3 + 1] = Math.max(points[i * 3 + 1], waterHeight(points[i * 3], points[i * 3 + 2], t) + 0.015);
+    // The line's belly dips under the water by the sitting float; the stiff wire lies along the top instead.
+    if (onTop) for (let i = 0; i < n; i += 1) points[i * 3 + 1] = Math.max(points[i * 3 + 1], waterHeight(points[i * 3], points[i * 3 + 2], t) + 0.015);
     leader.geometry.setDrawRange(0, n);
     attr.needsUpdate = true;
     const material = leader.material as THREE.LineBasicMaterial;
@@ -1597,7 +1597,7 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
       }
       line.geometry.setDrawRange(0, count);
       attr.needsUpdate = true;
-      fillLeader(count, t);
+      fillLeader(count, t, false);
       return;
     }
     line.visible = showLure;
@@ -1924,7 +1924,7 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
     }
     line.geometry.setDrawRange(0, count);
     attr.needsUpdate = true;
-    fillLeader(count, t);
+    fillLeader(count, t, sitting);
   });
 
   return (
