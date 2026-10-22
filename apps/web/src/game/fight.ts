@@ -250,9 +250,11 @@ export const DRAG_RUN_LINE: Record<Drag, number> = { light: 1.35, normal: 1, hea
 export const DRAG_RUN_PULL: Record<Drag, number> = { light: 0.7, normal: 1, heavy: 1.3 };
 /** A light drag slips under a turning reel: a run still takes this share of the line it takes off a slack one. */
 export const LIGHT_DRAG_SLIP = 0.5;
-/** A run against a heavy drag loads the line even with the reel let go, at this share of its pull on a turning reel, up to the cap: a strong fresh run reaches the red (and tears a soft mouth) but never snaps it. */
+/** A run against a heavy drag loads the line even with the reel let go, at this share of its pull on a turning reel, up to the cap: a strong fresh run reaches the red (and tears a soft mouth) but never snaps a sound line. Light line has no cap short of its snap, so a strong fresh run snaps it. */
 export const HEAVY_DRAG_LOAD = 1.2;
 export const HEAVY_DRAG_CAP = 0.85;
+/** On light line a run against a light drag slips line this far short of the snap, even as the reel turns, rather than break it. */
+export const LIGHT_LINE_SLIP_SHORT = 0.05;
 
 /** Under this the fish is tiring; under the other it is played out. */
 export const TIRING_STAMINA = 0.6;
@@ -499,9 +501,9 @@ export function fightWind(wind: string | undefined): FightWind | undefined {
  * bolts from it once, as a carp does), `fired` chasing the kingfisher's fry (fired up, its first run doesn't tire it).
  * `lineSnap` scales the strain the line snaps at, sound or frayed, for a light or heavy line on the reel, and `lineCover`
  * how long a fish holds in the weeds or a line stays wrapped round wood; `weedFrays` a light line the weed stems saw to
- * frayed once a fish runs into them.
+ * frayed once a fish runs into them; `lightLine` light line on the reel, which a light drag spares and a heavy one snaps.
  */
-export type FightCover = { farRock?: boolean; weedBall?: boolean; edge?: boolean; bed?: boolean; foam?: boolean; lantern?: boolean; fired?: boolean; lineSnap?: number; lineCover?: number; weedFrays?: boolean };
+export type FightCover = { farRock?: boolean; weedBall?: boolean; edge?: boolean; bed?: boolean; foam?: boolean; lantern?: boolean; fired?: boolean; lineSnap?: number; lineCover?: number; weedFrays?: boolean; lightLine?: boolean };
 /** In a foam lane on a breezy or strong day the wind's drift is at its strongest: a slack line drifts out this much faster still. */
 export const FOAM_DRIFT = 1.3;
 export type FightWater = "open" | "weeds" | "current" | "deep" | "rocks" | "boat" | "pilings" | "log";
@@ -630,7 +632,7 @@ export function makeFight(
   /** What the fish was hooked by, on top of the spot's water. */
   cover: FightCover = {},
 ): FightRuntime {
-  const { farRock = false, weedBall = false, edge = false, bed = false, foam = false, lantern = false, fired = false, lineSnap = 1, lineCover = 1, weedFrays = false } = cover;
+  const { farRock = false, weedBall = false, edge = false, bed = false, foam = false, lantern = false, fired = false, lineSnap = 1, lineCover = 1, weedFrays = false, lightLine = false } = cover;
   /** The strain the line snaps at right now: a frayed one sooner, both scaled by the line on the reel. */
   const snapNow = () => (sim.frayed ? FRAYED_SNAP : snapAt) * lineSnap;
   const weedy = water === "weeds";
@@ -935,22 +937,28 @@ export function makeFight(
     const lightRun = plainRun && runDrag === "light";
     const heavyRun = plainRun && runDrag === "heavy";
     const arm = armMul(reelSec);
+    const runDrift = driftSurge * DRAG_RUN_LINE[runDrag] * (sim.downstream ? DOWNSTREAM_RUN : 1) * (sim.withRun ? WITH_RUN_DRIFT : 1);
     if (reeling) {
       sim.tension += (tensionUpCalm + (sim.surge === 2 && !charging ? eff * rockPull * DRAG_RUN_PULL[runDrag] : 0) + (sim.wrapped ? WRAP_PULL : 0)) * dtSec;
-      // Line under real pressure comes in faster, for an angler brave enough to reel in the amber.
-      const pressure = sim.tension >= TIGHT_TENSION && sim.tension < RED_TENSION ? PRESSURE_REEL : 1;
-      sim.line -= reelRate * arm * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * (sim.weeded ? WEED_REEL : 1) * (sim.wrapped ? 0 : 1) * (broadsider && sim.stamina >= TIRING_STAMINA ? BROADSIDE_REEL : 1) * (charging ? CHARGE_REEL / pattern.reelSurge : 1) * (sim.withRun ? WITH_RUN_REEL : 1) * (sim.headTurned ? TURNED_HEAD_REEL : 1) * (sim.weedBall ? WEED_BALL_REEL : 1) * dtSec;
-      if (lightRun) sim.line += driftSurge * DRAG_RUN_LINE.light * LIGHT_DRAG_SLIP * dtSec;
+      // On light line a light drag slips before the line breaks: held just short of the snap, the reel gains nothing and the run takes its line.
+      const slipAt = snapNow() - LIGHT_LINE_SLIP_SHORT;
+      if (lightLine && lightRun && sim.tension >= slipAt) {
+        sim.tension = slipAt;
+        if (!sim.weeded && !sim.wrapped) sim.line += runDrift * dtSec;
+      } else {
+        // Line under real pressure comes in faster, for an angler brave enough to reel in the amber.
+        const pressure = sim.tension >= TIGHT_TENSION && sim.tension < RED_TENSION ? PRESSURE_REEL : 1;
+        sim.line -= reelRate * arm * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * (sim.weeded ? WEED_REEL : 1) * (sim.wrapped ? 0 : 1) * (broadsider && sim.stamina >= TIRING_STAMINA ? BROADSIDE_REEL : 1) * (charging ? CHARGE_REEL / pattern.reelSurge : 1) * (sim.withRun ? WITH_RUN_REEL : 1) * (sim.headTurned ? TURNED_HEAD_REEL : 1) * (sim.weedBall ? WEED_BALL_REEL : 1) * dtSec;
+        if (lightRun) sim.line += driftSurge * DRAG_RUN_LINE.light * LIGHT_DRAG_SLIP * dtSec;
+      }
     } else if (heavyRun) {
-      sim.tension =
-        sim.tension < HEAVY_DRAG_CAP
-          ? Math.min(HEAVY_DRAG_CAP, sim.tension + eff * rockPull * DRAG_RUN_PULL.heavy * HEAVY_DRAG_LOAD * dtSec)
-          : Math.max(HEAVY_DRAG_CAP, sim.tension - tensionDecay * dtSec);
-      sim.line += driftSurge * DRAG_RUN_LINE.heavy * (sim.downstream ? DOWNSTREAM_RUN : 1) * (sim.withRun ? WITH_RUN_DRIFT : 1) * dtSec;
+      const cap = lightLine ? Infinity : HEAVY_DRAG_CAP;
+      sim.tension = sim.tension < cap ? Math.min(cap, sim.tension + eff * rockPull * DRAG_RUN_PULL.heavy * HEAVY_DRAG_LOAD * dtSec) : Math.max(cap, sim.tension - tensionDecay * dtSec);
+      sim.line += runDrift * dtSec;
     } else {
       sim.tension = Math.max(0, sim.tension - tensionDecay * dtSec);
       // A sulking fish sits where it is: no line goes out.
-      if (!sim.sulk && !sim.weeded && !sim.wrapped && !charging) sim.line += (sim.surge === 2 ? driftSurge * DRAG_RUN_LINE[runDrag] * (sim.downstream ? DOWNSTREAM_RUN : 1) * (sim.withRun ? WITH_RUN_DRIFT : 1) : driftCalm) * dtSec;
+      if (!sim.sulk && !sim.weeded && !sim.wrapped && !charging) sim.line += (sim.surge === 2 ? runDrift : driftCalm) * dtSec;
     }
     // Like a leap, a shake reeled through costs the clean bonus, never the fish.
     if (reeling && sim.shake && nowMs >= shakeAt + SHAKE_GRACE_SEC * 1000) {

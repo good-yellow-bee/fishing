@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, NEST_GUARDERS, type FishSpecies } from "@stillwater/shared";
-import { DIVERS, FRAYED_SNAP, LINE_SPINNERS, NET_SHY_MS, SLIPPERS, THRASH_HEAD_MS, NET_BOLT_LINE, NET_WAIT_MS, NET_HEAD_EVERY_MS, NET_HEAD_MS, netsFish, liftsStickerInOne, STRONG_LIFT_STRENGTH, TEETH_SEC, TOOTHY, CHARGERS, CHARGE_SLACK_SEC, BREACHERS, BROADSIDE_REEL, BROADSIDERS, QUIT_TIRE, QUITTERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, FLOOD_DRIFT, floodedInlet, BOAT_RUN, STRONG_WIND_BOAT_RUN, boatSwingShare, WIND_SLACK, WINTER_TIRE, seasonTireMul, thrivesInCold, COLD_LOVERS, SUMMER_TIRE, COLDWATER, warmTireMul, rainCooled, deepCooled, FALL_RUN_TIRE, FALL_RUNNERS, runTireMul, SPRING_RUN_TIRE, SPRING_RUNNERS, springRunTireMul, CURRENT_FIGHTER_TIRE, CURRENT_FIGHTERS, currentTireMul, FALL_FEED_TIRE, FALL_FEEDERS, fallFeedTireMul, RAIN_HUNTER_TIRE, SCENT_HUNTERS, rainHunterTireMul, SUMMER_STRENGTH_TIRE, WARM_LOVERS, summerStrengthTireMul, NEST_TIRE, nestTireMul, NIGHT_HUNTER_TIRE, NIGHT_HUNTERS, nightTireMul, SPAWN_SPENT_TIRE, EARLY_SPAWNERS, spentTireMul, TWILIGHT_HUNTER_TIRE, TWILIGHT_HUNTERS, twilightTireMul, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, TREBLE_HOLD, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD, SHAKE_MS, SHAKE_GRACE_SEC, WITH_RUN_DRIFT, WITH_RUN_GRACE_SEC, WITH_RUN_REEL, TURNED_HEAD_MS, TURNED_HEAD_REEL, DRAG_RUN_LINE, DRAG_RUN_PULL, HEAVY_DRAG_CAP, WEED_BALL_REEL, FOAM_DRIFT, findsSecondWind, SECOND_WIND_AT, SECOND_WIND_GAIN, SECOND_WIND_GATHER_MS, ARM_FLOOR, ARM_FRESH_SEC, ARM_TIRE_PER_SEC, armMul } from "./fight";
+import { DIVERS, FRAYED_SNAP, LINE_SPINNERS, NET_SHY_MS, SLIPPERS, THRASH_HEAD_MS, NET_BOLT_LINE, NET_WAIT_MS, NET_HEAD_EVERY_MS, NET_HEAD_MS, netsFish, liftsStickerInOne, STRONG_LIFT_STRENGTH, TEETH_SEC, TOOTHY, CHARGERS, CHARGE_SLACK_SEC, BREACHERS, BROADSIDE_REEL, BROADSIDERS, QUIT_TIRE, QUITTERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, FLOOD_DRIFT, floodedInlet, BOAT_RUN, STRONG_WIND_BOAT_RUN, boatSwingShare, WIND_SLACK, WINTER_TIRE, seasonTireMul, thrivesInCold, COLD_LOVERS, SUMMER_TIRE, COLDWATER, warmTireMul, rainCooled, deepCooled, FALL_RUN_TIRE, FALL_RUNNERS, runTireMul, SPRING_RUN_TIRE, SPRING_RUNNERS, springRunTireMul, CURRENT_FIGHTER_TIRE, CURRENT_FIGHTERS, currentTireMul, FALL_FEED_TIRE, FALL_FEEDERS, fallFeedTireMul, RAIN_HUNTER_TIRE, SCENT_HUNTERS, rainHunterTireMul, SUMMER_STRENGTH_TIRE, WARM_LOVERS, summerStrengthTireMul, NEST_TIRE, nestTireMul, NIGHT_HUNTER_TIRE, NIGHT_HUNTERS, nightTireMul, SPAWN_SPENT_TIRE, EARLY_SPAWNERS, spentTireMul, TWILIGHT_HUNTER_TIRE, TWILIGHT_HUNTERS, twilightTireMul, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, TREBLE_HOLD, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD, SHAKE_MS, SHAKE_GRACE_SEC, WITH_RUN_DRIFT, WITH_RUN_GRACE_SEC, WITH_RUN_REEL, TURNED_HEAD_MS, TURNED_HEAD_REEL, DRAG_RUN_LINE, DRAG_RUN_PULL, HEAVY_DRAG_CAP, LIGHT_LINE_SLIP_SHORT, type FightCover, WEED_BALL_REEL, FOAM_DRIFT, findsSecondWind, SECOND_WIND_AT, SECOND_WIND_GAIN, SECOND_WIND_GATHER_MS, ARM_FLOOR, ARM_FRESH_SEC, ARM_TIRE_PER_SEC, armMul } from "./fight";
 import { LINE_COVER, LINE_SNAP, type LineWeight } from "./lineWeight";
 import { nextDrag, type Drag } from "./drag";
 
@@ -47,8 +47,8 @@ const REACTION_FRAMES = 12;
 const SLOW_REACTION_FRAMES = 15;
 
 /** Plays a fight at 60 Hz (by default) where the angler's hand acts on what they saw 0.2 s (by default) earlier. */
-function play(species: FishSpecies, weight: number, seed: number, policy: Policy, reactionFrames = REACTION_FRAMES, frameSec = FRAME_SEC, drag: Drag = "normal") {
-  const runtime = makeFight(species, weight, species.minStrength, seeded(seed));
+function play(species: FishSpecies, weight: number, seed: number, policy: Policy, reactionFrames = REACTION_FRAMES, frameSec = FRAME_SEC, drag: Drag = "normal", cover: FightCover = {}) {
+  const runtime = makeFight(species, weight, species.minStrength, seeded(seed), 1, "open", undefined, false, false, false, false, false, false, false, 1, 1, false, cover);
   const hand: boolean[] = Array(reactionFrames).fill(false);
   let intent = false;
   for (let frame = 0; frame < 120 / frameSec; frame++) {
@@ -1305,6 +1305,57 @@ describe("the line on the reel", () => {
     let outcome = "fighting";
     for (let at = 0; at < 250; at += 50) outcome = f.step((now += 50), 0.05, true);
     expect(outcome).toBe("fighting");
+  });
+});
+
+describe("light line on the drag", () => {
+  const LIGHT: FightCover = { lineSnap: LINE_SNAP.light, lightLine: true };
+  /** Plays to the first run on the given drag, then through it reeling or let go, and says how it went. */
+  const firstRun = (drag: Drag, reeling: boolean, cover: FightCover, id = "pike", weight = 6, frayed = false) => {
+    const f = makeFight(fish(id), weight, 3, () => 0.5, 1, "open", undefined, false, false, false, false, false, frayed, false, 1, 1, false, cover);
+    let now = 0;
+    let outcome: FightOutcome = "fighting";
+    while (f.sim.surge !== 2) f.step((now += 50), 0.05, false, 0, drag);
+    const line = f.sim.line;
+    let peak = 0;
+    while (outcome === "fighting" && f.sim.surge === 2) {
+      outcome = f.step((now += 50), 0.05, reeling, 0, drag);
+      if (f.sim.surge === 2) peak = Math.max(peak, f.sim.tension);
+    }
+    return { outcome, peak, line: f.sim.line - line };
+  };
+
+  it("holds a run reeled against a light drag just short of light line's snap, and lets it take line instead", () => {
+    const light = firstRun("light", true, LIGHT, "carp", 20);
+    expect(light.outcome).toBe("fighting");
+    expect(light.peak).toBeCloseTo(LINE_SNAP.light - LIGHT_LINE_SLIP_SHORT);
+    expect(light.line).toBeGreaterThan(0);
+    expect(firstRun("normal", true, LIGHT, "carp", 20).outcome).toBe("snapped");
+    expect(firstRun("light", true, { lineSnap: 1 }, "carp", 20).outcome).toBe("snapped");
+    const frayed = firstRun("light", true, LIGHT, "carp", 20, true);
+    expect(frayed.outcome).toBe("fighting");
+    expect(frayed.peak).toBeCloseTo(FRAYED_SNAP * LINE_SNAP.light - LIGHT_LINE_SLIP_SHORT);
+  });
+
+  it("snaps light line on a strong fresh run let go against a heavy drag, though a sound standard line holds", () => {
+    expect(firstRun("heavy", false, LIGHT, "carp", 20).outcome).toBe("snapped");
+    const standard = firstRun("heavy", false, {}, "carp", 20);
+    expect(standard.outcome).toBe("fighting");
+    expect(standard.peak).toBeLessThanOrEqual(HEAVY_DRAG_CAP);
+  });
+
+  it("lets a small fish's runs against a heavy drag load light line without snapping it", () => {
+    const perch = fish("perch");
+    expect(play(perch, perch.minWeight, 1, releaseOnTelegraph, REACTION_FRAMES, FRAME_SEC, "heavy", LIGHT).outcome).toBe("landed");
+  });
+
+  it("still lands every fish on light line and a light drag for an angler who follows the card", () => {
+    for (const species of FISH) {
+      for (const weight of weights(species)) {
+        const results = SEEDS.slice(0, 4).map((seed) => play(species, weight, seed, releaseOnTelegraph, REACTION_FRAMES, FRAME_SEC, "light", LIGHT).outcome);
+        expect(results.filter((outcome) => outcome === "landed").length, `${species.id} ${weight}`).toBeGreaterThanOrEqual(3);
+      }
+    }
   });
 });
 
