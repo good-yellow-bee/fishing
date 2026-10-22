@@ -14,13 +14,13 @@ export function brightCalm(hour: LakeHour, sky: Sky | undefined, wind: Wind | un
 }
 /** In winter the cold water runs clear and the fish grow line-shy, so light line's bites come sooner still, and heavy line's come as slow as in bright, calm water. */
 export const LIGHT_WINTER_WAIT = 0.75;
-/** Whether the water is winter's clear water: from dawn to dusk in winter, as the night hides the line, and not in rain, which runs it murky. */
-export function winterClear(hour: LakeHour, season: LakeSeason | undefined, sky: Sky | undefined) {
-  return season === "winter" && hour !== "night" && !murkyRain(sky);
+/** Whether the water is winter's clear water: from dawn to dusk in winter, as the night hides the line. */
+export function winterClear(hour: LakeHour, season: LakeSeason | undefined) {
+  return season === "winter" && hour !== "night";
 }
-/** Whether the rain has run the water murky, so the fish can't see heavy line at all. */
-export function murkyRain(sky: Sky | undefined) {
-  return sky === "rain";
+/** Whether the rain has run the water murky, so the fish can't see heavy line at all; winter's snow leaves it clear. */
+export function murkyRain(sky: Sky | undefined, season: LakeSeason | undefined) {
+  return sky === "rain" && season !== "winter";
 }
 /** How long a bite takes on this line: heavy line shows plainer in bright, calm water or winter's clear water, where light line's bites come sooner, and murky rain water hides it, so its bites come at the standard pace. */
 export function lineWaitMul(line: LineWeight, bright: boolean, winter: boolean, murky: boolean) {

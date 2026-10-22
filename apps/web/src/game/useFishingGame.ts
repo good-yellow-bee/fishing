@@ -1335,12 +1335,12 @@ export function useFishingGame(
     castLampRef.current = lampLit(lampRef.current, hour) && !mercyRef.current;
     const lampWait = castLampRef.current ? LAMP_WAIT : 1;
     if (lampWait > 1) reasons.unshift(t("Your headlamp shows the float plainly, but its light on the water puts the fish off."));
-    // The line on the reel holds for the cast and its fight. Heavy line is a slow side told with the others the angler can
-    // switch off; light line's speed-up is told last, after the bank's own reasons.
+    // The line on the reel holds for the cast and its fight. Heavy line is told with the slow sides the angler can switch
+    // off, in the rain too, where it is no slower; light line's speed-up is told last, after the bank's own reasons.
     castLineRef.current = settings.line;
     const bright = brightCalm(hour, sky, windRef.current);
-    const winter = winterClear(hour, season, sky);
-    const murky = murkyRain(sky);
+    const winter = winterClear(hour, season);
+    const murky = murkyRain(sky, season);
     const lineWait = lineWaitMul(castLineRef.current, bright, winter, murky);
     // The small feeders on a swim built all the way, or a wire leader, draw the bank's pike, when the tied lure would take one the angler can land.
     const wire = castLineRef.current === "wire";
@@ -1360,7 +1360,6 @@ export function useFishingGame(
     else if (castLineRef.current === "heavy") {
       // Where a fish hooked here could run into the weeds or wrap the line round wood, heavy line's pull is told with it.
       // In winter's clear water, or bright, calm water, the fish see it plainer, and that is told in its place (winter first).
-      // In murky rain water it is no slow side, so it is told last, as light line's speed-up is.
       const cover = castWater === "weeds" ? "weeds" : wrapsLine(castWater) ? "wood" : "open";
       const said = murky
         ? {
@@ -1385,8 +1384,7 @@ export function useFishingGame(
                 wood: t("Heavy line: the fish can see it, so the bites come slower, but a line wrapped round the wood comes free in half the time."),
                 open: t("Heavy line: the fish can see it, so the bites come slower."),
               };
-      if (murky) reasons.push(said[cover]);
-      else reasons.unshift(said[cover]);
+      reasons.unshift(said[cover]);
     }
     else if (lineWait < 1) {
       // Only the warnings are told up front; it draws no pike to the light line.

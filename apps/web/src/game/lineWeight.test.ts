@@ -47,9 +47,9 @@ describe("the line on the reel", () => {
   });
 
   it("finds winter's water clear from dawn to dusk, and not at night or in the other seasons", () => {
-    for (const hour of ["dawn", "day", "dusk"] as const) expect(winterClear(hour, "winter", "overcast")).toBe(true);
-    expect(winterClear("night", "winter", "overcast")).toBe(false);
-    for (const season of ["spring", "summer", "fall", undefined] as const) expect(winterClear("day", season, "overcast")).toBe(false);
+    for (const hour of ["dawn", "day", "dusk"] as const) expect(winterClear(hour, "winter")).toBe(true);
+    expect(winterClear("night", "winter")).toBe(false);
+    for (const season of ["spring", "summer", "fall", undefined] as const) expect(winterClear("day", season)).toBe(false);
   });
 
   it("makes the line-shy winter fish come sooner to light line and slower to heavy, without stacking on bright, calm water", () => {
@@ -61,11 +61,10 @@ describe("the line on the reel", () => {
     for (const line of ["standard", "wire"] as const) expect(lineWaitMul(line, true, true, false)).toBe(LINE_WAIT[line]);
   });
 
-  it("finds the water murky in the rain, and not winter's clear water then", () => {
-    expect(murkyRain("rain")).toBe(true);
-    for (const sky of ["clear", "partly-cloudy", "overcast", "fog", undefined] as const) expect(murkyRain(sky)).toBe(false);
-    expect(winterClear("day", "winter", "rain")).toBe(false);
-    expect(winterClear("day", "winter", undefined)).toBe(true);
+  it("finds the water murky in the rain outside winter, where it falls as snow", () => {
+    for (const season of ["spring", "summer", "fall", undefined] as const) expect(murkyRain("rain", season)).toBe(true);
+    expect(murkyRain("rain", "winter")).toBe(false);
+    for (const sky of ["clear", "partly-cloudy", "overcast", "fog", undefined] as const) expect(murkyRain(sky, "summer")).toBe(false);
   });
 
   it("hides heavy line in murky rain water, so its bites come at the standard pace, winning over clear water, and leaves the other lines as they are", () => {
