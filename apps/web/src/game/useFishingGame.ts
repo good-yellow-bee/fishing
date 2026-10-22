@@ -40,7 +40,7 @@ import {
   legendaryCanBite,
 } from "@stillwater/shared";
 import { locale, t, tn } from "../i18n";
-import { fightLines, liftsStickerInOne, LINE_SPINNERS, netsFish, SPIN_TWIST, TOOTHY, fightWater, fightWind, isCleanFight, isCloseCall, LEAPERS, makeFight, seasonTireMul, thrivesInCold, floodedInlet, warmTireMul, rainCooled, deepCooled, runTireMul, nestTireMul, nightTireMul, spentTireMul, twilightTireMul, springRunTireMul, currentTireMul, fallFeedTireMul, rainHunterTireMul, summerStrengthTireMul, SOFT_MOUTHS, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type FightWater, type FightWind, type Steer, type SurgeState } from "./fight";
+import { fightLines, wrapsLine, liftsStickerInOne, LINE_SPINNERS, netsFish, SPIN_TWIST, TOOTHY, fightWater, fightWind, isCleanFight, isCloseCall, LEAPERS, makeFight, seasonTireMul, thrivesInCold, floodedInlet, warmTireMul, rainCooled, deepCooled, runTireMul, nestTireMul, nightTireMul, spentTireMul, twilightTireMul, springRunTireMul, currentTireMul, fallFeedTireMul, rainHunterTireMul, summerStrengthTireMul, SOFT_MOUTHS, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type FightWater, type FightWind, type Steer, type SurgeState } from "./fight";
 import { boat } from "./scene/boat";
 import { fightInput } from "./scene/fightMotion";
 import { settings } from "./settings";
@@ -72,7 +72,7 @@ import { castForFoe, foeGone, isOldFoe, loadOldFoe, saveOldFoe } from "./oldFoe"
 import { loadNightLine, nightLineCatch, nightLineKinds, nightLineNextChange, nightLineSeason, nightLineState, nightSkyFor, saveNightLine, wormLineHour, type NightLine } from "./nightLine";
 import { markShy, loadGiantShy, rollGiantShy, saveGiantShy, shyOf, type GiantShy } from "./giantShy";
 import { AGAIN_CASTS, backAgain, castForGotAway, gotAwayAfterDrop, PATIENT_DROP_RANK, gotAwayAfterLoss, type GotAway } from "./gotAway";
-import { LIGHT_BITE_THROUGH, LINE_SNAP, LINE_WAIT, type LineWeight } from "./lineWeight";
+import { LIGHT_BITE_THROUGH, LINE_COVER, LINE_SNAP, LINE_WAIT, type LineWeight } from "./lineWeight";
 import { countAtBank, loadBankMemory, rollBankMemory, saveBankMemory, waryFromYesterday, YESTERDAY_WAIT, type BankMemory } from "./bankMemory";
 import { castForLodgeLost, castForLodgeTag, castForReleased, loadReleased, saveReleased, type Recaught } from "./releasedFish";
 import { weightText } from "../i18n/content";
@@ -962,10 +962,8 @@ export function useFishingGame(
     const underpowered = !canLand(current, species);
     // A pike's teeth close on light line at the strike, parting it on the fight's first frame; a beginner is spared.
     const bitThrough = !!strike && !underpowered && !mercyRef.current && castLineRef.current === "light" && TOOTHY.has(species.id) && Math.random() < LIGHT_BITE_THROUGH;
-    // A fish hooked tight to the lily pads dives for the stems, so the fight there is a weed fight whatever the bank;
-    // one hooked tight to the sunken log from the bank runs for the log and can wrap the line round it (out on the boat, the hull swings clear).
     const pads = castPadsRef.current;
-    const water: FightWater = pads ? "weeds" : castLogRef.current && spotRef.current !== "open" ? "log" : fightWater(spotRef.current);
+    const water = fightWater(spotRef.current, pads, castLogRef.current);
     const windy = fightWind(windRef.current);
     // One hooked tight to the far rock from the boat runs round the rock, dragging the line over it unless turned.
     const farRock = castFarRockRef.current && water === "boat";
@@ -997,7 +995,7 @@ export function useFishingGame(
         resetToIdle(current.strength < species.minStrength ? t("Line parted. Spend points on Strength.") : t("Line parted. Spend points on Accuracy."));
       }, 1400);
     } else {
-      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)) * seasonTireMul(season, species.id) * warmTireMul(season, species.id, sky, spotRef.current) * runTireMul(season, species.id) * nestTireMul(season, species.id, spotRef.current) * nightTireMul(hourRef.current, species.id) * spentTireMul(season, species.id) * twilightTireMul(hourRef.current, species.id) * springRunTireMul(season, species.id, spotRef.current) * currentTireMul(species.id, spotRef.current) * fallFeedTireMul(season, species.id) * rainHunterTireMul(sky, species.id) * summerStrengthTireMul(season, species.id), water, windy, isTopwater(lureRef?.current) || rising, hasTrebles(lureRef?.current) || deep, seasonTireMul(season, species.id) > 1, isTrophyWeight(species, weight), floodedInlet(spotRef.current, season, sky), frayedRef.current, deep && !wired, lineSnapForLevel(anglerLevel(current.lifetimePoints)), turnCutMulForLevel(anglerLevel(current.lifetimePoints)), netsFish(species, mercyRef.current), { farRock, weedBall, edge, bed, foam, lantern, fired: fired || hookWise, lineSnap: LINE_SNAP[castLineRef.current] });
+      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)) * seasonTireMul(season, species.id) * warmTireMul(season, species.id, sky, spotRef.current) * runTireMul(season, species.id) * nestTireMul(season, species.id, spotRef.current) * nightTireMul(hourRef.current, species.id) * spentTireMul(season, species.id) * twilightTireMul(hourRef.current, species.id) * springRunTireMul(season, species.id, spotRef.current) * currentTireMul(species.id, spotRef.current) * fallFeedTireMul(season, species.id) * rainHunterTireMul(sky, species.id) * summerStrengthTireMul(season, species.id), water, windy, isTopwater(lureRef?.current) || rising, hasTrebles(lureRef?.current) || deep, seasonTireMul(season, species.id) > 1, isTrophyWeight(species, weight), floodedInlet(spotRef.current, season, sky), frayedRef.current, deep && !wired, lineSnapForLevel(anglerLevel(current.lifetimePoints)), turnCutMulForLevel(anglerLevel(current.lifetimePoints)), netsFish(species, mercyRef.current), { farRock, weedBall, edge, bed, foam, lantern, fired: fired || hookWise, lineSnap: LINE_SNAP[castLineRef.current], lineCover: LINE_COVER[castLineRef.current] });
       runtimeRef.current = runtime;
       simRef.current = runtime.sim;
       performanceRef.current = runtime.performance;
@@ -1343,7 +1341,17 @@ export function useFishingGame(
             : t("Wire leader: the fish see it, so the bites come slower, but pike come to it twice as often."),
       );
     }
-    else if (lineWait > 1) reasons.unshift(t("Heavy line: the fish can see it, so the bites come slower."));
+    else if (lineWait > 1) {
+      // Where a fish hooked here could run into the weeds or wrap the line round wood, heavy line's pull is told with it.
+      const castWater = fightWater(spotRef.current, castPadsRef.current, castLogRef.current);
+      reasons.unshift(
+        castWater === "weeds"
+          ? t("Heavy line: the fish can see it, so the bites come slower, but it pulls a fish out of the weeds in half the time.")
+          : wrapsLine(castWater)
+            ? t("Heavy line: the fish can see it, so the bites come slower, but a line wrapped round the wood comes free in half the time.")
+            : t("Heavy line: the fish can see it, so the bites come slower."),
+      );
+    }
     else if (lineWait < 1) {
       // Only the warning is told up front; it draws no pike to the light line.
       const toothy = !mercyRef.current && poolForLure(FISH.filter((fish) => fish.spots.includes(spotRef.current)), lureRef?.current).some((fish) => TOOTHY.has(fish.id) && canLand(current, fish));

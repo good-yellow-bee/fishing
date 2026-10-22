@@ -11,6 +11,12 @@ import { PLAY_LAKE_ID } from "./playLake";
 import { isSampleSpot } from "./bookCopy";
 import { foldName, twinNamesAmong } from "./spotOrder";
 import { waterName } from "./format";
+import { plainName } from "./tripDates";
+
+/** What the kept water holds after the merge; a water with no name has its own words, as Polish would say "łowisku" twice. */
+function keptText(name: string, fish: string, outings: string): string {
+  return plainName(name) ? t("{name} then holds {fish} and {outings}.", { name: plainName(name), fish, outings }) : t("The water with no name then holds {fish} and {outings}.", { fish, outings });
+}
 
 /** In a water's link, the water to merge it into: the merge box opens with it picked. */
 export const MERGE_PARAM = "merge";
@@ -95,7 +101,7 @@ export function MergeWater({ spotId }: { spotId: string }) {
                   : t("Moves {what}.", { what: moves.outings > 0 ? tn(moves.outings, "{n} outing", "{n} outings") : tn(moves.fish, "{n} fish", "{n} fish") })) +
                 (moves.joined > 0 ? ` ${tn(moves.joined, "{n} outing joins the one on its day.", "{n} outings join the ones on their days.")}` : "") +
                 // What the kept water holds after, so a merge into the wrong one shows itself in its totals too.
-                (kept ? ` ${t("{name} then holds {fish} and {outings}.", { name: waterName(kept.name), fish: tn(kept.fish + moves.fish, "{n} fish", "{n} fish"), outings: tn(kept.outings + moves.outings - moves.joined, "{n} outing", "{n} outings") })}` : "")
+                (kept ? ` ${keptText(kept.name, tn(kept.fish + moves.fish, "{n} fish", "{n} fish"), tn(kept.outings + moves.outings - moves.joined, "{n} outing", "{n} outings"))}` : "")
             : null}
         </p>
         <p className="field-hint" id="merge-water-hint">

@@ -443,7 +443,7 @@ function SpotView() {
         <h1>{t("Missing water")}</h1>
         {into ? (
           <>
-            <p className="lede">{t("This water was merged into {name}.", { name: waterName(into.name) })}</p>
+            <p className="lede">{plainName(into.name) ? t("This water was merged into {name}.", { name: plainName(into.name) }) : t("This water was merged into a water with no name.")}</p>
             <p className="lone-link">
               <Link to={`/spots/${into.id}`}>{t("Open {name}", { name: waterName(into.name) })}</Link>
             </p>

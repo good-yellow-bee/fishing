@@ -212,7 +212,8 @@ function searchLabel(parts: readonly string[]): string {
  * with its day, kind, size, lure and water.
  */
 /** `largest`: the list was shown largest first, so the copy keeps that order and says so. */
-export function searchSummary(parts: readonly string[], matches: readonly CatchEntry[], waterOf: (spotId: string) => string | null, largest = false, all: readonly CatchEntry[] = matches): string {
+/** `leads`: what the fish have in common as the search says it above them ("Most on Jig (5)."), on a line under the count. */
+export function searchSummary(parts: readonly string[], matches: readonly CatchEntry[], waterOf: (spotId: string) => string | null, largest = false, all: readonly CatchEntry[] = matches, leads: readonly string[] = []): string {
   const kindName = kindNames(all);
   const lureName = lureNames(all);
   const fish = (largest ? [...matches] : [...matches].sort((a, b) => a.caughtAt.localeCompare(b.caughtAt)))
@@ -222,5 +223,5 @@ export function searchSummary(parts: readonly string[], matches: readonly CatchE
       const bits = [`${formatDatedDay(new Date(entry.caughtAt))} ${formatTimeOfDay(entry.caughtAt)} ${kindName(entry.species)}`, measuresText(entry), lureName(entry.lure), ...(water ? [water] : []), ...(entry.released ? [t("Released")] : [])];
       return `- ${bits.join(", ")}`;
     });
-  return [searchLabel(parts), largest ? `${fishCountLabel(matches.length)} · ${t("Largest first")}` : fishCountLabel(matches.length), ...fish].join("\n");
+  return [searchLabel(parts), largest ? `${fishCountLabel(matches.length)} · ${t("Largest first")}` : fishCountLabel(matches.length), ...(leads.length > 0 ? [leads.join(" ")] : []), ...fish].join("\n");
 }
