@@ -228,7 +228,7 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, thi
           const fish = perchAt(i, t, still);
           const x = at.x + fish.dx;
           const z = at.z + fish.dz;
-          // Its back just under the cloud, a faint sway as it hangs and a wide tail-beat as it darts.
+          // Its back just under the cloud and its spiny fin breaking the surface, a faint sway as it hangs and a wide tail-beat as it darts.
           place.position.set(x, waterHeight(x, z, t) - 0.06, z);
           place.rotation.set(0, fish.yaw + (still ? 0 : (0.04 + 0.16 * fish.dart) * Math.sin(t * 12 + i)), 0);
           place.scale.setScalar(1);

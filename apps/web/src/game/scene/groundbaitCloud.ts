@@ -115,7 +115,7 @@ const THIEF_TURN = 0.3;
 const THIEF_GONE = 0.7;
 /** It starts and ends its dart this far out from the cloud's middle, and turns away this far in. */
 export const THIEF_OUT = 1.15 * CLOUD_RADIUS;
-const THIEF_IN = 0.8 * CLOUD_RADIUS;
+export const THIEF_IN = 0.8 * CLOUD_RADIUS;
 /** How far round the cloud it slips while turning in, and by the end of the dart. */
 const THIEF_SLIP = 0.25;
 const THIEF_SWING = 0.9;
@@ -202,7 +202,7 @@ const PERCH_SEC = 2.6;
 const PERCH_DART = 0.25;
 /** It hangs between this near and this far from the cloud's middle, well inside the shiners' darts. */
 export const PERCH_NEAR = 0.15 * CLOUD_RADIUS;
-export const PERCH_FAR = 0.6 * CLOUD_RADIUS;
+export const PERCH_FAR = 0.5 * CLOUD_RADIUS;
 /** It turns to face its next spot over this share of each hang. */
 const PERCH_TURN = 0.3;
 /** A perch's nose and tail are this far from its middle. */
@@ -220,9 +220,9 @@ export function perchAt(i: number, time: number, still = false): { dx: number; d
     return { dx: at.x, dz: at.z, yaw: (i / PERCH) * Math.PI * 2, dart: 0 };
   }
   const cycle = PERCH_SEC + 0.47 * i;
-  const round = Math.floor((time + i * 1.3) / cycle);
-  const k = ((time + i * 1.3) % cycle) / cycle;
-  const before = perchSpot(i, round - 1);
+  const laps = (time + i * 1.3) / cycle;
+  const round = Math.floor(laps);
+  const k = laps - round;
   const here = perchSpot(i, round);
   const next = perchSpot(i, round + 1);
   const hang = 1 - PERCH_DART;
@@ -233,7 +233,7 @@ export function perchAt(i: number, time: number, still = false): { dx: number; d
     return { dx: here.x + (next.x - here.x) * u, dz: here.z + (next.z - here.z) * u, yaw: nextYaw, dart: 1 - v };
   }
   // It finishes the turn from its last dart toward the next spot, drifting a little and back as it hangs.
-  const lastYaw = heading(before, here);
+  const lastYaw = heading(perchSpot(i, round - 1), here);
   const turn = Math.atan2(Math.sin(nextYaw - lastYaw), Math.cos(nextYaw - lastYaw));
   const yaw = lastYaw + turn * Math.min(1, k / hang / PERCH_TURN);
   const drift = 0.03 * Math.sin((Math.PI * k) / hang);

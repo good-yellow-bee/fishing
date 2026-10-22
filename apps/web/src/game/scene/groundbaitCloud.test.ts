@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { FISH, spotAt, SPOT_IDS, walkableAt } from "@stillwater/shared";
 import { bigFeedersOver, hasWormFeeders, PROWLERS, prowlerOver, GROUNDBAIT_CASTS, SWIM_MAX_CASTS, throwHandful, TOPUP_MAX } from "../logic";
 import { BANK_STANDS } from "../hotspot";
-import { cloudCenter, cloudOpacity, CLOUD_RADIUS, DIMPLES, dimpleAt, feedersShow, openWaterYaw, PERCH, PERCH_FAR, PERCH_NEAR, PERCH_REACH, perchAt, perchShow, PIKE_REACH, PROWL_IN, PROWL_LEG_SEC, PROWL_OUT, prowlAt, ROLL_GAP_SEC, ROLL_SEC, ROLL_SPAN, rollAt, SCATTER_SEC, SCATTER_WAKES, scatterWakeAt, THIEF_OUT, thiefAt, thiefCount, THIEVES } from "./groundbaitCloud";
+import { cloudCenter, cloudOpacity, CLOUD_RADIUS, DIMPLES, dimpleAt, feedersShow, openWaterYaw, PERCH, PERCH_FAR, PERCH_NEAR, PERCH_REACH, perchAt, perchShow, PIKE_REACH, PROWL_IN, PROWL_LEG_SEC, PROWL_OUT, prowlAt, ROLL_GAP_SEC, ROLL_SEC, ROLL_SPAN, rollAt, SCATTER_SEC, SCATTER_WAKES, scatterWakeAt, THIEF_IN, THIEF_OUT, thiefAt, thiefCount, THIEVES } from "./groundbaitCloud";
 
 describe("groundbait cloud", () => {
   it.each(SPOT_IDS)("lands on the %s's own open water", (spot) => {
@@ -203,7 +203,7 @@ describe("perch under a swim with chopped worm in it", () => {
       const hangs = poses.filter((pose) => pose.dart === 0).map((pose) => Math.hypot(pose.dx, pose.dz));
       expect(Math.min(...hangs)).toBeGreaterThan(PERCH_NEAR - 0.05);
       expect(Math.max(...reach)).toBeLessThan(PERCH_FAR + 0.05);
-      expect(Math.max(...reach) + PERCH_REACH).toBeLessThan(THIEF_OUT);
+      expect(Math.max(...reach) + PERCH_REACH).toBeLessThan(THIEF_IN);
       expect(poses.some((pose) => pose.dart > 0)).toBe(true);
       expect(poses.filter((pose) => pose.dart === 0).length).toBeGreaterThan(poses.length / 2);
       expect(new Set(poses.map((pose) => pose.yaw.toFixed(1))).size).toBeGreaterThan(3);
@@ -219,6 +219,14 @@ describe("perch under a swim with chopped worm in it", () => {
         expect(Math.abs(Math.atan2(Math.sin(pose.yaw - last.yaw), Math.cos(pose.yaw - last.yaw)))).toBeLessThan(0.25);
         last = pose;
       }
+    }
+  });
+
+  it("stay put across exact cycle ends", () => {
+    for (const t of [13, 26, 39, 52]) {
+      const at = perchAt(0, t);
+      const near = perchAt(0, t - 1e-6);
+      expect(Math.hypot(at.dx - near.dx, at.dz - near.dz)).toBeLessThan(0.01);
     }
   });
 
