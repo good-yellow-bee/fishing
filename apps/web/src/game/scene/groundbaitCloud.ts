@@ -98,3 +98,56 @@ export function rollAt(time: number): { dx: number; dz: number; yaw: number; age
   const turn = hash(slot + 0.75) < 0.5 ? 1 : -1;
   return { dx: Math.cos(angle) * out, dz: Math.sin(angle) * out, yaw: Math.atan2(-Math.sin(angle) * turn, Math.cos(angle) * turn), age };
 }
+
+/** Bait thieves crowding a swim (GT484): this many shiners over a fresh one, fewer once topped up, none once built all the way. */
+export const THIEVES = 5;
+const TOPPED_THIEVES = 2;
+
+/** How many shiners crowd a swim topped up `built` times. */
+export function thiefCount(built = 0): number {
+  if (built >= TOPUP_MAX) return 0;
+  return built > 0 ? TOPPED_THIEVES : THIEVES;
+}
+
+/** Each shiner's dart takes about this long; it darts in from past the cloud's edge, turns at this share of it and darts back out, gone from this share on. */
+const THIEF_SEC = 2.2;
+const THIEF_TURN = 0.3;
+const THIEF_GONE = 0.7;
+/** It starts and ends its dart this far out from the cloud's middle, and turns away this far in. */
+export const THIEF_OUT = 1.15 * CLOUD_RADIUS;
+const THIEF_IN = 0.8 * CLOUD_RADIUS;
+/** How far round the cloud it slips while turning in, and by the end of the dart. */
+const THIEF_SLIP = 0.25;
+const THIEF_SWING = 0.9;
+
+function edgePoint(angle: number, out: number) {
+  return { x: Math.cos(angle) * out, z: Math.sin(angle) * out };
+}
+
+function heading(from: { x: number; z: number }, to: { x: number; z: number }) {
+  return Math.atan2(to.x - from.x, to.z - from.z);
+}
+
+/** Shiner `i` at `time`: where by the cloud's middle, its heading (a +z-facing fish turned by it) and how much of it shows (0..1); null between darts. Held at the turn of its dart when `still`. Pure. */
+export function thiefAt(i: number, time: number, still = false): { dx: number; dz: number; yaw: number; show: number } | null {
+  const cycle = THIEF_SEC + 0.41 * i;
+  const round = still ? 0 : Math.floor((time + i * 0.83) / cycle);
+  const k = still ? THIEF_TURN : ((time + i * 0.83) % cycle) / cycle;
+  if (k < 0 || k >= THIEF_GONE) return null;
+  const angle = still ? (i / THIEVES) * Math.PI * 2 + 0.4 : hash(round * 7 + i * 13.1) * Math.PI * 2;
+  const side = still || hash(round * 7 + i * 13.1 + 0.5) < 0.5 ? 1 : -1;
+  const from = edgePoint(angle, THIEF_OUT);
+  const turn = edgePoint(angle + THIEF_SLIP * side, THIEF_IN);
+  const away = edgePoint(angle + THIEF_SWING * side, THIEF_OUT);
+  const show = still ? 1 : Math.min(1, k / 0.06, (THIEF_GONE - k) / 0.1);
+  const inYaw = heading(from, turn);
+  if (k < THIEF_TURN) {
+    const u = 1 - (1 - k / THIEF_TURN) ** 2;
+    return { dx: from.x + (turn.x - from.x) * u, dz: from.z + (turn.z - from.z) * u, yaw: inYaw, show };
+  }
+  const v = (k - THIEF_TURN) / (THIEF_GONE - THIEF_TURN);
+  const u = 1 - (1 - v) ** 2;
+  // It whips round over the first fifth of the dart away.
+  const swing = Math.atan2(Math.sin(heading(turn, away) - inYaw), Math.cos(heading(turn, away) - inYaw));
+  return { dx: turn.x + (away.x - turn.x) * u, dz: turn.z + (away.z - turn.z) * u, yaw: inYaw + swing * Math.min(1, v / 0.2), show };
+}

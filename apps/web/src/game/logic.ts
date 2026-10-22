@@ -107,7 +107,7 @@ function sizedPool(pool: FishSpecies[], large: boolean): FishSpecies[] {
   return large ? ordered.slice(ordered.length - count) : ordered.slice(0, count);
 }
 
-function poolForLure(pool: FishSpecies[], lure: string | undefined): FishSpecies[] {
+export function poolForLure(pool: FishSpecies[], lure: string | undefined): FishSpecies[] {
   const tied = lure?.trim();
   return tied ? sizedPool(pool, favorsLargeFish(tied)) : pool;
 }
