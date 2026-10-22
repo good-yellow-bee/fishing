@@ -184,33 +184,49 @@ describe("a swim a lure ripped through", () => {
   });
 
   it("trails crumbs off down the lane, each drifting out and fading as it goes", () => {
+    // Down a lane along +z, `dz` is how far down it and `dx` how far to one side.
     for (let t = 0; t < 2 * RIP_PUFF_SEC; t += 0.1) {
-      const trail = Array.from({ length: RIP_PUFFS }, (_, i) => puffAt(i, t));
+      const trail = Array.from({ length: RIP_PUFFS }, (_, i) => puffAt(i, t, 0));
       expect(trail.filter((puff) => puff.show > 0.3).length).toBeGreaterThan(0);
       for (const puff of trail) {
-        expect(puff.run).toBeLessThanOrEqual(PUFF_TO);
-        expect(Math.abs(puff.side)).toBeLessThan(LANE_HALF * CLOUD_RADIUS);
+        expect(puff.dz).toBeLessThanOrEqual(PUFF_TO);
+        expect(Math.abs(puff.dx)).toBeLessThan(LANE_HALF * CLOUD_RADIUS);
       }
     }
-    const early = puffAt(0, 0.2 * RIP_PUFF_SEC);
-    const late = puffAt(0, 0.8 * RIP_PUFF_SEC);
-    expect(late.run).toBeGreaterThan(early.run);
+    const early = puffAt(0, 0.2 * RIP_PUFF_SEC, 0);
+    const late = puffAt(0, 0.8 * RIP_PUFF_SEC, 0);
+    expect(late.dz).toBeGreaterThan(early.dz);
     expect(late.size).toBeGreaterThan(early.size);
     expect(late.show).toBeLessThan(early.show);
-    expect(puffAt(1, 3)).toEqual(puffAt(1, 3 + RIP_PUFF_SEC));
+    expect(puffAt(1, 3, 0)).toEqual(puffAt(1, 3 + RIP_PUFF_SEC, 0));
+  });
+
+  it("drifts its crumbs out along the lane's heading", () => {
+    const along = puffAt(2, 1.4, 0);
+    const turned = puffAt(2, 1.4, Math.PI / 2);
+    expect(turned.dx).toBeCloseTo(along.dz);
+    expect(turned.dz).toBeCloseTo(-along.dx);
   });
 
   it("holds the trail strung down the lane when still", () => {
-    const runs = Array.from({ length: RIP_PUFFS }, (_, i) => puffAt(i, 7, true));
-    expect(runs).toEqual(Array.from({ length: RIP_PUFFS }, (_, i) => puffAt(i, 0, true)));
-    expect(new Set(runs.map((puff) => puff.run)).size).toBe(RIP_PUFFS);
+    const trail = Array.from({ length: RIP_PUFFS }, (_, i) => puffAt(i, 7, 0, true));
+    expect(trail).toEqual(Array.from({ length: RIP_PUFFS }, (_, i) => puffAt(i, 0, 0, true)));
+    expect(new Set(trail.map((puff) => puff.dz)).size).toBe(RIP_PUFFS);
   });
 
   it.each(SPOT_IDS)("trails its crumbs over the %s's open water", (spot) => {
     const at = cloudCenter(spot);
     const yaw = openWaterYaw(spot);
-    const reach = PUFF_TO + puffAt(0, RIP_PUFF_SEC * 0.999).size;
-    expect(walkableAt(at.x + Math.sin(yaw) * reach, at.z + Math.cos(yaw) * reach)).toBe(false);
+    for (let t = 0; t < RIP_PUFF_SEC; t += 0.1) {
+      for (let i = 0; i < RIP_PUFFS; i++) {
+        const puff = puffAt(i, t, yaw);
+        for (let a = 0; a < 8; a++) {
+          const x = at.x + puff.dx + Math.cos((a * Math.PI) / 4) * puff.size;
+          const z = at.z + puff.dz + Math.sin((a * Math.PI) / 4) * puff.size;
+          expect(walkableAt(x, z)).toBe(false);
+        }
+      }
+    }
   });
 });
 

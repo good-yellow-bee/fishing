@@ -51,13 +51,15 @@ export const RIP_PUFF_SEC = 5;
 const PUFF_FROM = 0.5 * CLOUD_RADIUS;
 export const PUFF_TO = 1.7 * CLOUD_RADIUS;
 
-/** Puff `i` at `time`: how far down the lane from the cloud's middle, how far to one side of it, its radius and how much of it shows (0..1). Strung down the lane, held, when `still`. Pure. */
-export function puffAt(i: number, time: number, still = false): { run: number; side: number; size: number; show: number } {
+/** Puff `i` at `time` down the lane that runs out along `yaw`: where by the cloud's middle, its radius and how much of it shows (0..1). Strung down the lane, held, when `still`. Pure. */
+export function puffAt(i: number, time: number, yaw: number, still = false): { dx: number; dz: number; size: number; show: number } {
   // Spaced evenly through the drift, so a trail of them always leads off the cloud.
   const k = still ? (i + 0.5) / RIP_PUFFS : (time / RIP_PUFF_SEC + i / RIP_PUFFS) % 1;
+  const run = PUFF_FROM + (PUFF_TO - PUFF_FROM) * k;
+  const side = (i % 2 === 0 ? 1 : -1) * 0.06 * (1 + k);
   return {
-    run: PUFF_FROM + (PUFF_TO - PUFF_FROM) * k,
-    side: (i % 2 === 0 ? 1 : -1) * 0.06 * (1 + k),
+    dx: Math.sin(yaw) * run + Math.cos(yaw) * side,
+    dz: Math.cos(yaw) * run - Math.sin(yaw) * side,
     size: 0.18 + 0.22 * k,
     show: Math.min(1, k / 0.15) * (1 - k),
   };

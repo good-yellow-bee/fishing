@@ -140,7 +140,9 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, cat
   const still = useReducedMotion();
   const geo = useMemo(() => new THREE.CircleGeometry(CLOUD_RADIUS, 32).rotateX(-Math.PI / 2), []);
   const edge = useMemo(() => softEdge(), []);
-  const torn = useMemo(() => softEdge(true), []);
+  // Painted only once a lure has ripped through the swim.
+  const torn = useMemo(() => (bait.ripped ? softEdge(true) : null), [bait.ripped]);
+  useEffect(() => () => torn?.dispose(), [torn]);
   const puffGeo = useMemo(() => new THREE.CircleGeometry(1, 16).rotateX(-Math.PI / 2), []);
   const puffs = useRef<(THREE.Mesh | null)[]>([]);
   const mat = useMemo(() => new THREE.MeshBasicMaterial({ color: CLOUD, alphaMap: edge, transparent: true, depthWrite: false }), [edge]);
@@ -175,7 +177,6 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, cat
       carpGeo.dispose();
       catfishGeo.dispose();
       edge.dispose();
-      torn.dispose();
       puffGeo.dispose();
       mat.dispose();
       shinerGeo.dispose();
@@ -184,7 +185,7 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, cat
       perchMat.dispose();
       pikeGeo.dispose();
     },
-    [geo, ringGeo, wake, carpGeo, catfishGeo, edge, torn, puffGeo, mat, shinerGeo, shinerMat, perchGeo, perchMat, pikeGeo],
+    [geo, ringGeo, wake, carpGeo, catfishGeo, edge, puffGeo, mat, shinerGeo, shinerMat, perchGeo, perchMat, pikeGeo],
   );
   useFrame((state, dt) => {
     const mesh = cloud.current;
@@ -195,7 +196,7 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, cat
     mesh.scale.setScalar(still ? 1 : 1 + 0.06 * Math.sin(t * 0.8));
     // Turned so a torn lane runs out along the cast line; the plain cloud is round either way.
     mesh.rotation.y = out;
-    mat.alphaMap = bait.ripped ? torn : edge;
+    mat.alphaMap = torn ?? edge;
     const spooked = !!bait.spooked;
     if (!scattered.current && spooked) bolted.current = t;
     scattered.current = spooked;
@@ -229,9 +230,9 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, cat
       if (!puff) return;
       puff.visible = !!bait.ripped;
       if (!puff.visible) return;
-      const drift = puffAt(i, t, still);
-      const x = at.x + Math.sin(out) * drift.run + Math.cos(out) * drift.side;
-      const z = at.z + Math.cos(out) * drift.run - Math.sin(out) * drift.side;
+      const drift = puffAt(i, t, out, still);
+      const x = at.x + drift.dx;
+      const z = at.z + drift.dz;
       puff.position.set(x, waterHeight(x, z, t) + 0.02, z);
       puff.scale.setScalar(drift.size);
       (puff.material as THREE.MeshBasicMaterial).opacity = 1.8 * mat.opacity * drift.show;
