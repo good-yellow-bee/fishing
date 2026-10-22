@@ -170,7 +170,7 @@ function lastTimeNote(book: Logbook, trip: Trip): string {
 export function planText(book: Logbook, trip: Trip, tackleItems: TackleItem[]): string {
   const spot = spotById(book, trip.spotId);
   // An untitled outing's name is its water's, which follows anyway.
-  const head = [ownTitle(trip, book.spots), formatDay(trip.date), spot ? plainName(spot.name) : t("Unknown water")].filter(Boolean).join(" · ");
+  const head = [ownTitle(trip, book.spots), formatDay(trip.date), spot ? waterName(spot.name) : t("Unknown water")].filter(Boolean).join(" · ");
   return [head, ...calendarNotes(book, trip, tackleItems), trip.note.trim()].filter(Boolean).join("\n");
 }
 
@@ -812,7 +812,7 @@ function TripView() {
         ) : null
       )}
       {/* A hard day is worth telling too: a past blank outing with a note, or fish lost or missed. Today's plan with only a note isn't a day yet. */}
-      {catches.length > 0 || (!samplePlan && (pastDay || trip.lost || trip.missed) && (trip.note.trim() || trip.lost || trip.missed)) ? <CopySummary text={() => tripSummary(trip, spot ? plainName(spot.name) : null, catches, (id) => { const name = spotById(book, id)?.name; return name === undefined ? null : plainName(name); }, countedFish(book.catches))} file="stillwater-outing.txt" /> : null}
+      {catches.length > 0 || (!samplePlan && (pastDay || trip.lost || trip.missed) && (trip.note.trim() || trip.lost || trip.missed)) ? <CopySummary text={() => tripSummary(trip, spot ? plainName(spot.name) : null, catches, (id) => { const name = spotById(book, id)?.name; return name === undefined ? null : waterName(name); }, countedFish(book.catches))} file="stillwater-outing.txt" /> : null}
       {/* Planning ahead: what has worked on this water before. */}
       {!fished && spot && !play ? <WaterTipsBox catches={countedFish(catchesForSpot(countedBook(book), spot.id))} on={trip.date} within={countedSearch(book, exactTerm("water", plainName(spot.name)), catchesForSpot(book, spot.id))} /> : null}
       <TripWeather catches={catches} />

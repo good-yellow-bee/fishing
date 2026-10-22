@@ -143,6 +143,7 @@ export function TripCard({
   const times = sameDayFishTimes(book).get(trip.id);
   const [from, to] = times ? [formatTimeOfDay(times.first), formatTimeOfDay(times.last)] : [];
   const span = !from ? null : from === to ? from : `${from}–${to}`;
+  const water = spotName === null ? null : waterName(spotName);
   return (
     <Link to={`/trips/${trip.id}`} className="trip-card" state={FROM_LIST}>
       <p className="when">{tripWhen(trip.date, today, tomorrow, going)}</p>
@@ -151,7 +152,7 @@ export function TripCard({
         <p className="meta">
           {/* The fish that got away and the strikes missed too, so a hard day stands out in the list. */}
           {/* An untitled outing is already named after its water. */}
-          {[spotName && sameName(spotName, outingName(trip, book.spots)) ? null : spotName, waterType ? t(WATER_LABELS[waterType]) : null, tally, span, fishCount === 0 ? daysAheadLabel(trip.date, today) : null, trip.lost ? tn(trip.lost, "{n} lost", "{n} lost") : null, trip.missed ? tn(trip.missed, "{n} missed", "{n} missed") : null].filter(Boolean).join(" · ")}
+          {[water && sameName(water, outingName(trip, book.spots)) ? null : water, waterType ? t(WATER_LABELS[waterType]) : null, tally, span, fishCount === 0 ? daysAheadLabel(trip.date, today) : null, trip.lost ? tn(trip.lost, "{n} lost", "{n} lost") : null, trip.missed ? tn(trip.missed, "{n} missed", "{n} missed") : null].filter(Boolean).join(" · ")}
         </p>
       </div>
     </Link>
