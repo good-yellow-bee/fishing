@@ -151,3 +151,40 @@ export function thiefAt(i: number, time: number, still = false): { dx: number; d
   const swing = Math.atan2(Math.sin(heading(turn, away) - inYaw), Math.cos(heading(turn, away) - inYaw));
   return { dx: turn.x + (away.x - turn.x) * u, dz: turn.z + (away.z - turn.z) * u, yaw: inYaw + swing * Math.min(1, v / 0.2), show };
 }
+
+/** A pike prowling a swim built all the way (GT481) swims each pass along the cloud's open-water side in this long, this far out from its middle and this far either side of the way out, in radians. */
+export const PROWL_LEG_SEC = 9;
+export const PROWL_OUT = 1.25 * CLOUD_RADIUS;
+export const PROWL_SPAN = 0.9;
+/** Midway through each pass it slashes in at the feeders this far from the cloud's middle, over this share of the pass. */
+export const PROWL_IN = 0.8 * CLOUD_RADIUS;
+const SLASH_FROM = 0.4;
+const SLASH_SHARE = 0.2;
+/** The pike's nose and tail are this far from its middle. */
+export const PIKE_REACH = 0.55;
+/** It turns round over open water over this share of the pass at either end. */
+const PROWL_TURN = 0.12;
+
+/** The prowling pike at `time` on the swim whose way out is `out`: where by the cloud's middle, its heading (a +z-facing fish turned by it), how fast it is going (0..1) and how hard it slashes (0..1). Held mid-pass, slow, when `still`. Pure. */
+export function prowlAt(time: number, out: number, still = false): { dx: number; dz: number; yaw: number; speed: number; slash: number } {
+  const leg = still ? 0 : Math.floor(time / PROWL_LEG_SEC);
+  const k = still ? 0.5 : time / PROWL_LEG_SEC - leg;
+  const dir = leg % 2 === 0 ? 1 : -1;
+  // Slow at either end of the pass, where it turns, quickest midway.
+  const ease = k * k * (3 - 2 * k);
+  const angle = out + PROWL_SPAN * dir * (2 * ease - 1);
+  const v = still ? -1 : (k - SLASH_FROM) / SLASH_SHARE;
+  const slash = v > 0 && v < 1 ? Math.sin(Math.PI * v) : 0;
+  const reach = PROWL_OUT - (PROWL_OUT - PROWL_IN) * slash;
+  // Along the pass, turned in toward the feeders as it slashes and back out after; round through the way out at either end.
+  const along = angle + (dir * Math.PI) / 2;
+  const tilt = slash > 0 ? 0.7 * Math.sin(2 * Math.PI * v) : 0;
+  const turnIn = k < PROWL_TURN ? 1 - k / PROWL_TURN : k > 1 - PROWL_TURN ? (k - (1 - PROWL_TURN)) / PROWL_TURN : 0;
+  return {
+    dx: Math.sin(angle) * reach,
+    dz: Math.cos(angle) * reach,
+    yaw: along + dir * tilt - (dir * Math.PI * turnIn) / 2,
+    speed: still ? 0 : 4 * k * (1 - k),
+    slash,
+  };
+}

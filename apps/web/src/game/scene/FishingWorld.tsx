@@ -235,6 +235,8 @@ type Props = {
   groundbaitBig?: boolean;
   /** Bait thieves at that swim's bank would strip the tied bait, and its feeders are not scattered; fewer show as it is built up. */
   groundbaitThieves?: boolean;
+  /** A pike prowls that swim: built all the way at a bank where the tied lure would take one the angler could land. */
+  groundbaitProwler?: boolean;
   /** The shiner trap by the shack while it is set (minnowTrap.ts trapState), or null when it is not. */
   shinerTrap?: ReturnType<typeof trapState> | null;
   /** An evening rise is on: rings dimple the water in reach of the bank. */
@@ -2316,7 +2318,7 @@ function Tone({ hour }: { hour: LakeHour }) {
 
 const NO_BANKS: readonly SpotId[] = [];
 
-function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, follow = null, giantBanks = NO_BANKS, lostFloatBanks = NO_BANKS, nightLineSpot = null, nightLineState = null, baitBucket = 0, groundbaitBag = 0, aerated = false, wormBin = false, breadCrumb = false, worms = 0, topwater = false, hour, sky, season = DEFAULT_SEASON, species, weight, golden = false, released = false, moon, wind, boatSwing = 0, headlamp = false, hotspot, groundbait = null, groundbaitPrimed = false, groundbaitBig = false, groundbaitThieves = false, shinerTrap = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
+function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, follow = null, giantBanks = NO_BANKS, lostFloatBanks = NO_BANKS, nightLineSpot = null, nightLineState = null, baitBucket = 0, groundbaitBag = 0, aerated = false, wormBin = false, breadCrumb = false, worms = 0, topwater = false, hour, sky, season = DEFAULT_SEASON, species, weight, golden = false, released = false, moon, wind, boatSwing = 0, headlamp = false, hotspot, groundbait = null, groundbaitPrimed = false, groundbaitBig = false, groundbaitThieves = false, groundbaitProwler = false, shinerTrap = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
   // How this fish takes the bait: a topwater lure makes every take a hit at the top.
   const take = species !== null ? takeStyle(species.id, topwater) : null;
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
@@ -2352,7 +2354,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       <Precompile />
       <LakeWorld spot={spot} hour={hour} sky={sky} season={season} hotspot={hotspot} moon={moon} wind={wind} wormBin={wormBin} breadCrumb={breadCrumb} />
       {tracks && tracks.length > 0 && <ShoreTracks tracks={tracks} />}
-      {groundbait && <GroundbaitCloud bait={groundbait} feeding={groundbaitPrimed} bigFeeders={groundbaitBig} thieves={groundbaitThieves} />}
+      {groundbait && <GroundbaitCloud bait={groundbait} feeding={groundbaitPrimed} bigFeeders={groundbaitBig} thieves={groundbaitThieves} prowler={groundbaitProwler} />}
       {rising && <RiseRings spot={spot} />}
       {rising && <Mayflies spot={spot} />}
       <Windsock wind={wind ?? NO_WIND} />

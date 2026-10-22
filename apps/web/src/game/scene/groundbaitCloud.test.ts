@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { spotAt, SPOT_IDS, walkableAt } from "@stillwater/shared";
-import { bigFeedersOver, GROUNDBAIT_CASTS, SWIM_MAX_CASTS, throwHandful, TOPUP_MAX } from "../logic";
+import { FISH, spotAt, SPOT_IDS, walkableAt } from "@stillwater/shared";
+import { bigFeedersOver, PROWLERS, prowlerOver, GROUNDBAIT_CASTS, SWIM_MAX_CASTS, throwHandful, TOPUP_MAX } from "../logic";
 import { BANK_STANDS } from "../hotspot";
-import { cloudCenter, cloudOpacity, CLOUD_RADIUS, DIMPLES, dimpleAt, feedersShow, openWaterYaw, ROLL_GAP_SEC, ROLL_SEC, ROLL_SPAN, rollAt, SCATTER_SEC, SCATTER_WAKES, scatterWakeAt, THIEF_OUT, thiefAt, thiefCount, THIEVES } from "./groundbaitCloud";
+import { cloudCenter, cloudOpacity, CLOUD_RADIUS, DIMPLES, dimpleAt, feedersShow, openWaterYaw, PIKE_REACH, PROWL_IN, PROWL_LEG_SEC, PROWL_OUT, prowlAt, ROLL_GAP_SEC, ROLL_SEC, ROLL_SPAN, rollAt, SCATTER_SEC, SCATTER_WAKES, scatterWakeAt, THIEF_OUT, thiefAt, thiefCount, THIEVES } from "./groundbaitCloud";
 
 describe("groundbait cloud", () => {
   it.each(SPOT_IDS)("lands on the %s's own open water", (spot) => {
@@ -183,6 +183,59 @@ describe("bait thieves at the cloud", () => {
       // The shiner's nose or tail just past the farthest it darts.
       const reach = THIEF_OUT + 0.25;
       expect(walkableAt(at.x + Math.cos(angle) * reach, at.z + Math.sin(angle) * reach)).toBe(false);
+    }
+  });
+});
+
+describe("a pike prowling a built swim", () => {
+  const swim = (spot: "dock" | "reeds", built: number) => ({ spot, casts: 8, built });
+  const pikeBanks = SPOT_IDS.filter((spot) => FISH.some((fish) => PROWLERS.has(fish.id) && fish.spots.includes(spot)));
+
+  it("comes only to a swim topped up all the way, at a bank where the tied lure takes pike", () => {
+    expect(prowlerOver(swim("reeds", TOPUP_MAX), "Spinner")?.id).toBe("pike");
+    expect(prowlerOver(swim("reeds", TOPUP_MAX - 1), "Spinner")).toBeUndefined();
+    expect(prowlerOver(swim("reeds", TOPUP_MAX), "Worm")).toBeUndefined();
+    expect(prowlerOver(swim("dock", TOPUP_MAX), "Spinner")).toBeUndefined();
+  });
+
+  it("glides along the cloud's edge, slashing in at the feeders once a pass", () => {
+    const poses = Array.from({ length: (2 * PROWL_LEG_SEC) / 0.05 }, (_, n) => prowlAt(n * 0.05, 0));
+    const reach = poses.map((pose) => Math.hypot(pose.dx, pose.dz));
+    expect(Math.max(...reach)).toBeCloseTo(PROWL_OUT, 6);
+    expect(Math.min(...reach)).toBeCloseTo(PROWL_IN, 2);
+    expect(Math.min(...reach)).toBeLessThan(CLOUD_RADIUS);
+    // One slash a pass: two passes, two slashes.
+    const slashes = poses.filter((pose, n) => pose.slash > 0 && !(poses[n - 1]?.slash > 0)).length;
+    expect(slashes).toBe(2);
+    // It keeps to the open-water side: never round behind the cloud toward the bank.
+    expect(Math.min(...poses.map((pose) => pose.dz))).toBeGreaterThan(0);
+  });
+
+  it("turns round at each end of a pass without a snap", () => {
+    let last = prowlAt(0, 0).yaw;
+    for (let t = 0.02; t < 2 * PROWL_LEG_SEC + 1; t += 0.02) {
+      const yaw = prowlAt(t, 0).yaw;
+      expect(Math.abs(Math.atan2(Math.sin(yaw - last), Math.cos(yaw - last)))).toBeLessThan(0.2);
+      last = yaw;
+    }
+  });
+
+  it("holds still mid-pass under reduced motion", () => {
+    expect(prowlAt(0, 1, true)).toEqual(prowlAt(7.7, 1, true));
+    expect(prowlAt(0, 1, true).speed).toBe(0);
+    expect(prowlAt(0, 1, true).slash).toBe(0);
+  });
+
+  it.each(pikeBanks)("stays on the %s's water, nose to tail", (spot) => {
+    const at = cloudCenter(spot);
+    const out = openWaterYaw(spot);
+    for (let t = 0; t < 2 * PROWL_LEG_SEC; t += 0.1) {
+      const pose = prowlAt(t, out);
+      for (const end of [PIKE_REACH, -PIKE_REACH]) {
+        const x = at.x + pose.dx + Math.sin(pose.yaw) * end;
+        const z = at.z + pose.dz + Math.cos(pose.yaw) * end;
+        expect(walkableAt(x, z)).toBe(false);
+      }
     }
   });
 });
