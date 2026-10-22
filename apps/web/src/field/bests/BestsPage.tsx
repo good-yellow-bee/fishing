@@ -695,7 +695,8 @@ export function BestsPage() {
             </div>
             <div className="card-grid">
               {waterCards.map((water) => (
-                <Link key={water.spotId} to={year || water.twins ? linkFor(exactTerm("water", plainName(water.name))) : `/spots/${water.spotId}`} className="spot-card">
+                // A water with no name has no search to open, so its own page, even in a season.
+                <Link key={water.spotId} to={plainName(water.name) && (year || water.twins) ? linkFor(exactTerm("water", plainName(water.name))) : `/spots/${water.spotId}`} className="spot-card">
                   <div className="spot-card-top">
                     <h3>{water.name === "Unknown water" ? t(water.name) : waterName(water.name)}</h3>
                     {freshWaters?.has(waterKey(water.spotId)) ? <span className="stamp">{t("New this season")}</span> : null}

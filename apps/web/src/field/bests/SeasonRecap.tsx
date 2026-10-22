@@ -105,17 +105,20 @@ export function SeasonRecapBox({
   const lureLine = topLure ? t("Best lure: {lure} ({count})", { lure: bookLureName(book.catches)(topLure.lure), count: topLure.count }) : null;
   // And the water it was won on, once one clearly led: the "where" beside the "on what". Waters that read the same are
   // one, as the search its link opens takes them; the game's lake and the sample week are left out, as there.
-  // Named as most of its fish were logged, as Gear's lure record names a water.
+  // Named as most of its fish were logged, as Gear's lure record names a water. Waters with no name count apart, each
+  // its own water, as one gone from the book does, so a tie with one is no lead; one leading says nothing, as its fish
+  // have no search to open.
   const byWater = new Map<string, Map<string, number>>();
   for (const entry of countedFish(book.catches)) {
-    const spotName = book.spots.find((spot) => spot.id === entry.spotId)?.name;
-    if (!spotName?.trim() || !bookFishDay(book, entry).startsWith(`${year}-`)) continue;
-    const names = byWater.get(foldName(spotName)) ?? new Map<string, number>();
+    const spotName = book.spots.find((spot) => spot.id === entry.spotId)?.name ?? "";
+    if (!bookFishDay(book, entry).startsWith(`${year}-`)) continue;
+    const key = foldName(spotName) || `\u0000${entry.spotId}`;
+    const names = byWater.get(key) ?? new Map<string, number>();
     names.set(plainName(spotName), (names.get(plainName(spotName)) ?? 0) + 1);
-    byWater.set(foldName(spotName), names);
+    byWater.set(key, names);
   }
   const [water, nextWater] = [...byWater.values()].map((names) => ({ name: mostWritten(names), count: [...names.values()].reduce((sum, n) => sum + n, 0) })).sort((a, b) => b.count - a.count);
-  const topWater = water && water.count >= 2 && water.count > (nextWater?.count ?? 0) ? water : null;
+  const topWater = water && water.name && water.count >= 2 && water.count > (nextWater?.count ?? 0) ? water : null;
   const waterLine = topWater ? t("Best water: {water} ({count})", { water: topWater.name, count: topWater.count }) : null;
   const lines = [
     fishLine,
