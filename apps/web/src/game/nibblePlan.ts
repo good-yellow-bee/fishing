@@ -1,4 +1,5 @@
-import { TOPUP_MAX } from "./logic";
+import { FISH } from "@stillwater/shared";
+import { poolForLure, TOPUP_MAX, type Groundbait } from "./logic";
 
 /**
  * When the fish nibbles before it bites. One to three nibbles land at varied
@@ -93,6 +94,11 @@ export function stealChance(built: number | null) {
   if (built === null) return STEAL_CHANCE;
   if (built === 0) return FRESH_SWIM_STEAL_CHANCE;
   return built >= TOPUP_MAX ? BUILT_SWIM_STEAL_CHANCE : STEAL_CHANCE;
+}
+
+/** Whether bait thieves crowd this swim: ones at its bank that would take this lure, while its feeders are not scattered. */
+export function baitThievesOver(bait: Groundbait, lure: string | undefined) {
+  return !bait.spooked && poolForLure(FISH.filter((fish) => fish.spots.includes(bait.spot)), lure).some((fish) => BAIT_THIEVES.has(fish.id));
 }
 
 /** Whether this wait ends with the bait stolen; only a thief that nibbles first can steal it. */

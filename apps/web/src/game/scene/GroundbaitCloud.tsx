@@ -3,13 +3,14 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import type { Groundbait } from "../logic";
-import { CLOUD_RADIUS, DIMPLES, ROLL_SPAN, SCATTER_SEC, SCATTER_WAKES, WAKE_ARC, cloudCenter, cloudOpacity, dimpleAt, feedersShow, openWaterYaw, rollAt, scatterWakeAt } from "./groundbaitCloud";
+import { CLOUD_RADIUS, DIMPLES, ROLL_SPAN, SCATTER_SEC, SCATTER_WAKES, THIEVES, WAKE_ARC, cloudCenter, cloudOpacity, dimpleAt, feedersShow, openWaterYaw, rollAt, scatterWakeAt, thiefAt, thiefCount } from "./groundbaitCloud";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
 
 const CLOUD = "#7a5a32";
 const CARP = "#6b5524";
+const SHINER = "#c8d2d6";
 /** The roll turns the fish over a point this far under the water, so its head, back and then tail break the surface in turn. */
 const ROLL_DEPTH = 0.45;
 const ROLL_ARC = 1.4;
@@ -24,6 +25,15 @@ function carpShape() {
   // Drawn a little larger than life so it reads from the bank.
   const merged = mergeGeometries([body, fin, tail]).scale(1.25, 1.25, 1.25);
   [body, fin, tail].forEach((part) => part.dispose());
+  return merged;
+}
+
+/** A +z-facing shiner: a slim body and tail, drawn a little larger than life so it reads from the bank. */
+function shinerShape() {
+  const body = new THREE.SphereGeometry(1, 8, 6).scale(0.03, 0.035, 0.1);
+  const tail = new THREE.ConeGeometry(0.035, 0.06, 4).scale(0.3, 1, 1).rotateX(Math.PI / 2).translate(0, 0, -0.12);
+  const merged = mergeGeometries([body, tail]).scale(1.4, 1.4, 1.4);
+  [body, tail].forEach((part) => part.dispose());
   return merged;
 }
 
@@ -48,8 +58,8 @@ function softEdge() {
   return new THREE.CanvasTexture(canvas);
 }
 
-/** The muddy cloud a handful of groundbait leaves off the bank, thinning as its casts are fished out; fish dimple over it once `feeding` or topped up, more often the more it was built up, and with `bigFeeders` in a carp now and then rolls at its edge. When a lost big feeder scatters the feeders the dimples stop, bow wakes fan out toward open water and the cloud thins. */
-export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false }: { bait: Groundbait; feeding?: boolean; bigFeeders?: boolean }) {
+/** The muddy cloud a handful of groundbait leaves off the bank, thinning as its casts are fished out; fish dimple over it once `feeding` or topped up, more often the more it was built up, with `bigFeeders` in a carp now and then rolls at its edge, and with `thieves` shiners dart in at its edge and turn away, fewer as it is topped up. When a lost big feeder scatters the feeders the dimples stop, bow wakes fan out toward open water and the cloud thins. */
+export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, thieves = false }: { bait: Groundbait; feeding?: boolean; bigFeeders?: boolean; thieves?: boolean }) {
   const still = useReducedMotion();
   const geo = useMemo(() => new THREE.CircleGeometry(CLOUD_RADIUS, 32).rotateX(-Math.PI / 2), []);
   const edge = useMemo(() => softEdge(), []);
@@ -61,6 +71,10 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false }: {
   const carpGeo = useMemo(() => carpShape(), []);
   const carp = useRef<THREE.Mesh>(null);
   const swirl = useRef<THREE.Mesh>(null);
+  const shinerGeo = useMemo(() => shinerShape(), []);
+  const shinerMat = useMemo(() => new THREE.MeshToonMaterial({ color: SHINER, gradientMap: toonRamp() }), []);
+  const shiners = useRef<THREE.InstancedMesh>(null);
+  const place = useMemo(() => new THREE.Object3D(), []);
   // Whether the swim was scattered last frame, and when the feeders last bolted; a swim that comes in already scattered (a reload) has no bolt to show.
   const scattered = useRef(!!bait.spooked);
   const bolted = useRef(-Infinity);
@@ -74,8 +88,10 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false }: {
       carpGeo.dispose();
       edge.dispose();
       mat.dispose();
+      shinerGeo.dispose();
+      shinerMat.dispose();
     },
-    [geo, ringGeo, wake, carpGeo, edge, mat],
+    [geo, ringGeo, wake, carpGeo, edge, mat, shinerGeo, shinerMat],
   );
   useFrame((state, dt) => {
     const mesh = cloud.current;
@@ -137,6 +153,26 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false }: {
         (swirl.current.material as THREE.MeshBasicMaterial).opacity = 0.6 * (1 - k);
       }
     }
+    const school = shiners.current;
+    if (school) {
+      const crowd = thieves ? thiefCount(bait.built) : 0;
+      school.visible = crowd > 0;
+      for (let i = 0; i < crowd; i++) {
+        const thief = thiefAt(i, t, still);
+        if (thief) {
+          const x = at.x + thief.dx;
+          const z = at.z + thief.dz;
+          // Its back just breaks the surface, with a quick tail-beat wobble as it darts.
+          place.position.set(x, waterHeight(x, z, t) - 0.02, z);
+          place.rotation.set(0, thief.yaw + (still ? 0 : 0.15 * Math.sin(t * 22 + i)), 0);
+          place.scale.setScalar(thief.show);
+        } else place.scale.setScalar(0);
+        place.updateMatrix();
+        school.setMatrixAt(i, place.matrix);
+      }
+      school.count = crowd;
+      school.instanceMatrix.needsUpdate = true;
+    }
   });
   return (
     <>
@@ -149,6 +185,7 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false }: {
       <mesh ref={carp} geometry={carpGeo} visible={false}>
         <meshToonMaterial color={CARP} gradientMap={toonRamp()} />
       </mesh>
+      <instancedMesh ref={shiners} name="bait-thieves" args={[shinerGeo, shinerMat, THIEVES]} visible={false} frustumCulled={false} />
       <mesh ref={swirl} geometry={ringGeo} visible={false} renderOrder={4}>
         <meshBasicMaterial color="#e4efea" transparent opacity={0} depthWrite={false} />
       </mesh>
