@@ -16,6 +16,8 @@ import { FIND_PARAM } from "./findLinks";
 import { findCatches } from "./CatchSearch";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+// jsdom has no scrolling; the merge box scrolls itself into view when a link opens it.
+HTMLElement.prototype.scrollIntoView = () => undefined;
 
 const spot = (id: string, name: string) => ({ id, name, waterType: "lake" as const, notes: "", bestConditions: "" });
 const fish = (id: string, day: number, hour: number, species = "Northern pike", lure = "Spoon", spotId = "own"): CatchEntry => ({
@@ -109,8 +111,6 @@ describe("round 129 ideas: catch pages", () => {
   it("names a water with no name kept in a merge, and one merged into it, in words of their own", async () => {
     const merged = new Map([[LOGBOOK_STORAGE_KEY, JSON.stringify(book)], [MERGED_WATERS_KEY, JSON.stringify({ gone: "blank" })]]);
     expect((await draw("/spots/gone", merged)).querySelector(".lede")?.textContent).toBe("This water was merged into a water with no name.");
-    // jsdom has no scrolling; the merge box scrolls itself into view when a link opens it.
-    HTMLElement.prototype.scrollIntoView = () => undefined;
     const hint = (await draw("/merge/east?merge=blank")).querySelector(".field-hint")?.textContent;
     expect(hint).toContain("The water with no name then holds 1 fish and 0 outings.");
     setLang("pl");

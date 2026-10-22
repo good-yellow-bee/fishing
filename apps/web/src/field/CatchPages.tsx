@@ -631,6 +631,8 @@ function CatchForm() {
   // One-tap picks: the kinds this water gives, and once a kind is typed, the lures that took it here.
   // One chip each however the book names them: "Pike" and "Northern pike" both read "Szczupak" in Polish.
   const hereSpecies = useMemo(() => ownFirst(waterSpecies(hereCatches, 3, (name) => kindKey(shownKind(name))), [], pieceName), [hereCatches, lang]);
+  // The picked water's name over the kinds caught there; "" for a water with no name.
+  const formWater = plainName(spotById(book, spotId)?.name ?? "");
   const kindLures = useMemo(
     () => ownFirst(speciesLures(hereCatches.map((entry) => ({ ...entry, species: shownKind(entry.species) })), species), [], pieceName),
     [hereCatches, species, lang],
@@ -1058,7 +1060,7 @@ function CatchForm() {
             <p className="wide form-note lure-tips">
               {/* Which water these come from, with a way to it: on a phone the water's own field is further down. */}
               {/* A water with no name has its own words: Polish would say "łowiska" twice. */}
-              {plainName(spotById(book, spotId)?.name ?? "") ? t("From {water}:", { water: plainName(spotById(book, spotId)!.name) }) : t("From a water with no name:")}{" "}
+              {formWater ? t("From {water}:", { water: formWater }) : t("From a water with no name:")}{" "}
               <button type="button" className="text-button" aria-label={t("Change water")} onClick={() => document.querySelector<HTMLSelectElement>('select[name="spot"]')?.focus()}>
                 {t("change")}
               </button>{" "}
@@ -1770,9 +1772,10 @@ function CatchView() {
   const onThisDay = isCounted ? sameDayBefore(book, caughtDay, bookCounted, t("sample|search word")) : null;
   const yearCount = isCounted ? findCatches(book, `${yearSearch[0]} + ${yearSearch[1]}`, t, (id) => photoFor(id) !== null).filter((other) => countedIds.has(other.id)).length : 0;
   // The fish of its kind at the same part of the day (dawn, evening), by the clock as Bests and the search read it.
-  const biteTime = BITE_TIMES.find((row) => row.id === biteTimeOf(new Date(entry.caughtAt).getHours()))!;
-  const timeSearch = [exactTerm("species", kindName(entry.species)), `${withoutPlayLake(book, exactTerm("time", t(biteTime.label)), kind.filter((other) => biteTimeOf(new Date(other.caughtAt).getHours()) === biteTime.id))}${noSample}`] as const;
-  const timeCount = isCounted ? findCatches(book, `${timeSearch[0]} + ${timeSearch[1]}`, t, (id) => photoFor(id) !== null).filter((other) => countedIds.has(other.id)).length : 0;
+  // A fish with no readable time has no part of the day, as the search finds none for it.
+  const biteTime = Number.isNaN(Date.parse(entry.caughtAt)) ? null : BITE_TIMES.find((row) => row.id === biteTimeOf(new Date(entry.caughtAt).getHours()))!;
+  const timeSearch = biteTime ? ([exactTerm("species", kindName(entry.species)), `${withoutPlayLake(book, exactTerm("time", t(biteTime.label)), kind.filter((other) => biteTimeOf(new Date(other.caughtAt).getHours()) === biteTime.id))}${noSample}`] as const) : null;
+  const timeCount = timeSearch && isCounted ? findCatches(book, `${timeSearch[0]} + ${timeSearch[1]}`, t, (id) => photoFor(id) !== null).filter((other) => countedIds.has(other.id)).length : 0;
   // The water's 10° band, and the fish caught under the same sky and wind in it, counted as the link opens them.
   const tempBand =
     entry.weather?.waterTempF === undefined
@@ -1943,7 +1946,7 @@ function CatchView() {
             <Link to={findWithLink(...yearSearch)}>{t("{species} in {year}: {count}", { species: kindName(entry.species), year: caughtYear, count: yearCount })}</Link>
           </p>
         ) : null}
-        {timeCount > 1 ? (
+        {timeSearch && biteTime && timeCount > 1 ? (
           <p className="meta kind-time">
             {/* Polish writes the part of the day in lower case inside a sentence, as the search's "Best time of day" does. */}
             <Link to={findWithLink(...timeSearch)}>{t("{species} at this time of day ({time}): {count}", { species: kindName(entry.species), time: inSentence(t(biteTime.label)), count: timeCount })}</Link>

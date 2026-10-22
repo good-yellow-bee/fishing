@@ -1008,7 +1008,6 @@ function leader<T>(catches: readonly CatchEntry[], of: (entry: CatchEntry) => T 
   return { value: top[0], count: top[1] };
 }
 
-/** What the found fish have in common, where one clearly leads: "Most on Jig (5). Best time of day: Dawn (4). Most from Cedar Lake (6)." */
 /**
  * The matches split by kind, by year and by water, once they hold more than one: "By kind: Northern pike 3 · Zander 2",
  * "By year: 2026 5 · 2025 3", "By water: Cedar Lake 4 · Mill Pond 1". Each narrows the search to that kind, year or water.
@@ -1155,7 +1154,7 @@ export function searchLeads(book: Logbook, catches: readonly CatchEntry[], t: Re
     return name === undefined ? null : plainName(name) ? foldText(name) : `\u0000${entry.spotId}`;
   });
   // Waters that read the same are one, as "By water" and the search take them.
-  const leadWater = water ? (twinWaterNames(book).get(water.value) ?? "") : "";
+  const leadWater = water && !water.value.startsWith("\u0000") ? (twinWaterNames(book).get(water.value) ?? "") : "";
   // As the book writes the lure most, as Gear and the catch cards name it.
   const lureName = lure ? bookLureName(book.catches)(catches.find((entry) => lureKey(entry) === lure.value)!.lure) : "";
   return [
