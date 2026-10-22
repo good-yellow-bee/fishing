@@ -1638,6 +1638,51 @@ describe("useFishingGame strike timing", () => {
     expect(container!.querySelector("[data-testid=frayed]")?.textContent).toBe("true");
   });
 
+  it("hands light line in the weeds to the fight, and says so when the stems fray it", () => {
+    updateSettings({ line: "light" });
+    try {
+      // The lily pads stand in summer; they die back in winter.
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, undefined, undefined, undefined, "summer");
+      Object.assign(surface.dataset, { stance: "point", angler: "-5.6,12.2", aim: "-6.8,4.8" });
+      vi.mocked(waitMs).mockReturnValueOnce(1_000);
+      step.mockReturnValueOnce("fighting");
+      castAndFight(surface, 1);
+      expect(vi.mocked(makeFight).mock.calls.at(-1)?.[17]).toMatchObject({ weedFrays: true });
+      const sim = vi.mocked(makeFight).mock.results.at(-1)!.value.sim as FightSim;
+      sim.sawn = true;
+      sim.frayed = true;
+      step.mockReturnValueOnce("fighting");
+      act(() => frames.at(-1)!(now));
+      expect(hint()).toBe("The weed stems have frayed your light line! It snaps sooner now, so ease it out of the weeds.");
+      vi.mocked(makeFight).mock.results.at(-1)!.value.performance.sawn = true;
+      step.mockReturnValueOnce("landed");
+      act(() => frames.at(-1)!(now));
+      expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toContain("The weed stems frayed your light line: it snaps sooner until you retie it.");
+      expect(container!.querySelector("[data-testid=frayed]")?.textContent).toBe("true");
+    } finally {
+      updateSettings({ line: "standard" });
+    }
+  });
+
+  it.each([
+    ["light", "dock", false, false],
+    ["standard", "pads", false, false],
+    ["light", "pads", false, true],
+    ["light", "pads", true, false],
+  ] as const)("hands a %s line at the %s (beginner %s) weed stems that fray it: %s", (line, stance, beginner, frays) => {
+    updateSettings({ line });
+    try {
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, undefined, undefined, undefined, "summer", beginner);
+      if (stance === "pads") Object.assign(surface.dataset, { stance: "point", angler: "-5.6,12.2", aim: "-6.8,4.8" });
+      vi.mocked(waitMs).mockReturnValueOnce(1_000);
+      step.mockReturnValueOnce("fighting");
+      castAndFight(surface, 1);
+      expect(vi.mocked(makeFight).mock.calls.at(-1)?.[17]).toMatchObject({ weedFrays: frays });
+    } finally {
+      updateSettings({ line: "standard" });
+    }
+  });
+
   it("keeps a swallowing pike's teeth on the wire leader, off the line", () => {
     updateSettings({ line: "wire" });
     try {
@@ -3710,6 +3755,23 @@ describe("useFishingGame groundbait", () => {
       expect(vi.mocked(pickBite).mock.lastCall?.[12]).toBeUndefined();
       expect(hint()).toContain(said);
       if (lure === "Nightcrawler") expect(hint()).not.toContain("bite through");
+    } finally {
+      updateSettings({ line: "standard" });
+    }
+  });
+
+  it.each([
+    ["Spinner", false, "Light line: the fish can't see it, so the bites come sooner, but a pike here can bite through it at the strike, and the weed stems fray it if a fish runs in."],
+    ["Nightcrawler", false, "Light line: the fish can't see it, so the bites come sooner, but the weed stems fray it if a fish runs in."],
+    ["Spinner", true, "Light line: the fish can't see it, so the bites come sooner."],
+  ] as const)("warns light line on a %s tight to the lily pads of the weed stems (beginner %s)", (lure, beginner, said) => {
+    updateSettings({ line: "light" });
+    try {
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, lure, undefined, undefined, "summer", beginner);
+      Object.assign(surface.dataset, { stance: "point", angler: "-5.6,12.2", aim: "-6.8,4.8" });
+      cast(surface);
+      expect(hint()).toContain(said);
+      if (beginner) expect(hint()).not.toContain("weed stems");
     } finally {
       updateSettings({ line: "standard" });
     }
