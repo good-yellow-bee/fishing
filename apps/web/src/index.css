@@ -591,6 +591,23 @@ a:focus-visible {
   }
 }
 
+.hint-tail-more {
+  display: none;
+}
+
+/* On a touch screen the walking stick stands over the hint's corner, and a window held sideways leaves it only the room
+   under the HUD. A groundbait toss ran five sentences up past both, so there a long hint keeps its first sentence and
+   folds the rest behind "Read more". */
+@media (pointer: coarse), (max-height: 500px) {
+  .hint-tail:not([data-open]) {
+    display: none;
+  }
+
+  .hint-tail:not([data-open]) + .hint-tail-more {
+    display: inline;
+  }
+}
+
 /* In a fight the hint would overlap the fight card, which shows the hookset's message itself for a while. */
 .scene-wrap[data-phase="fight"] .hint {
   display: none;

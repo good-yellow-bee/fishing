@@ -17,7 +17,7 @@ import { sessionKey, startSession } from "../game/session";
 import type { Outcome } from "../game/useFishingGame";
 
 const scene = vi.fn<(props: { hour: LakeHour; sky: Sky; species?: FishSpecies | null; weight?: number; tracks?: readonly LodgeTrack[]; released?: boolean }) => void>();
-const landed = vi.hoisted(() => ({ outcome: null as Outcome | null, fishedHard: null as SpotId[] | null, waiting: null as { hint: string; more: string[] } | null, bite: null as string | null, stance: null as SpotId | null }));
+const landed = vi.hoisted(() => ({ outcome: null as Outcome | null, fishedHard: null as SpotId[] | null, waiting: null as { hint: string; more: string[] } | null, fold: null as { hint: string; lead: string } | null, bite: null as string | null, stance: null as SpotId | null }));
 
 vi.mock("../api", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../api")>()),
@@ -45,7 +45,7 @@ vi.mock("../game/useFishingGame", async (importOriginal) => {
     ...real,
     useFishingGame: (...args: Parameters<typeof real.useFishingGame>) => {
       const game = real.useFishingGame(...args);
-      return { ...game, ...(landed.outcome ? { outcome: landed.outcome } : {}), ...(landed.fishedHard ? { fishedHard: landed.fishedHard } : {}), ...(landed.waiting ? { phase: "waiting" as const, hint: landed.waiting.hint, moreReasons: landed.waiting.more } : {}), ...(landed.bite ? { phase: "hookset" as const, hint: landed.bite } : {}), ...(landed.stance ? { stance: landed.stance } : {}) };
+      return { ...game, ...(landed.outcome ? { outcome: landed.outcome } : {}), ...(landed.fishedHard ? { fishedHard: landed.fishedHard } : {}), ...(landed.waiting ? { phase: "waiting" as const, hint: landed.waiting.hint, moreReasons: landed.waiting.more } : {}), ...(landed.fold ? { hint: landed.fold.hint, hintLead: landed.fold.lead } : {}), ...(landed.bite ? { phase: "hookset" as const, hint: landed.bite } : {}), ...(landed.stance ? { stance: landed.stance } : {}) };
     },
   };
 });
@@ -102,6 +102,7 @@ afterEach(() => {
   landed.outcome = null;
   landed.fishedHard = null;
   landed.waiting = null;
+  landed.fold = null;
   landed.bite = null;
   landed.stance = null;
   vi.mocked(getGiants).mockResolvedValue([]);
@@ -202,6 +203,20 @@ describe("dock weather", () => {
     await act(async () => more.click());
     expect(page.querySelector(".hint")?.textContent).toBe("Fresh water. Glassy water, made for a topwater. The chop hides the topwater.");
     expect(page.querySelector(".hint .hint-more")).toBeNull();
+    expect(document.activeElement).not.toBe(more);
+  });
+
+  it("folds a long hint after its first sentence until Read more opens it, and steps the focus off the button", async () => {
+    landed.fold = { hint: "You toss a handful. Top it up as it fades.", lead: "You toss a handful." };
+    const page = await openDock("/?hour=day&sky=clear");
+    const tail = page.querySelector(".hint .hint-tail")!;
+    expect(tail.textContent).toBe(" Top it up as it fades.");
+    expect(tail.hasAttribute("data-open")).toBe(false);
+    const more = page.querySelector<HTMLButtonElement>(".hint .hint-tail-more")!;
+    expect(more.textContent).toBe("Read more");
+    more.focus();
+    await act(async () => more.click());
+    expect(tail.hasAttribute("data-open")).toBe(true);
     expect(document.activeElement).not.toBe(more);
   });
 

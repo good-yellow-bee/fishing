@@ -843,6 +843,8 @@ export function useFishingGame(
   }, [hour]);
   /** The reasons past WAIT_REASONS the cast's hint left out, with the hint they belong to. */
   const [moreReasons, setMoreReasons] = useState<{ hint: string; more: readonly string[] }>({ hint: "", more: NO_REASONS });
+  /** The first sentence a long hint can fold the rest behind on a phone, with the hint it belongs to. */
+  const [hintFold, setHintFold] = useState({ hint: "", lead: "" });
   const [stance, setStance] = useState<StanceId>("shop");
   const [shopTap, setShopTap] = useState(0);
   const [hotspot, setHotspot] = useState<Hotspot | null>(null);
@@ -2383,8 +2385,13 @@ export function useFishingGame(
     const perch = wormFeedersTake(spotRef.current, lureRef?.current)
       ? t("{n} chopped worms went in with it: the perch here come in to feed with the feeders while the swim lasts.", { n: CHOPPED_WORMS })
       : t("{n} chopped worms went in with it: the perch here come in to feed while the swim lasts, though not to the lure you have tied on.", { n: CHOPPED_WORMS });
-    const worm = chopped ? `${perch} ${t("Worms left in your tin: {worms}.", { worms: wormsRef.current })}` : "";
-    const withWorm = (said: string) => [said, worm].filter(Boolean).join(" ");
+    const worm = chopped ? [perch, t("Worms left in your tin: {worms}.", { worms: wormsRef.current })] : [];
+    // On a phone the hint ends at the walking stick, so it shows what happened and folds the rest.
+    const foldHint = (lead: string, rest: string[]) => {
+      const said = [lead, ...rest].filter(Boolean).join(" ");
+      setHint(said);
+      setHintFold({ hint: said, lead });
+    };
     if (kind === "topped") {
       // The big feeders are told of only where they live and would take the tied lure; wary of the swim, they no longer move in.
       const takesBig = bigFeedersOver(next, lureRef?.current);
@@ -2394,21 +2401,20 @@ export function useFishingGame(
       const prowler = next.built! >= TOPUP_MAX ? prowlerAt(spotRef.current, lureRef?.current) : undefined;
       const wary = takesBig && isWary(next) ? t("The big feeders here are wary of this swim now: let it fade and build a fresh one to bring them back.") : "";
       const prowl = prowler && profileRef.current && canLand(profileRef.current, prowler) ? t("{fish} prowls round it now, hunting the small feeders: one hooked here scatters them, landed or lost.", { fish: t(prowler.name) }) : "";
-      setHint(
-        withWorm(
-          [big && grew
-            ? t("You top up the swim again as it fades: the feeders stay, and the big ones move in. {casts} casts of it now.", { casts: next.casts })
-            : big
-              ? t("You top up the swim as it fades: the feeders stay, the big ones too. {casts} casts of it now.", { casts: next.casts })
-              : grew
-                ? t("You top up the swim as it fades: the feeders stay, and more come in. {casts} casts of it now.", { casts: next.casts })
-                : t("You top up the swim as it fades: the feeders stay. {casts} casts of it now.", { casts: next.casts }), wary, prowl].filter(Boolean).join(" "),
-        ),
+      foldHint(
+        big && grew
+          ? t("You top up the swim again as it fades: the feeders stay, and the big ones move in. {casts} casts of it now.", { casts: next.casts })
+          : big
+            ? t("You top up the swim as it fades: the feeders stay, the big ones too. {casts} casts of it now.", { casts: next.casts })
+            : grew
+              ? t("You top up the swim as it fades: the feeders stay, and more come in. {casts} casts of it now.", { casts: next.casts })
+              : t("You top up the swim as it fades: the feeders stay. {casts} casts of it now.", { casts: next.casts }),
+        [wary, prowl, ...worm],
       );
       return;
     }
     if (kind === "overfed") {
-      setHint(withWorm(t("Too much too soon: the fish fill up on it, so the next {full} casts bite slower and no feeders take. {casts} casts of it now.", { full: next.full!, casts: next.casts })));
+      foldHint(t("Too much too soon: the fish fill up on it, so the next {full} casts bite slower and no feeders take. {casts} casts of it now.", { full: next.full!, casts: next.casts }), worm);
       return;
     }
     const run = builtFresh
@@ -2416,14 +2422,16 @@ export function useFishingGame(
       : day?.newDay && day.next.days >= 2
         ? t("Day {days} running you bait this bank: from day {need} its feeders start to expect it.", { days: day.next.days, need: PREBAIT_DAYS })
         : "";
-    const tossed = [t("You toss a handful of groundbait. The fish will gather to feed here for the next {casts} casts.", { casts: GROUNDBAIT_CASTS }), worm, t("Top it up as it fades, with {left} casts or fewer left, and more feeders come in.", { left: TOPUP_CASTS_LEFT }), run].filter(Boolean).join(" ");
-    setHint(
+    foldHint(t("You toss a handful of groundbait. The fish will gather to feed here for the next {casts} casts.", { casts: GROUNDBAIT_CASTS }), [
+      ...worm,
+      t("Top it up as it fades, with {left} casts or fewer left, and more feeders come in.", { left: TOPUP_CASTS_LEFT }),
+      run,
       season === "summer"
-        ? `${tossed} ${t("In the summer heat, any left draws them back after three hours but is eaten within a day.")}`
+        ? t("In the summer heat, any left draws them back after three hours but is eaten within a day.")
         : season === "winter"
-          ? `${tossed} ${t("In the winter cold, any left takes twelve hours to draw them back but keeps four days.")}`
-          : tossed,
-    );
+          ? t("In the winter cold, any left takes twelve hours to draw them back but keeps four days.")
+          : "",
+    ]);
   };
   const throwGroundbait = useCallback(() => tossHandful(false), [season]);
   /** Toss a handful with chopped worm in it, as throwGroundbait does. */
@@ -2578,6 +2586,8 @@ export function useFishingGame(
     hint,
     /** Reasons the hint left out, while the hint is still the cast's own. */
     moreReasons: moreReasons.hint === hint ? moreReasons.more : NO_REASONS,
+    /** The hint's first sentence, which a phone shows alone until the rest is asked for; "" when the hint doesn't fold. */
+    hintLead: hintFold.hint === hint && hintFold.lead !== hint ? hintFold.lead : "",
     nibble,
     schooled,
     handfuls,

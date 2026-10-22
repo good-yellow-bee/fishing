@@ -135,6 +135,7 @@ export const PL_GAME: PlBook = {
   "Lily pads: turn every run, or it dives into the pad stems": "Grzybienie: zawracaj każdy odjazd, bo zanurkuje między łodygi",
   "A cloud slides over the sun, and the fish move up into the shallows to feed.": "Chmura nasuwa się na słońce, a ryby podpływają na płyciznę żerować.",
   "{n} more reasons": ["jeszcze {n} powód", "jeszcze {n} powody", "jeszcze {n} powodów"],
+  "Read more": "Czytaj dalej",
   "Your headlamp shows the float plainly, but its light on the water puts the fish off.": "Czołówka dobrze oświetla spławik, ale jej światło na wodzie płoszy ryby.",
   "A headlamp shows the float plainly, so the strike holds longer, but its light on the water puts the fish off.": "Czołówka dobrze oświetla spławik, więc na zacięcie jest więcej czasu, ale jej światło na wodzie płoszy ryby.",
   "Headlamp": "Czołówka",
