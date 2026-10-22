@@ -2013,7 +2013,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT494~~ | ~~News card game80 covers GT492-GT493: the wire leader and light line bitten through~~ (folded into GT491, game79) | ui | S |
 | ~~GT495~~ | ~~Heavy line pulls a fish out of cover: on heavy line a fish that runs into the weeds (the reeds, or tight to the lily pads) sits there half as long, and a line wrapped round a dock piling or the sunken log swings free in half the time, so heavy line is the line for the reeds and the dock as light line is for the perch and trout banks and the wire leader for the pike; the wait hint on heavy line where a fish hooked could go into cover says so, and the fight card's heavy-line line names it for a fish that can be turned~~ (#1797) | gameplay | M |
 | GT496 | Heavy line in bright, calm water: on a clear day with no wind the fish see heavy line plainer, so its bites come 1.3x slower, not 1.15x (under cloud, rain or a ripple, or at night, as now), making heavy line a dull-day or night choice; the heavy-line wait hint says so on a bright, calm day | gameplay | S |
-| GT497 | News card game80 covers GT495-GT496: heavy line pulling fish out of cover and heavy line in bright, calm water (game80 is free once GT494 folds into game79) | ui | S |
+| GT497 | News card game80 covers GT495-GT496: heavy line pulling fish out of cover and heavy line in bright, calm water | ui | S |
 
 ## Risks / open questions for the owner
 
