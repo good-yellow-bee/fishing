@@ -962,7 +962,7 @@ export function CatchSearch() {
           ) : null}
           {matches.length > 0 ? (
             // The angler's own fish, as the count above sums them: a pasted copy doesn't credit them with the sample's.
-            <CopySummary text={() => searchSummary(searchParts(book, settled), mine.length > 0 ? mine : matches, (id) => { const name = spotById(book, id)?.name; return name === undefined ? null : waterName(name); }, largest, countedFish(book.catches))} file="stillwater-search.txt" />
+            <CopySummary text={() => searchSummary(searchParts(book, settled), mine.length > 0 ? mine : matches, (id) => { const name = spotById(book, id)?.name; return name === undefined ? null : waterName(name); }, largest, countedFish(book.catches), searchLeads(book, mine.length > 0 ? mine : matches, t))} file="stillwater-search.txt" />
           ) : null}
           {matches.length > 1 ? (
             // "Which was my biggest pike at Cedar": the same matches, largest first.
@@ -1140,9 +1140,8 @@ function twinWaterNames(book: Logbook): Map<string, string> {
   return new Map([...spellings].map(([key, forms]) => [key, mostWritten(forms)]));
 }
 
-function TopLure({ catches }: { catches: readonly CatchEntry[] }) {
-  const t = useT();
-  const { book } = useLogbook();
+/** What the found fish have in common, where one clearly leads, as the search shows it and its copy carries it: "Most on Jig (5).", "Best time of day: dawn (4).", "Most from Cedar Lake (6)." */
+export function searchLeads(book: Logbook, catches: readonly CatchEntry[], t: ReturnType<typeof useT>): string[] {
   // "Spinnerbait" and "Spinnerbaits" are one lure, as the exact lure search and Gear count them.
   const lureKey = (entry: CatchEntry) => (entry.lure.trim() ? shownPieceKey(entry.lure.trim()) || null : null);
   const lure = leader(catches, lureKey);
@@ -1150,22 +1149,28 @@ function TopLure({ catches }: { catches: readonly CatchEntry[] }) {
     const at = new Date(entry.caughtAt);
     return Number.isNaN(at.getTime()) ? null : biteTimeOf(at.getHours());
   });
-  // Waters that read the same are one, as "By water" and the search take them.
-  const shownWater = useMemo(() => twinWaterNames(book), [book]);
-  // Waters with no name stay apart by id: two of them are two waters, each read "Water with no name".
+  // Waters with no name stay apart by id: two of them are two waters, each read "a water with no name".
   const water = leader(catches, (entry) => {
     const name = spotById(book, entry.spotId)?.name;
     return name === undefined ? null : plainName(name) ? foldText(name) : `\u0000${entry.spotId}`;
   });
-  const leadWater = water ? waterName(shownWater.get(water.value) ?? "") : "";
+  // Waters that read the same are one, as "By water" and the search take them.
+  const leadWater = water ? (twinWaterNames(book).get(water.value) ?? "") : "";
   // As the book writes the lure most, as Gear and the catch cards name it.
   const lureName = lure ? bookLureName(book.catches)(catches.find((entry) => lureKey(entry) === lure.value)!.lure) : "";
-  const lines = [
+  return [
     lure ? t("Most on {lure}.", { lure: `${lureName} (${lure.count})` }) : null,
     // Polish writes the part of the day in lower case inside a sentence: "Najczęściej o tej porze: świt (2)."
     time ? t("Best time of day: {time}.", { time: `${inSentence(t(BITE_TIMES.find((row) => row.id === time.value)!.label))} (${time.count})` }) : null,
-    water ? t("Most from {water}.", { water: `${leadWater} (${water.count})` }) : null,
-  ].filter(Boolean);
+    // A water with no name has its own words: Polish would say "łowiska" twice.
+    water ? (leadWater ? t("Most from {water}.", { water: `${leadWater} (${water.count})` }) : t("Most from a water with no name ({count}).", { count: water.count })) : null,
+  ].filter((line) => line !== null);
+}
+
+function TopLure({ catches }: { catches: readonly CatchEntry[] }) {
+  const t = useT();
+  const { book } = useLogbook();
+  const lines = searchLeads(book, catches, t);
   return lines.length > 0 ? <p className="meta top-lure">{lines.join(" ")}</p> : null;
 }
 

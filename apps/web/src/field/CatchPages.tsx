@@ -5,6 +5,8 @@ import { largestFirst } from "./largestFirst";
 import { MatchOrder, useLargestOrder } from "./MatchOrder";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
+  BITE_TIMES,
+  biteTimeOf,
   likelyLength,
   likelyWeight,
   sizePairs,
@@ -79,6 +81,7 @@ import { NearestWater, canFindNearest } from "./NearestWater";
 import { SpeciesChips } from "./SpeciesChips";
 import { CatchSearch, FIND_PARAM, exactTerm, findCatches, findLink } from "./CatchSearch";
 import { findWithLink } from "./findLinks";
+import { inSentence } from "./MonthBars";
 import { savedState, sayAfterBack } from "./SavedNote";
 import { CopySummary } from "./CopySummary";
 import { catchSummary } from "./summaries";
@@ -1054,7 +1057,8 @@ function CatchForm() {
           {hereSpecies.length > 0 ? (
             <p className="wide form-note lure-tips">
               {/* Which water these come from, with a way to it: on a phone the water's own field is further down. */}
-              {t("From {water}:", { water: waterName(spotById(book, spotId)?.name ?? "") })}{" "}
+              {/* A water with no name has its own words: Polish would say "łowiska" twice. */}
+              {plainName(spotById(book, spotId)?.name ?? "") ? t("From {water}:", { water: plainName(spotById(book, spotId)!.name) }) : t("From a water with no name:")}{" "}
               <button type="button" className="text-button" aria-label={t("Change water")} onClick={() => document.querySelector<HTMLSelectElement>('select[name="spot"]')?.focus()}>
                 {t("change")}
               </button>{" "}
@@ -1765,6 +1769,10 @@ function CatchView() {
   // The same day of an earlier year, the latest one the angler was out and caught: what the water gave then.
   const onThisDay = isCounted ? sameDayBefore(book, caughtDay, bookCounted, t("sample|search word")) : null;
   const yearCount = isCounted ? findCatches(book, `${yearSearch[0]} + ${yearSearch[1]}`, t, (id) => photoFor(id) !== null).filter((other) => countedIds.has(other.id)).length : 0;
+  // The fish of its kind at the same part of the day (dawn, evening), by the clock as Bests and the search read it.
+  const biteTime = BITE_TIMES.find((row) => row.id === biteTimeOf(new Date(entry.caughtAt).getHours()))!;
+  const timeSearch = [exactTerm("species", kindName(entry.species)), `${withoutPlayLake(book, exactTerm("time", t(biteTime.label)), kind.filter((other) => biteTimeOf(new Date(other.caughtAt).getHours()) === biteTime.id))}${noSample}`] as const;
+  const timeCount = isCounted ? findCatches(book, `${timeSearch[0]} + ${timeSearch[1]}`, t, (id) => photoFor(id) !== null).filter((other) => countedIds.has(other.id)).length : 0;
   // The water's 10° band, and the fish caught under the same sky and wind in it, counted as the link opens them.
   const tempBand =
     entry.weather?.waterTempF === undefined
@@ -1933,6 +1941,12 @@ function CatchView() {
         {yearCount > 1 ? (
           <p className="meta kind-year">
             <Link to={findWithLink(...yearSearch)}>{t("{species} in {year}: {count}", { species: kindName(entry.species), year: caughtYear, count: yearCount })}</Link>
+          </p>
+        ) : null}
+        {timeCount > 1 ? (
+          <p className="meta kind-time">
+            {/* Polish writes the part of the day in lower case inside a sentence, as the search's "Best time of day" does. */}
+            <Link to={findWithLink(...timeSearch)}>{t("{species} at this time of day ({time}): {count}", { species: kindName(entry.species), time: inSentence(t(biteTime.label)), count: timeCount })}</Link>
           </p>
         ) : null}
         {milestone ? (
