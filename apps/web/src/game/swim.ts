@@ -49,6 +49,7 @@ export function loadSwim(userId: string): Swim | null {
           ...(swim.bread ? { bread: true } : {}),
           ...(swim.worm ? { worm: true } : {}),
           ...(upTo(swim.landedBig, WARY_LANDED) ? { landedBig: swim.landedBig } : {}),
+          ...(swim.ripped ? { ripped: true } : {}),
         }
       : null;
   });
@@ -58,12 +59,12 @@ export function saveSwim(userId: string, swim: Swim | null) {
   writeAngler(swimKey(userId), swim);
 }
 
-/** The swim on a new visit: as it was if soon after, freshly baited once when the feeders have gathered (longer with bread crumb in it, shorter when it is raining, its top-ups gone, its chopped worm and wary big feeders kept), gone once the season's days run out. */
+/** The swim on a new visit: as it was if soon after, freshly baited once when the feeders have gathered (longer with bread crumb in it, shorter when it is raining, its top-ups gone, its chopped worm, wary big feeders and a lure ripped through it kept), gone once the season's days run out. */
 export function swimNow(swim: Swim | null, now: number, season?: LakeSeason, sky?: Sky): (Swim & { primedNow: boolean }) | null {
   if (!swim || swim.casts <= 0) return null;
   const age = now - swim.at;
   const { primedMs, goneMs } = swimTimes(season);
   if (age > goneMs) return null;
   const casts = (swim.bread ? BREAD_SWIM_CASTS : GROUNDBAIT_CASTS) - (sky === "rain" ? RAIN_WASHED_CASTS : 0);
-  return age >= primedMs && !swim.primed ? { spot: swim.spot as SpotId, casts, at: swim.at, primed: true, ...(swim.bread ? { bread: true } : {}), ...(swim.worm ? { worm: true } : {}), ...(swim.landedBig ? { landedBig: swim.landedBig } : {}), primedNow: true } : { ...swim, primedNow: false };
+  return age >= primedMs && !swim.primed ? { spot: swim.spot as SpotId, casts, at: swim.at, primed: true, ...(swim.bread ? { bread: true } : {}), ...(swim.worm ? { worm: true } : {}), ...(swim.landedBig ? { landedBig: swim.landedBig } : {}), ...(swim.ripped ? { ripped: true } : {}), primedNow: true } : { ...swim, primedNow: false };
 }
