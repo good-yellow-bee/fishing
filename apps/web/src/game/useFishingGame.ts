@@ -2410,7 +2410,7 @@ export function useFishingGame(
       const prowler = next.built! >= TOPUP_MAX ? prowlerAt(spotRef.current, lureRef?.current) : undefined;
       const prowl = prowler && profileRef.current && canLand(profileRef.current, prowler) ? t("{fish} prowls round it now, hunting the small feeders: one hooked here scatters them, landed or lost.", { fish: t(prowler.name) }) : "";
       const leader = big && afterDark(hourRef.current) ? afterDarkLeaderAt(spotRef.current, lureRef?.current) : undefined;
-      const night = leader ? t("After dark {fish} come to it most: a night over this swim is the time for one.", { fish: t(leader.name) }) : "";
+      const night = leader && profileRef.current && canLand(profileRef.current, leader) ? t("{fish} come to it most after dark: a night over this swim is the time for one.", { fish: t(leader.name) }) : "";
       foldHint(
         big && grew
           ? t("You top up the swim again as it fades: the feeders stay, and the big ones move in. {casts} casts of it now.", { casts: next.casts })
