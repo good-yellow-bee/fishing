@@ -1283,7 +1283,7 @@ export function DockPage() {
             <>
               {" "}
               {reasonsOpen ? (
-                <span>{game.moreReasons.join(" ")}</span>
+                <span className="hint-reasons">{game.moreReasons.join(" ")}</span>
               ) : (
                 <button className="hint-more" type="button" data-camera-control onClick={(event) => {
                   // Off the button, so Space strikes again rather than pressing it.

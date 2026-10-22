@@ -220,6 +220,22 @@ describe("dock weather", () => {
     expect(document.activeElement).not.toBe(more);
   });
 
+  it("folds a long wait hint with its left-out reasons, which come after Read more", async () => {
+    landed.waiting = { hint: "Over the groundbait. Watch the bobber.", more: ["Fresh water."] };
+    landed.fold = { hint: "Over the groundbait. Watch the bobber.", lead: "Over the groundbait." };
+    const page = await openDock("/?hour=day&sky=clear");
+    const hint = page.querySelector(".hint")!;
+    const tail = hint.querySelector(".hint-tail")!;
+    expect(tail.textContent).toBe(" Watch the bobber.");
+    // index.css folds what follows a folded tail on a phone: the reasons button, and the reasons once opened.
+    const reasons = hint.querySelector<HTMLButtonElement>(".hint-tail ~ .hint-more:not(.hint-tail-more)")!;
+    expect(reasons.textContent).toBe("1 more reason");
+    await act(async () => reasons.click());
+    expect(hint.querySelector(".hint-tail ~ .hint-reasons")?.textContent).toBe("Fresh water.");
+    await act(async () => hint.querySelector<HTMLButtonElement>(".hint-tail-more")!.click());
+    expect(tail.hasAttribute("data-open")).toBe(true);
+  });
+
   it("marks the walk signs of the banks whose giant is still out there, and the stance it is at", async () => {
     landed.stance = "dock";
     vi.mocked(getGiants).mockResolvedValue([
