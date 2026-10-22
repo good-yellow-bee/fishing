@@ -37,7 +37,7 @@ function carpShape() {
 /** A whisker reaching `len` from a corner of the mouth at (`x`, `y`, `z`), out to that side and `back` radians round toward the tail, drooping `down` radians. */
 function barbel(x: number, y: number, z: number, len: number, back: number, down: number) {
   const side = Math.sign(x);
-  return new THREE.CylinderGeometry(0.014, 0.006, len, 4)
+  return new THREE.CylinderGeometry(0.006, 0.014, len, 4)
     .rotateZ((-side * Math.PI) / 2)
     .translate((side * len) / 2, 0, 0)
     .rotateZ(-side * down)
@@ -123,7 +123,7 @@ function softEdge() {
   return new THREE.CanvasTexture(canvas);
 }
 
-/** The muddy cloud a handful of groundbait leaves off the bank, thinning as its casts are fished out; fish dimple over it once `feeding` or topped up, more often the more it was built up, with `bigFeeders` in a carp now and then rolls at its edge (a catfish after dark where they lead them, with `catfish`), and with `thieves` shiners dart in at its edge and turn away, fewer as it is topped up, with chopped worm in it perch hang under it and dart about, and with `prowler` a pike glides along its open-water side, slashing in at the feeders once a pass. When a lost big feeder scatters the feeders the dimples stop, bow wakes fan out toward open water and the cloud thins. */
+/** The muddy cloud a handful of groundbait leaves off the bank, thinning as its casts are fished out; fish dimple over it once `feeding` or topped up, more often the more it was built up, with `bigFeeders` in a carp now and then rolls at its edge (a catfish instead with `catfish`), and with `thieves` shiners dart in at its edge and turn away, fewer as it is topped up, with chopped worm in it perch hang under it and dart about, and with `prowler` a pike glides along its open-water side, slashing in at the feeders once a pass. When a lost big feeder scatters the feeders the dimples stop, bow wakes fan out toward open water and the cloud thins. */
 export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false, catfish = false, thieves = false, prowler = false }: { bait: Groundbait; feeding?: boolean; bigFeeders?: boolean; catfish?: boolean; thieves?: boolean; prowler?: boolean }) {
   const still = useReducedMotion();
   const geo = useMemo(() => new THREE.CircleGeometry(CLOUD_RADIUS, 32).rotateX(-Math.PI / 2), []);

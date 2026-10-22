@@ -1,6 +1,6 @@
-import { LAKE_CENTER_Z, type SpotId } from "@stillwater/shared";
+import { FISH, LAKE_CENTER_Z, type LakeHour, type SpotId } from "@stillwater/shared";
 import { BANK_STANDS, PLACES } from "../hotspot";
-import { afterDark, afterDarkLeaderAt, bigFeedersOver, GROUNDBAIT_CASTS, SWIM_MAX_CASTS, TOPUP_MAX, type Groundbait } from "../logic";
+import { afterDark, afterDarkLeaderAt, bigFeedersOver, GROUNDBAIT_CASTS, poolForLure, SWIM_MAX_CASTS, TOPUP_MAX, type Groundbait } from "../logic";
 
 /** How wide the cloud of groundbait spreads on the water, in metres. */
 export const CLOUD_RADIUS = 1.1;
@@ -99,9 +99,10 @@ export function rollAt(time: number): { dx: number; dz: number; yaw: number; age
   return { dx: Math.cos(angle) * out, dz: Math.sin(angle) * out, yaw: Math.atan2(-Math.sin(angle) * turn, Math.cos(angle) * turn), age };
 }
 
-/** After dark a catfish rolls in the carp's place over a built swim at a bank where they lead the big feeders and would take the tied lure (GT489). */
-export function catfishRolls(bait: Groundbait, lure: string | undefined, hour: string): boolean {
-  return afterDark(hour) && bigFeedersOver(bait, lure) && afterDarkLeaderAt(bait.spot, lure) !== undefined;
+/** The big feeder rolling over a built swim is a catfish after dark where they lead the big feeders (GT489), or where they are the only big feeder the tied lure takes; a carp otherwise. */
+export function catfishRolls(bait: Groundbait, lure: string | undefined, hour: LakeHour): boolean {
+  if (!bigFeedersOver(bait, lure) || !afterDarkLeaderAt(bait.spot, lure)) return false;
+  return afterDark(hour) || !poolForLure(FISH.filter((fish) => fish.spots.includes(bait.spot)), lure).some((fish) => fish.id === "carp");
 }
 
 /** Bait thieves crowding a swim (GT484): this many shiners over a fresh one, fewer once topped up, none once built all the way. */

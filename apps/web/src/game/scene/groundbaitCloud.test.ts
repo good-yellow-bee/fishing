@@ -77,14 +77,15 @@ describe("big feeders rolling over a built swim", () => {
     expect(bigFeedersOver(swim("point", TOPUP_MAX), undefined)).toBe(false);
   });
 
-  it("roll as a catfish after dark where the catfish lead them, a carp by day or where none come", () => {
+  it("roll as a catfish after dark where the catfish lead them or where they are the only big feeder, a carp otherwise", () => {
     const built = (spot: "dock" | "dropoff" | "reeds", times = TOPUP_MAX) => ({ spot, casts: 8, built: times });
     expect(catfishRolls(built("dock"), undefined, "dusk")).toBe(true);
-    expect(catfishRolls(built("dropoff"), undefined, "night")).toBe(true);
+    expect(catfishRolls(built("dock"), undefined, "night")).toBe(true);
     expect(catfishRolls(built("dock"), undefined, "day")).toBe(false);
     expect(catfishRolls(built("dock", TOPUP_MAX - 1), undefined, "night")).toBe(false);
     expect(catfishRolls(built("dock"), "Worm", "night")).toBe(false);
-    // The reeds have carp but no catfish: the carp still roll there after dark.
+    // The drop-off has catfish but no carp, the reeds carp but no catfish.
+    expect(catfishRolls(built("dropoff"), undefined, "day")).toBe(true);
     expect(bigFeedersOver(built("reeds"), undefined)).toBe(true);
     expect(catfishRolls(built("reeds"), undefined, "night")).toBe(false);
   });
