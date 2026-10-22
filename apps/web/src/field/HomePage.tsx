@@ -503,14 +503,18 @@ export function HomePage() {
             <>
               <h3 className="subhead">{t("This week in years past")}</h3>
               <div className="stack">
-                {yearsAgo.map((entry) => (
+                {yearsAgo.map((entry, index) => (
                   <div key={entry.id} className="years-ago">
                     {/* Say plainly how long ago, beside the date on the card. */}
                     <p className="meta">
                       {tn(yearsBack(entry, now) ?? 1, "{n} year ago", "{n} years ago")}
-                      {" · "}
-                      {/* The whole day it came from, in the catch search. */}
-                      <Link to={findLink(everyFishThatDay(entry))}>{t("Every fish that day")}</Link>
+                      {/* The whole day it came from, in the catch search: once a day, on its newest fish, a night's small hours on its outing's day. */}
+                      {index > 0 && bookFishDay(book, yearsAgo[index - 1]) === bookFishDay(book, entry) ? null : (
+                        <>
+                          {" · "}
+                          <Link to={findLink(everyFishThatDay(entry))}>{t("Every fish that day")}</Link>
+                        </>
+                      )}
                     </p>
                     <CatchCard
                       level={4}

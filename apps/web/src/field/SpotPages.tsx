@@ -49,7 +49,7 @@ import { sunTimes } from "./sunTimes";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { useKeptForm } from "./keptForm";
 import { ChoiceRow } from "./ChoiceRow";
-import { countedBook, hasOwnEntries, ownFish } from "./milestones";
+import { countedBook, hasOwnEntries } from "./milestones";
 import { PhotoStrip } from "./SpeciesPage";
 import { formatCoord, placeFor } from "./map/places";
 import { hookTally, hookText } from "./hookTally";
@@ -159,8 +159,6 @@ export function SpotsPage() {
   const countedCatches = countedBook(book).catches;
   const ownRows = spotsByLastFish({ ...book, catches: countedCatches });
   const ownOrder = new Map(ownRows.map((row, index) => [row.spot.id, index]));
-  const ownCount = new Map(ownRows.map((row) => [row.spot.id, row.fishCount]));
-  const countOf = (row: { spot: { id: string } }) => ownCount.get(row.spot.id) ?? 0;
   rows.sort((a, b) => (ownOrder.get(a.spot.id) ?? 0) - (ownOrder.get(b.spot.id) ?? 0));
   // The order picked holds while its control shows: a list cut to two waters goes back to the last fish.
   const order: SpotOrder = rows.length > 2 ? storedOrder : "fish";
@@ -224,12 +222,12 @@ export function SpotsPage() {
       return (!x ? (y ? 1 : 0) : !y ? -1 : x < y ? -1 : x > y ? 1 : 0) || tidyOrder(a, b);
     });
   }
-  // Once the angler has fish of their own, the sample week's invented waters follow theirs under every order, as they
-  // do by the last fish: by name or by the most fish they would sit among, or above, the angler's own.
-  if (book.catches.some(ownFish)) {
-    const invented = (row: { spot: { id: string } }) => Number(isSampleSpot(row.spot.id) && countOf(row) === 0);
-    rows.sort((a, b) => invented(a) - invented(b));
-  }
+  // Once the angler has an outing or a fish of their own, as Home counts their waters, the sample week's invented
+  // waters with nothing of theirs follow theirs under every order: by name or by the most fish they would sit among,
+  // or above, the angler's own.
+  const ownAny = hasOwnEntries(book);
+  const invented = (row: { spot: { id: string } }) => ownAny && isSampleSpot(row.spot.id) && !ownHere(row.spot.id);
+  rows.sort((a, b) => Number(invented(a)) - Number(invented(b)));
   rows.sort((a, b) => Number(a.spot.id === PLAY_LAKE_ID) - Number(b.spot.id === PLAY_LAKE_ID));
   // With rivers and lakes both in the book, the list can narrow to one kind of water; the game's lake shows under all.
   const types = WATER_TYPES.filter((type) => rows.some((row) => row.spot.id !== PLAY_LAKE_ID && row.spot.waterType === type));
@@ -261,9 +259,8 @@ export function SpotsPage() {
     const bests = personalBests({ ...book, catches: catches.filter((entry) => entry.spotId === spotId) });
     return bests.longest ? { entry: bests.longest, kind: "length" as const } : bests.heaviest ? { entry: bests.heaviest, kind: "weight" as const } : null;
   };
-  const sampleGroup = (row: { spot: { id: string } }) => book.catches.some(ownFish) && isSampleSpot(row.spot.id) && countOf(row) === 0;
-  const ownShown = shownRows.filter((row) => row.spot.id !== PLAY_LAKE_ID && !sampleGroup(row));
-  const sampleShown = shownRows.filter((row) => row.spot.id !== PLAY_LAKE_ID && sampleGroup(row));
+  const ownShown = shownRows.filter((row) => row.spot.id !== PLAY_LAKE_ID && !invented(row));
+  const sampleShown = shownRows.filter((row) => row.spot.id !== PLAY_LAKE_ID && invented(row));
   const gameShown = shownRows.filter((row) => row.spot.id === PLAY_LAKE_ID);
   // Labelled only below waters of the angler's own: alone, the sample week's or the game's need no heading.
   const waterGroups = [
