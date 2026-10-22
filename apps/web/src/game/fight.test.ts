@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { FISH, NEST_GUARDERS, type FishSpecies } from "@stillwater/shared";
 import { DIVERS, FRAYED_SNAP, LINE_SPINNERS, NET_SHY_MS, SLIPPERS, THRASH_HEAD_MS, NET_BOLT_LINE, NET_WAIT_MS, NET_HEAD_EVERY_MS, NET_HEAD_MS, netsFish, liftsStickerInOne, STRONG_LIFT_STRENGTH, TEETH_SEC, TOOTHY, CHARGERS, CHARGE_SLACK_SEC, BREACHERS, BROADSIDE_REEL, BROADSIDERS, QUIT_TIRE, QUITTERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, FLOOD_DRIFT, floodedInlet, BOAT_RUN, STRONG_WIND_BOAT_RUN, boatSwingShare, WIND_SLACK, WINTER_TIRE, seasonTireMul, thrivesInCold, COLD_LOVERS, SUMMER_TIRE, COLDWATER, warmTireMul, rainCooled, deepCooled, FALL_RUN_TIRE, FALL_RUNNERS, runTireMul, SPRING_RUN_TIRE, SPRING_RUNNERS, springRunTireMul, CURRENT_FIGHTER_TIRE, CURRENT_FIGHTERS, currentTireMul, FALL_FEED_TIRE, FALL_FEEDERS, fallFeedTireMul, RAIN_HUNTER_TIRE, SCENT_HUNTERS, rainHunterTireMul, SUMMER_STRENGTH_TIRE, WARM_LOVERS, summerStrengthTireMul, NEST_TIRE, nestTireMul, NIGHT_HUNTER_TIRE, NIGHT_HUNTERS, nightTireMul, SPAWN_SPENT_TIRE, EARLY_SPAWNERS, spentTireMul, TWILIGHT_HUNTER_TIRE, TWILIGHT_HUNTERS, twilightTireMul, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, TREBLE_HOLD, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD, SHAKE_MS, SHAKE_GRACE_SEC, WITH_RUN_DRIFT, WITH_RUN_GRACE_SEC, WITH_RUN_REEL, TURNED_HEAD_MS, TURNED_HEAD_REEL, DRAG_RUN_LINE, DRAG_RUN_PULL, HEAVY_DRAG_CAP, WEED_BALL_REEL, FOAM_DRIFT, findsSecondWind, SECOND_WIND_AT, SECOND_WIND_GAIN, SECOND_WIND_GATHER_MS, ARM_FLOOR, ARM_FRESH_SEC, ARM_TIRE_PER_SEC, armMul } from "./fight";
-import { LINE_COVER, type LineWeight } from "./lineWeight";
+import { LINE_COVER, LINE_SNAP, type LineWeight } from "./lineWeight";
 import { nextDrag, type Drag } from "./drag";
 
 function fish(id: string) {
@@ -1495,6 +1495,32 @@ describe("heavy line in cover", () => {
     expect(bass.sim.weeded).toBe(true);
     bass.step(at + WEED_MS * COVER_HOLD * LINE_COVER.heavy + 50, 0.05, false);
     expect(bass.sim.weeded).toBe(false);
+  });
+
+  it("saws a light line to frayed as the fish goes into the weeds, and only then", () => {
+    const sawn = makeFight(fish("smallmouth-bass"), 4, 3, () => 0, 1, "weeds", undefined, false, false, false, false, false, false, false, 1, 1, false, { lineSnap: LINE_SNAP.light, weedFrays: true });
+    const at = firstRunEnd(sawn);
+    expect(sawn.sim.weeded).toBe(true);
+    expect(sawn.sim.frayed).toBe(true);
+    expect(sawn.sim.sawn).toBe(true);
+    expect(sawn.performance.sawn).toBe(true);
+    const plain = onLine("light", "weeds");
+    expect(firstRunEnd(plain)).toBe(at);
+    expect(plain.sim.weeded).toBe(true);
+    expect(plain.sim.frayed).toBeUndefined();
+    expect(plain.performance.sawn).toBeUndefined();
+    // Sawn, it snaps short of where the sound light line would.
+    for (const runtime of [sawn, plain]) runtime.sim.tension = (FRAYED_SNAP * LINE_SNAP.light + LINE_SNAP.light) / 2;
+    expect(sawn.step(at + 50, 0.05, false)).toBe("snapped");
+    expect(plain.step(at + 50, 0.05, false)).toBe("fighting");
+  });
+
+  it("leaves a line already frayed from before as it was, with no sawing to tell", () => {
+    const worn = makeFight(fish("smallmouth-bass"), 4, 3, () => 0, 1, "weeds", undefined, false, false, false, false, false, true, false, 1, 1, false, { weedFrays: true });
+    firstRunEnd(worn);
+    expect(worn.sim.frayed).toBe(true);
+    expect(worn.sim.sawn).toBeUndefined();
+    expect(worn.performance.sawn).toBeUndefined();
   });
 
   it("leaves the other lines to hold in cover as a standard line does", () => {

@@ -275,6 +275,14 @@ describe("FightBar for screen readers", () => {
     expect(heavyLine(trout, "log")).toBe("Heavy line: it holds more strain before it snaps, and a wrapped line comes free in half the time");
     expect(heavyLine(trout, "deep")).toBe("Heavy line: it holds more strain before it snaps");
     expect(heavyLine(perch, "weeds")).toBe("Heavy line: it holds more strain before it snaps");
+    // Light line warns of the weed stems only for a turnable fish fought where they fray it.
+    const lightLine = (species: typeof perch, weedFrays: boolean) => {
+      act(() => root!.render(<FightBar fight={{ species, weight: 2, underpowered: false, line: "light", water: "weeds", weedFrays }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
+      return [...container!.querySelectorAll(".fight-water")].map((line) => line.textContent ?? "").find((line) => line.startsWith("Light line"));
+    };
+    expect(lightLine(trout, true)).toBe("Light line: it snaps sooner, and the weed stems fray it if the fish goes in, so turn every run");
+    expect(lightLine(trout, false)).toBe("Light line: it snaps sooner, so keep out of the red");
+    expect(lightLine(perch, true)).toBe("Light line: it snaps sooner, so keep out of the red");
     // A wire leader is named only when a swallowing fish has its teeth on it.
     act(() => root!.render(<FightBar fight={{ species: FISH.find((fish) => fish.id === "pike")!, weight: 4, underpowered: false, line: "wire", wired: true }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
     expect([...container!.querySelectorAll(".fight-water")].map((line) => line.textContent)).toContain("Wire leader: its teeth can't fray the line");

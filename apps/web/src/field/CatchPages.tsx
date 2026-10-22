@@ -951,7 +951,7 @@ function CatchForm() {
             {existing
               ? t("Changes you made to this fish were not saved.")
               : waiting.species.trim()
-              ? t("A fish you started logging was not saved: {species}.", { species: t(waiting.species.trim()) })
+              ? t("A fish you started logging was not saved: {species}.", { species: bookKindName(book.catches)(waiting.species) })
               : t("A fish you started logging was not saved.")}
           </p>
           <button type="button" className="field-primary inline" onClick={() => pickUp(waiting)}>

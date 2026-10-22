@@ -117,7 +117,7 @@ vi.mock("./fight", async (importOriginal) => {
 });
 
 import { updateSettings } from "./settings";
-import { HEAVY_BRIGHT_WAIT, LINE_COVER, LINE_WAIT } from "./lineWeight";
+import { HEAVY_BRIGHT_WAIT, LIGHT_WINTER_WAIT, LINE_COVER, LINE_WAIT } from "./lineWeight";
 import { giantShyKey } from "./giantShy";
 import { NIGHT_LINE_STALE_MS, nightLineKey, nightLineReadyAt, nightLineState } from "./nightLine";
 import { WORM_TIN_WET, wormsDug, wormTinKey } from "./wormTin";
@@ -1636,6 +1636,61 @@ describe("useFishingGame strike timing", () => {
     act(() => frames.at(-1)!(now));
     expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toContain("Its teeth frayed your line: it snaps sooner until you retie it.");
     expect(container!.querySelector("[data-testid=frayed]")?.textContent).toBe("true");
+  });
+
+  it("hands light line in the weeds to the fight, and says so when the stems fray it", () => {
+    updateSettings({ line: "light" });
+    try {
+      // The lily pads stand in summer; they die back in winter.
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, undefined, undefined, undefined, "summer");
+      Object.assign(surface.dataset, { stance: "point", angler: "-5.6,12.2", aim: "-6.8,4.8" });
+      vi.mocked(waitMs).mockReturnValueOnce(1_000);
+      step.mockReturnValueOnce("fighting");
+      castAndFight(surface, 1);
+      expect(vi.mocked(makeFight).mock.calls.at(-1)?.[17]).toMatchObject({ weedFrays: true });
+      const sim = vi.mocked(makeFight).mock.results.at(-1)!.value.sim as FightSim;
+      sim.sawn = true;
+      sim.frayed = true;
+      step.mockReturnValueOnce("fighting");
+      act(() => frames.at(-1)!(now));
+      expect(hint()).toBe("The weed stems have frayed your light line! It snaps sooner now, so ease it out of the weeds.");
+      vi.mocked(makeFight).mock.results.at(-1)!.value.performance.sawn = true;
+      step.mockReturnValueOnce("landed");
+      act(() => frames.at(-1)!(now));
+      expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toContain("The weed stems frayed your light line: it snaps sooner until you retie it.");
+      expect(container!.querySelector("[data-testid=frayed]")?.textContent).toBe("true");
+      // Already frayed, the stems have nothing more to do to it, and the hint doesn't warn of them.
+      act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
+      vi.mocked(waitMs).mockReturnValueOnce(1_000);
+      step.mockReturnValueOnce("fighting");
+      cast(surface);
+      expect(hint()).not.toContain("weed stems");
+      act(() => vi.advanceTimersByTime(2_201));
+      act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+      expect(phase()).toBe("fight:none");
+      expect(vi.mocked(makeFight).mock.calls.at(-1)?.[17]).toMatchObject({ weedFrays: false });
+    } finally {
+      updateSettings({ line: "standard" });
+    }
+  });
+
+  it.each([
+    ["light", "dock", false, false],
+    ["standard", "pads", false, false],
+    ["light", "pads", false, true],
+    ["light", "pads", true, false],
+  ] as const)("hands a %s line at the %s (beginner %s) weed stems that fray it: %s", (line, stance, beginner, frays) => {
+    updateSettings({ line });
+    try {
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, undefined, undefined, undefined, "summer", beginner);
+      if (stance === "pads") Object.assign(surface.dataset, { stance: "point", angler: "-5.6,12.2", aim: "-6.8,4.8" });
+      vi.mocked(waitMs).mockReturnValueOnce(1_000);
+      step.mockReturnValueOnce("fighting");
+      castAndFight(surface, 1);
+      expect(vi.mocked(makeFight).mock.calls.at(-1)?.[17]).toMatchObject({ weedFrays: frays });
+    } finally {
+      updateSettings({ line: "standard" });
+    }
   });
 
   it("keeps a swallowing pike's teeth on the wire leader, off the line", () => {
@@ -3716,6 +3771,23 @@ describe("useFishingGame groundbait", () => {
   });
 
   it.each([
+    ["Spinner", false, "Light line: the fish can't see it, so the bites come sooner, but a pike here can bite through it at the strike, and the weed stems fray it if a fish runs in."],
+    ["Nightcrawler", false, "Light line: the fish can't see it, so the bites come sooner, but the weed stems fray it if a fish runs in."],
+    ["Spinner", true, "Light line: the fish can't see it, so the bites come sooner."],
+  ] as const)("warns light line on a %s tight to the lily pads of the weed stems (beginner %s)", (lure, beginner, said) => {
+    updateSettings({ line: "light" });
+    try {
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, lure, undefined, undefined, "summer", beginner);
+      Object.assign(surface.dataset, { stance: "point", angler: "-5.6,12.2", aim: "-6.8,4.8" });
+      cast(surface);
+      expect(hint()).toContain(said);
+      if (beginner) expect(hint()).not.toContain("weed stems");
+    } finally {
+      updateSettings({ line: "standard" });
+    }
+  });
+
+  it.each([
     ["dock", "Heavy line: the fish can see it, so the bites come slower, but a line wrapped round the wood comes free in half the time."],
     ["dropoff", "Heavy line: the fish can see it, so the bites come slower."],
   ] as const)("tells heavy line's pull out of cover at the %s", (stance, said) => {
@@ -3745,6 +3817,44 @@ describe("useFishingGame groundbait", () => {
       // The line's wait goes second to last into the stack, ahead of the frenzy's.
       expect(vi.mocked(stackWaitMs).mock.lastCall?.at(-2)).toBe(slower);
       expect(hint()).toContain(said);
+    } finally {
+      updateSettings({ line: "standard" });
+    }
+  });
+
+  it.each([
+    ["heavy", "dock", "Spinner", "overcast", HEAVY_BRIGHT_WAIT, "Heavy line: in the clear winter water the fish see it plainer, so the bites come slower still, but a line wrapped round the wood comes free in half the time."],
+    ["heavy", "dropoff", "Spinner", "clear", HEAVY_BRIGHT_WAIT, "Heavy line: in the clear winter water the fish see it plainer, so the bites come slower still."],
+    ["light", "dropoff", "Spinner", "overcast", LIGHT_WINTER_WAIT, "Light line: in the clear winter water the line-shy fish can't see it, so the bites come sooner still, but a pike here can bite through it at the strike."],
+    ["light", "dropoff", "Nightcrawler", "overcast", LIGHT_WINTER_WAIT, "Light line: in the clear winter water the line-shy fish can't see it, so the bites come sooner still."],
+    ["heavy", "reeds", "Spinner", "overcast", HEAVY_BRIGHT_WAIT, "Heavy line: in the clear winter water the fish see it plainer, so the bites come slower still, but it pulls a fish out of the weeds in half the time."],
+    ["light", "reeds", "Spinner", "overcast", LIGHT_WINTER_WAIT, "Light line: in the clear winter water the line-shy fish can't see it, so the bites come sooner still, but a pike here can bite through it at the strike, and the weed stems fray it if a fish runs in."],
+    ["light", "reeds", "Nightcrawler", "overcast", LIGHT_WINTER_WAIT, "Light line: in the clear winter water the line-shy fish can't see it, so the bites come sooner still, but the weed stems fray it if a fish runs in."],
+  ] as const)("tells %s line at the %s on a %s in winter's clear water under a %s sky", (line, stance, lure, sky, wait, said) => {
+    updateSettings({ line });
+    try {
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, lure, "calm", sky, "winter");
+      if (stance === "dropoff") atDropoff(surface);
+      if (stance === "reeds") Object.assign(surface.dataset, { stance: "reeds", angler: "-13.6,10.7", aim: "-11,5" });
+      cast(surface);
+      expect(vi.mocked(stackWaitMs).mock.lastCall?.at(-2)).toBe(wait);
+      expect(hint()).toContain(said);
+    } finally {
+      updateSettings({ line: "standard" });
+    }
+  });
+
+  it.each([
+    ["heavy", LINE_WAIT.heavy, "Heavy line: the fish can see it, so the bites come slower."],
+    ["light", LINE_WAIT.light, "Light line: the fish can't see it, so the bites come sooner."],
+  ] as const)("leaves %s line as it is on a winter night, as the dark hides it", (line, wait, said) => {
+    updateSettings({ line });
+    try {
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "night", false, "Nightcrawler", "calm", "clear", "winter");
+      atDropoff(surface);
+      cast(surface);
+      expect(vi.mocked(stackWaitMs).mock.lastCall?.at(-2)).toBe(wait);
+      expect(`${hint()} ${container!.querySelector("[data-testid=more-reasons]")?.textContent}`).toContain(said);
     } finally {
       updateSettings({ line: "standard" });
     }
