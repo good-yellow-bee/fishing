@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { spotAt, SPOT_IDS, walkableAt } from "@stillwater/shared";
 import { bigFeedersOver, GROUNDBAIT_CASTS, SWIM_MAX_CASTS, throwHandful, TOPUP_MAX } from "../logic";
-import { cloudCenter, cloudOpacity, CLOUD_RADIUS, DIMPLES, dimpleAt, feedersShow, ROLL_GAP_SEC, ROLL_SEC, ROLL_SPAN, rollAt } from "./groundbaitCloud";
+import { BANK_STANDS } from "../hotspot";
+import { cloudCenter, cloudOpacity, CLOUD_RADIUS, DIMPLES, dimpleAt, feedersShow, openWaterYaw, ROLL_GAP_SEC, ROLL_SEC, ROLL_SPAN, rollAt, SCATTER_SEC, SCATTER_WAKES, scatterWakeAt } from "./groundbaitCloud";
 
 describe("groundbait cloud", () => {
   it.each(SPOT_IDS)("lands on the %s's own open water", (spot) => {
@@ -102,5 +103,39 @@ describe("big feeders rolling over a built swim", () => {
       const along = { x: Math.sin(roll.yaw), z: Math.cos(roll.yaw) };
       expect(Math.abs(along.x * roll.dx + along.z * roll.dz)).toBeLessThan(1e-9);
     }
+  });
+});
+
+describe("a scattered swim", () => {
+  const built = { spot: "dock" as const, casts: 4, built: TOPUP_MAX };
+
+  it("stops the dimples", () => {
+    expect(feedersShow(built, false)).toBe(true);
+    expect(feedersShow({ ...built, spooked: 2 }, true)).toBe(false);
+  });
+
+  it("thins the cloud", () => {
+    expect(cloudOpacity(4, true)).toBeLessThan(cloudOpacity(4));
+    expect(cloudOpacity(1, true)).toBeGreaterThan(0);
+  });
+
+  it("fans a few wakes out toward open water that run on and fade within the scatter", () => {
+    for (const spot of SPOT_IDS) {
+      const yaw = openWaterYaw(spot);
+      const heads = Array.from({ length: SCATTER_WAKES }, (_, i) => scatterWakeAt(i, 0.5, yaw)!.yaw);
+      expect(new Set(heads).size).toBe(SCATTER_WAKES);
+      for (const head of heads) expect(Math.abs(head - yaw)).toBeLessThan(0.7);
+      const stand = BANK_STANDS[spot];
+      const at = cloudCenter(spot);
+      // The way out leads from the stand through the cloud.
+      expect(Math.sin(yaw) * (at.x - stand.x) + Math.cos(yaw) * (at.z - stand.z)).toBeGreaterThan(0);
+    }
+    const early = scatterWakeAt(1, 0.2, 0)!;
+    const late = scatterWakeAt(1, 1.6, 0)!;
+    expect(late.run).toBeGreaterThan(early.run);
+    expect(late.glow).toBeLessThan(early.glow);
+    expect(scatterWakeAt(1, SCATTER_SEC, 0)).toBeNull();
+    expect(scatterWakeAt(1, -1, 0)).toBeNull();
+    expect(SCATTER_WAKES).toBeLessThanOrEqual(DIMPLES);
   });
 });

@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import type { Groundbait } from "../logic";
-import { CLOUD_RADIUS, DIMPLES, ROLL_SPAN, cloudCenter, cloudOpacity, dimpleAt, feedersShow, rollAt } from "./groundbaitCloud";
+import { CLOUD_RADIUS, DIMPLES, ROLL_SPAN, SCATTER_WAKES, WAKE_ARC, cloudCenter, cloudOpacity, dimpleAt, feedersShow, openWaterYaw, rollAt, scatterWakeAt } from "./groundbaitCloud";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
@@ -27,6 +27,11 @@ function carpShape() {
   return merged;
 }
 
+/** The front of a ring, facing +z: the bow wave of a fish that bolts. */
+function wakeShape() {
+  return new THREE.RingGeometry(0.8, 1, 12, 1, -Math.PI / 2 - WAKE_ARC / 2, WAKE_ARC).rotateX(-Math.PI / 2);
+}
+
 /** A soft round edge, so the cloud fades into the water instead of ending in a hard disc. */
 function softEdge() {
   const canvas = document.createElement("canvas");
@@ -43,7 +48,7 @@ function softEdge() {
   return new THREE.CanvasTexture(canvas);
 }
 
-/** The muddy cloud a handful of groundbait leaves off the bank, thinning as its casts are fished out; fish dimple over it once `feeding` or topped up, more often the more it was built up, and with `bigFeeders` in a carp now and then rolls at its edge. */
+/** The muddy cloud a handful of groundbait leaves off the bank, thinning as its casts are fished out; fish dimple over it once `feeding` or topped up, more often the more it was built up, and with `bigFeeders` in a carp now and then rolls at its edge. When a lost big feeder scatters the feeders the dimples stop, bow wakes fan out toward open water and the cloud thins. */
 export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false }: { bait: Groundbait; feeding?: boolean; bigFeeders?: boolean }) {
   const still = useReducedMotion();
   const geo = useMemo(() => new THREE.CircleGeometry(CLOUD_RADIUS, 32).rotateX(-Math.PI / 2), []);
@@ -51,31 +56,55 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false }: {
   const mat = useMemo(() => new THREE.MeshBasicMaterial({ color: CLOUD, alphaMap: edge, transparent: true, depthWrite: false }), [edge]);
   const cloud = useRef<THREE.Mesh>(null);
   const rings = useRef<(THREE.Mesh | null)[]>([]);
-  const ring = useMemo(() => new THREE.RingGeometry(0.85, 1, 24).rotateX(-Math.PI / 2), []);
+  const ringGeo = useMemo(() => new THREE.RingGeometry(0.85, 1, 24).rotateX(-Math.PI / 2), []);
+  const wake = useMemo(() => wakeShape(), []);
   const carpGeo = useMemo(() => carpShape(), []);
   const carp = useRef<THREE.Mesh>(null);
   const swirl = useRef<THREE.Mesh>(null);
+  // Whether the swim was scattered last frame (null before the first), and when the feeders last bolted.
+  const scattered = useRef<boolean | null>(null);
+  const bolted = useRef(-Infinity);
   const at = cloudCenter(bait.spot);
+  const out = openWaterYaw(bait.spot);
   useEffect(
     () => () => {
       geo.dispose();
-      ring.dispose();
+      ringGeo.dispose();
+      wake.dispose();
       carpGeo.dispose();
       edge.dispose();
       mat.dispose();
     },
-    [geo, ring, carpGeo, edge, mat],
+    [geo, ringGeo, wake, carpGeo, edge, mat],
   );
-  useFrame((state) => {
+  useFrame((state, dt) => {
     const mesh = cloud.current;
     if (!mesh) return;
     const t = state.clock.elapsedTime;
     mesh.position.set(at.x, waterHeight(at.x, at.z, t) + 0.02, at.z);
     // A slow swell as the crumbs drift and settle.
     mesh.scale.setScalar(still ? 1 : 1 + 0.06 * Math.sin(t * 0.8));
-    mat.opacity = cloudOpacity(bait.casts);
+    const spooked = (bait.spooked ?? 0) > 0;
+    // A swim that comes in already scattered (a reload) has no bolt to show.
+    if (scattered.current === false && spooked) bolted.current = t;
+    const first = scattered.current === null;
+    scattered.current = spooked;
+    const thick = cloudOpacity(bait.casts, spooked);
+    mat.opacity = still || first ? thick : mat.opacity + (thick - mat.opacity) * Math.min(1, dt * 2);
     rings.current.forEach((ring, i) => {
       if (!ring) return;
+      const bolt = i < SCATTER_WAKES && !still ? scatterWakeAt(i, t - bolted.current, out) : null;
+      ring.geometry = bolt ? wake : ringGeo;
+      ring.rotation.y = bolt ? bolt.yaw : 0;
+      if (bolt) {
+        const x = at.x + Math.sin(bolt.yaw) * bolt.run;
+        const z = at.z + Math.cos(bolt.yaw) * bolt.run;
+        ring.visible = true;
+        ring.position.set(x, waterHeight(x, z, t) + 0.03, z);
+        ring.scale.setScalar(bolt.size);
+        (ring.material as THREE.MeshBasicMaterial).opacity = 0.75 * bolt.glow;
+        return;
+      }
       const dimple = dimpleAt(i, t, bait.built);
       ring.visible = feedersShow(bait, feeding) && !still && dimple.age < 1;
       if (!ring.visible) return;
@@ -114,14 +143,14 @@ export function GroundbaitCloud({ bait, feeding = false, bigFeeders = false }: {
     <>
       <mesh ref={cloud} geometry={geo} material={mat} renderOrder={1} />
       {Array.from({ length: DIMPLES }, (_, i) => (
-        <mesh key={i} ref={(mesh) => void (rings.current[i] = mesh)} geometry={ring} visible={false} renderOrder={4}>
+        <mesh key={i} ref={(mesh) => void (rings.current[i] = mesh)} geometry={ringGeo} visible={false} renderOrder={4}>
           <meshBasicMaterial color="#e4efea" transparent opacity={0} depthWrite={false} />
         </mesh>
       ))}
       <mesh ref={carp} geometry={carpGeo} visible={false}>
         <meshToonMaterial color={CARP} gradientMap={toonRamp()} />
       </mesh>
-      <mesh ref={swirl} geometry={ring} visible={false} renderOrder={4}>
+      <mesh ref={swirl} geometry={ringGeo} visible={false} renderOrder={4}>
         <meshBasicMaterial color="#e4efea" transparent opacity={0} depthWrite={false} />
       </mesh>
     </>
