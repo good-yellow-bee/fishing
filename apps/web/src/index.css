@@ -3642,6 +3642,26 @@ html[data-contrast="high"] :is(.daily-requests-note, .hud .eyebrow, .settings-no
   }
 }
 
+/* On a touch tablet the hint kept the desktop's bottom-left corner under the stick, so a four-line hint ran up behind it
+   (a groundbait toss covered all of it on a 1366 x 1024 tablet), and a left-handed cast meter lay over the hint. The hint
+   stands beside the stick instead, as the lake's news does, over the cast meter and short of the strike button. */
+@media (pointer: coarse) and (min-width: 801px) and (min-height: 501px) {
+  .hint {
+    left: calc(136px / var(--text-zoom, 1));
+    bottom: 72px;
+    max-width: min(46ch, calc((100vw - 136px) / var(--text-zoom, 1) - 116px));
+  }
+
+  html[data-hand="left"] .hint {
+    right: calc(136px / var(--text-zoom, 1));
+    left: auto;
+  }
+
+  .lodge-tracks {
+    bottom: calc(80px + var(--hint-h, 54px));
+  }
+}
+
 /* A finger needs a bigger target than a mouse: on touch screens the header's links and the coach's Skip stand at least 32 px tall (they were 22). */
 @media (pointer: coarse) {
   .hud .hud-link,
