@@ -106,11 +106,12 @@ export function SeasonRecapBox({
   // And the water it was won on, once one clearly led: the "where" beside the "on what". Waters that read the same are
   // one, as the search its link opens takes them; the game's lake and the sample week are left out, as there.
   // Named as most of its fish were logged, as Gear's lure record names a water. Waters with no name count apart, each
-  // its own water, so a tie with one is no lead; one leading says nothing, as its fish have no search to open.
+  // its own water, as one gone from the book does, so a tie with one is no lead; one leading says nothing, as its fish
+  // have no search to open.
   const byWater = new Map<string, Map<string, number>>();
   for (const entry of countedFish(book.catches)) {
-    const spotName = book.spots.find((spot) => spot.id === entry.spotId)?.name;
-    if (spotName === undefined || !bookFishDay(book, entry).startsWith(`${year}-`)) continue;
+    const spotName = book.spots.find((spot) => spot.id === entry.spotId)?.name ?? "";
+    if (!bookFishDay(book, entry).startsWith(`${year}-`)) continue;
     const key = foldName(spotName) || `\u0000${entry.spotId}`;
     const names = byWater.get(key) ?? new Map<string, number>();
     names.set(plainName(spotName), (names.get(plainName(spotName)) ?? 0) + 1);

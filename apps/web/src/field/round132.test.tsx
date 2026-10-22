@@ -59,6 +59,19 @@ describe("round 132: Bests in a picked season and waters with no name", () => {
     expect(cards.find((href) => href !== "/spots/blank")).toContain("Own+Lake");
   });
 
+  it("still opens twin waters' search from one card in All time", async () => {
+    const book: Logbook = { spots: [water("blank", ""), water("mill", "Mill Pond"), water("mill2", "Mill pond")], trips: [], catches: [fish("1", "blank", 2026, 1), fish("2", "mill", 2026, 2), fish("3", "mill2", 2026, 3)] };
+    const cards = waterCards(await showBests(book, "/bests"));
+    expect(cards).toHaveLength(2);
+    expect(cards).toContain("/spots/blank");
+    expect(cards.find((href) => href !== "/spots/blank")).toContain("water");
+  });
+
+  it("calls no water best when a water gone from the book has as many fish that season", async () => {
+    const book: Logbook = { spots: [water("own", "Own Lake")], trips: [], catches: [fish("1", "own", 2025, 1), fish("2", "gone", 2026, 2), fish("3", "gone", 2026, 3), fish("4", "own", 2026, 4), fish("5", "own", 2026, 5)] };
+    expect(recap(await showBests(book))).not.toContain("Best water");
+  });
+
   it("calls no water best when a no-name water has as many fish that season", async () => {
     const book: Logbook = {
       spots: [water("blank", ""), water("own", "Own Lake")],
