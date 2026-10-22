@@ -444,7 +444,7 @@ export const PL_GAME: PlBook = {
   "{fish}: it was hunting the feeders on the built-up swim.": "{fish}: ta ryba polowała na ryby żerujące na obficie zanęconym łowisku.",
   "{fish} prowls round it now, hunting the small feeders: one hooked here scatters them, landed or lost.": "{fish} krąży teraz wokół niej, polując na drobne ryby: zacięty tutaj płoszy je, wyholowany czy stracony.",
   "{fish}: that's the second big one off this swim, so the rest are wary of it now: they come no more than the other feeders until a fresh swim is built.": "{fish}: to już druga duża ryba z tego łowiska, więc pozostałe są teraz ostrożne: podpływają nie częściej niż inne ryby żerujące na zanęcie, dopóki łowisko nie zostanie zanęcone od nowa.",
-  "The big feeders here are wary of this swim now: let it fade and build a fresh one to bring them back.": "Duże ryby są teraz ostrożne wobec tego łowiska: pozwól zanęcie się wyczerpać i zanęć od nowa, a wrócą.",
+  "{n} big feeders landed off this swim, none left to draw: the rest are wary of it. Let it fade and build a fresh one to bring them back.": "{n} duże ryby wyłowione z tego łowiska, więcej się nie zwabi: reszta jest wobec niego ostrożna. Pozwól zanęcie się wyczerpać i zanęć od nowa, a wrócą.",
   "{fish}: there's a school here, feeding on the groundbait. It stays a while, so cast again quickly!": "{fish}: tu jest ławica, żeruje na zanęcie. Zostanie dłużej, więc zarzuć szybko jeszcze raz!",
   "bites sooner now": "teraz szybciej bierze",
   "{bank}: bites sooner now": "{bank}: teraz szybciej bierze",

@@ -2390,7 +2390,7 @@ export function useFishingGame(
     const withWorm = (said: string) => [said, worm].filter(Boolean).join(" ");
     // The big feeders are told of only where they live and would take the tied lure; wary of the swim, they no longer move in.
     const takesBig = bigFeedersOver(next, lureRef?.current);
-    const wary = takesBig && isWary(next) ? t("The big feeders here are wary of this swim now: let it fade and build a fresh one to bring them back.") : "";
+    const wary = takesBig && isWary(next) ? t("{n} big feeders landed off this swim, none left to draw: the rest are wary of it. Let it fade and build a fresh one to bring them back.", { n: next.landedBig! }) : "";
     if (kind === "topped") {
       const big = takesBig && !isWary(next);
       const grew = next.built! > before;
