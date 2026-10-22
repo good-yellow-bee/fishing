@@ -192,8 +192,8 @@ const SIGNPOSTS: readonly { target: WalkTarget; label: string }[] = [
 const EFFECTS_NOTICE_MS = 5000;
 
 /** The walk signs' line button, naming the line on the reel. */
-const LINE_WORD: Record<LineWeight, string> = { light: "Line: light", standard: "Line: standard", heavy: "Line: heavy" };
-const LINE_SHORT: Record<LineWeight, string> = { light: "Thin", standard: "Line", heavy: "Thick" };
+const LINE_WORD: Record<LineWeight, string> = { light: "Line: light", standard: "Line: standard", heavy: "Line: heavy", wire: "Line: wire leader" };
+const LINE_SHORT: Record<LineWeight, string> = { light: "Thin", standard: "Line", heavy: "Thick", wire: "Wire" };
 
 /** A lost trophy's news is told once by its report's id. */
 const lostNewsId = (one: LostFound) => one.id;
@@ -1438,8 +1438,8 @@ export function DockPage() {
               <button
                 className="panel-btn"
                 type="button"
-                title={t("Change the line: light line brings more bites but snaps sooner, heavy line holds more but the fish see it.")}
-                aria-label={`${t(LINE_WORD[prefs.line])}. ${t("Change the line: light line brings more bites but snaps sooner, heavy line holds more but the fish see it.")}`}
+                title={t("Change the line: light line brings more bites but snaps sooner, heavy line holds more but the fish see it, and a wire leader draws pike and stands up to their teeth, though the fish see it too.")}
+                aria-label={`${t(LINE_WORD[prefs.line])}. ${t("Change the line: light line brings more bites but snaps sooner, heavy line holds more but the fish see it, and a wire leader draws pike and stands up to their teeth, though the fish see it too.")}`}
                 onClick={(event) => {
                   // Leave Space free for casting.
                   event.currentTarget.blur();
