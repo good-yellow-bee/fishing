@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-22-pa42";
+export const NEWS_ID = "2026-10-22-field85";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "An outing's page now names its longest wait between fish and when it began, when one stands out among three fish or more, and a past outing's Last time here says how many days the water had rested before it, from two days on. And a water with no name now reads Water with no name on its outings' cards, the catch form and a search's Most from, and in copied plans and summaries.",
   "On a touch screen or a short window, the hint for a handful of groundbait now shows its first sentence and folds the rest behind Read more, so on a phone with larger text it no longer runs over the walking stick. And on a touch tablet the hint over the lake now stands beside the walking stick instead of behind it, above the cast meter and short of the strike button; left-handed, it takes the other side.",
   "A swim you leave to gather the feeders now comes back two casts thinner if it is raining when you return, and in the rain a handful on a fading swim keeps it going but builds it up no further, so top it up once the rain stops. And on a swim topped up twice, where your lure would take the big feeders, a handful now says how many carp or catfish you have landed off it, and once two are landed, that the rest are wary until you build a fresh swim.",
   "A water's page now names the nearest other water pinned on the Map and how far off it is, opening it, and Waters copies its list, with each water's fish, outings and last fish, as text for a message. And a water imported with no name now reads Water with no name on Waters, its page, the Map and Bests, never an empty heading.",
