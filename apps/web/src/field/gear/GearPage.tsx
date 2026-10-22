@@ -45,7 +45,7 @@ import { lateOutings, outingDay, outNow, plainName, sameName } from "../tripDate
 import { focusPageHeading } from "../pageFocus";
 import { bookLureName, onPiece } from "../pieceTally";
 import { newestOutingFirst } from "../catchNeighbors";
-import { kindNames, mostWritten } from "../speciesLink";
+import { kindKey, kindNames, mostWritten } from "../speciesLink";
 import { foldName, twinName, twinNamesAmong } from "../spotOrder";
 
 function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
@@ -183,6 +183,14 @@ function LureRecord({ today }: { today: string }) {
       .sort((a, b) => b.count - a.count);
     return top && top.name && byWater.size > 1 && top.count >= 2 && top.count > (next?.count ?? 0) ? top : null;
   };
+  const kindLine = (row: PieceRecord) => {
+    const kind = row.kind!;
+    const text = kind.only ? t("all {species}", { species: kindName(kind.species) }) : t("mostly {species} ({count})", { species: kindName(kind.species), count: kind.count });
+    if (!searchable) return text;
+    const terms = [exactTerm("lure", lureName(row.name)), exactTerm("species", kindName(kind.species)), ...(water ? [exactTerm("water", plainName(water.name))] : [])];
+    const fish = atWater.catches.filter((entry) => onPiece(entry, row.lure!) && kindKey(entry.species) === kindKey(kind.species));
+    return <Link to={findLink(countedSearch(book, terms.join(" + "), fish))}>{text}</Link>;
+  };
   // Each row's best water worked out once, with all waters shown.
   const mostAt = new Map(water ? [] : records.flatMap((row) => (row.lure ? [[row.label, bestWater(row.lure)] as const] : [])).filter(([, best]) => best !== null));
   // The book the record counts: the sample week's made-up lures go with the first outing of the angler's own.
@@ -263,6 +271,8 @@ function LureRecord({ today }: { today: string }) {
                       </Link>
                     </span>
                   ) : null}
+                  {/* The kind it takes most, opening those fish: what to tie it on for. */}
+                  {row.kind ? <span className="lure-last">{kindLine(row)}</span> : null}
                 </>
               ) : null}
               {/* Where it took most, opening its fish there. */}

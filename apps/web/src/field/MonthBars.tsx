@@ -25,7 +25,7 @@ export function inSentence(word: string): string {
   return getLang() === "pl" && word ? word.charAt(0).toLocaleLowerCase("pl") + word.slice(1) : word;
 }
 
-function monthWord(month: number): string {
+export function monthWord(month: number): string {
   return monthName(`2026-${String(month).padStart(2, "0")}`).split(" ")[0]!;
 }
 

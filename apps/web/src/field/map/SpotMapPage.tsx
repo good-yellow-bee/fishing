@@ -8,7 +8,8 @@ import { getUnits, t, tn, useT } from "../../i18n";
 import { fishCountLabel, formatDay, outingName, tripWhen, waterName } from "../format";
 import { useTackleItems } from "../gear/TackleState";
 import { outingDay, outNowAt } from "../tripDates";
-import { inSentence } from "../MonthBars";
+import { bookFishDay } from "../tripMonths";
+import { inSentence, monthOfYearTally, monthWord } from "../MonthBars";
 import { useLogbook } from "../LogbookState";
 import {
   ALDERS,
@@ -384,6 +385,14 @@ export function SpotMapPage() {
   // From the fish the Waters card counts: the angler's own where it counts theirs, an untouched sample water what it has.
   const lureName = bookLureName(book.catches);
   const bestLure = (spotId: string) => bestLureAt(ownHere(spotId) ? counted.catches : book.catches, spotId);
+  // The month it gives most, said while it is that month: where to go now. Once its fish came in two months or more, three
+  // in the leader, none tying it; a night fish in its outing's month, as the water's page counts them.
+  const monthNow = Number(fishedBy.slice(5, 7));
+  const bestMonthNow = (spotId: string) => {
+    const here = (ownHere(spotId) ? counted.catches : book.catches).filter((entry) => entry.spotId === spotId);
+    const [top, next] = monthOfYearTally(here, (entry) => bookFishDay(book, entry).slice(0, 7)).sort((a, b) => b.count - a.count);
+    return top!.month === monthNow && top!.count >= 3 && next!.count > 0 && top!.count > next!.count;
+  };
   const fishLine = (spotId: string) => {
     const row = rowOf(spotId);
     // A water been out on without a fish says "0 fish", as its card does, not "Nothing logged": by the outings that
@@ -393,7 +402,8 @@ export function SpotMapPage() {
     const dated = row?.lastFishDay ? t("{fish}, last {day}", { fish, day: formatDay(row.lastFishDay) }) : fish;
     // What to pack for there: the lure that took the most of its fish, when two or more did and none ties it.
     const best = bestLure(spotId);
-    const line = best ? `${dated} · ${t("best on {lure}", { lure: lureName(best) })}` : dated;
+    const lured = best ? `${dated} · ${t("best on {lure}", { lure: lureName(best) })}` : dated;
+    const line = bestMonthNow(spotId) ? `${lured} · ${t("{month} is its best month", { month: inSentence(monthWord(monthNow)) })}` : lured;
     // The outing the angler is out on now there; of a dawn and a dusk, the later.
     const going = outNowAt(book, spotId);
     if (going)
