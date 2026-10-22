@@ -3657,6 +3657,22 @@ describe("useFishingGame groundbait", () => {
     }
   });
 
+  it("tells a wire leader over a built swim that the pike prowl it already, drawing them no more", () => {
+    const kept = new Map<string, string>();
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
+    kept.set(swimKey(profile.userId), JSON.stringify({ spot: "dropoff", casts: 6, built: TOPUP_MAX, at: DOCK_BUBBLES.at - 60_000 }));
+    updateSettings({ line: "wire" });
+    try {
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, "Spinner");
+      atDropoff(surface);
+      cast(surface);
+      expect(vi.mocked(pickBite).mock.lastCall?.[12]).toBe("pike");
+      expect(hint()).toContain("Wire leader: the fish see it, so the bites come slower, and the pike already prowl the built-up swim.");
+    } finally {
+      updateSettings({ line: "standard" });
+    }
+  });
+
   it("keeps the pike off a wire leader when the angler can't land one", () => {
     updateSettings({ line: "wire" });
     try {

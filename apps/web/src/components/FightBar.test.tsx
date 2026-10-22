@@ -265,10 +265,10 @@ describe("FightBar for screen readers", () => {
     expect(water("log")).toBeNull();
     act(() => root!.render(<FightBar fight={{ species: perch, weight: 0.8, underpowered: false, line: "light" }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
     expect([...container!.querySelectorAll(".fight-water")].map((line) => line.textContent)).toContain("Light line: it snaps sooner, so keep out of the red");
-    // A wire leader is named only for the fish whose teeth it stands up to.
-    act(() => root!.render(<FightBar fight={{ species: FISH.find((fish) => fish.id === "pike")!, weight: 4, underpowered: false, line: "wire" }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
+    // A wire leader is named only when a swallowing fish has its teeth on it.
+    act(() => root!.render(<FightBar fight={{ species: FISH.find((fish) => fish.id === "pike")!, weight: 4, underpowered: false, line: "wire", wired: true }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
     expect([...container!.querySelectorAll(".fight-water")].map((line) => line.textContent)).toContain("Wire leader: its teeth can't fray the line");
-    act(() => root!.render(<FightBar fight={{ species: perch, weight: 0.8, underpowered: false, line: "wire" }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
+    act(() => root!.render(<FightBar fight={{ species: FISH.find((fish) => fish.id === "pike")!, weight: 4, underpowered: false, line: "wire" }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
     expect([...container!.querySelectorAll(".fight-water")].map((line) => line.textContent).some((line) => line?.startsWith("Wire"))).toBe(false);
     act(() => root!.render(<FightBar fight={{ species: trout, weight: 2, underpowered: false, rising: true }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
     expect([...container!.querySelectorAll(".fight-water")].map((line) => line.textContent)).toContain("Risen to the hatch: it is at the top already, so its first run is a leap — bow");
