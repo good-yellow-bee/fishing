@@ -181,6 +181,9 @@ export function HomePage() {
   const kinds = speciesCounts(real).length;
   // A look back: what came out of the water this same week in earlier years.
   const yearsAgo = thisWeekInPastYears(real, now);
+  // "Every fish that day" once a day, on its newest fish: a night's small hours on its outing's day.
+  const linkedDays = new Set<string>();
+  const dayLinkOn = new Set(yearsAgo.filter((entry) => !linkedDays.has(bookFishDay(book, entry)) && linkedDays.add(bookFishDay(book, entry))).map((entry) => entry.id));
   const thisMonth = today.slice(0, 7);
   // By the outing's day, as the year below: a New Year's Eve night's small hours are December's, not January's.
   const monthRows = book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${thisMonth}-`));
@@ -508,9 +511,13 @@ export function HomePage() {
                     {/* Say plainly how long ago, beside the date on the card. */}
                     <p className="meta">
                       {tn(yearsBack(entry, now) ?? 1, "{n} year ago", "{n} years ago")}
-                      {" · "}
                       {/* The whole day it came from, in the catch search. */}
-                      <Link to={findLink(everyFishThatDay(entry))}>{t("Every fish that day")}</Link>
+                      {!dayLinkOn.has(entry.id) ? null : (
+                        <>
+                          {" · "}
+                          <Link to={findLink(everyFishThatDay(entry))}>{t("Every fish that day")}</Link>
+                        </>
+                      )}
                     </p>
                     <CatchCard
                       level={4}
