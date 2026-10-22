@@ -297,6 +297,21 @@ describe("the lure panel on a touch tablet", () => {
   });
 });
 
+describe("the hint on a touch tablet", () => {
+  it("stands beside the walking stick, over the cast meter and short of the strike button, either hand", () => {
+    const from = css.indexOf("@media (pointer: coarse) and (min-width: 801px) and (min-height: 501px) {\n  .hint {");
+    expect(from).toBeGreaterThan(-1);
+    const block = css.slice(from, css.indexOf("\n}\n", from));
+    const hint = /\n  \.hint \{([^}]*)\}/.exec(block)?.[1];
+    expect(hint).toContain("left: calc(136px / var(--text-zoom, 1));");
+    expect(hint).toContain("bottom: 72px;");
+    expect(hint).toContain("max-width: min(46ch, calc((100vw - 136px) / var(--text-zoom, 1) - 116px));");
+    expect(/html\[data-hand="left"\] \.hint \{([^}]*)\}/.exec(block)?.[1]).toContain("right: calc(136px / var(--text-zoom, 1));");
+    expect(/html:not\(\[data-hand="left"\]\) \.lodge-tracks \{([^}]*)\}/.exec(block)?.[1]).toContain("bottom: calc(80px + var(--hint-h, 54px));");
+    expect(/html\[data-hand="left"\] \.lodge-tracks \{([^}]*)\}/.exec(block)?.[1]).toContain("bottom: 124px;");
+  });
+});
+
 describe("the sign-in page and the catch log with larger text", () => {
   it("take the window's height divided by the zoom they are drawn at", () => {
     expect(/\n\.auth-shell \{([^}]*)\}/.exec(css)?.[1]).toContain("min-height: calc(100vh / var(--text-zoom, 1));");
