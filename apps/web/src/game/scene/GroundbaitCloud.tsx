@@ -37,7 +37,7 @@ function carpShape() {
 /** A whisker reaching `len` from a corner of the mouth at (`x`, `y`, `z`), out to that side and `back` radians round toward the tail, drooping `down` radians. */
 function barbel(x: number, y: number, z: number, len: number, back: number, down: number) {
   const side = Math.sign(x);
-  return new THREE.CylinderGeometry(0.007, 0.003, len, 4)
+  return new THREE.CylinderGeometry(0.014, 0.006, len, 4)
     .rotateZ((-side * Math.PI) / 2)
     .translate((side * len) / 2, 0, 0)
     .rotateZ(-side * down)
@@ -51,7 +51,7 @@ function catfishShape() {
   const head = new THREE.SphereGeometry(1, 12, 6).scale(0.13, 0.06, 0.13).translate(0, -0.01, 0.24);
   const fin = new THREE.ConeGeometry(0.04, 0.1, 4).scale(0.25, 1, 1.4).translate(0, 0.1, 0.08);
   const tail = new THREE.ConeGeometry(0.11, 0.16, 4).scale(0.25, 1, 1).rotateX(Math.PI / 2).translate(0, 0.01, -0.4);
-  const whiskers = [-1, 1].flatMap((side) => [barbel(side * 0.09, 0, 0.33, 0.22, 0.4, 0.1), barbel(side * 0.04, -0.04, 0.33, 0.09, 0.2, 0.6)]);
+  const whiskers = [-1, 1].flatMap((side) => [barbel(side * 0.09, 0.02, 0.33, 0.26, 0.5, 0.05), barbel(side * 0.04, -0.03, 0.34, 0.1, 0.2, 0.6)]);
   const parts = [body, head, fin, tail, ...whiskers];
   // Drawn a little larger than life so it reads from the bank.
   const merged = mergeGeometries(parts).scale(1.3, 1.3, 1.3);
