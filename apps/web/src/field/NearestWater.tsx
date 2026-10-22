@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { Logbook } from "@stillwater/shared";
 import { getUnits, num, t, type Units } from "../i18n";
 import { nearestWater } from "./spotOrder";
-import { plainName } from "./tripDates";
+import { waterName } from "./format";
 
 /** "1.2 km" or "0.7 mi", in the player's units. */
 export function distanceText(km: number, units: Units): string {
@@ -34,7 +34,7 @@ export function NearestWater({ book, onPick }: { book: Logbook; onPick: (spotId:
         // At a new water, a pinned one 180 km off would take the form's water and its outing with it: only one close by.
         const far = found.km > NEAR_KM;
         if (!far) onPick(found.spot.id);
-        setLocating({ name: plainName(found.spot.name), km: found.km, far });
+        setLocating({ name: found.spot.name, km: found.km, far });
       },
       () => setLocating("failed"),
       { enableHighAccuracy: true, timeout: 15000 },
@@ -52,10 +52,10 @@ export function NearestWater({ book, onPick }: { book: Logbook; onPick: (spotId:
             ? // Standing on it: a distance that rounds to nothing reads as "here".
               ` ${
                 locating.far
-                  ? t("No pinned water is close by; the nearest is {water}, {distance} away.", { water: locating.name, distance: distanceText(locating.km, getUnits()) })
+                  ? t("No pinned water is close by; the nearest is {water}, {distance} away.", { water: waterName(locating.name), distance: distanceText(locating.km, getUnits()) })
                   : locating.km < 0.1
-                    ? t("{water}, right here.", { water: locating.name })
-                    : t("{water}, {distance} away.", { water: locating.name, distance: distanceText(locating.km, getUnits()) })
+                    ? t("{water}, right here.", { water: waterName(locating.name) })
+                    : t("{water}, {distance} away.", { water: waterName(locating.name), distance: distanceText(locating.km, getUnits()) })
               }`
             : ""}
       </span>
