@@ -1656,28 +1656,29 @@ describe("useFishingGame strike timing", () => {
   });
 
   it.each([
-    ["pike", "light", 0, true],
-    ["pike", "light", 0.2, false],
-    ["pike", "standard", 0, false],
-    ["perch", "light", 0, false],
-  ] as const)("bites a %s through the %s line at the strike on a roll of %s: %s", (id, line, roll, bitten) => {
+    ["pike", "light", 0, false, true],
+    ["pike", "light", 0.2, false, false],
+    ["pike", "standard", 0, false, false],
+    ["perch", "light", 0, false, false],
+    ["pike", "light", 0, true, false],
+  ] as const)("bites a %s through the %s line at the strike on a roll of %s (beginner %s): %s", (id, line, roll, mercy, bitten) => {
     updateSettings({ line });
     try {
-      const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Nightcrawler");
+      const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Nightcrawler", undefined, undefined, undefined, mercy);
       vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === id)!);
       cast(surface);
       for (let waited = 0; phase() !== "hookset:none" && waited < 20_000; waited += 10) act(() => vi.advanceTimersByTime(10));
       vi.mocked(Math.random).mockReturnValue(roll);
-      const fights = vi.mocked(makeFight).mock.calls.length;
       act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+      expect(phase()).toBe("fight:none");
+      step.mockReturnValueOnce("fighting");
+      act(() => frames.at(-1)!(now));
       if (bitten) {
         expect(phase()).toBe("idle:broke");
         expect(container!.querySelector("[data-testid=broke]")?.textContent).toBe("The Northern pike bit through the light line at the strike.");
-        expect(hint()).toBe("A fresh knot goes on. Heavy line or a wire leader stands up to a pike's teeth.");
-        expect(vi.mocked(makeFight).mock.calls.length).toBe(fights);
+        expect(hint()).toMatch(/^A fresh knot goes on\. Heavy line or a wire leader stands up to its teeth\./);
       } else {
         expect(phase()).toBe("fight:none");
-        expect(vi.mocked(makeFight).mock.calls.length).toBe(fights + 1);
       }
     } finally {
       updateSettings({ line: "standard" });

@@ -199,7 +199,7 @@ export const PL_GAME: PlBook = {
   "Light line: the fish can't see it, so the bites come sooner.": "Cienka żyłka: ryby jej nie widzą, więc brania przychodzą szybciej.",
   "Light line: the fish can't see it, so the bites come sooner, but a pike here can bite through it at the strike.": "Cienka żyłka: ryby jej nie widzą, więc brania przychodzą szybciej, ale szczupak stąd może ją przegryźć przy zacięciu.",
   "The {fish} bit through the light line at the strike.": "{fish} — zęby przegryzły cienką żyłkę przy zacięciu.",
-  "A fresh knot goes on. Heavy line or a wire leader stands up to a pike's teeth.": "Wiążesz nowy węzeł. Gruba żyłka albo przypon stalowy wytrzyma zęby szczupaka.",
+  "A fresh knot goes on. Heavy line or a wire leader stands up to its teeth.": "Wiążesz nowy węzeł. Gruba żyłka albo przypon stalowy wytrzyma jej zęby.",
   "Light line: it snaps sooner, so keep out of the red": "Cienka żyłka: pęka szybciej, więc nie wchodź na czerwone",
   "Heavy line: it holds more strain before it snaps": "Gruba żyłka: wytrzyma większe napięcie, zanim pęknie",
   "Lodge record · was {weight} ({holder})": "Rekord przystani · było {weight} ({holder})",
