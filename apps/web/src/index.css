@@ -595,8 +595,8 @@ a:focus-visible {
   display: none;
 }
 
-/* On a touch screen up to 900 px tall the walking stick stands over the hint's corner, and a window held sideways leaves
-   it only the room under the HUD. A groundbait toss ran five sentences up past both, so there a long hint shows what
+/* On a touch screen up to 900 px tall the walking stick stands over the hint's corner (on a tablet the lure panel above
+   it), and a window held sideways leaves it only the room under the HUD. A groundbait toss ran five sentences up past both, so there a long hint shows what
    happened and folds the rest behind "Read more"; a screen reader still reads it all. */
 @media (pointer: coarse) and (max-height: 900px), (max-height: 500px) {
   .hint-tail:not([data-open]) {
@@ -3639,6 +3639,31 @@ html[data-contrast="high"] :is(.daily-requests-note, .hud .eyebrow, .settings-no
   html[data-hand="left"] .power-meter {
     right: auto;
     left: 12px;
+  }
+}
+
+/* On a touch tablet the hint kept the desktop's bottom-left corner under the stick, so a four-line hint ran up behind it
+   (a groundbait toss covered all of it on a 1366 x 1024 tablet), and a left-handed cast meter lay over the hint. The hint
+   stands beside the stick instead, as the lake's news does, over the cast meter and short of the strike button. */
+@media (pointer: coarse) and (min-width: 801px) and (min-height: 501px) {
+  .hint {
+    left: calc(136px / var(--text-zoom, 1));
+    bottom: 72px;
+    max-width: min(46ch, calc((100vw - 136px) / var(--text-zoom, 1) - 116px));
+  }
+
+  html[data-hand="left"] .hint {
+    right: calc(136px / var(--text-zoom, 1));
+    left: auto;
+  }
+
+  html:not([data-hand="left"]) .lodge-tracks {
+    bottom: calc(80px + var(--hint-h, 54px));
+  }
+
+  /* Left-handed the hint is across the lake, so the news stands clear of the strike button and meter in its corner. */
+  html[data-hand="left"] .lodge-tracks {
+    bottom: 124px;
   }
 }
 

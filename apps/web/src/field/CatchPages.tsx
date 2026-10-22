@@ -1783,7 +1783,7 @@ function CatchView() {
     const caught = new Date(`${bookFishDay(book, entry)}T12:00:00`);
     const text = {
       title: kindName(entry.species),
-      detail: [measuresText(entry), spot ? plainName(spot.name) : null].filter(Boolean).join(" · "),
+      detail: [measuresText(entry), spot ? waterName(spot.name) : null].filter(Boolean).join(" · "),
       conditions: entry.weather ? weatherText(entry.weather) : pieceName(entry.lure),
       date: caught.toLocaleDateString(locale(), { year: "numeric", month: "long", day: "numeric" }),
     };
@@ -2007,7 +2007,7 @@ function CatchView() {
         </p>
       </aside>
       {entry.note ? <p className="prose">{noteText(entry.note)}</p> : null}
-      <CopySummary text={() => catchSummary(entry, spot ? plainName(spot.name) : null, trip && namedOuting ? outingName(trip, book.spots) : null, countedFish(book.catches))} file="stillwater-catch.txt" photo={photo} />
+      <CopySummary text={() => catchSummary(entry, spot ? waterName(spot.name) : null, trip && namedOuting ? outingName(trip, book.spots) : null, countedFish(book.catches))} file="stillwater-catch.txt" photo={photo} />
       {trip ? (
         <p className="trip-link">
           {/* An untitled outing on this fish's water, named just above: "That day's outing" rather than the name twice. */}

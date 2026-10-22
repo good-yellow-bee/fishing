@@ -23,7 +23,7 @@ import { countedFish } from "./milestones";
 export function tripSummary(trip: Trip, spotName: string | null, catches: readonly CatchEntry[], waterOf: (spotId: string) => string | null = () => null, all: readonly CatchEntry[] = catches): string {
   // An outing saved without a title, which keeps its water's name for one, starts at its day.
   const title = trip.title.trim();
-  const water = spotName === null ? null : plainName(spotName);
+  const water = spotName === null ? null : waterName(spotName);
   const head = [water && sameName(title, water) ? "" : title, formatDatedDay(new Date(`${trip.date}T12:00:00`)), ...(water ? [water] : [])].filter(Boolean).join(" · ");
   const kindName = kindNames(all);
   const lureName = lureNames(all);
