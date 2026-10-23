@@ -32,7 +32,7 @@ describe("round 77: a search shown largest first steps largest first", () => {
     expect(list.rows.map((row) => row.id)).toEqual(largestFirst(list.rows).map((row) => row.id));
     expect(list.rows[0]!.id).toBe(pike[0]!.id);
     expect(list.back).toBe("/catches?find=pike&order=largest");
-    expect(catchList(book, "find-largest:pike", pike[0]!.id, t, none)?.back).toBe("/?find=pike&order=largest");
+    expect(catchList(book, "find-largest:pike", pike[0]!.id, t, none)?.back).toBe("/book?find=pike&order=largest");
     expect(largestList(list.key)).toBe(true);
     expect(largestList("catches:pike")).toBe(false);
   });

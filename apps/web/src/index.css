@@ -4150,3 +4150,89 @@ html[data-contrast="high"] .sound-captions li {
   color: var(--amber);
   font-weight: 700;
 }
+
+/* The start page and the sign-in pages: one large button to play and larger words, for young readers and anyone new to
+   computers. A link that looks like the card's button stands 48 px tall. */
+.auth-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 18px;
+  padding: 12px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 18px;
+  text-decoration: none;
+}
+
+.auth-cta:hover {
+  background: #8f3a28;
+}
+
+.auth-cta.quiet {
+  margin-top: 8px;
+  background: transparent;
+  color: var(--ink);
+  border: 2px solid var(--ink);
+}
+
+.auth-cta.quiet:hover {
+  background: #f3e6cc;
+}
+
+.auth-card .start-note {
+  margin: 18px 0 0;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.auth-card .start-note + .auth-cta {
+  margin-top: 8px;
+}
+
+/* The language row at the card's top: its own small buttons, not the card's full-width one. */
+.auth-card .choice-row {
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.auth-card .choice-row button {
+  width: auto;
+  min-height: 40px;
+  margin-top: 0;
+  padding: 8px 14px;
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid #6b5233;
+  font-size: 15px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.auth-card .choice-row button:hover {
+  background: #f3e6cc;
+}
+
+.auth-card .choice-row button.on {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+/* A button that reads as a link inside a sentence ("Not you? Sign out"). */
+.auth-card .text-link {
+  display: inline;
+  width: auto;
+  margin: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  text-decoration: underline;
+}
+
+.auth-card .text-link:hover {
+  background: none;
+  color: #8f3a28;
+}
