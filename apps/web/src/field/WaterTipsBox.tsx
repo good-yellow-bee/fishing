@@ -53,14 +53,14 @@ export function waterRange(fish: readonly CatchEntry[]): string | null {
 }
 
 /** A tip line such as "Best weather: {sky}", with the named value linked to the catch search for it. */
-function TipLine({ text, name, value, to }: { text: string; name: string; value: string; to: string }) {
+function TipLine({ text, name, value, to }: { text: string; name: string; value: string; to: string | undefined }) {
   const [before, after] = t(text, { [name]: "\u0000" }).split("\u0000");
   return (
     <>
       <br />
       {before}
       {/* Polish writes a label in lower case inside a sentence: "Najwięcej ryb: rano". */}
-      <Link to={to}>{inSentence(value)}</Link>
+      {to ? <Link to={to}>{inSentence(value)}</Link> : inSentence(value)}
       {after}
     </>
   );
@@ -81,7 +81,8 @@ export function WaterTipsBox({
   catches: readonly CatchEntry[];
   label?: string;
   on?: string;
-  within?: string;
+  /** null: no search finds just these fish (a water with no name), so nothing links. */
+  within?: string | null;
   /** The water's place, for one water's box: then it says how many fish came around sunrise or sunset. */
   place?: { lat: number; lng: number };
 }) {
@@ -93,7 +94,7 @@ export function WaterTipsBox({
   const tips = waterTips(catches);
   if (!tips) return null;
   // Links narrow to the same water or kind of fish (`within`) when the box is about one.
-  const find = (text: string) => (within ? findWithLink(within, text) : findLink(text));
+  const find = (text: string) => (within === null ? undefined : within ? findWithLink(within, text) : findLink(text));
   const [y, m, d] = (on ?? "").split("-").map(Number);
   const dayMoon = on ? moonQuarterOf(new Date(y!, m! - 1, d!, 12)) : null;
   // "today", "tomorrow" or "last night" when it is, as outing cards say it, in lower case mid-sentence; a date keeps its own.
@@ -130,7 +131,7 @@ export function WaterTipsBox({
         {tips.lures.map((row, index) => (
           <Fragment key={row.lure}>
             {index > 0 ? " · " : null}
-            <Link to={find(exactTerm("lure", lureName(row.lure)))}>{lureName(row.lure)}</Link>{"\u00a0"}({row.count})
+            {within === null ? lureName(row.lure) : <Link to={find(exactTerm("lure", lureName(row.lure)))!}>{lureName(row.lure)}</Link>}{"\u00a0"}({row.count})
           </Fragment>
         ))}
         {tips.time ? <TipLine text="Most fish at: {time}" name="time" value={t(tips.time.label)} to={find(exactTerm("time", t(tips.time.label)))} /> : null}

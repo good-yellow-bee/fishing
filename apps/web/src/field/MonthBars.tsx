@@ -30,10 +30,11 @@ export function monthWord(month: number): string {
 }
 
 /** "Through the year", once fish came in more than one month; each month opens its fish, within a kind or water when given. */
-export function MonthBars({ catches, within, monthOf }: { catches: readonly CatchEntry[]; within?: string; monthOf?: (entry: CatchEntry) => string }) {
+/** `within` null: no search finds just these fish (a water with no name), so the months are plain words. */
+export function MonthBars({ catches, within, monthOf }: { catches: readonly CatchEntry[]; within?: string | null; monthOf?: (entry: CatchEntry) => string }) {
   const rows = monthOfYearTally(catches, monthOf);
   if (rows.filter((row) => row.count > 0).length < 2) return null;
-  const link = (text: string) => (within ? findWithLink(within, text) : findLink(text));
+  const link = (text: string) => (within === null ? undefined : within ? findWithLink(within, text) : findLink(text));
   const total = rows.reduce((sum, row) => sum + row.count, 0);
   const most = Math.max(...rows.map((row) => row.count));
   const best = rows.filter((row) => row.count === most).length === 1 ? rows.find((row) => row.count === most)! : null;
@@ -46,7 +47,11 @@ export function MonthBars({ catches, within, monthOf }: { catches: readonly Catc
       {/* The month it gives most, once one stands clear of the rest. */}
       {best ? (
         <p className="meta">
-          <Link to={link(exactTerm("month", monthWord(best.month)))}>{t("Best month: {month} ({count} of {total})", { month: inSentence(monthWord(best.month)), count: best.count, total })}</Link>
+          {within === null ? (
+            t("Best month: {month} ({count} of {total})", { month: inSentence(monthWord(best.month)), count: best.count, total })
+          ) : (
+            <Link to={link(exactTerm("month", monthWord(best.month)))!}>{t("Best month: {month} ({count} of {total})", { month: inSentence(monthWord(best.month)), count: best.count, total })}</Link>
+          )}
         </p>
       ) : null}
     </section>

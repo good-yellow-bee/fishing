@@ -47,7 +47,7 @@ const PHOTOS_SHOWN = 4;
  * (a kind or a water). `named` puts each fish's kind in its caption, for a strip of mixed kinds.
  */
 /** `list` is the list each photo's fish steps through. */
-export function PhotoStrip({ catches, within, named = false, list }: { catches: readonly CatchEntry[]; within: string; named?: boolean; list?: ListKey }) {
+export function PhotoStrip({ catches, within, named = false, list }: { catches: readonly CatchEntry[]; within: string | null; named?: boolean; list?: ListKey }) {
   const { photoFor, book } = useLogbook();
   const pictured = catches.filter((entry) => photoFor(entry.id));
   if (pictured.length === 0) return null;
@@ -56,7 +56,11 @@ export function PhotoStrip({ catches, within, named = false, list }: { catches: 
       <div className="section-head">
         <h2>{t("Photos")}</h2>
         {pictured.length > PHOTOS_SHOWN ? (
-          <Link to={findWithLink(within, t("Photo").toLowerCase())}>{tn(pictured.length, "{n} photo", "{n} photos")}</Link>
+          within === null ? (
+            <span>{tn(pictured.length, "{n} photo", "{n} photos")}</span>
+          ) : (
+            <Link to={findWithLink(within, t("Photo").toLowerCase())}>{tn(pictured.length, "{n} photo", "{n} photos")}</Link>
+          )
         ) : null}
       </div>
       <ul className="photo-wall species-photos">

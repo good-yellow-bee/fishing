@@ -245,14 +245,14 @@ export function SpotsPage() {
       { replace: true },
     );
   const shownKind = kind !== "all" && types.includes(kind) ? kind : "all";
-  // A long list narrows by name, accents and case aside; kept in the address like the kind, so Back keeps it.
+  // A long list narrows by name, accents and case aside, a water with no name by the name its card shows; kept in the
+  // address like the kind, so Back keeps it.
   const finding = rows.length > FIND_WATER_FROM;
   const [typedQuery, setQuery] = useTypedParam(WATER_FIND);
   const query = finding ? typedQuery : "";
   const needle = foldText(query.trim()).toLowerCase();
-  const byName = (row: { spot: { name: string } }) => !needle || foldText(row.spot.name).toLowerCase().includes(needle);
+  const byName = (row: { spot: { name: string } }) => !needle || foldText(waterName(row.spot.name)).toLowerCase().includes(needle);
   const shownRows = (shownKind === "all" ? rows : rows.filter((row) => row.spot.id !== PLAY_LAKE_ID && row.spot.waterType === shownKind)).filter(byName);
-  // Waters of that name under another kind: the kind picked hides them, so say so and offer them.
   // A water's longest and heaviest fish: what the card names as its best.
   const bestsAt = (catches: readonly CatchEntry[], spotId: string) => biggestOf(catches.filter((entry) => entry.spotId === spotId));
   const ownShown = shownRows.filter((row) => row.spot.id !== PLAY_LAKE_ID && !invented(row));
@@ -264,6 +264,7 @@ export function SpotsPage() {
     { key: "sample", label: ownShown.length > 0 ? t("From the sample week ({n})", { n: sampleShown.length }) : null, rows: sampleShown },
     { key: "game", label: ownShown.length + sampleShown.length > 0 ? t("The game's lake") : null, rows: gameShown },
   ].filter((group) => group.rows.length > 0);
+  // Waters of that name under another kind: the kind picked hides them, so say so and offer them.
   const elsewhere = needle && shownRows.length === 0 && shownKind !== "all" && rows.some(byName);
 
   return (
@@ -485,14 +486,16 @@ function SpotView() {
   // Dated as the season line above dates them, so a New Year's Eve night fish is last year's on both.
   const notYet = notYetThisYear(summed, new Date(`${fishedBy}T12:00:00`), undefined, (entry) => bookFishDay(book, entry));
   const kindsDay = mostKindsDay({ ...book, catches: summed });
-  // Its links open the fish its counts count: the sample week's beside the angler's own left out, as here.
   // Kinds named as the book writes them most, as Bests and the catch cards name them, not as this water's few fish do.
   const kindName = bookKindName(book.catches);
   const lureName = bookLureName(book.catches);
-  const here = summed.length < catches.length ? `${exactTerm("water", plainName(spot.name))} -${t("sample|search word")}` : exactTerm("water", plainName(spot.name));
+  // Its links open the fish its counts count: the sample week's beside the angler's own left out, as here. No search
+  // finds a water with no name alone, so its counts stay plain words rather than open nothing.
+  const named = Boolean(foldName(spot.name));
+  const here = !named ? null : summed.length < catches.length ? `${exactTerm("water", plainName(spot.name))} -${t("sample|search word")}` : exactTerm("water", plainName(spot.name));
   // A search finds a water by its name, so while others share it, this page's links open their fish too. A water with
   // no name is no one's twin.
-  const twins = foldName(spot.name) ? book.spots.filter((other) => other.id !== spot.id && twinName(other.name, spot.name)) : [];
+  const twins = named ? book.spots.filter((other) => other.id !== spot.id && twinName(other.name, spot.name)) : [];
   const twin = twins[0];
   // The kinds no other water in the book has given, its twins aside as its links take them: where to come back for
   // them. Said once another water has a fish, or every kind would be this water's alone; not for the game's lake, nor
@@ -775,7 +778,11 @@ function SpotView() {
       ) : null}
       {kindsDay ? (
         <p className="meta most-kinds">
-          <Link to={findWithLink(here, kindsDay.date)}>{t("Most kinds in one day: {count}, on {day}", { count: kindsDay.kinds, day: formatDay(kindsDay.date) })}</Link>
+          {here ? (
+            <Link to={findWithLink(here, kindsDay.date)}>{t("Most kinds in one day: {count}, on {day}", { count: kindsDay.kinds, day: formatDay(kindsDay.date) })}</Link>
+          ) : (
+            t("Most kinds in one day: {count}, on {day}", { count: kindsDay.kinds, day: formatDay(kindsDay.date) })
+          )}
         </p>
       ) : null}
       {/* The game's lake and a sample water beside the angler's own: a kind's page holds other fish, so the kind opens this water's. */}
@@ -783,17 +790,17 @@ function SpotView() {
         kindName={kindName}
         catches={summed}
         spotId={spot.id}
-        kindLink={(species) => (kindOnPage(book, species).some((entry) => entry.spotId === spot.id) ? speciesLink(species) : findWithLink(here, exactTerm("species", kindName(species))))}
+        kindLink={(species) => (kindOnPage(book, species).some((entry) => entry.spotId === spot.id) ? speciesLink(species) : here ? findWithLink(here, exactTerm("species", kindName(species))) : undefined)}
       />
       {/* Every photo it shows, the sample week's too, so its count opens them all. */}
-      <PhotoStrip catches={catches} within={exactTerm("water", plainName(spot.name))} named list={`water:${spot.id}`} />
+      <PhotoStrip catches={catches} within={named ? exactTerm("water", plainName(spot.name)) : null} named list={`water:${spot.id}`} />
       <FishCsv catches={catches} name={spot.name} />
       {summed.length > 1 ? (
         <>
           <div className="section-head">
             <h2>{t("When it bites")}</h2>
           </div>
-          <TallyBars key={spot.id} rows={biteTimes({ ...book, catches: summed }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(here, exactTerm("time", t(row.label))) : undefined }))} />
+          <TallyBars key={spot.id} rows={biteTimes({ ...book, catches: summed }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 && here ? findWithLink(here, exactTerm("time", t(row.label))) : undefined }))} />
         </>
       ) : null}
       <MonthBars catches={summed} within={here} monthOf={(entry) => bookFishDay(book, entry).slice(0, 7)} />
@@ -803,7 +810,7 @@ function SpotView() {
           <div className="section-head">
             <h2>{t("By year")}</h2>
           </div>
-          <TallyBars key={`years-${spot.id}`} rows={years.map((row) => ({ key: row.year, label: row.year, count: row.count, to: findWithLink(here, row.year) }))} />
+          <TallyBars key={`years-${spot.id}`} rows={years.map((row) => ({ key: row.year, label: row.year, count: row.count, to: here ? findWithLink(here, row.year) : undefined }))} />
         </>
       ) : null}
       {catches.length === 0 ? (
@@ -1116,18 +1123,17 @@ function SunAtWater({ place }: { place: { lat: number; lng: number } }) {
   return <p className="meta sun-line">{afterDark ? t("Tomorrow: sunrise {rise} · sunset {set}", times) : t("Today: sunrise {rise} · sunset {set}", times)}</p>;
 }
 
-/** "Water temperature in 2026: Apr 20 52°F → Jun 3 64°F → Sep 9 58°F", from the readings noted with fish. */
-/** "Last fished here 8 days ago · Sat, Oct 10 · 2 fish · Spinner ×1": that day's outing, with what it gave and on what. */
-/** Kinds in readers' order, each opening its fish within `within`: "Tench, Zander". */
-function KindLinks({ names, within, kindName }: { names: readonly string[]; within: string; kindName: (name: string) => string }) {
+/** Kinds in readers' order, each opening its fish within `within`: "Tench, Zander"; with none, plain names. */
+function KindLinks({ names, within, kindName }: { names: readonly string[]; within: string | null; kindName: (name: string) => string }) {
   return inReadersOrder(names, kindName).map((name, index) => (
     <Fragment key={name}>
       {index > 0 ? ", " : null}
-      <Link to={findWithLink(within, exactTerm("species", kindName(name)))}>{kindName(name)}</Link>
+      {within ? <Link to={findWithLink(within, exactTerm("species", kindName(name)))}>{kindName(name)}</Link> : kindName(name)}
     </Fragment>
   ));
 }
 
+/** "Last fished here 8 days ago · Sat, Oct 10 · 2 fish · Spinner ×1": that day's outing, with what it gave and on what. */
 function LastHereLine({
   rest,
   day,
@@ -1163,6 +1169,7 @@ function LastHereLine({
   );
 }
 
+/** "Water temperature in 2026: Apr 20 52°F → Jun 3 64°F → Sep 9 58°F", from the readings noted with fish. */
 function TempThroughYear({ catches }: { catches: readonly CatchEntry[] }) {
   useT();
   const { book } = useLogbook();
