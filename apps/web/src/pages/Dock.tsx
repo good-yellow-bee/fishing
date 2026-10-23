@@ -674,16 +674,6 @@ export function DockPage() {
     };
   }, [prefs.backgroundSound]);
 
-  // The page's CSS mirrors the system reduced-motion rules under this flag.
-  useEffect(() => {
-    const root = document.documentElement;
-    if (prefs.reduceMotion) root.dataset.reduceMotion = "1";
-    else delete root.dataset.reduceMotion;
-    return () => {
-      delete root.dataset.reduceMotion;
-    };
-  }, [prefs.reduceMotion]);
-
   // Held while a strike, fight, result, or the shop is up so it never covers them; the 4s only run while shown.
   const photoAllowed = !shopOpen && scenePhase !== "hookset" && scenePhase !== "fight";
   useEffect(() => {

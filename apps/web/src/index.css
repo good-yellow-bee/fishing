@@ -62,23 +62,90 @@ a {
 }
 
 /* Pages drawn larger by zoom divide the window's height by it, or the sign-in card sat lower than the middle with
-   larger text and the page scrolled past its end. */
+   larger text and the page scrolled past its end. Behind the card, our lake at dawn under a dark veil; the old
+   gradient shows until the picture is in. Wide screens keep the angler on the dock to the right of the card. */
 .auth-shell {
+  --auth-picture: url("/textures/start-dawn-wide.webp") 30% 45%;
+  position: relative;
+  overflow: hidden;
   min-height: calc(100vh / var(--text-zoom, 1));
   display: grid;
   place-items: center;
   background:
+    linear-gradient(rgba(16, 14, 12, 0.28), rgba(16, 14, 12, 0.62)),
+    var(--auth-picture) / cover no-repeat,
     radial-gradient(1200px 500px at 50% -10%, #e8c696 0%, transparent 55%),
     linear-gradient(#24343c, #12100e);
   padding: 24px;
 }
 
+@media (max-aspect-ratio: 1/1) {
+  .auth-shell {
+    --auth-picture: url("/textures/start-dawn-tall.webp") 50% 50%;
+  }
+}
+
+/* Mist drifting over the water: soft bands moved by transform only, cheap on old phones. */
+.auth-shell::before,
+.auth-shell::after {
+  content: "";
+  position: absolute;
+  left: -30%;
+  width: 160%;
+  pointer-events: none;
+  animation: auth-mist 80s ease-in-out infinite alternate;
+}
+
+.auth-shell::before {
+  bottom: 2%;
+  height: 48%;
+  background:
+    radial-gradient(30% 40% at 18% 62%, rgba(238, 228, 214, 0.24), transparent 70%),
+    radial-gradient(26% 34% at 52% 48%, rgba(238, 228, 214, 0.18), transparent 70%),
+    radial-gradient(32% 40% at 84% 60%, rgba(238, 228, 214, 0.22), transparent 70%);
+}
+
+.auth-shell::after {
+  top: 28%;
+  height: 30%;
+  background:
+    radial-gradient(28% 36% at 30% 50%, rgba(238, 228, 214, 0.14), transparent 70%),
+    radial-gradient(30% 40% at 72% 56%, rgba(238, 228, 214, 0.12), transparent 70%);
+  animation-duration: 110s;
+  animation-direction: alternate-reverse;
+}
+
+@keyframes auth-mist {
+  from {
+    transform: translateX(-8%);
+  }
+  to {
+    transform: translateX(8%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-shell::before,
+  .auth-shell::after {
+    animation: none;
+  }
+}
+
+html[data-reduce-motion="1"] .auth-shell::before,
+html[data-reduce-motion="1"] .auth-shell::after {
+  animation: none;
+}
+
+/* About a third of a large screen, never narrower than before; words at 18-20 px for young and older readers. */
 .auth-card {
-  width: min(420px, 100%);
+  position: relative;
+  z-index: 1;
+  width: min(clamp(420px, calc(36vw / var(--text-zoom, 1)), 560px), 100%);
   background: var(--paper);
   border: 1px solid #8a6a3c;
   box-shadow: 8px 12px 0 var(--shadow);
-  padding: 28px 28px 24px;
+  padding: clamp(24px, 3vw, 40px) clamp(22px, 3vw, 40px) clamp(22px, 2.5vw, 32px);
+  font-size: clamp(18px, calc(14px + 0.4vw), 20px);
 }
 
 .auth-card p.lede {
@@ -119,8 +186,8 @@ a {
 }
 
 .auth-card .foot {
-  margin-top: 16px;
-  font-size: 13px;
+  margin-top: 20px;
+  font-size: 18px;
 }
 
 /* Not .hint: that is the lake's fixed hint bar. */
@@ -4152,18 +4219,18 @@ html[data-contrast="high"] .sound-captions li {
 }
 
 /* The start page and the sign-in pages: one large button to play and larger words, for young readers and anyone new to
-   computers. A link that looks like the card's button stands 48 px tall. */
+   computers. A link that looks like the card's button stands 56 px tall. */
 .auth-cta {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  min-height: 48px;
+  min-height: 56px;
   margin-top: 18px;
   padding: 12px;
   background: var(--ink);
   color: var(--paper);
-  font-size: 18px;
+  font-size: 1.1em;
   text-decoration: none;
 }
 
@@ -4184,7 +4251,6 @@ html[data-contrast="high"] .sound-captions li {
 
 .auth-card .start-note {
   margin: 18px 0 0;
-  font-size: 16px;
   line-height: 1.45;
 }
 
@@ -4192,23 +4258,26 @@ html[data-contrast="high"] .sound-captions li {
   margin-top: 8px;
 }
 
-/* The language row at the card's top: its own small buttons, not the card's full-width one. */
+/* The language row at the card's top: its own small buttons, not the card's full-width one. A narrow card with larger
+   text puts Polski under English rather than breaking a name. */
 .auth-card .choice-row {
+  flex-wrap: wrap;
   justify-content: flex-end;
   margin-bottom: 12px;
 }
 
 .auth-card .choice-row button {
   width: auto;
-  min-height: 40px;
+  min-height: 48px;
   margin-top: 0;
-  padding: 8px 14px;
+  padding: 8px 16px;
   background: transparent;
   color: var(--ink);
   border: 1px solid #6b5233;
-  font-size: 15px;
+  font-size: 16px;
   letter-spacing: 0;
   text-transform: none;
+  overflow-wrap: normal;
 }
 
 .auth-card .choice-row button:hover {
@@ -4221,36 +4290,36 @@ html[data-contrast="high"] .sound-captions li {
   border-color: var(--ink);
 }
 
-/* Sentence-case labels and hints a size up from the old 12 and 13 px, for young and unpractised readers. */
+/* Sentence-case labels at the card's size and hints at 18 px, up from the old 12 and 13 px, for young and unpractised readers. */
 .auth-card label {
-  font-size: 16px;
+  font-size: 1em;
   text-transform: none;
   letter-spacing: 0;
 }
 
 .auth-card input {
-  min-height: 48px;
+  min-height: 56px;
 }
 
 .auth-card .field-help {
-  font-size: 15px;
+  font-size: 18px;
 }
 
 .auth-card .auth-switch {
   margin: 0 0 8px;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 /* Under the password, a small switch rather than the card's full-width button. */
 .auth-card .show-password {
   width: auto;
-  min-height: 40px;
+  min-height: 48px;
   margin-top: 8px;
-  padding: 8px 12px;
+  padding: 8px 14px;
   background: transparent;
   color: var(--ink);
   border: 1px solid #6b5233;
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .auth-card .show-password:hover,
@@ -4259,8 +4328,8 @@ html[data-contrast="high"] .sound-captions li {
 }
 
 .auth-card button[type="submit"] {
-  min-height: 48px;
-  font-size: 18px;
+  min-height: 56px;
+  font-size: 1.1em;
 }
 
 .auth-card button:disabled {
