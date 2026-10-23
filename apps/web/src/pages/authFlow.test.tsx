@@ -154,9 +154,35 @@ describe("creating an account", () => {
     type("name", "  Ana  ");
     type("email", "ana@example.com");
     type("password", "long-enough-1");
+    type("password-again", "long-enough-1");
     await submit();
     expect(authClient.signUp.email).toHaveBeenCalledWith({ name: "Ana", email: "ana@example.com", password: "long-enough-1" });
     expect(shown()?.dataset.at).toBe("/play");
+  });
+
+  it("stops two different passwords before sending, on the second field, until either is changed", async () => {
+    await open(["/register"]);
+    type("email", "ana@example.com");
+    type("password", "long-enough-1");
+    type("password-again", "long-enough-2");
+    await submit();
+    expect(authClient.signUp.email).not.toHaveBeenCalled();
+    expect(container.querySelector("#password-again-error")?.textContent).toBe("The two passwords are different.");
+    expect(document.activeElement).toBe(input("password-again"));
+    expect(input("password-again").getAttribute("aria-describedby")).toBe("password-again-error");
+    expect([input("password").value, input("password-again").value]).toEqual(["long-enough-1", "long-enough-2"]);
+    expect(container.querySelector<HTMLButtonElement>("button[type=submit]")?.disabled).toBe(false);
+    await act(async () => type("password", "long-enough-2"));
+    expect(container.querySelector("#password-again-error")).toBeNull();
+  });
+
+  it("shows both passwords with one switch", async () => {
+    await open(["/register"]);
+    const show = container.querySelector<HTMLButtonElement>(".show-password")!;
+    await act(async () => show.click());
+    expect(show.getAttribute("aria-pressed")).toBe("true");
+    expect([input("password").type, input("password-again").type]).toEqual(["text", "text"]);
+    expect([input("password").getAttribute("autocomplete"), input("password-again").getAttribute("autocomplete")]).toEqual(["new-password", "new-password"]);
   });
 
   it("names a taken email and offers to sign in with it", async () => {
@@ -164,6 +190,7 @@ describe("creating an account", () => {
     await open(["/register"]);
     type("email", "ana@example.com");
     type("password", "long-enough-1");
+    type("password-again", "long-enough-1");
     await submit();
     expect(container.querySelector(".error")?.textContent).toBe("This email already has an account.");
     await act(async () => link("Sign in instead")!.click());
@@ -173,7 +200,7 @@ describe("creating an account", () => {
 
 describe("Polish on the sign-in pages", () => {
   it("speaks to any player, not to a man or a woman", () => {
-    const keys = ["Sign in to play.", "No account yet?", "Forgot your password? It can't be reset yet. You can create a new account.", "Free. Your email is only for signing in; other players see only your nickname.", "Other players see this. Don't use your real name.", "No email? Ask a grown-up to help.", "Write it down. It can't be reset yet.", "You're signed in as {name}.", "Sign out? To come back you need your email and password.", "Have an account?", "New here? It's free."];
+    const keys = ["Sign in to play.", "No account yet?", "Forgot your password? It can't be reset yet. You can create a new account.", "Free. Your email is only for signing in; other players see only your nickname.", "Other players see this. Don't use your real name.", "No email? Ask a grown-up to help.", "Write it down. It can't be reset yet.", "You're signed in as {name}.", "Sign out? To come back you need your email and password.", "Have an account?", "New here? It's free.", "Type the password again", "The two passwords are different."];
     for (const key of keys) {
       const line = PL_PAGES[key];
       expect(line, key).toBeTypeOf("string");

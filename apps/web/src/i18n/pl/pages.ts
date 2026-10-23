@@ -40,6 +40,8 @@ export const PL_PAGES: PlBook = {
   "Other players see this. Don't use your real name.": "Inni gracze ją zobaczą. Nie wpisuj prawdziwego imienia.",
   "No email? Ask a grown-up to help.": "Nie masz e-maila? Poproś dorosłą osobę o pomoc.",
   "Write it down. It can't be reset yet.": "Zapisz je. Na razie nie da się go odzyskać.",
+  "Type the password again": "Wpisz hasło jeszcze raz",
+  "The two passwords are different.": "Te dwa hasła się różnią.",
   "Create account and play": "Załóż konto i graj",
   "You're signed in as {name}.": "Zalogowano jako {name}.",
   "Sign out to use another account": "Wyloguj się, aby użyć innego konta",
