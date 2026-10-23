@@ -39,14 +39,18 @@ export function Walkthrough({ userId, caughtTotal, fishing, phase, nibble, outco
   const coachRef = useRef<HTMLElement>(null);
   const props = useRef({ fishing, phase, nibble, outcome });
   props.current = { fishing, phase, nibble, outcome };
+  // Brought back from Settings over a catch card: that fish is not this walkthrough's, so it starts once the card goes.
+  const pastResult = useRef(again && phase === "result");
 
   useEffect(() => {
     if (!open) return;
     const touch = window.matchMedia?.("(pointer: coarse)").matches ?? false;
     const read = () => {
       const surface = surfaceRef.current;
+      if (props.current.phase !== "result") pastResult.current = false;
       const snap: WalkthroughSnapshot = {
         ...props.current,
+        ...(pastResult.current ? { phase: "idle" as const, outcome: null } : {}),
         cast: surface?.dataset.cast,
         surge: Number(surface?.dataset.surge ?? 0),
         reeling: fightInput.reeling,
