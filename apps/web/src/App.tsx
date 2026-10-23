@@ -41,7 +41,7 @@ const SpotMapPage = lazy(() => loadMap().then((module) => ({ default: module.Spo
 function Waiting({ what }: { what: "sign-in" | "page" }) {
   const t = useT();
   return (
-    <main className="auth-shell">
+    <main className="auth-shell" data-wait="">
       <div className="auth-card">
         <h1>Stillwater</h1>
         <p className="lede" role="status">

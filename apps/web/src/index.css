@@ -85,6 +85,11 @@ a {
   }
 }
 
+/* The short wait before the lake fetches no picture: the lake's own models are loading. */
+.auth-shell[data-wait] {
+  --auth-picture: none 50% 50%;
+}
+
 /* Mist drifting over the water: soft bands moved by transform only, cheap on old phones. */
 .auth-shell::before,
 .auth-shell::after {
