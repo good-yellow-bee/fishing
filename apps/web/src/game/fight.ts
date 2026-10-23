@@ -1,7 +1,7 @@
 import { isTrophyWeight, offItsNest, type ChallengeId, type FishSpecies } from "@stillwater/shared";
 import { t } from "../i18n";
 import { BED_RAIDERS, difficulty01 } from "./logic";
-import type { Drag } from "./drag";
+import { DRAGS, type Drag } from "./drag";
 import { biteStyle } from "./nibblePlan";
 
 export type SurgeState = 0 | 1 | 2; // 0 calm, 1 warning (telegraph), 2 surging
@@ -718,7 +718,7 @@ export function makeFight(
   let windLeft = findsSecondWind(species, weight);
   /** After the second wind's run, the last run near the net waits out a calm like any other run. */
   let windCalmUntil = -Infinity;
-  /** The drag as it stood when the run began: turning the knob mid-run takes effect on the next one. */
+  /** The drag a run is fought on: set as it began, eased at once mid-run, tightened only from the next one. */
   let runDrag: Drag = "normal";
   /** Seconds the angler has reeled, less what resting gave back: it tires the arm. */
   let reelSec = 0;
@@ -778,6 +778,8 @@ export function makeFight(
       sim.lastRun = true;
       nextAt = nowMs;
     }
+    // Eased mid-run, the drag gives at once; tightened, it waits for the next run.
+    if (sim.surge === 2 && DRAGS.indexOf(drag) < DRAGS.indexOf(runDrag)) runDrag = drag;
     if (nowMs >= nextAt) {
       if (sim.surge === 0) {
         sim.surge = 1;

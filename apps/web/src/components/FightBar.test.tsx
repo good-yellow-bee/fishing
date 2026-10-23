@@ -645,7 +645,7 @@ describe("FightBar drag line", () => {
       expect(dragLine("light")).toBe("On light line set it light: it slips before the line breaks");
       expect(dragLine("standard")).toBe("Light lets a run go easy; heavy holds it short");
       act(() => updateSettings({ drag: "heavy" }));
-      expect(dragLine("light")).toBe("On light line a strong run snaps it, even let go: set it light");
+      expect(dragLine("light")).toBe("On light line a strong run snaps it, even let go: set it light, even mid-run");
       act(() => updateSettings({ drag: "light" }));
       expect(dragLine("light")).toBe("On light line it slips before the line breaks, even as you reel: the run takes line instead");
       expect(dragLine("standard")).toBe("A run takes more line, even as you reel, but pulls softly");
@@ -665,7 +665,7 @@ describe("FightBar drag line", () => {
       act(() => updateSettings({ drag: "light" }));
       expect(dragLine()).toBe("On heavy line set it heavy: it holds a tiring fish out of cover");
       act(() => updateSettings({ drag: "heavy" }));
-      expect(dragLine()).toBe("On heavy line it holds a tiring fish out of cover, but loads the line even let go and tires your arm: a strong run goes red");
+      expect(dragLine()).toBe("On heavy line it holds a tiring fish out of cover, but loads the line even let go and tires your arm: if a strong run goes red, ease it at once");
     } finally {
       act(() => updateSettings({ drag: "normal" }));
     }

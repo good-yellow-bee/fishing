@@ -30,19 +30,19 @@ const DRAG_WORD: Record<Drag, string> = { light: "Drag: light", normal: "Drag: n
 const DRAG_LINE: Record<Drag, string> = {
   light: "A run takes more line, even as you reel, but pulls softly",
   normal: "Light lets a run go easy; heavy holds it short",
-  heavy: "A run takes less line, but loads it even let go, and tires your arm: a strong one goes red",
+  heavy: "A run takes less line, but loads it even let go, and tires your arm: if a strong one goes red, ease it at once",
 };
 /** On light line the drag decides whether a strong run breaks it: a light one slips first, a heavy one snaps it. */
 const LIGHT_LINE_DRAG: Record<Drag, string> = {
   light: "On light line it slips before the line breaks, even as you reel: the run takes line instead",
   normal: "On light line set it light: it slips before the line breaks",
-  heavy: "On light line a strong run snaps it, even let go: set it light",
+  heavy: "On light line a strong run snaps it, even let go: set it light, even mid-run",
 };
 /** On heavy line at cover a heavy drag stops a tiring fish's unturned run short of the weeds or the wood. */
 const HEAVY_LINE_COVER_DRAG: Record<Drag, string> = {
   light: "On heavy line set it heavy: it holds a tiring fish out of cover",
   normal: "On heavy line set it heavy: it holds a tiring fish out of cover",
-  heavy: "On heavy line it holds a tiring fish out of cover, but loads the line even let go and tires your arm: a strong run goes red",
+  heavy: "On heavy line it holds a tiring fish out of cover, but loads the line even let go and tires your arm: if a strong run goes red, ease it at once",
 };
 
 export function FightBar({ fight, sim, performance, best = null, note = null, cleanRun = 0 }: Props) {
@@ -365,7 +365,7 @@ export function FightBar({ fight, sim, performance, best = null, note = null, cl
             <button
               type="button"
               className="fight-drag-btn"
-              title={t("Turn the reel's drag: light, normal or heavy. It takes hold from the next run.")}
+              title={t("Turn the reel's drag: light, normal or heavy. Eased, it gives at once; tightened, it takes hold from the next run.")}
               onClick={(event) => {
                 // Leave Space free for reeling.
                 event.currentTarget.blur();

@@ -910,7 +910,22 @@ describe("the reel's drag", () => {
     const before = f.sim.line;
     f.step((now += 50), 0.05, false, 0, "heavy");
     const normal = run("normal", false, 50).line;
-    expect(f.sim.line - before).toBeCloseTo(normal);
+    expect(f.sim.line - before).toBeCloseTo(normal, 6);
+  });
+
+  it("eases at once mid-run, so a run started on a heavy drag takes a normal drag's line from the turn", () => {
+    const f = makeFight(fish("pike"), 6, 3, () => 0);
+    let now = 0;
+    while (f.sim.surge !== 2) f.step((now += 50), 0.05, false, 0, "heavy");
+    const before = f.sim.line;
+    f.step((now += 50), 0.05, false, 0, "normal");
+    const normal = run("normal", false, 50).line;
+    expect(normal).toBeGreaterThan(run("heavy", false, 50).line);
+    expect(f.sim.line - before).toBeCloseTo(normal, 6);
+    // Turned back up, it waits for the next run again.
+    const eased = f.sim.line;
+    f.step((now += 50), 0.05, false, 0, "heavy");
+    expect(f.sim.line - eased).toBeCloseTo(normal, 6);
   });
 
   it("goes round from light to heavy and back", () => {
@@ -1344,6 +1359,20 @@ describe("light line on the drag", () => {
     expect(standard.peak).toBeLessThanOrEqual(HEAVY_DRAG_CAP);
   });
 
+  it("saves light line from a strong run on a heavy drag when the drag is eased mid-run", () => {
+    const f = makeFight(fish("carp"), 20, 3, () => 0.5, 1, "open", undefined, false, false, false, false, false, false, false, 1, 1, false, LIGHT);
+    let now = 0;
+    let outcome: FightOutcome = "fighting";
+    let drag: Drag = "heavy";
+    while (f.sim.surge !== 2) f.step((now += 50), 0.05, false, 0, drag);
+    while (outcome === "fighting" && f.sim.surge === 2) {
+      if (f.sim.tension >= LINE_SNAP.light / 2) drag = "light";
+      outcome = f.step((now += 50), 0.05, false, 0, drag);
+    }
+    expect(drag).toBe("light");
+    expect(outcome).toBe("fighting");
+  });
+
   it("lets a small fish's runs against a heavy drag load light line without snapping it", () => {
     const perch = fish("perch");
     expect(play(perch, perch.minWeight, 1, releaseOnTelegraph, REACTION_FRAMES, FRAME_SEC, "heavy", LIGHT).outcome).toBe("landed");
@@ -1576,13 +1605,13 @@ describe("heavy line in cover", () => {
 
   describe("on a heavy drag", () => {
     /** Lets the first run go unturned on the given drag, from the given stamina, and says how it ended. */
-    const afterRun = (cover: FightCover, water: "weeds" | "pilings" | "log", drag: Drag, stamina = 1) => {
+    const afterRun = (cover: FightCover, water: "weeds" | "pilings" | "log", drag: Drag, stamina = 1, easeTo?: Drag) => {
       const runtime = makeFight(fish("smallmouth-bass"), 4, 3, () => 0, 1, water, undefined, false, false, false, false, false, false, false, 1, 1, false, cover);
       runtime.sim.stamina = stamina;
       let was = runtime.sim.surge;
       let now = 0;
       for (; now < 60_000; now += 50) {
-        runtime.step(now, 0.05, false, 0, drag);
+        runtime.step(now, 0.05, false, 0, easeTo && runtime.sim.surge === 2 ? easeTo : drag);
         if (was === 2 && runtime.sim.surge === 0) break;
         was = runtime.sim.surge;
       }
@@ -1598,6 +1627,8 @@ describe("heavy line in cover", () => {
       expect(afterRun(HEAVY, water, "normal", 0.5).inCover).toBe(true);
       expect(afterRun(HEAVY, water, "light", 0.5).inCover).toBe(true);
       expect(afterRun({ lineCover: LINE_COVER.standard }, water, "heavy", 0.5).inCover).toBe(true);
+      // Eased mid-run, it no longer holds the fish out.
+      expect(afterRun(HEAVY, water, "heavy", 0.5, "normal").inCover).toBe(true);
     });
 
     it("lets a fresh fish bore in, and still pulls it out in half the time", () => {
