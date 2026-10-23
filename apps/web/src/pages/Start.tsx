@@ -1,19 +1,18 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { authClient } from "../auth-client";
-import { ChoiceRow } from "../field/ChoiceRow";
 import { FIND_PARAM } from "../field/findLinks";
-import { LANGUAGES } from "../field/ThemeChoice";
-import { setLang, useLang, useT } from "../i18n";
+import { useT } from "../i18n";
 import { usePageTitle } from "../pageTitle";
 import { warmLake } from "../warmLake";
+import { AuthLanguage, useHeadingFocus } from "./authParts";
 
 /** The front door: one big Play, a clear Sign in, and the field log a step aside. */
 export function StartPage({ loadLake }: { loadLake: () => Promise<unknown> }) {
   const t = useT();
-  const lang = useLang();
   const { search } = useLocation();
   usePageTitle(t("Stillwater · A fishing game"));
+  const heading = useHeadingFocus();
   const session = authClient.useSession();
   const user = session.data?.user;
   // Signed out, each background refetch (on focus, say) marks the session pending again: once answered, the page stays put.
@@ -35,8 +34,10 @@ export function StartPage({ loadLake }: { loadLake: () => Promise<unknown> }) {
   return (
     <main className="auth-shell">
       <div className="auth-card">
-        <ChoiceRow label={t("Language")} value={lang} options={LANGUAGES} onChange={setLang} />
-        <h1>Stillwater</h1>
+        <AuthLanguage />
+        <h1 ref={heading} tabIndex={-1}>
+          Stillwater
+        </h1>
         <p className="lede">{t("A fishing game. Cast, wait for a bite, reel in a fish.")}</p>
         <Link
           className="auth-cta"

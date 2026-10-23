@@ -1062,7 +1062,28 @@ export function DockPage() {
   const onBuyBreadCrumb = buyOnce(buyBreadCrumb);
 
   if (!me) {
-    return <main className="dock-page">{error || t("Walking the planks…")}</main>;
+    return (
+      <main className="dock-page dock-loading">
+        <p role="status">{error || t("Loading the lake…")}</p>
+        {error && (
+          <p>
+            <button
+              className="panel-btn"
+              type="button"
+              onClick={() => {
+                setError("");
+                refresh().catch((err: Error) => setError(errorText(err.message)));
+              }}
+            >
+              {t("Try again")}
+            </button>{" "}
+            <Link className="panel-btn" to="/">
+              {t("Back to start")}
+            </Link>
+          </p>
+        )}
+      </main>
+    );
   }
 
   const dropoffOpen = canUseSpot("dropoff", me.level);

@@ -2,6 +2,7 @@
 import { JSDOM } from "jsdom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  LAKE_WORDS,
   BADGES,
   FIELD_ARCHIVE_REFUSAL,
   FIELD_ARCHIVE_TOO_LARGE,
@@ -69,6 +70,10 @@ describe("Polish game content", () => {
       LAKE_HOUR_BLURB,
     ];
     expect(missing(records.flatMap((record) => Object.values(record)))).toEqual([]);
+  });
+
+  it("has every word a lake nickname is made from", () => {
+    expect(missing([...LAKE_WORDS])).toEqual([]);
   });
 
   it("has every level unlock and badge", () => {

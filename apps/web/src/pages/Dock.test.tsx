@@ -14,6 +14,7 @@ import { oldFoeKey } from "../game/oldFoe";
 import { baitBucketKey } from "../game/baitBucket";
 import { WORM_TIN_WET, wormTinKey } from "../game/wormTin";
 import { sessionKey, startSession } from "../game/session";
+import { authClient } from "../auth-client";
 import type { Outcome } from "../game/useFishingGame";
 
 const scene = vi.fn<(props: { hour: LakeHour; sky: Sky; species?: FishSpecies | null; weight?: number; tracks?: readonly LodgeTrack[]; released?: boolean }) => void>();
@@ -1156,5 +1157,29 @@ describe("dock lake hour", () => {
     });
     expect(page.querySelector(".hour-veil")).toBeNull();
     expect(lastScene().hour).toBe("day");
+  });
+});
+
+describe("the way into the lake and out", () => {
+  it("says the lake is loading, and after a failed load offers Try again and the start page", async () => {
+    vi.mocked(getMe).mockRejectedValueOnce(new Error("request failed (503)")).mockResolvedValue(me);
+    const page = await openDock("/?hour=day&sky=clear");
+    expect(page.textContent).toContain("Request failed (503)");
+    expect([...page.querySelectorAll("a")].find((a) => a.textContent === "Back to start")?.getAttribute("href")).toBe("/");
+    const again = [...page.querySelectorAll("button")].find((button) => button.textContent === "Try again")!;
+    await act(async () => again.click());
+    expect(getMe).toHaveBeenCalledTimes(2);
+    expect(page.querySelector(".hud")).not.toBeNull();
+  });
+
+  it("asks before signing out, and signs out only on yes", async () => {
+    const page = await openDock("/?hour=day&sky=clear");
+    const logout = [...page.querySelectorAll("button")].find((button) => button.textContent === "Logout")!;
+    vi.stubGlobal("confirm", vi.fn(() => false));
+    await act(async () => logout.click());
+    expect(authClient.signOut).not.toHaveBeenCalled();
+    vi.stubGlobal("confirm", vi.fn(() => true));
+    await act(async () => logout.click());
+    expect(authClient.signOut).toHaveBeenCalledTimes(1);
   });
 });

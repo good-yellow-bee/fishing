@@ -3587,11 +3587,11 @@ html[data-contrast="high"] :is(.daily-requests-note, .hud .eyebrow, .settings-no
   color: #fbf3e2;
 }
 
-/* Off the lake, a few lines end on a small link: Sign in's and Join's "Make a profile" or "Sign in", the catch log's
+/* Off the lake, a few lines end on a small link: Sign in's and Create account's links to each other and back to start, the catch log's
    and lodge board's way back to the dock, the trip recap's "Open the trip" and the field guide's "In your field log".
    They were 15-19 px targets on a touch screen: each is now a 32 px band. */
 @media (pointer: coarse) {
-  :is(.auth-card .foot, .log-page > p:first-child, .trip-recap-filed, .guide-book) a {
+  :is(.auth-card .foot, .auth-card .auth-switch, .log-page > p:first-child, .trip-recap-filed, .guide-book) a {
     display: inline-block;
     min-height: 32px;
     padding-block: 7px;
@@ -4219,6 +4219,67 @@ html[data-contrast="high"] .sound-captions li {
   background: var(--ink);
   color: var(--paper);
   border-color: var(--ink);
+}
+
+/* Sentence-case labels and hints a size up from the old 12 and 13 px, for young and unpractised readers. */
+.auth-card label {
+  font-size: 16px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.auth-card input {
+  min-height: 48px;
+}
+
+.auth-card .field-help {
+  font-size: 15px;
+}
+
+.auth-card .auth-switch {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+/* Under the password, a small switch rather than the card's full-width button. */
+.auth-card .show-password {
+  width: auto;
+  min-height: 40px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid #6b5233;
+  font-size: 15px;
+}
+
+.auth-card .show-password:hover,
+.auth-card .show-password[aria-pressed="true"] {
+  background: #f3e6cc;
+}
+
+.auth-card button[type="submit"] {
+  min-height: 48px;
+  font-size: 18px;
+}
+
+.auth-card button:disabled {
+  cursor: progress;
+  opacity: 0.75;
+}
+
+/* While the lake's profile loads, or after it failed: the line and its two ways on, in the middle of the dark page. */
+.dock-loading {
+  display: grid;
+  place-content: center;
+  gap: 16px;
+  padding: 24px;
+  color: var(--paper);
+  text-align: center;
+}
+
+.dock-loading p {
+  margin: 0;
 }
 
 /* A button that reads as a link inside a sentence ("Not you? Sign out"). */

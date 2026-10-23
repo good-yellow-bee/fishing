@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, type ReactNode } from "react";
-import { Link, Navigate, Outlet, Route, Routes } from "react-router-dom";
+import { Link, Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 import { prefetchMe } from "./api";
 import { authClient } from "./auth-client";
 import { useT } from "./i18n";
@@ -37,13 +37,16 @@ const loadMap = () => import("./field/map/SpotMapPage");
 // Offline, before the map was ever fetched, a short note instead of a blank app.
 const SpotMapPage = lazy(() => loadMap().then((module) => ({ default: module.SpotMapPage }), () => ({ default: MapOffline })));
 
-function FogLifting() {
+/** A short wait before the lake's pages: the sign-in check, then their code. */
+function Waiting({ what }: { what: "sign-in" | "page" }) {
   const t = useT();
   return (
     <main className="auth-shell">
       <div className="auth-card">
         <h1>Stillwater</h1>
-        <p className="lede">{t("Fog lifting…")}</p>
+        <p className="lede" role="status">
+          {what === "sign-in" ? t("Checking your sign-in…") : t("Loading…")}
+        </p>
       </div>
     </main>
   );
@@ -66,11 +69,13 @@ function Offline() {
 
 function Gate({ children }: { children: ReactNode }) {
   const session = authClient.useSession();
-  if (session.isPending) return <FogLifting />;
+  const { pathname, search } = useLocation();
+  if (session.isPending) return <Waiting what="sign-in" />;
   // Offline, the session check fails too; don't send a signed-in angler to the sign-in page.
   if (!session.data && !navigator.onLine) return <Offline />;
-  if (!session.data) return <Navigate to="/login" replace />;
-  return <Suspense fallback={<FogLifting />}>{children}</Suspense>;
+  // Signed in, the player comes back to the page asked for ("/board?tab=week"), not always the lake.
+  if (!session.data) return <Navigate to="/login" replace state={{ from: pathname + search }} />;
+  return <Suspense fallback={<Waiting what="page" />}>{children}</Suspense>;
 }
 
 function FieldLayout() {

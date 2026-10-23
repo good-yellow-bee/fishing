@@ -9,7 +9,7 @@ describe("page titles", () => {
   it.each([
     ["pages/Start.tsx", 'usePageTitle(t("Stillwater · A fishing game"));'],
     ["pages/Login.tsx", 'usePageTitle(`${t("Sign in")} · Stillwater`);'],
-    ["pages/Register.tsx", 'usePageTitle(t("Join Stillwater"));'],
+    ["pages/Register.tsx", 'usePageTitle(`${t("Create account")} · Stillwater`);'],
     ["pages/Board.tsx", 'usePageTitle(`${t("Lodge board")} · Stillwater`);'],
     ["pages/Log.tsx", 'usePageTitle(`${me ? t("{name}’s catch log", { name: me.profile.displayName }) : t("Catch log")} · Stillwater`);'],
     ["pages/Dock.tsx", 'usePageTitle(`${t("On the lake")} · Stillwater`);'],

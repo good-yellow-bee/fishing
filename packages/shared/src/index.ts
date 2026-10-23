@@ -34,3 +34,4 @@ export * from "./streak.ts";
 export * from "./snow.ts";
 export * from "./moon.ts";
 export * from "./hotBank.ts";
+export * from "./nickname.ts";
