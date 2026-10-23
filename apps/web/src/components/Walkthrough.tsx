@@ -5,7 +5,9 @@ import {
   chipLabel,
   finishWalkthrough,
   nextStep,
+  reelLine,
   stepLine,
+  walkthroughAgain,
   walkthroughDone,
   WALKTHROUGH_CHIPS,
   type WalkthroughSnapshot,
@@ -20,15 +22,17 @@ type Props = {
   nibble: boolean;
   outcome: WalkthroughSnapshot["outcome"];
   surfaceRef: RefObject<HTMLDivElement | null>;
+  /** Asked for again from Settings this visit. */
+  again?: boolean;
 };
 
 /** How often the aim ring and the fight are read; they live outside React. */
 const POLL_MS = 150;
 
-export function Walkthrough({ userId, caughtTotal, fishing, phase, nibble, outcome, surfaceRef }: Props) {
+export function Walkthrough({ userId, caughtTotal, fishing, phase, nibble, outcome, surfaceRef, again = false }: Props) {
   // Decided once per visit, so the first landing does not hide its own send-off.
   const t = useT();
-  const [open, setOpen] = useState(() => caughtTotal === 0 && !walkthroughDone(userId));
+  const [open, setOpen] = useState(() => again || walkthroughAgain(userId) || (caughtTotal === 0 && !walkthroughDone(userId)));
   const [step, setStep] = useState<WalkthroughStep>("aim");
   const stepRef = useRef<WalkthroughStep>("aim");
   const [line, setLine] = useState("");
@@ -108,7 +112,7 @@ export function Walkthrough({ userId, caughtTotal, fishing, phase, nibble, outco
       {/* In the fight the line turns with every run, which the fight card already calls out at once: a screen reader
           hears the fight's first line and no more, not each step twice. */}
       <span className="sr-only" role="status">
-        {step === "ease" ? t("Hold to reel it in. Ease off when the line runs hot.") : line}
+        {step === "ease" ? reelLine() : line}
       </span>
       {step !== "landed" && (
         <button

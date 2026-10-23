@@ -44,6 +44,16 @@ describe("settings panel", () => {
     expect(settings.autoEffects).toBe(false);
   });
 
+  it("offers the first-cast tips again only where the lake can show them", () => {
+    expect(host.querySelector("[data-tips-again]")).toBeNull();
+    const onTips = vi.fn();
+    act(() => root.render(<SettingsPanel onClose={() => {}} onTips={onTips} />));
+    const again = host.querySelector<HTMLButtonElement>("[data-tips-again]")!;
+    expect(again.textContent).toBe("Show the first-cast tips again");
+    act(() => again.click());
+    expect(onTips).toHaveBeenCalledTimes(1);
+  });
+
   it("other choices leave the step-down on", () => {
     pick("Soft");
     expect(settings.shake).toBe("soft");

@@ -36,7 +36,7 @@ describe("the first-cast coach on a screen reader", () => {
     fightInput.reeling = true;
     await render("fight");
     expect(shown().textContent).toBe("It's running. Let go!");
-    expect(said().textContent).toBe("Hold to reel it in. Ease off when the line runs hot.");
+    expect(said().textContent).toBe("Hold to reel it in. Let go when the Tension bar goes red.");
     await act(async () => root.unmount());
   });
 });
