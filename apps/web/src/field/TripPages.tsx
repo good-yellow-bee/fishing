@@ -818,7 +818,7 @@ function TripView() {
       {/* A hard day is worth telling too: a past blank outing with a note, or fish lost or missed. Today's plan with only a note isn't a day yet. */}
       {catches.length > 0 || (!samplePlan && (pastDay || trip.lost || trip.missed) && (trip.note.trim() || trip.lost || trip.missed)) ? <CopySummary text={() => tripSummary(trip, spot?.name ?? null, catches, (id) => { const name = spotById(book, id)?.name; return name === undefined ? null : waterName(name); }, countedFish(book.catches))} file="stillwater-outing.txt" /> : null}
       {/* Planning ahead: what has worked on this water before. */}
-      {!fished && spot && !play ? <WaterTipsBox catches={countedFish(catchesForSpot(countedBook(book), spot.id))} on={trip.date} within={countedSearch(book, exactTerm("water", plainName(spot.name)), catchesForSpot(book, spot.id))} /> : null}
+      {!fished && spot && !play ? <WaterTipsBox catches={countedFish(catchesForSpot(countedBook(book), spot.id))} on={trip.date} within={plainName(spot.name) ? countedSearch(book, exactTerm("water", plainName(spot.name)), catchesForSpot(book, spot.id)) : null} /> : null}
       <TripWeather catches={catches} />
       {/* Once the day comes, the fish lead; before that, the bag does. */}
       {fishFirst ? fish : tackle}
