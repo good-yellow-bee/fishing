@@ -42,7 +42,7 @@ const LIGHT_LINE_DRAG: Record<Drag, string> = {
 const HEAVY_LINE_COVER_DRAG: Record<Drag, string> = {
   light: "On heavy line set it heavy: it holds a tiring fish out of cover",
   normal: "On heavy line set it heavy: it holds a tiring fish out of cover",
-  heavy: "On heavy line it holds a tiring fish out of cover, but loads the line even let go and tires your arm: if a strong run goes red, ease it at once",
+  heavy: "On heavy line it holds a tiring fish out of cover, but loads the line even let go and tires your arm: a strong run goes red, and easing it then lets the fish in",
 };
 
 export function FightBar({ fight, sim, performance, best = null, note = null, cleanRun = 0 }: Props) {
