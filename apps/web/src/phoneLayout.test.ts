@@ -422,21 +422,42 @@ describe("a wait hint opened on a touch phone", () => {
     const media = "@media (pointer: coarse) and (max-width: 800px) and (min-height: 501px) {";
     const block = css.slice(css.indexOf(media), css.indexOf("\n}\n", css.indexOf(media)));
     const rule = block.slice(block.indexOf(opened), block.indexOf("}", block.indexOf(opened)));
-    expect(rule).toContain("max-height: calc(100% - var(--hud-bottom, 140px) - 10px - max(var(--stance-h, 0px), var(--lure-h, 80px)) - 120px);");
+    expect(rule).toContain("max-height: calc(100% - var(--hud-bottom, 140px) - 10px - max(var(--stance-h, 0px), var(--lure-h, 80px)) - var(--strike-bottom) - var(--strike-size) - 8px);");
     expect(rule).toContain("overflow-y: auto;");
     expect(rule).toContain("pointer-events: auto;");
   });
 
-  it("takes the stick's corner held sideways, up to the Strike button and down from the bank chip, and scrolls", () => {
+  it("takes the stick's corner held sideways, up to the Strike button and down from the bank chip or the coach, and scrolls", () => {
     const media = "@media (pointer: coarse) and (max-height: 500px) {";
     const block = css.slice(css.indexOf(media), css.indexOf("\n}\n", css.indexOf(media)));
     const sideways = '\n  .scene-wrap[data-phase="waiting"] .hint:has(.hint-tail[data-open], .hint-reasons) {';
     const rule = block.slice(block.indexOf(sideways), block.indexOf("}", block.indexOf(sideways)));
     expect(rule).toContain("left: 10px;");
-    expect(rule).toContain("max-width: calc(100vw / var(--text-zoom, 1) - 122px);");
-    expect(rule).toContain("max-height: calc(100% - var(--hud-bottom, 52px) - 22px - var(--stance-h, 0px));");
+    expect(rule).toContain("max-width: calc(100vw / var(--text-zoom, 1) - 10px - var(--strike-size) - var(--strike-side) - 8px);");
+    expect(rule).toContain("max-height: calc(100% - var(--hud-bottom, 52px) - 22px - max(var(--stance-h, 0px), var(--coach-h, 0px)));");
     expect(rule).toContain("pointer-events: auto;");
     expect(block).toMatch(/html\[data-hand="left"\] \.scene-wrap\[data-phase="waiting"\] \.hint:has\(\.hint-tail\[data-open\], \.hint-reasons\) \{\n    right: 10px;\n    left: auto;/);
+  });
+
+  it("keeps clear of the Strike button by the numbers the button is drawn with", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {\n  .strike-cue .cue-keys {"));
+    expect(/\n  \.scene-wrap \{([^}]*)\}/.exec(touch)?.[1]).toBe("\n    --strike-side: 16px;\n    --strike-bottom: 24px;\n    --strike-size: 88px;\n  ");
+    const strike = /\n  \.thumb-strike \{([^}]*)\}/.exec(touch)?.[1];
+    expect(strike).toContain("right: var(--strike-side);");
+    expect(strike).toContain("bottom: var(--strike-bottom);");
+    expect(strike).toContain("width: var(--strike-size);");
+    expect(strike).toContain("height: var(--strike-size);");
+    expect(css).toMatch(/html\[data-hand="left"\] \.thumb-strike \{\n    right: auto;\n    left: var\(--strike-side\);/);
+  });
+
+  it("moves the sound captions up off it when held sideways", () => {
+    const media = "@media (pointer: coarse) and (max-height: 500px) {";
+    const block = css.slice(css.indexOf(media), css.indexOf("\n}\n", css.indexOf(media)));
+    const captions = '.scene-wrap[data-phase="waiting"]:has(> .hint :is(.hint-tail[data-open], .hint-reasons)) > .sound-captions {';
+    const rule = block.slice(block.indexOf(captions), block.indexOf("}", block.indexOf(captions)));
+    expect(rule).toContain("top: 8px;");
+    expect(rule).toContain("bottom: calc(10px + var(--hint-h, 54px) + 6px);");
+    expect(rule).toContain("justify-content: safe flex-end;");
   });
 
   it("keeps a finger on the hint from striking", () => {

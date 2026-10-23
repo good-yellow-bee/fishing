@@ -32,6 +32,7 @@ export function Walkthrough({ userId, caughtTotal, fishing, phase, nibble, outco
   const [step, setStep] = useState<WalkthroughStep>("aim");
   const stepRef = useRef<WalkthroughStep>("aim");
   const [line, setLine] = useState("");
+  const coachRef = useRef<HTMLElement>(null);
   const props = useRef({ fishing, phase, nibble, outcome });
   props.current = { fishing, phase, nibble, outcome };
 
@@ -75,11 +76,24 @@ export function Walkthrough({ userId, caughtTotal, fishing, phase, nibble, outco
     };
   }, [open, surfaceRef]);
 
+  // Held sideways, a wait hint opened past Read more stops under the coach as well as the bank chip.
+  useEffect(() => {
+    const surface = surfaceRef.current;
+    const coach = coachRef.current;
+    if (!open || !surface || !coach || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() => surface.style.setProperty("--coach-h", `${coach.offsetHeight}px`));
+    observer.observe(coach);
+    return () => {
+      observer.disconnect();
+      surface.style.removeProperty("--coach-h");
+    };
+  }, [open, surfaceRef]);
+
   if (!open) return null;
   const at = WALKTHROUGH_CHIPS.findIndex((chip) => chip.step === step);
 
   return (
-    <aside className="walkthrough" data-camera-control data-step={step} aria-label={t("First cast")}>
+    <aside className="walkthrough" ref={coachRef} data-camera-control data-step={step} aria-label={t("First cast")}>
       <ol>
         {WALKTHROUGH_CHIPS.map((chip, index) => {
           const state = step === "landed" || index < at ? "done" : index === at ? "now" : "todo";
