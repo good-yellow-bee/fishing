@@ -93,7 +93,7 @@ function FloatColourChoice() {
 
 /** Language, text size, sound, camera, effects and reel controls, remembered in this browser. */
 /** `onPhoto`, when given, hides every panel for a clean screenshot (H does the same). */
-export function SettingsPanel({ onClose, onPhoto, onKeys }: { onClose: () => void; onPhoto?: () => void; onKeys?: () => void }) {
+export function SettingsPanel({ onClose, onPhoto, onKeys, onTips }: { onClose: () => void; onPhoto?: () => void; onKeys?: () => void; onTips?: () => void }) {
   const current = useSettings();
   const t = useT();
   const panel = useRef<HTMLElement>(null);
@@ -228,6 +228,11 @@ export function SettingsPanel({ onClose, onPhoto, onKeys }: { onClose: () => voi
           {t("Shadows")}
         </label>
         <p className="settings-note">{t("Picture and shadows change the next time you open the lake.")}</p>
+        {onTips && (
+          <button className="panel-btn" type="button" data-tips-again onClick={onTips}>
+            {t("Show the first-cast tips again")}
+          </button>
+        )}
         {onKeys && (
           <button className="panel-btn" type="button" data-keys-card onClick={onKeys}>
             {t("Keys and buttons (?)")}

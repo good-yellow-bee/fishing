@@ -36,7 +36,30 @@ describe("the first-cast coach on a screen reader", () => {
     fightInput.reeling = true;
     await render("fight");
     expect(shown().textContent).toBe("It's running. Let go!");
-    expect(said().textContent).toBe("Hold to reel it in. Ease off when the line runs hot.");
+    expect(said().textContent).toBe("Hold to reel it in. Let go when the Tension bar goes red.");
+    await act(async () => root.unmount());
+  });
+
+  it("brought back over a landed fish's card, waits for the next fish instead of ending at once", async () => {
+    const surface = createRef<HTMLDivElement>();
+    const box = document.createElement("div");
+    document.body.append(box);
+    const root = createRoot(box);
+    const render = (phase: "result" | "idle", outcome: "landed" | null) =>
+      act(async () => {
+        root.render(
+          <>
+            <div ref={surface} />
+            <Walkthrough userId="u-again" caughtTotal={4} fishing phase={phase} nibble={false} outcome={outcome} surfaceRef={surface} again />
+          </>,
+        );
+      });
+    await render("result", "landed");
+    expect(box.querySelector(".walkthrough")?.getAttribute("data-step")).toBe("aim");
+    await render("idle", null);
+    expect(box.querySelector(".walkthrough")?.getAttribute("data-step")).toBe("aim");
+    await render("result", "landed");
+    expect(box.querySelector(".walkthrough")?.getAttribute("data-step")).toBe("landed");
     await act(async () => root.unmount());
   });
 });

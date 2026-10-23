@@ -4,7 +4,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
-import { badgeProgress, catchPoints, CLEAN_RUN_BONUS, DAY_RUN_BONUS, GOLDEN_BONUS, LODGE_RECORD_BONUS, PB_BONUS, isGolden, weeklyBonus, dailyConditions, skyTurnForDay, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky, type SpotId, MASTER_BONUS, localDate } from "@stillwater/shared";
+import { badgeProgress, catchPoints, CLEAN_RUN_BONUS, DAY_RUN_BONUS, GOLDEN_BONUS, LODGE_RECORD_BONUS, PB_BONUS, isGolden, weeklyBonus, dailyConditions, skyTurnForDay, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky, type SpotId, type StanceId, MASTER_BONUS, localDate } from "@stillwater/shared";
 import { buyAerator, buyBreadCrumb, buyGroundbait, buyShiner, buyWorm, buyWormBin, getGiants, getLodgeLost, getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
@@ -18,7 +18,7 @@ import { authClient } from "../auth-client";
 import type { Outcome } from "../game/useFishingGame";
 
 const scene = vi.fn<(props: { hour: LakeHour; sky: Sky; species?: FishSpecies | null; weight?: number; tracks?: readonly LodgeTrack[]; released?: boolean }) => void>();
-const landed = vi.hoisted(() => ({ outcome: null as Outcome | null, fishedHard: null as SpotId[] | null, waiting: null as { hint: string; more: string[] } | null, fold: null as { hint: string; lead: string } | null, bite: null as string | null, stance: null as SpotId | null }));
+const landed = vi.hoisted(() => ({ outcome: null as Outcome | null, fishedHard: null as SpotId[] | null, waiting: null as { hint: string; more: string[] } | null, fold: null as { hint: string; lead: string } | null, bite: null as string | null, stance: null as StanceId | null }));
 
 vi.mock("../api", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../api")>()),
@@ -130,6 +130,12 @@ async function openDock(url: string) {
     );
   });
   return container;
+}
+
+/** Opens the lake with the angler stood at the shack, where the shop button opens the shop. */
+async function openShack(url: string) {
+  landed.stance = "shop";
+  return openDock(url);
 }
 
 function lastScene() {
@@ -757,9 +763,9 @@ describe("touch play", () => {
 
   it("walks the angler to a bank from its signpost", async () => {
     const { anglerPose } = await import("../game/scene/pose");
-    const page = await openDock("/?hour=day&sky=clear");
+    const page = await openShack("/?hour=day&sky=clear");
     const signs = [...page.querySelectorAll<HTMLButtonElement>(".walk-signs button")];
-    // The angler starts the session at the shack, so the shop button leads the row.
+    // At the shack the shop button leads the row.
     expect(signs.map((b) => b.textContent)).toEqual(["Open shop", "Dock", "Point", "Reeds", "Drop-off", "Shack"]);
     const reeds = signs.find((b) => b.textContent === "Reeds")!;
     act(() => reeds.click());
@@ -791,7 +797,7 @@ describe("touch play", () => {
   });
 
   it("opens the shop from the HUD button at the shack", async () => {
-    const page = await openDock("/?hour=day&sky=clear");
+    const page = await openShack("/?hour=day&sky=clear");
     const open = page.querySelector<HTMLButtonElement>(".walk-shop")!;
     act(() => open.click());
     const shop = page.querySelector(".shop-overlay")!;
@@ -803,7 +809,7 @@ describe("touch play", () => {
   });
 
   it("names the shop by an h2 between the page's h1 and its sections' h3s", async () => {
-    const page = await openDock("/?hour=day&sky=clear");
+    const page = await openShack("/?hour=day&sky=clear");
     act(() => page.querySelector<HTMLButtonElement>(".walk-shop")!.click());
     const shop = page.querySelector(".shop-overlay")!;
     const title = document.getElementById(shop.getAttribute("aria-labelledby")!)!;
@@ -820,7 +826,7 @@ describe("the shack's bait tin", () => {
     vi.mocked(getMe).mockResolvedValue({ ...me, profile: { ...me.profile, points: 500 } });
     vi.mocked(buyGroundbait).mockClear();
     vi.mocked(buyGroundbait).mockResolvedValue({ profile: { ...me.profile, points: 440 } });
-    const page = await openDock("/?hour=day&sky=clear");
+    const page = await openShack("/?hour=day&sky=clear");
     act(() => page.querySelector<HTMLButtonElement>(".walk-shop")!.click());
     const tin = page.querySelector(".bait-shop")!;
     const buy = tin.querySelector("button")!;
@@ -839,7 +845,7 @@ describe("the shack's bait tin", () => {
 
   it("will not sell to an angler short of points", async () => {
     vi.mocked(buyGroundbait).mockClear();
-    const page = await openDock("/?hour=day&sky=clear");
+    const page = await openShack("/?hour=day&sky=clear");
     act(() => page.querySelector<HTMLButtonElement>(".walk-shop")!.click());
     const buy = page.querySelector<HTMLButtonElement>(".bait-shop button")!;
     expect(buy.getAttribute("aria-disabled")).toBe("true");
@@ -849,7 +855,7 @@ describe("the shack's bait tin", () => {
 
   it("prices its bait a fifth cheaper from level 17", async () => {
     vi.mocked(getMe).mockResolvedValue({ ...me, level: 17, profile: { ...me.profile, points: 500, lifetimePoints: 57_000 } });
-    const page = await openDock("/?hour=day&sky=clear");
+    const page = await openShack("/?hour=day&sky=clear");
     act(() => page.querySelector<HTMLButtonElement>(".walk-shop")!.click());
     expect([...page.querySelectorAll(".bait-shop button")].map((button) => button.textContent)).toEqual(["A handful (48 pts)", "A live shiner (40 pts)", "A bucket aerator (120 pts)", "A worm (12 pts)", "A place in the worm bin (80 pts)", "A sack of bread crumb (96 pts)", "Bait the shiner trap (1 handful)"]);
   });
@@ -858,7 +864,7 @@ describe("the shack's bait tin", () => {
     vi.mocked(getMe).mockResolvedValue({ ...me, profile: { ...me.profile, points: 500 } });
     vi.mocked(buyShiner).mockClear();
     vi.mocked(buyShiner).mockResolvedValue({ profile: { ...me.profile, points: 450 } });
-    const page = await openDock("/?hour=day&sky=clear");
+    const page = await openShack("/?hour=day&sky=clear");
     act(() => page.querySelector<HTMLButtonElement>(".walk-shop")!.click());
     const buy = [...page.querySelectorAll<HTMLButtonElement>(".bait-shop button")][1]!;
     const note = page.querySelector("#shiner-shop-note")!;
@@ -880,7 +886,7 @@ describe("the shack's bait tin", () => {
     vi.mocked(buyWorm).mockClear();
     vi.mocked(buyWorm).mockResolvedValue({ profile: { ...me.profile, points: 485 } });
     localStorage.setItem(wormTinKey("u1"), JSON.stringify({ worms: WORM_TIN_WET - 1, day: localDate(new Date()) }));
-    const page = await openDock("/?hour=day&sky=clear");
+    const page = await openShack("/?hour=day&sky=clear");
     act(() => page.querySelector<HTMLButtonElement>(".walk-shop")!.click());
     const buy = [...page.querySelectorAll<HTMLButtonElement>(".bait-shop button")].find((button) => button.textContent?.startsWith("A worm"))!;
     await act(async () => buy.click());
@@ -899,7 +905,7 @@ describe("the shack's bait tin", () => {
       vi.mocked(getMe).mockResolvedValue({ ...me, profile: { ...me.profile, points: 350, aerator: true } });
       return { profile: { ...me.profile, points: 350, aerator: true } };
     });
-    const page = await openDock("/?hour=day&sky=clear");
+    const page = await openShack("/?hour=day&sky=clear");
     act(() => page.querySelector<HTMLButtonElement>(".walk-shop")!.click());
     const aeratorButton = () => page.querySelector<HTMLButtonElement>("[aria-describedby=aerator-note]")!;
     await act(async () => aeratorButton().click());
@@ -917,7 +923,7 @@ describe("the shack's bait tin", () => {
       vi.mocked(getMe).mockResolvedValue({ ...me, profile: { ...me.profile, points: 400, wormBin: true } });
       return { profile: { ...me.profile, points: 400, wormBin: true } };
     });
-    const page = await openDock("/?hour=day&sky=clear");
+    const page = await openShack("/?hour=day&sky=clear");
     act(() => page.querySelector<HTMLButtonElement>(".walk-shop")!.click());
     const binButton = () => page.querySelector<HTMLButtonElement>("[aria-describedby=worm-bin-note]")!;
     await act(async () => binButton().click());
@@ -934,7 +940,7 @@ describe("the shack's bait tin", () => {
       vi.mocked(getMe).mockResolvedValue({ ...me, profile: { ...me.profile, points: 380, breadCrumb: true } });
       return { profile: { ...me.profile, points: 380, breadCrumb: true } };
     });
-    const page = await openDock("/?hour=day&sky=clear");
+    const page = await openShack("/?hour=day&sky=clear");
     act(() => page.querySelector<HTMLButtonElement>(".walk-shop")!.click());
     const crumbButton = () => page.querySelector<HTMLButtonElement>("[aria-describedby=bread-crumb-note]")!;
     await act(async () => crumbButton().click());
@@ -946,12 +952,15 @@ describe("the shack's bait tin", () => {
 });
 
 describe("first-cast walkthrough", () => {
-  it("greets a new angler with the aim chip lit, sending them to a bank first", async () => {
+  it("greets a new angler on the dock with the aim chip lit, before the scene has said where they stand", async () => {
     const page = await openDock("/?hour=day&sky=clear");
     const chips = [...page.querySelectorAll(".walkthrough li")];
     expect(chips.map((chip) => chip.textContent)).toEqual(["Aim", "Charge", "Wait", "Strike", "Ease"]);
     expect(chips[0]!.getAttribute("data-state")).toBe("now");
-    expect(page.querySelector(".walkthrough p")?.textContent).toMatch(/Walk onto a bank/);
+    expect(page.querySelector(".walkthrough p")?.textContent).toBe("Point the mouse at the water close in front of you, or aim with the arrow keys.");
+    expect(page.querySelector(".stance-chip")?.textContent).toMatch(/^Dock/);
+    expect(page.querySelector(".walk-shop")).toBeNull();
+    expect(page.querySelector(".hint")?.textContent).toMatch(/^Point at the water in front of you/);
     expect(page.querySelector(".scene-wrap")?.getAttribute("data-walkthrough")).toBe("1");
   });
 
@@ -982,6 +991,28 @@ describe("first-cast walkthrough", () => {
     expect(page.querySelector(".walkthrough")?.getAttribute("data-step")).toBe("landed");
     expect(page.querySelector(".walkthrough p")?.textContent).toMatch(/first fish/);
     expect([...page.querySelectorAll(".walkthrough li")].every((chip) => chip.getAttribute("data-state") === "done")).toBe(true);
+    expect(localStorage.getItem("stillwater.walkthrough.u1.v1")).toBe("done");
+  });
+
+  it("comes back from Settings at Aim, even with fish in the book, and stays through a reload until Skip", async () => {
+    vi.mocked(getMe).mockResolvedValue({ ...me, speciesStats: [{ speciesId: "perch", caught: 3, heaviest: 0.5, lastAt: "2026-10-10T12:00:00.000Z" }] });
+    localStorage.setItem("stillwater.walkthrough.u1.v1", "done");
+    let page = await openDock("/?hour=day&sky=clear");
+    expect(page.querySelector(".walkthrough")).toBeNull();
+    const gear = [...page.querySelectorAll<HTMLButtonElement>(".hud button")].find((b) => b.textContent === "Settings")!;
+    act(() => gear.click());
+    const again = page.querySelector<HTMLButtonElement>("[data-tips-again]")!;
+    expect(again.textContent).toBe("Show the first-cast tips again");
+    act(() => again.click());
+    expect(page.querySelector(".settings-panel")).toBeNull();
+    expect(page.querySelector(".walkthrough")?.getAttribute("data-step")).toBe("aim");
+    expect(page.querySelector(".scene-wrap")?.getAttribute("data-walkthrough")).toBe("1");
+    act(() => root?.unmount());
+    container?.remove();
+
+    page = await openDock("/?hour=day&sky=clear");
+    expect(page.querySelector(".walkthrough")).not.toBeNull();
+    act(() => page.querySelector<HTMLButtonElement>(".walkthrough-skip")!.click());
     expect(localStorage.getItem("stillwater.walkthrough.u1.v1")).toBe("done");
   });
 });

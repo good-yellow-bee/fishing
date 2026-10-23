@@ -99,6 +99,7 @@ import { eveningRiseOn } from "../game/eveningRise";
 import { SHALLOW_BANKS, useCloudOverSun } from "../game/sunCover";
 import { useMoonPassing } from "../game/solunar";
 import { Walkthrough } from "../components/Walkthrough";
+import { showWalkthroughAgain } from "../game/walkthrough";
 import { bestPounds } from "../game/bestWeight";
 import { hookNoteMs } from "../game/hookNote";
 import { bookForPlay, markReleasedInBook, saveLandedCatch, saveLandedPhoto } from "../field/keepCatch";
@@ -240,6 +241,8 @@ export function DockPage() {
   );
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [keysOpen, setKeysOpen] = useState(false);
+  // Bumped by Settings' "Show the first-cast tips again", which starts the walkthrough over from Aim.
+  const [tipsRun, setTipsRun] = useState(0);
   const shopPanel = useRef<HTMLDivElement>(null);
   useTabWrap(shopPanel);
   // The lake's news sits just above the hint, however many lines the hint wraps to: its height rides on a CSS variable.
@@ -1337,6 +1340,8 @@ export function DockPage() {
           </aside>
         )}
         <Walkthrough
+          key={tipsRun}
+          again={tipsRun > 0}
           userId={me.profile.userId}
           caughtTotal={caughtTotal}
           fishing={fishing}
@@ -1835,6 +1840,11 @@ export function DockPage() {
           onKeys={() => {
             setSettingsOpen(false);
             setKeysOpen(true);
+          }}
+          onTips={() => {
+            showWalkthroughAgain(me.profile.userId);
+            setSettingsOpen(false);
+            setTipsRun((run) => run + 1);
           }}
           onPhoto={
             photoAllowed

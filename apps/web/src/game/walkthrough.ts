@@ -66,22 +66,32 @@ export function nextStep(step: WalkthroughStep, snap: WalkthroughSnapshot): Walk
   }
 }
 
-/** The one line under the chips for this step. */
+/** The fight's steady line, also the one a screen reader hears for the whole fight. */
+export function reelLine(): string {
+  return t("Hold to reel it in. Let go when the Tension bar goes red.");
+}
+
+/** The one line under the chips for this step, in plain words for a child or a first-time player. */
 export function stepLine(step: WalkthroughStep, snap: WalkthroughSnapshot): string {
   switch (step) {
     case "aim":
-      if (snap.fishing) return snap.touch ? t("Point at open water until the ring shows.") : t("Point at open water, or press the arrow keys, until the ring shows.");
-      return t("Walk onto a bank: tap a signpost, the shore, or use WASD.");
+      if (!snap.fishing) return snap.touch ? t("Tap a signpost or the shore to walk to the water.") : t("Click a signpost or the shore, or use WASD, to walk to the water.");
+      // Only the water in front of the bank casts; the far lake is another bank's.
+      if (snap.cast === "range" || snap.cast === "basin") return snap.touch ? t("Too far. Touch the water closer in front of you.") : t("Too far. Point at the water closer in front of you.");
+      if (snap.cast === "shore") return snap.touch ? t("That's land. Touch the water in front of you.") : t("That's land. Point at the water in front of you.");
+      return snap.touch ? t("Touch the water close in front of you and hold.") : t("Point the mouse at the water close in front of you, or aim with the arrow keys.");
     case "charge":
-      if (snap.outcome) return t("It got away. Cast again.");
-      return snap.touch ? t("Hold a finger on the water, and lift it in the moss band.") : t("Hold the mouse or Space, and let go in the moss band.");
+      if (snap.outcome) return t("Not this time. Cast again.");
+      if (snap.touch) return snap.phase === "casting" ? t("Keep holding. Lift your finger when the Cast bar reaches the green.") : t("Touch the water close in front of you and hold.");
+      return snap.phase === "casting" ? t("Keep holding. Let go when the Cast bar reaches the green.") : t("Hold the mouse button or Space. Let go when the Cast bar reaches the green.");
     case "wait":
-      return snap.nibble ? t("Just a nibble. Not yet…") : t("Wait. A nibble comes first; strike on the real dip.");
+      if (snap.nibble) return t("Just a nibble. Not yet…");
+      return snap.touch ? t("Wait for a bite. Tap only when it says Now!") : t("Wait for a bite. Click only when it says Now!");
     case "strike":
       return snap.touch ? t("Now! Tap.") : t("Now! Click or press Space.");
     case "ease":
       if (snap.surge === 2) return snap.reeling ? t("It's running. Let go!") : t("Good. Let it run, then reel again.");
-      return t("Hold to reel it in. Ease off when the line runs hot.");
+      return reelLine();
     case "landed":
       return t("Your first fish. You've got it from here.");
   }
@@ -104,5 +114,22 @@ export function finishWalkthrough(userId: string) {
     localStorage.setItem(walkthroughKey(userId), "done");
   } catch {
     // Private mode: the walkthrough just shows again next visit.
+  }
+}
+
+/** Asked for again from Settings: it shows even with fish in the book, until the next fish or Skip. */
+export function walkthroughAgain(userId: string) {
+  try {
+    return localStorage.getItem(walkthroughKey(userId)) === "again";
+  } catch {
+    return false;
+  }
+}
+
+export function showWalkthroughAgain(userId: string) {
+  try {
+    localStorage.setItem(walkthroughKey(userId), "again");
+  } catch {
+    // Private mode: it still shows for this visit.
   }
 }

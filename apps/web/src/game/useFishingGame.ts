@@ -101,7 +101,7 @@ function castFailHint(reason: CastFail, stance?: StanceId): string {
     case "range":
       return t("Too far for this bank. Walk closer.");
     case "basin":
-      return t("Wrong water from here. Walk to that bank.");
+      return t("That water is too far from here. Aim closer in, or walk to that bank.");
     case "locked":
       return t("Drop-off unlocks at level 3. Cast closer in, or toward the reeds.");
     default:
@@ -142,8 +142,8 @@ export function idleHint(stance: StanceId | null, touch = touchScreen()) {
   }
   if (stance && isFishingStance(stance)) {
     return touch
-      ? t("Touch the water to aim. Hold to charge, lift in the moss band.")
-      : t("Click the water or use the arrow keys to aim. Hold to charge, release in the moss band.");
+      ? t("Touch the water in front of you and hold. Lift your finger in the green.")
+      : t("Point at the water in front of you, or use the arrow keys. Hold the mouse or Space, let go in the green.");
   }
   return t("Walk to the water.");
 }
@@ -156,9 +156,9 @@ export function castHint(kind: "landed" | "cancelled" | "overpowered" | "ring", 
     case "cancelled":
       return touch ? t("Cast cancelled. Touch the water to try again.") : t("Cast cancelled. Click the water or hold Space to try again.");
     case "overpowered":
-      return touch ? t("Overpowered. Lift in the band.") : t("Overpowered. Release in the band.");
+      return touch ? t("Too hard. Lift your finger sooner, in the green.") : t("Too hard. Let go sooner, in the green.");
     case "ring":
-      return touch ? t("Keep the ring on the water. Lift in the moss band.") : t("Keep the ring on the water. Release in the moss band.");
+      return touch ? t("Keep the ring on the water. Lift your finger in the green.") : t("Keep the ring on the water. Let go in the green.");
   }
 }
 
@@ -727,7 +727,8 @@ export function useFishingGame(
   const castHotspotRef = useRef(false);
   const movedUnheardRef = useRef(false);
   const aimHintRef = useRef<AimHint>("dock");
-  const stanceRef = useRef<StanceId>("shop");
+  // The angler starts each visit on the dock (resetAnglerPose), so the first frame says so before the scene reports it.
+  const stanceRef = useRef<StanceId>("dock");
   const timers = useRef<Timers>({});
   const waitHintRef = useRef("");
   const resultAtRef = useRef(0);
@@ -845,7 +846,7 @@ export function useFishingGame(
   const [lurkerCloseInMs, setLurkerCloseInMs] = useState(0);
   /** How long this bite's fish holds the bait, so the strike cue runs out when it lets go. */
   const [strikeWindowMs, setStrikeWindowMs] = useState(0);
-  const [hint, setHint] = useState(() => t("Walk to the water."));
+  const [hint, setHint] = useState(() => idleHint("dock"));
   /** The angler's headlamp, switched on by the player; it only lights the water at night. */
   const [lamp, setLamp] = useState(false);
   const lampRef = useRef(false);
@@ -862,7 +863,7 @@ export function useFishingGame(
   const [moreReasons, setMoreReasons] = useState<{ hint: string; more: readonly string[] }>({ hint: "", more: NO_REASONS });
   /** What happened, which a long hint can fold the rest behind on a phone, with the hint it belongs to. */
   const [hintFold, setHintFold] = useState({ hint: "", lead: "" });
-  const [stance, setStance] = useState<StanceId>("shop");
+  const [stance, setStance] = useState<StanceId>("dock");
   const [shopTap, setShopTap] = useState(0);
   const [hotspot, setHotspot] = useState<Hotspot | null>(null);
   /** Whether the bubble patch is in a feeding frenzy right now. */
