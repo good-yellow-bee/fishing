@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-23-game82";
+export const NEWS_ID = "2026-10-23-pa43";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "On a touch phone, a long hint while you wait for a bite now shows its first sentence and folds the rest behind Read more, as a groundbait toss does, so with larger text it no longer runs under the Strike button or over the header. Opened, it stops above the Strike button and scrolls, and a finger on it scrolls it instead of striking; held sideways it takes the walking stick's corner, stopping under the first-cast tips, and sound captions move up off its words.",
   "On light line, a light drag now slips line before the line can break, so a run takes line instead of snapping it, even as you reel, but a strong fresh run on a heavy drag snaps light line even let go. And on heavy line, a heavy drag holds a tiring fish's run short of the weeds and the wood when you don't turn it, so it ends without going into the reeds, the lily pads, the dock or the sunken log, though a fresh fish still bores in: set the drag light on light line and heavy on heavy line.",
   "The Line button's choice now shows on the water: light line rests fainter and heavy line plainer, and a wire leader shows as a pale steel trace over the last meter of line, flashing in the sun every few seconds by day and dull at dusk and night. And the line looks the way the fish see it: heavy line plainer still on a clear, calm day and in winter's clear water, light line all but lost in winter's clear water, and heavy line no plainer than standard line in murky rain water.",
   "A water's card on Bests and on Waters now names its heaviest fish beside its longest when that is another fish, so a big fish only weighed is no longer hidden behind a small one measured, and a fish both measured and weighed shows both. And in a season picked on Bests, a water with no name now opens its own page from its card, and the season's Best water counts each water with no name as a water of its own.",
