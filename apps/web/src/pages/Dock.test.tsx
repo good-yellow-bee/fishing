@@ -956,7 +956,7 @@ describe("first-cast walkthrough", () => {
     const chips = [...page.querySelectorAll(".walkthrough li")];
     expect(chips.map((chip) => chip.textContent)).toEqual(["Aim", "Charge", "Wait", "Strike", "Ease"]);
     expect(chips[0]!.getAttribute("data-state")).toBe("now");
-    expect(page.querySelector(".walkthrough p")?.textContent).toBe("Point the mouse at the water close in front of you.");
+    expect(page.querySelector(".walkthrough p")?.textContent).toBe("Point the mouse at the water close in front of you, or aim with the arrow keys.");
     expect(page.querySelector(".stance-chip")?.textContent).toMatch(/^Dock/);
     expect(page.querySelector(".walk-shop")).toBeNull();
     expect(page.querySelector(".hint")?.textContent).toMatch(/^Point at the water in front of you/);

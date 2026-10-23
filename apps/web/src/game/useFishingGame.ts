@@ -143,7 +143,7 @@ export function idleHint(stance: StanceId | null, touch = touchScreen()) {
   if (stance && isFishingStance(stance)) {
     return touch
       ? t("Touch the water in front of you and hold. Lift your finger in the green.")
-      : t("Point at the water in front of you. Hold the mouse or Space, let go in the green.");
+      : t("Point at the water in front of you, or use the arrow keys. Hold the mouse or Space, let go in the green.");
   }
   return t("Walk to the water.");
 }

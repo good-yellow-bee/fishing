@@ -79,7 +79,7 @@ export function stepLine(step: WalkthroughStep, snap: WalkthroughSnapshot): stri
       // Only the water in front of the bank casts; the far lake is another bank's.
       if (snap.cast === "range" || snap.cast === "basin") return snap.touch ? t("Too far. Touch the water closer in front of you.") : t("Too far. Point at the water closer in front of you.");
       if (snap.cast === "shore") return snap.touch ? t("That's land. Touch the water in front of you.") : t("That's land. Point at the water in front of you.");
-      return snap.touch ? t("Touch the water close in front of you and hold.") : t("Point the mouse at the water close in front of you.");
+      return snap.touch ? t("Touch the water close in front of you and hold.") : t("Point the mouse at the water close in front of you, or aim with the arrow keys.");
     case "charge":
       if (snap.outcome) return t("Not this time. Cast again.");
       if (snap.touch) return snap.phase === "casting" ? t("Keep holding. Lift your finger when the Cast bar reaches the green.") : t("Touch the water close in front of you and hold.");

@@ -691,7 +691,7 @@ export const PL_GAME: PlBook = {
   "Touch the water close in front of you and hold.": "Dotknij wody tuż przed sobą i przytrzymaj.",
   "Too far. Touch the water closer in front of you.": "Za daleko. Dotknij wody bliżej przed sobą.",
   "That's land. Touch the water in front of you.": "To ląd. Dotknij wody przed sobą.",
-  "Point the mouse at the water close in front of you.": "Wskaż myszą wodę tuż przed sobą.",
+  "Point the mouse at the water close in front of you, or aim with the arrow keys.": "Wskaż myszą wodę tuż przed sobą albo celuj strzałkami.",
   "Too far. Point at the water closer in front of you.": "Za daleko. Wskaż wodę bliżej przed sobą.",
   "That's land. Point at the water in front of you.": "To ląd. Wskaż wodę przed sobą.",
   "Tap a signpost or the shore to walk to the water.": "Dotknij drogowskazu albo brzegu, by dojść nad wodę.",
@@ -770,7 +770,7 @@ export const PL_GAME: PlBook = {
   "Missed the lake.": "Chybiony rzut — nie w jezioro.",
   "Open the tackle shack with E or the Open shop button. Walk down to the water to fish.":
     "Otwórz szopę ze sprzętem klawiszem E albo przyciskiem Otwórz sklep. Zejdź nad wodę, by łowić.",
-  "Point at the water in front of you. Hold the mouse or Space, let go in the green.": "Wskaż wodę przed sobą. Przytrzymaj mysz lub Spację, puść na zielonym polu.",
+  "Point at the water in front of you, or use the arrow keys. Hold the mouse or Space, let go in the green.": "Wskaż wodę przed sobą albo użyj strzałek. Przytrzymaj mysz lub Spację, puść na zielonym polu.",
   "Touch the water in front of you and hold. Lift your finger in the green.": "Dotknij wody przed sobą i przytrzymaj. Podnieś palec na zielonym polu.",
   "Tap Open shop to visit the tackle shack. Walk down to the water to fish.":
     "Stuknij Otwórz sklep, by zajrzeć do szopy ze sprzętem. Zejdź nad wodę, by łowić.",
