@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cleanNickname, lakeNickname, NICKNAME_MAX } from "@stillwater/shared";
 import { authClient } from "../auth-client";
@@ -21,6 +21,9 @@ export function RegisterPage() {
   const [name, setName] = useState(newNickname);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [again, setAgain] = useState("");
+  const [mismatch, setMismatch] = useState(false);
+  const againField = useRef<HTMLInputElement>(null);
   const [shown, setShown] = useState(false);
   const [error, setError] = useState("");
   const [taken, setTaken] = useState(false);
@@ -30,6 +33,12 @@ export function RegisterPage() {
     event.preventDefault();
     setError("");
     setTaken(false);
+    // A typo here can't be undone: passwords can't be reset yet.
+    if (again !== password) {
+      setMismatch(true);
+      againField.current?.focus();
+      return;
+    }
     setBusy(true);
     try {
       const result = await authClient.signUp.email({ name: cleanNickname(name) || newNickname(), email, password });
@@ -100,18 +109,42 @@ export function RegisterPage() {
               type={shown ? "text" : "password"}
               autoComplete="new-password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setMismatch(false);
+              }}
               required
               minLength={8}
               aria-describedby="password-hint"
             />
-            <button type="button" className="show-password" aria-pressed={shown} onClick={() => setShown(!shown)}>
-              {t("Show password")}
-            </button>
             {/* Said before the first try, not only in the browser's refusal after it. */}
             <p className="field-help" id="password-hint">
               {t("At least 8 characters.")} {t("Write it down. It can't be reset yet.")}
             </p>
+            <label htmlFor="password-again">{t("Type the password again")}</label>
+            <input
+              id="password-again"
+              ref={againField}
+              type={shown ? "text" : "password"}
+              autoComplete="new-password"
+              value={again}
+              onChange={(e) => {
+                setAgain(e.target.value);
+                setMismatch(false);
+              }}
+              required
+              minLength={8}
+              aria-invalid={mismatch || undefined}
+              aria-describedby="password-again-error"
+            />
+            {mismatch && (
+              <p className="error" id="password-again-error" role="alert">
+                {t("The two passwords are different.")}
+              </p>
+            )}
+            <button type="button" className="show-password" aria-pressed={shown} onClick={() => setShown(!shown)}>
+              {t("Show password")}
+            </button>
             <p className="error" role="alert">{error}</p>
             {taken && (
               <p className="auth-switch">
