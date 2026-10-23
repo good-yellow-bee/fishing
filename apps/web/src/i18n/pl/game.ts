@@ -514,7 +514,6 @@ export const PL_GAME: PlBook = {
   "The field log could not be saved in this browser.": "Nie udało się zapisać dziennika połowów w tej przeglądarce.",
   "The field log could not be saved.": "Nie udało się zapisać dziennika połowów.",
   "upgrade failed": "Ulepszenie nie powiodło się",
-  "Walking the planks…": "Idziesz po deskach pomostu…",
   Rowing: "Wiosłujesz",
   "{spot} (lv {level})": "{spot} (poz. {level})",
   "Strike!": "Zatnij!",
