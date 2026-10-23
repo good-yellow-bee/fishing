@@ -276,6 +276,15 @@ describe("FightBar for screen readers", () => {
     expect(heavyLine(trout, "log")).toBe("Heavy line: it holds more strain before it snaps, and a wrapped line comes free in half the time");
     expect(heavyLine(trout, "deep")).toBe("Heavy line: it holds more strain before it snaps");
     expect(heavyLine(perch, "weeds")).toBe("Heavy line: it holds more strain before it snaps");
+    // Its drag line says a heavy drag holds a tiring fish out of cover, only where a turnable fish can go in.
+    const dragLine = (species: typeof perch, w?: "weeds" | "pilings" | "log" | "deep") => {
+      heavyLine(species, w);
+      return container!.querySelector(".fight-drag-line")?.textContent;
+    };
+    expect(dragLine(trout, "weeds")).toBe("On heavy line set it heavy: it holds a tiring fish out of cover");
+    expect(dragLine(trout, "log")).toBe("On heavy line set it heavy: it holds a tiring fish out of cover");
+    expect(dragLine(trout, "deep")).toBe("Light lets a run go easy; heavy holds it short");
+    expect(dragLine(perch, "pilings")).toBe("Light lets a run go easy; heavy holds it short");
     // Light line warns of the weed stems only for a turnable fish fought where they fray it.
     const lightLine = (species: typeof perch, weedFrays: boolean) => {
       act(() => root!.render(<FightBar fight={{ species, weight: 2, underpowered: false, line: "light", water: "weeds", weedFrays }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));

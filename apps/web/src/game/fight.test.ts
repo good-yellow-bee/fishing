@@ -1574,6 +1574,41 @@ describe("heavy line in cover", () => {
     expect(worn.performance.sawn).toBeUndefined();
   });
 
+  describe("on a heavy drag", () => {
+    /** Lets the first run go unturned on the given drag, from the given stamina, and says how it ended. */
+    const afterRun = (cover: FightCover, water: "weeds" | "pilings" | "log", drag: Drag, stamina = 1) => {
+      const runtime = makeFight(fish("smallmouth-bass"), 4, 3, () => 0, 1, water, undefined, false, false, false, false, false, false, false, 1, 1, false, cover);
+      runtime.sim.stamina = stamina;
+      let was = runtime.sim.surge;
+      let now = 0;
+      for (; now < 60_000; now += 50) {
+        runtime.step(now, 0.05, false, 0, drag);
+        if (was === 2 && runtime.sim.surge === 0) break;
+        was = runtime.sim.surge;
+      }
+      return { runtime, now, inCover: runtime.sim.weeded === true || runtime.sim.wrapped === true };
+    };
+    const HEAVY: FightCover = { lineCover: LINE_COVER.heavy, heavyLine: true };
+
+    it.each(["weeds", "pilings", "log"] as const)("holds a tiring fish's unturned run out of the %s on heavy line", (water) => {
+      const held = afterRun(HEAVY, water, "heavy", 0.5);
+      expect(held.runtime.sim.stamina).toBeLessThan(TIRING_STAMINA);
+      expect(held.inCover).toBe(false);
+      expect(held.runtime.performance.clearOf).toBe(water);
+      expect(afterRun(HEAVY, water, "normal", 0.5).inCover).toBe(true);
+      expect(afterRun(HEAVY, water, "light", 0.5).inCover).toBe(true);
+      expect(afterRun({ lineCover: LINE_COVER.standard }, water, "heavy", 0.5).inCover).toBe(true);
+    });
+
+    it("lets a fresh fish bore in, and still pulls it out in half the time", () => {
+      const fresh = afterRun(HEAVY, "weeds", "heavy");
+      expect(fresh.runtime.sim.stamina).toBeGreaterThanOrEqual(TIRING_STAMINA);
+      expect(fresh.runtime.sim.weeded).toBe(true);
+      fresh.runtime.step(fresh.now + WEED_MS * LINE_COVER.heavy + 50, 0.05, false, 0, "heavy");
+      expect(fresh.runtime.sim.weeded).toBe(false);
+    });
+  });
+
   it("leaves the other lines to hold in cover as a standard line does", () => {
     expect([LINE_COVER.light, LINE_COVER.standard, LINE_COVER.wire]).toEqual([1, 1, 1]);
     expect(LINE_COVER.heavy).toBeLessThan(1);

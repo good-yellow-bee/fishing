@@ -38,11 +38,23 @@ const LIGHT_LINE_DRAG: Record<Drag, string> = {
   normal: "On light line set it light: it slips before the line breaks",
   heavy: "On light line a strong run snaps it, even let go: set it light",
 };
+/** On heavy line at cover a heavy drag stops a tiring fish's unturned run short of the weeds or the wood. */
+const HEAVY_LINE_COVER_DRAG: Record<Drag, string> = {
+  light: "On heavy line set it heavy: it holds a tiring fish out of cover",
+  normal: "On heavy line set it heavy: it holds a tiring fish out of cover",
+  heavy: "On heavy line it holds a tiring fish out of cover, but loads the line and tires your arm",
+};
 
 export function FightBar({ fight, sim, performance, best = null, note = null, cleanRun = 0 }: Props) {
   const { reelMode, drag } = useSettings();
   /** Where the line breaks on the tension bar: short of its end for a frayed or a light line. */
   const snapMark = (sim.current?.frayed ? FRAYED_SNAP : 1) * LINE_SNAP[fight.line ?? "standard"];
+  const dragLines =
+    fight.line === "light"
+      ? LIGHT_LINE_DRAG
+      : fight.line === "heavy" && canTurnRuns(fight.species.challenge) && (fight.water === "weeds" || wrapsLine(fight.water))
+        ? HEAVY_LINE_COVER_DRAG
+        : DRAG_LINE;
   const t = useT();
   const lang = useLang();
   const card = useRef<HTMLDivElement>(null);
@@ -363,7 +375,7 @@ export function FightBar({ fight, sim, performance, best = null, note = null, cl
               {t(DRAG_WORD[drag])}
               <span className="on-pointer"> (F)</span>
             </button>{" "}
-            <span className="fight-drag-line">{t((fight.line === "light" ? LIGHT_LINE_DRAG : DRAG_LINE)[drag])}</span>
+            <span className="fight-drag-line">{t(dragLines[drag])}</span>
           </p>
           <p ref={clean} className="fight-clean">{cleanLine}</p>
           {reelMode === "toggle" ? (
