@@ -96,6 +96,7 @@ import type { trapState } from "../minnowTrap";
 import { BaitBag } from "./BaitBag";
 import { BaitBucket } from "./BaitBucket";
 import { weedClumpShape } from "./weedClump";
+import { weedTangleShape, weedThrash } from "./weedTangle";
 import { fishSize, landedScale } from "./fishSize";
 import {
   LAND_DRIPS,
@@ -1421,12 +1422,15 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
   const weedBall = useRef<THREE.Mesh>(null);
   const weedShape = useMemo(weedClumpShape, []);
   const weedMaterial = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
+  const tangle = useRef<THREE.Mesh>(null);
+  const tangleShape = useMemo(weedTangleShape, []);
   useEffect(
     () => () => {
       weedShape.dispose();
+      tangleShape.dispose();
       weedMaterial.dispose();
     },
-    [weedShape, weedMaterial],
+    [weedShape, tangleShape, weedMaterial],
   );
   const leapStart = useRef<number | null>(null);
   const rollStart = useRef<number | null>(null);
@@ -1539,6 +1543,7 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
     if (isFrozen(t, fightView.freezeUntil)) return;
     // Off unless this frame's fight shows it below; several paths return before getting there.
     if (weedBall.current) weedBall.current.visible = false;
+    if (tangle.current) tangle.current.visible = false;
     const aiming = isAiming(phase);
     const castStarted = prevPhase.current === "casting" && phase === "waiting";
     const fightStarted = prevPhase.current !== "fight" && phase === "fight";
@@ -1812,6 +1817,13 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
       weedBall.current.visible = true;
       weedBall.current.position.set(hookedPose.x, waterHeight(hookedPose.x, hookedPose.z, t) + 0.02, hookedPose.z);
     }
+    // A fish that ran into the reeds or pads thrashes in the stems till it comes out (fight.ts weeded).
+    if (tangle.current && hookedPose?.show && phase === "fight" && sim.current?.weeded === true) {
+      const thrash = weedThrash(t, still);
+      tangle.current.visible = true;
+      tangle.current.position.set(hookedPose.x, waterHeight(hookedPose.x, hookedPose.z, t), hookedPose.z);
+      tangle.current.rotation.set(thrash.x, hookedPose.yaw + thrash.y, thrash.z);
+    }
     // A leap: the fish clears the water nose first, then turns over and falls back.
     const leaping = phase === "fight" && sim.current?.jump === true && sim.current.surge === 2;
     if (!leaping) leapStart.current = null;
@@ -1953,6 +1965,7 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
       {phase === "result" && <MissDrips />}
       {phase === "fight" && <RetrieveSplash />}
       <mesh ref={weedBall} geometry={weedShape} material={weedMaterial} visible={false} />
+      <mesh ref={tangle} geometry={tangleShape} material={weedMaterial} visible={false} />
       <mesh ref={sitRing} visible={false} rotation={[-Math.PI / 2, 0, 0]} renderOrder={3}>
         <ringGeometry args={[0.4, 0.55, 32]} />
         <meshBasicMaterial color="#e7f4ee" transparent opacity={0.78} depthWrite={false} />
