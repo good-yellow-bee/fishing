@@ -489,12 +489,11 @@ function SpotView() {
   // And the other way: this year's kinds the water never gave before, once an earlier year's fish say what it gives, as
   // an outing's page names its firsts here. Not for the game's lake, as Not yet counts none there.
   const year = fishedBy.slice(0, 4);
-  const earlier = spot.id === PLAY_LAKE_ID ? [] : summed.filter((entry) => entry.species.trim() && bookFishDay(book, entry) < `${year}-01-01`);
+  const kindFish = spot.id === PLAY_LAKE_ID ? [] : summed.filter((entry) => entry.species.trim() && bookFishDay(book, entry) <= fishedBy);
+  const earlier = kindFish.filter((entry) => bookFishDay(book, entry) < `${year}-01-01`);
   const known = new Set(earlier.map((entry) => kindKey(entry.species)));
   const newHere =
-    earlier.length === 0
-      ? []
-      : speciesCounts(summed.filter((entry) => entry.species.trim() && bookFishDay(book, entry).startsWith(`${year}-`) && !known.has(kindKey(entry.species)))).map((row) => row.species);
+    earlier.length === 0 ? [] : speciesCounts(kindFish.filter((entry) => bookFishDay(book, entry).startsWith(`${year}-`) && !known.has(kindKey(entry.species)))).map((row) => row.species);
   // Kinds named as the book writes them most, as Bests and the catch cards name them, not as this water's few fish do.
   const kindName = bookKindName(book.catches);
   const lureName = bookLureName(book.catches);
