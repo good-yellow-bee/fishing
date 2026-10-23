@@ -1,18 +1,18 @@
 import * as THREE from "three";
 import { mergePainted } from "./mergeParts";
 
-const STEMS = 7;
+const STEMS = 8;
 
 /** The stems a fish has buried itself in (fight.ts weeded): a ring of thin reed blades standing out of the water round it, leaning every way. */
 export function weedTangleShape() {
   return mergePainted(
     Array.from({ length: STEMS }, (_, i) => {
       const angle = (i / STEMS) * Math.PI * 2 + (i % 2) * 0.4;
-      const out = 0.12 + (i % 3) * 0.05;
-      const height = 0.42 + (i % 4) * 0.07;
+      const out = 0.16 + (i % 3) * 0.06;
+      const height = 0.56 + (i % 4) * 0.09;
       const lean = 0.2 + (i % 3) * 0.08;
       return {
-        geometry: new THREE.ConeGeometry(0.022, height, 4),
+        geometry: new THREE.ConeGeometry(0.028, height, 4),
         position: [Math.cos(angle) * out, height / 2 - 0.08, Math.sin(angle) * out] as [number, number, number],
         // Tipped outward, away from the fish in the middle.
         rotation: [Math.sin(angle) * lean, 0, -Math.cos(angle) * lean] as [number, number, number],
