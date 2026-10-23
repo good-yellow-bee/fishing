@@ -101,6 +101,10 @@ describe("settings", () => {
     expect(document.documentElement.dataset.contrast).toBe("high");
     act(() => updateSettings({ highContrast: false }));
     expect(document.documentElement.dataset.contrast).toBeUndefined();
+    act(() => updateSettings({ reduceMotion: true }));
+    expect(document.documentElement.dataset.reduceMotion).toBe("1");
+    act(() => updateSettings({ reduceMotion: false }));
+    expect(document.documentElement.dataset.reduceMotion).toBeUndefined();
     act(() => root.unmount());
   });
 });

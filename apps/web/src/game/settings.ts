@@ -173,9 +173,9 @@ export function subscribeSettings(listener: () => void) {
   };
 }
 
-/** Mirrors the text size, handedness and contrast onto <html>, where the stylesheet scales the panels, moves the thumb controls and firms up the panels. */
+/** Mirrors the text size, handedness, contrast and reduced motion onto <html>, where the stylesheet scales the panels, moves the thumb controls, firms up the panels and stills what moves. */
 export function useRootSettings() {
-  const { textSize, leftHanded, highContrast } = useSettings();
+  const { textSize, leftHanded, highContrast, reduceMotion } = useSettings();
   useEffect(() => {
     const root = document.documentElement;
     if (textSize === "normal") delete root.dataset.textSize;
@@ -191,6 +191,11 @@ export function useRootSettings() {
     if (highContrast) root.dataset.contrast = "high";
     else delete root.dataset.contrast;
   }, [highContrast]);
+  useEffect(() => {
+    const root = document.documentElement;
+    if (reduceMotion) root.dataset.reduceMotion = "1";
+    else delete root.dataset.reduceMotion;
+  }, [reduceMotion]);
 }
 
 export function useSettings() {

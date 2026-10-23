@@ -319,6 +319,13 @@ describe("the sign-in page and the catch log with larger text", () => {
   });
 });
 
+describe("the start and sign-in pages' mist", () => {
+  it("stands still under the system's reduced motion and the game's own", () => {
+    expect(/@media \(prefers-reduced-motion: reduce\) \{\n  \.auth-shell::before,\n  \.auth-shell::after \{([^}]*)\}/.exec(css)?.[1]).toContain("animation: none;");
+    expect(/\nhtml\[data-reduce-motion="1"\] \.auth-shell::before,\nhtml\[data-reduce-motion="1"\] \.auth-shell::after \{([^}]*)\}/.exec(css)?.[1]).toContain("animation: none;");
+  });
+});
+
 describe("the shack's three-day board", () => {
   const rule = /\n\.forecast-board ul \{([^}]*)\}/.exec(css)?.[1] ?? "";
   // auto-fit's count for a given list width, from the rule's own minimum: max((W - 17px) / 3, min(W, (364px - W) * 999)).
