@@ -31,14 +31,14 @@ export function RegisterPage() {
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    setError("");
+    setTaken(false);
     // A typo here can't be undone: passwords can't be reset yet.
     if (again !== password) {
       setMismatch(true);
       againField.current?.focus();
       return;
     }
-    setError("");
-    setTaken(false);
     setBusy(true);
     try {
       const result = await authClient.signUp.email({ name: cleanNickname(name) || newNickname(), email, password });
