@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-22-field88";
+export const NEWS_ID = "2026-10-23-scene79";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "The Line button's choice now shows on the water: light line rests fainter and heavy line plainer, and a wire leader shows as a pale steel trace over the last meter of line, flashing in the sun every few seconds by day and dull at dusk and night. And the line looks the way the fish see it: heavy line plainer still on a clear, calm day and in winter's clear water, light line all but lost in winter's clear water, and heavy line no plainer than standard line in murky rain water.",
   "A water's card on Bests and on Waters now names its heaviest fish beside its longest when that is another fish, so a big fish only weighed is no longer hidden behind a small one measured, and a fish both measured and weighed shows both. And in a season picked on Bests, a water with no name now opens its own page from its card, and the season's Best water counts each water with no name as a water of its own.",
   "In winter the cold water now runs clear and the fish grow line-shy, so from dawn to dusk light line's bites come sooner still, and heavy line's come as slow as on a clear, calm day. And in the rain the water runs murky and the fish can't see heavy line, so at any hour its bites come as quick as on standard line, though winter's rain falls as snow and leaves the water clear: light line is the line for winter, and in the rain heavy line costs you no bites.",
   "On Home, a fish you started logging and did not save can now be let go right there, and both its notes name its kind as your book writes it. This week in years past now counts a night's small hours on its outing's day and offers Every fish that day once a day. And once you have an outing of your own, not only a fish, Waters sets the sample week's waters apart under From the sample week, as Home counts your waters.",
