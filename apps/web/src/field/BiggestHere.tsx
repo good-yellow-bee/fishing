@@ -37,7 +37,7 @@ export function BiggestLinks({ catches, list, about }: { catches: readonly Catch
 }
 
 /** A water's biggest fish of each kind, once more than one kind came from it: the water page's one record says less. */
-/** `kindLink` opens a kind's fish when its page wouldn't hold this water's (the game's lake, a sample water). */
+/** `kindLink` opens a kind's fish when its page wouldn't hold this water's (the game's lake, a sample water); none, a plain name. */
 export function BiggestHere({
   catches,
   spotId,
@@ -46,7 +46,7 @@ export function BiggestHere({
 }: {
   catches: readonly CatchEntry[];
   spotId: string;
-  kindLink?: (species: string) => string;
+  kindLink?: (species: string) => string | undefined;
   kindName?: (species: string) => string;
 }) {
   const kinds = speciesCounts(catches);
@@ -60,9 +60,10 @@ export function BiggestHere({
       <ul className="species-waters">
         {kinds.map(({ species }) => {
           const key = kindKey(species);
+          const to = kindLink(species);
           return (
             <li key={key}>
-              <Link to={kindLink(species)}>{kindName(species)}</Link>
+              {to ? <Link to={to}>{kindName(species)}</Link> : <span>{kindName(species)}</span>}
               <span className="meta sizes">
                 <BiggestLinks catches={catches.filter((entry) => kindKey(entry.species) === key)} list={`water:${spotId}`} about={kindName(species)} />
               </span>

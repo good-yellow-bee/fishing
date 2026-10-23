@@ -1924,7 +1924,7 @@ html:has(.form-save):has(.undo-bar) .field-main {
 
 /* Kind and water chips, lure tips and a kind's waters: a long unbroken name wraps inside its chip or line. */
 .species-waters a,
-.species-chips a,
+.species-chips :is(a, span),
 .bests-scope :is(a, button),
 .lure-tip {
   min-width: 0;

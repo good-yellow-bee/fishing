@@ -8,6 +8,7 @@ import { pieceName } from "./gear/pieceKey";
 
 /** The kinds among some fish, each a link to its own page, or with `within` (a search, a water's) to just those fish there. */
 /** With `outing`, each kind opens that outing's fish of it, as counted; with `water` too, only those on its water. */
+/** `within` null: counted as within one, but no search finds just these fish (a water with no name), so plain words. */
 export function SpeciesChips({
   catches,
   within,
@@ -16,7 +17,7 @@ export function SpeciesChips({
   kindName: named,
 }: {
   catches: readonly CatchEntry[];
-  within?: string;
+  within?: string | null;
   outing?: { date: string; title: string };
   water?: string;
   /** How to name a kind; by default as these fish write it most. */
@@ -29,7 +30,12 @@ export function SpeciesChips({
   return (
     <p className="species-chips">
       {/* A chip that opens the kind's page counts as that page does. */}
-      {(within || outing ? speciesCounts(catches) : pageCounts(catches)).map((row) => (
+      {(within !== undefined || outing ? speciesCounts(catches) : pageCounts(catches)).map((row) =>
+        within === null ? (
+          <span key={row.species}>
+            {kindName(row.species)} ({row.count})
+          </span>
+        ) : (
         <Link
           key={row.species}
           to={
@@ -43,7 +49,8 @@ export function SpeciesChips({
           {/* "zander" and "tench" as the kinds list writes them, in the reader's language. */}
           {kindName(row.species)} ({row.count})
         </Link>
-      ))}
+        ),
+      )}
     </p>
   );
 }
