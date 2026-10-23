@@ -370,7 +370,7 @@ describe("the fight card's drag line", () => {
     const short = css.slice(css.indexOf("@media (pointer: coarse) and (max-height: 500px), (pointer: coarse) and (max-width: 520px) {"));
     expect(/\.fight-bar \.fight-drag-line \{([^}]*)\}/.exec(short)?.[1]).toContain("clip: rect(0 0 0 0);");
     const bar = readFileSync(`${import.meta.dirname}/components/FightBar.tsx`, "utf8");
-    expect(bar).toContain('<span className="fight-drag-line">{t((fight.line === "light" ? LIGHT_LINE_DRAG : DRAG_LINE)[drag])}</span>');
+    expect(bar).toContain('<span className="fight-drag-line">{t(dragLines[drag])}</span>');
   });
 });
 

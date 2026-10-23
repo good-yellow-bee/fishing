@@ -501,9 +501,10 @@ export function fightWind(wind: string | undefined): FightWind | undefined {
  * bolts from it once, as a carp does), `fired` chasing the kingfisher's fry (fired up, its first run doesn't tire it).
  * `lineSnap` scales the strain the line snaps at, sound or frayed, for a light or heavy line on the reel, and `lineCover`
  * how long a fish holds in the weeds or a line stays wrapped round wood; `weedFrays` a light line the weed stems saw to
- * frayed once a fish runs into them; `lightLine` light line on the reel, which a light drag spares and a heavy one snaps.
+ * frayed once a fish runs into them; `lightLine` light line on the reel, which a light drag spares and a heavy one snaps;
+ * `heavyLine` heavy line on the reel, which with a heavy drag holds a tiring fish out of cover.
  */
-export type FightCover = { farRock?: boolean; weedBall?: boolean; edge?: boolean; bed?: boolean; foam?: boolean; lantern?: boolean; fired?: boolean; lineSnap?: number; lineCover?: number; weedFrays?: boolean; lightLine?: boolean };
+export type FightCover = { farRock?: boolean; weedBall?: boolean; edge?: boolean; bed?: boolean; foam?: boolean; lantern?: boolean; fired?: boolean; lineSnap?: number; lineCover?: number; weedFrays?: boolean; lightLine?: boolean; heavyLine?: boolean };
 /** In a foam lane on a breezy or strong day the wind's drift is at its strongest: a slack line drifts out this much faster still. */
 export const FOAM_DRIFT = 1.3;
 export type FightWater = "open" | "weeds" | "current" | "deep" | "rocks" | "boat" | "pilings" | "log";
@@ -632,7 +633,7 @@ export function makeFight(
   /** What the fish was hooked by, on top of the spot's water. */
   cover: FightCover = {},
 ): FightRuntime {
-  const { farRock = false, weedBall = false, edge = false, bed = false, foam = false, lantern = false, fired = false, lineSnap = 1, lineCover = 1, weedFrays = false, lightLine = false } = cover;
+  const { farRock = false, weedBall = false, edge = false, bed = false, foam = false, lantern = false, fired = false, lineSnap = 1, lineCover = 1, weedFrays = false, lightLine = false, heavyLine = false } = cover;
   /** The strain the line snaps at right now: a frayed one sooner, both scaled by the line on the reel. */
   const snapNow = () => (sim.frayed ? FRAYED_SNAP : snapAt) * lineSnap;
   const weedy = water === "weeds";
@@ -810,8 +811,10 @@ export function makeFight(
         if (sim.jump && !heldThroughLeap) performance.bowedLeaps = (performance.bowedLeaps ?? 0) + 1;
         if (followedDart) performance.followedDarts = (performance.followedDarts ?? 0) + 1;
         followedDart = false;
+        // Heavy line on a heavy drag stops a tiring fish's run short of the cover; a fresh one still bores in.
+        const heldOut = heavyLine && runDrag === "heavy" && sim.stamina < TIRING_STAMINA;
         // At the reeds a run nobody turned carries the fish into the weeds; a leap goes up, not in.
-        if (weedy && turnable && !sim.jump && !sim.roll && !sim.charge && !turnedThisRun && sim.line > 0) {
+        if (weedy && turnable && !sim.jump && !sim.roll && !sim.charge && !turnedThisRun && !heldOut && sim.line > 0) {
           sim.weeded = true;
           weedUntil = nowMs + WEED_MS * coverHold * lineCover;
           // The stems saw a light line it went in on: frayed from here, as a pike's teeth leave it.
@@ -822,7 +825,7 @@ export function makeFight(
           }
         }
         // At the dock it wraps the line round a piling instead, and by the sunken log round the log.
-        if (wrapsLine(water) && turnable && !sim.jump && !sim.roll && !sim.charge && !turnedThisRun && sim.line > 0) {
+        if (wrapsLine(water) && turnable && !sim.jump && !sim.roll && !sim.charge && !turnedThisRun && !heldOut && sim.line > 0) {
           sim.wrapped = true;
           wrapUntil = nowMs + WRAP_MS * coverHold * lineCover;
         }
