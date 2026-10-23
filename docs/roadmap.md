@@ -1039,6 +1039,13 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~BQ1~~ | ~~The catch log, a spot's page and a trip's page draw their catches 50 at a time with a "Show 50 more" button and an "N of M fish" count, instead of every card at once (a 2,000-catch log drew 30,000 elements and took 1.6 s to open; now about 800 and 0.7 s)~~ (#239) | perf | S |
 | ~~BQ2~~ | ~~Find a catch keeps up with typing in a long log (2.6 s to type a word over 2,000 catches, now under 0.1 s): results follow the keys a beat behind, show 50 at a time, and only a "Matches: N" line is read out instead of every card~~ (#240) | perf, access | S |
 
+## Entrance (added 2026-10-23; a simpler way in for kids and anyone new to computers)
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| EN1 | A start page at `/`: a big Play, a clear Sign in and a small link to the field log, with the language at the top; signed in, it names the account and plays straight away. The field log's home moves to `/book` (old `/?find=` links still open there), and the field log gets a Play link in its side rail and phone bar (#1833) | entrance | M |
+| EN2 | Sign in and Create account in plain words with larger text: each links to the other, returns the player where they were going, says when it is busy, names a taken email or too many tries, and fills in a lake nickname; the lake's loading line can be retried and Logout asks first | entrance | M |
+
 ## Phone and access track (added 2026-10-18; its own thread works phone layouts, touch, larger text, keyboard and screen readers, contrast, motion and load speed across the app)
 
 | # | Title | Area | Size |

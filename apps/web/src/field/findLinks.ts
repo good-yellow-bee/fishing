@@ -29,5 +29,5 @@ export function parseExactTerm(text: string): { field: ExactField; name: string 
 
 /** The field log home, opened with this catch search already typed in. */
 export function findLink(text: string): string {
-  return `/?${new URLSearchParams({ [FIND_PARAM]: text }).toString()}`;
+  return `/book?${new URLSearchParams({ [FIND_PARAM]: text }).toString()}`;
 }

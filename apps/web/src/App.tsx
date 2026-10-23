@@ -20,6 +20,7 @@ import { SpotFormPage, SpotPage, SpotsPage } from "./field/SpotPages";
 import { TripFormPage, TripPage, TripsPage } from "./field/TripPages";
 import { LoginPage } from "./pages/Login";
 import { RegisterPage } from "./pages/Register";
+import { StartPage } from "./pages/Start";
 
 // The lake pulls in three.js and the models, so it and the pages around it load on demand:
 // sign-in and the field log open without waiting for the 3D bundle.
@@ -56,7 +57,7 @@ function Offline() {
         <h1>Stillwater</h1>
         <p className="lede">{t("You're offline. The lake needs a connection, but your field log works without one.")}</p>
         <p>
-          <Link to="/">{t("Open the field log")}</Link>
+          <Link to="/book">{t("Open the field log")}</Link>
         </p>
       </div>
     </main>
@@ -94,8 +95,9 @@ export function App() {
   useRootSettings();
   return (
     <Routes>
+      <Route path="/" element={<StartPage loadLake={loadDock} />} />
       <Route element={<FieldLayout />}>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/book" element={<HomePage />} />
         <Route path="/catches" element={<CatchesPage />} />
         <Route path="/photos" element={<PhotosPage />} />
         <Route path="/catches/new" element={<CatchFormPage />} />

@@ -11,7 +11,7 @@ async function openField(page: Page, path: string, heading: RegExp, lang: "en" |
 
 test.describe("the field log", () => {
   test("Home", async ({ page }) => {
-    await openField(page, "/", /.+/);
+    await openField(page, "/book", /.+/);
     await expect(page).toHaveScreenshot("home.png", { fullPage: true });
   });
 
@@ -24,7 +24,7 @@ test.describe("the field log", () => {
   });
 
   test("Home in Polish", async ({ page }) => {
-    await openField(page, "/", /.+/, "pl");
+    await openField(page, "/book", /.+/, "pl");
     await expect(page).toHaveScreenshot("home-pl.png", { fullPage: true });
   });
 });

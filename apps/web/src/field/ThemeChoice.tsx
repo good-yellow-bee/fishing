@@ -23,7 +23,7 @@ export function ThemeChoice() {
 }
 
 /** Each language in its own words, so either reader can find theirs. */
-const LANGUAGES: ReadonlyArray<{ id: Lang; label: string; lang: string }> = [
+export const LANGUAGES: ReadonlyArray<{ id: Lang; label: string; lang: string }> = [
   { id: "en", label: "English", lang: "en" },
   { id: "pl", label: "Polski", lang: "pl" },
 ];

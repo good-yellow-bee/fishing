@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
-import { NavLink, useLocation, useNavigate, useNavigationType } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate, useNavigationType } from "react-router-dom";
 import { useLang, useT } from "../i18n";
 import { focusPageHeading } from "./pageFocus";
 import { SavedNote } from "./SavedNote";
@@ -25,7 +25,7 @@ function FieldLinks() {
   const t = useT();
   return (
     <>
-      <NavLink to="/" end>
+      <NavLink to="/book" end>
         {t("Home")}
       </NavLink>
       <NavLink to="/catches">{t("Catches")}</NavLink>
@@ -100,7 +100,7 @@ export function FieldShell({ children }: { children: ReactNode }) {
     const update = () => {
       // A page can name its tab apart from its heading (data-title), so an edit form or one fish of many is told apart.
       const named = main?.querySelector("[data-title]")?.getAttribute("data-title") ?? main?.querySelector("h1")?.textContent ?? "";
-      const heading = pathname === "/" ? "" : named.trim();
+      const heading = pathname === "/book" ? "" : named.trim();
       const next = heading ? `${heading} · Stillwater` : name;
       if (document.title !== next) document.title = next;
     };
@@ -208,7 +208,7 @@ export function FieldShell({ children }: { children: ReactNode }) {
   // Come in by a link from outside the field log (the lake's "Field log"), the first page focuses its heading too, so a
   // screen reader says where it landed; a page load or reload leaves focus to the browser.
   const lastFocused = useRef<string | null>(how === "POP" ? pathname : null);
-  // The page left with its search: Bests' rows open "/?find=…" searches that differ only there.
+  // The page left with its search: Bests' rows open "/book?find=…" searches that differ only there.
   const lastShown = useRef(pathname + search);
   useEffect(() => {
     const leftShown = lastShown.current;
@@ -272,7 +272,7 @@ export function FieldShell({ children }: { children: ReactNode }) {
         {t("Skip to the page")}
       </a>
       <aside className="field-rail">
-        <NavLink to="/" className="field-brand" end>
+        <NavLink to="/book" className="field-brand" end>
           <FishMark />
           <span>
             <strong>Stillwater</strong>
@@ -285,19 +285,27 @@ export function FieldShell({ children }: { children: ReactNode }) {
         <NavLink to="/catches/new" className="field-primary">
           {t("Log a catch")}
         </NavLink>
+        <Link to="/play" className="field-play">
+          {t("Play")}
+        </Link>
       </aside>
       <div className="field-stage">
         <header className="field-mobile-bar" ref={bar}>
-          <NavLink to="/" className="field-brand" end>
+          <NavLink to="/book" className="field-brand" end>
             <FishMark />
             <span>
               <strong>Stillwater</strong>
               <small>{t("Field log")}</small>
             </span>
           </NavLink>
-          <NavLink to="/catches/new" className="field-primary">
-            {t("Log a catch")}
-          </NavLink>
+          <div className="field-bar-actions">
+            <Link to="/play" className="field-play">
+              {t("Play")}
+            </Link>
+            <NavLink to="/catches/new" className="field-primary">
+              {t("Log a catch")}
+            </NavLink>
+          </div>
         </header>
         {/* Before the page in reading order: one Shift+Tab from the heading a delete leaves focus on. It sits fixed at the bottom all the same. */}
         <UndoBar />

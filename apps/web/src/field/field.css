@@ -121,6 +121,31 @@
   background: #d9a94e;
 }
 
+/* The way to the game, beside Log a catch: outlined, so the book's own button stays the one that stands out. */
+.field-play {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 14px;
+  border: 1px solid currentColor;
+  color: inherit;
+  text-decoration: none;
+}
+
+.field-play:hover {
+  background: rgba(243, 230, 204, 0.12);
+}
+
+.field-rail .field-play {
+  margin-top: -16px;
+}
+
+.field-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* Holds a paged list for Show more's focus without laying anything out. */
 .fish-csv {
   margin: 4px 0 10px;
@@ -1311,10 +1336,22 @@ html:has(.form-save):has(.undo-bar) .field-main {
     flex-wrap: wrap;
   }
 
-  .field-mobile-bar .field-primary {
+  .field-mobile-bar :is(.field-primary, .field-play) {
     margin-top: 0;
     padding: 10px 12px;
     white-space: nowrap;
+  }
+
+  /* The outline's pixel each side, so Play stands as tall as Log a catch. */
+  .field-mobile-bar .field-play {
+    padding-block: 9px;
+  }
+
+  /* On a phone the fish gives way to Play, so the bar keeps to one row in Polish too. */
+  @media (max-width: 460px) {
+    .field-mobile-bar .fish-mark {
+      display: none;
+    }
   }
 
   /* On a small phone the brand packs tighter, so a longer subtitle ("Dziennik połowów") keeps the bar to one row. */
@@ -1335,8 +1372,8 @@ html:has(.form-save):has(.undo-bar) .field-main {
       padding: 14px 12px;
     }
 
-    .field-mobile-bar .field-primary {
-      padding: 10px 8px;
+    .field-mobile-bar :is(.field-primary, .field-play) {
+      padding-inline: 8px;
     }
   }
 

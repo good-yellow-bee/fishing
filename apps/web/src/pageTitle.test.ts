@@ -7,6 +7,7 @@ const read = (path: string) => readFileSync(`${import.meta.dirname}/${path}`, "u
 // WCAG 2.4.2: each page outside the field log names its own browser tab, not just "Stillwater".
 describe("page titles", () => {
   it.each([
+    ["pages/Start.tsx", 'usePageTitle(t("Stillwater · A fishing game"));'],
     ["pages/Login.tsx", 'usePageTitle(`${t("Sign in")} · Stillwater`);'],
     ["pages/Register.tsx", 'usePageTitle(t("Join Stillwater"));'],
     ["pages/Board.tsx", 'usePageTitle(`${t("Lodge board")} · Stillwater`);'],
