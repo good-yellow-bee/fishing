@@ -354,7 +354,7 @@ export const PL_GAME: PlBook = {
   "On light line set it light: it slips before the line breaks": "Na cienkiej żyłce ustaw lekki: puszcza, zanim żyłka pęknie",
   "On light line a strong run snaps it, even let go: set it light": "Na cienkiej żyłce mocny odjazd ją zrywa, nawet bez zwijania: ustaw lekki",
   "On heavy line set it heavy: it holds a tiring fish out of cover": "Na grubej żyłce ustaw mocny: trzyma słabnącą rybę z dala od kryjówki",
-  "On heavy line it holds a tiring fish out of cover, but loads the line and tires your arm": "Na grubej żyłce trzyma słabnącą rybę z dala od kryjówki, ale napina linkę i męczy ci rękę",
+  "On heavy line it holds a tiring fish out of cover, but loads the line even let go and tires your arm: a strong run goes red": "Na grubej żyłce trzyma słabnącą rybę z dala od kryjówki, ale napina linkę nawet bez zwijania i męczy ci rękę: mocny odjazd wchodzi na czerwone",
   "Known fish: {fish} · {n} landed": "Znana ryba: {fish} · złowiono {n}",
   "Skilled: {fish} · {n} landed": "Wprawa: {fish} · złowiono {n}",
   "Mastered: {fish} · 1.1× points from the next one": "Mistrzostwo: {fish} · od następnej 1,1× punktów",

@@ -653,4 +653,21 @@ describe("FightBar drag line", () => {
       act(() => updateSettings({ drag: "normal" }));
     }
   });
+
+  it("tells an angler on heavy line at cover to set the drag heavy, and what a heavy one costs", () => {
+    const dragLine = () => {
+      act(() => root!.render(<FightBar fight={{ species: trout, weight: 2, underpowered: false, line: "heavy", water: "weeds" }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
+      return container!.querySelector(".fight-drag-line")?.textContent;
+    };
+    mount(null);
+    try {
+      expect(dragLine()).toBe("On heavy line set it heavy: it holds a tiring fish out of cover");
+      act(() => updateSettings({ drag: "light" }));
+      expect(dragLine()).toBe("On heavy line set it heavy: it holds a tiring fish out of cover");
+      act(() => updateSettings({ drag: "heavy" }));
+      expect(dragLine()).toBe("On heavy line it holds a tiring fish out of cover, but loads the line even let go and tires your arm: a strong run goes red");
+    } finally {
+      act(() => updateSettings({ drag: "normal" }));
+    }
+  });
 });
