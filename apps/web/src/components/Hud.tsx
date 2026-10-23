@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   levelProgress,
   levelUnlock,
@@ -45,6 +45,13 @@ export function Hud({ profile, hour, sky, season, onSettings, onPackUp, streak =
   const level = progress.level;
   const { muted } = useSettings();
   const t = useT();
+  const navigate = useNavigate();
+  // Asked first: a child who taps it by mistake may not know the password to come back. Start first, so the gate isn't left showing.
+  const signOut = () => {
+    if (!window.confirm(t("Sign out? To come back you need your email and password."))) return;
+    navigate("/", { replace: true });
+    void authClient.signOut();
+  };
   const header = useRef<HTMLElement>(null);
   // Phones stack the scene's chips under the HUD, whose height changes as it wraps.
   useEffect(() => {
@@ -115,7 +122,7 @@ export function Hud({ profile, hour, sky, season, onSettings, onPackUp, streak =
             {t("Settings|hud")}
           </button>
         )}
-        <button className="hud-link" type="button" onClick={() => authClient.signOut()}>
+        <button className="hud-link" type="button" onClick={signOut}>
           {t("Logout")}
         </button>
       </div>

@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { cleanNickname, lakeNickname } from "@stillwater/shared";
 import { createProfile, db } from "./db.ts";
 
 const production = process.env.NODE_ENV === "production";
@@ -28,12 +29,17 @@ export const auth = betterAuth({
     enabled: true,
     minPasswordLength: 8,
   },
+  // A forgotten password can't be reset yet, so a sign-in lasts two months rather than one week.
+  session: { expiresIn: 60 * 60 * 24 * 60 },
+  // A class signing up together shares one address: ten sign-ups per 10 s rather than three. Sign-in keeps the default.
+  rateLimit: { customRules: { "/sign-up/email": { window: 10, max: 10 } } },
   databaseHooks: {
     user: {
       create: {
+        // The account's name is the public nickname: trimmed, 24 characters at most, a lake nickname when left blank.
+        before: async (user) => ({ data: { ...user, name: cleanNickname(user.name) || lakeNickname() } }),
         after: async (user) => {
-          const name = user.name?.trim() || user.email.split("@")[0] || "Angler";
-          createProfile(user.id, name);
+          createProfile(user.id, user.name);
         },
       },
     },

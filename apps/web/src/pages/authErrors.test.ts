@@ -30,7 +30,7 @@ describe("joining", () => {
     expect(page).toContain('{t("At least 8 characters.")}');
   });
 
-  it("names the display name's purpose so the phone can fill it in (WCAG 1.3.5)", () => {
-    expect(read("Register.tsx")).toContain('<input id="name" autoComplete="nickname"');
+  it("keeps the phone from filling the nickname with the player's own name", () => {
+    expect(read("Register.tsx")).toMatch(/<input\s+id="name"\s+autoComplete="off"/);
   });
 });
