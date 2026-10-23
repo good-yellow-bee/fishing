@@ -1043,8 +1043,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 
 | # | Title | Area | Size |
 |---|---|---|---|
-| EN1 | A start page at `/`: a big Play, a clear Sign in and a small link to the field log, with the language at the top; signed in, it names the account and plays straight away. The field log's home moves to `/book` (old `/?find=` links still open there), and the field log gets a Play link in its side rail and phone bar (#1833) | entrance | M |
-| EN2 | Sign in and Create account in plain words with larger text: each links to the other, returns the player where they were going, says when it is busy, names a taken email or too many tries, and fills in a lake nickname; the lake's loading line can be retried and Logout asks first | entrance | M |
+| ~~EN1~~ | ~~A start page at `/`: a big Play, a clear Sign in and a small link to the field log, with the language at the top; signed in, it names the account and plays straight away. The field log's home moves to `/book` (old `/?find=` links still open there), and the field log gets a Play link in its side rail and phone bar (#1833)~~ | entrance | M |
+| EN2 | Sign in and Create account in plain words with larger text: each links to the other, returns the player where they were going, says when it is busy, names a taken email or too many tries, and fills in a lake nickname; the lake's loading line can be retried and Logout asks first (#1834) | entrance | M |
 
 ## Phone and access track (added 2026-10-18; its own thread works phone layouts, touch, larger text, keyboard and screen readers, contrast, motion and load speed across the app)
 
