@@ -2,7 +2,9 @@
 
 A local field log for after the trip, and a browser fishing game on a northern lake.
 
-Open [http://localhost:5173](http://localhost:5173). The book stays in this browser: spots, trips, and catches, with a sample week already written in. Nothing in the log is sent to a server.
+Open [http://localhost:5173](http://localhost:5173): the start page leads to the game and the field log.
+
+The field log is at [http://localhost:5173/book](http://localhost:5173/book). The book stays in this browser: spots, trips, and catches, with a sample week already written in. Nothing in the log is sent to a server.
 
 The lake game is at [http://localhost:5173/play](http://localhost:5173/play). Register locally, then walk the shore, cast, and fight whatever takes the hook.
 
@@ -65,7 +67,7 @@ docker compose up --build
 
 The game is at [http://localhost:5173](http://localhost:5173) as above. SQLite lives in the `api-data` volume; `docker compose down -v` wipes it. Rebuild after pulling.
 
-Force a lake hour while developing: `http://localhost:5173/?hour=dawn` (`day`, `dusk`, `night`).
+Force a lake hour while developing: `http://localhost:5173/play?hour=dawn` (`day`, `dusk`, `night`).
 
 ## Visual tests
 

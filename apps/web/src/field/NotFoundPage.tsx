@@ -13,7 +13,10 @@ export function NotFoundPage() {
         </div>
       </header>
       <p className="lone-link">
-        <Link to="/">{t("Back to the book")}</Link>
+        <Link to="/book">{t("Back to the book")}</Link>
+      </p>
+      <p className="lone-link">
+        <Link to="/">{t("Go to the start page")}</Link>
       </p>
     </div>
   );

@@ -7,6 +7,19 @@ export const PL_PAGES: PlBook = {
     "Jesteś offline. Jezioro potrzebuje połączenia, ale dziennik połowów działa bez niego.",
   "Open the field log": "Otwórz dziennik połowów",
 
+  // Start page
+  "Stillwater · A fishing game": "Stillwater · Gra wędkarska",
+  "A fishing game. Cast, wait for a bite, reel in a fish.": "Gra wędkarska. Zarzuć, poczekaj na branie i wyciągnij rybę.",
+  "Play": "Graj",
+  "New here? It's free.": "Pierwszy raz? To nic nie kosztuje.",
+  "Have an account?": "Masz już konto?",
+  "Signed in as {name} ({email}).": "Zalogowano jako {name} ({email}).",
+  "Signed in as {email}.": "Zalogowano jako {email}.",
+  "Not you?": "To nie Ty?",
+  "Sign out": "Wyloguj się",
+  "Diary of your real fishing trips": "Dziennik twoich prawdziwych wypraw na ryby",
+  "Go to the start page": "Przejdź do strony startowej",
+
   // Login and register
   "Email": "E-mail",
   "Password": "Hasło",

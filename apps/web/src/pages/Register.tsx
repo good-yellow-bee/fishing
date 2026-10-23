@@ -8,6 +8,7 @@ import { usePageTitle } from "../pageTitle";
 export function RegisterPage() {
   const navigate = useNavigate();
   const t = useT();
+  const session = authClient.useSession();
   usePageTitle(t("Join Stillwater"));
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -23,7 +24,8 @@ export function RegisterPage() {
         setError(result.error.message ? errorText(result.error.message) : t("Could not register"));
         return;
       }
-      await authClient.getSession();
+      // The lake's gate reads the shared session store, which still says signed out: fill it before going on.
+      await session.refetch();
       navigate("/play");
     } catch (err) {
       setError(err instanceof Error ? errorText(err.message) : t("Could not register"));
