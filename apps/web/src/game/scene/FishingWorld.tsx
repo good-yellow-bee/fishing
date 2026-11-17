@@ -237,7 +237,7 @@ type Props = {
   groundbaitPrimed?: boolean;
   /** That swim is built up enough to have drawn the big feeders the tied lure would take. */
   groundbaitBig?: boolean;
-  /** The big feeder rolling there is a catfish (groundbaitCloud.ts catfishRolls), not a carp. */
+  /** The big feeder rolling there is a catfish (groundbaitCloudModel.ts catfishRolls), not a carp. */
   groundbaitCatfish?: boolean;
   /** Bait thieves at that swim's bank would strip the tied bait, and its feeders are not scattered; fewer show as it is built up. */
   groundbaitThieves?: boolean;

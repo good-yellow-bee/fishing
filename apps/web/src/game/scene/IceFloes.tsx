@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { FLOE_COUNT, floeSpot, iceFloes } from "./iceFloes";
+import { FLOE_COUNT, floeSpot, iceFloes } from "./iceFloesModel";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
@@ -10,7 +10,7 @@ const ICE = "#dfeaef";
 
 /**
  * Winter's pancake ice: round plates afloat in the shallows, riding the chop, wandering slowly and
- * turning, all in one draw (iceFloes.ts).
+ * turning, all in one draw (iceFloesModel.ts).
  */
 export function IceFloes({ wind }: { wind: { x: number; z: number } }) {
   const still = useReducedMotion();

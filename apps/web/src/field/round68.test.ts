@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { CatchEntry, Logbook, Trip } from "@stillwater/shared";
-import { seasonRecap } from "./bests/seasonRecap";
+import { seasonRecap } from "./bests/seasonRecapModel";
 import { newWatersThisYear } from "./bests/notYet";
 import { seasonFirst, seasonLast } from "./seasonFirst";
 import { weekStreak } from "./outingAverage";

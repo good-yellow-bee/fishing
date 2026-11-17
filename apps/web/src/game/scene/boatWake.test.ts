@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { speedOf, wakeLook } from "./boatWake";
+import { speedOf, wakeLook } from "./boatWakeModel";
 import { wakeGeometry } from "./BoatWake";
 import { canoeAt } from "./canoeTrip";
 import { LEG_SEC, sailAt } from "./sailingTrip";

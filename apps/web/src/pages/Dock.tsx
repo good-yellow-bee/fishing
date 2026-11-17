@@ -117,8 +117,8 @@ import { lostNewsKey, useNewsToast, useTagNewsToast } from "../game/useTagNewsTo
 import { bookSeasonNote, bookSessionTitle, loadSession, saveSession, sessionTitle, startSession, withSessionFish, type SessionDraft } from "../game/session";
 import { TripRecap } from "../components/TripRecap";
 import { useLodgeTracks } from "../game/useLodgeTracks";
-import { trackLabel } from "../game/scene/shoreTracks";
-import { catfishRolls } from "../game/scene/groundbaitCloud";
+import { trackLabel } from "../game/scene/shoreTracksModel";
+import { catfishRolls } from "../game/scene/groundbaitCloudModel";
 import { useLevelToast } from "../game/useLevelToast";
 import { defaultLure, lureCanChange, nextLure } from "../game/lureChoice";
 import { FishingWorld } from "../game/scene/FishingWorld";

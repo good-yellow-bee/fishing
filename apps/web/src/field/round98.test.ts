@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { sampleLogbook, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { reloadLang, setLang, t } from "../i18n";
 import { kindNames } from "./speciesLink";
-import { seasonRecap } from "./bests/seasonRecap";
+import { seasonRecap } from "./bests/seasonRecapModel";
 import { kindPairs } from "./bests/kindPairs";
 import { hookTally } from "./hookTally";
 import { yearSummary } from "./summaries";

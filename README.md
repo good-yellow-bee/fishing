@@ -57,6 +57,7 @@ The field log needs only the web app. For the lake, register an account at `/pla
 ```bash
 pnpm test        # shared lake / catch / board rules
 pnpm typecheck
+pnpm check:module-stems # reject ambiguous extensionless imports on case-insensitive filesystems
 ```
 
 Or run both in Docker, with no local Node:

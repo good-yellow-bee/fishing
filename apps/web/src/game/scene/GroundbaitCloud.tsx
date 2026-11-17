@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import type { Groundbait } from "../logic";
-import { CLOUD_RADIUS, DIMPLES, laneLeft, puffAt, RIP_PUFFS, ROLL_SPAN, SCATTER_SEC, SCATTER_WAKES, THIEVES, WAKE_ARC, cloudCenter, cloudOpacity, dimpleAt, feedersShow, openWaterYaw, PERCH, perchAt, perchShow, PIKE_REACH, prowlAt, rollAt, scatterWakeAt, thiefAt, thiefCount } from "./groundbaitCloud";
+import { CLOUD_RADIUS, DIMPLES, laneLeft, puffAt, RIP_PUFFS, ROLL_SPAN, SCATTER_SEC, SCATTER_WAKES, THIEVES, WAKE_ARC, cloudCenter, cloudOpacity, dimpleAt, feedersShow, openWaterYaw, PERCH, perchAt, perchShow, PIKE_REACH, prowlAt, rollAt, scatterWakeAt, thiefAt, thiefCount } from "./groundbaitCloudModel";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";

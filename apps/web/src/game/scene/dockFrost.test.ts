@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DOCK_PLANKS } from "@stillwater/shared";
-import { FROST_PALE, FROST_SHEETS, SNOW_PALE, dockFrost, frostPrints, frostSpecks, sheetUv, walkwayPale } from "./dockFrost";
+import { FROST_PALE, FROST_SHEETS, SNOW_PALE, dockFrost, frostPrints, frostSpecks, sheetUv, walkwayPale } from "./dockFrostModel";
 
 describe("hoar frost on the dock", () => {
   it("lies only at dawn after a clear night, thickest in fall", () => {

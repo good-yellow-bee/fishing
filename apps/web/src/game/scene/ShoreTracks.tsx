@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { TRACK_LIMIT, type LodgeTrack } from "@stillwater/shared";
-import { TRACK_RING_MAX, trackAnchor, trackOpacity, trackPulse } from "./shoreTracks";
+import { TRACK_RING_MAX, trackAnchor, trackOpacity, trackPulse } from "./shoreTracksModel";
 import { waterHeight } from "./water";
 
 const RING_COLOR = new THREE.Color("#f3e6cc");

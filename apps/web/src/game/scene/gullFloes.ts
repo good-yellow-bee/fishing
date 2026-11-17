@@ -1,5 +1,5 @@
 import type { LakeHour, LakeSeason, Sky } from "@stillwater/shared";
-import { floeSpot, iceFloes, type Floe } from "./iceFloes";
+import { floeSpot, iceFloes, type Floe } from "./iceFloesModel";
 
 /**
  * Black-headed gulls in winter, each standing on a floe of pancake ice out on the far side of the

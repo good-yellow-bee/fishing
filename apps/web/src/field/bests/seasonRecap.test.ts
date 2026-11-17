@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook, type CatchEntry } from "@stillwater/shared";
-import { seasonRecap } from "./seasonRecap";
+import { seasonRecap } from "./seasonRecapModel";
 
 describe("a season against the one before", () => {
   const base = sampleLogbook(new Date(2026, 9, 15)).catches[0]!;

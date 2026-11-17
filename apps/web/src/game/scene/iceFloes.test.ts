@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { inLake } from "@stillwater/shared";
-import { FLOE_COUNT, floeSpot, floesOut, iceFloes } from "./iceFloes";
+import { FLOE_COUNT, floeSpot, floesOut, iceFloes } from "./iceFloesModel";
 import { MOORING } from "./boat";
 
 const EAST = { x: 0.08, z: 0 };

@@ -1,5 +1,5 @@
 import type { LakeSeason } from "@stillwater/shared";
-import { BARN_OFFSET, FARM_AT, FARM_SCALE, farmPoint } from "./farmstead";
+import { BARN_OFFSET, FARM_AT, FARM_SCALE, farmPoint } from "./farmsteadModel";
 
 /**
  * White storks on the barn: a nest of sticks sits on the west end of the barn's ridge on the far hills, and

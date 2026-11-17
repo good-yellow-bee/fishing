@@ -21,7 +21,7 @@ import { GOAL_PARAM, YearGoal } from "../YearGoal";
 import { DayCalendar } from "./DayCalendar";
 import { FROM_LIST } from "../leaveDeleted";
 import { SeasonRecapBox, seasonCopy } from "./SeasonRecap";
-import { seasonRecap } from "./seasonRecap";
+import { seasonRecap } from "./seasonRecapModel";
 import { dayMarks } from "./dayMarks";
 import { mostKindsDay } from "./mostKinds";
 import { inReadersOrder, newWatersThisYear, notYetThisYear } from "./notYet";

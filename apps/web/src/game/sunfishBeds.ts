@@ -1,5 +1,5 @@
 import type { LakeSeason } from "@stillwater/shared";
-import { nestsOut, sunfishNests, type Nest } from "./scene/sunfishNests";
+import { nestsOut, sunfishNests, type Nest } from "./scene/sunfishNestsModel";
 
 /** How far past a nest's rim, in metres, a lure can land and still be on the bed. */
 export const BED_REACH = 0.4;

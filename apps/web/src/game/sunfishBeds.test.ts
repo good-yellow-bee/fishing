@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { BED_REACH, onSunfishBed } from "./sunfishBeds";
-import { sunfishNests } from "./scene/sunfishNests";
+import { sunfishNests } from "./scene/sunfishNestsModel";
 
 describe("onSunfishBed", () => {
   const nest = sunfishNests()[0]!;

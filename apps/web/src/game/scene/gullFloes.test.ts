@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { inLake } from "@stillwater/shared";
 import { FLIGHT_EVERY_SEC, GULL_COUNT, gullAt, gullFloes, gullsOut } from "./gullFloes";
-import { floeSpot } from "./iceFloes";
+import { floeSpot } from "./iceFloesModel";
 
 const WIND = { x: 0.02, z: -0.01 };
 

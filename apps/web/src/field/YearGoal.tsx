@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { localDate, type Logbook } from "@stillwater/shared";
 import { t, tn } from "../i18n";
 import { bookFishDay } from "./tripMonths";
-import { seasonRecap } from "./bests/seasonRecap";
+import { seasonRecap } from "./bests/seasonRecapModel";
 
 /** The angler's own target of fish for a year, kept in this browser by year. */
 export const YEAR_GOAL_KEY = "stillwater.field-log.year-goal.v1";

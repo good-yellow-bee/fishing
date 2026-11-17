@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";
-import { FROST_COLOR, FROST_SHEETS, frostPrints, frostSpecks, type FrostSheet } from "./dockFrost";
+import { FROST_COLOR, FROST_SHEETS, frostPrints, frostSpecks, type FrostSheet } from "./dockFrostModel";
 import { toonRamp } from "./toon";
 
 /** Canvas pixels per metre of plank. */
@@ -55,7 +55,7 @@ function FrostSheetMesh({ sheet, amount, snow }: { sheet: FrostSheet; amount: nu
 }
 
 /**
- * Hoar frost on the dock after a clear, cold night (dockFrost.ts): a sparkling white rime over the
+ * Hoar frost on the dock after a clear, cold night (dockFrostModel.ts): a sparkling white rime over the
  * walkway out to the dock, the angler's boot prints melted back to bare wood. In winter (`snow`)
  * the walkway lies under snow instead, the prints trodden into it.
  */

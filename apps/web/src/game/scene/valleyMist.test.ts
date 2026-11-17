@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { LAKE_CENTER_Z, LAKE_RX, LAKE_RZ } from "@stillwater/shared";
 import { hillFront } from "./farHills";
-import { LIES, PUFFS, valleyMistOut, valleyPuff } from "./valleyMist";
+import { LIES, PUFFS, valleyMistOut, valleyPuff } from "./valleyMistModel";
 
 const STILL = { x: 0.01, z: 0.01 };
 

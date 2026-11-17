@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { BASS_BEDS, bassSpot, straySpot } from "./bassBeds";
-import { guardSpot, sunfishNests } from "./sunfishNests";
+import { guardSpot, sunfishNests } from "./sunfishNestsModel";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { bedHeight } from "./water";
@@ -34,7 +34,7 @@ function nestTexture() {
 
 /**
  * Sunfish nests in the shallows either side of the dock in late spring and summer: pale round beds
- * fanned in the sand, each with its guard hovering over it (sunfishNests.ts). In spring (`bass`) the
+ * fanned in the sand, each with its guard hovering over it (sunfishNestsModel.ts). In spring (`bass`) the
  * bass guard their wider beds among them too, facing off the sunfish that stray near (bassBeds.ts).
  * Two draws in all.
  */
