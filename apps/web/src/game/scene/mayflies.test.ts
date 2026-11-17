@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { inLake } from "@stillwater/shared";
-import { DANCE_DOWN_SEC, DANCE_UP_SEC, MAYFLY_CLIMB, MAYFLY_COUNT, MAYFLY_LOW, MAYFLY_SWARMS, mayfly, swarmCenters } from "./mayflies";
+import { DANCE_DOWN_SEC, DANCE_UP_SEC, MAYFLY_CLIMB, MAYFLY_COUNT, MAYFLY_LOW, MAYFLY_SWARMS, mayfly, swarmCenters } from "./mayfliesModel";
 
 describe("mayfly hatch", () => {
   it("puts its swarms over water each bank can reach", () => {

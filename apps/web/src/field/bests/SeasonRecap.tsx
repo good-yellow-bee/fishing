@@ -4,7 +4,7 @@ import { locale, t, tn, useT } from "../../i18n";
 import { CopySummary } from "../CopySummary";
 import { yearSummary } from "../summaries";
 import { readYearGoal } from "../YearGoal";
-import { seasonRecap } from "./seasonRecap";
+import { seasonRecap } from "./seasonRecapModel";
 import { newWatersThisYear } from "./notYet";
 import { bestFishDay, bookFishDay } from "../tripMonths";
 import { formatDay, waterName } from "../format";

@@ -3,12 +3,12 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { makeSoftSpotTexture } from "./Atmosphere";
 import { useReducedMotion } from "./reducedMotion";
-import { PUFFS, valleyPuff } from "./valleyMist";
+import { PUFFS, valleyPuff } from "./valleyMistModel";
 
 /** Faint enough that the far trees show through it as shapes. */
 const OPACITY = 0.6;
 
-/** The dawn's bank of mist along the hills' foot behind the far bank (valleyMist.ts): one draw. */
+/** The dawn's bank of mist along the hills' foot behind the far bank (valleyMistModel.ts): one draw. */
 export function ValleyMist({ color }: { color: string }) {
   const still = useReducedMotion();
   const mesh = useRef<THREE.InstancedMesh>(null);

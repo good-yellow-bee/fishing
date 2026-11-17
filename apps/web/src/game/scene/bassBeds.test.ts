@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { inLake } from "@stillwater/shared";
 import { BASS_BEDS, FACE_OFF_EVERY, bassBedsOut, bassSpot, faceOff, straySpot } from "./bassBeds";
 import { REEDS_STAND } from "./bankWalk";
-import { sunfishNests } from "./sunfishNests";
+import { sunfishNests } from "./sunfishNestsModel";
 import { TADPOLE_SCHOOLS } from "./tadpoleSchools";
 import { waterDepth } from "./water";
 

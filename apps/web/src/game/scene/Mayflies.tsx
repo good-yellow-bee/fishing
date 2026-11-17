@@ -4,7 +4,7 @@ import * as THREE from "three";
 import type { SpotId } from "@stillwater/shared";
 import { settings } from "../settings";
 import { makeSoftSpotTexture } from "./Atmosphere";
-import { MAYFLY_COUNT, mayfly, swarmCenters } from "./mayflies";
+import { MAYFLY_COUNT, mayfly, swarmCenters } from "./mayfliesModel";
 import { useReducedMotion } from "./reducedMotion";
 
 /** Meters across one fly, drawn a little large so the swarm reads against the dusk water. */

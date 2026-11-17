@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { inLake } from "@stillwater/shared";
-import { NESTS_PER_COLONY, NEST_COLONIES, guardSpot, nestsOut, sunfishNests } from "./sunfishNests";
+import { NESTS_PER_COLONY, NEST_COLONIES, guardSpot, nestsOut, sunfishNests } from "./sunfishNestsModel";
 import { waterDepth } from "./water";
 
 describe("sunfish nests in the shallows", () => {

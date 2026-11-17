@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { COWS } from "./cowGraze";
-import { FARM_AT } from "./farmstead";
+import { FARM_AT } from "./farmsteadModel";
 import { PAIR, nestAt, storkAt, storksOut } from "./storkNest";
 
 describe("the barn storks", () => {

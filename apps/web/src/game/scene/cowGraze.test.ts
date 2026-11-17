@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { hillFront } from "./farHills";
 import { COWS, cowAt, cowsOut } from "./cowGraze";
-import { BARN_OFFSET, FARM_AT } from "./farmstead";
+import { BARN_OFFSET, FARM_AT } from "./farmsteadModel";
 import { FIELDS } from "./hayField";
 
 describe("cows", () => {

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { WAKE_SPREAD, speedOf, wakeLook } from "./boatWake";
+import { WAKE_SPREAD, speedOf, wakeLook } from "./boatWakeModel";
 import { waterHeight } from "./water";
 
 const WAKE = "#e4f0ec";

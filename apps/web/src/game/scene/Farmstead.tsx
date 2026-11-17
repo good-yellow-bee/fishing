@@ -2,7 +2,7 @@ import type { LakeHour, LakeSeason } from "@stillwater/shared";
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { cabinWindowsLit, chimneySmoking } from "./cabinLook";
-import { BARN_OFFSET, CHIMNEY_TOP, FARM_AT, FARM_SCALE, farmPoint } from "./farmstead";
+import { BARN_OFFSET, CHIMNEY_TOP, FARM_AT, FARM_SCALE, farmPoint } from "./farmsteadModel";
 import { mergePainted, mergeParts, type PaintedPart } from "./mergeParts";
 import { SmokePlume } from "./SmokePlume";
 import { toonRamp } from "./toon";
@@ -54,7 +54,7 @@ export function windowsShape() {
   );
 }
 
-/** A farmhouse and barn on the hills behind the far bank, their windows warm and the chimney smoking when the cabin's are (farmstead.ts). */
+/** A farmhouse and barn on the hills behind the far bank, their windows warm and the chimney smoking when the cabin's are (farmsteadModel.ts). */
 export function Farmstead({ season, hour, wind }: { season: LakeSeason; hour: LakeHour; wind: { x: number; z: number } }) {
   const shape = useMemo(() => farmShape(season), [season]);
   const windows = useMemo(() => windowsShape(), []);

@@ -3,6 +3,7 @@
   "private": true,
   "packageManager": "pnpm@10.14.0",
   "scripts": {
+    "check:module-stems": "node --test scripts/check-module-stems.test.mjs && node scripts/check-module-stems.mjs",
     "dev": "pnpm --parallel --filter @stillwater/web --filter @stillwater/api dev",
     "test": "pnpm --filter @stillwater/shared --filter @stillwater/web --filter @stillwater/api test",
     "typecheck": "pnpm -r typecheck",

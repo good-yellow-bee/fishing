@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { EWES } from "./sheepFlock";
 import { COWS } from "./cowGraze";
 import { hillFront } from "./farHills";
-import { FARM_AT } from "./farmstead";
+import { FARM_AT } from "./farmsteadModel";
 import { FIELDS } from "./hayField";
 import { ORCHARD_EAST, ORCHARD_WEST, TREE_HEIGHT, orchardLook, orchardTrees } from "./orchardRows";
 import { CAR_HEIGHT, TRACK_Y } from "./trainLine";

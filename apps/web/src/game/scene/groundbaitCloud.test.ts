@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { FISH, spotAt, SPOT_IDS, walkableAt } from "@stillwater/shared";
 import { bigFeedersOver, castOverGroundbait, hasWormFeeders, PROWLERS, prowlerOver, GROUNDBAIT_CASTS, SWIM_MAX_CASTS, throwHandful, TOPUP_MAX } from "../logic";
 import { BANK_STANDS } from "../hotspot";
-import { catfishRolls, cloudCenter, cloudOpacity, CLOUD_RADIUS, DIMPLES, dimpleAt, feedersShow, LANE_HALF, laneLeft, openWaterYaw, PUFF_TO, puffAt, RIP_PUFF_SEC, RIP_PUFFS, PERCH, PERCH_FAR, PERCH_NEAR, PERCH_REACH, perchAt, perchShow, PIKE_REACH, PROWL_IN, PROWL_LEG_SEC, PROWL_OUT, prowlAt, ROLL_GAP_SEC, ROLL_SEC, ROLL_SPAN, rollAt, SCATTER_SEC, SCATTER_WAKES, scatterWakeAt, THIEF_IN, THIEF_OUT, thiefAt, thiefCount, THIEVES } from "./groundbaitCloud";
+import { catfishRolls, cloudCenter, cloudOpacity, CLOUD_RADIUS, DIMPLES, dimpleAt, feedersShow, LANE_HALF, laneLeft, openWaterYaw, PUFF_TO, puffAt, RIP_PUFF_SEC, RIP_PUFFS, PERCH, PERCH_FAR, PERCH_NEAR, PERCH_REACH, perchAt, perchShow, PIKE_REACH, PROWL_IN, PROWL_LEG_SEC, PROWL_OUT, prowlAt, ROLL_GAP_SEC, ROLL_SEC, ROLL_SPAN, rollAt, SCATTER_SEC, SCATTER_WAKES, scatterWakeAt, THIEF_IN, THIEF_OUT, thiefAt, thiefCount, THIEVES } from "./groundbaitCloudModel";
 
 describe("groundbait cloud", () => {
   it.each(SPOT_IDS)("lands on the %s's own open water", (spot) => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { spotAt, SPOT_IDS, TRACK_WINDOW_MS, type LodgeTrack } from "@stillwater/shared";
-import { trackAnchor, trackLabel, trackOpacity, trackPulse } from "./shoreTracks";
+import { trackAnchor, trackLabel, trackOpacity, trackPulse } from "./shoreTracksModel";
 
 describe("shore tracks", () => {
   it("keeps every anchor on its own bank's water and steady for the same catch", () => {
